@@ -117,3 +117,7 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# SSL certs
+*.crt
+*.key

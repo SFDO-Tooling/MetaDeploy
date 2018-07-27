@@ -53,6 +53,11 @@ To make an initial user::
 
 Then follow the prompts.
 
+You'll have to also create a database row containing configuration
+information for talking with the SalesForce connected app you're using
+for OAuth. You can do this at
+`<https://localhost:8000/admin/socialaccount/socialapp/add/>`_.
+
 Setting up a message queue
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -68,7 +73,12 @@ indirectly through the database.
 
 To run web in development::
 
-   python src/manage.py runserver
+   python src/manage.py runserver_plus --cert-file cert.crt
+
+This will create a ``.crt`` and ``.key`` file if they don't exist.
+You'll have add them to your browser, as they'll be self-signed and not
+automatically trusted. We need to serve local development on HTTPS to
+support Salesforce's requirement for an HTTPS callback for OAuth though.
 
 To run worker in development::
 
@@ -78,4 +88,4 @@ In production, the commands in the Procfile should suffice.
 
 .. todo:: Set up JS dependencies?
 
-Access the running server at `<http://localhost:8000/>`.
+Access the running server at `<https://localhost:8000/>`.

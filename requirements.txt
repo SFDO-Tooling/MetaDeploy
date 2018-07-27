@@ -5,3 +5,6 @@ whitenoise==3.3.1
 pytest==3.6.3
 Sphinx==1.7.6
 django-allauth==0.36.0
+django-extensions==2.1.0
+werkzeug==0.14.1
+pyopenssl==18.0.0
