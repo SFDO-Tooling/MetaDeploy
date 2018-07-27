@@ -1,0 +1,39 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/metadeploy
+    docker:
+      - image: python:3.7.0
+        environment:
+          DJANGO_SECRET_KEY: test-secret-key
+          DJANGO_DEBUG: False
+          DJANGO_SETTINGS_MODULE: metadeploy.settings.test
+          PYTHONPATH: src
+          DATABASE_URL: postgresql://ubuntu@localhost/circle_test
+          HASHID_FIELD_SALT: test-hash-salt
+      - image: postgres:10.4
+        environment:
+          POSTGRES_USER: ubuntu
+          POSTGRES_DB: circle_test
+          POSTGRES_PASSWORD: ""
+    steps:
+      - checkout
+      - run:
+          name: Install Dependencies
+          command: |
+            export PATH=~/metadeploy/node/bin:$PATH
+            pip install -r requirements.txt
+      - run:
+          name: Run Database Migrations
+          command: python src/manage.py migrate --no-input
+      - run:
+          name: Lint Python
+          command: flake8 src/
+      - run:
+          name: Test Python
+          command: py.test --junitxml=pycov/pytest-junit.xml
+      - store_artifacts:
+          path: htmlcov
+          destination: py-reports
+      - store_test_results:
+          path: pycov
