@@ -1,0 +1,83 @@
+{
+  "name": "metadeploy",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/salesforce/metadeploy.git"
+  },
+  "devDependencies": {
+    "autoprefixer": "^8.6.3",
+    "babel-core": "^6.26.3",
+    "babel-eslint": "^8.2.5",
+    "babel-loader": "^7.1.5",
+    "clean-webpack-plugin": "^0.1.19",
+    "css-loader": "^1.0.0",
+    "eslint": "^5.1.0",
+    "eslint-config-prettier": "^2.9.0",
+    "eslint-import-resolver-webpack": "^0.10.1",
+    "eslint-plugin-flowtype": "^2.50.0",
+    "eslint-plugin-flowtype-errors": "^3.6.0",
+    "eslint-plugin-import": "^2.13.0",
+    "eslint-plugin-prettier": "^2.6.1",
+    "eslint-plugin-react": "^7.10.0",
+    "file-loader": "^1.1.11",
+    "flow-bin": "^0.76.0",
+    "flow-types": "^1.0.0",
+    "html-webpack-plugin": "^3.2.0",
+    "husky": "^0.14.3",
+    "lint-staged": "^7.2.0",
+    "mini-css-extract-plugin": "^0.4.1",
+    "node-sass": "^4.9.2",
+    "optimize-css-assets-webpack-plugin": "^4.0.3",
+    "postcss-loader": "^2.1.6",
+    "prettier": "^1.13.6",
+    "sass-loader": "^7.0.3",
+    "stylelint": "^9.3.0",
+    "stylelint-config-recommended-scss": "^3.2.0",
+    "stylelint-scss": "^3.1.3",
+    "uglifyjs-webpack-plugin": "^1.2.7",
+    "url-loader": "^1.0.1",
+    "webpack": "^4.15.1",
+    "webpack-command": "^0.4.1",
+    "webpack-merge": "^4.1.3",
+    "webpack-serve": "^2.0.2"
+  },
+  "dependencies": {
+    "@salesforce-ux/design-system": "^2.6.2",
+    "@salesforce/design-system-react": "^0.8.18",
+    "money-clip": "^2.1.0",
+    "react": "^15.6.2",
+    "react-dom": "^15.6.2",
+    "react-redux": "^5.0.7",
+    "redux": "^4.0.0",
+    "redux-devtools-extension": "^2.13.5",
+    "redux-logger": "^3.0.6",
+    "redux-persist-middleware": "^1.0.1",
+    "reselect": "^3.0.1",
+    "uuid": "^3.3.2"
+  },
+  "scripts": {
+    "precommit": "lint-staged",
+    "start": "webpack-serve --open --config webpack.dev.js",
+    "prettier": "prettier --write *.js .*.js src/js/*.js src/js/**/*.js src/sass/**/*.scss",
+    "eslint": "eslint *.js src/js/*.js src/js/**/*.js",
+    "stylelint": "stylelint src/sass/**/*.scss",
+    "lint": "yarn run prettier; yarn run eslint; yarn run stylelint",
+    "build": "webpack --config webpack.dev.js",
+    "prod": "webpack --config webpack.prod.js"
+  },
+  "lint-staged": {
+    "*.js": [
+      "prettier --write",
+      "eslint",
+      "git add"
+    ],
+    "*.scss": [
+      "prettier --write",
+      "stylelint",
+      "git add"
+    ]
+  }
+}

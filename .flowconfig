@@ -1,0 +1,15 @@
+[ignore]
+./dist/.*
+.*/test/.*
+
+[include]
+
+[libs]
+
+[lints]
+all=warn
+
+[options]
+include_warnings=true
+
+[strict]

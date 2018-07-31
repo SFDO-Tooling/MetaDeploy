@@ -127,7 +127,9 @@ ROOT_URLCONF = 'metadeploy.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            PROJECT_ROOT / 'dist',
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -206,8 +208,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
+STATICFILES_DIRS = [
+    PROJECT_ROOT / 'dist',
+]
 STATIC_URL = '/static/'
-STATIC_ROOT = PROJECT_ROOT.joinpath('staticfiles')
+STATIC_ROOT = PROJECT_ROOT / 'staticfiles'
 
 # if MODE == 'dev':
 #     static_dir_root = 'static/dist'
