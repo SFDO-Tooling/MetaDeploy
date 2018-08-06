@@ -53,10 +53,15 @@ To make an initial user::
 
 Then follow the prompts.
 
-You'll have to also create a database row containing configuration
-information for talking with the SalesForce connected app you're using
-for OAuth. You can do this at
-`<https://localhost:8000/admin/socialaccount/socialapp/add/>`_.
+You'll have to also create an entry in the database with configuration
+information for talking with SalesForce for OAuth. You can do this by
+filling in the form at
+`<https://localhost:8000/admin/socialaccount/socialapp/add/>`_ if you're
+logged in as your superuser.
+
+To fill this in, you'll need some specific values from a Connected App
+in your SalesForce configuration. If you're an Oddbird, you can find
+these values in Keybase.
 
 Setting up a message queue
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
