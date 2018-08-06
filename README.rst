@@ -88,4 +88,4 @@ In production, the commands in the Procfile should suffice.
 
 .. todo:: Set up JS dependencies?
 
-Access the running server at `<https://localhost:8000/>`.
+Access the running server at `<https://localhost:8000/>`_.
