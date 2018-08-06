@@ -22,7 +22,7 @@ Assuming you use `Virtualenvwrapper`_, setup is pretty simple::
 
 Copy the ``.env`` file somewhere that will be sourced when you need it::
 
-    mv env.example $VIRTUAL_ENV/bin/postactivate
+    cp env.example $VIRTUAL_ENV/bin/postactivate
 
 You can also edit this file if you have any values that you know should
 be different.
@@ -35,6 +35,18 @@ reader.
 
 .. _Virtualenvwrapper: https://virtualenvwrapper.readthedocs.io/en/latest/
 .. _Pipenv: https://docs.pipenv.org/
+
+Installing requirements
+~~~~~~~~~~~~~~~~~~~~~~~
+
+While activated::
+
+    pip install -r requirements.txt
+
+For the front-end::
+
+    yarn
+    yarn build
 
 Setting up the database
 ~~~~~~~~~~~~~~~~~~~~~~~
