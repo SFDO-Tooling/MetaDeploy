@@ -11,7 +11,7 @@ import { composeWithDevTools } from 'redux-devtools-extension';
 
 import { cache, persistMiddleware } from './caching';
 
-const App = () => <div />;
+const App = () => <div>MetaDeploy</div>;
 
 cache.getAll().then(data => {
   const appStore = createStore(
