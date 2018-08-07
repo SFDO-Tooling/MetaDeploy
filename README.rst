@@ -82,7 +82,7 @@ Then follow the prompts.
 
 You'll have to also create an entry in the database with configuration
 information for talking with SalesForce for OAuth. You can do this by filling in
-the form at `<https://localhost:8000/admin/socialaccount/socialapp/add/>`_ if
+the form at `<https://localhost:8080/admin/socialaccount/socialapp/add/>`_ if
 you're logged in as your superuser.
 
 To fill this in, you'll need some specific values from a Connected App in your

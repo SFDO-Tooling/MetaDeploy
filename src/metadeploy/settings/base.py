@@ -83,8 +83,10 @@ MODE = env('DJANGO_MODE', default='dev' if DEBUG else 'prod')
 ALLOWED_HOSTS = [
     '127.0.0.1',
     '127.0.0.1:8000',
+    '127.0.0.1:8080',
     'localhost',
     'localhost:8000',
+    'localhost:8080',
 ] + [
     el.strip()
     for el
