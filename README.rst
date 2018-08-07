@@ -17,7 +17,8 @@ Making a virtual env
 
 MetaDeploy development requires Python v3.6. If ``which python3.6`` returns
 a non-empty path, it's already installed and you can continue to the next step.
-If it returns nothing, then install Python v3.6 using ``brew install python3``,
+If it returns nothing, then install Python v3.6 using
+``brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/f2a764ef944b1080be64bd88dca9a1d80130c558/Formula/python.rb``,
 or from `Python.org`_.
 
 .. _Python.org: https://www.python.org/downloads/
@@ -54,11 +55,18 @@ While activated::
 
     pip install -r requirements.txt
 
-For the front-end::
+Setting up JS dependencies
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    bin/unpack-node
-    yarn
-    yarn build
+First, install the project-local version of Node. It is
+important that you do all this with the virtualenv activated, for the
+``$PATH``-munging that it does::
+
+   bin/unpack-node
+
+Then use ``yarn`` to install dependencies::
+
+   yarn
 
 Setting up the database
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -116,16 +124,3 @@ To run worker in development::
 In production, the commands in the Procfile should suffice.
 
 Access the running server at `<https://localhost:8000/>`_.
-
-Setting up JS dependencies
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-First, locally install the project-local version of Node. It is
-important that you do all this with the virtualenv activated, for the
-``$PATH``-munging that it does::
-
-   bin/unpack-node
-
-Then use ``yarn`` to install dependencies::
-
-   yarn

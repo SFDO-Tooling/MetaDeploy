@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/metadeploy
     docker:
-      - image: python:3.7.0
+      - image: python:3.6.5
         environment:
           DJANGO_SECRET_KEY: test-secret-key
           DJANGO_DEBUG: False
