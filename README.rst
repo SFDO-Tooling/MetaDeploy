@@ -9,15 +9,22 @@ Cloning the project
 
 Like so::
 
-   git clone git@github.com:salesforce/metadeploy.git
+   git clone git@github.com:oddbird/metadeploy
    cd metadeploy
 
 Making a virtual env
 ~~~~~~~~~~~~~~~~~~~~
 
-Assuming you use `Virtualenvwrapper`_, setup is pretty simple::
+MetaDeploy development requires Python v3.7. If ``which python3.7`` returns
+a non-empty path, it's already installed and you can continue to the next step.
+If it returns nothing, then install Python v3.7 using ``brew install python3``,
+or from `Python.org`_.
 
-   mkvirtualenv metadeploy
+.. _Python.org: https://www.python.org/downloads/
+
+Assuming you use `virtualenvwrapper`_, setup is pretty simple::
+
+   mkvirtualenv metadeploy --python=$(which python3.7)
    setvirtualenvproject
 
 Copy the ``.env`` file somewhere that will be sourced when you need it::
@@ -27,13 +34,17 @@ Copy the ``.env`` file somewhere that will be sourced when you need it::
 You can also edit this file if you have any values that you know should
 be different.
 
-Now run ``workon metadeploy`` again to set those
-environment variables.
+Now run ``workon metadeploy`` again to set those environment variables.
+
+Your ``PATH`` (and environment variables) will be updated when you
+``workon metadeploy`` and restored when you ``deactivate``. This will make
+sure that whenever you are working on MD, you use the MD-specific version of
+Node instead of any system-wide Node you may have.
 
 Adapting this project to use `Pipenv`_ is left as an exercise to the
 reader.
 
-.. _Virtualenvwrapper: https://virtualenvwrapper.readthedocs.io/en/latest/
+.. _virtualenvwrapper: https://virtualenvwrapper.readthedocs.io/en/latest/
 .. _Pipenv: https://docs.pipenv.org/
 
 Installing requirements
@@ -45,6 +56,7 @@ While activated::
 
 For the front-end::
 
+    bin/unpack-node
     yarn
     yarn build
 

@@ -5,7 +5,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/salesforce/metadeploy.git"
+    "url": "https://github.com/oddbird/metadeploy.git"
+  },
+  "engines": {
+    "node": "10.8.0",
+    "yarn": "1.9.4"
   },
   "devDependencies": {
     "autoprefixer": "^8.6.3",
@@ -64,7 +68,8 @@
     "prettier": "prettier --write *.js .*.js src/js/*.js src/js/**/*.js src/sass/**/*.scss",
     "eslint": "eslint *.js src/js/*.js src/js/**/*.js",
     "stylelint": "stylelint src/sass/**/*.scss",
-    "lint": "yarn run prettier; yarn run eslint; yarn run stylelint",
+    "flake8": "flake8 src/",
+    "lint": "yarn prettier; yarn eslint; yarn stylelint; yarn flake8",
     "build": "webpack --config webpack.dev.js",
     "prod": "webpack --config webpack.prod.js"
   },
@@ -77,6 +82,10 @@
     "*.scss": [
       "prettier --write",
       "stylelint",
+      "git add"
+    ],
+    "*.py": [
+      "flake8",
       "git add"
     ]
   }

@@ -4,17 +4,18 @@ TAGS
 .vscode
 .livereload
 node_modules/
+node/
 jscov/
 jscov_temp/
 jscache/
 *.orig
-static/dist/
 *.swp
 *.swo
 *.css.map
 *.js.map
 *.log
 npm-debug.log
+yarn-error.log
 staticfiles/
 dump.rdb
 

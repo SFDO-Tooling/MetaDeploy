@@ -1,0 +1,23 @@
+#!/bin/bash
+
+mkdir -p node
+pushd node
+
+config=`../bin/config.guess`
+if [[ $config == *linux* ]]; then
+    platform=linux
+elif [[ $config == *darwin* ]]; then
+    platform=darwin
+else
+    echo "Unknown platform ${config}!"
+    exit 1
+fi
+
+nodefile="../requirements/node-v10.8.0-${platform}-x64.tar.xz"
+yarnfile="../requirements/yarn-v1.9.4.tar.gz"
+
+rm -rf ../node/*
+tar --strip-components=1 -Jxf ${nodefile}
+tar --strip-components=1 -xzf ${yarnfile}
+
+popd
