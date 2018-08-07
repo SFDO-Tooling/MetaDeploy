@@ -15,16 +15,16 @@ Like so::
 Making a virtual env
 ~~~~~~~~~~~~~~~~~~~~
 
-MetaDeploy development requires Python v3.7. If ``which python3.7`` returns
+MetaDeploy development requires Python v3.6. If ``which python3.6`` returns
 a non-empty path, it's already installed and you can continue to the next step.
-If it returns nothing, then install Python v3.7 using ``brew install python3``,
+If it returns nothing, then install Python v3.6 using ``brew install python3``,
 or from `Python.org`_.
 
 .. _Python.org: https://www.python.org/downloads/
 
 Assuming you use `virtualenvwrapper`_, setup is pretty simple::
 
-   mkvirtualenv metadeploy --python=$(which python3.7)
+   mkvirtualenv metadeploy --python=$(which python3.6)
    setvirtualenvproject
 
 Copy the ``.env`` file somewhere that will be sourced when you need it::
@@ -115,6 +115,17 @@ To run worker in development::
 
 In production, the commands in the Procfile should suffice.
 
-.. todo:: Set up JS dependencies?
-
 Access the running server at `<https://localhost:8000/>`_.
+
+Setting up JS dependencies
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+First, locally install the project-local version of Node. It is
+important that you do all this with the virtualenv activated, for the
+``$PATH``-munging that it does::
+
+   bin/unpack-node
+
+Then use ``yarn`` to install dependencies::
+
+   yarn
