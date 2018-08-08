@@ -90,7 +90,7 @@ To fill this in, you'll need some specific values from a Connected App in your
 Salesforce configuration. If you're an OddBird, you can find these values in the
 shared Keybase team folder.
 
-If you don't have a Salesforce account, ask Kit`<mailto:kit@oddbird.net>`_ to
+If you don't have a Salesforce account, ask `Kit<mailto:kit@oddbird.net>`_ to
 send you an invitation by email.
 
 Running the service
@@ -137,12 +137,15 @@ In production, the commands in the Procfile should suffice.
 Development Tasks
 -----------------
 
-- `yarn serve`: starts development server (with watcher) at
-  `<https://localhost:8080/>`_ (assets are served from `dist/` dir)
-- `yarn lint`: formats and lints `.scss` and `.js` files; lints `.py` files
-- `yarn prettier`: formats `.scss` and `.js` files
-- `yarn eslint`: lints `.js` files
-- `yarn stylelint`: lints `.scss` files
-- `yarn flake8`: lints `.py` files
-- `yarn build`: builds development (unminified) static assets into `dist/` dir
-- `yarn prod`: builds production (minified) static assets into `dist/prod/` dir
+- ``yarn serve``: starts development server (with watcher) at
+  `<https://localhost:8080/>`_ (assets are served from ``dist/`` dir)
+- ``yarn lint``: formats and lints ``.scss`` and ``.js`` files; lints ``.py``
+  files
+- ``yarn prettier``: formats ``.scss`` and ``.js`` files
+- ``yarn eslint``: lints ``.js`` files
+- ``yarn stylelint``: lints ``.scss`` files
+- ``yarn flake8``: lints ``.py`` files
+- ``yarn build``: builds development (unminified) static assets into ``dist/``
+  dir
+- ``yarn prod``: builds production (minified) static assets into ``dist/prod/``
+  dir
