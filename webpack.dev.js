@@ -29,6 +29,9 @@ module.exports = merge(common, {
       // eslint-disable-next-line no-sync
       cert: fs.readFileSync(path.join(__dirname, 'cert.crt')),
     },
+    hotClient: {
+      port: 5000,
+    },
     add: (app, middleware, options) => {
       app.use(
         webpackServeWaitpage(options, {
@@ -40,7 +43,6 @@ module.exports = merge(common, {
         convert(
           proxy({
             target: 'https://localhost:8000',
-            changeOrigin: true,
             secure: false,
           }),
         ),

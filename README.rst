@@ -110,9 +110,13 @@ The running server will open automatically in your default browser at
 `<https://localhost:8080/>`_.
 
 We need to serve local development on HTTPS to support Salesforce's requirement
-for an HTTPS callback for OAuth. You'll have add the local certificate
-exceptions to your browser, as they'll be self-signed and not automatically
-trusted.
+for an HTTPS callback for OAuth. You'll have to add a local certificate
+exception to your browser (following the browser prompts) the first time, as
+they'll be self-signed and not automatically trusted.
+
+The WebSocket server (to live-reload on file changes) listens on
+``wss://localhost:5000``. In FireFox, this requires first visiting
+`<https://localhost:5000/>`_ to add another local certificate exception.
 
 To run worker in development::
 
