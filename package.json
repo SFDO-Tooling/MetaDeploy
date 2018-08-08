@@ -74,8 +74,8 @@
     "prettier": "prettier --write *.js .*.js src/js/*.js src/js/**/*.js src/sass/**/*.scss",
     "eslint": "eslint *.js src/js/*.js src/js/**/*.js",
     "stylelint": "stylelint src/sass/**/*.scss",
-    "flake8": "flake8 src/",
-    "lint": "yarn prettier; yarn eslint; yarn stylelint; yarn flake8",
+    "flake8": "flake8 --exit-zero src/",
+    "lint": "npm-run-all -p prettier flake8 -p eslint stylelint",
     "build": "webpack --config webpack.dev.js",
     "prod": "webpack --config webpack.prod.js"
   },

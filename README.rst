@@ -74,25 +74,24 @@ Then run the initial migrations::
 
    python src/manage.py migrate
 
-To make an initial user::
+Logging in with Salesforce
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To make an initial local user::
 
    python src/manage.py createsuperuser
 
-Then follow the prompts.
-
-You'll have to also create an entry in the database with configuration
-information for talking with SalesForce for OAuth. You can do this by filling in
-the form at `<https://localhost:8080/admin/socialaccount/socialapp/add/>`_ if
-you're logged in as your superuser.
+To setup the Salesforce OAuth integration, add an entry in the database with
+configuration information. You can do this by filling in the form at
+`<https://localhost:8080/admin/socialaccount/socialapp/add/>`_ (you'll first be
+asked to login using the local user you created above).
 
 To fill this in, you'll need some specific values from a Connected App in your
-SalesForce configuration. If you're an OddBird, you can find these values in
-Keybase.
+Salesforce configuration. If you're an OddBird, you can find these values in the
+shared Keybase team folder.
 
-Setting up a message queue
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Just have Redis running locally.
+If you don't have a Salesforce account, ask Kit`<mailto:kit@oddbird.net>`_ to
+send you an invitation by email.
 
 Running the service
 ~~~~~~~~~~~~~~~~~~~
@@ -101,6 +100,9 @@ There are two basic processes: the web and the worker. The web will handle web
 requests, the worker will handle longer-running background tasks. The two
 processes communicate through the message queue, and indirectly through the
 database.
+
+Starting the web service
+````````````````````````
 
 To run web in development::
 
@@ -118,8 +120,29 @@ The WebSocket server (to live-reload on file changes) listens on
 ``wss://localhost:5000``. In FireFox, this requires first visiting
 `<https://localhost:5000/>`_ to add another local certificate exception.
 
+Setting up a message queue
+``````````````````````````
+
+Just have Redis running locally.
+
+Starting the worker service
+```````````````````````````
+
 To run worker in development::
 
    celery -A metadeploy worker -l debug
 
 In production, the commands in the Procfile should suffice.
+
+Development Tasks
+-----------------
+
+- `yarn serve`: starts development server (with watcher) at
+  `<https://localhost:8080/>`_ (assets are served from `dist/` dir)
+- `yarn lint`: formats and lints `.scss` and `.js` files; lints `.py` files
+- `yarn prettier`: formats `.scss` and `.js` files
+- `yarn eslint`: lints `.js` files
+- `yarn stylelint`: lints `.scss` files
+- `yarn flake8`: lints `.py` files
+- `yarn build`: builds development (unminified) static assets into `dist/` dir
+- `yarn prod`: builds production (minified) static assets into `dist/prod/` dir
