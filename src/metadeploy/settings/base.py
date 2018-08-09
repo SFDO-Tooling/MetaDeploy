@@ -232,3 +232,9 @@ STATIC_ROOT = PROJECT_ROOT / 'staticfiles'
 # This comes at a cost, though:
 # > you won't benefit from cache versioning
 # WHITENOISE_ROOT = PROJECT_ROOT.joinpath(static_dir_root)
+
+SOCIALACCOUNT_PROVIDERS = {
+    'salesforce': {
+        'SCOPE': ['web', 'full', 'refresh_token'],
+    },
+}
