@@ -4,6 +4,9 @@
 
 extends: stylelint-config-recommended-scss
 
+ignoreFiles:
+  - '**/*.js'
+
 rules:
   # possible errors (these are all on by default)
   no-descending-specificity: null

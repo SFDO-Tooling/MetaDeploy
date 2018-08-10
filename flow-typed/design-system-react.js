@@ -4,7 +4,13 @@ declare module '@salesforce/design-system-react/components/icon-settings' {
   declare export default Component;
 }
 
-declare module '@salesforce/design-system-react/components/page-header' {
+declare module '@salesforce/design-system-react/components/global-header' {
+  import typeof { Component } from 'react';
+
+  declare export default Component;
+}
+
+declare module '@salesforce/design-system-react/components/global-header/dropdown' {
   import typeof { Component } from 'react';
 
   declare export default Component;

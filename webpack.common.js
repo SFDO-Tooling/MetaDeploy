@@ -16,7 +16,7 @@ module.exports = {
     app: ['./index.js', 'app.scss'],
   },
   resolve: {
-    modules: ['src/js', 'src/sass', 'node_modules'],
+    modules: ['src/js', 'src/sass', 'static', 'node_modules'],
     extensions: ['.js', '.jsx'],
   },
   output: {

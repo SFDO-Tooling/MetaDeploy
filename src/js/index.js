@@ -3,22 +3,23 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import IconSettings from '@salesforce/design-system-react/components/icon-settings';
-import PageHeader from '@salesforce/design-system-react/components/page-header';
 import logger from 'redux-logger';
 import utilitySprite from '@salesforce-ux/design-system/assets/icons/utility-sprite/svg/symbols.svg';
 import { Provider } from 'react-redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import { createStore, applyMiddleware } from 'redux';
 
+import Footer from './footer.js';
+import Header from './header.js';
 import { cache, persistMiddleware } from './caching';
+
+const MD_logo = require('images/metadeploy-logo.png');
+const SF_logo = require('images/salesforce-logo.png');
 
 const App = () => (
   <div>
-    <PageHeader
-      title="MetaDeploy"
-      iconName="salesforce1"
-      iconCategory="utility"
-    />
+    <Header logoSrc={MD_logo} />
+    <Footer logoSrc={SF_logo} />
   </div>
 );
 
