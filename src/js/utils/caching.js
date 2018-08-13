@@ -8,7 +8,8 @@ export const cache = getConfiguredCache({
 });
 
 const actionsToPersist = {
-  // ...
+  USER_LOGGED_IN: ['user'],
+  USER_LOGGED_OUT: ['user'],
 };
 
 export const persistMiddleware = getPersistMiddleware({
