@@ -1,6 +1,10 @@
 MetaDeploy
 ==========
 
+.. image:: https://badges.greenkeeper.io/oddbird/metadeploy.svg?token=cdd1aa435bc2abd632c8499a57f321736ca10821eb55bd45a68df6b138e20a31&ts=1534281126964
+   :alt: Greenkeeper badge
+   :target: https://greenkeeper.io/
+
 Setup
 -----
 
