@@ -13,6 +13,6 @@
     <meta name="description" content="{% block description %}{% endblock description %}" />
   </head>
   <body>
-    <main id="app">Loading...</main>
+    <main id="app" data-username="{% if user.is_authenticated %}{{ user.get_username }}{% endif %}">Loading...</main>
   </body>
 </html>

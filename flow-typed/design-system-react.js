@@ -15,3 +15,9 @@ declare module '@salesforce/design-system-react/components/global-header/dropdow
 
   declare export default Component;
 }
+
+declare module '@salesforce/design-system-react/components/global-header/profile' {
+  import typeof { Component } from 'react';
+
+  declare export default Component;
+}

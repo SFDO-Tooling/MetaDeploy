@@ -17,6 +17,10 @@ settings:
           extensions:
             - .js
             - .jsx
+          modules:
+            - src/js
+            - static
+            - node_modules
 plugins:
   - react
   - prettier
