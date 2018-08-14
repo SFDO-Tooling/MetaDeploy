@@ -10,3 +10,4 @@ django-js-reverse==0.8.2
 djangorestframework==3.8.2
 django-colorfield==0.1.15
 raven==6.9.0
+git+https://github.com/SalesforceFoundation/Cumulusci.git@feature/python3
