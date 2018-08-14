@@ -8,9 +8,13 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: metadeploy-py-{{ checksum "requirements.txt" }}
+          keys:
+            - metadeploy-py-{{ checksum "requirements.txt" }}
+            - metadeploy-py-
       - restore_cache:
-          key: metadeploy-npm-{{ checksum "yarn.lock" }}
+          keys:
+            - metadeploy-npm-{{ checksum "yarn.lock" }}
+            - metadeploy-npm-
       - run:
           name: Install Node & Yarn
           command: ./bin/unpack-node
@@ -30,7 +34,9 @@ jobs:
           name: Install Dependencies
           command: |
             yarn
-            sudo pip install -r requirements.txt
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r requirements.txt
       - run:
           name: Upload yarn.lock [greenkeeper]
           command: |
@@ -56,6 +62,7 @@ jobs:
           key: metadeploy-py-{{ checksum "requirements.txt" }}
           paths:
             - "~/.cache/pip"
+            - ./venv
       - save_cache:
           key: metadeploy-npm-{{ checksum "yarn.lock" }}
           paths:
@@ -80,6 +87,11 @@ jobs:
           key: metadeploy-npm-{{ checksum "yarn.lock" }}
       - restore_cache:
           key: metadeploy-built-{{ .Revision }}
+      - run:
+          name: Set $PATH
+          command: |
+            echo 'export PATH=~/metadeploy/node_modules/.bin:$PATH' >> $BASH_ENV
+            echo 'export PATH=~/metadeploy/node/bin:$PATH' >> $BASH_ENV
       - run:
           name: Lint
           command: yarn lint
