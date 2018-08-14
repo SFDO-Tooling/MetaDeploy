@@ -14,7 +14,7 @@ const reducer = (state: User = null, action: UserAction): User => {
     case 'USER_LOGGED_IN':
       return action.payload;
     case 'USER_LOGGED_OUT':
-      return state && action.payload === state.username ? null : state;
+      return null;
   }
   return state;
 };

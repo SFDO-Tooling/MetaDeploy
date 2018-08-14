@@ -42,9 +42,7 @@ const Header = ({
             },
           },
         ]}
-        onSelect={() => {
-          doLogout(user.username);
-        }}
+        onSelect={doLogout}
       />
     ) : (
       <GlobalHeaderDropdown

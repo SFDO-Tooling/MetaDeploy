@@ -12,8 +12,10 @@ import { composeWithDevTools } from 'redux-devtools-extension';
 
 import Footer from 'components/footer';
 import Header from 'components/header';
+import getApiFetch from 'utils/api';
 import userReducer from 'accounts/reducer';
 import { cache, persistMiddleware } from 'utils/caching';
+import { doLocalLogout } from 'accounts/actions';
 
 const MD_logo = require('images/metadeploy-logo.png');
 const SF_logo = require('images/salesforce-logo.png');
@@ -40,7 +42,17 @@ cache.getAll().then(data => {
         user: userReducer,
       }),
       data,
-      composeWithDevTools(applyMiddleware(thunk, persistMiddleware, logger)),
+      composeWithDevTools(
+        applyMiddleware(
+          thunk.withExtraArgument({
+            apiFetch: getApiFetch(() => {
+              appStore.dispatch(doLocalLogout());
+            }),
+          }),
+          persistMiddleware,
+          logger,
+        ),
+      ),
     );
     ReactDOM.render(
       <IconSettings utilitySprite={utilitySprite}>
