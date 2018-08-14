@@ -5,7 +5,7 @@ import cookies from 'js-cookie';
 // these HTTP methods do not require CSRF protection
 const csrfSafeMethod = method => /^(GET|HEAD|OPTIONS|TRACE)$/.test(method);
 
-const getApiFetch = (onAuthFailure: () => void) => (url: string, opts: {}) => {
+const getApiFetch = (onAuthFailure: () => void) => (url: string, opts: any) => {
   const options = Object.assign({}, { headers: {} }, opts);
   const method = options.method || 'GET';
   if (!csrfSafeMethod(method)) {
