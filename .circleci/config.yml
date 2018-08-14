@@ -9,12 +9,12 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - metadeploy-py-{{ checksum "requirements.txt" }}
-            - metadeploy-py-
+            - v1-metadeploy-py-{{ checksum "requirements.txt" }}
+            - v1-metadeploy-py-
       - restore_cache:
           keys:
-            - metadeploy-npm-{{ checksum "yarn.lock" }}
-            - metadeploy-npm-
+            - v1-metadeploy-npm-{{ checksum "yarn.lock" }}
+            - v1-metadeploy-npm-
       - run:
           name: Install Node & Yarn
           command: ./bin/unpack-node
@@ -55,21 +55,21 @@ jobs:
           name: Compile Front-End Assets
           command: yarn prod
       - save_cache:
-          key: metadeploy-node-{{ checksum "bin/unpack-node" }}
+          key: v1-metadeploy-node-{{ checksum "bin/unpack-node" }}
           paths:
             - "~/metadeploy/node"
       - save_cache:
-          key: metadeploy-py-{{ checksum "requirements.txt" }}
+          key: v1-metadeploy-py-{{ checksum "requirements.txt" }}
           paths:
             - "~/.cache/pip"
             - ./venv
       - save_cache:
-          key: metadeploy-npm-{{ checksum "yarn.lock" }}
+          key: v1-metadeploy-npm-{{ checksum "yarn.lock" }}
           paths:
             - "~/.cache/yarn"
             - "~/metadeploy/node_modules"
       - save_cache:
-          key: metadeploy-built-{{ .Revision }}
+          key: v1-metadeploy-built-{{ .Revision }}
           paths:
             - "~/metadeploy/dist/prod"
 
@@ -80,18 +80,19 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: metadeploy-node-{{ checksum "bin/unpack-node" }}
+          key: v1-metadeploy-node-{{ checksum "bin/unpack-node" }}
       - restore_cache:
-          key: metadeploy-py-{{ checksum "requirements.txt" }}
+          key: v1-metadeploy-py-{{ checksum "requirements.txt" }}
       - restore_cache:
-          key: metadeploy-npm-{{ checksum "yarn.lock" }}
+          key: v1-metadeploy-npm-{{ checksum "yarn.lock" }}
       - restore_cache:
-          key: metadeploy-built-{{ .Revision }}
+          key: v1-metadeploy-built-{{ .Revision }}
       - run:
           name: Set $PATH
           command: |
             echo 'export PATH=~/metadeploy/node_modules/.bin:$PATH' >> $BASH_ENV
             echo 'export PATH=~/metadeploy/node/bin:$PATH' >> $BASH_ENV
+      - run: . venv/bin/activate
       - run:
           name: Lint
           command: yarn lint
