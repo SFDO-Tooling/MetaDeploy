@@ -1,39 +1,132 @@
 version: 2
 jobs:
+
   build:
     working_directory: ~/metadeploy
     docker:
-      - image: python:3.6.5
-        environment:
-          DJANGO_SECRET_KEY: test-secret-key
-          DJANGO_DEBUG: False
-          DJANGO_SETTINGS_MODULE: metadeploy.settings.test
-          PYTHONPATH: src
-          DATABASE_URL: postgresql://ubuntu@localhost/circle_test
-          HASHID_FIELD_SALT: test-hash-salt
-      - image: postgres:10.4
-        environment:
-          POSTGRES_USER: ubuntu
-          POSTGRES_DB: circle_test
-          POSTGRES_PASSWORD: ""
+      - image: circleci/python:3.6.5
     steps:
       - checkout
+      - restore_cache:
+          key: metadeploy-py-{{ checksum "requirements.txt" }}
+      - restore_cache:
+          key: metadeploy-npm-{{ checksum "yarn.lock" }}
+      - run:
+          name: Install Node & Yarn
+          command: ./bin/unpack-node
+      - run:
+          name: Set $PATH
+          command: |
+            echo 'export PATH=~/metadeploy/node_modules/.bin:$PATH' >> $BASH_ENV
+            echo 'export PATH=~/metadeploy/node/bin:$PATH' >> $BASH_ENV
+      - run:
+          name: Update yarn.lock [greenkeeper]
+          command: |
+            if [[ "${CIRCLE_BRANCH}" =~ greenkeeper\/.* ]]; then
+              yarn global add greenkeeper-lockfile@1 --prefix ~/metadeploy/node
+              greenkeeper-lockfile-update
+            fi
       - run:
           name: Install Dependencies
           command: |
-            export PATH=~/metadeploy/node/bin:$PATH
-            pip install -r requirements.txt
+            yarn
+            sudo pip install -r requirements.txt
       - run:
-          name: Run Database Migrations
-          command: python src/manage.py migrate --no-input
+          name: Upload yarn.lock [greenkeeper]
+          command: |
+            if [[ "${CIRCLE_BRANCH}" =~ greenkeeper\/.* ]]; then
+              greenkeeper-lockfile-upload
+            fi
       - run:
-          name: Lint Python
-          command: flake8 src/
+          name: Check that yarn.lock matches package.json
+          command: |
+            if [[ ! "${CIRCLE_BRANCH}" =~ greenkeeper\/.* ]]; then
+              [[ $(git diff --name-only yarn.lock) == "" ]] && exit 0
+              echo ">> yarn.lock is out of date, run \"yarn\""
+              exit 1
+            fi
       - run:
-          name: Test Python
-          command: py.test --junitxml=pycov/pytest-junit.xml
-      - store_artifacts:
-          path: htmlcov
-          destination: py-reports
-      - store_test_results:
-          path: pycov
+          name: Compile Front-End Assets
+          command: yarn prod
+      - save_cache:
+          key: metadeploy-node-{{ checksum "bin/unpack-node" }}
+          paths:
+            - "~/metadeploy/node"
+      - save_cache:
+          key: metadeploy-py-{{ checksum "requirements.txt" }}
+          paths:
+            - "~/.cache/pip"
+      - save_cache:
+          key: metadeploy-npm-{{ checksum "yarn.lock" }}
+          paths:
+            - "~/.cache/yarn"
+            - "~/metadeploy/node_modules"
+      - save_cache:
+          key: metadeploy-built-{{ .Revision }}
+          paths:
+            - "~/metadeploy/dist/prod"
+
+  lint:
+    working_directory: ~/metadeploy
+    docker:
+      - image: circleci/python:3.6.5
+    steps:
+      - checkout
+      - restore_cache:
+          key: metadeploy-node-{{ checksum "bin/unpack-node" }}
+      - restore_cache:
+          key: metadeploy-py-{{ checksum "requirements.txt" }}
+      - restore_cache:
+          key: metadeploy-npm-{{ checksum "yarn.lock" }}
+      - restore_cache:
+          key: metadeploy-built-{{ .Revision }}
+      - run:
+          name: Lint
+          command: yarn lint
+
+#   lint:
+#     working_directory: ~/metadeploy
+#     docker:
+#       - image: circleci/python:3.6.5
+#         environment:
+#           DJANGO_SECRET_KEY: test-secret-key
+#           DJANGO_DEBUG: False
+#           DJANGO_SETTINGS_MODULE: metadeploy.settings.test
+#           PYTHONPATH: src
+#           DATABASE_URL: postgresql://ubuntu@localhost/circle_test
+#           HASHID_FIELD_SALT: test-hash-salt
+#       - image: circleci/postgres:10.4
+#         environment:
+#           POSTGRES_USER: ubuntu
+#           POSTGRES_DB: circle_test
+#           POSTGRES_PASSWORD: ""
+#     steps:
+#       - checkout
+#       - run:
+#           name: Install Dependencies
+#           command: |
+#             export PATH=~/metadeploy/node/bin:$PATH
+#             pip install -r requirements.txt
+#       - run:
+#           name: Run Database Migrations
+#           command: python src/manage.py migrate --no-input
+#       - run:
+#           name: Lint Python
+#           command: flake8 src/
+#       - run:
+#           name: Test Python
+#           command: py.test src/ --junitxml=pycov/pytest-junit.xml
+#       - store_artifacts:
+#           path: htmlcov
+#           destination: py-reports
+#       - store_test_results:
+#           path: pycov
+
+workflows:
+  version: 2
+  build-and-test:
+    jobs:
+      - build
+      - lint:
+          requires:
+            - build
