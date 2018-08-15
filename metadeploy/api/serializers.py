@@ -31,3 +31,9 @@ class ProductSerializer(serializers.ModelSerializer):
             'color',
             'icon',
         )
+
+
+class TriggerInstallSerializer(serializers.Serializer):
+    instance_url = serializers.URLField()
+    package_url = serializers.URLField()
+    flow_name = serializers.CharField()

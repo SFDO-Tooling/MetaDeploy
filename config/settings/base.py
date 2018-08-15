@@ -106,6 +106,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
+    'django_rq',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -258,6 +259,17 @@ ACCOUNT_UNIQUE_EMAIL = False
 
 JS_REVERSE_JS_VAR_NAME = 'api_urls'
 JS_REVERSE_EXCLUDE_NAMESPACES = ['admin']
+
+
+RQ_QUEUES = {
+    'default': {
+        'HOST': 'localhost',
+        'PORT': 6379,
+        'DB': 0,
+        'PASSWORD': '',
+        'DEFAULT_TIMEOUT': 360,
+    },
+}
 
 
 # Raven / Sentry

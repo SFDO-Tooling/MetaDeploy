@@ -22,6 +22,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^accounts/', include('allauth.urls')),
     url(r'^api/', include('metadeploy.api.urls')),
+    url(r'^django-rq/', include('django_rq.urls')),
     # Catchall for the rest:
     url(
         r'^(?!admin|accounts|api)',

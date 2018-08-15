@@ -11,3 +11,5 @@ djangorestframework==3.8.2
 django-colorfield==0.1.15
 raven==6.9.0
 git+https://github.com/SalesforceFoundation/Cumulusci.git@feature/python3
+GitPython==2.1.11
+django-rq==1.2.0
