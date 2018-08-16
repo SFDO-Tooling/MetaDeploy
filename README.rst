@@ -97,14 +97,17 @@ To make an initial local user::
 
    python src/manage.py createsuperuser
 
-To setup the Salesforce OAuth integration, add an entry in the database with
+To setup the Salesforce OAuth integration, add two entries in the database with
 configuration information. You can do this by filling in the form at
 `<https://localhost:8080/admin/socialaccount/socialapp/add/>`_ (you'll first be
 asked to login using the local user you created above).
 
 To fill this in, you'll need some specific values from a Connected App in your
 Salesforce configuration. If you're an OddBird, you can find these values in the
-shared Keybase team folder.
+shared Keybase team folder. You'll have to set the ``key`` field to two
+different values: for the "Salesforce Production" provider, it'll be
+``https://login.salesforce.com``, and for the "Salesforce Test"
+provider, it'll be ``https://test.salesforce.com``.
 
 If you don't have a Salesforce account, ask `Kit <mailto:kit@oddbird.net>`_ to
 send you an invitation by email.

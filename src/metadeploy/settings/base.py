@@ -110,7 +110,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'allauth.socialaccount.providers.salesforce',
+    'multisalesforce',
 ]
 
 MIDDLEWARE = [
@@ -236,7 +236,10 @@ STATIC_ROOT = str(PROJECT_ROOT / 'staticfiles')
 # WHITENOISE_ROOT = PROJECT_ROOT.joinpath(static_dir_root)
 
 SOCIALACCOUNT_PROVIDERS = {
-    'salesforce': {
+    'salesforce-production': {
+        'SCOPE': ['web', 'full', 'refresh_token'],
+    },
+    'salesforce-test': {
         'SCOPE': ['web', 'full', 'refresh_token'],
     },
 }
