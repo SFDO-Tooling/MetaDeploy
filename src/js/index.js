@@ -21,7 +21,7 @@ const MD_logo = require('images/metadeploy-logo.png');
 const SF_logo = require('images/salesforce-logo.png');
 
 const App = () => (
-  <div>
+  <div className="site-page-wrapper slds-grid">
     <Header logoSrc={MD_logo} />
     <Footer logoSrc={SF_logo} />
   </div>
