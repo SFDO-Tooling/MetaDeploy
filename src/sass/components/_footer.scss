@@ -1,0 +1,23 @@
+// Footer
+// ======
+
+.site-contentinfo {
+  align-self: flex-end;
+  background-color: $color-background-reminder;
+  flex: 1 0 100%;
+  padding: $spacing-small $spacing-x-large;
+  font-size: 0.8rem;
+}
+
+.slds-global-footer__logo {
+  background-size: contain;
+  background-repeat: no-repeat;
+  flex: 1 0 auto;
+  min-height: 22px;
+}
+
+.slds-global-footer__item {
+  display: flex;
+  flex: 0 1 70%;
+  text-align: right;
+}
