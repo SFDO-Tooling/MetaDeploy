@@ -213,10 +213,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATICFILES_DIRS = [
-    PROJECT_ROOT / 'dist',
+    str(PROJECT_ROOT / 'dist'),
 ]
 STATIC_URL = '/static/'
-STATIC_ROOT = PROJECT_ROOT / 'staticfiles'
+STATIC_ROOT = str(PROJECT_ROOT / 'staticfiles')
 
 # if MODE == 'dev':
 #     static_dir_root = 'static/dist'
