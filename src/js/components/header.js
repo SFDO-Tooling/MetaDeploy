@@ -50,11 +50,11 @@ const Header = ({
         options={[
           {
             label: 'Production or Developer Org',
-            href: '/accounts/salesforce/login/',
+            href: window.URLS.salesforce_production_login(),
           },
           {
             label: 'Sandbox Org',
-            href: '/accounts/salesforce/login/',
+            href: window.URLS.salesforce_test_login(),
           },
         ]}
         onSelect={opt => {

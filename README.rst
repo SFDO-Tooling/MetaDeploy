@@ -97,17 +97,15 @@ To make an initial local user::
 
    python src/manage.py createsuperuser
 
-To setup the Salesforce OAuth integration, add two entries in the database with
-configuration information. You can do this by filling in the form at
+To setup the Salesforce OAuth integration, add two entries (one for Production,
+and one for Sandbox) in the database with configuration information. You can do
+this by filling in the form twice at
 `<https://localhost:8080/admin/socialaccount/socialapp/add/>`_ (you'll first be
 asked to login using the local user you created above).
 
-To fill this in, you'll need some specific values from a Connected App in your
+To fill it in, you'll need some specific values from Connected Apps in your
 Salesforce configuration. If you're an OddBird, you can find these values in the
-shared Keybase team folder. You'll have to set the ``key`` field to two
-different values: for the "Salesforce Production" provider, it'll be
-``https://login.salesforce.com``, and for the "Salesforce Test"
-provider, it'll be ``https://test.salesforce.com``.
+shared Keybase team folder (``metadeploy/prod.db``).
 
 If you don't have a Salesforce account, ask `Kit <mailto:kit@oddbird.net>`_ to
 send you an invitation by email.
@@ -127,8 +125,7 @@ To run web in development::
 
    yarn serve
 
-The running server will open automatically in your default browser at
-`<https://localhost:8080/>`_.
+The running server will be available at `<https://localhost:8080/>`_.
 
 We need to serve local development on HTTPS to support Salesforce's requirement
 for an HTTPS callback for OAuth. You'll have to add a local certificate

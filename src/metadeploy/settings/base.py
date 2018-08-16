@@ -111,6 +111,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'multisalesforce',
+    'django_js_reverse',
 ]
 
 MIDDLEWARE = [
@@ -243,3 +244,6 @@ SOCIALACCOUNT_PROVIDERS = {
         'SCOPE': ['web', 'full', 'refresh_token'],
     },
 }
+
+
+JS_REVERSE_JS_VAR_NAME = 'URLS'

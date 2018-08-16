@@ -69,7 +69,7 @@
   },
   "scripts": {
     "precommit": "lint-staged",
-    "webpack-serve": "webpack-serve --open --config webpack.dev.js",
+    "webpack-serve": "webpack-serve --config webpack.dev.js",
     "django-serve": "python src/manage.py runserver_plus --cert-file cert",
     "serve": "run-p django-serve webpack-serve",
     "prettier": "prettier --write *.js .*.js src/js/*.js src/js/**/*.js src/sass/**/*.scss",
