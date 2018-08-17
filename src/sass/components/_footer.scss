@@ -5,19 +5,24 @@
   align-self: flex-end;
   background-color: $color-background-reminder;
   flex: 1 0 100%;
-  padding: $spacing-small $spacing-x-large;
-  font-size: 0.8rem;
+  padding: $spacing-small 0;
+  font-size: $font-size-text-x-small;
 }
 
 .slds-global-footer__logo {
   background-size: contain;
   background-repeat: no-repeat;
-  flex: 1 0 auto;
+  flex: 1 1 auto;
   min-height: 22px;
+  margin-left: $spacing-medium;
+  margin-right: $spacing-medium;
+  min-width: 100px;
 }
 
 .slds-global-footer__item {
   display: flex;
   flex: 0 1 70%;
-  text-align: right;
+  justify-content: flex-end;
+  margin-left: $spacing-medium;
+  margin-right: $spacing-medium;
 }
