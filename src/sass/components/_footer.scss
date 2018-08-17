@@ -5,8 +5,13 @@
   align-self: flex-end;
   background-color: $color-background-reminder;
   flex: 1 0 100%;
+  flex-wrap: wrap;
   padding: $spacing-small 0;
   font-size: $font-size-text-x-small;
+
+  @media (min-width: $mq-medium) {
+    flex-wrap: nowrap;
+  }
 }
 
 .slds-global-footer__logo {
@@ -17,12 +22,18 @@
   margin-left: $spacing-medium;
   margin-right: $spacing-medium;
   min-width: 100px;
+
+  @media (max-width: $mq-medium) {
+    margin-bottom: $spacing-small;
+  }
 }
 
 .slds-global-footer__item {
   display: flex;
-  flex: 0 1 70%;
-  justify-content: flex-end;
   margin-left: $spacing-medium;
   margin-right: $spacing-medium;
+
+  @media (min-width: $mq-medium) {
+    justify-content: flex-end;
+  }
 }
