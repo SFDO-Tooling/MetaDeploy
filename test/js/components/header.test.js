@@ -4,15 +4,14 @@ import { fireEvent } from 'react-testing-library';
 import { renderWithRedux } from './../utils';
 
 import Header from 'components/header';
-import reducer from 'accounts/reducer';
 
 describe('<Header />', () => {
   test('renders logo with `backgroundImage` set to `logoSrc`', () => {
     const initialState = { user: null };
-    const { container } = renderWithRedux(<Header logoSrc="my/logo.png" />, {
+    const { container } = renderWithRedux(
+      <Header logoSrc="my/logo.png" />,
       initialState,
-      reducer,
-    });
+    );
 
     expect(container.querySelector('.slds-global-header__logo')).toHaveStyle(
       'background-image: url(my/logo.png)',
@@ -22,10 +21,7 @@ describe('<Header />', () => {
   describe('logged out', () => {
     test('renders login dropdown', () => {
       const initialState = { user: null };
-      const { getByText } = renderWithRedux(<Header />, {
-        initialState,
-        reducer,
-      });
+      const { getByText } = renderWithRedux(<Header />, initialState);
       const btn = getByText('Log In');
 
       expect(btn).toBeVisible();
@@ -38,10 +34,7 @@ describe('<Header />', () => {
 
     test('updates `window.location.href` on login click', () => {
       const initialState = { user: null };
-      const { getByText } = renderWithRedux(<Header />, {
-        initialState,
-        reducer,
-      });
+      const { getByText } = renderWithRedux(<Header />, initialState);
       window.location.assign = jest.fn();
       fireEvent.click(getByText('Log In'));
       fireEvent.click(getByText('Sandbox Org'));
@@ -53,10 +46,10 @@ describe('<Header />', () => {
   describe('logged in', () => {
     test('renders profile dropdown (with logout)', () => {
       const initialState = { user: { username: 'Test User' } };
-      const { container, getByText } = renderWithRedux(<Header />, {
+      const { container, getByText } = renderWithRedux(
+        <Header />,
         initialState,
-        reducer,
-      });
+      );
       const btn = container.querySelector('#logout');
 
       expect(btn).toBeVisible();
