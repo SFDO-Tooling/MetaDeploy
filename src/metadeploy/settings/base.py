@@ -244,6 +244,7 @@ SOCIALACCOUNT_PROVIDERS = {
         'SCOPE': ['web', 'full', 'refresh_token'],
     },
 }
+ACCOUNT_EMAIL_REQUIRED = True
 
 
 JS_REVERSE_JS_VAR_NAME = 'URLS'
