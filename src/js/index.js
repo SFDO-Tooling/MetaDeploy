@@ -6,6 +6,7 @@ import IconSettings from '@salesforce/design-system-react/components/icon-settin
 import logger from 'redux-logger';
 import thunk from 'redux-thunk';
 import utilitySprite from '@salesforce-ux/design-system/assets/icons/utility-sprite/svg/symbols.svg';
+import { BrowserRouter as Router, Route, Link, Switch } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { combineReducers, createStore, applyMiddleware } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
@@ -20,9 +21,27 @@ import { doLocalLogout } from 'accounts/actions';
 const MD_logo = require('images/metadeploy-logo.png');
 const SF_logo = require('images/salesforce-logo.png');
 
+const Home = () => (
+  <div>
+    Homepage
+    <Link to="/foo">this is a broken link</Link>
+  </div>
+);
+
+const NoMatch = () => (
+  <div>
+    Oops! 404...
+    <Link to="/">go home</Link>
+  </div>
+);
+
 const App = () => (
   <div>
     <Header logoSrc={MD_logo} />
+    <Switch>
+      <Route exact path="/" component={Home} />
+      <Route component={NoMatch} />
+    </Switch>
     <Footer logoSrc={SF_logo} />
   </div>
 );
@@ -55,11 +74,13 @@ cache.getAll().then(data => {
       ),
     );
     ReactDOM.render(
-      <IconSettings utilitySprite={utilitySprite}>
-        <Provider store={appStore}>
-          <App />
-        </Provider>
-      </IconSettings>,
+      <Provider store={appStore}>
+        <Router>
+          <IconSettings utilitySprite={utilitySprite}>
+            <App />
+          </IconSettings>
+        </Router>
+      </Provider>,
       el,
     );
   }
