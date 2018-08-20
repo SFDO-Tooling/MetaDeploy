@@ -4,6 +4,13 @@ import 'jest-dom/extend-expect';
 import 'react-testing-library/cleanup-after-each';
 import React from 'react';
 
+beforeAll(() => {
+  window.URLS = {
+    salesforce_production_login: () => '/accounts/salesforce-production/login/',
+    salesforce_test_login: () => '/accounts/salesforce-test/login/',
+  };
+});
+
 /**
  * Since React v15.5, there's a warning printed if you access `React.createClass` or `React.PropTypes`
  * https://reactjs.org/blog/2017/04/07/react-v15.5.0.html#new-deprecation-warnings
