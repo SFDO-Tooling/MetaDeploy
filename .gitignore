@@ -5,8 +5,7 @@ TAGS
 .livereload
 node_modules/
 node/
-jscov/
-jscov_temp/
+coverage/
 jscache/
 *.orig
 *.swp
