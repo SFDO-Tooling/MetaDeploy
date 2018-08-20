@@ -2,7 +2,7 @@ Django==2.1
 psycopg2-binary==2.7.5
 dj-database-url==0.5.0
 whitenoise==4.0
-pytest==3.7.1
+pytest==3.7.2
 pytest-cov==2.5.1
 pytest-django==3.3.3
 Sphinx==1.7.6
