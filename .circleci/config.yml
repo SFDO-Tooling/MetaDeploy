@@ -68,10 +68,6 @@ jobs:
           paths:
             - "~/.cache/yarn"
             - "~/metadeploy/node_modules"
-      - save_cache:
-          key: v1-metadeploy-built-{{ .Revision }}
-          paths:
-            - "~/metadeploy/dist/prod"
 
   lint:
     working_directory: ~/metadeploy
@@ -85,8 +81,6 @@ jobs:
           key: v1-metadeploy-py-{{ checksum "requirements.txt" }}
       - restore_cache:
           key: v1-metadeploy-npm-{{ checksum "yarn.lock" }}
-      - restore_cache:
-          key: v1-metadeploy-built-{{ .Revision }}
       - run:
           name: Set $PATH
           command: |
@@ -98,11 +92,43 @@ jobs:
             . venv/bin/activate
             yarn lint
 
+  test-client:
+    working_directory: ~/metadeploy
+    docker:
+      - image: circleci/python:3.6.5
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-metadeploy-node-{{ checksum "bin/unpack-node" }}
+      - restore_cache:
+          key: v1-metadeploy-npm-{{ checksum "yarn.lock" }}
+      - run:
+          name: Set $PATH
+          command: |
+            echo 'export PATH=~/metadeploy/node_modules/.bin:$PATH' >> $BASH_ENV
+            echo 'export PATH=~/metadeploy/node/bin:$PATH' >> $BASH_ENV
+      - run:
+          name: Test JS
+          command: yarn test:coverage
+      - run:
+          name: Check JS Test Coverage
+          command: |
+            yarn test:report-coverage
+            yarn test:check-coverage
+      - store_artifacts:
+          path: coverage
+          destination: js-reports
+      - store_test_results:
+          path: coverage
+
 workflows:
   version: 2
   build-and-test:
     jobs:
       - build
       - lint:
+          requires:
+            - build
+      - test-client:
           requires:
             - build

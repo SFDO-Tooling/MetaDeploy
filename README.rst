@@ -5,6 +5,10 @@ MetaDeploy
      :target: https://circleci.com/gh/oddbird/metadeploy
      :alt: Build Status
 
+.. image:: https://coveralls.io/repos/github/oddbird/metadeploy/badge.svg?branch=master&amp;t=nvcQcu
+     :target: https://coveralls.io/github/oddbird/metadeploy?branch=master
+     :alt: Test Coverage
+
 .. image:: https://badges.greenkeeper.io/oddbird/metadeploy.svg?token=cdd1aa435bc2abd632c8499a57f321736ca10821eb55bd45a68df6b138e20a31&ts=1534281126964
      :target: https://greenkeeper.io/
      :alt: Greenkeeper Status
@@ -165,3 +169,5 @@ Development Tasks
   dir
 - ``yarn prod``: builds production (minified) static assets into ``dist/prod/``
   dir
+- ``yarn test``: run JS tests
+- ``yarn test:watch``: run JS tests with a watcher for development
