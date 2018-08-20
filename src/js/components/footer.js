@@ -10,6 +10,7 @@ const Footer = (props: { logoSrc: string }) => (
     <div
       className="slds-global-footer__logo"
       style={{ backgroundImage: `url(${props.logoSrc})` }}
+      data-testid="footer-logo"
     />
     <div className="slds-global-footer__item">
       <p>

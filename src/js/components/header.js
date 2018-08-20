@@ -58,7 +58,7 @@ const Header = ({
           },
         ]}
         onSelect={opt => {
-          window.location.href = opt.href;
+          window.location.assign(opt.href);
         }}
         label="Log In"
         offset="12px 12px"

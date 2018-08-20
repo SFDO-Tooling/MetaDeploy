@@ -22,17 +22,14 @@ export const login = (payload: User): LoginAction => ({
   payload,
 });
 
-export const doLocalLogout = (): ThunkAction => dispatch => {
-  dispatch({
-    type: 'USER_LOGGED_OUT',
-  });
+export const doLocalLogout = (): LogoutAction => {
   cache.clear();
+  return {
+    type: 'USER_LOGGED_OUT',
+  };
 };
 
-export const logout = (): ThunkAction => (dispatch, getState, { apiFetch }) => {
+export const logout = (): ThunkAction => (dispatch, getState, { apiFetch }) =>
   apiFetch('/accounts/logout/', {
     method: 'POST',
-  }).then(() => {
-    dispatch(doLocalLogout());
-  });
-};
+  }).then(() => dispatch(doLocalLogout()));
