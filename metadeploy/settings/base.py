@@ -65,7 +65,7 @@ def env(name, default=NoDefaultValue, type_=str):
 
 
 # Build paths inside the project like this: BASE_DIR.joinpath(...)
-BASE_DIR = Path(__file__).absolute().parent.parent.parent
+BASE_DIR = Path(__file__).absolute().parent.parent
 PROJECT_ROOT = BASE_DIR.parent
 
 
