@@ -4,4 +4,4 @@ Changelog
 v0.1.0
 ------
 
- * Definitely some features.
+ * Initial project setup.
