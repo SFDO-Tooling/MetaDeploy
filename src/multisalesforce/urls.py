@@ -5,6 +5,7 @@ from allauth.utils import import_attribute
 from .provider import (
     SalesforceProductionProvider,
     SalesforceTestProvider,
+    SalesforceCustomProvider,
 )
 
 
@@ -26,3 +27,4 @@ def default_urlpatterns(provider, version):
 
 urlpatterns = default_urlpatterns(SalesforceProductionProvider, 'prod')
 urlpatterns += default_urlpatterns(SalesforceTestProvider, 'test')
+urlpatterns += default_urlpatterns(SalesforceCustomProvider, 'custom')

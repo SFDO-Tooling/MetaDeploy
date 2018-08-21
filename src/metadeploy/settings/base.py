@@ -243,6 +243,9 @@ SOCIALACCOUNT_PROVIDERS = {
     'salesforce-test': {
         'SCOPE': ['web', 'full', 'refresh_token'],
     },
+    'salesforce-custom': {
+        'SCOPE': ['web', 'full', 'refresh_token'],
+    },
 }
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = False

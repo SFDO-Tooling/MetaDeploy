@@ -112,11 +112,12 @@ To make an initial local user::
 
    python src/manage.py createsuperuser
 
-To setup the Salesforce OAuth integration, add two entries (one for Production,
-and one for Sandbox) in the database with configuration information. You can do
-this by filling in the form twice at
-`<https://localhost:8080/admin/socialaccount/socialapp/add/>`_ (you'll first be
-asked to log in using the local user you created above).
+To setup the Salesforce OAuth integration, add three entries (one for
+Production, one for Sandbox, and one for Custom Domain) in the database
+with configuration information. You can do this by filling in the form
+twice at `<https://localhost:8080/admin/socialaccount/socialapp/add/>`_
+(you'll first be asked to log in using the local user you created
+above).
 
 To fill it in, you'll need some specific values from Connected Apps in your
 Salesforce configuration. If you're an OddBird, you can find these values in the
