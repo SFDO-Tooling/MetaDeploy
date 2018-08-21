@@ -1,4 +1,0 @@
-Contributors
-============
-
-Salesforce.org

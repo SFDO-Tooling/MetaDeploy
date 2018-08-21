@@ -2,7 +2,7 @@
   "name": "metadeploy",
   "version": "0.1.0",
   "private": true,
-  "license": "MIT",
+  "license": "BSD-3-Clause",
   "repository": {
     "type": "git",
     "url": "https://github.com/oddbird/metadeploy.git"
@@ -80,6 +80,7 @@
   },
   "scripts": {
     "precommit": "lint-staged",
+    "preparecommitmsg": "./bin/prepare-commit-msg",
     "webpack:serve": "webpack-serve --config webpack.dev.js",
     "django:serve": "python src/manage.py runserver_plus --cert-file cert",
     "serve": "run-p django:serve webpack:serve",
