@@ -23,7 +23,15 @@ import { doLocalLogout } from 'accounts/actions';
 const MD_logo = require('images/metadeploy-logo.png');
 const SF_logo = require('images/salesforce-logo.png');
 
-const Home = () => <div>Welcome to MetaDeploy!</div>;
+const Home = () => (
+  <div className="site-intro">
+    <h1>Welcome to MetaDeploy</h1>!
+    <p>
+      This is some sample intro text, where (in the project-template) we might
+      provide some basic quickstart instructions and documentation.
+    </p>
+  </div>
+);
 
 const App = () => (
   <DocumentTitle title="MetaDeploy">
