@@ -1,0 +1,10 @@
+[flake8]
+exclude =
+    .git,
+    __pycache__,
+    docs,
+    dist,
+    coverage,
+    node,
+    node_modules,
+    requirements
