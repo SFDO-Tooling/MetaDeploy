@@ -3,4 +3,3 @@
 -r test.txt
 
 Sphinx==1.7.7
-flake8==3.5.0
