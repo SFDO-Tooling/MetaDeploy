@@ -244,7 +244,7 @@ SOCIALACCOUNT_PROVIDERS = {
     },
 }
 SOCIALACCOUNT_ADAPTER = (
-    'metadeploy.multisalesforce.views.CustomSocialAccountAdapter'
+    'metadeploy.multisalesforce.adapters.CustomSocialAccountAdapter'
 )
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = False

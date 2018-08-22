@@ -1,11 +1,10 @@
-from allauth.accounts.models import EmailAddress
-
+from allauth.account.models import EmailAddress
 from allauth.socialaccount.providers.salesforce.provider import (
     SalesforceProvider,
 )
 
 
-class PromptLoginMixin:
+class MultiMixin:
     def get_auth_params(self, request, action):
         ret = super().get_auth_params(request, action)
         # This will ensure that even if you're logged in to Salesforce,
@@ -13,8 +12,6 @@ class PromptLoginMixin:
         ret['prompt'] = 'login'
         return ret
 
-
-class CleanUpEmailAddressesMixin:
     def cleanup_email_addresses(self, email, addresses):
         # Move user.email over to EmailAddress
         if email and email.lower() not in [a.email.lower() for a in addresses]:
@@ -35,15 +32,13 @@ class CleanUpEmailAddressesMixin:
                 address.verified = True
 
 
-class SalesforceProductionProvider(
-        PromptLoginMixin, CleanUpEmailAddressesMixin, SalesforceProvider):
+class SalesforceProductionProvider(MultiMixin, SalesforceProvider):
     id = 'salesforce-production'
     name = 'Salesforce Production'
     package = 'metadeploy.multisalesforce'
 
 
-class SalesforceTestProvider(
-        PromptLoginMixin, CleanUpEmailAddressesMixin, SalesforceProvider):
+class SalesforceTestProvider(MultiMixin, SalesforceProvider):
     id = 'salesforce-test'
     name = 'Salesforce Test'
     package = 'metadeploy.multisalesforce'
