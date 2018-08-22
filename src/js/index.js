@@ -21,7 +21,6 @@ import userReducer from 'accounts/reducer';
 import { cache, persistMiddleware } from 'utils/caching';
 import { doLocalLogout } from 'accounts/actions';
 
-const MD_logo = require('images/metadeploy-logo.png');
 const SF_logo = require('images/salesforce-logo.png');
 
 const Home = () => (
@@ -37,7 +36,7 @@ const Home = () => (
 const App = () => (
   <DocumentTitle title="MetaDeploy">
     <div className="site-page-wrapper slds-grid slds-grid_vertical">
-      <Header logoSrc={MD_logo} />
+      <Header />
       <Switch>
         <Route exact path="/" component={Home} />
         <Route component={FourOhFour} />

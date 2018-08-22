@@ -6,18 +6,6 @@ import { renderWithRedux } from './../utils';
 import Header from 'components/header';
 
 describe('<Header />', () => {
-  test('renders logo with `backgroundImage` set to `logoSrc`', () => {
-    const initialState = { user: null };
-    const { container } = renderWithRedux(
-      <Header logoSrc="my/logo.png" />,
-      initialState,
-    );
-
-    expect(container.querySelector('.slds-global-header__logo')).toHaveStyle(
-      'background-image: url(my/logo.png)',
-    );
-  });
-
   describe('logged out', () => {
     test('renders login dropdown', () => {
       const initialState = { user: null };
