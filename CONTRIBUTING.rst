@@ -51,7 +51,7 @@ Installing Python requirements
 
 ::
 
-    pip install -r requirements.txt
+    pip install -r requirements/local.txt
 
 Installing JavaScript requirements
 ----------------------------------
@@ -145,7 +145,7 @@ Development Tasks
 In commit messages or pull request titles, we use the following emojis to label
 which development commands need to be run before serving locally:
 
-- 📦 (``:package:``) -> ``pip install -r requirements.txt``
+- 📦 (``:package:``) -> ``pip install -r requirements/local.txt``
 - 🛢 (``:oil_drum:``) -> ``python manage.py migrate``
 - 🐈 (``:cat2:``) -> ``yarn``
 - 🙀 (``:scream_cat:``) -> ``rm -rf node_modules/; bin/unpack-node; yarn``

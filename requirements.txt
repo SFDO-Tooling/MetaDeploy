@@ -1,13 +1,4 @@
-Django==2.1
-psycopg2-binary==2.7.5
-dj-database-url==0.5.0
-whitenoise==4.0
-pytest==3.7.2
-pytest-cov==2.5.1
-pytest-django==3.4.2
-Sphinx==1.7.7
-django-allauth==0.36.0
-django-extensions==2.1.0
-werkzeug==0.14.1
-pyopenssl==18.0.0
-flake8==3.5.0
+# This file is here because many Platforms as a Service look for
+# requirements.txt in the root directory of a project.
+
+-r requirements/production.txt
