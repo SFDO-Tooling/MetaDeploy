@@ -9,7 +9,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v1-metadeploy-py-{{ checksum "requirements.txt" }}
+            - v1-metadeploy-py-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
             - v1-metadeploy-py-
       - restore_cache:
           keys:
@@ -36,7 +36,7 @@ jobs:
             yarn
             python3 -m venv venv
             . venv/bin/activate
-            pip install -r requirements.txt
+            pip install -r requirements/local.txt
       - run:
           name: Upload yarn.lock [greenkeeper]
           command: |
@@ -59,7 +59,7 @@ jobs:
           paths:
             - "~/metadeploy/node"
       - save_cache:
-          key: v1-metadeploy-py-{{ checksum "requirements.txt" }}
+          key: v1-metadeploy-py-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
           paths:
             - "~/.cache/pip"
             - ./venv
@@ -78,7 +78,7 @@ jobs:
       - restore_cache:
           key: v1-metadeploy-node-{{ checksum "bin/unpack-node" }}
       - restore_cache:
-          key: v1-metadeploy-py-{{ checksum "requirements.txt" }}
+          key: v1-metadeploy-py-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
       - restore_cache:
           key: v1-metadeploy-npm-{{ checksum "yarn.lock" }}
       - run:
