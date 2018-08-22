@@ -67,6 +67,7 @@ const Logout = ({
       },
     ]}
     onSelect={doLogout}
+    menuPosition="relative"
     nubbinPosition="top right"
   >
     <DropdownTrigger>
@@ -87,8 +88,8 @@ const Header = ({
   <PageHeader
     title={
       <div className="slds-page-header__title md-logo">
-        <span>meta</span>
-        <span>deploy</span>
+        <span data-logo-bit="start">meta</span>
+        <span data-logo-bit="end">deploy</span>
       </div>
     }
     navRight={

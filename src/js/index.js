@@ -24,7 +24,10 @@ import { doLocalLogout } from 'accounts/actions';
 const SF_logo = require('images/salesforce-logo.png');
 
 const Home = () => (
-  <div className="site-intro slds-grow slds-shrink-none">
+  <div
+    className="site-intro slds-grow slds-shrink-none
+    slds-p-horizontal_medium slds-p-vertical_large"
+  >
     <h1>Welcome to MetaDeploy!</h1>
     <p>
       This is some sample intro text, where (in the project-template) we might
