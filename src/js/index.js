@@ -24,7 +24,7 @@ const MD_logo = require('images/metadeploy-logo.png');
 const SF_logo = require('images/salesforce-logo.png');
 
 const Home = () => (
-  <div className="site-intro">
+  <div className="site-intro slds-grow slds-shrink-none">
     <h1>Welcome to MetaDeploy</h1>!
     <p>
       This is some sample intro text, where (in the project-template) we might
@@ -35,7 +35,7 @@ const Home = () => (
 
 const App = () => (
   <DocumentTitle title="MetaDeploy">
-    <div className="site-page-wrapper slds-grid">
+    <div className="site-page-wrapper slds-grid slds-grid_vertical">
       <Header logoSrc={MD_logo} />
       <Switch>
         <Route exact path="/" component={Home} />
