@@ -65,7 +65,6 @@ const Header = ({
           window.location.assign(opt.href);
         }}
         label="Log In"
-        offset="12px 12px"
         buttonVariant="brand"
         iconVariant={null}
       />
