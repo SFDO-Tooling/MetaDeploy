@@ -68,7 +68,10 @@ const Header = ({
           },
         ]}
         onSelect={opt => {
-          window.location.assign(opt.href);
+          /* istanbul ignore else */
+          if (opt.href) {
+            window.location.assign(opt.href);
+          }
         }}
         label="Log In"
         buttonVariant="brand"
