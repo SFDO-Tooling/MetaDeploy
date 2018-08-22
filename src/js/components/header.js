@@ -40,6 +40,7 @@ const Login = () => (
     }}
     label="Log In"
     buttonVariant="brand"
+    menuPosition="relative"
     nubbinPosition="top right"
   />
 );
