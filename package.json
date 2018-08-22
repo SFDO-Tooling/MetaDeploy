@@ -87,7 +87,7 @@
     "prettier": "prettier --write *.js .*.js src/js/*.js src/js/**/*.js test/js/*.js test/js/**/*.js src/sass/**/*.scss",
     "eslint": "eslint *.js src/js/*.js src/js/**/*.js test/js/*.js test/js/**/*.js",
     "stylelint": "stylelint src/sass/**/*.scss",
-    "flake8": "flake8 metadeploy config",
+    "flake8": "flake8 manage.py metadeploy/ config/",
     "lint": "npm-run-all -p prettier flake8 -p eslint stylelint",
     "build": "webpack --config webpack.dev.js",
     "prod": "webpack --config webpack.prod.js",
