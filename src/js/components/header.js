@@ -35,6 +35,10 @@ const Header = ({
         id="logout"
         options={[
           {
+            label: user.username,
+            type: 'header',
+          },
+          {
             label: 'Log Out',
             leftIcon: {
               name: 'logout',
@@ -50,11 +54,11 @@ const Header = ({
         options={[
           {
             label: 'Production or Developer Org',
-            href: '/accounts/salesforce/login/',
+            href: window.URLS.salesforce_production_login(),
           },
           {
             label: 'Sandbox Org',
-            href: '/accounts/salesforce/login/',
+            href: window.URLS.salesforce_test_login(),
           },
         ]}
         onSelect={opt => {

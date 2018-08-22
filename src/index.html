@@ -1,3 +1,5 @@
+{% load js_reverse %}
+
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
@@ -13,6 +15,12 @@
     <meta name="description" content="{% block description %}{% endblock description %}" />
   </head>
   <body>
-    <main id="app"{% if user.is_authenticated %} data-username="{{ user.get_username }}"{% endif %}>Loading...</main>
+    <main id="app"{% if user.is_authenticated %} data-username="{{ user.get_username }}"{% endif %}>
+      Loading...
+    </main>
+
+    <script type="text/javascript" charset="utf-8">
+      {% js_reverse_inline %}
+    </script>
   </body>
 </html>
