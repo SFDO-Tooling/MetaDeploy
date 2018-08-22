@@ -35,6 +35,10 @@ const Header = ({
         id="logout"
         options={[
           {
+            label: user.username,
+            type: 'header',
+          },
+          {
             label: 'Log Out',
             leftIcon: {
               name: 'logout',
