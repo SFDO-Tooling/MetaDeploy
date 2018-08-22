@@ -51,7 +51,7 @@ Installing Python requirements
 
 ::
 
-    pip install -r requirements.txt
+    pip install -r requirements/local.txt
 
 Installing JavaScript requirements
 ----------------------------------
@@ -85,7 +85,7 @@ and running locally::
 
 Then run the initial migrations::
 
-   python src/manage.py migrate
+   python manage.py migrate
 
 Running the server
 ------------------
@@ -110,7 +110,7 @@ Logging in with Salesforce
 
 To make an initial local user::
 
-   python src/manage.py createsuperuser
+   python manage.py createsuperuser
 
 To setup the Salesforce OAuth integration, add an entry in the database with
 configuration information. You can do this by filling in the form at
@@ -145,7 +145,7 @@ Development Tasks
 In commit messages or pull request titles, we use the following emojis to label
 which development commands need to be run before serving locally:
 
-- 📦 (``:package:``) -> ``pip install -r requirements.txt``
-- 🛢 (``:oil_drum:``) -> ``python src/manage.py migrate``
+- 📦 (``:package:``) -> ``pip install -r requirements/local.txt``
+- 🛢 (``:oil_drum:``) -> ``python manage.py migrate``
 - 🐈 (``:cat2:``) -> ``yarn``
 - 🙀 (``:scream_cat:``) -> ``rm -rf node_modules/; bin/unpack-node; yarn``

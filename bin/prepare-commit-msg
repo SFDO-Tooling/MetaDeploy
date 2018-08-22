@@ -11,7 +11,9 @@ prepend_emoji () {
 }
 
 has_pip () {
-    if [[ $CHANGED == *"requirements.txt"* ]]; then
+    if [[ $CHANGED == *"requirements/base.txt"*     ||
+          $CHANGED == *"requirements/test.txt"*     ||
+          $CHANGED == *"requirements/local.txt"*    ]]; then
         return 0
     else
         return 1
