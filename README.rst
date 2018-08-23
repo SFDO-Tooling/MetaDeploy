@@ -9,10 +9,6 @@ MetaDeploy
      :target: https://coveralls.io/github/SFDO-Tooling/metadeploy?branch=master
      :alt: Test Coverage
 
-.. image:: https://badges.greenkeeper.io/SFDO-Tooling/metadeploy.svg
-     :target: https://greenkeeper.io/
-     :alt: Greenkeeper Status
-
 .. image:: https://pyup.io/repos/github/SFDO-Tooling/metadeploy/shield.svg
      :target: https://pyup.io/repos/github/SFDO-Tooling/metadeploy/
      :alt: Python Updates
