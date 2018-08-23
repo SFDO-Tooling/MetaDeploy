@@ -243,9 +243,6 @@ SOCIALACCOUNT_PROVIDERS = {
         'SCOPE': ['web', 'full', 'refresh_token'],
     },
 }
-SOCIALACCOUNT_ADAPTER = (
-    'metadeploy.multisalesforce.adapters.CustomSocialAccountAdapter'
-)
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = False
 
