@@ -39,7 +39,7 @@ const Home = () => (
 
 const App = () => (
   <DocumentTitle title="MetaDeploy">
-    <div className="site-page-wrapper slds-grid slds-grid_vertical">
+    <div className="slds-grid slds-grid_frame slds-grid_vertical">
       <Header />
       <Switch>
         <Route exact path="/" component={Home} />
