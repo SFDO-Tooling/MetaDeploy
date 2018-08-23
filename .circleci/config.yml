@@ -4,7 +4,7 @@ jobs:
   build:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.6.5
+      - image: circleci/python:3.6.6
     steps:
       - checkout
       - restore_cache:
@@ -72,7 +72,7 @@ jobs:
   lint:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.6.5
+      - image: circleci/python:3.6.6
     steps:
       - checkout
       - restore_cache:
@@ -95,7 +95,7 @@ jobs:
   test-client:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.6.5
+      - image: circleci/python:3.6.6
     steps:
       - checkout
       - restore_cache:
