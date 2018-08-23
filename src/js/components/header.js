@@ -23,28 +23,47 @@ const actions = {
   doLogout: logout,
 };
 
-const Login = () => (
-  <Dropdown
-    id="login"
-    options={[
-      {
-        label: 'Production or Developer Org',
-        href: window.URLS.salesforce_production_login(),
-      },
-      {
-        label: 'Sandbox Org',
-        href: window.URLS.salesforce_test_login(),
-      },
-    ]}
-    onSelect={opt => {
-      window.location.assign(opt.href);
-    }}
-    label="Log In"
-    buttonVariant="brand"
-    menuPosition="relative"
-    nubbinPosition="top right"
-  />
-);
+const Login = () => {
+  if (!window.URLS.salesforce_production_login) {
+    window.console.error(
+      'Login URL not found for salesforce_production provider.',
+    );
+  }
+  if (!window.URLS.salesforce_test_login) {
+    window.console.error('Login URL not found for salesforce_test provider.');
+  }
+  return (
+    <Dropdown
+      id="login"
+      options={[
+        {
+          label: 'Production or Developer Org',
+          href:
+            window.URLS.salesforce_production_login &&
+            window.URLS.salesforce_production_login(),
+          disabled: !window.URLS.salesforce_production_login,
+        },
+        {
+          label: 'Sandbox Org',
+          href:
+            window.URLS.salesforce_test_login &&
+            window.URLS.salesforce_test_login(),
+          disabled: !window.URLS.salesforce_test_login,
+        },
+      ]}
+      onSelect={opt => {
+        /* istanbul ignore else */
+        if (opt.href) {
+          window.location.assign(opt.href);
+        }
+      }}
+      label="Log In"
+      buttonVariant="brand"
+      menuPosition="relative"
+      nubbinPosition="top right"
+    />
+  );
+};
 
 const Logout = ({
   user,

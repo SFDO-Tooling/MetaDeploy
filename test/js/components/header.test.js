@@ -60,4 +60,24 @@ describe('<Header />', () => {
       expect(getByText('Log Out')).toBeVisible();
     });
   });
+
+  describe('URLs not found', () => {
+    const URLS = window.URLS;
+    afterEach(() => {
+      window.URLS = URLS;
+    });
+
+    test('logs error to console', () => {
+      window.URLS = [];
+      const initialState = { user: null };
+      renderWithRedux(
+        <MemoryRouter>
+          <Header />
+        </MemoryRouter>,
+        initialState,
+      );
+
+      expect(window.console.error).toHaveBeenCalled();
+    });
+  });
 });
