@@ -1,0 +1,54 @@
+{
+    "name": "MetaDeploy",
+    "description": "The future, today.",
+    "repository": "https://github.com/SFDO-Tooling/MetaDeploy",
+    "logo": "",
+    "keywords": ["ci", "python", "django", "salesforce", "github"],
+    "env": {
+      "DJANGO_ALLOWED_HOSTS": {
+        "description": "Heroku proxies web requests and Django needs to be configured to allow the forwards",
+        "value": ".herokuapp.com"
+      },
+      "DJANGO_ADMIN_URL": {
+        "description": "The url path to the admin section of the site",
+        "generator": "secret"
+      },
+      "DJANGO_SECRET_KEY": {
+        "description": "The url path to the admin section of the site",
+        "generator": "secret"
+      },
+      "DJANGO_SETTINGS_MODULE": {
+        "description": "The site settings to use",
+        "value": "config.settings.production"
+      }
+    },
+    "formation": {
+      "web": {
+        "quantity": 1,
+        "size": "free"
+      }
+    },
+    "scripts": {
+      "postdeploy": "yarn prod"
+    },
+    "image": "heroku/python",
+    "addons": [
+      "heroku-postgresql"
+    ],
+    "buildpacks": [
+       {"url": "heroku/python"},
+       {"url": "heroku/node"}
+    ],
+    "environments": {
+      "test": {
+        "scripts": {
+          "test-setup": "pip install --upgrade -r requirements/test.txt",
+          "test": "python manage.py test"
+        },
+        "env": {
+          "DJANGO_SETTINGS_MODULE": "config.settings.test",
+          "DATABASE_URL": "sqlite:///test.db"
+        }
+      }
+    }
+  }
