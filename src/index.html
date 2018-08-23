@@ -15,8 +15,12 @@
     <meta name="description" content="{% block description %}{% endblock description %}" />
   </head>
   <body>
-    <main id="app"{% if user.is_authenticated %} data-username="{{ user.get_username }}"{% endif %}>
-      Loading...
+    <main id="app" class="slds-grid slds-grid_vertical"{% if user.is_authenticated %} data-username="{{ user.get_username }}"{% endif %}>
+      <div role="status" class="slds-spinner slds-spinner_large">
+        <span class="slds-assistive-text">Loading...</span>
+        <div class="slds-spinner__dot-a"></div>
+        <div class="slds-spinner__dot-b"></div>
+      </div>
     </main>
 
     <script type="text/javascript" charset="utf-8">
