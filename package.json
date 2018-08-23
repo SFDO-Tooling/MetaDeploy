@@ -95,7 +95,9 @@
     "test:watch": "jest --watchAll",
     "test:coverage": "JEST_JUNIT_OUTPUT='./coverage/junit.xml' jest --ci --runInBand --reporters=default --reporters=jest-junit",
     "test:report-coverage": "cat ./coverage/lcov.info | coveralls",
-    "test:check-coverage": "nyc check-coverage --temp-directory coverage"
+    "test:check-coverage": "nyc check-coverage --temp-directory coverage",
+    "heroku-postbuild": "yarn prod"
+
   },
   "lint-staged": {
     "*.js": [

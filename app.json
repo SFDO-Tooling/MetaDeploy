@@ -28,9 +28,6 @@
         "size": "free"
       }
     },
-    "scripts": {
-      "heroku-postbuild": "yarn prod"
-    },
     "image": "heroku/python",
     "addons": [
       "heroku-postgresql"
