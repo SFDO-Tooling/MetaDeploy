@@ -13,6 +13,6 @@ const actionsToPersist = {
 
 export const persistMiddleware = getPersistMiddleware({
   cacheFn: cache.set,
-  logger: console.info, // eslint-disable-line no-console
+  logger: window.console.info,
   actionMap: actionsToPersist,
 });

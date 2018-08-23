@@ -50,45 +50,51 @@ const App = () => (
   </DocumentTitle>
 );
 
-cache.getAll().then(data => {
-  const el = document.getElementById('app');
-  if (el) {
-    // Initialize with correct logged-in/out status
-    const username = el.getAttribute('data-username');
-    if (username !== null && username !== undefined) {
-      data.user = { username };
-    } else {
-      data.user = null;
-    }
-    const appStore = createStore(
-      combineReducers({
-        user: userReducer,
-      }),
-      data,
-      composeWithDevTools(
-        applyMiddleware(
-          thunk.withExtraArgument({
-            apiFetch: getApiFetch(() => {
-              appStore.dispatch(doLocalLogout());
+cache
+  .getAll()
+  .then(data => {
+    const el = document.getElementById('app');
+    if (el) {
+      // Initialize with correct logged-in/out status
+      const username = el.getAttribute('data-username');
+      if (username !== null && username !== undefined) {
+        data.user = { username };
+      } else {
+        data.user = null;
+      }
+      const appStore = createStore(
+        combineReducers({
+          user: userReducer,
+        }),
+        data,
+        composeWithDevTools(
+          applyMiddleware(
+            thunk.withExtraArgument({
+              apiFetch: getApiFetch(() => {
+                appStore.dispatch(doLocalLogout());
+              }),
             }),
-          }),
-          persistMiddleware,
-          logger,
+            persistMiddleware,
+            logger,
+          ),
         ),
-      ),
-    );
-    ReactDOM.render(
-      <Provider store={appStore}>
-        <Router>
-          <IconSettings
-            standardSprite={standardSprite}
-            utilitySprite={utilitySprite}
-          >
-            <App />
-          </IconSettings>
-        </Router>
-      </Provider>,
-      el,
-    );
-  }
-});
+      );
+      ReactDOM.render(
+        <Provider store={appStore}>
+          <Router>
+            <IconSettings
+              standardSprite={standardSprite}
+              utilitySprite={utilitySprite}
+            >
+              <App />
+            </IconSettings>
+          </Router>
+        </Provider>,
+        el,
+      );
+    }
+  })
+  .catch(err => {
+    window.console.error(err);
+    throw err;
+  });
