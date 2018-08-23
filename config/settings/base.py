@@ -130,7 +130,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            PROJECT_ROOT / 'dist',
+            str(PROJECT_ROOT / 'dist'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -216,7 +216,7 @@ STATICFILES_DIRS = [
     str(PROJECT_ROOT / 'dist'),
 ]
 STATIC_URL = '/static/'
-STATIC_ROOT = str(PROJECT_ROOT / 'static')
+STATIC_ROOT = str(PROJECT_ROOT / 'staticfiles')
 
 # if MODE == 'dev':
 #     static_dir_root = 'static/dist'
