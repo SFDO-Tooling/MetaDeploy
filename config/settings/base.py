@@ -216,7 +216,7 @@ STATICFILES_DIRS = [
     str(PROJECT_ROOT / 'dist'),
 ]
 STATIC_URL = '/static/'
-STATIC_ROOT = str(PROJECT_ROOT / 'staticfiles')
+STATIC_ROOT = str(PROJECT_ROOT / 'static')
 
 # if MODE == 'dev':
 #     static_dir_root = 'static/dist'
