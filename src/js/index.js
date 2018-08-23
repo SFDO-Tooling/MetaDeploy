@@ -25,13 +25,14 @@ const SF_logo = require('images/salesforce-logo.png');
 
 const Home = () => (
   <div
-    className="site-intro slds-grow slds-shrink-none
-    slds-p-horizontal_medium slds-p-vertical_large"
+    className="site-intro slds-grow slds-shrink-none slds-text-longform
+      slds-p-horizontal_medium slds-p-vertical_large"
   >
-    <h1>Welcome to MetaDeploy!</h1>
+    <h1 className="slds-text-heading_large">Welcome to MetaDeploy!</h1>
     <p>
-      This is some sample intro text, where (in the project-template) we might
-      provide some basic quickstart instructions and documentation.
+      This is sample intro text, where (in the&nbsp;
+      <a href="https://github.com/oddbird/sfdo-template">project-template</a>)
+      we might provide some basic quickstart instructions and documentation.
     </p>
   </div>
 );

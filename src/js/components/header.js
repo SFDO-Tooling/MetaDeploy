@@ -6,6 +6,7 @@ import Button from '@salesforce/design-system-react/components/button';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import DropdownTrigger from '@salesforce/design-system-react/components/menu-dropdown/button-trigger';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
+import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 
 import { logout } from 'accounts/actions';
@@ -88,10 +89,14 @@ const Header = ({
 }) => (
   <PageHeader
     title={
-      <div className="slds-page-header__title md-logo">
+      <Link
+        to="/"
+        className="slds-page-header__title slds-text-heading_large
+          slds-text-link_reset"
+      >
         <span data-logo-bit="start">meta</span>
         <span data-logo-bit="end">deploy</span>
-      </div>
+      </Link>
     }
     navRight={
       user && user.username ? (
