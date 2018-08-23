@@ -5,7 +5,7 @@
   "license": "BSD-3-Clause",
   "repository": {
     "type": "git",
-    "url": "https://github.com/oddbird/metadeploy.git"
+    "url": "https://github.com/SFDO-Tooling/metadeploy.git"
   },
   "engines": {
     "node": "10.8.0",

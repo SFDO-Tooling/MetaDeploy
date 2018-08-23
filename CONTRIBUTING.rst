@@ -6,7 +6,7 @@ Cloning the project
 
 ::
 
-   git clone git@github.com:oddbird/metadeploy
+   git clone git@github.com:SFDO-Tooling/metadeploy
    cd metadeploy
 
 Making a virtual env
