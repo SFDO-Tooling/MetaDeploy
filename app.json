@@ -29,7 +29,7 @@
       }
     },
     "scripts": {
-      "postdeploy": "yarn prod"
+      "heroku-postbuild": "yarn prod"
     },
     "image": "heroku/python",
     "addons": [
