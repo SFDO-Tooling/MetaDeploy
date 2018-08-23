@@ -31,8 +31,10 @@ const Home = () => (
     <h1 className="slds-text-heading_large">Welcome to MetaDeploy!</h1>
     <p>
       This is sample intro text, where (in the&nbsp;
-      <a href="https://github.com/oddbird/sfdo-template">project-template</a>)
-      we might provide some basic quickstart instructions and documentation.
+      <a href="https://github.com/SFDO-Tooling/sfdo-template">
+        project-template
+      </a>
+      ) we might provide some basic quickstart instructions and documentation.
     </p>
   </div>
 );
