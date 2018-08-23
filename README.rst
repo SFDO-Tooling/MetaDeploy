@@ -1,6 +1,10 @@
 MetaDeploy
 ==========
 
+.. image:: https://badges.greenkeeper.io/SFDO-Tooling/metadeploy.svg
+   :alt: Greenkeeper badge
+   :target: https://greenkeeper.io/
+
 .. image:: https://circleci.com/gh/SFDO-Tooling/metadeploy.svg?style=shield
      :target: https://circleci.com/gh/SFDO-Tooling/metadeploy
      :alt: Build Status
