@@ -33,8 +33,8 @@
       "heroku-postgresql"
     ],
     "buildpacks": [
-       {"url": "heroku/python"},
-       {"url": "heroku/node"}
+       {"url": "heroku/node"},
+       {"url": "heroku/python"}
     ],
     "environments": {
       "test": {
