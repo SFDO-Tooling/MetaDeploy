@@ -9,6 +9,7 @@ beforeAll(() => {
     salesforce_production_login: () => '/accounts/salesforce-production/login/',
     salesforce_test_login: () => '/accounts/salesforce-test/login/',
   };
+  window.console.error = jest.fn();
 });
 
 /**

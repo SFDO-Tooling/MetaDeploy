@@ -16,10 +16,13 @@ const getResponse = resp =>
       }
       return text;
     })
-    .catch(err => {
-      window.console.error(err);
-      throw err;
-    });
+    .catch(
+      /* istanbul ignore next */
+      err => {
+        window.console.error(err);
+        throw err;
+      },
+    );
 
 const getApiFetch = (onAuthFailure: () => void) => (
   url: string,
