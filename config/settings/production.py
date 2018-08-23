@@ -1,11 +1,9 @@
 from .base import *  # NOQA
 
-#STATICFILES_DIRS = [
-#    str(PROJECT_ROOT / 'dist'),
-#]
-#STATIC_URL = '/static/'
-#STATIC_ROOT = str(PROJECT_ROOT / 'staticfiles')
+STATICFILES_DIRS = [
+    str(PROJECT_ROOT / 'dist/prod'),
+]
 
-static_dir_root = 'static/dist/min'
+static_dir_root = 'dist/prod'
 
 WHITENOISE_ROOT = PROJECT_ROOT.joinpath(static_dir_root)
