@@ -6,3 +6,4 @@ django-allauth==0.36.0
 django-extensions==2.1.0
 werkzeug==0.14.1
 pyopenssl==18.0.0
+django-js-reverse==0.8.2

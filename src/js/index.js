@@ -5,6 +5,7 @@ import * as ReactDOM from 'react-dom';
 import DocumentTitle from 'react-document-title';
 import IconSettings from '@salesforce/design-system-react/components/icon-settings';
 import logger from 'redux-logger';
+import standardSprite from '@salesforce-ux/design-system/assets/icons/standard-sprite/svg/symbols.svg';
 import thunk from 'redux-thunk';
 import utilitySprite from '@salesforce-ux/design-system/assets/icons/utility-sprite/svg/symbols.svg';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
@@ -20,15 +21,26 @@ import userReducer from 'accounts/reducer';
 import { cache, persistMiddleware } from 'utils/caching';
 import { doLocalLogout } from 'accounts/actions';
 
-const MD_logo = require('images/metadeploy-logo.png');
 const SF_logo = require('images/salesforce-logo.png');
 
-const Home = () => <div>Welcome to MetaDeploy!</div>;
+const Home = () => (
+  <div
+    className="site-intro slds-grow slds-shrink-none slds-text-longform
+      slds-p-horizontal_medium slds-p-vertical_large"
+  >
+    <h1 className="slds-text-heading_large">Welcome to MetaDeploy!</h1>
+    <p>
+      This is sample intro text, where (in the&nbsp;
+      <a href="https://github.com/oddbird/sfdo-template">project-template</a>)
+      we might provide some basic quickstart instructions and documentation.
+    </p>
+  </div>
+);
 
 const App = () => (
   <DocumentTitle title="MetaDeploy">
-    <div>
-      <Header logoSrc={MD_logo} />
+    <div className="slds-grid slds-grid_frame slds-grid_vertical">
+      <Header />
       <Switch>
         <Route exact path="/" component={Home} />
         <Route component={FourOhFour} />
@@ -68,7 +80,10 @@ cache.getAll().then(data => {
     ReactDOM.render(
       <Provider store={appStore}>
         <Router>
-          <IconSettings utilitySprite={utilitySprite}>
+          <IconSettings
+            standardSprite={standardSprite}
+            utilitySprite={utilitySprite}
+          >
             <App />
           </IconSettings>
         </Router>

@@ -109,7 +109,8 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'allauth.socialaccount.providers.salesforce',
+    'metadeploy.multisalesforce',
+    'django_js_reverse',
 ]
 
 MIDDLEWARE = [
@@ -235,7 +236,15 @@ STATIC_ROOT = str(PROJECT_ROOT / 'staticfiles')
 # WHITENOISE_ROOT = PROJECT_ROOT.joinpath(static_dir_root)
 
 SOCIALACCOUNT_PROVIDERS = {
-    'salesforce': {
+    'salesforce-production': {
+        'SCOPE': ['web', 'full', 'refresh_token'],
+    },
+    'salesforce-test': {
         'SCOPE': ['web', 'full', 'refresh_token'],
     },
 }
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = False
+
+
+JS_REVERSE_JS_VAR_NAME = 'URLS'
