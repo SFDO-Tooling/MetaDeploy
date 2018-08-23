@@ -14,11 +14,7 @@ const Footer = (props: { logoSrc: string }) => (
     />
     <div className="footer-item">
       <p>
-        © Copyright 2018 Salesforce.com, inc.&nbsp;
-        <a href="https://www.salesforce.com/company/legal/intellectual/">
-          All rights reserved
-        </a>
-        . Various trademarks held by their respective owners.
+        Copyright 2000-2018 Salesforce.org. All Rights Reserved
       </p>
     </div>
   </footer>
