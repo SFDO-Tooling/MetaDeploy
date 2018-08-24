@@ -118,15 +118,20 @@ const Header = ({
       </Link>
     }
     navRight={
-      user && user.username ? (
-        <div>
+      <div>
+        <Link
+          to="/products"
+          className="global-nav slds-text-heading_medium slds-p-right_large
+            slds-text-link_reset slds-align-middle"
+        >
+          Products
+        </Link>
+        {user && user.username ? (
           <Logout user={user} doLogout={doLogout} />
-        </div>
-      ) : (
-        <div>
+        ) : (
           <Login />
-        </div>
-      )
+        )}
+      </div>
     }
     variant="objectHome"
   />

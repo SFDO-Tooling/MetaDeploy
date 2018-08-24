@@ -26,7 +26,7 @@ import { doLocalLogout } from 'accounts/actions';
 import Footer from 'components/footer';
 import FourOhFour from 'components/404';
 import Header from 'components/header';
-import Products from 'components/products';
+import ProductsList from 'components/products';
 
 const SF_logo = require('images/salesforce-logo.png');
 
@@ -40,7 +40,7 @@ const App = () => (
       >
         <Switch>
           <Route exact path="/" render={() => <Redirect to="/products" />} />
-          <Route path="/products" component={Products} />
+          <Route exact path="/products" component={ProductsList} />
           <Route component={FourOhFour} />
         </Switch>
       </div>
