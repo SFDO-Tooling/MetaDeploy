@@ -21,6 +21,10 @@ MetaDeploy
      :target: https://pyup.io/repos/github/SFDO-Tooling/metadeploy/
      :alt: Python 3 Status
 
+.. image:: https://www.herokucdn.com/deploy/button.svg
+     :target: https://heroku.com/deploy
+     :alt: Deploy to Heroku
+
 Development
 -----------
 
