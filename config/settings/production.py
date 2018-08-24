@@ -1,3 +1,4 @@
+from .base import *  # NOQA
 from .base import (
     PROJECT_ROOT,
     TEMPLATES,
