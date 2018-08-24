@@ -8,45 +8,42 @@ import logger from 'redux-logger';
 import standardSprite from '@salesforce-ux/design-system/assets/icons/standard-sprite/svg/symbols.svg';
 import thunk from 'redux-thunk';
 import utilitySprite from '@salesforce-ux/design-system/assets/icons/utility-sprite/svg/symbols.svg';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Route,
+  Switch,
+  Redirect,
+} from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { combineReducers, createStore, applyMiddleware } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 
-import Footer from 'components/footer';
-import FourOhFour from 'components/404';
-import Header from 'components/header';
 import getApiFetch from 'utils/api';
 import userReducer from 'accounts/reducer';
 import { cache, persistMiddleware } from 'utils/caching';
 import { doLocalLogout } from 'accounts/actions';
 
-const SF_logo = require('images/salesforce-logo.png');
+import Footer from 'components/footer';
+import FourOhFour from 'components/404';
+import Header from 'components/header';
+import Products from 'components/products';
 
-const Home = () => (
-  <div
-    className="site-intro slds-grow slds-shrink-none slds-text-longform
-      slds-p-horizontal_medium slds-p-vertical_large"
-  >
-    <h1 className="slds-text-heading_large">Welcome to MetaDeploy!</h1>
-    <p>
-      This is sample intro text, where (in the&nbsp;
-      <a href="https://github.com/SFDO-Tooling/sfdo-template">
-        project-template
-      </a>
-      ) we might provide some basic quickstart instructions and documentation.
-    </p>
-  </div>
-);
+const SF_logo = require('images/salesforce-logo.png');
 
 const App = () => (
   <DocumentTitle title="MetaDeploy">
     <div className="slds-grid slds-grid_frame slds-grid_vertical">
       <Header />
-      <Switch>
-        <Route exact path="/" component={Home} />
-        <Route component={FourOhFour} />
-      </Switch>
+      <div
+        className="slds-grow slds-shrink-none slds-text-longform
+          slds-p-horizontal_medium slds-p-vertical_large"
+      >
+        <Switch>
+          <Route exact path="/" render={() => <Redirect to="/products" />} />
+          <Route path="/products" component={Products} />
+          <Route component={FourOhFour} />
+        </Switch>
+      </div>
       <Footer logoSrc={SF_logo} />
     </div>
   </DocumentTitle>
