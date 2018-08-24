@@ -25,4 +25,4 @@ def default_urlpatterns(provider, version):
 
 
 urlpatterns = default_urlpatterns(SalesforceProductionProvider, 'prod')
-urlpatterns += default_urlpatterns(SalesforceTestProvider, 'test')
+urlpatterns += default_urlpatterns(SalesforceTestProvider, 'sandbox')

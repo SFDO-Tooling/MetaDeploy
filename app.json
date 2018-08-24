@@ -39,7 +39,7 @@
     "test": {
       "scripts": {
         "test-setup": "pip install --upgrade -r requirements/test.txt",
-        "test": "python manage.py test"
+        "test": "pytest"
       },
       "env": {
         "DJANGO_SETTINGS_MODULE": "config.settings.test",

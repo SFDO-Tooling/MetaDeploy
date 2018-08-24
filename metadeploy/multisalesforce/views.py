@@ -16,7 +16,7 @@ class SalesforceOAuth2ProductionAdapter(SalesforceOAuth2BaseAdapter):
     provider_id = SalesforceProductionProvider.id
 
 
-class SalesforceOAuth2TestAdapter(SalesforceOAuth2BaseAdapter):
+class SalesforceOAuth2SandboxAdapter(SalesforceOAuth2BaseAdapter):
     provider_id = SalesforceTestProvider.id
 
 
@@ -26,9 +26,9 @@ prod_oauth2_login = OAuth2LoginView.adapter_view(
 prod_oauth2_callback = OAuth2CallbackView.adapter_view(
     SalesforceOAuth2ProductionAdapter,
 )
-test_oauth2_login = OAuth2LoginView.adapter_view(
-    SalesforceOAuth2TestAdapter,
+sandbox_oauth2_login = OAuth2LoginView.adapter_view(
+    SalesforceOAuth2SandboxAdapter,
 )
-test_oauth2_callback = OAuth2CallbackView.adapter_view(
-    SalesforceOAuth2TestAdapter,
+sandbox_oauth2_callback = OAuth2CallbackView.adapter_view(
+    SalesforceOAuth2SandboxAdapter,
 )
