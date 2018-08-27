@@ -121,6 +121,35 @@ jobs:
       - store_test_results:
           path: coverage
 
+  test-python:
+    working_directory: ~/metadeploy
+    docker:
+      - image: circleci/python:3.6.6
+      - image: circleci/postgres:latest
+        environment:
+          POSTGRES_USER: circleci
+          POSTGRES_DB: circle_test
+          POSTGRES_PASSWORD: ""
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-metadeploy-py-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+      - run:
+          name: Run Database Migrations
+          command: |
+            . venv/bin/activate
+            python ./manage.py migrate --no-input
+      - run:
+          name: Test Python
+          command: |
+            . venv/bin/activate
+            pytest --junitxml=pycov/pytest-junit.xml
+      - store_artifacts:
+          path: htmlcov
+          destination: py-reports
+      - store_test_results:
+          path: pycov
+
 workflows:
   version: 2
   build-and-test:
@@ -130,5 +159,8 @@ workflows:
           requires:
             - build
       - test-client:
+          requires:
+            - build
+      - test-python:
           requires:
             - build
