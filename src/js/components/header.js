@@ -107,6 +107,7 @@ const Header = ({
   doLogout: typeof logout,
 }) => (
   <PageHeader
+    className="page-header"
     title={
       <Link
         to="/"

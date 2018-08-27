@@ -19,6 +19,7 @@ import { combineReducers, createStore, applyMiddleware } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 
 import getApiFetch from 'utils/api';
+import productsReducer from 'products/reducer';
 import userReducer from 'accounts/reducer';
 import { cache, persistMiddleware } from 'utils/caching';
 import { doLocalLogout } from 'accounts/actions';
@@ -55,15 +56,19 @@ cache
     const el = document.getElementById('app');
     if (el) {
       // Initialize with correct logged-in/out status
-      const username = el.getAttribute('data-username');
-      if (username !== null && username !== undefined) {
-        data.user = { username };
-      } else {
-        data.user = null;
+      const user = el.getAttribute('data-user');
+      data.user = null;
+      if (user !== null && user !== undefined) {
+        try {
+          data.user = JSON.parse(user);
+        } catch (err) {
+          // swallow error
+        }
       }
       const appStore = createStore(
         combineReducers({
           user: userReducer,
+          products: productsReducer,
         }),
         data,
         composeWithDevTools(
