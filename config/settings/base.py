@@ -89,7 +89,7 @@ ALLOWED_HOSTS = [
 ] + [
     el.strip()
     for el
-    in env('DJANGO_ALLOWED_HOSTS', default=[], type_=lambda x: x.split(','))
+    in env('DJANGO_ALLOWED_HOSTS', default='', type_=lambda x: x.split(','))
     if el.strip()
 ]
 
