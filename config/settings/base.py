@@ -89,7 +89,7 @@ ALLOWED_HOSTS = [
 ] + [
     el.strip()
     for el
-    in env('DJANGO_ALLOWED_HOSTS', default=[], type_=lambda x: x.split(','))
+    in env('DJANGO_ALLOWED_HOSTS', default='', type_=lambda x: x.split(','))
     if el.strip()
 ]
 
@@ -130,7 +130,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            PROJECT_ROOT / 'dist',
+            str(PROJECT_ROOT / 'dist'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {

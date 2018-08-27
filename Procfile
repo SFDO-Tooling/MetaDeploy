@@ -1,1 +1,1 @@
-web: gunicorn metadeploy:app --preload
+web: gunicorn metadeploy.wsgi:application --preload

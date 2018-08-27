@@ -130,6 +130,7 @@ Development Tasks
 
 - ``yarn serve``: starts development server (with watcher) at
   `<https://localhost:8080/>`_ (assets are served from ``dist/`` dir)
+- ``yarn pytest``: run Python tests
 - ``yarn test``: run JS tests
 - ``yarn test:watch``: run JS tests with a watcher for development
 - ``yarn lint``: formats and lints ``.scss`` and ``.js`` files; lints ``.py``
