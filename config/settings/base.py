@@ -110,6 +110,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'rest_framework',
+    'metadeploy',
     'metadeploy.multisalesforce',
     'metadeploy.api',
     'django_js_reverse',
