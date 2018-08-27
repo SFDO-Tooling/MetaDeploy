@@ -91,11 +91,13 @@
     "lint": "npm-run-all -p prettier flake8 -p eslint stylelint",
     "build": "webpack --config webpack.dev.js",
     "prod": "webpack --config webpack.prod.js",
+    "pytest": "pytest",
     "test": "jest",
     "test:watch": "jest --watchAll",
     "test:coverage": "JEST_JUNIT_OUTPUT='./coverage/junit.xml' jest --ci --runInBand --reporters=default --reporters=jest-junit",
     "test:report-coverage": "cat ./coverage/lcov.info | coveralls",
-    "test:check-coverage": "nyc check-coverage --temp-directory coverage"
+    "test:check-coverage": "nyc check-coverage --temp-directory coverage",
+    "heroku-postbuild": "yarn prod"
   },
   "lint-staged": {
     "*.js": [
