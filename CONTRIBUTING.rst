@@ -113,6 +113,11 @@ To setup the Salesforce OAuth integration, run the
 
    python manage.py populate_social_apps --prod-id XXX --prod-secret YYY
 
+To setup the Salesforce OAuth integration, run the
+``populate_social_apps`` management command::
+
+   python manage.py populate_social_apps --prod-id XXX --prod-secret YYY
+
 You can also run it with ``--test-id`` and ``--test-secret``, or
 ``--cust-id`` and ``--cust-secret``, or all three sets at once, to
 populate all three providers. The values to pass in with these flags can
