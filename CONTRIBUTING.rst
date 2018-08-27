@@ -108,10 +108,6 @@ The WebSocket server (to live-reload on file changes) listens on
 Logging in with Salesforce
 --------------------------
 
-To make an initial local user::
-
-   python manage.py createsuperuser
-
 To setup the Salesforce OAuth integration, run the
 ``populate_social_apps`` management command::
 
