@@ -25,4 +25,5 @@ class ProductSerializer(serializers.ModelSerializer):
             'title',
             'description',
             'version',
+            'category',
         )
