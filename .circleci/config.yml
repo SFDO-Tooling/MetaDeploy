@@ -127,9 +127,9 @@ jobs:
       - image: circleci/python:3.6.6
       - image: circleci/postgres:latest
         environment:
-          POSTGRES_USER: circleci
+          POSTGRES_USER: root
           POSTGRES_DB: circle_test
-          POSTGRES_PASSWORD: ""
+          POSTGRES_PASSWORD: circle_test
     steps:
       - checkout
       - restore_cache:
