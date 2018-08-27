@@ -1,9 +1,9 @@
 from rest_framework import viewsets
 
-from .serializers import ProjectSerializer
-from .models import Project
+from .serializers import ProductSerializer
+from .models import Product
 
 
-class ProjectViewSet(viewsets.ModelViewSet):
-    serializer_class = ProjectSerializer
-    queryset = Project.objects.all()
+class ProductViewSet(viewsets.ModelViewSet):
+    serializer_class = ProductSerializer
+    queryset = Product.objects.all()

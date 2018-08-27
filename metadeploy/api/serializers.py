@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Project
+from .models import Product
 
 from django.contrib.auth import get_user_model
 
@@ -17,9 +17,9 @@ class FullUserSerializer(serializers.ModelSerializer):
         )
 
 
-class ProjectSerializer(serializers.ModelSerializer):
+class ProductSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Project
+        model = Product
         fields = (
             'title',
             'description',
