@@ -112,18 +112,26 @@ To make an initial local user::
 
    python manage.py createsuperuser
 
-To setup the Salesforce OAuth integration, add two entries (one for Production,
-and one for Sandbox) in the database with configuration information. You can do
-this by filling in the form twice at
-`<https://localhost:8080/admin/socialaccount/socialapp/add/>`_ (you'll first be
-asked to log in using the local user you created above).
+To setup the Salesforce OAuth integration, run the
+``populate_social_apps`` management command::
 
-To fill it in, you'll need some specific values from Connected Apps in your
-Salesforce configuration. If you're an OddBird, you can find these values in the
+   python manage.py populate_social_apps --prod-id XXX --prod-secret YYY
+
+You can also run it with ``--test-id`` and ``--test-secret``, or
+``--cust-id`` and ``--cust-secret``, or all three sets at once, to
+populate all three providers. The values to pass in with these flags can
+be found on the Connected App you've made in your Salesforce
+configuration, or if you're an OddBird, you can find these values in the
 shared Keybase team folder (``metadeploy/prod.db``).
 
 If you don't have a Salesforce account, ask `Kit <mailto:kit@oddbird.net>`_ to
 send you an invitation by email.
+
+Once you've logged in, you probably want to make your user a superuser.
+You can do that easily via the ``promote_superuser`` management
+command::
+
+   python manage promote_superuser <your email>
 
 Development Tasks
 -----------------
