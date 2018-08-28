@@ -88,6 +88,7 @@ describe('<Products />', () => {
           version: '3.131',
           description: 'This is another test product.',
           category: 'community',
+          color: '#fff',
         },
       ],
     };

@@ -25,10 +25,10 @@ class Product(models.Model):
         default='salesforce',
         max_length=256,
     )
-    color = ColorField(default='#ffffff')
+    color = ColorField(blank=True)
     icon_url = models.URLField(
         blank=True,
-        help_text='This will take precedence over the SLDS Icons.',
+        help_text='This will take precedence over Color and the SLDS Icons.',
     )
     slds_icon_category = models.CharField(
         choices=SLDS_ICON_CHOICES,
@@ -51,4 +51,4 @@ class Product(models.Model):
                 'category': self.slds_icon_category,
                 'name': self.slds_icon_name,
             }
-        return {'type': 'none'}
+        return None

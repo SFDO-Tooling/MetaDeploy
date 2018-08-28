@@ -14,9 +14,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='product',
             name='color',
-            field=colorfield.fields.ColorField(
-                default='#ffffff',
-                max_length=18,
-            ),
+            field=colorfield.fields.ColorField(blank=True, max_length=18),
         ),
     ]

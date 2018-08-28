@@ -19,4 +19,4 @@ class TestIconProperty:
 
     def test_default(self):
         product = Product()
-        assert product.icon == {'type': 'none'}
+        assert product.icon is None

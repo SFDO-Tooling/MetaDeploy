@@ -64,11 +64,22 @@ const ProductItem = ({ item }: { item: ProductType }) => {
     item.icon.name
   ) {
     icon = (
-      <Icon
-        assistiveText={{ label: item.title }}
-        category={item.icon.category}
-        name={item.icon.name}
-      />
+      <span className="slds-avatar slds-avatar_medium">
+        <Icon
+          assistiveText={{ label: item.title }}
+          category={item.icon.category}
+          name={item.icon.name}
+        />
+      </span>
+    );
+  } else if (item.color) {
+    icon = (
+      <div
+        className="has-custom-color"
+        style={{ '--custom-color': item.color }}
+      >
+        <Avatar variant="entity" label={item.title} />
+      </div>
     );
   } else {
     icon = <Avatar variant="entity" label={item.title} />;

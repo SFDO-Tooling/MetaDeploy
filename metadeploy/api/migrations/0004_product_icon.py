@@ -15,7 +15,10 @@ class Migration(migrations.Migration):
             name='icon_url',
             field=models.URLField(
                 blank=True,
-                help_text='This will take precedence over the SLDS Icons.',
+                help_text=(
+                        'This will take precedence over Color and the '
+                        'SLDS Icons.'
+                    ),
             ),
         ),
         migrations.AddField(

@@ -10,4 +10,4 @@ def test_populate_sample_products():
 
     call_command('populate_sample_products')
 
-    assert Product.objects.count() == 12
+    assert Product.objects.count() == 8
