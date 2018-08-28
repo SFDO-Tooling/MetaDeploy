@@ -10,6 +10,7 @@ import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
+import routes from 'utils/routes';
 import { fetchProducts } from 'products/actions';
 
 import type {
@@ -45,7 +46,7 @@ const actions = {
 
 const ProductItem = ({ item }: { item: ProductType }) => (
   <Link
-    to={`/products/${item.id}`}
+    to={routes.product_detail(item.id)}
     className="slds-text-link_reset slds-p-around_medium"
   >
     <Card

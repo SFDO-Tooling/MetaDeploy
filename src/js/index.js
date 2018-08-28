@@ -20,6 +20,7 @@ import { composeWithDevTools } from 'redux-devtools-extension';
 
 import getApiFetch from 'utils/api';
 import productsReducer from 'products/reducer';
+import routes from 'utils/routes';
 import userReducer from 'accounts/reducer';
 import { cache, persistMiddleware } from 'utils/caching';
 import { doLocalLogout } from 'accounts/actions';
@@ -40,8 +41,12 @@ const App = () => (
           slds-p-vertical_large"
       >
         <Switch>
-          <Route exact path="/" render={() => <Redirect to="/products" />} />
-          <Route exact path="/products" component={ProductsList} />
+          <Route
+            exact
+            path={routes.home()}
+            render={() => <Redirect to={routes.product_list()} />}
+          />
+          <Route exact path={routes.product_list()} component={ProductsList} />
           <Route component={FourOhFour} />
         </Switch>
       </div>

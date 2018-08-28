@@ -8,7 +8,7 @@ import ProductsList from 'components/products';
 
 describe('<Products />', () => {
   beforeEach(() => {
-    fetchMock.getOnce(window.URLS.product_list(), []);
+    fetchMock.getOnce(window.api_urls.product_list(), []);
   });
 
   afterEach(fetchMock.restore);

@@ -62,13 +62,13 @@ describe('<Header />', () => {
   });
 
   describe('URLs not found', () => {
-    const URLS = window.URLS;
+    const URLS = window.api_urls;
     afterEach(() => {
-      window.URLS = URLS;
+      window.api_urls = URLS;
     });
 
     test('logs error to console', () => {
-      window.URLS = [];
+      window.api_urls = [];
       const initialState = { user: null };
       renderWithRedux(
         <MemoryRouter>

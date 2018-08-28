@@ -17,7 +17,7 @@ describe('fetchProducts', () => {
         version: '3.130',
         description: 'This is a test product.',
       };
-      fetchMock.getOnce(window.URLS.product_list(), [product]);
+      fetchMock.getOnce(window.api_urls.product_list(), [product]);
       const started = {
         type: 'FETCH_PRODUCTS_STARTED',
       };
@@ -36,7 +36,7 @@ describe('fetchProducts', () => {
     const store = storeWithApi({});
 
     test('dispatches FETCH_PRODUCTS_FAILED action', () => {
-      fetchMock.getOnce(window.URLS.product_list(), 500);
+      fetchMock.getOnce(window.api_urls.product_list(), 500);
       const started = {
         type: 'FETCH_PRODUCTS_STARTED',
       };

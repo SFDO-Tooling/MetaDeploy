@@ -22,6 +22,6 @@ export const doLocalLogout = (): LogoutAction => {
 };
 
 export const logout = (): ThunkAction => (dispatch, getState, { apiFetch }) =>
-  apiFetch(window.URLS.account_logout(), {
+  apiFetch(window.api_urls.account_logout(), {
     method: 'POST',
   }).then(() => dispatch(doLocalLogout()));

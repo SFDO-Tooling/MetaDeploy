@@ -21,7 +21,7 @@ export const fetchProducts = (): ThunkAction => (
   { apiFetch },
 ) => {
   dispatch({ type: 'FETCH_PRODUCTS_STARTED' });
-  return apiFetch(window.URLS.product_list())
+  return apiFetch(window.api_urls.product_list())
     .then(response =>
       dispatch({ type: 'FETCH_PRODUCTS_SUCCEEDED', payload: response }),
     )

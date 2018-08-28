@@ -5,7 +5,7 @@ import 'react-testing-library/cleanup-after-each';
 import React from 'react';
 
 beforeAll(() => {
-  window.URLS = {
+  window.api_urls = {
     account_logout: () => '/accounts/logout/',
     salesforce_production_login: () => '/accounts/salesforce-production/login/',
     salesforce_test_login: () => '/accounts/salesforce-test/login/',

@@ -41,7 +41,10 @@ describe('logout', () => {
   afterEach(fetchMock.restore);
 
   test('POSTs logout then dispatches LogoutAction', () => {
-    fetchMock.postOnce(window.URLS.account_logout(), { status: 204, body: {} });
+    fetchMock.postOnce(window.api_urls.account_logout(), {
+      status: 204,
+      body: {},
+    });
     const store = storeWithApi({});
     const expected = {
       type: 'USER_LOGGED_OUT',
