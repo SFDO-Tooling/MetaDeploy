@@ -109,6 +109,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
+    'colorfield',
     'rest_framework',
     'metadeploy',
     'metadeploy.multisalesforce',

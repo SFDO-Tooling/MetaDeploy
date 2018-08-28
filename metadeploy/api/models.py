@@ -1,5 +1,7 @@
 from django.db import models
 
+from colorfield.fields import ColorField
+
 
 class Product(models.Model):
     CATEGORY_CHOICES = (
@@ -15,3 +17,4 @@ class Product(models.Model):
         default='salesforce',
         max_length=256,
     )
+    color = ColorField(default='#ffffff')
