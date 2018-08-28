@@ -52,7 +52,7 @@ declare module '@salesforce/design-system-react/components/tabs/panel' {
   declare export default Component;
 }
 
-declare module '@salesforce/design-system-react/components/tabs/icon' {
+declare module '@salesforce/design-system-react/components/icon' {
   import typeof { Component } from 'react';
 
   declare export default Component;

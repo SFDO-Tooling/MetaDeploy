@@ -5,9 +5,7 @@ import * as ReactDOM from 'react-dom';
 import DocumentTitle from 'react-document-title';
 import IconSettings from '@salesforce/design-system-react/components/icon-settings';
 import logger from 'redux-logger';
-import standardSprite from '@salesforce-ux/design-system/assets/icons/standard-sprite/svg/symbols.svg';
 import thunk from 'redux-thunk';
-import utilitySprite from '@salesforce-ux/design-system/assets/icons/utility-sprite/svg/symbols.svg';
 import {
   BrowserRouter as Router,
   Route,
@@ -17,6 +15,12 @@ import {
 import { Provider } from 'react-redux';
 import { combineReducers, createStore, applyMiddleware } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
+
+import actionSprite from '@salesforce-ux/design-system/assets/icons/action-sprite/svg/symbols.svg';
+import customSprite from '@salesforce-ux/design-system/assets/icons/custom-sprite/svg/symbols.svg';
+import doctypeSprite from '@salesforce-ux/design-system/assets/icons/doctype-sprite/svg/symbols.svg';
+import standardSprite from '@salesforce-ux/design-system/assets/icons/standard-sprite/svg/symbols.svg';
+import utilitySprite from '@salesforce-ux/design-system/assets/icons/utility-sprite/svg/symbols.svg';
 
 import getApiFetch from 'utils/api';
 import productsReducer from 'products/reducer';
@@ -92,6 +96,9 @@ cache
         <Provider store={appStore}>
           <Router>
             <IconSettings
+              actionSprite={actionSprite}
+              customSprite={customSprite}
+              doctypeSprite={doctypeSprite}
               standardSprite={standardSprite}
               utilitySprite={utilitySprite}
             >

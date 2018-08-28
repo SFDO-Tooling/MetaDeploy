@@ -45,70 +45,86 @@ const actions = {
   doFetchProducts: fetchProducts,
 };
 
-const ProductItem = ({ item }: { item: ProductType }) => {
-  let icon;
-  if (item.icon && item.icon.type === 'url' && item.icon.url) {
-    icon = (
-      <Avatar
-        variant="entity"
-        label={item.title}
-        imgSrc={item.icon.url}
-        imgAlt={item.title}
-        title={item.title}
-      />
-    );
-  } else if (
-    item.icon &&
-    item.icon.type === 'slds' &&
-    item.icon.category &&
-    item.icon.name
-  ) {
-    icon = (
-      <span className="slds-avatar slds-avatar_medium">
-        <Icon
-          assistiveText={{ label: item.title }}
-          category={item.icon.category}
-          name={item.icon.name}
+class ProductItem extends React.Component<{
+  item: ProductType,
+}> {
+  getIcon(): React.Node {
+    const { item } = this.props;
+    if (item.icon && item.icon.type === 'url' && item.icon.url) {
+      // Custom icon at provided URL
+      return (
+        <Avatar
+          variant="entity"
+          label={item.title}
+          imgSrc={item.icon.url}
+          imgAlt={item.title}
+          title={item.title}
         />
-      </span>
-    );
-  } else if (item.color) {
-    icon = (
-      <div
-        className="has-custom-color"
-        style={{ '--custom-color': item.color }}
-      >
-        <Avatar variant="entity" label={item.title} />
-      </div>
-    );
-  } else {
-    icon = <Avatar variant="entity" label={item.title} />;
-  }
-  return (
-    <Link
-      to={routes.product_detail(item.id)}
-      className="slds-text-link_reset slds-p-around_medium"
-    >
-      <Card heading={item.title} icon={icon}>
-        <div className="slds-card__body_inner">
-          <div className="slds-text-title">Version {item.version}</div>
-          <p className="slds-truncate">{item.description}</p>
+      );
+    }
+    if (
+      item.icon &&
+      item.icon.type === 'slds' &&
+      item.icon.category &&
+      item.icon.name
+    ) {
+      // Custom SLDS svg icon
+      return (
+        <span className="slds-avatar slds-avatar_medium">
+          <Icon
+            assistiveText={{ label: item.title }}
+            category={item.icon.category}
+            name={item.icon.name}
+          />
+        </span>
+      );
+    }
+    if (item.color) {
+      // Standard entity icon (initials) with custom color
+      return (
+        <div
+          className="has-custom-color"
+          style={{ '--custom-color': item.color }}
+        >
+          <Avatar variant="entity" label={item.title} />
         </div>
-      </Card>
-    </Link>
-  );
-};
+      );
+    }
+    // Standard entity icon (initials)
+    return <Avatar variant="entity" label={item.title} />;
+  }
+
+  render(): React.Node {
+    const { item } = this.props;
+    const icon = this.getIcon();
+    return (
+      <Link
+        to={routes.product_detail(item.id)}
+        className="slds-text-link_reset slds-p-around_medium"
+      >
+        <Card heading={item.title} icon={icon}>
+          <div className="slds-card__body_inner">
+            <div className="slds-text-title">Version {item.version}</div>
+            <p className="slds-truncate">{item.description}</p>
+          </div>
+        </Card>
+      </Link>
+    );
+  }
+}
 
 class ProductsList extends React.Component<{
   productsByCategory: ProductsMapType,
   doFetchProducts: typeof fetchProducts,
 }> {
   componentDidMount() {
-    // @@@ Do we need to do this every time?
+    // Instead of doing this every time, we could:
+    //   - Only do it once on initial app-load
+    //   - Only do it when the cached values are old
     this.props.doFetchProducts();
   }
 
-  static mapProducts(products: ProductsType): React.Node {
+  static getProductComponents(products: ProductsType): React.Node {
     return products.map(item => <ProductItem item={item} key={item.id} />);
   }
 
@@ -116,6 +132,7 @@ class ProductsList extends React.Component<{
     let contents;
     switch (this.props.productsByCategory.size) {
       case 0: {
+        // No products; show empty message
         contents = (
           <div className="slds-text-longform">
             <h1 className="slds-text-heading_large">Uh oh.</h1>
@@ -125,16 +142,18 @@ class ProductsList extends React.Component<{
         break;
       }
       case 1: {
+        // Products are all in one category; no need for multicategory tabs
         const products = Array.from(this.props.productsByCategory.values())[0];
-        contents = <div>{ProductsList.mapProducts(products)}</div>;
+        contents = <div>{ProductsList.getProductComponents(products)}</div>;
         break;
       }
       default: {
+        // Products are in multiple categories; divide into tabs
         const tabs = [];
         for (const [category, products] of this.props.productsByCategory) {
           const panel = (
             <TabsPanel label={category} key={category}>
-              {ProductsList.mapProducts(products)}
+              {ProductsList.getProductComponents(products)}
             </TabsPanel>
           );
           tabs.push(panel);
