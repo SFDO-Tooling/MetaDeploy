@@ -13,28 +13,6 @@ describe('<Products />', () => {
 
   afterEach(fetchMock.restore);
 
-  test('renders products list', () => {
-    const initialState = {
-      products: [
-        {
-          id: 1,
-          title: 'Product 1',
-          version: '3.130',
-          description: 'This is a test product.',
-        },
-      ],
-    };
-    const { getByText } = renderWithRedux(
-      <MemoryRouter>
-        <ProductsList />
-      </MemoryRouter>,
-      initialState,
-      storeWithApi,
-    );
-
-    expect(getByText('Product 1')).toBeVisible();
-  });
-
   test('fetches products', () => {
     const initialState = {
       products: [],
@@ -48,5 +26,77 @@ describe('<Products />', () => {
     );
 
     expect(fetchMock.called('/api/products/')).toBe(true);
+  });
+
+  test('renders products list (empty)', () => {
+    const initialState = {
+      products: [],
+    };
+    const { getByText } = renderWithRedux(
+      <MemoryRouter>
+        <ProductsList />
+      </MemoryRouter>,
+      initialState,
+      storeWithApi,
+    );
+
+    expect(getByText('Uh oh.')).toBeVisible();
+  });
+
+  test('renders products list (1 category)', () => {
+    const initialState = {
+      products: [
+        {
+          id: 1,
+          title: 'Product 1',
+          version: '3.130',
+          description: 'This is a test product.',
+          category: 'salesforce',
+        },
+      ],
+    };
+    const { getByText, queryByText } = renderWithRedux(
+      <MemoryRouter>
+        <ProductsList />
+      </MemoryRouter>,
+      initialState,
+      storeWithApi,
+    );
+
+    expect(getByText('Product 1')).toBeVisible();
+    expect(queryByText('salesforce')).toBeNull();
+  });
+
+  test('renders products list (2 categories)', () => {
+    const initialState = {
+      products: [
+        {
+          id: 1,
+          title: 'Product 1',
+          version: '3.130',
+          description: 'This is a test product.',
+          category: 'salesforce',
+        },
+        {
+          id: 2,
+          title: 'Product 2',
+          version: '3.131',
+          description: 'This is another test product.',
+          category: 'community',
+        },
+      ],
+    };
+    const { getByText } = renderWithRedux(
+      <MemoryRouter>
+        <ProductsList />
+      </MemoryRouter>,
+      initialState,
+      storeWithApi,
+    );
+
+    expect(getByText('Product 1')).toBeVisible();
+    expect(getByText('Product 2')).toBeInTheDocument();
+    expect(getByText('salesforce')).toBeVisible();
+    expect(getByText('community')).toBeVisible();
   });
 });

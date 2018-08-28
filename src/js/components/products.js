@@ -4,8 +4,11 @@ import * as React from 'react';
 import Avatar from '@salesforce/design-system-react/components/avatar';
 import Card from '@salesforce/design-system-react/components/card';
 import DocumentTitle from 'react-document-title';
+import Tabs from '@salesforce/design-system-react/components/tabs';
+import TabsPanel from '@salesforce/design-system-react/components/tabs/panel';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
+import { createSelector } from 'reselect';
 
 import { fetchProducts } from 'products/actions';
 
@@ -14,10 +17,26 @@ import type {
   Product as ProductType,
 } from 'products/reducer';
 
+type ProductsMapType = Map<string, Array<ProductType>>;
+
 const selectProductsState = (appState): ProductsType => appState.products;
 
+const selectProductsByCategory = createSelector(
+  selectProductsState,
+  (products: ProductsType): ProductsMapType => {
+    const productsByCategory = new Map();
+    for (const product of products) {
+      const category = product.category;
+      const existing = productsByCategory.get(category) || [];
+      existing.push(product);
+      productsByCategory.set(category, existing);
+    }
+    return productsByCategory;
+  },
+);
+
 const select = appState => ({
-  products: selectProductsState(appState),
+  productsByCategory: selectProductsByCategory(appState),
 });
 
 const actions = {
@@ -42,21 +61,51 @@ const ProductItem = ({ item }: { item: ProductType }) => (
 );
 
 class ProductsList extends React.Component<{
-  products: ProductsType,
+  productsByCategory: ProductsMapType,
   doFetchProducts: typeof fetchProducts,
 }> {
   componentDidMount() {
+    // @@@ Do we need to do this every time?
     this.props.doFetchProducts();
   }
 
+  static mapProducts(products: ProductsType): React.Node {
+    return products.map(item => <ProductItem item={item} key={item.id} />);
+  }
+
   render(): React.Node {
-    const productItems = this.props.products.map(item => (
-      <ProductItem item={item} key={item.id} />
-    ));
+    let contents;
+    switch (this.props.productsByCategory.size) {
+      case 0: {
+        contents = (
+          <div className="slds-text-longform">
+            <h1 className="slds-text-heading_large">Uh oh.</h1>
+            <p>We couldn&rsquo;t find any products.</p>
+          </div>
+        );
+        break;
+      }
+      case 1: {
+        const products = Array.from(this.props.productsByCategory.values())[0];
+        contents = <div>{ProductsList.mapProducts(products)}</div>;
+        break;
+      }
+      default: {
+        const tabs = [];
+        for (const [category, products] of this.props.productsByCategory) {
+          const panel = (
+            <TabsPanel label={category} key={category}>
+              {ProductsList.mapProducts(products)}
+            </TabsPanel>
+          );
+          tabs.push(panel);
+        }
+        contents = <Tabs variant="scoped">{tabs}</Tabs>;
+        break;
+      }
+    }
     return (
-      <DocumentTitle title="Products | MetaDeploy">
-        <div>{productItems}</div>
-      </DocumentTitle>
+      <DocumentTitle title="Products | MetaDeploy">{contents}</DocumentTitle>
     );
   }
 }

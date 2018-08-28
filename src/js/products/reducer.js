@@ -7,6 +7,7 @@ export type Product = {
   +title: string,
   +version: string,
   +description: string,
+  +category: string,
 };
 export type Products = Array<Product>;
 

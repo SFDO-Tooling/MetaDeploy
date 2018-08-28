@@ -76,6 +76,7 @@
     "redux-logger": "^3.0.6",
     "redux-persist-middleware": "^1.0.1",
     "redux-thunk": "^2.3.0",
+    "reselect": "^3.0.1",
     "whatwg-fetch": "^2.0.4"
   },
   "scripts": {

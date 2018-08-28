@@ -36,8 +36,8 @@ const App = () => (
     <div className="slds-grid slds-grid_frame slds-grid_vertical">
       <Header />
       <div
-        className="slds-grow slds-shrink-none slds-text-longform
-          slds-p-horizontal_medium slds-p-vertical_large"
+        className="slds-grow slds-shrink-none slds-p-horizontal_medium
+          slds-p-vertical_large"
       >
         <Switch>
           <Route exact path="/" render={() => <Redirect to="/products" />} />

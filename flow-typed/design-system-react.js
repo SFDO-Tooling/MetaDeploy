@@ -39,3 +39,15 @@ declare module '@salesforce/design-system-react/components/card' {
 
   declare export default Component;
 }
+
+declare module '@salesforce/design-system-react/components/tabs' {
+  import typeof { Component } from 'react';
+
+  declare export default Component;
+}
+
+declare module '@salesforce/design-system-react/components/tabs/panel' {
+  import typeof { Component } from 'react';
+
+  declare export default Component;
+}

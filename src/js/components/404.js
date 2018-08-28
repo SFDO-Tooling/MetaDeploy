@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 
 const FourOhFour = () => (
   <DocumentTitle title="404 | MetaDeploy">
-    <div>
+    <div className="slds-text-longform">
       <h1 className="slds-text-heading_large">Oh Noes!</h1>
       <p>
         That page cannot be found. Try the <Link to="/">home page</Link>?
