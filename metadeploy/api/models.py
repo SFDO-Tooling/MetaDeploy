@@ -3,7 +3,7 @@ from django.db import models
 
 class Product(models.Model):
     CATEGORY_CHOICES = (
-        ('sfdo', "SFDO"),
+        ('salesforce', "Salesforce"),
         ('community', "Community"),
     )
 
@@ -12,6 +12,6 @@ class Product(models.Model):
     version = models.CharField(max_length=256)
     category = models.CharField(
         choices=CATEGORY_CHOICES,
-        default='sfdo',
+        default='salesforce',
         max_length=256,
     )

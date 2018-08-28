@@ -14,8 +14,11 @@ class Migration(migrations.Migration):
             model_name='product',
             name='category',
             field=models.CharField(
-                choices=[('sfdo', 'SFDO'), ('community', 'Community')],
-                default='sfdo',
+                choices=[
+                    ('salesforce', 'Salesforce'),
+                    ('community', 'Community'),
+                ],
+                default='salesforce',
                 max_length=256,
             ),
         ),
