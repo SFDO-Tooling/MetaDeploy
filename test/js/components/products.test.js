@@ -76,6 +76,11 @@ describe('<Products />', () => {
           version: '3.130',
           description: 'This is a test product.',
           category: 'salesforce',
+          icon: {
+            type: 'slds',
+            category: 'utility',
+            name: 'salesforce1',
+          },
         },
         {
           id: 2,
@@ -98,5 +103,34 @@ describe('<Products />', () => {
     expect(getByText('Product 2')).toBeInTheDocument();
     expect(getByText('salesforce')).toBeVisible();
     expect(getByText('community')).toBeVisible();
+  });
+
+  test('renders product with custom icon', () => {
+    const initialState = {
+      products: [
+        {
+          id: 1,
+          title: 'Product 1',
+          version: '3.130',
+          description: 'This is a test product.',
+          category: 'salesforce',
+          icon: {
+            type: 'url',
+            url: 'http://foo.bar',
+          },
+        },
+      ],
+    };
+    const { getByAltText } = renderWithRedux(
+      <MemoryRouter>
+        <ProductsList />
+      </MemoryRouter>,
+      initialState,
+      storeWithApi,
+    );
+    const icon = getByAltText('Product 1');
+
+    expect(icon).toBeVisible();
+    expect(icon).toHaveAttribute('src', 'http://foo.bar');
   });
 });

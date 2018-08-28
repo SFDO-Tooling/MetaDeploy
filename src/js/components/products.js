@@ -4,6 +4,7 @@ import * as React from 'react';
 import Avatar from '@salesforce/design-system-react/components/avatar';
 import Card from '@salesforce/design-system-react/components/card';
 import DocumentTitle from 'react-document-title';
+import Icon from '@salesforce/design-system-react/components/icon';
 import Tabs from '@salesforce/design-system-react/components/tabs';
 import TabsPanel from '@salesforce/design-system-react/components/tabs/panel';
 import { Link } from 'react-router-dom';
@@ -44,22 +45,48 @@ const actions = {
   doFetchProducts: fetchProducts,
 };
 
-const ProductItem = ({ item }: { item: ProductType }) => (
-  <Link
-    to={routes.product_detail(item.id)}
-    className="slds-text-link_reset slds-p-around_medium"
-  >
-    <Card
-      heading={item.title}
-      icon={<Avatar variant="entity" label={item.title} />}
+const ProductItem = ({ item }: { item: ProductType }) => {
+  let icon;
+  if (item.icon && item.icon.type === 'url' && item.icon.url) {
+    icon = (
+      <Avatar
+        variant="entity"
+        label={item.title}
+        imgSrc={item.icon.url}
+        imgAlt={item.title}
+        title={item.title}
+      />
+    );
+  } else if (
+    item.icon &&
+    item.icon.type === 'slds' &&
+    item.icon.category &&
+    item.icon.name
+  ) {
+    icon = (
+      <Icon
+        assistiveText={{ label: item.title }}
+        category={item.icon.category}
+        name={item.icon.name}
+      />
+    );
+  } else {
+    icon = <Avatar variant="entity" label={item.title} />;
+  }
+  return (
+    <Link
+      to={routes.product_detail(item.id)}
+      className="slds-text-link_reset slds-p-around_medium"
     >
-      <div className="slds-card__body_inner">
-        <div className="slds-text-title">Version {item.version}</div>
-        <p className="slds-truncate">{item.description}</p>
-      </div>
-    </Card>
-  </Link>
-);
+      <Card heading={item.title} icon={icon}>
+        <div className="slds-card__body_inner">
+          <div className="slds-text-title">Version {item.version}</div>
+          <p className="slds-truncate">{item.description}</p>
+        </div>
+      </Card>
+    </Link>
+  );
+};
 
 class ProductsList extends React.Component<{
   productsByCategory: ProductsMapType,

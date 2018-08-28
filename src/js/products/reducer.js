@@ -8,6 +8,12 @@ export type Product = {
   +version: string,
   +description: string,
   +category: string,
+  +icon: {
+    +type: 'url' | 'slds',
+    +category?: 'action' | 'custom' | 'doctype' | 'standard' | 'utility',
+    +name?: string,
+    +url?: string,
+  },
 };
 export type Products = Array<Product>;
 

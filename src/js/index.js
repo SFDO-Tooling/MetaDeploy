@@ -63,7 +63,7 @@ cache
       // Initialize with correct logged-in/out status
       const user = el.getAttribute('data-user');
       data.user = null;
-      if (user !== null && user !== undefined) {
+      if (user) {
         try {
           data.user = JSON.parse(user);
         } catch (err) {
