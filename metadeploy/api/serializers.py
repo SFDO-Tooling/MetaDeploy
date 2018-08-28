@@ -28,4 +28,6 @@ class ProductSerializer(serializers.ModelSerializer):
             'description',
             'version',
             'category',
+            'color',
+            'icon',
         )

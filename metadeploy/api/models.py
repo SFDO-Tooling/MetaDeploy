@@ -8,6 +8,14 @@ class Product(models.Model):
         ('salesforce', "Salesforce"),
         ('community', "Community"),
     )
+    SLDS_ICON_CHOICES = (
+        ('', ''),
+        ('action', 'action'),
+        ('custom', 'custom'),
+        ('doctype', 'doctype'),
+        ('standard', 'standard'),
+        ('utility', 'utility'),
+    )
 
     title = models.CharField(max_length=256)
     description = models.TextField()
@@ -18,3 +26,29 @@ class Product(models.Model):
         max_length=256,
     )
     color = ColorField(default='#ffffff')
+    icon_url = models.URLField(
+        blank=True,
+        help_text='This will take precedence over the SLDS Icons.',
+    )
+    slds_icon_category = models.CharField(
+        choices=SLDS_ICON_CHOICES,
+        default='',
+        blank=True,
+        max_length=32,
+    )
+    slds_icon_name = models.CharField(max_length=64, blank=True)
+
+    @property
+    def icon(self):
+        if self.icon_url:
+            return {
+                'type': 'url',
+                'url': self.icon_url,
+            }
+        if self.slds_icon_name and self.slds_icon_category:
+            return {
+                'type': 'slds',
+                'category': self.slds_icon_category,
+                'name': self.slds_icon_name,
+            }
+        return {'type': 'none'}
