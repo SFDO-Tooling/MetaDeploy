@@ -18,6 +18,8 @@ class FullUserSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    category = serializers.CharField(source='get_category_display')
+
     class Meta:
         model = Product
         fields = (
