@@ -13,7 +13,7 @@ export type Product = {
     +category?: 'action' | 'custom' | 'doctype' | 'standard' | 'utility',
     +name?: string,
     +url?: string,
-  } | void,
+  } | null,
   +color: string,
 };
 export type Products = Array<Product>;

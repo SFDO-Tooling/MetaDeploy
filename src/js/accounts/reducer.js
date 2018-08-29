@@ -2,12 +2,10 @@
 
 import type { UserAction } from 'accounts/actions';
 
-export type User = ?{
+export type User = {
   +username: string,
-  +first_name?: ?string,
-  +last_name?: ?string,
-  +email?: ?string,
-};
+  +email: string,
+} | null;
 
 const reducer = (state: User = null, action: UserAction): User => {
   switch (action.type) {

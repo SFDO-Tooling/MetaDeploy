@@ -6,12 +6,7 @@ import DocumentTitle from 'react-document-title';
 import IconSettings from '@salesforce/design-system-react/components/icon-settings';
 import logger from 'redux-logger';
 import thunk from 'redux-thunk';
-import {
-  BrowserRouter as Router,
-  Route,
-  Switch,
-  Redirect,
-} from 'react-router-dom';
+import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { combineReducers, createStore, applyMiddleware } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
@@ -94,7 +89,7 @@ cache
       );
       ReactDOM.render(
         <Provider store={appStore}>
-          <Router>
+          <BrowserRouter>
             <IconSettings
               actionSprite={actionSprite}
               customSprite={customSprite}
@@ -104,7 +99,7 @@ cache
             >
               <App />
             </IconSettings>
-          </Router>
+          </BrowserRouter>
         </Provider>,
         el,
       );
