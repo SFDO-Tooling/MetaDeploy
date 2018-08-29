@@ -123,7 +123,7 @@ const Header = ({
       <div>
         <Link
           to={routes.product_list()}
-          className="global-nav slds-text-heading_small slds-p-right_large
+          className="slds-text-heading_small slds-p-right_large
             slds-text-link_reset slds-align-middle"
         >
           Products
