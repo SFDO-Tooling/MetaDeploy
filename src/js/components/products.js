@@ -100,7 +100,8 @@ class ProductItem extends React.Component<{
     return (
       <Link
         to={routes.product_detail(item.id)}
-        className="slds-text-link_reset slds-p-around_medium"
+        className="slds-text-link_reset slds-p-around_small
+          slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-3"
       >
         <Card heading={item.title} icon={icon}>
           <div className="slds-card__body_inner">
@@ -153,7 +154,9 @@ class ProductsList extends React.Component<{
         for (const [category, products] of this.props.productsByCategory) {
           const panel = (
             <TabsPanel label={category} key={category}>
-              {ProductsList.getProductComponents(products)}
+              <div className="slds-grid slds-wrap">
+                {ProductsList.getProductComponents(products)}
+              </div>
             </TabsPanel>
           );
           tabs.push(panel);
