@@ -126,7 +126,13 @@ class ProductsList extends React.Component<{
   }
 
   static getProductComponents(products: ProductsType): React.Node {
-    return products.map(item => <ProductItem item={item} key={item.id} />);
+    return (
+      <div className="slds-grid slds-wrap">
+        {products.map(item => (
+          <ProductItem item={item} key={item.id} />
+        ))}
+      </div>
+    );
   }
 
   render(): React.Node {
@@ -145,7 +151,7 @@ class ProductsList extends React.Component<{
       case 1: {
         // Products are all in one category; no need for multicategory tabs
         const products = Array.from(this.props.productsByCategory.values())[0];
-        contents = <div>{ProductsList.getProductComponents(products)}</div>;
+        contents = ProductsList.getProductComponents(products);
         break;
       }
       default: {
@@ -154,9 +160,7 @@ class ProductsList extends React.Component<{
         for (const [category, products] of this.props.productsByCategory) {
           const panel = (
             <TabsPanel label={category} key={category}>
-              <div className="slds-grid slds-wrap">
-                {ProductsList.getProductComponents(products)}
-              </div>
+              {ProductsList.getProductComponents(products)}
             </TabsPanel>
           );
           tabs.push(panel);
