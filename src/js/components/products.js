@@ -82,10 +82,7 @@ class ProductItem extends React.Component<{
     if (item.color) {
       // Standard entity icon (initials) with custom color
       return (
-        <div
-          className="has-custom-color"
-          style={{ '--custom-color': item.color }}
-        >
+        <div style={{ '--custom-color': item.color }}>
           <Avatar variant="entity" label={item.title} />
         </div>
       );

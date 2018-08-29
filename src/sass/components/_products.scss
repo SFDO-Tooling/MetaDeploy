@@ -2,7 +2,7 @@
 // ========
 
 .slds-icon-standard-account {
-  .has-custom-color & {
+  [style*='--custom-color'] & {
     background-color: var(--custom-color);
   }
 }
