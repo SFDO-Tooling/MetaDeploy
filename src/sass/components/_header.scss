@@ -1,5 +1,9 @@
-// Footer
+// Header
 // ======
+
+.page-header {
+  background: $color-background-backdrop-tint;
+}
 
 [data-logo-bit='end'] {
   color: $color-text-brand;

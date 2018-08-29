@@ -13,9 +13,7 @@ const Footer = (props: { logoSrc: string }) => (
       data-testid="footer-logo"
     />
     <div className="footer-item">
-      <p>
-        Copyright 2000-2018 Salesforce.org. All Rights Reserved
-      </p>
+      <p>Copyright 2000–2018 Salesforce.org. All rights reserved.</p>
     </div>
   </footer>
 );

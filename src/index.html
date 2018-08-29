@@ -1,4 +1,5 @@
 {% load js_reverse %}
+{% load api_bootstrap %}
 
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -15,7 +16,7 @@
     <meta name="description" content="{% block description %}{% endblock description %}" />
   </head>
   <body>
-    <main id="app" class="slds-grid slds-grid_vertical"{% if user.is_authenticated %} data-username="{{ user.get_username }}"{% endif %}>
+    <main id="app" class="slds-grid slds-grid_vertical"{% if user.is_authenticated %} data-user="{{ user|serialize }}"{% endif %}>
       <div role="status" class="slds-spinner slds-spinner_large">
         <span class="slds-assistive-text">Loading...</span>
         <div class="slds-spinner__dot-a"></div>

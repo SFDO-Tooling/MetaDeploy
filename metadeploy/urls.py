@@ -21,7 +21,7 @@ from django.views.generic import TemplateView
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^accounts/', include('allauth.urls')),
-    # url(r'^api/', include('api.urls')),
+    url(r'^api/', include('metadeploy.api.urls')),
     # Catchall for the rest:
     url(
         r'^(?!admin|accounts|api)',

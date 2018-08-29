@@ -7,3 +7,5 @@ django-extensions==2.1.2
 werkzeug==0.14.1
 pyopenssl==18.0.0
 django-js-reverse==0.8.2
+djangorestframework==3.8.2
+django-colorfield==0.1.15

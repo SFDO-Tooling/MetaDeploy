@@ -9,6 +9,7 @@ import PageHeader from '@salesforce/design-system-react/components/page-header';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 
+import routes from 'utils/routes';
 import { logout } from 'accounts/actions';
 
 import type { User } from 'accounts/reducer';
@@ -24,12 +25,12 @@ const actions = {
 };
 
 const Login = () => {
-  if (!window.URLS.salesforce_production_login) {
+  if (!window.api_urls.salesforce_production_login) {
     window.console.error(
       'Login URL not found for salesforce_production provider.',
     );
   }
-  if (!window.URLS.salesforce_test_login) {
+  if (!window.api_urls.salesforce_test_login) {
     window.console.error('Login URL not found for salesforce_test provider.');
   }
   return (
@@ -39,16 +40,16 @@ const Login = () => {
         {
           label: 'Production or Developer Org',
           href:
-            window.URLS.salesforce_production_login &&
-            window.URLS.salesforce_production_login(),
-          disabled: !window.URLS.salesforce_production_login,
+            window.api_urls.salesforce_production_login &&
+            window.api_urls.salesforce_production_login(),
+          disabled: !window.api_urls.salesforce_production_login,
         },
         {
           label: 'Sandbox Org',
           href:
-            window.URLS.salesforce_test_login &&
-            window.URLS.salesforce_test_login(),
-          disabled: !window.URLS.salesforce_test_login,
+            window.api_urls.salesforce_test_login &&
+            window.api_urls.salesforce_test_login(),
+          disabled: !window.api_urls.salesforce_test_login,
         },
       ]}
       onSelect={opt => {
@@ -107,9 +108,10 @@ const Header = ({
   doLogout: typeof logout,
 }) => (
   <PageHeader
+    className="page-header"
     title={
       <Link
-        to="/"
+        to={routes.home()}
         className="slds-page-header__title slds-text-heading_large
           slds-text-link_reset"
       >
@@ -118,15 +120,20 @@ const Header = ({
       </Link>
     }
     navRight={
-      user && user.username ? (
-        <div>
+      <div>
+        <Link
+          to={routes.product_list()}
+          className="slds-text-heading_small slds-p-right_large
+            slds-text-link_reset slds-align-middle"
+        >
+          Products
+        </Link>
+        {user && user.username ? (
           <Logout user={user} doLogout={doLogout} />
-        </div>
-      ) : (
-        <div>
+        ) : (
           <Login />
-        </div>
-      )
+        )}
+      </div>
     }
     variant="objectHome"
   />

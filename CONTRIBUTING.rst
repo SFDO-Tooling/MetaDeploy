@@ -127,7 +127,7 @@ Once you've logged in, you probably want to make your user a superuser.
 You can do that easily via the ``promote_superuser`` management
 command::
 
-   python manage promote_superuser <your email>
+   python manage.py promote_superuser <your email>
 
 Development Tasks
 -----------------

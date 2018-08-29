@@ -109,8 +109,11 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
+    'colorfield',
+    'rest_framework',
     'metadeploy',
     'metadeploy.multisalesforce',
+    'metadeploy.api',
     'django_js_reverse',
 ]
 
@@ -248,5 +251,5 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = False
 
 
-JS_REVERSE_JS_VAR_NAME = 'URLS'
+JS_REVERSE_JS_VAR_NAME = 'api_urls'
 JS_REVERSE_EXCLUDE_NAMESPACES = ['admin']

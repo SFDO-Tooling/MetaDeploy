@@ -50,6 +50,7 @@
     "react-testing-library": "^5.0.0",
     "redux-mock-store": "^1.5.3",
     "sass-loader": "^7.1.0",
+    "size-plugin": "^1.0.1",
     "stylelint": "^9.5.0",
     "stylelint-config-recommended-scss": "^3.2.0",
     "stylelint-scss": "^3.3.0",
@@ -76,6 +77,7 @@
     "redux-logger": "^3.0.6",
     "redux-persist-middleware": "^1.0.1",
     "redux-thunk": "^2.3.0",
+    "reselect": "^3.0.1",
     "whatwg-fetch": "^2.0.4"
   },
   "scripts": {
