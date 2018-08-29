@@ -1,6 +1,6 @@
 import pytest
 
-from ..api_bootstrap import serialize
+from ..templatetags.api_bootstrap import serialize
 
 
 @pytest.mark.django_db
