@@ -6,14 +6,23 @@ import cookies from 'js-cookie';
 const csrfSafeMethod = method => /^(GET|HEAD|OPTIONS|TRACE)$/.test(method);
 
 const getResponse = resp =>
-  resp.text().then(text => {
-    try {
-      return JSON.parse(text);
-    } catch (err) {
-      // swallow error
-    }
-    return text;
-  });
+  resp
+    .text()
+    .then(text => {
+      try {
+        return JSON.parse(text);
+      } catch (err) {
+        // swallow error
+      }
+      return text;
+    })
+    .catch(
+      /* istanbul ignore next */
+      err => {
+        window.console.error(err);
+        throw err;
+      },
+    );
 
 const getApiFetch = (onAuthFailure: () => void) => (
   url: string,
@@ -39,6 +48,7 @@ const getApiFetch = (onAuthFailure: () => void) => (
       throw error;
     })
     .catch(err => {
+      window.console.error(err);
       throw err;
     });
 };

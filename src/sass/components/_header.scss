@@ -1,0 +1,12 @@
+// Header
+// ======
+
+.page-header {
+  background: $color-background-backdrop-tint;
+}
+
+[data-logo-bit='end'] {
+  color: $color-text-brand;
+  font-weight: $font-weight-regular;
+  text-transform: uppercase;
+}

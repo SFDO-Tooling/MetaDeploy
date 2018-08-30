@@ -6,7 +6,7 @@ Cloning the project
 
 ::
 
-   git clone git@github.com:oddbird/metadeploy
+   git clone git@github.com:SFDO-Tooling/metadeploy
    cd metadeploy
 
 Making a virtual env
@@ -51,7 +51,7 @@ Installing Python requirements
 
 ::
 
-    pip install -r requirements.txt
+    pip install -r requirements/local.txt
 
 Installing JavaScript requirements
 ----------------------------------
@@ -85,7 +85,7 @@ and running locally::
 
 Then run the initial migrations::
 
-   python src/manage.py migrate
+   python manage.py migrate
 
 Running the server
 ------------------
@@ -108,29 +108,33 @@ The WebSocket server (to live-reload on file changes) listens on
 Logging in with Salesforce
 --------------------------
 
-To make an initial local user::
+To setup the Salesforce OAuth integration, run the
+``populate_social_apps`` management command::
 
-   python src/manage.py createsuperuser
+   python manage.py populate_social_apps --prod-id XXX --prod-secret YYY
 
-To setup the Salesforce OAuth integration, add three entries (one for
-Production, one for Sandbox, and one for Custom Domain) in the database
-with configuration information. You can do this by filling in the form
-twice at `<https://localhost:8080/admin/socialaccount/socialapp/add/>`_
-(you'll first be asked to log in using the local user you created
-above).
-
-To fill it in, you'll need some specific values from Connected Apps in your
-Salesforce configuration. If you're an OddBird, you can find these values in the
+You can also run it with ``--test-id`` and ``--test-secret``, or
+``--cust-id`` and ``--cust-secret``, or all three sets at once, to
+populate all three providers. The values to pass in with these flags can
+be found on the Connected App you've made in your Salesforce
+configuration, or if you're an OddBird, you can find these values in the
 shared Keybase team folder (``metadeploy/prod.db``).
 
 If you don't have a Salesforce account, ask `Kit <mailto:kit@oddbird.net>`_ to
 send you an invitation by email.
+
+Once you've logged in, you probably want to make your user a superuser.
+You can do that easily via the ``promote_superuser`` management
+command::
+
+   python manage.py promote_superuser <your email>
 
 Development Tasks
 -----------------
 
 - ``yarn serve``: starts development server (with watcher) at
   `<https://localhost:8080/>`_ (assets are served from ``dist/`` dir)
+- ``yarn pytest``: run Python tests
 - ``yarn test``: run JS tests
 - ``yarn test:watch``: run JS tests with a watcher for development
 - ``yarn lint``: formats and lints ``.scss`` and ``.js`` files; lints ``.py``
@@ -147,7 +151,7 @@ Development Tasks
 In commit messages or pull request titles, we use the following emojis to label
 which development commands need to be run before serving locally:
 
-- 📦 (``:package:``) -> ``pip install -r requirements.txt``
-- 🛢 (``:oil_drum:``) -> ``python src/manage.py migrate``
+- 📦 (``:package:``) -> ``pip install -r requirements/local.txt``
+- 🛢 (``:oil_drum:``) -> ``python manage.py migrate``
 - 🐈 (``:cat2:``) -> ``yarn``
 - 🙀 (``:scream_cat:``) -> ``rm -rf node_modules/; bin/unpack-node; yarn``

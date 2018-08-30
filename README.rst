@@ -1,28 +1,32 @@
 MetaDeploy
 ==========
 
-.. image:: https://circleci.com/gh/oddbird/metadeploy.svg?style=shield&circle-token=36ac74830e831dfbdbdbe40aa68b6910df25016f
-     :target: https://circleci.com/gh/oddbird/metadeploy
+.. image:: https://circleci.com/gh/SFDO-Tooling/metadeploy.svg?style=shield
+     :target: https://circleci.com/gh/SFDO-Tooling/metadeploy
      :alt: Build Status
 
-.. image:: https://coveralls.io/repos/github/oddbird/metadeploy/badge.svg?branch=master&amp;t=nvcQcu
-     :target: https://coveralls.io/github/oddbird/metadeploy?branch=master
+.. image:: https://coveralls.io/repos/github/SFDO-Tooling/metadeploy/badge.svg?branch=master
+     :target: https://coveralls.io/github/SFDO-Tooling/metadeploy?branch=master
      :alt: Test Coverage
 
-.. image:: https://badges.greenkeeper.io/oddbird/metadeploy.svg?token=cdd1aa435bc2abd632c8499a57f321736ca10821eb55bd45a68df6b138e20a31&ts=1534281126964
+.. image:: https://badges.greenkeeper.io/SFDO-Tooling/metadeploy.svg
      :target: https://greenkeeper.io/
      :alt: Greenkeeper Status
 
-.. image:: https://pyup.io/repos/github/oddbird/metadeploy/shield.svg?token=2ed1ac41-6006-4162-99f8-bcc41e7cf43d
-     :target: https://pyup.io/repos/github/oddbird/metadeploy/
+.. image:: https://pyup.io/repos/github/SFDO-Tooling/metadeploy/shield.svg
+     :target: https://pyup.io/repos/github/SFDO-Tooling/metadeploy/
      :alt: Python Updates
 
-.. image:: https://pyup.io/repos/github/oddbird/metadeploy/python-3-shield.svg?token=2ed1ac41-6006-4162-99f8-bcc41e7cf43d
-     :target: https://pyup.io/repos/github/oddbird/metadeploy/
+.. image:: https://pyup.io/repos/github/SFDO-Tooling/metadeploy/python-3-shield.svg
+     :target: https://pyup.io/repos/github/SFDO-Tooling/metadeploy/
      :alt: Python 3 Status
 
 Development
 -----------
+
+.. image:: https://www.herokucdn.com/deploy/button.svg
+     :target: https://heroku.com/deploy
+     :alt: Deploy to Heroku
 
 See `CONTRIBUTING.rst <CONTRIBUTING.rst>`_.
 
@@ -30,4 +34,4 @@ Got feedback?
 -------------
 
 Please open a new `GitHub Issue
-<https://github.com/oddbird/metadeploy/issues>`_.
+<https://github.com/SFDO-Tooling/metadeploy/issues>`_.

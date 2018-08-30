@@ -4,19 +4,55 @@ declare module '@salesforce/design-system-react/components/icon-settings' {
   declare export default Component;
 }
 
-declare module '@salesforce/design-system-react/components/global-header' {
+declare module '@salesforce/design-system-react/components/avatar' {
   import typeof { Component } from 'react';
 
   declare export default Component;
 }
 
-declare module '@salesforce/design-system-react/components/global-header/dropdown' {
+declare module '@salesforce/design-system-react/components/button' {
   import typeof { Component } from 'react';
 
   declare export default Component;
 }
 
-declare module '@salesforce/design-system-react/components/global-header/profile' {
+declare module '@salesforce/design-system-react/components/menu-dropdown' {
+  import typeof { Component } from 'react';
+
+  declare export default Component;
+}
+
+declare module '@salesforce/design-system-react/components/menu-dropdown/button-trigger' {
+  import typeof { Component } from 'react';
+
+  declare export default Component;
+}
+
+declare module '@salesforce/design-system-react/components/page-header' {
+  import typeof { Component } from 'react';
+
+  declare export default Component;
+}
+
+declare module '@salesforce/design-system-react/components/card' {
+  import typeof { Component } from 'react';
+
+  declare export default Component;
+}
+
+declare module '@salesforce/design-system-react/components/tabs' {
+  import typeof { Component } from 'react';
+
+  declare export default Component;
+}
+
+declare module '@salesforce/design-system-react/components/tabs/panel' {
+  import typeof { Component } from 'react';
+
+  declare export default Component;
+}
+
+declare module '@salesforce/design-system-react/components/icon' {
   import typeof { Component } from 'react';
 
   declare export default Component;

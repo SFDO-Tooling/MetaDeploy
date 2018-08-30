@@ -1,0 +1,37 @@
+// Footer
+// ======
+
+.site-contentinfo {
+  background-color: $color-background-reminder;
+  flex-wrap: wrap;
+  padding: $spacing-small 0;
+  font-size: $font-size-text-x-small;
+
+  @media (min-width: $mq-medium) {
+    flex-wrap: nowrap;
+  }
+}
+
+.footer-logo {
+  background-size: contain;
+  background-repeat: no-repeat;
+  flex: 1 1 auto;
+  min-height: 22px;
+  margin-left: $spacing-medium;
+  margin-right: $spacing-medium;
+  min-width: 100px;
+
+  @media (max-width: $mq-medium) {
+    margin-bottom: $spacing-small;
+  }
+}
+
+.footer-item {
+  display: flex;
+  margin-left: $spacing-medium;
+  margin-right: $spacing-medium;
+
+  @media (min-width: $mq-medium) {
+    justify-content: flex-end;
+  }
+}

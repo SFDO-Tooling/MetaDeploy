@@ -1,9 +1,8 @@
-import configureStore from 'redux-mock-store';
 import fetchMock from 'fetch-mock';
-import thunk from 'redux-thunk';
+
+import { storeWithApi } from './../utils';
 
 import * as actions from 'accounts/actions';
-import getApiFetch from 'utils/api';
 import { cache } from 'utils/caching';
 
 describe('login', () => {
@@ -41,15 +40,12 @@ describe('doLocalLogout', () => {
 describe('logout', () => {
   afterEach(fetchMock.restore);
 
-  const mockStore = configureStore([
-    thunk.withExtraArgument({
-      apiFetch: getApiFetch(),
-    }),
-  ]);
-
   test('POSTs logout then dispatches LogoutAction', () => {
-    fetchMock.postOnce('/accounts/logout/', { status: 204, body: {} });
-    const store = mockStore({});
+    fetchMock.postOnce(window.api_urls.account_logout(), {
+      status: 204,
+      body: {},
+    });
+    const store = storeWithApi({});
     const expected = {
       type: 'USER_LOGGED_OUT',
     };

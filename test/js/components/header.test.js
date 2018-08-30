@@ -1,4 +1,5 @@
 import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { fireEvent } from 'react-testing-library';
 
 import { renderWithRedux } from './../utils';
@@ -6,22 +7,15 @@ import { renderWithRedux } from './../utils';
 import Header from 'components/header';
 
 describe('<Header />', () => {
-  test('renders logo with `backgroundImage` set to `logoSrc`', () => {
-    const initialState = { user: null };
-    const { container } = renderWithRedux(
-      <Header logoSrc="my/logo.png" />,
-      initialState,
-    );
-
-    expect(container.querySelector('.slds-global-header__logo')).toHaveStyle(
-      'background-image: url(my/logo.png)',
-    );
-  });
-
   describe('logged out', () => {
     test('renders login dropdown', () => {
       const initialState = { user: null };
-      const { getByText } = renderWithRedux(<Header />, initialState);
+      const { getByText } = renderWithRedux(
+        <MemoryRouter>
+          <Header />
+        </MemoryRouter>,
+        initialState,
+      );
       const btn = getByText('Log In');
 
       expect(btn).toBeVisible();
@@ -34,7 +28,12 @@ describe('<Header />', () => {
 
     test('updates `window.location.href` on login click', () => {
       const initialState = { user: null };
-      const { getByText } = renderWithRedux(<Header />, initialState);
+      const { getByText } = renderWithRedux(
+        <MemoryRouter>
+          <Header />
+        </MemoryRouter>,
+        initialState,
+      );
       window.location.assign = jest.fn();
       fireEvent.click(getByText('Log In'));
       fireEvent.click(getByText('Sandbox Org'));
@@ -47,7 +46,9 @@ describe('<Header />', () => {
     test('renders profile dropdown (with logout)', () => {
       const initialState = { user: { username: 'Test User' } };
       const { container, getByText } = renderWithRedux(
-        <Header />,
+        <MemoryRouter>
+          <Header />
+        </MemoryRouter>,
         initialState,
       );
       const btn = container.querySelector('#logout');
@@ -57,6 +58,26 @@ describe('<Header />', () => {
       fireEvent.click(btn);
 
       expect(getByText('Log Out')).toBeVisible();
+    });
+  });
+
+  describe('URLs not found', () => {
+    const URLS = window.api_urls;
+    afterEach(() => {
+      window.api_urls = URLS;
+    });
+
+    test('logs error to console', () => {
+      window.api_urls = [];
+      const initialState = { user: null };
+      renderWithRedux(
+        <MemoryRouter>
+          <Header />
+        </MemoryRouter>,
+        initialState,
+      );
+
+      expect(window.console.error).toHaveBeenCalled();
     });
   });
 });
