@@ -26,7 +26,7 @@ class SalesforceOAuth2CustomAdapter(SalesforceOAuth2BaseAdapter):
 
     @property
     def base_url(self):
-        return 'https://{}.my.salesforce.com/'.format(
+        return 'https://{}.my.salesforce.com'.format(
             self.request.GET.get("custom_domain"),
         )
 
