@@ -52,6 +52,7 @@ class CustomDomainForm extends React.Component<{}, { url: string }> {
       return;
     }
     event.stopPropagation();
+    /* istanbul ignore else */
     if (event.nativeEvent && event.nativeEvent.stopPropagation) {
       event.nativeEvent.stopPropagation();
     }
@@ -63,6 +64,7 @@ class CustomDomainForm extends React.Component<{}, { url: string }> {
         className="slds-p-vertical_x-small slds-p-horizontal_small"
         onClick={this.trapEvent}
         onKeyDown={this.trapEvent}
+        onSubmit={this.handleSubmit}
       >
         <Input
           id="login-custom-domain"
@@ -74,9 +76,11 @@ class CustomDomainForm extends React.Component<{}, { url: string }> {
         >
           <p className="slds-p-vertical_x-small">
             https://
-            <span>
-              {this.state.url.trim() ? this.state.url.trim() : <em>domain</em>}
-            </span>
+            {this.state.url.trim() ? (
+              this.state.url.trim()
+            ) : (
+              <em data-testid="custom-domain">domain</em>
+            )}
             .my.salesforce.com
           </p>
         </Input>
@@ -85,7 +89,6 @@ class CustomDomainForm extends React.Component<{}, { url: string }> {
           type="submit"
           label="Continue"
           variant="neutral"
-          onClick={this.handleSubmit}
           disabled={!window.api_urls.salesforce_custom_login}
         />
       </form>
