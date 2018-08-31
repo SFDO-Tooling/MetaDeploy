@@ -74,7 +74,7 @@ class CustomDomainForm extends React.Component<{}, { url: string }> {
           assistiveText={null}
           disabled={!window.api_urls.salesforce_custom_login}
         >
-          <p className="slds-p-vertical_x-small">
+          <p className="slds-p-vertical_x-small slds-truncate">
             https://
             {this.state.url.trim() ? (
               this.state.url.trim()
@@ -131,7 +131,7 @@ const Login = () => {
     <Dropdown
       id="login"
       label="Log In"
-      className="slds-dropdown_actions"
+      className="slds-dropdown_actions slds-dropdown_medium"
       buttonVariant="brand"
       menuPosition="relative"
       nubbinPosition="top right"
