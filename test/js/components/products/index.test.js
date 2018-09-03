@@ -2,11 +2,22 @@ import React from 'react';
 import fetchMock from 'fetch-mock';
 import { MemoryRouter } from 'react-router-dom';
 
-import { renderWithRedux, storeWithApi } from './../utils';
+import { renderWithRedux, storeWithApi } from './../../utils';
 
 import ProductsList from 'components/products';
 
 describe('<Products />', () => {
+  const setup = initialState => {
+    const { getByText, queryByText } = renderWithRedux(
+      <MemoryRouter>
+        <ProductsList />
+      </MemoryRouter>,
+      initialState,
+      storeWithApi,
+    );
+    return { getByText, queryByText };
+  };
+
   beforeEach(() => {
     fetchMock.getOnce(window.api_urls.product_list(), []);
   });
@@ -17,13 +28,7 @@ describe('<Products />', () => {
     const initialState = {
       products: [],
     };
-    renderWithRedux(
-      <MemoryRouter>
-        <ProductsList />
-      </MemoryRouter>,
-      initialState,
-      storeWithApi,
-    );
+    setup(initialState);
 
     expect(fetchMock.called('/api/products/')).toBe(true);
   });
@@ -32,13 +37,7 @@ describe('<Products />', () => {
     const initialState = {
       products: [],
     };
-    const { getByText } = renderWithRedux(
-      <MemoryRouter>
-        <ProductsList />
-      </MemoryRouter>,
-      initialState,
-      storeWithApi,
-    );
+    const { getByText } = setup(initialState);
 
     expect(getByText('Uh oh.')).toBeVisible();
   });
@@ -55,13 +54,7 @@ describe('<Products />', () => {
         },
       ],
     };
-    const { getByText, queryByText } = renderWithRedux(
-      <MemoryRouter>
-        <ProductsList />
-      </MemoryRouter>,
-      initialState,
-      storeWithApi,
-    );
+    const { getByText, queryByText } = setup(initialState);
 
     expect(getByText('Product 1')).toBeVisible();
     expect(queryByText('salesforce')).toBeNull();
@@ -92,46 +85,11 @@ describe('<Products />', () => {
         },
       ],
     };
-    const { getByText } = renderWithRedux(
-      <MemoryRouter>
-        <ProductsList />
-      </MemoryRouter>,
-      initialState,
-      storeWithApi,
-    );
+    const { getByText } = setup(initialState);
 
     expect(getByText('Product 1')).toBeVisible();
     expect(getByText('Product 2')).toBeInTheDocument();
     expect(getByText('salesforce')).toBeVisible();
     expect(getByText('community')).toBeVisible();
-  });
-
-  test('renders product with custom icon', () => {
-    const initialState = {
-      products: [
-        {
-          id: 1,
-          title: 'Product 1',
-          version: '3.130',
-          description: 'This is a test product.',
-          category: 'salesforce',
-          icon: {
-            type: 'url',
-            url: 'http://foo.bar',
-          },
-        },
-      ],
-    };
-    const { getByAltText } = renderWithRedux(
-      <MemoryRouter>
-        <ProductsList />
-      </MemoryRouter>,
-      initialState,
-      storeWithApi,
-    );
-    const icon = getByAltText('Product 1');
-
-    expect(icon).toBeVisible();
-    expect(icon).toHaveAttribute('src', 'http://foo.bar');
   });
 });

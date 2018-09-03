@@ -33,10 +33,16 @@ const SF_logo = require('images/salesforce-logo.png');
 
 const App = () => (
   <DocumentTitle title="MetaDeploy">
-    <div className="slds-grid slds-grid_frame slds-grid_vertical">
+    <div
+      className="slds-grid
+        slds-grid_frame
+        slds-grid_vertical"
+    >
       <Header />
       <div
-        className="slds-grow slds-shrink-none slds-p-horizontal_medium
+        className="slds-grow
+          slds-shrink-none
+          slds-p-horizontal_medium
           slds-p-vertical_large"
       >
         <Switch>
