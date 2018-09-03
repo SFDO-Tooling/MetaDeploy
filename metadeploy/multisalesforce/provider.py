@@ -24,7 +24,14 @@ class SalesforceTestProvider(PromptLoginMixin, SalesforceProvider):
     package = 'metadeploy.multisalesforce'
 
 
+class SalesforceCustomProvider(PromptLoginMixin, SalesforceProvider):
+    id = 'salesforce-custom'
+    name = 'Salesforce Custom'
+    package = 'metadeploy.multisalesforce'
+
+
 provider_classes = [
     SalesforceProductionProvider,
     SalesforceTestProvider,
+    SalesforceCustomProvider,
 ]

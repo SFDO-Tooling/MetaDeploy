@@ -95,7 +95,7 @@
     "prod": "webpack --config webpack.prod.js",
     "pytest": "pytest",
     "test": "jest",
-    "test:watch": "jest --watchAll",
+    "test:watch": "jest --watch",
     "test:coverage": "JEST_JUNIT_OUTPUT='./coverage/junit.xml' jest --ci --runInBand --reporters=default --reporters=jest-junit",
     "test:report-coverage": "cat ./coverage/lcov.info | coveralls",
     "test:check-coverage": "nyc check-coverage --temp-directory coverage",
