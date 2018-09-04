@@ -59,9 +59,12 @@ class CustomDomainForm extends React.Component<{}, { url: string }> {
           onChange={this.handleChange}
           assistiveText={null}
           disabled={!window.api_urls.salesforce_custom_login}
+          aria-describedby="login-custom-domain-help"
         >
           <p
-            className="slds-p-vertical_x-small
+            id="login-custom-domain-help"
+            className="slds-form-element__help
+              slds-p-bottom_x-small
               slds-truncate"
           >
             https://
