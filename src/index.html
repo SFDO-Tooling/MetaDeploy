@@ -14,6 +14,10 @@
     <!-- Page Info -->
     <title>{% block title %}MetaDeploy{% endblock %}</title>
     <meta name="description" content="{% block description %}{% endblock description %}" />
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="<%= htmlWebpackPlugin.files.chunks.vendors.css[0] %>" type="text/css">
+    <link rel="stylesheet" href="<%= htmlWebpackPlugin.files.chunks.app.css[0] %>" type="text/css">
   </head>
   <body>
     <main id="app" class="slds-grid slds-grid_vertical"{% if user.is_authenticated %} data-user="{{ user|serialize }}"{% endif %}>
@@ -24,8 +28,21 @@
       </div>
     </main>
 
+    <!-- JavaScript -->
+    <script type="text/javascript" src="<%= htmlWebpackPlugin.files.chunks.runtime.entry %>"></script>
+    <script type="text/javascript" src="<%= htmlWebpackPlugin.files.chunks.vendors.entry %>"></script>
+    {% if SENTRY_DSN_PUBLIC %}
+      <!-- Insert Raven JS -->
+      <script id="js-raven-setup" type="application/json">
+        {
+          "dsn": "{{ SENTRY_DSN_PUBLIC }}"
+        }
+      </script>
+      <script type="text/javascript" src="<%= htmlWebpackPlugin.files.chunks.raven.entry %>"></script>
+    {% endif %}
     <script type="text/javascript" charset="utf-8">
       {% js_reverse_inline %}
     </script>
+    <script type="text/javascript" src="<%= htmlWebpackPlugin.files.chunks.app.entry %>"></script>
   </body>
 </html>

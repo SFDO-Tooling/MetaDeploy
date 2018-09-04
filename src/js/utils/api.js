@@ -2,6 +2,8 @@
 
 import cookies from 'js-cookie';
 
+import { logError } from 'utils/logging';
+
 // these HTTP methods do not require CSRF protection
 const csrfSafeMethod = method => /^(GET|HEAD|OPTIONS|TRACE)$/.test(method);
 
@@ -19,14 +21,14 @@ const getResponse = resp =>
     .catch(
       /* istanbul ignore next */
       err => {
-        window.console.error(err);
+        logError(err);
         throw err;
       },
     );
 
 const getApiFetch = (onAuthFailure: () => void) => (
   url: string,
-  opts: any = {},
+  opts: { [string]: mixed } = {},
 ) => {
   const options = Object.assign({}, { headers: {} }, opts);
   const method = options.method || 'GET';
@@ -43,12 +45,12 @@ const getApiFetch = (onAuthFailure: () => void) => (
         onAuthFailure();
         return getResponse(response);
       }
-      const error = (new Error(response.statusText): any);
+      const error = (new Error(response.statusText): { [string]: mixed });
       error.response = response;
       throw error;
     })
     .catch(err => {
-      window.console.error(err);
+      logError(err);
       throw err;
     });
 };

@@ -18,6 +18,29 @@ describe('login', () => {
 
     expect(actions.login(user)).toEqual(expected);
   });
+
+  describe('with Raven', () => {
+    beforeEach(() => {
+      window.Raven = {
+        isSetup: () => true,
+        setUserContext: jest.fn(),
+      };
+    });
+
+    afterEach(() => {
+      Reflect.deleteProperty(window, 'Raven');
+    });
+
+    test('sets user context', () => {
+      const user = {
+        username: 'Test User',
+        email: 'test@foo.bar',
+      };
+      actions.login(user);
+
+      expect(window.Raven.setUserContext).toHaveBeenCalledWith(user);
+    });
+  });
 });
 
 describe('doLocalLogout', () => {
@@ -34,6 +57,25 @@ describe('doLocalLogout', () => {
     actions.doLocalLogout();
 
     expect(cache.clear).toHaveBeenCalled();
+  });
+
+  describe('with Raven', () => {
+    beforeEach(() => {
+      window.Raven = {
+        isSetup: () => true,
+        setUserContext: jest.fn(),
+      };
+    });
+
+    afterEach(() => {
+      Reflect.deleteProperty(window, 'Raven');
+    });
+
+    test('resets user context', () => {
+      actions.doLocalLogout();
+
+      expect(window.Raven.setUserContext).toHaveBeenCalledWith();
+    });
   });
 });
 

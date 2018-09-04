@@ -22,7 +22,8 @@ import productsReducer from 'products/reducer';
 import routes from 'utils/routes';
 import userReducer from 'accounts/reducer';
 import { cache, persistMiddleware } from 'utils/caching';
-import { doLocalLogout } from 'accounts/actions';
+import { login, doLocalLogout } from 'accounts/actions';
+import { logError } from 'utils/logging';
 
 import Footer from 'components/footer';
 import FourOhFour from 'components/404';
@@ -65,16 +66,7 @@ cache
   .then(data => {
     const el = document.getElementById('app');
     if (el) {
-      // Initialize with correct logged-in/out status
-      const user = el.getAttribute('data-user');
-      data.user = null;
-      if (user) {
-        try {
-          data.user = JSON.parse(user);
-        } catch (err) {
-          // swallow error
-        }
-      }
+      // Create store
       const appStore = createStore(
         combineReducers({
           user: userReducer,
@@ -93,6 +85,23 @@ cache
           ),
         ),
       );
+
+      // Get logged-in/out status
+      const userString = el.getAttribute('data-user');
+      if (userString) {
+        let user;
+        try {
+          user = JSON.parse(userString);
+        } catch (err) {
+          // swallow error
+        }
+        if (user) {
+          // Login
+          appStore.dispatch(login(user));
+        }
+      }
+      el.removeAttribute('data-user');
+
       ReactDOM.render(
         <Provider store={appStore}>
           <BrowserRouter>
@@ -112,6 +121,6 @@ cache
     }
   })
   .catch(err => {
-    window.console.error(err);
+    logError(err);
     throw err;
   });
