@@ -13,7 +13,8 @@ const path = require('path');
 module.exports = {
   context: path.join(__dirname, 'src', 'js'),
   entry: {
-    app: ['whatwg-fetch', './index.js', 'app.scss'],
+    app: ['whatwg-fetch', './index', 'app.scss'],
+    raven: './raven',
   },
   resolve: {
     modules: ['src/js', 'src/sass', 'static', 'node_modules'],
@@ -36,7 +37,7 @@ module.exports = {
       cacheGroups: {
         vendor: {
           name: 'vendors',
-          test: /[\\/]node_modules[\\/]/,
+          test: /[\\/]node_modules[\\/](?!raven-js)/,
           chunks: 'all',
         },
         styles: {
@@ -105,6 +106,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
+      inject: false,
       template: path.join(__dirname, 'src', 'index.html'),
     }),
   ],

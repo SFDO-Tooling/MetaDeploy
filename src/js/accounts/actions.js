@@ -9,13 +9,21 @@ type LoginAction = { type: 'USER_LOGGED_IN', payload: User };
 type LogoutAction = { type: 'USER_LOGGED_OUT' };
 export type UserAction = LoginAction | LogoutAction;
 
-export const login = (payload: User): LoginAction => ({
-  type: 'USER_LOGGED_IN',
-  payload,
-});
+export const login = (payload: User): LoginAction => {
+  if (window.Raven && window.Raven.isSetup()) {
+    window.Raven.setUserContext(payload);
+  }
+  return {
+    type: 'USER_LOGGED_IN',
+    payload,
+  };
+};
 
 export const doLocalLogout = (): LogoutAction => {
   cache.clear();
+  if (window.Raven && window.Raven.isSetup()) {
+    window.Raven.setUserContext();
+  }
   return {
     type: 'USER_LOGGED_OUT',
   };

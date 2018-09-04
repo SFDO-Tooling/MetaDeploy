@@ -4,19 +4,19 @@ import * as React from 'react';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import List from '@salesforce/design-system-react/components/menu-list/list';
 
+import { logError } from 'utils/logging';
+
 import CustomDomainForm from 'components/header/customDomainForm';
 
 const Login = () => {
   if (!window.api_urls.salesforce_production_login) {
-    window.console.error(
-      'Login URL not found for salesforce_production provider.',
-    );
+    logError('Login URL not found for salesforce_production provider.');
   }
   if (!window.api_urls.salesforce_test_login) {
-    window.console.error('Login URL not found for salesforce_test provider.');
+    logError('Login URL not found for salesforce_test provider.');
   }
   if (!window.api_urls.salesforce_custom_login) {
-    window.console.error('Login URL not found for salesforce_custom provider.');
+    logError('Login URL not found for salesforce_custom provider.');
   }
   const menuOpts = [
     {
