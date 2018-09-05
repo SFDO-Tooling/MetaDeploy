@@ -13,17 +13,26 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
+from urllib.parse import urljoin
+
+from django.conf import settings
 from django.conf.urls import url, include
 from django.contrib import admin
 from django.views.generic import TemplateView
 
 
+PREFIX = settings.ADMIN_AREA_PREFIX
+
+
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
+    url(urljoin(PREFIX, r'django-rq/'), include('django_rq.urls')),
+    # Put this after all other things using `PREFIX`:
+    url(PREFIX, admin.site.urls),
     url(r'^accounts/', include('allauth.urls')),
     url(r'^api/', include('metadeploy.api.urls')),
-    url(r'^django-rq/', include('django_rq.urls')),
-    # Catchall for the rest:
+    # Catchall for the rest. Right now, it just trusts that PREFIX ==
+    # '^admin/', because we don't want to do string munging to get just
+    # the part without the regex and path cruft on it.
     url(
         r'^(?!admin|accounts|api)',
         TemplateView.as_view(template_name='index.html'),

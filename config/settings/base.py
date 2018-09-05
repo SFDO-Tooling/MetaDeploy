@@ -129,8 +129,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'metadeploy.urls'
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -171,6 +169,12 @@ DATABASES = {
     ),
 }
 
+
+# URL configuration:
+ROOT_URLCONF = 'metadeploy.urls'
+
+# Must start with ^ and end in a /, or you will experience surprises:
+ADMIN_AREA_PREFIX = r'^admin/'
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
@@ -270,6 +274,12 @@ RQ_QUEUES = {
         'DEFAULT_TIMEOUT': 360,
     },
 }
+
+
+CONNECTED_APP_CLIENT_SECRET = env('CONNECTED_APP_CLIENT_SECRET')
+CONNECTED_APP_CALLBACK_URL = env('CONNECTED_APP_CALLBACK_URL')
+CONNECTED_APP_CLIENT_ID = env('CONNECTED_APP_CLIENT_ID')
+GITHUB_TOKEN = env('GITHUB_TOKEN')
 
 
 # Raven / Sentry
