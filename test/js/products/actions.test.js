@@ -8,9 +8,8 @@ describe('fetchProducts', () => {
   afterEach(fetchMock.restore);
 
   describe('success', () => {
-    const store = storeWithApi({});
-
     test('GETs products from api', () => {
+      const store = storeWithApi({});
       const product = {
         id: 1,
         title: 'Product 1',
@@ -33,9 +32,16 @@ describe('fetchProducts', () => {
   });
 
   describe('error', () => {
-    const store = storeWithApi({});
+    test('throws Error', () => {
+      const store = storeWithApi({});
+      fetchMock.getOnce(window.api_urls.product_list(), 'string');
+
+      expect.assertions(1);
+      return expect(store.dispatch(actions.fetchProducts())).rejects.toThrow();
+    });
 
     test('dispatches FETCH_PRODUCTS_FAILED action', () => {
+      const store = storeWithApi({});
       fetchMock.getOnce(window.api_urls.product_list(), 500);
       const started = {
         type: 'FETCH_PRODUCTS_STARTED',
@@ -44,9 +50,10 @@ describe('fetchProducts', () => {
         type: 'FETCH_PRODUCTS_FAILED',
       };
 
-      expect.assertions(1);
-      return store.dispatch(actions.fetchProducts()).then(() => {
+      expect.assertions(2);
+      return store.dispatch(actions.fetchProducts()).catch(() => {
         expect(store.getActions()).toEqual([started, failed]);
+        expect(window.console.error).toHaveBeenCalled();
       });
     });
   });

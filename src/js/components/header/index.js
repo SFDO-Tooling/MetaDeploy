@@ -44,11 +44,7 @@ const Header = ({
         >
           Products
         </Link>
-        {user && user.username ? (
-          <Logout user={user} doLogout={doLogout} />
-        ) : (
-          <Login />
-        )}
+        {user ? <Logout user={user} doLogout={doLogout} /> : <Login />}
       </div>
     }
     variant="objectHome"

@@ -3,7 +3,7 @@ import { MemoryRouter } from 'react-router-dom';
 
 import { renderWithRedux } from './../../utils';
 
-import ProductItem from 'components/products/product';
+import ProductItem from 'components/products/listItem';
 
 describe('<ProductItem />', () => {
   const setup = initialState => {

@@ -1,10 +1,9 @@
 import React from 'react';
-import fetchMock from 'fetch-mock';
 import { MemoryRouter } from 'react-router-dom';
 
-import { renderWithRedux, storeWithApi } from './../../utils';
+import { renderWithRedux } from './../../utils';
 
-import ProductsList from 'components/products';
+import ProductsList from 'components/products/list';
 
 describe('<Products />', () => {
   const setup = initialState => {
@@ -13,25 +12,9 @@ describe('<Products />', () => {
         <ProductsList />
       </MemoryRouter>,
       initialState,
-      storeWithApi,
     );
     return { getByText, queryByText };
   };
-
-  beforeEach(() => {
-    fetchMock.getOnce(window.api_urls.product_list(), []);
-  });
-
-  afterEach(fetchMock.restore);
-
-  test('fetches products', () => {
-    const initialState = {
-      products: [],
-    };
-    setup(initialState);
-
-    expect(fetchMock.called('/api/products/')).toBe(true);
-  });
 
   test('renders products list (empty)', () => {
     const initialState = {
