@@ -21,7 +21,8 @@ const Header = ({
   doLogout: typeof logout,
 }) => (
   <PageHeader
-    className="page-header"
+    className="global-header
+      slds-p-horizontal_large"
     title={
       <Link
         to={routes.home()}

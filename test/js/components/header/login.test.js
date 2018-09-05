@@ -1,20 +1,11 @@
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { fireEvent } from 'react-testing-library';
-
-import { renderWithRedux } from './../../utils';
+import { render, fireEvent } from 'react-testing-library';
 
 import Login from 'components/header/login';
 
 describe('<Login />', () => {
   test('updates `window.location.href` on login click', () => {
-    const initialState = { user: null };
-    const { getByText } = renderWithRedux(
-      <MemoryRouter>
-        <Login />
-      </MemoryRouter>,
-      initialState,
-    );
+    const { getByText } = render(<Login />);
     window.location.assign = jest.fn();
     fireEvent.click(getByText('Log In'));
     fireEvent.click(getByText('Sandbox or Scratch Org'));
@@ -36,13 +27,7 @@ describe('<Login />', () => {
     });
 
     test('logs error to console', () => {
-      const initialState = { user: null };
-      renderWithRedux(
-        <MemoryRouter>
-          <Login />
-        </MemoryRouter>,
-        initialState,
-      );
+      render(<Login />);
 
       expect(window.console.error).toHaveBeenCalled();
     });

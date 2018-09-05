@@ -67,7 +67,9 @@ class ProductsList extends React.Component<{
       }
     }
     return (
-      <DocumentTitle title="Products | MetaDeploy">{contents}</DocumentTitle>
+      <DocumentTitle title="Products | MetaDeploy">
+        <div className="slds-p-around_large">{contents}</div>
+      </DocumentTitle>
     );
   }
 }

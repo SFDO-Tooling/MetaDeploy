@@ -46,9 +46,7 @@ const App = () => (
       <Header />
       <div
         className="slds-grow
-          slds-shrink-none
-          slds-p-horizontal_medium
-          slds-p-vertical_large"
+          slds-shrink-none"
       >
         <Switch>
           <Route

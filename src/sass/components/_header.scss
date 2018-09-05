@@ -1,8 +1,10 @@
 // Header
 // ======
 
-.page-header {
-  background: $color-background-backdrop-tint;
+.global-header {
+  border-radius: 0;
+  background-color: $color-background-backdrop-tint;
+  z-index: 100;
 }
 
 [data-logo-bit='end'] {
