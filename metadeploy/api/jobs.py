@@ -3,7 +3,7 @@ import sys
 import contextlib
 from tempfile import TemporaryDirectory
 
-from git import Repo
+import git
 
 from cumulusci.core import (
     config,
@@ -43,7 +43,7 @@ def run_flow(token, instance_url, package_url, flow_name):
         sys.path.insert(0, '')
 
         # Let's clone the repo locally:
-        Repo.clone_from(package_url, tmpdirname)
+        git.Repo.clone_from(package_url, tmpdirname)
 
         # There's a lot of setup to make configs and keychains, link
         # them properly, and then eventually pass them into a flow,
@@ -60,9 +60,9 @@ def run_flow(token, instance_url, package_url, flow_name):
 
         # Set up the connected_app:
         connected_app = config.ServiceConfig({
-            'client_secret': settings['CONNECTED_APP_CLIENT_SECRET'],
-            'callback_url': settings['CONNECTED_APP_CALLBACK_URL'],
-            'client_id': settings['CONNECTED_APP_CLIENT_ID'],
+            'client_secret': settings.CONNECTED_APP_CLIENT_SECRET,
+            'callback_url': settings.CONNECTED_APP_CALLBACK_URL,
+            'client_id': settings.CONNECTED_APP_CLIENT_ID,
         })
         proj_config.keychain.set_service(
             'connected_app',
@@ -73,8 +73,8 @@ def run_flow(token, instance_url, package_url, flow_name):
         # Set up github:
         github_app = config.ServiceConfig({
             # It would be nice to only need the token:
-            'token': settings['GITHUB_TOKEN'],
-            'password': settings['GITHUB_TOKEN'],
+            'token': settings.GITHUB_TOKEN,
+            'password': settings.GITHUB_TOKEN,
             'email': 'test@example.com',
             'username': 'not-a-username',
         })
