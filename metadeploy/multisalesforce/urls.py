@@ -1,3 +1,5 @@
+from functools import partial
+
 from django.urls import include, path
 
 from allauth.utils import import_attribute
@@ -10,10 +12,13 @@ from .provider import (
 
 
 def default_urlpatterns(provider, version):
-    login_view = import_attribute(
-        provider.get_package() + f'.views.{version}_oauth2_login')
-    callback_view = import_attribute(
-        provider.get_package() + f'.views.{version}_oauth2_callback')
+    import_attribute_tpl = partial(
+        '{package}.views.{version}_oauth2_{kind}'.format,
+        package=provider.get_package(),
+        version=version,
+    )
+    login_view = import_attribute(import_attribute_tpl(kind='login'))
+    callback_view = import_attribute(import_attribute_tpl(kind='callback'))
 
     urlpatterns = [
         path(
