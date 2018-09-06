@@ -1,6 +1,9 @@
 from rest_framework import serializers
 
-from .models import Product
+from .models import (
+    Product,
+    Job,
+)
 
 from django.contrib.auth import get_user_model
 
@@ -30,6 +33,22 @@ class ProductSerializer(serializers.ModelSerializer):
             'category',
             'color',
             'icon',
+        )
+
+
+class JobSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
+    )
+
+    class Meta:
+        model = Job
+        fields = (
+            'token',
+            'user',
+            'instance_url',
+            'package_url',
+            'flow_name',
         )
 
 

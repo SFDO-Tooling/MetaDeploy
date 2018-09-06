@@ -1,6 +1,9 @@
+from django.conf import settings
 from django.db import models
 
 from colorfield.fields import ColorField
+
+from . import jobs
 
 
 class Product(models.Model):
@@ -20,6 +23,8 @@ class Product(models.Model):
     title = models.CharField(max_length=256)
     description = models.TextField()
     version = models.CharField(max_length=256)
+    # TODO: We have reason to want this to be a disinct model, so it can
+    # be set in the Django Admin:
     category = models.CharField(
         choices=CATEGORY_CHOICES,
         default='salesforce',
@@ -52,3 +57,27 @@ class Product(models.Model):
                 'name': self.slds_icon_name,
             }
         return None
+
+
+class Job(models.Model):
+    token = models.CharField(max_length=256)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+    )
+    instance_url = models.URLField()
+    package_url = models.URLField()
+    flow_name = models.CharField(max_length=64)
+
+    def save(self, *args, **kwargs):
+        instance = super().save(*args, **kwargs)
+        # TODO: We may have to ensure that the save has completed
+        # writing to the database, assuming we exist in a transaction
+        # here, to be guaranteed to kick off the background job:
+        jobs.run_flow_job.delay(
+            self.token,
+            self.instance_url,
+            self.package_url,
+            self.flow_name,
+        )
+        return instance

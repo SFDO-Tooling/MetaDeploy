@@ -5,8 +5,12 @@ from . import jobs
 from .serializers import (
     ProductSerializer,
     TriggerInstallSerializer,
+    JobSerializer,
 )
-from .models import Product
+from .models import (
+    Product,
+    Job,
+)
 
 
 class ProductViewSet(viewsets.ModelViewSet):
@@ -31,3 +35,9 @@ class TriggerBuildView(views.APIView):
             )
             return Response('', status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class JobViewSet(viewsets.ModelViewSet):
+    serializers_class = JobSerializer
+    queryset = Job.objects.all()
+    permission_classes = (permissions.IsAuthenticated,)

@@ -1,4 +1,9 @@
-from ..models import Product
+import pytest
+
+from ..models import (
+    Product,
+    Job,
+)
 
 
 class TestIconProperty:
@@ -20,3 +25,20 @@ class TestIconProperty:
     def test_default(self):
         product = Product()
         assert product.icon is None
+
+
+@pytest.mark.django_db
+def test_job_save(mocker, user_factory):
+    run_flow_job = mocker.patch('metadeploy.api.jobs.run_flow_job')
+    user = user_factory()
+
+    job = Job(
+        token='sample token',
+        user=user,
+        instance_url='https://example.com/',
+        package_url='https://example.com/',
+        flow_name='sample_flow',
+    )
+    job.save()
+
+    assert run_flow_job.delay.called
