@@ -68,7 +68,7 @@
     "js-cookie": "^2.2.0",
     "money-clip": "^2.1.0",
     "raven-js": "^3.26.4",
-    "react": "^15.6.2",
+    "react": "^16.5.0",
     "react-document-title": "^2.0.3",
     "react-dom": "^15.6.2",
     "react-redux": "^5.0.7",
