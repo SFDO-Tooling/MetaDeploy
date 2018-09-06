@@ -1,11 +1,7 @@
-import pytest
-
 import factory
 from pytest_factoryboy import register
 
 from django.contrib.auth import get_user_model
-
-from rest_framework.test import APIClient
 
 from allauth.socialaccount.models import (
     SocialApp,
@@ -56,14 +52,18 @@ class UserFactory(factory.django.DjangoModelFactory):
     socialaccount_set = factory.RelatedFactory(SocialAccountFactory, 'user')
 
 
-@pytest.fixture
-def client(user_factory):
-    user = user_factory()
-    client = APIClient()
-    client.force_login(user)
-    return client
-
-
+# TODO: We will need these eventually, but not yet:
+#
+# import pytest
+# from rest_framework.test import APIClient
+#
+# @pytest.fixture
+# def client(user_factory):
+#     user = user_factory()
+#     client = APIClient()
+#     client.force_login(user)
+#     return client
+#
 # @pytest.fixture
 # def anon_client():
 #     return APIClient()

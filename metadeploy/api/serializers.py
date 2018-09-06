@@ -50,9 +50,3 @@ class JobSerializer(serializers.ModelSerializer):
             'package_url',
             'flow_name',
         )
-
-
-class TriggerInstallSerializer(serializers.Serializer):
-    instance_url = serializers.URLField()
-    package_url = serializers.URLField()
-    flow_name = serializers.CharField()
