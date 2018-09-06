@@ -40,7 +40,7 @@ def run_flow(token, instance_url, package_url, flow_name):
 
         # Get cwd into Python path, so that the tasks below can import
         # from the checked-out repo:
-        sys.path.insert(0, '')
+        sys.path.insert(0, os.path.abspath(tmpdirname))
 
         # Let's clone the repo locally:
         git.Repo.clone_from(package_url, tmpdirname)
@@ -48,11 +48,12 @@ def run_flow(token, instance_url, package_url, flow_name):
         # There's a lot of setup to make configs and keychains, link
         # them properly, and then eventually pass them into a flow,
         # which we then run:
+        current_org = 'current_org'
         org_config = config.OrgConfig({
             'access_token': token.token,
             'instance_url': instance_url,
             'refresh_token': token.token_secret,
-        }, 'test')
+        }, current_org)
         proj_config = config.YamlProjectConfig(config.YamlGlobalConfig())
         proj_keychain = keychain.BaseProjectKeychain(proj_config, None)
         proj_keychain.set_org(org_config)
@@ -74,6 +75,8 @@ def run_flow(token, instance_url, package_url, flow_name):
         github_app = config.ServiceConfig({
             # It would be nice to only need the token:
             'token': settings.GITHUB_TOKEN,
+            # The following three values don't matter and aren't used,
+            # but are required to validate the Service:
             'password': settings.GITHUB_TOKEN,
             'email': 'test@example.com',
             'username': 'not-a-username',
@@ -85,7 +88,7 @@ def run_flow(token, instance_url, package_url, flow_name):
         flowinstance = flows.BaseFlow(
             proj_config,
             flow_config,
-            proj_keychain.get_org('test'),
+            proj_keychain.get_org(current_org),
             options={},
             skip=[],
             name=flow_name,
