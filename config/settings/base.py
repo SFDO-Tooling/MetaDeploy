@@ -57,7 +57,7 @@ def env(name, default=NoDefaultValue, type_=str):
     except KeyError:
         if default == NoDefaultValue:
             raise ImproperlyConfigured(
-                f"Missing environment variable: {name}."
+                f'Missing environment variable: {name}.'
             )
         val = default
     val = type_(val)
@@ -265,17 +265,28 @@ JS_REVERSE_JS_VAR_NAME = 'api_urls'
 JS_REVERSE_EXCLUDE_NAMESPACES = ['admin']
 
 
-RQ_QUEUES = {
+# Redis configuration:
+
+REDIS_LOCATION = '{0}/{1}'.format(
+    env('REDIS_URL', default='redis://localhost:6379'),
+    0,
+)
+CACHES = {
     'default': {
-        'HOST': 'localhost',
-        'PORT': 6379,
-        'DB': 0,
-        'PASSWORD': '',
-        'DEFAULT_TIMEOUT': 360,
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': REDIS_LOCATION,
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'IGNORE_EXCEPTIONS': True,
+        },
     },
+}
+RQ_QUEUES = {
+    'default': {'USE_REDIS_CACHE': 'default'},
 }
 
 
+# SF Connected App and GitHub configuration:
 CONNECTED_APP_CLIENT_SECRET = env('CONNECTED_APP_CLIENT_SECRET')
 CONNECTED_APP_CALLBACK_URL = env('CONNECTED_APP_CALLBACK_URL')
 CONNECTED_APP_CLIENT_ID = env('CONNECTED_APP_CLIENT_ID')
