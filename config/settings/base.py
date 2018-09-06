@@ -173,8 +173,8 @@ DATABASES = {
 # URL configuration:
 ROOT_URLCONF = 'metadeploy.urls'
 
-# Must start with ^ and end in a /, or you will experience surprises:
-ADMIN_AREA_PREFIX = r'^admin/'
+# Must end in a /, or you will experience surprises:
+ADMIN_AREA_PREFIX = 'admin/'
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
