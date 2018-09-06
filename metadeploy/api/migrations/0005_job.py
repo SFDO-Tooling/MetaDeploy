@@ -30,6 +30,10 @@ class Migration(migrations.Migration):
                     models.CharField(max_length=256),
                 ),
                 (
+                    'token_secret',
+                    models.CharField(max_length=256),
+                ),
+                (
                     'instance_url',
                     models.URLField(),
                 ),

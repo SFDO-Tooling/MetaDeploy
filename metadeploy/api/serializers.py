@@ -44,7 +44,6 @@ class JobSerializer(serializers.ModelSerializer):
     class Meta:
         model = Job
         fields = (
-            'token',
             'user',
             'instance_url',
             'package_url',

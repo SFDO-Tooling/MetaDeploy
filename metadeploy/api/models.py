@@ -6,6 +6,11 @@ from colorfield.fields import ColorField
 from . import jobs
 
 
+def get_token_off_user(user):
+    token = user.socialaccount_set.first().socialtoken_set.first()
+    return token.token, token.token_secret
+
+
 class Product(models.Model):
     CATEGORY_CHOICES = (
         ('salesforce', "Salesforce"),
@@ -61,6 +66,7 @@ class Product(models.Model):
 
 class Job(models.Model):
     token = models.CharField(max_length=256)
+    token_secret = models.CharField(max_length=256)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -70,12 +76,16 @@ class Job(models.Model):
     flow_name = models.CharField(max_length=64)
 
     def save(self, *args, **kwargs):
+        # TODO: I don't like this, we shouldn't munge the data on every
+        # save like this:
+        self.token, self.token_secret = get_token_off_user(self.user)
         instance = super().save(*args, **kwargs)
         # TODO: We may have to ensure that the save has completed
         # writing to the database, assuming we exist in a transaction
         # here, to be guaranteed to kick off the background job:
         jobs.run_flow_job.delay(
             self.token,
+            self.token_secret,
             self.instance_url,
             self.package_url,
             self.flow_name,

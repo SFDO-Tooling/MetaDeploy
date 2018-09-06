@@ -33,7 +33,7 @@ def run_flow_job(*args, **kwargs):  # pragma: nocover
     return run_flow(*args, **kwargs)
 
 
-def run_flow(token, instance_url, package_url, flow_name):
+def run_flow(token, token_secret, instance_url, package_url, flow_name):
     with contextlib.ExitStack() as stack:
         tmpdirname = stack.enter_context(TemporaryDirectory())
         stack.enter_context(cd(tmpdirname))
@@ -50,9 +50,9 @@ def run_flow(token, instance_url, package_url, flow_name):
         # which we then run:
         current_org = 'current_org'
         org_config = config.OrgConfig({
-            'access_token': token.token,
+            'access_token': token,
             'instance_url': instance_url,
-            'refresh_token': token.token_secret,
+            'refresh_token': token_secret,
         }, current_org)
         proj_config = config.YamlProjectConfig(config.YamlGlobalConfig())
         proj_keychain = keychain.BaseProjectKeychain(proj_config, None)

@@ -23,14 +23,6 @@ class SocialAppFactory(factory.django.DjangoModelFactory):
 
 
 @register
-class SocialAccountFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = SocialAccount
-
-    provider = 'salesforce-production'
-
-
-@register
 class SocialTokenFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = SocialToken
@@ -38,7 +30,15 @@ class SocialTokenFactory(factory.django.DjangoModelFactory):
     token = factory.Sequence('0123456789abcdef{}'.format)
     token_secret = factory.Sequence('secret.0123456789abcdef{}'.format)
     app = factory.SubFactory(SocialAppFactory)
-    account = factory.SubFactory(SocialAccountFactory)
+
+
+@register
+class SocialAccountFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = SocialAccount
+
+    provider = 'salesforce-production'
+    socialtoken_set = factory.RelatedFactory(SocialTokenFactory, 'account')
 
 
 @register

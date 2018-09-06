@@ -1,8 +1,4 @@
-from collections import namedtuple
-
 from ..jobs import run_flow
-
-Token = namedtuple('Token', ('token', 'token_secret'))
 
 
 def test_run_flow(mocker):
@@ -16,12 +12,13 @@ def test_run_flow(mocker):
     mocker.patch('cumulusci.core.keychain.BaseProjectKeychain')
     base_flow = mocker.patch('cumulusci.core.flows.BaseFlow')
 
-    token = Token('token', 'token_secret')
+    token = 'token'
+    token_secret = 'token_secret'
     instance_url = 'https://example.com/'
     package_url = 'https://example.com/'
     flow_name = 'test_flow'
 
-    run_flow(token, instance_url, package_url, flow_name)
+    run_flow(token, token_secret, instance_url, package_url, flow_name)
 
     # TODO assert? What we really need to assert is a change in the SF
     # org, but that'd be an integration test.
