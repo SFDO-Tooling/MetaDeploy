@@ -11,7 +11,6 @@ describe('<ProductDetail />', () => {
       {
         id: 1,
         title: 'Product 1',
-        version: '3.130',
         description: 'This is a test product.',
         category: 'salesforce',
         image_url: 'http://foo.bar',
@@ -63,7 +62,6 @@ describe('<ProductDetail />', () => {
     const product = {
       id: 1,
       title: 'Product 1',
-      version: '3.130',
       description: 'This is a test product.',
       category: 'salesforce',
       most_recent_version: {

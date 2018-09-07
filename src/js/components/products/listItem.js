@@ -21,7 +21,9 @@ const ProductItem = ({ item }: { item: ProductType }) => (
   >
     <Card heading={item.title} icon={<ProductIcon item={item} />}>
       <div className="slds-card__body_inner">
-        <div className="slds-text-title">Version {item.version}</div>
+        <div className="slds-text-title">
+          Version {item.most_recent_version.label}
+        </div>
         <p className="slds-truncate">{item.description}</p>
       </div>
     </Card>

@@ -31,9 +31,19 @@ describe('<Products />', () => {
         {
           id: 1,
           title: 'Product 1',
-          version: '3.130',
           description: 'This is a test product.',
           category: 'salesforce',
+          most_recent_version: {
+            id: 1,
+            product: 1,
+            label: '1.0.0',
+            description: 'This is a test product version.',
+            primary_plan: {
+              id: 1,
+              title: 'My Plan',
+            },
+            additional_plans: [],
+          },
         },
       ],
     };
@@ -49,7 +59,6 @@ describe('<Products />', () => {
         {
           id: 1,
           title: 'Product 1',
-          version: '3.130',
           description: 'This is a test product.',
           category: 'salesforce',
           icon: {
@@ -57,14 +66,35 @@ describe('<Products />', () => {
             category: 'utility',
             name: 'salesforce1',
           },
+          most_recent_version: {
+            id: 1,
+            product: 1,
+            label: '1.0.0',
+            description: 'This is a test product version.',
+            primary_plan: {
+              id: 1,
+              title: 'My Plan',
+            },
+            additional_plans: [],
+          },
         },
         {
           id: 2,
           title: 'Product 2',
-          version: '3.131',
           description: 'This is another test product.',
           category: 'community',
           color: '#fff',
+          most_recent_version: {
+            id: 2,
+            product: 2,
+            label: '1.0.0',
+            description: 'This is a test product version.',
+            primary_plan: {
+              id: 2,
+              title: 'My Plan',
+            },
+            additional_plans: [],
+          },
         },
       ],
     };

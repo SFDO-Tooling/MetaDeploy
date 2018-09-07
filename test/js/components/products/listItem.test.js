@@ -24,12 +24,22 @@ describe('<ProductItem />', () => {
         {
           id: 1,
           title: 'Product 1',
-          version: '3.130',
           description: 'This is a test product.',
           category: 'salesforce',
           icon: {
             type: 'url',
             url: 'http://foo.bar',
+          },
+          most_recent_version: {
+            id: 1,
+            product: 1,
+            label: '1.0.0',
+            description: 'This is a test product version.',
+            primary_plan: {
+              id: 1,
+              title: 'My Plan',
+            },
+            additional_plans: [],
           },
         },
       ],

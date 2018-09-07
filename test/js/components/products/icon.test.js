@@ -13,7 +13,6 @@ describe('<ProductIcon />', () => {
     const item = {
       id: 1,
       title: 'Product 1',
-      version: '3.130',
       description: 'This is a test product.',
       category: 'salesforce',
       icon: {

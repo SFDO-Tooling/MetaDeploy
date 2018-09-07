@@ -13,7 +13,6 @@ describe('fetchProducts', () => {
       const product = {
         id: 1,
         title: 'Product 1',
-        version: '3.130',
         description: 'This is a test product.',
       };
       fetchMock.getOnce(window.api_urls.product_list(), [product]);
