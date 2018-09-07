@@ -12,20 +12,13 @@ import routes from 'utils/routes';
 import ProductIcon from 'components/products/icon';
 
 import type { Match } from 'react-router-dom';
-import type { Products as ProductsType } from 'products/reducer';
+import type { Product as ProductType } from 'products/reducer';
 
-const ProductDetail = ({
-  match: { params },
-  products,
-}: {
-  match: Match,
-  products: ProductsType,
-}) => {
-  const id = parseInt(params.id, 10);
-  const product = products.find(p => p.id === id);
-  if (!product) {
+const ProductDetail = ({ product }: { product: ProductType | void }) => {
+  if (product === undefined) {
     return <Redirect to={routes.product_list()} />;
   }
+  const version = product.most_recent_version;
   const BodySection = ({ children }: { children: React.Node }) => (
     <div
       className="slds-text-longform
@@ -44,7 +37,7 @@ const ProductDetail = ({
           className="page-header
             slds-p-around_large"
           title={product.title}
-          info={product.version}
+          info={version.label}
           icon={<ProductIcon item={product} />}
         />
         <div
@@ -57,47 +50,45 @@ const ProductDetail = ({
             <h3 className="slds-text-heading_small">
               Select a Plan to Install
             </h3>
-            <p>
-              Any description needed for the various plans? Lorem Ipsum is
-              simply dummy text of the printing and typesetting industry.
-            </p>
+            <p>{version.description}</p>
             <p>
               <Button
                 className="slds-size_full"
-                label={`Latest Production (${product.version})`}
+                label={version.primary_plan.title}
                 variant="brand"
               />
             </p>
-            <p>
-              <Button
-                className="slds-size_full slds-button_outline-brand"
-                label="Latest Beta (3.3.0-beta.4)"
-                variant="base"
-              />
-            </p>
-            <div className="slds-p-top_large">
-              <h3 className="slds-text-heading_small">
-                Additional Plan Options
-              </h3>
-              <ul>
-                <li>
-                  <a>Previous Production (3.2.0)</a>
-                </li>
-                <li>
-                  <a>Previous Beta (3.3.0-beta.3)</a>
-                </li>
-                <li>
-                  <a>Earlier Production with Longer Title (3.1.2)</a>
-                </li>
-              </ul>
-            </div>
+            {version.secondary_plan ? (
+              <p>
+                <Button
+                  className="slds-size_full slds-button_outline-brand"
+                  label={version.secondary_plan.title}
+                  variant="base"
+                />
+              </p>
+            ) : null}
+            {version.additional_plans.length ? (
+              <div className="slds-p-top_large">
+                <h3 className="slds-text-heading_small">Additional Plans</h3>
+                <ul>
+                  {version.additional_plans.map(plan => (
+                    <li key={plan.id}>
+                      <a>{plan.title}</a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
           </BodySection>
           <BodySection>
             <h3 className="slds-text-heading_small">About {product.title}</h3>
-            <img
-              className="slds-size_full"
-              src="https://placekitten.com/g/300/150"
-            />
+            {product.image_url ? (
+              <img
+                className="slds-size_full"
+                src={product.image_url}
+                alt={product.title}
+              />
+            ) : null}
             <p>{product.description}</p>
           </BodySection>
         </div>
@@ -106,10 +97,17 @@ const ProductDetail = ({
   );
 };
 
-const selectProductsState = (appState): ProductsType => appState.products;
+const selectProduct = (
+  appState,
+  { match: { params } }: { match: Match },
+): ProductType | void => {
+  const products = appState.products;
+  const id = parseInt(params.id, 10);
+  return products.find(p => p.id === id);
+};
 
-const select = appState => ({
-  products: selectProductsState(appState),
+const select = (appState, props) => ({
+  product: selectProduct(appState, props),
 });
 
 export default connect(select)(ProductDetail);
