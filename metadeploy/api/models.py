@@ -25,6 +25,7 @@ class Product(models.Model):
         max_length=256,
     )
     color = ColorField(blank=True)
+    image_url = models.URLField(blank=True)
     icon_url = models.URLField(
         blank=True,
         help_text='This will take precedence over Color and the SLDS Icons.',
@@ -62,6 +63,41 @@ class Version(models.Model):
     label = models.CharField(max_length=64)
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    is_production = models.BooleanField(default=True)
 
     def natural_key(self):
         return (self.product, self.label)
+
+    @property
+    def primary_plan(self):
+        # This will raise an error if the number of primary plans != 1:
+        return self.plan_set.filter(tier=Plan.Tier.Primary).get()
+
+    @property
+    def secondary_plan(self):
+        return self.plan_set.filter(tier=Plan.Tier.Secondary).first()
+
+    @property
+    def additional_plans(self):
+        return self.plan_set.filter(tier=Plan.Tier.Additional).order_by('id')
+
+
+class Plan(models.Model):
+    class Tier:
+        Primary = 'primary'
+        Secondary = 'secondary'
+        Additional = 'additional'
+
+    PLAN_TIERS = (
+        (Tier.Primary, 'Primary'),
+        (Tier.Secondary, 'Secondary'),
+        (Tier.Additional, 'Additional'),
+    )
+
+    title = models.CharField(max_length=128)
+    version = models.ForeignKey(Version, on_delete=models.PROTECT)
+    tier = models.CharField(
+        choices=PLAN_TIERS,
+        default=Tier.Primary,
+        max_length=64,
+    )

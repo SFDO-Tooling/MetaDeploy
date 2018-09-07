@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from metadeploy.api.models import (
     Product,
     Version,
+    Plan,
 )
 
 User = get_user_model()
@@ -41,6 +42,15 @@ class VersionFactory(factory.django.DjangoModelFactory):
     product = factory.SubFactory(ProductFactory)
     label = 'v0.1.0'
     description = 'A sample version.'
+
+
+@register
+class PlanFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Plan
+
+    title = 'Sample plan'
+    version = factory.SubFactory(VersionFactory)
 
 
 register(UserFactory)

@@ -3,6 +3,7 @@ from rest_framework import serializers
 from .models import (
     Product,
     Version,
+    Plan,
 )
 
 from django.contrib.auth import get_user_model
@@ -20,6 +21,17 @@ class FullUserSerializer(serializers.ModelSerializer):
         )
 
 
+class PlanSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Plan
+        fields = (
+            'id',
+            'title',
+            'version',
+            'tier',
+        )
+
+
 class VersionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Version
@@ -29,6 +41,9 @@ class VersionSerializer(serializers.ModelSerializer):
             'label',
             'description',
             'created_at',
+            'primary_plan',
+            'secondary_plan',
+            'additional_plans',
         )
 
 

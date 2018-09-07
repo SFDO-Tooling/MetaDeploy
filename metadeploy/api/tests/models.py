@@ -1,27 +1,69 @@
 import pytest
 
-from ..models import Product
+from django.core.exceptions import (
+    ObjectDoesNotExist,
+    MultipleObjectsReturned,
+)
 
 
+@pytest.mark.django_db
 class TestIconProperty:
-    def test_uses_icon_url(self):
-        product = Product(icon_url='https://example.com/example.png')
+    def test_uses_icon_url(self, product_factory):
+        product = product_factory(icon_url='https://example.com/example.png')
         assert product.icon == {
             'type': 'url',
             'url': 'https://example.com/example.png',
         }
 
-    def test_uses_slds_attrs(self):
-        product = Product(slds_icon_category='action', slds_icon_name='test')
+    def test_uses_slds_attrs(self, product_factory):
+        product = product_factory(
+            slds_icon_category='action',
+            slds_icon_name='test',
+        )
         assert product.icon == {
             'type': 'slds',
             'category': 'action',
             'name': 'test',
         }
 
-    def test_default(self):
-        product = Product()
+    def test_default(self, product_factory):
+        product = product_factory()
         assert product.icon is None
+
+
+@pytest.mark.django_db
+class TestPlansProperties:
+    def test_primary_plan__missing(self, version_factory):
+        version = version_factory()
+        with pytest.raises(ObjectDoesNotExist):
+            version.primary_plan
+
+    def test_primary_plan__too_many(self, version_factory, plan_factory):
+        version = version_factory()
+        plan_factory(version=version, tier='primary')
+        plan_factory(version=version, tier='primary')
+        with pytest.raises(MultipleObjectsReturned):
+            version.primary_plan
+
+    def test_primary_plan__good(self, version_factory, plan_factory):
+        version = version_factory()
+        plan = plan_factory(version=version, tier='primary')
+        assert version.primary_plan == plan
+
+    def test_secondary_plan__none(self, version_factory, plan_factory):
+        version = version_factory()
+        assert version.secondary_plan is None
+
+    def test_secondary_plan__good(self, version_factory, plan_factory):
+        version = version_factory()
+        plan = plan_factory(version=version, tier='secondary')
+        assert version.secondary_plan == plan
+
+    def test_additional_plans(self, version_factory, plan_factory):
+        version = version_factory()
+        plan1 = plan_factory(version=version, tier='additional')
+        plan2 = plan_factory(version=version, tier='additional')
+        assert list(version.additional_plans) == [plan1, plan2]
 
 
 @pytest.mark.django_db
