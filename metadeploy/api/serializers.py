@@ -33,6 +33,10 @@ class PlanSerializer(serializers.ModelSerializer):
 
 
 class VersionSerializer(serializers.ModelSerializer):
+    primary_plan = PlanSerializer()
+    secondary_plan = PlanSerializer()
+    additional_plans = PlanSerializer(many=True)
+
     class Meta:
         model = Version
         fields = (
