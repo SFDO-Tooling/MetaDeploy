@@ -42,7 +42,6 @@ class ProductSerializer(serializers.ModelSerializer):
             'id',
             'title',
             'description',
-            'version',
             'category',
             'color',
             'icon',
