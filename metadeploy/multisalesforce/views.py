@@ -26,9 +26,12 @@ class SalesforceOAuth2CustomAdapter(SalesforceOAuth2BaseAdapter):
 
     @property
     def base_url(self):
-        return 'https://{}.my.salesforce.com'.format(
-            self.request.GET.get("custom_domain"),
+        custom_domain = self.request.GET.get(
+            'custom_domain',
+            self.request.session.get('custom_domain'),
         )
+        self.request.session['custom_domain'] = custom_domain
+        return 'https://{}.my.salesforce.com'.format(custom_domain)
 
 
 prod_oauth2_login = OAuth2LoginView.adapter_view(
