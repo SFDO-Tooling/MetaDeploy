@@ -25,6 +25,15 @@ class TestIconProperty:
 
 
 @pytest.mark.django_db
+def test_product_most_recent_version(product_factory, version_factory):
+    product = product_factory()
+    version_factory(label='v0.1.0', product=product)
+    v2 = version_factory(label='v0.2.0', product=product)
+
+    assert product.most_recent_version == v2
+
+
+@pytest.mark.django_db
 def test_version_natural_key(version_factory):
     version = version_factory(label='v0.1.0')
     assert version.natural_key() == (version.product, 'v0.1.0')

@@ -38,6 +38,10 @@ class Product(models.Model):
     slds_icon_name = models.CharField(max_length=64, blank=True)
 
     @property
+    def most_recent_version(self):
+        return self.version_set.order_by('-created_at').first()
+
+    @property
     def icon(self):
         if self.icon_url:
             return {
@@ -57,6 +61,7 @@ class Version(models.Model):
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
     label = models.CharField(max_length=64)
     description = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def natural_key(self):
         return (self.product, self.label)

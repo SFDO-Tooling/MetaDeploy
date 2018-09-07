@@ -20,8 +20,21 @@ class FullUserSerializer(serializers.ModelSerializer):
         )
 
 
+class VersionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Version
+        fields = (
+            'id',
+            'product',
+            'label',
+            'description',
+            'created_at',
+        )
+
+
 class ProductSerializer(serializers.ModelSerializer):
     category = serializers.CharField(source='get_category_display')
+    most_recent_version = VersionSerializer()
 
     class Meta:
         model = Product
@@ -33,15 +46,5 @@ class ProductSerializer(serializers.ModelSerializer):
             'category',
             'color',
             'icon',
-        )
-
-
-class VersionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Version
-        fields = (
-            'id',
-            'product',
-            'label',
-            'description',
+            'most_recent_version',
         )
