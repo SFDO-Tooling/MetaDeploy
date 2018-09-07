@@ -1,6 +1,9 @@
 from rest_framework import serializers
 
-from .models import Product
+from .models import (
+    Product,
+    Version,
+)
 
 from django.contrib.auth import get_user_model
 
@@ -30,4 +33,15 @@ class ProductSerializer(serializers.ModelSerializer):
             'category',
             'color',
             'icon',
+        )
+
+
+class VersionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Version
+        fields = (
+            'id',
+            'product',
+            'label',
+            'description',
         )

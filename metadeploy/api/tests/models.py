@@ -1,3 +1,5 @@
+import pytest
+
 from ..models import Product
 
 
@@ -20,3 +22,9 @@ class TestIconProperty:
     def test_default(self):
         product = Product()
         assert product.icon is None
+
+
+@pytest.mark.django_db
+def test_version_natural_key(version_factory):
+    version = version_factory(label='v0.1.0')
+    assert version.natural_key() == (version.product, 'v0.1.0')

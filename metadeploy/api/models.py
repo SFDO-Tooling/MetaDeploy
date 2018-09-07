@@ -19,7 +19,6 @@ class Product(models.Model):
 
     title = models.CharField(max_length=256)
     description = models.TextField()
-    version = models.CharField(max_length=256)
     category = models.CharField(
         choices=CATEGORY_CHOICES,
         default='salesforce',
@@ -52,3 +51,12 @@ class Product(models.Model):
                 'name': self.slds_icon_name,
             }
         return None
+
+
+class Version(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    label = models.CharField(max_length=64)
+    description = models.TextField()
+
+    def natural_key(self):
+        return (self.product, self.label)
