@@ -28,9 +28,14 @@ def cd(path):
         os.chdir(prev_cwd)
 
 
-@job
-def run_flow_job(*args, **kwargs):  # pragma: nocover
-    return run_flow(*args, **kwargs)
+@contextlib.contextmanager
+def prepend_python_path(path):
+    prev_path = sys.path.copy()
+    sys.path.insert(0, path)
+    try:
+        yield
+    finally:
+        sys.path = prev_path
 
 
 def run_flow(token, token_secret, instance_url, package_url, flow_name):
@@ -40,7 +45,7 @@ def run_flow(token, token_secret, instance_url, package_url, flow_name):
 
         # Get cwd into Python path, so that the tasks below can import
         # from the checked-out repo:
-        sys.path.insert(0, os.path.abspath(tmpdirname))
+        stack.enter_context(prepend_python_path(os.path.abspath(tmpdirname)))
 
         # Let's clone the repo locally:
         git.Repo.clone_from(package_url, tmpdirname)
@@ -103,3 +108,6 @@ def run_flow(token, token_secret, instance_url, package_url, flow_name):
 # pre_flow, post_flow, pre_task, post_task, pre_subflow, post_subflow
 #
 # Can we do anything meaningful with a return value from a @job, too?
+
+
+run_flow_job = job(run_flow)
