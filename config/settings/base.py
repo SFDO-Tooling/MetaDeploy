@@ -279,6 +279,7 @@ CACHES = {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
             'IGNORE_EXCEPTIONS': True,
         },
+        'DEFAULT_TIMEOUT': 360,
     },
 }
 RQ_QUEUES = {
@@ -323,6 +324,10 @@ if SENTRY_DSN:
                         '%(thread)d %(message)s'
                     ),
                 },
+                "rq_console": {
+                    "format": "%(asctime)s %(message)s",
+                    "datefmt": "%H:%M:%S",
+                },
             },
             'handlers': {
                 'sentry': {
@@ -337,7 +342,13 @@ if SENTRY_DSN:
                     'level': 'DEBUG',
                     'class': 'logging.StreamHandler',
                     'formatter': 'verbose'
-                }
+                },
+                "rq_console": {
+                    "level": "DEBUG",
+                    "class": "rq.utils.ColorizingStreamHandler",
+                    "formatter": "rq_console",
+                    "exclude": ["%(asctime)s"],
+                },
             },
             'loggers': {
                 'django.db.backends': {
@@ -354,6 +365,10 @@ if SENTRY_DSN:
                     'level': 'DEBUG',
                     'handlers': ['console'],
                     'propagate': False,
+                },
+                "rq.worker": {
+                    "handlers": ["rq_console", "sentry"],
+                    "level": "DEBUG"
                 },
             },
         }

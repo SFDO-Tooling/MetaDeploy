@@ -19,6 +19,6 @@ class ProductViewSet(viewsets.ModelViewSet):
 
 
 class JobViewSet(viewsets.ModelViewSet):
-    serializers_class = JobSerializer
+    serializer_class = JobSerializer
     queryset = Job.objects.all()
     permission_classes = (permissions.IsAuthenticated,)
