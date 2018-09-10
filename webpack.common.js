@@ -110,4 +110,5 @@ module.exports = {
       template: path.join(__dirname, 'src', 'index.html'),
     }),
   ],
+  stats: 'verbose',
 };
