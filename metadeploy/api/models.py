@@ -38,6 +38,9 @@ class Product(models.Model):
     )
     slds_icon_name = models.CharField(max_length=64, blank=True)
 
+    def __str__(self):
+        return self.title
+
     @property
     def most_recent_version(self):
         return self.version_set.order_by('-created_at').first()
@@ -67,6 +70,9 @@ class Version(models.Model):
 
     def natural_key(self):
         return (self.product, self.label)
+
+    def __str__(self):
+        return "{}, Version {}".format(self.product, self.label)
 
     @property
     def primary_plan(self):
@@ -101,3 +107,9 @@ class Plan(models.Model):
         default=Tier.Primary,
         max_length=64,
     )
+
+    def natural_key(self):
+        return (self.version, self.title)
+
+    def __str__(self):
+        return "{}, Plan {}".format(self.version, self.title)

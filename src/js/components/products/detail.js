@@ -1,7 +1,6 @@
 // @flow
 
 import * as React from 'react';
-import Button from '@salesforce/design-system-react/components/button';
 import DocumentTitle from 'react-document-title';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import { Redirect } from 'react-router-dom';
@@ -14,22 +13,23 @@ import ProductIcon from 'components/products/icon';
 import type { Match } from 'react-router-dom';
 import type { Product as ProductType } from 'products/reducer';
 
+const BodySection = ({ children }: { children: React.Node }) => (
+  <div
+    className="slds-text-longform
+      slds-p-vertical_small
+      slds-p-horizontal_x-large
+      slds-size_1-of-1
+      slds-medium-size_1-of-2"
+  >
+    {children}
+  </div>
+);
+
 const ProductDetail = ({ product }: { product: ProductType | void }) => {
   if (product === undefined) {
     return <Redirect to={routes.product_list()} />;
   }
   const version = product.most_recent_version;
-  const BodySection = ({ children }: { children: React.Node }) => (
-    <div
-      className="slds-text-longform
-        slds-p-vertical_small
-        slds-p-horizontal_x-large
-        slds-size_1-of-1
-        slds-medium-size_1-of-2"
-    >
-      {children}
-    </div>
-  );
   return (
     <DocumentTitle title={`${product.title} | MetaDeploy`}>
       <div>
@@ -52,19 +52,23 @@ const ProductDetail = ({ product }: { product: ProductType | void }) => {
             </h3>
             <p>{version.description}</p>
             <p>
-              <Button
-                className="slds-size_full"
-                label={version.primary_plan.title}
-                variant="brand"
-              />
+              <a
+                className="slds-button
+                  slds-button_brand
+                  slds-size_full"
+              >
+                {version.primary_plan.title}
+              </a>
             </p>
             {version.secondary_plan ? (
               <p>
-                <Button
-                  className="slds-size_full slds-button_outline-brand"
-                  label={version.secondary_plan.title}
-                  variant="base"
-                />
+                <a
+                  className="slds-button
+                  slds-button_outline-brand
+                    slds-size_full"
+                >
+                  {version.secondary_plan.title}
+                </a>
               </p>
             ) : null}
             {version.additional_plans.length ? (
