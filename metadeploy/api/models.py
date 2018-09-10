@@ -1,5 +1,7 @@
 from django.db import models
 
+from model_utils import Choices
+
 from colorfield.fields import ColorField
 
 
@@ -25,7 +27,7 @@ class Product(models.Model):
         max_length=256,
     )
     color = ColorField(blank=True)
-    image_url = models.URLField(blank=True)
+    image_url = models.ImageField()
     icon_url = models.URLField(
         blank=True,
         help_text='This will take precedence over Color and the SLDS Icons.',
@@ -61,12 +63,24 @@ class Product(models.Model):
         return None
 
 
+class VersionManager(models.Manager):
+    def get_by_natural_key(self, product, label):
+        return self.get(product=product, label=label)
+
+
 class Version(models.Model):
+    objects = VersionManager()
+
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
-    label = models.CharField(max_length=64)
+    label = models.CharField(max_length=1024)
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     is_production = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = (
+            ('product', 'label'),
+        )
 
     def natural_key(self):
         return (self.product, self.label)
@@ -77,34 +91,25 @@ class Version(models.Model):
     @property
     def primary_plan(self):
         # This will raise an error if the number of primary plans != 1:
-        return self.plan_set.filter(tier=Plan.Tier.Primary).get()
+        return self.plan_set.filter(tier=Plan.Tier.primary).get()
 
     @property
     def secondary_plan(self):
-        return self.plan_set.filter(tier=Plan.Tier.Secondary).first()
+        return self.plan_set.filter(tier=Plan.Tier.secondary).first()
 
     @property
     def additional_plans(self):
-        return self.plan_set.filter(tier=Plan.Tier.Additional).order_by('id')
+        return self.plan_set.filter(tier=Plan.Tier.additional).order_by('id')
 
 
 class Plan(models.Model):
-    class Tier:
-        Primary = 'primary'
-        Secondary = 'secondary'
-        Additional = 'additional'
-
-    PLAN_TIERS = (
-        (Tier.Primary, 'Primary'),
-        (Tier.Secondary, 'Secondary'),
-        (Tier.Additional, 'Additional'),
-    )
+    Tier = Choices('primary', 'secondary', 'additional')
 
     title = models.CharField(max_length=128)
     version = models.ForeignKey(Version, on_delete=models.PROTECT)
     tier = models.CharField(
-        choices=PLAN_TIERS,
-        default=Tier.Primary,
+        choices=Tier,
+        default=Tier.primary,
         max_length=64,
     )
 
