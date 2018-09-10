@@ -125,14 +125,15 @@ jobs:
     working_directory: ~/metadeploy
     docker:
       - image: circleci/python:3.6.6
+        environment:
+          BUCKETEER_AWS_ACCESS_KEY_ID: access-key
+          BUCKETEER_AWS_SECRET_ACCESS_KEY: secret-key
+          BUCKETEER_BUCKET_NAME: a-bucket
       - image: circleci/postgres:latest
         environment:
           POSTGRES_USER: ubuntu
           POSTGRES_DB: circle_test
           POSTGRES_PASSWORD: circle_test
-          BUCKETEER_AWS_ACCESS_KEY_ID: access-key
-          BUCKETEER_AWS_SECRET_ACCESS_KEY: secret-key
-          BUCKETEER_BUCKET_NAME: a-bucket
     steps:
       - checkout
       - restore_cache:
