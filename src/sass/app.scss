@@ -2,5 +2,6 @@
 @import '~@salesforce-ux/design-system/scss/design-tokens';
 
 // Import Manifests
-@import 'initial/manifest';
+@import 'config/manifest';
+//@import 'initial/manifest';
 @import 'components/manifest';
