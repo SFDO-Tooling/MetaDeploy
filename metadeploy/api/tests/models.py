@@ -67,6 +67,12 @@ class TestPlansProperties:
 
 
 @pytest.mark.django_db
+def test_product_str(product_factory):
+    product = product_factory(title='My Product')
+    assert str(product) == 'My Product'
+
+
+@pytest.mark.django_db
 def test_product_most_recent_version(product_factory, version_factory):
     product = product_factory()
     version_factory(label='v0.1.0', product=product)
@@ -79,3 +85,24 @@ def test_product_most_recent_version(product_factory, version_factory):
 def test_version_natural_key(version_factory):
     version = version_factory(label='v0.1.0')
     assert version.natural_key() == (version.product, 'v0.1.0')
+
+
+@pytest.mark.django_db
+def test_version_str(product_factory, version_factory):
+    product = product_factory(title='My Product')
+    version = version_factory(label='v0.1.0', product=product)
+    assert str(version) == 'My Product, Version v0.1.0'
+
+
+@pytest.mark.django_db
+def test_plan_natural_key(plan_factory):
+    plan = plan_factory(title='My Plan')
+    assert plan.natural_key() == (plan.version, 'My Plan')
+
+
+@pytest.mark.django_db
+def test_plan_str(product_factory, version_factory, plan_factory):
+    product = product_factory(title='My Product')
+    version = version_factory(label='v0.1.0', product=product)
+    plan = plan_factory(title='My Plan', version=version)
+    assert str(plan) == 'My Product, Version v0.1.0, Plan My Plan'
