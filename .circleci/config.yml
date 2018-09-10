@@ -130,6 +130,9 @@ jobs:
           POSTGRES_USER: ubuntu
           POSTGRES_DB: circle_test
           POSTGRES_PASSWORD: circle_test
+          BUCKETEER_AWS_ACCESS_KEY_ID: ''
+          BUCKETEER_AWS_SECRET_ACCESS_KEY: ''
+          BUCKETEER_BUCKET_NAME: ''
     steps:
       - checkout
       - restore_cache:
