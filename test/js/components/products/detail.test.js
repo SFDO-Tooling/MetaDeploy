@@ -13,7 +13,7 @@ describe('<ProductDetail />', () => {
         title: 'Product 1',
         description: 'This is a test product.',
         category: 'salesforce',
-        image_url: 'http://foo.bar',
+        image: 'http://foo.bar',
         most_recent_version: {
           id: 1,
           product: 1,

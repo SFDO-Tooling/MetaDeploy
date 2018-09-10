@@ -41,7 +41,7 @@ const ProductDetail = ({ product }: { product: ProductType | void }) => {
           icon={<ProductIcon item={product} />}
         />
         <div
-          className="slds-p-horizontal_x-large
+          className="slds-p-horizontal_large
             slds-p-vertical_medium
             slds-grid
             slds-wrap"
@@ -86,10 +86,10 @@ const ProductDetail = ({ product }: { product: ProductType | void }) => {
           </BodySection>
           <BodySection>
             <h3 className="slds-text-heading_small">About {product.title}</h3>
-            {product.image_url ? (
+            {product.image ? (
               <img
                 className="slds-size_full"
-                src={product.image_url}
+                src={product.image}
                 alt={product.title}
               />
             ) : null}
