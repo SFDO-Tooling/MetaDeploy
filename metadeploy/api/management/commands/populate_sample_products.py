@@ -31,7 +31,6 @@ class Command(BaseCommand):
                     'dictumst. Nulla facilisi etiam dignissim diam.'
                 ),
             category='salesforce',
-            image_url='https://placekitten.com/g/300/150',
         )
         version1 = Version.objects.create(
             product=product1,

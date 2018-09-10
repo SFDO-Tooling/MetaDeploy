@@ -64,6 +64,6 @@ class ProductSerializer(serializers.ModelSerializer):
             'category',
             'color',
             'icon',
-            'image_url',
+            'image',
             'most_recent_version',
         )

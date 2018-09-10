@@ -27,7 +27,7 @@ class Product(models.Model):
         max_length=256,
     )
     color = ColorField(blank=True)
-    image_url = models.ImageField()
+    image = models.ImageField()
     icon_url = models.URLField(
         blank=True,
         help_text='This will take precedence over Color and the SLDS Icons.',
