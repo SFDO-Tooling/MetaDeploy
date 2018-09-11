@@ -16,8 +16,7 @@ import type { Product as ProductType } from 'products/reducer';
 const BodySection = ({ children }: { children: React.Node }) => (
   <div
     className="slds-text-longform
-      slds-p-vertical_small
-      slds-p-horizontal_x-large
+      slds-p-around_medium
       slds-size_1-of-1
       slds-medium-size_1-of-2"
   >
@@ -35,14 +34,13 @@ const ProductDetail = ({ product }: { product: ProductType | void }) => {
       <div>
         <PageHeader
           className="page-header
-            slds-p-around_large"
+            slds-p-around_x-large"
           title={product.title}
           info={version.label}
           icon={<ProductIcon item={product} />}
         />
         <div
-          className="slds-p-horizontal_large
-            slds-p-vertical_medium
+          className="slds-p-around_medium
             slds-grid
             slds-wrap"
         >
@@ -72,15 +70,13 @@ const ProductDetail = ({ product }: { product: ProductType | void }) => {
               </p>
             ) : null}
             {version.additional_plans.length ? (
-              <div className="slds-p-top_large">
+              <div className="slds-p-top_x-large">
                 <h3 className="slds-text-heading_small">Additional Plans</h3>
-                <ul>
-                  {version.additional_plans.map(plan => (
-                    <li key={plan.id}>
-                      <a>{plan.title}</a>
-                    </li>
-                  ))}
-                </ul>
+                {version.additional_plans.map(plan => (
+                  <p key={plan.id}>
+                    <a>{plan.title}</a>
+                  </p>
+                ))}
               </div>
             ) : null}
           </BodySection>

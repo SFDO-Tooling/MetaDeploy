@@ -6,16 +6,25 @@ const Footer = (props: { logoSrc: string }) => (
   <footer
     className="slds-grid
       slds-grid--align-spread
-      site-contentinfo
       slds-grid_vertical-align-center
-      spacing-x-large"
+      slds-wrap
+      slds-p-horizontal_x-large
+      slds-p-vertical_medium
+      slds-text-body_small
+      site-contentinfo"
   >
     <div
-      className="footer-logo"
+      className="footer-logo
+        footer-item
+        slds-m-right_medium
+        slds-grow"
       style={{ backgroundImage: `url(${props.logoSrc})` }}
       data-testid="footer-logo"
     />
-    <div className="footer-item">
+    <div
+      className="footer-item
+        slds-grid"
+    >
       <p>Copyright 2000–2018 Salesforce.org. All rights reserved.</p>
     </div>
   </footer>

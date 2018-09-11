@@ -10,7 +10,7 @@ const FourOhFour = () => (
   <DocumentTitle title="404 | MetaDeploy">
     <div
       className="slds-text-longform
-        slds-p-around_large"
+        slds-p-around_x-large"
     >
       <h1 className="slds-text-heading_large">Oh Noes!</h1>
       <p>
