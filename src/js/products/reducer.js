@@ -25,7 +25,7 @@ export type Product = {
     +name?: string,
     +url?: string,
   } | null,
-  +image: string,
+  +image: string | null,
   +most_recent_version: Version,
 };
 export type Products = Array<Product>;

@@ -64,7 +64,7 @@ const ProductDetail = ({ product }: { product: ProductType | void }) => {
               <p>
                 <a
                   className="slds-button
-                  slds-button_outline-brand
+                    slds-button_outline-brand
                     slds-size_full"
                 >
                   {version.secondary_plan.title}
