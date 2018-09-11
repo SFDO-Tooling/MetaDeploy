@@ -1,1 +1,1 @@
-web: gunicorn metadeploy.wsgi:application --preload
+web: newrelic-admin run-program gunicorn metadeploy.wsgi:application --preload
