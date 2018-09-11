@@ -3,3 +3,4 @@
 
 -r base.txt
 gunicorn==19.8.1
+newrelic==4.4.0.103
