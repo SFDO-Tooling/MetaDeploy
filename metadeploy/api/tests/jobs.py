@@ -37,3 +37,4 @@ def test_enqueuer(mocker, job_factory):
     job.refresh_from_db()
     assert run_flow_job.delay.called
     assert job.enqueued_at is not None
+    assert job.job_id is not None

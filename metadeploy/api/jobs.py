@@ -133,13 +133,13 @@ run_flow_job = job(run_flow)
 
 def enqueuer():
     for j in Job.objects.filter(enqueued_at=None):
-        run_flow_job.delay(
+        j.job_id = run_flow_job.delay(
             j.token,
             j.token_secret,
             j.instance_url,
             j.package_url,
             j.flow_name,
-        )
+        ).id
         j.enqueued_at = timezone.now()
         j.save()
 

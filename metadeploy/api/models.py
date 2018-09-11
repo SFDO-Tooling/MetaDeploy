@@ -73,6 +73,7 @@ class Job(models.Model):
     package_url = models.URLField()
     flow_name = models.CharField(max_length=64)
     enqueued_at = models.DateTimeField(null=True)
+    job_id = models.UUIDField(null=True)
 
     def save(self, *args, **kwargs):
         # TODO: I don't like this, we shouldn't munge the data on every
