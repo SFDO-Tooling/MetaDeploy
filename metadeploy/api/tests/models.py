@@ -108,7 +108,10 @@ class TestVersionNaturalKey:
         v1 = version_factory(label='v0.1.0')
         version_factory(product=v1.product, label='v0.2.0')
 
-        assert Version.objects.get_by_natural_key(v1.product, 'v0.1.0') == v1
+        assert Version.objects.get_by_natural_key(
+            product=v1.product,
+            label='v0.1.0',
+        ) == v1
 
     def test_version_str(self, product_factory, version_factory):
         product = product_factory(title='My Product')

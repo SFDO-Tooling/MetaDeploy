@@ -64,7 +64,7 @@ class Product(models.Model):
 
 
 class VersionManager(models.Manager):
-    def get_by_natural_key(self, product, label):
+    def get_by_natural_key(self, *, product, label):
         return self.get(product=product, label=label)
 
 
