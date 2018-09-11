@@ -9,6 +9,8 @@ from allauth.socialaccount.models import (
     SocialToken,
 )
 
+from .api.models import Job
+
 User = get_user_model()
 
 
@@ -50,6 +52,20 @@ class UserFactory(factory.django.DjangoModelFactory):
     username = factory.Sequence("user_{}@example.com".format)
     password = factory.PostGenerationMethodCall('set_password', 'foobar')
     socialaccount_set = factory.RelatedFactory(SocialAccountFactory, 'user')
+
+
+@register
+class JobFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Job
+
+    token = 'sample-token'
+    token_secret = 'sample-secret'
+    user = factory.SubFactory(UserFactory)
+    instance_url = 'https://example.com/'
+    package_url = 'https://example.com/'
+    flow_name = 'sample_flow'
+    enqueued_at = None
 
 
 # TODO: We will need these eventually, but not yet:

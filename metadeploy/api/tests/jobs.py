@@ -1,4 +1,6 @@
-from ..jobs import run_flow
+import pytest
+
+from ..jobs import run_flow, enqueuer
 
 
 def test_run_flow(mocker):
@@ -24,3 +26,14 @@ def test_run_flow(mocker):
     # org, but that'd be an integration test.
 
     assert base_flow.called
+
+
+@pytest.mark.django_db
+def test_enqueuer(mocker, job_factory):
+    run_flow_job = mocker.patch('metadeploy.api.jobs.run_flow_job')
+    job = job_factory()
+    enqueuer()
+
+    job.refresh_from_db()
+    assert run_flow_job.delay.called
+    assert job.enqueued_at is not None

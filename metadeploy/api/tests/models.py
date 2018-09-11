@@ -29,7 +29,7 @@ class TestIconProperty:
 
 @pytest.mark.django_db
 def test_job_save(mocker, user_factory):
-    run_flow_job = mocker.patch('metadeploy.api.jobs.run_flow_job')
+    mocker.patch('metadeploy.api.jobs.run_flow_job')
     user = user_factory()
 
     job = Job(
@@ -40,5 +40,8 @@ def test_job_save(mocker, user_factory):
         flow_name='sample_flow',
     )
     job.save()
+    job.refresh_from_db()
 
-    assert run_flow_job.delay.called
+    token = user.socialaccount_set.first().socialtoken_set.first()
+    assert job.token == token.token
+    assert job.token_secret == token.token_secret

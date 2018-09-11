@@ -3,8 +3,6 @@ from django.db import models
 
 from colorfield.fields import ColorField
 
-from . import jobs
-
 
 def get_token_off_user(user):
     token = user.socialaccount_set.first().socialtoken_set.first()
@@ -74,20 +72,11 @@ class Job(models.Model):
     instance_url = models.URLField()
     package_url = models.URLField()
     flow_name = models.CharField(max_length=64)
+    enqueued_at = models.DateTimeField(null=True)
 
     def save(self, *args, **kwargs):
         # TODO: I don't like this, we shouldn't munge the data on every
         # save like this:
         self.token, self.token_secret = get_token_off_user(self.user)
         instance = super().save(*args, **kwargs)
-        # TODO: We may have to ensure that the save has completed
-        # writing to the database, assuming we exist in a transaction
-        # here, to be guaranteed to kick off the background job:
-        jobs.run_flow_job.delay(
-            self.token,
-            self.token_secret,
-            self.instance_url,
-            self.package_url,
-            self.flow_name,
-        )
         return instance

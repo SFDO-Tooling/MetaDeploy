@@ -1,3 +1,16 @@
+"""
+A note on how jobs are scheduled and run:
+
+Any job that has to touch the database should not be scheduled directly.
+This is because of the issues laid out in
+<https://brandur.org/job-drain>, but to summarize: if a job is triggered
+in the same transaction as the data it relies on is written, it may try
+to run before that data is actually visible in the database.
+
+To get around this, we have a single periodic enqueuer job that picks up
+instances of the Job model and triggers the run_flow_job.
+"""
+
 import os
 import sys
 import contextlib
@@ -15,6 +28,11 @@ from django_rq import job
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.utils import timezone
+
+from .models import Job
+
+
 User = get_user_model()
 
 
@@ -39,6 +57,15 @@ def prepend_python_path(path):
 
 
 def run_flow(token, token_secret, instance_url, package_url, flow_name):
+    # TODO:
+    #
+    # We'll want to subclass BaseFlow and add logic in the progress
+    # callbacks to record and possibly push progress:
+    # pre_flow, post_flow, pre_task, post_task, pre_subflow,
+    # post_subflow
+    #
+    # Can we do anything meaningful with a return value from a @job,
+    # too?
     with contextlib.ExitStack() as stack:
         tmpdirname = stack.enter_context(TemporaryDirectory())
         stack.enter_context(cd(tmpdirname))
@@ -101,13 +128,20 @@ def run_flow(token, token_secret, instance_url, package_url, flow_name):
         flowinstance()
 
 
-# TODO:
-#
-# We'll want to subclass BaseFlow and add logic in the progress
-# callbacks to record and possibly push progress:
-# pre_flow, post_flow, pre_task, post_task, pre_subflow, post_subflow
-#
-# Can we do anything meaningful with a return value from a @job, too?
-
-
 run_flow_job = job(run_flow)
+
+
+def enqueuer():
+    for j in Job.objects.filter(enqueued_at=None):
+        run_flow_job.delay(
+            j.token,
+            j.token_secret,
+            j.instance_url,
+            j.package_url,
+            j.flow_name,
+        )
+        j.enqueued_at = timezone.now()
+        j.save()
+
+
+run_enqueuer = job(enqueuer)
