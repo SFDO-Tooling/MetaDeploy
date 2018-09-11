@@ -107,6 +107,7 @@ INSTALLED_APPS = [
     'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
     'django_rq',
+    'scheduler',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -279,11 +280,17 @@ CACHES = {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
             'IGNORE_EXCEPTIONS': True,
         },
-        'DEFAULT_TIMEOUT': 360,
     },
 }
 RQ_QUEUES = {
-    'default': {'USE_REDIS_CACHE': 'default'},
+    'default': {
+        'USE_REDIS_CACHE': 'default',
+        'DEFAULT_TIMEOUT': 360,
+    },
+    'short': {
+        'USE_REDIS_CACHE': 'default',
+        'DEFAULT_TIMEOUT': 10,
+    },
 }
 
 

@@ -14,4 +14,4 @@ raven==6.9.0
 git+https://github.com/SalesforceFoundation/Cumulusci.git@feature/python3
 GitPython==2.1.11
 django-rq==1.2.0
-rq-scheduler==0.8.3
+django-rq-scheduler==1.1.1

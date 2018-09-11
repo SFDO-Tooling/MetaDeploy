@@ -144,4 +144,4 @@ def enqueuer():
         j.save()
 
 
-run_enqueuer = job(enqueuer)
+enqueuer_job = job(enqueuer)
