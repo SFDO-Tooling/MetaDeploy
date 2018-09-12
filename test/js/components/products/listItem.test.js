@@ -1,13 +1,12 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { render } from 'react-testing-library';
 
-import { renderWithRedux } from './../../utils';
-
-import ProductItem from 'components/products/product';
+import ProductItem from 'components/products/listItem';
 
 describe('<ProductItem />', () => {
   const setup = initialState => {
-    const { getByAltText } = renderWithRedux(
+    const { getByText } = render(
       <MemoryRouter>
         <div>
           {initialState.products.map(item => (
@@ -15,31 +14,38 @@ describe('<ProductItem />', () => {
           ))}
         </div>
       </MemoryRouter>,
-      initialState,
     );
-    return { getByAltText };
+    return { getByText };
   };
 
-  test('renders product with custom icon', () => {
+  test('renders product', () => {
     const initialState = {
       products: [
         {
           id: 1,
           title: 'Product 1',
-          version: '3.130',
           description: 'This is a test product.',
           category: 'salesforce',
           icon: {
             type: 'url',
             url: 'http://foo.bar',
           },
+          most_recent_version: {
+            id: 1,
+            product: 1,
+            label: '1.0.0',
+            description: 'This is a test product version.',
+            primary_plan: {
+              id: 1,
+              title: 'My Plan',
+            },
+            additional_plans: [],
+          },
         },
       ],
     };
-    const { getByAltText } = setup(initialState);
-    const icon = getByAltText('Product 1');
+    const { getByText } = setup(initialState);
 
-    expect(icon).toBeVisible();
-    expect(icon).toHaveAttribute('src', 'http://foo.bar');
+    expect(getByText('Product 1')).toBeVisible();
   });
 });

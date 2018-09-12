@@ -6,8 +6,8 @@ Cloning the project
 
 ::
 
-   git clone git@github.com:SFDO-Tooling/metadeploy
-   cd metadeploy
+    git clone git@github.com:SFDO-Tooling/metadeploy
+    cd metadeploy
 
 Making a virtual env
 --------------------
@@ -32,7 +32,13 @@ Copy the ``.env`` file somewhere that will be sourced when you need it::
 
     cp env.example $VIRTUAL_ENV/bin/postactivate
 
-Edit this file to change ``DJANGO_SECRET_KEY`` to any arbitrary string value.
+Edit this file to change ``DJANGO_SECRET_KEY`` to any arbitrary string value,
+and to add the following environment variables (if you're an OddBird, you can
+find these values in the shared Keybase team folder -- ``metadeploy/env``)::
+
+    export BUCKETEER_AWS_ACCESS_KEY_ID=...
+    export BUCKETEER_AWS_SECRET_ACCESS_KEY=...
+    export BUCKETEER_BUCKET_NAME=...
 
 Now run ``workon metadeploy`` again to set those environment variables.
 
@@ -63,14 +69,14 @@ Node versions).
 
 To install the project-local version of Node (and `yarn`_)::
 
-   bin/unpack-node
+    bin/unpack-node
 
 If you can run ``which node`` and see a path inside your MD repo ending with
 ``.../node/bin/node``, then you've got it set up right and can move on.
 
 Then use ``yarn`` to install dependencies::
 
-   yarn
+    yarn
 
 .. _Node.js: http://nodejs.org
 .. _yarn: https://yarnpkg.com/
@@ -81,18 +87,22 @@ Setting up the database
 Assuming you have `Postgres <https://www.postgresql.org/download/>`_ installed
 and running locally::
 
-   createdb metadeploy
+    createdb metadeploy
 
 Then run the initial migrations::
 
-   python manage.py migrate
+    python manage.py migrate
+
+To populate the database with sample data for development, run::
+
+    python manage.py populate_sample_products
 
 Running the server
 ------------------
 
 To run the local development server::
 
-   yarn serve
+    yarn serve
 
 The running server will be available at `<https://localhost:8080/>`_.
 
@@ -108,17 +118,17 @@ The WebSocket server (to live-reload on file changes) listens on
 Logging in with Salesforce
 --------------------------
 
-To setup the Salesforce OAuth integration, run the
-``populate_social_apps`` management command::
+To setup the Salesforce OAuth integration, run the ``populate_social_apps``
+management command. The values to use in place of the ``XXX` and ``YYY`` flags
+can be found on the Connected App you've made in your Salesforce configuration,
+or if you're an OddBird, you can find these values in the shared Keybase team
+folder (``metadeploy/prod.db``)::
 
-   python manage.py populate_social_apps --prod-id XXX --prod-secret YYY
+    python manage.py populate_social_apps --prod-id XXX --prod-secret YYY
 
 You can also run it with ``--test-id`` and ``--test-secret``, or
 ``--cust-id`` and ``--cust-secret``, or all three sets at once, to
-populate all three providers. The values to pass in with these flags can
-be found on the Connected App you've made in your Salesforce
-configuration, or if you're an OddBird, you can find these values in the
-shared Keybase team folder (``metadeploy/prod.db``).
+populate all three providers.
 
 If you don't have a Salesforce account, ask `Kit <mailto:kit@oddbird.net>`_ to
 send you an invitation by email.
@@ -127,7 +137,7 @@ Once you've logged in, you probably want to make your user a superuser.
 You can do that easily via the ``promote_superuser`` management
 command::
 
-   python manage.py promote_superuser <your email>
+    python manage.py promote_superuser <your email>
 
 Development Tasks
 -----------------

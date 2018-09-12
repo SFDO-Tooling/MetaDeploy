@@ -21,7 +21,9 @@ const Header = ({
   doLogout: typeof logout,
 }) => (
   <PageHeader
-    className="page-header"
+    className="global-header
+      slds-p-horizontal_x-large
+      slds-p-vertical_medium"
     title={
       <Link
         to={routes.home()}
@@ -44,11 +46,7 @@ const Header = ({
         >
           Products
         </Link>
-        {user && user.username ? (
-          <Logout user={user} doLogout={doLogout} />
-        ) : (
-          <Login />
-        )}
+        {user ? <Logout user={user} doLogout={doLogout} /> : <Login />}
       </div>
     }
     variant="objectHome"

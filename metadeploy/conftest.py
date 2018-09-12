@@ -9,7 +9,13 @@ from allauth.socialaccount.models import (
     SocialToken,
 )
 
-from .api.models import Job, Product, ProductCategory
+from metadeploy.api.models import (
+    Product,
+    ProductCategory,
+    Job,
+    Version,
+    Plan,
+)
 
 User = get_user_model()
 
@@ -55,6 +61,19 @@ class UserFactory(factory.django.DjangoModelFactory):
 
 
 @register
+class JobFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Job
+
+    user = factory.SubFactory(UserFactory)
+    instance_url = 'https://example.com/'
+    package_url = 'https://example.com/'
+    flow_name = 'sample_flow'
+    enqueued_at = None
+    job_id = None
+
+
+@register
 class ProductCategoryFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = ProductCategory
@@ -68,22 +87,31 @@ class ProductFactory(factory.django.DjangoModelFactory):
         model = Product
 
     title = factory.Sequence('Sample Product {}'.format)
-    description = 'A sample description.'
-    version = ''
+    description = 'This is a sample product.'
     category = factory.SubFactory(ProductCategoryFactory)
+    color = '#FFFFFF'
+    icon_url = ''
+    slds_icon_category = ''
+    slds_icon_name = ''
 
 
 @register
-class JobFactory(factory.django.DjangoModelFactory):
+class VersionFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = Job
+        model = Version
 
-    user = factory.SubFactory(UserFactory)
-    instance_url = 'https://example.com/'
-    package_url = 'https://example.com/'
-    flow_name = 'sample_flow'
-    enqueued_at = None
-    job_id = None
+    product = factory.SubFactory(ProductFactory)
+    label = 'v0.1.0'
+    description = 'A sample version.'
+
+
+@register
+class PlanFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Plan
+
+    title = 'Sample plan'
+    version = factory.SubFactory(VersionFactory)
 
 
 # TODO: We will need these eventually, but not yet:

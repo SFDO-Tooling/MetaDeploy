@@ -8,7 +8,7 @@ export const cache = getConfiguredCache({
 });
 
 const actionsToPersist = {
-  FETCH_PRODUCTS_SUCCEEDED: ['products'],
+  // ...
 };
 
 export const persistMiddleware = getPersistMiddleware({

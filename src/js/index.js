@@ -18,17 +18,21 @@ import standardSprite from '@salesforce-ux/design-system/assets/icons/standard-s
 import utilitySprite from '@salesforce-ux/design-system/assets/icons/utility-sprite/svg/symbols.svg';
 
 import getApiFetch from 'utils/api';
-import productsReducer from 'products/reducer';
 import routes from 'utils/routes';
-import userReducer from 'accounts/reducer';
 import { cache, persistMiddleware } from 'utils/caching';
-import { login, doLocalLogout } from 'accounts/actions';
 import { logError } from 'utils/logging';
+
+import userReducer from 'accounts/reducer';
+import { login, doLocalLogout } from 'accounts/actions';
+
+import productsReducer from 'products/reducer';
+import { fetchProducts } from 'products/actions';
 
 import Footer from 'components/footer';
 import FourOhFour from 'components/404';
 import Header from 'components/header';
-import ProductsList from 'components/products';
+import ProductDetail from 'components/products/detail';
+import ProductsList from 'components/products/list';
 
 const SF_logo = require('images/salesforce-logo.png');
 
@@ -42,9 +46,7 @@ const App = () => (
       <Header />
       <div
         className="slds-grow
-          slds-shrink-none
-          slds-p-horizontal_medium
-          slds-p-vertical_large"
+          slds-shrink-none"
       >
         <Switch>
           <Route
@@ -53,6 +55,7 @@ const App = () => (
             render={() => <Redirect to={routes.product_list()} />}
           />
           <Route exact path={routes.product_list()} component={ProductsList} />
+          <Route path={routes.product_detail()} component={ProductDetail} />
           <Route component={FourOhFour} />
         </Switch>
       </div>
@@ -102,22 +105,25 @@ cache
       }
       el.removeAttribute('data-user');
 
-      ReactDOM.render(
-        <Provider store={appStore}>
-          <BrowserRouter>
-            <IconSettings
-              actionSprite={actionSprite}
-              customSprite={customSprite}
-              doctypeSprite={doctypeSprite}
-              standardSprite={standardSprite}
-              utilitySprite={utilitySprite}
-            >
-              <App />
-            </IconSettings>
-          </BrowserRouter>
-        </Provider>,
-        el,
-      );
+      // Fetch products before rendering App
+      appStore.dispatch(fetchProducts()).finally(() => {
+        ReactDOM.render(
+          <Provider store={appStore}>
+            <BrowserRouter>
+              <IconSettings
+                actionSprite={actionSprite}
+                customSprite={customSprite}
+                doctypeSprite={doctypeSprite}
+                standardSprite={standardSprite}
+                utilitySprite={utilitySprite}
+              >
+                <App />
+              </IconSettings>
+            </BrowserRouter>
+          </Provider>,
+          el,
+        );
+      });
     }
   })
   .catch(err => {
