@@ -56,7 +56,12 @@ def prepend_python_path(path):
         sys.path = prev_path
 
 
-def run_flow(token, token_secret, instance_url, package_url, flow_name):
+def get_token_off_user(user):
+    token = user.socialaccount_set.first().socialtoken_set.first()
+    return token.token, token.token_secret
+
+
+def run_flow(user, instance_url, package_url, flow_name):
     # TODO:
     #
     # We'll want to subclass BaseFlow and add logic in the progress
@@ -66,6 +71,9 @@ def run_flow(token, token_secret, instance_url, package_url, flow_name):
     #
     # Can we do anything meaningful with a return value from a @job,
     # too?
+
+    token, token_secret = get_token_off_user(user)
+
     with contextlib.ExitStack() as stack:
         tmpdirname = stack.enter_context(TemporaryDirectory())
         stack.enter_context(cd(tmpdirname))
@@ -134,8 +142,7 @@ run_flow_job = job(run_flow)
 def enqueuer():
     for j in Job.objects.filter(enqueued_at=None):
         j.job_id = run_flow_job.delay(
-            j.token,
-            j.token_secret,
+            j.user,
             j.instance_url,
             j.package_url,
             j.flow_name,

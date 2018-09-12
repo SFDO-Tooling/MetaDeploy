@@ -3,7 +3,8 @@ import pytest
 from ..jobs import run_flow, enqueuer
 
 
-def test_run_flow(mocker):
+@pytest.mark.django_db
+def test_run_flow(mocker, user_factory):
     # TODO: I don't like this test at all. But there's a lot of IO that
     # this code causes, so I'm mocking it out.
     mocker.patch('git.Repo.clone_from')
@@ -14,13 +15,12 @@ def test_run_flow(mocker):
     mocker.patch('cumulusci.core.keychain.BaseProjectKeychain')
     base_flow = mocker.patch('cumulusci.core.flows.BaseFlow')
 
-    token = 'token'
-    token_secret = 'token_secret'
+    user = user_factory()
     instance_url = 'https://example.com/'
     package_url = 'https://example.com/'
     flow_name = 'test_flow'
 
-    run_flow(token, token_secret, instance_url, package_url, flow_name)
+    run_flow(user, instance_url, package_url, flow_name)
 
     # TODO assert? What we really need to assert is a change in the SF
     # org, but that'd be an integration test.
@@ -30,11 +30,13 @@ def test_run_flow(mocker):
 
 @pytest.mark.django_db
 def test_enqueuer(mocker, job_factory):
-    run_flow_job = mocker.patch('metadeploy.api.jobs.run_flow_job')
+    delay = mocker.patch('metadeploy.api.jobs.run_flow_job.delay')
+    # Just a random UUID:
+    delay.return_value.id = '294fc6d2-0f3c-4877-b849-54184724b6b2'
     job = job_factory()
     enqueuer()
 
     job.refresh_from_db()
-    assert run_flow_job.delay.called
+    assert delay.called
     assert job.enqueued_at is not None
     assert job.job_id is not None

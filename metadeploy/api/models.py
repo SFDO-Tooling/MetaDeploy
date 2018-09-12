@@ -4,11 +4,6 @@ from django.db import models
 from colorfield.fields import ColorField
 
 
-def get_token_off_user(user):
-    token = user.socialaccount_set.first().socialtoken_set.first()
-    return token.token, token.token_secret
-
-
 class ProductCategory(models.Model):
     title = models.CharField(max_length=256)
 
@@ -65,8 +60,6 @@ class Product(models.Model):
 
 
 class Job(models.Model):
-    token = models.CharField(max_length=256)
-    token_secret = models.CharField(max_length=256)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -76,10 +69,3 @@ class Job(models.Model):
     flow_name = models.CharField(max_length=64)
     enqueued_at = models.DateTimeField(null=True)
     job_id = models.UUIDField(null=True)
-
-    def save(self, *args, **kwargs):
-        # TODO: I don't like this, we shouldn't munge the data on every
-        # save like this:
-        self.token, self.token_secret = get_token_off_user(self.user)
-        instance = super().save(*args, **kwargs)
-        return instance

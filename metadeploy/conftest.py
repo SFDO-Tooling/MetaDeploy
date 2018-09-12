@@ -9,7 +9,7 @@ from allauth.socialaccount.models import (
     SocialToken,
 )
 
-from .api.models import Job
+from .api.models import Job, Product, ProductCategory
 
 User = get_user_model()
 
@@ -55,17 +55,35 @@ class UserFactory(factory.django.DjangoModelFactory):
 
 
 @register
+class ProductCategoryFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = ProductCategory
+
+    title = 'salesforce'
+
+
+@register
+class ProductFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Product
+
+    title = factory.Sequence('Sample Product {}'.format)
+    description = 'A sample description.'
+    version = ''
+    category = factory.SubFactory(ProductCategoryFactory)
+
+
+@register
 class JobFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Job
 
-    token = 'sample-token'
-    token_secret = 'sample-secret'
     user = factory.SubFactory(UserFactory)
     instance_url = 'https://example.com/'
     package_url = 'https://example.com/'
     flow_name = 'sample_flow'
     enqueued_at = None
+    job_id = None
 
 
 # TODO: We will need these eventually, but not yet:
