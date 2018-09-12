@@ -36,6 +36,7 @@ jobs:
             yarn
             python3 -m venv venv
             . venv/bin/activate
+            unset PYTHONPATH
             pip install -r requirements/test.txt
       - run:
           name: Upload yarn.lock [greenkeeper]
