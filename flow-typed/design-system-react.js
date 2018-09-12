@@ -70,6 +70,12 @@ declare module '@salesforce/design-system-react/components/menu-list/list' {
   declare export default Component;
 }
 
+declare module '@salesforce/design-system-react/components/spinner' {
+  import typeof { Component } from 'react';
+
+  declare export default Component;
+}
+
 declare module '@salesforce/design-system-react/utilities/key-code' {
   declare export default { [string]: number };
 }

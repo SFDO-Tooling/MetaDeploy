@@ -3,15 +3,21 @@
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
+import Spinner from '@salesforce/design-system-react/components/spinner';
 import { Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
+import { createSelector } from 'reselect';
 
 import routes from 'utils/routes';
+import { fetchVersions } from 'products/actions';
 
 import ProductIcon from 'components/products/icon';
 
 import type { Match } from 'react-router-dom';
-import type { Product as ProductType } from 'products/reducer';
+import type {
+  Product as ProductType,
+  Version as VersionType,
+} from 'products/reducer';
 
 const BodySection = ({ children }: { children: React.Node }) => (
   <div
@@ -24,11 +30,36 @@ const BodySection = ({ children }: { children: React.Node }) => (
   </div>
 );
 
-const ProductDetail = ({ product }: { product: ProductType | void }) => {
-  if (product === undefined) {
+let ProductDetail = ({ product }: { product: ProductType | null }) => {
+  if (!product) {
     return <Redirect to={routes.product_list()} />;
   }
   const version = product.most_recent_version;
+  return <Redirect to={routes.version_detail(product.slug, version.slug)} />;
+};
+
+let VersionDetail = ({
+  product,
+  version,
+  doFetchVersions,
+}: {
+  product: ProductType | null,
+  version: VersionType | null,
+  doFetchVersions: typeof fetchVersions,
+}) => {
+  if (!product) {
+    // No product... redirect to products-list
+    return <Redirect to={routes.product_list()} />;
+  }
+  if (!version) {
+    if (product.versions) {
+      // Versions have already been fetched... redirect to product-detail
+      return <Redirect to={routes.product_detail(product.slug)} />;
+    }
+    // Fetch version from API
+    doFetchVersions(product.id);
+    return <Spinner />;
+  }
   return (
     <DocumentTitle title={`${product.title} | MetaDeploy`}>
       <div>
@@ -100,14 +131,63 @@ const ProductDetail = ({ product }: { product: ProductType | void }) => {
 const selectProduct = (
   appState,
   { match: { params } }: { match: Match },
-): ProductType | void => {
-  const products = appState.products;
-  const id = parseInt(params.id, 10);
-  return products.find(p => p.id === id);
+): ProductType | null => {
+  const product = appState.products.find(p => p.slug === params.productSlug);
+  if (!product) {
+    // Will redirect back to products-list
+    return null;
+  }
+  // Will redirect to most_recent_version detail
+  return product;
 };
 
-const select = (appState, props) => ({
+const selectVersionSlug = (
+  appState,
+  { match: { params } }: { match: Match },
+): ?string => params.versionSlug;
+
+const selectVersion = createSelector(
+  [selectProduct, selectVersionSlug],
+  (product: ProductType | null, versionSlug: ?string): VersionType | null => {
+    if (!product) {
+      // Will redirect back to products-list
+      return null;
+    }
+    if (product.most_recent_version.slug === versionSlug) {
+      // Will display version-detail
+      return product.most_recent_version;
+    }
+    if (product.versions) {
+      const version = product.versions.find(v => v.slug === versionSlug);
+      if (!version) {
+        // Will redirect back to product-detail
+        return null;
+      }
+      // Will display version-detail
+      return version;
+    }
+    // Will fetch product versions from API
+    return null;
+  },
+);
+
+const selectProductDetail = (appState, props) => ({
   product: selectProduct(appState, props),
 });
 
-export default connect(select)(ProductDetail);
+const selectVersionDetail = (appState, props) => ({
+  product: selectProduct(appState, props),
+  version: selectVersion(appState, props),
+});
+
+const actions = {
+  doFetchVersions: fetchVersions,
+};
+
+ProductDetail = connect(selectProductDetail)(ProductDetail);
+VersionDetail = connect(
+  selectVersionDetail,
+  actions,
+)(VersionDetail);
+
+export { ProductDetail, VersionDetail };
