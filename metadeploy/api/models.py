@@ -9,6 +9,10 @@ def get_token_off_user(user):
     return token.token, token.token_secret
 
 
+class ProductCategory(models.Model):
+    title = models.CharField(max_length=256)
+
+
 class Product(models.Model):
     CATEGORY_CHOICES = (
         ('salesforce', "Salesforce"),
@@ -26,12 +30,10 @@ class Product(models.Model):
     title = models.CharField(max_length=256)
     description = models.TextField()
     version = models.CharField(max_length=256)
-    # TODO: We have reason to want this to be a disinct model, so it can
-    # be set in the Django Admin:
-    category = models.CharField(
-        choices=CATEGORY_CHOICES,
-        default='salesforce',
-        max_length=256,
+    category = models.ForeignKey(
+        ProductCategory,
+        null=True,
+        on_delete=models.PROTECT,
     )
     color = ColorField(blank=True)
     icon_url = models.URLField(

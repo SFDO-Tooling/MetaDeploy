@@ -1,12 +1,14 @@
 from django.core.management.base import BaseCommand
 
-from ...models import Product
+from ...models import Product, ProductCategory
 
 
 class Command(BaseCommand):
     help = 'Add some sample Products to the database.'
 
     def handle(self, *args, **options):
+        sf_category = ProductCategory.objects.create(title='salesforce')
+        co_category = ProductCategory.objects.create(title='community')
         Product.objects.create(
             title=f'Sample Salesforce Product',
             description=(
@@ -20,20 +22,20 @@ class Command(BaseCommand):
                     'dictumst. Nulla facilisi etiam dignissim diam.'
                 ),
             version='0.1.0',
-            category='salesforce',
+            category=sf_category,
         )
         Product.objects.create(
             title=f'Red Salesforce Product',
             description=f'This product should have a red icon.',
             version='0.1.0',
-            category='salesforce',
+            category=sf_category,
             color='#c23934',
         )
         Product.objects.create(
             title=f'Custom Icon Salesforce Product',
             description=f'This product should have a custom icon.',
             version='0.1.0',
-            category='salesforce',
+            category=sf_category,
             icon_url=(
                     'https://lightningdesignsystem.com/assets/images'
                     '/avatar3.jpg'
@@ -43,7 +45,7 @@ class Command(BaseCommand):
             title=f'Custom SLDS Icon Salesforce Product',
             description=f'This product should have a custom SLDS icon.',
             version='0.1.0',
-            category='salesforce',
+            category=sf_category,
             slds_icon_category='utility',
             slds_icon_name='world',
         )
@@ -62,5 +64,5 @@ class Command(BaseCommand):
                         'dignissim diam.'
                     ),
                 version='0.1.0',
-                category='community',
+                category=co_category,
             )
