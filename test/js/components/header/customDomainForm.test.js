@@ -1,19 +1,12 @@
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { fireEvent } from 'react-testing-library';
-
-import { renderWithRedux } from './../../utils';
+import { render, fireEvent } from 'react-testing-library';
 
 import CustomDomainForm from 'components/header/customDomainForm';
 
 describe('<CustomDomainForm />', () => {
   const setup = () => {
-    const initialState = { user: null };
-    const { getByLabelText, getByText, getByTestId } = renderWithRedux(
-      <MemoryRouter>
-        <CustomDomainForm />
-      </MemoryRouter>,
-      initialState,
+    const { getByLabelText, getByText, getByTestId } = render(
+      <CustomDomainForm />,
     );
     return { getByLabelText, getByText, getByTestId };
   };

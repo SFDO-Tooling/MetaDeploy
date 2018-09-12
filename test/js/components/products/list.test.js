@@ -1,10 +1,9 @@
 import React from 'react';
-import fetchMock from 'fetch-mock';
 import { MemoryRouter } from 'react-router-dom';
 
-import { renderWithRedux, storeWithApi } from './../../utils';
+import { renderWithRedux } from './../../utils';
 
-import ProductsList from 'components/products';
+import ProductsList from 'components/products/list';
 
 describe('<Products />', () => {
   const setup = initialState => {
@@ -13,25 +12,9 @@ describe('<Products />', () => {
         <ProductsList />
       </MemoryRouter>,
       initialState,
-      storeWithApi,
     );
     return { getByText, queryByText };
   };
-
-  beforeEach(() => {
-    fetchMock.getOnce(window.api_urls.product_list(), []);
-  });
-
-  afterEach(fetchMock.restore);
-
-  test('fetches products', () => {
-    const initialState = {
-      products: [],
-    };
-    setup(initialState);
-
-    expect(fetchMock.called('/api/products/')).toBe(true);
-  });
 
   test('renders products list (empty)', () => {
     const initialState = {
@@ -48,9 +31,19 @@ describe('<Products />', () => {
         {
           id: 1,
           title: 'Product 1',
-          version: '3.130',
           description: 'This is a test product.',
           category: 'salesforce',
+          most_recent_version: {
+            id: 1,
+            product: 1,
+            label: '1.0.0',
+            description: 'This is a test product version.',
+            primary_plan: {
+              id: 1,
+              title: 'My Plan',
+            },
+            additional_plans: [],
+          },
         },
       ],
     };
@@ -66,7 +59,6 @@ describe('<Products />', () => {
         {
           id: 1,
           title: 'Product 1',
-          version: '3.130',
           description: 'This is a test product.',
           category: 'salesforce',
           icon: {
@@ -74,14 +66,35 @@ describe('<Products />', () => {
             category: 'utility',
             name: 'salesforce1',
           },
+          most_recent_version: {
+            id: 1,
+            product: 1,
+            label: '1.0.0',
+            description: 'This is a test product version.',
+            primary_plan: {
+              id: 1,
+              title: 'My Plan',
+            },
+            additional_plans: [],
+          },
         },
         {
           id: 2,
           title: 'Product 2',
-          version: '3.131',
           description: 'This is another test product.',
           category: 'community',
           color: '#fff',
+          most_recent_version: {
+            id: 2,
+            product: 2,
+            label: '1.0.0',
+            description: 'This is a test product version.',
+            primary_plan: {
+              id: 2,
+              title: 'My Plan',
+            },
+            additional_plans: [],
+          },
         },
       ],
     };

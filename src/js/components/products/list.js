@@ -7,9 +7,7 @@ import TabsPanel from '@salesforce/design-system-react/components/tabs/panel';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
-import { fetchProducts } from 'products/actions';
-
-import ProductItem from 'components/products/product';
+import ProductItem from 'components/products/listItem';
 
 import type {
   Products as ProductsType,
@@ -20,15 +18,7 @@ type ProductsMapType = Map<string, Array<ProductType>>;
 
 class ProductsList extends React.Component<{
   productsByCategory: ProductsMapType,
-  doFetchProducts: typeof fetchProducts,
 }> {
-  componentDidMount() {
-    // Instead of doing this every time, we could:
-    //   - Only do it once on initial app-load
-    //   - Only do it when the cached values are old
-    this.props.doFetchProducts();
-  }
-
   static getProductsList(products: ProductsType): React.Node {
     return (
       <div
@@ -77,7 +67,9 @@ class ProductsList extends React.Component<{
       }
     }
     return (
-      <DocumentTitle title="Products | MetaDeploy">{contents}</DocumentTitle>
+      <DocumentTitle title="Products | MetaDeploy">
+        <div className="slds-p-around_x-large">{contents}</div>
+      </DocumentTitle>
     );
   }
 }
@@ -102,11 +94,4 @@ const select = appState => ({
   productsByCategory: selectProductsByCategory(appState),
 });
 
-const actions = {
-  doFetchProducts: fetchProducts,
-};
-
-export default connect(
-  select,
-  actions,
-)(ProductsList);
+export default connect(select)(ProductsList);
