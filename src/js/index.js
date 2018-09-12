@@ -4,6 +4,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import DocumentTitle from 'react-document-title';
 import IconSettings from '@salesforce/design-system-react/components/icon-settings';
+import settings from '@salesforce/design-system-react/components/settings';
 import logger from 'redux-logger';
 import thunk from 'redux-thunk';
 import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
@@ -104,6 +105,9 @@ cache
         }
       }
       el.removeAttribute('data-user');
+
+      // Set App element (used for react-SLDS modals)
+      settings.setAppElement(el);
 
       // Fetch products before rendering App
       appStore.dispatch(fetchProducts()).finally(() => {

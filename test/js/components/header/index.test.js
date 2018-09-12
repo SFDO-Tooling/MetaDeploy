@@ -1,4 +1,3 @@
-import KEYS from '@salesforce/design-system-react/utilities/key-code';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { fireEvent } from 'react-testing-library';
@@ -29,21 +28,6 @@ describe('<Header />', () => {
 
       expect(getByText('Production or Developer Org')).toBeVisible();
       expect(getByText('Sandbox or Scratch Org')).toBeVisible();
-    });
-
-    test('closes menu on ESC', () => {
-      const { getByLabelText, getByText } = setup();
-
-      const login = getByText('Log In');
-      fireEvent.click(login);
-
-      expect(login).toHaveAttribute('aria-expanded', 'true');
-
-      fireEvent.keyDown(getByLabelText('Use Custom Domain'), {
-        keyCode: KEYS.ESCAPE,
-      });
-
-      expect(login).toHaveAttribute('aria-expanded', 'false');
     });
   });
 
