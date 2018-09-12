@@ -75,6 +75,23 @@ def test_product_str(product_factory):
 
 
 @pytest.mark.django_db
+class TestProductSlug:
+    def test_present(self, product_factory, product_slug_factory):
+        product = product_factory(title='a product')
+        product_slug_factory(product=product, slug='a-slug-1', is_active=False)
+        product_slug_factory(product=product, slug='a-slug-2', is_active=True)
+        product_slug_factory(product=product, slug='a-slug-3', is_active=True)
+        product_slug_factory(product=product, slug='a-slug-4', is_active=False)
+
+        assert product.slug == 'a-slug-3'
+
+    def test_absent(self, product_factory):
+        product = product_factory(title='a product')
+
+        assert product.slug is None
+
+
+@pytest.mark.django_db
 def test_product_most_recent_version(product_factory, version_factory):
     product = product_factory()
     version_factory(label='v0.1.0', product=product)

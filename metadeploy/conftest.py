@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 
 from metadeploy.api.models import (
     Product,
+    ProductSlug,
     Version,
     Plan,
 )
@@ -32,6 +33,15 @@ class ProductFactory(factory.django.DjangoModelFactory):
     icon_url = ''
     slds_icon_category = ''
     slds_icon_name = ''
+
+
+@register
+class ProductSlugFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = ProductSlug
+
+    slug = factory.Sequence('this-is-a-slug-{}'.format)
+    product = factory.SubFactory(ProductFactory)
 
 
 @register

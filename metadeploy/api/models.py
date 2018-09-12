@@ -62,6 +62,31 @@ class Product(models.Model):
             }
         return None
 
+    @property
+    def slug(self):
+        slug = self.productslug_set.filter(is_active=True).last()
+        if slug:
+            return slug.slug
+        return None
+
+
+class ProductSlug(models.Model):
+    """
+    Rather than have a slugfield directly on the Product model, we have
+    a related model. That way, we can have a bunch of slugs that pertain
+    to a particular model, and even if the slug changes and someone uses
+    an old slug, we can redirect them appropriately.
+    """
+    slug = models.SlugField(unique=True)
+    product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    is_active = models.BooleanField(
+        default=True,
+        help_text=(
+            'The most recently-created active slug for a Product is the '
+            'default slug.'
+        ),
+    )
+
 
 class VersionManager(models.Manager):
     def get_by_natural_key(self, *, product, label):

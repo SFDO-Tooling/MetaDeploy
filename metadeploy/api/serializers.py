@@ -66,4 +66,5 @@ class ProductSerializer(serializers.ModelSerializer):
             'icon',
             'image',
             'most_recent_version',
+            'slug',
         )
