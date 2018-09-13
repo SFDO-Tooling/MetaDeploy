@@ -32,7 +32,7 @@ describe('<CustomDomainModal />', () => {
   test('updates window.location.href on submit', () => {
     const { getByLabelText, getByText } = setup();
 
-    window.location.assign = jest.fn();
+    jest.spyOn(window.location, 'assign');
     const input = getByLabelText('Custom Domain');
     fireEvent.change(input, { target: { value: ' ' } });
     fireEvent.click(getByText('Continue'));

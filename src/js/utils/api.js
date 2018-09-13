@@ -64,7 +64,7 @@ export const addUrlParams = (
   Object.keys(params).forEach(key =>
     url.searchParams.append(key, params[key].toString()),
   );
-  return url;
+  return url.toString();
 };
 
 export default getApiFetch;

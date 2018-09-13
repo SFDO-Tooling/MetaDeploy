@@ -1,6 +1,6 @@
 import fetchMock from 'fetch-mock';
 
-import getApiFetch from 'utils/api';
+import getApiFetch, { addUrlParams } from 'utils/api';
 
 describe('apiFetch', () => {
   const apiFetch = getApiFetch();
@@ -40,5 +40,15 @@ describe('apiFetch', () => {
     return expect(() => {
       apiFetch('/test/url/');
     }).toThrow('not cool');
+  });
+});
+
+describe('addUrlParams', () => {
+  test('adds params to url string', () => {
+    const baseUrl = `${window.location.origin}/foobar`;
+    const expected = `${baseUrl}?this=that`;
+    const actual = addUrlParams(baseUrl, { this: 'that' });
+
+    return expect(actual).toBe(expected);
   });
 });
