@@ -1,19 +1,21 @@
 import React from 'react';
 import { render, fireEvent } from 'react-testing-library';
 
-import CustomDomainForm from 'components/header/customDomainForm';
+import CustomDomainModal from 'components/header/customDomainModal';
 
-describe('<CustomDomainForm />', () => {
+describe('<CustomDomainModal />', () => {
+  const toggleModal = jest.fn();
+
   const setup = () => {
     const { getByLabelText, getByText, getByTestId } = render(
-      <CustomDomainForm />,
+      <CustomDomainModal isOpen={true} toggleModal={toggleModal} />,
     );
     return { getByLabelText, getByText, getByTestId };
   };
 
   test('updates label when input changes', () => {
     const { getByLabelText, getByText, getByTestId } = setup();
-    const input = getByLabelText('Use Custom Domain');
+    const input = getByLabelText('Custom Domain');
 
     expect(input).toBeVisible();
     expect(getByTestId('custom-domain')).toHaveTextContent('domain');
@@ -31,7 +33,7 @@ describe('<CustomDomainForm />', () => {
     const { getByLabelText, getByText } = setup();
 
     window.location.assign = jest.fn();
-    const input = getByLabelText('Use Custom Domain');
+    const input = getByLabelText('Custom Domain');
     fireEvent.change(input, { target: { value: ' ' } });
     fireEvent.click(getByText('Continue'));
 
@@ -43,5 +45,14 @@ describe('<CustomDomainForm />', () => {
     const expected = `${baseUrl}?custom_domain=foobar`;
 
     expect(window.location.assign).toHaveBeenCalledWith(expected);
+  });
+
+  describe('cancel', () => {
+    test('closes modal', () => {
+      const { getByText } = setup();
+      fireEvent.click(getByText('Cancel'));
+
+      expect(toggleModal).toHaveBeenCalledWith(false);
+    });
   });
 });
