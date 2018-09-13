@@ -135,6 +135,7 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             str(PROJECT_ROOT / 'dist'),
+            str(PROJECT_ROOT / 'templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -261,7 +262,9 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = False
-
+SOCIALACCOUNT_ADAPTER = (
+    'metadeploy.multisalesforce.adapter.CustomSocialAccountAdapter'
+)
 
 JS_REVERSE_JS_VAR_NAME = 'api_urls'
 JS_REVERSE_EXCLUDE_NAMESPACES = ['admin']
