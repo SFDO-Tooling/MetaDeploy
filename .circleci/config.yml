@@ -113,13 +113,16 @@ jobs:
       - run:
           name: Check JS Test Coverage
           command: |
-            yarn test:report-coverage
             yarn test:check-coverage
       - store_artifacts:
           path: coverage
           destination: js-reports
       - store_test_results:
           path: coverage
+      - save_cache:
+          key: v1-metadeploy-jscoverage
+          paths:
+            - "~/metadeploy/coverage"
 
   test-python:
     working_directory: ~/metadeploy
@@ -144,20 +147,43 @@ jobs:
           command: |
             . venv/bin/activate
             pytest --junitxml=pycov/pytest-junit.xml
-            coveralls
       - store_artifacts:
           path: htmlcov
           destination: py-reports
       - store_test_results:
           path: pycov
+      - save_cache:
+          key: v1-metadeploy-pycoverage
+          paths:
+            - "~/metadeploy/htmlcov"
 
   report-test-coverage:
     working_directory: ~/metadeploy
     docker:
       - image: circleci/python:3.6.6
     steps:
+      - checkout
+      - restore_cache:
+          key: v1-metadeploy-node-{{ checksum "bin/unpack-node" }}
+      - restore_cache:
+          key: v1-metadeploy-npm-{{ checksum "yarn.lock" }}
+      - restore_cache:
+          key: v1-metadeploy-py-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+      - restore_cache:
+          key: v1-metadeploy-jscoverage
+      - restore_cache:
+          key: v1-metadeploy-pycoverage
       - run:
-          name: Report Test Coverage
+          name: Report Python Test Coverage
+          command: |
+            . venv/bin/activate
+            coveralls
+      - run:
+          name: Report JS Test Coverage
+          command: |
+            cat ./coverage/lcov.info | ./node_modules/.bin/coveralls
+      - run:
+          name: Report Test Coverage Complete
           command: |
             curl -k "https://coveralls.io/webhook?repo_token=${COVERALLS_REPO_TOKEN}" -d "payload[build_number]=${CIRCLE_BUILD_NUM}&payload[status]=done"
 
