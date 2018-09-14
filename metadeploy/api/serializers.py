@@ -72,7 +72,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
 class JobSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(
-        default=serializers.CurrentUserDefault()
+        default=serializers.CurrentUserDefault(),
     )
 
     class Meta:
@@ -80,6 +80,6 @@ class JobSerializer(serializers.ModelSerializer):
         fields = (
             'user',
             'instance_url',
-            'package_url',
+            'repo_url',
             'flow_name',
         )

@@ -74,7 +74,7 @@ class Job(models.Model):
         on_delete=models.PROTECT,
     )
     instance_url = models.URLField()
-    package_url = models.URLField()
+    repo_url = models.URLField()
     flow_name = models.CharField(max_length=64)
     enqueued_at = models.DateTimeField(null=True)
     job_id = models.UUIDField(null=True)

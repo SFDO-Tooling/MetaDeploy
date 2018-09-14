@@ -61,7 +61,11 @@ def get_token_off_user(user):
     return token.token, token.token_secret
 
 
-def run_flow(user, instance_url, package_url, flow_name):
+def get_instance_url_off_user(user):
+    return user.socialaccount_set.first().extra_data['instance_url']
+
+
+def run_flow(user, repo_url, flow_name):
     # TODO:
     #
     # We'll want to subclass BaseFlow and add logic in the progress
@@ -73,6 +77,7 @@ def run_flow(user, instance_url, package_url, flow_name):
     # too?
 
     token, token_secret = get_token_off_user(user)
+    instance_url = get_instance_url_off_user(user)
 
     with contextlib.ExitStack() as stack:
         tmpdirname = stack.enter_context(TemporaryDirectory())
@@ -83,7 +88,7 @@ def run_flow(user, instance_url, package_url, flow_name):
         stack.enter_context(prepend_python_path(os.path.abspath(tmpdirname)))
 
         # Let's clone the repo locally:
-        git.Repo.clone_from(package_url, tmpdirname)
+        git.Repo.clone_from(repo_url, tmpdirname)
 
         # There's a lot of setup to make configs and keychains, link
         # them properly, and then eventually pass them into a flow,
@@ -143,8 +148,7 @@ def enqueuer():
     for j in Job.objects.filter(enqueued_at=None):
         j.job_id = run_flow_job.delay(
             j.user,
-            j.instance_url,
-            j.package_url,
+            j.repo_url,
             j.flow_name,
         ).id
         j.enqueued_at = timezone.now()

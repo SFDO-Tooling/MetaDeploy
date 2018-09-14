@@ -47,6 +47,9 @@ class SocialAccountFactory(factory.django.DjangoModelFactory):
 
     provider = 'salesforce-production'
     socialtoken_set = factory.RelatedFactory(SocialTokenFactory, 'account')
+    extra_data = {
+        'instance_url': 'https://example.com',
+    }
 
 
 @register
@@ -66,8 +69,7 @@ class JobFactory(factory.django.DjangoModelFactory):
         model = Job
 
     user = factory.SubFactory(UserFactory)
-    instance_url = 'https://example.com/'
-    package_url = 'https://example.com/'
+    repo_url = 'https://example.com/'
     flow_name = 'sample_flow'
     enqueued_at = None
     job_id = None

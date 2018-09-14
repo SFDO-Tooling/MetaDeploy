@@ -16,11 +16,10 @@ def test_run_flow(mocker, user_factory):
     base_flow = mocker.patch('cumulusci.core.flows.BaseFlow')
 
     user = user_factory()
-    instance_url = 'https://example.com/'
     package_url = 'https://example.com/'
     flow_name = 'test_flow'
 
-    run_flow(user, instance_url, package_url, flow_name)
+    run_flow(user, package_url, flow_name)
 
     # TODO assert? What we really need to assert is a change in the SF
     # org, but that'd be an integration test.
