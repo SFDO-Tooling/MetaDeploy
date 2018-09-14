@@ -120,7 +120,7 @@ jobs:
       - store_test_results:
           path: coverage
       - save_cache:
-          key: v1-metadeploy-jscoverage-{{ checksum "coverage/lcov.info" }}
+          key: v1-metadeploy-jscoverage-{{ .Revision }}
           paths:
             - "~/metadeploy/coverage"
 
@@ -153,7 +153,7 @@ jobs:
       - store_test_results:
           path: pycov
       - save_cache:
-          key: v1-metadeploy-pycoverage-{{ checksum ".coverage" }}
+          key: v1-metadeploy-pycoverage-{{ .Revision }}
           paths:
             - "~/metadeploy/.coverage"
 
@@ -170,9 +170,9 @@ jobs:
       - restore_cache:
           key: v1-metadeploy-py-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
       - restore_cache:
-          key: v1-metadeploy-jscoverage-{{ checksum "coverage/lcov.info" }}
+          key: v1-metadeploy-jscoverage-{{ .Revision }}
       - restore_cache:
-          key: v1-metadeploy-pycoverage-{{ checksum ".coverage" }}
+          key: v1-metadeploy-pycoverage-{{ .Revision }}
       - run:
           name: Report Python Test Coverage
           command: |
