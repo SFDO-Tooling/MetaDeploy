@@ -179,9 +179,14 @@ jobs:
             . venv/bin/activate
             coveralls
       - run:
+          name: Set $PATH
+          command: |
+            echo 'export PATH=~/metadeploy/node_modules/.bin:$PATH' >> $BASH_ENV
+            echo 'export PATH=~/metadeploy/node/bin:$PATH' >> $BASH_ENV
+      - run:
           name: Report JS Test Coverage
           command: |
-            cat ./coverage/lcov.info | ./node_modules/.bin/coveralls
+            yarn test:report-coverage
       - run:
           name: Report Test Coverage Complete
           command: |
