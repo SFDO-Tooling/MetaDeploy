@@ -155,7 +155,7 @@ jobs:
       - save_cache:
           key: v1-metadeploy-pycoverage
           paths:
-            - "~/metadeploy/htmlcov"
+            - "~/metadeploy/.coverage"
 
   report-test-coverage:
     working_directory: ~/metadeploy
