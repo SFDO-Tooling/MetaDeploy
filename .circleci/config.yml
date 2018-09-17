@@ -110,25 +110,20 @@ jobs:
       - run:
           name: Test JS
           command: yarn test:coverage
-      - run:
-          name: Check JS Test Coverage
-          command: |
-            yarn test:report-coverage
-            yarn test:check-coverage
       - store_artifacts:
           path: coverage
           destination: js-reports
       - store_test_results:
           path: coverage
+      - persist_to_workspace:
+          root: .
+          paths:
+            - coverage
 
   test-python:
     working_directory: ~/metadeploy
     docker:
       - image: circleci/python:3.6.6
-        environment:
-          BUCKETEER_AWS_ACCESS_KEY_ID: access-key
-          BUCKETEER_AWS_SECRET_ACCESS_KEY: secret-key
-          BUCKETEER_BUCKET_NAME: a-bucket
       - image: circleci/postgres:latest
         environment:
           POSTGRES_USER: ubuntu
@@ -153,6 +148,43 @@ jobs:
           destination: py-reports
       - store_test_results:
           path: pycov
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .coverage
+
+  report-test-coverage:
+    working_directory: ~/metadeploy
+    docker:
+      - image: circleci/python:3.6.6
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - restore_cache:
+          key: v1-metadeploy-node-{{ checksum "bin/unpack-node" }}
+      - restore_cache:
+          key: v1-metadeploy-npm-{{ checksum "yarn.lock" }}
+      - restore_cache:
+          key: v1-metadeploy-py-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+      - run:
+          name: Set $PATH
+          command: |
+            echo 'export PATH=~/metadeploy/node_modules/.bin:$PATH' >> $BASH_ENV
+            echo 'export PATH=~/metadeploy/node/bin:$PATH' >> $BASH_ENV
+      - run:
+          name: Report Test Coverage
+          command: |
+            . venv/bin/activate
+            yarn pytest:report-coverage
+            yarn test:report-coverage
+            curl -k "https://coveralls.io/webhook?repo_token=${COVERALLS_REPO_TOKEN}" -d "payload[build_num]=${CIRCLE_BUILD_NUM}&payload[status]=done"
+      - run:
+          name: Check Test Coverage
+          command: |
+            . venv/bin/activate
+            yarn pytest:check-coverage
+            yarn test:check-coverage
 
 workflows:
   version: 2
@@ -168,3 +200,7 @@ workflows:
       - test-python:
           requires:
             - build
+      - report-test-coverage:
+          requires:
+            - test-client
+            - test-python
