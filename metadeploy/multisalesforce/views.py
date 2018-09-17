@@ -1,3 +1,5 @@
+import requests
+
 from allauth.socialaccount.providers.oauth2.views import (
     OAuth2CallbackView,
     OAuth2LoginView,
@@ -13,15 +15,32 @@ from .provider import (
 )
 
 
-class SalesforceOAuth2ProductionAdapter(SalesforceOAuth2BaseAdapter):
+class SaveInstanceUrlMixin:
+    def complete_login(self, request, app, token, **kwargs):
+        resp = requests.get(self.userinfo_url, params={'oauth_token': token})
+        resp.raise_for_status()
+        extra_data = resp.json()
+        instance_url = kwargs.get('response', {}).get('instance_url', None)
+        ret = self.get_provider().sociallogin_from_response(
+            request,
+            extra_data,
+        )
+        ret.account.extra_data['instance_url'] = instance_url
+        return ret
+
+
+class SalesforceOAuth2ProductionAdapter(
+        SaveInstanceUrlMixin, SalesforceOAuth2BaseAdapter):
     provider_id = SalesforceProductionProvider.id
 
 
-class SalesforceOAuth2SandboxAdapter(SalesforceOAuth2BaseAdapter):
+class SalesforceOAuth2SandboxAdapter(
+        SaveInstanceUrlMixin, SalesforceOAuth2BaseAdapter):
     provider_id = SalesforceTestProvider.id
 
 
-class SalesforceOAuth2CustomAdapter(SalesforceOAuth2BaseAdapter):
+class SalesforceOAuth2CustomAdapter(
+        SaveInstanceUrlMixin, SalesforceOAuth2BaseAdapter):
     provider_id = SalesforceCustomProvider.id
 
     @property

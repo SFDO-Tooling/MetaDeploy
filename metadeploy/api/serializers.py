@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from .models import (
     Product,
+    Job,
     Version,
     Plan,
 )
@@ -67,4 +68,19 @@ class ProductSerializer(serializers.ModelSerializer):
             'image',
             'most_recent_version',
             'slug',
+        )
+
+
+class JobSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(
+        default=serializers.CurrentUserDefault(),
+    )
+
+    class Meta:
+        model = Job
+        fields = (
+            'user',
+            'instance_url',
+            'repo_url',
+            'flow_name',
         )
