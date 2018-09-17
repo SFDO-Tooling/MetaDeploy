@@ -7,7 +7,9 @@ def forwards(apps, schema_editor):
     ProductCategory = apps.get_model('api', 'ProductCategory')
     Product = apps.get_model('api', 'Product')
     for product in Product.objects.all():
-        category, _ = ProductCategory.get_or_create(title=product.category)
+        category, _ = ProductCategory.objects.get_or_create(
+            title=product.category,
+        )
         product.category_fk = category
         product.save()
 
