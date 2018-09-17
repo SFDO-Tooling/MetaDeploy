@@ -78,6 +78,7 @@ def test_product_str(product_factory):
 class TestProductSlug:
     def test_present(self, product_factory, product_slug_factory):
         product = product_factory(title='a product')
+        product.productslug_set.all().delete()
         product_slug_factory(product=product, slug='a-slug-1', is_active=False)
         product_slug_factory(product=product, slug='a-slug-2', is_active=True)
         product_slug_factory(product=product, slug='a-slug-3', is_active=True)
@@ -87,8 +88,17 @@ class TestProductSlug:
 
     def test_absent(self, product_factory):
         product = product_factory(title='a product')
+        product.productslug_set.all().delete()
 
         assert product.slug is None
+
+    def test_ensure_slug(self, product_factory):
+        product = product_factory(title='a product')
+        product.productslug_set.all().delete()
+
+        product.ensure_slug()
+
+        assert product.slug == 'a-product'
 
 
 @pytest.mark.django_db
@@ -98,6 +108,33 @@ def test_product_most_recent_version(product_factory, version_factory):
     v2 = version_factory(label='v0.2.0', product=product)
 
     assert product.most_recent_version == v2
+
+
+@pytest.mark.django_db
+class TestPlanSlug:
+    def test_present(self, plan_factory, plan_slug_factory):
+        plan = plan_factory(title='a plan')
+        plan.planslug_set.all().delete()
+        plan_slug_factory(plan=plan, slug='a-slug-1', is_active=False)
+        plan_slug_factory(plan=plan, slug='a-slug-2', is_active=True)
+        plan_slug_factory(plan=plan, slug='a-slug-3', is_active=True)
+        plan_slug_factory(plan=plan, slug='a-slug-4', is_active=False)
+
+        assert plan.slug == 'a-slug-3'
+
+    def test_absent(self, plan_factory):
+        plan = plan_factory(title='a plan')
+        plan.planslug_set.all().delete()
+
+        assert plan.slug is None
+
+    def test_ensure_slug(self, plan_factory):
+        plan = plan_factory(title='a plan')
+        plan.planslug_set.all().delete()
+
+        plan.ensure_slug()
+
+        assert plan.slug == 'a-plan'
 
 
 @pytest.mark.django_db

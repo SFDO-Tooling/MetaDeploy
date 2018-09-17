@@ -8,6 +8,7 @@ from metadeploy.api.models import (
     ProductSlug,
     Version,
     Plan,
+    PlanSlug,
 )
 
 User = get_user_model()
@@ -33,6 +34,7 @@ class ProductFactory(factory.django.DjangoModelFactory):
     icon_url = ''
     slds_icon_category = ''
     slds_icon_name = ''
+    _ensure_slug = factory.PostGenerationMethodCall('ensure_slug')
 
 
 @register
@@ -61,6 +63,16 @@ class PlanFactory(factory.django.DjangoModelFactory):
 
     title = 'Sample plan'
     version = factory.SubFactory(VersionFactory)
+    _ensure_slug = factory.PostGenerationMethodCall('ensure_slug')
+
+
+@register
+class PlanSlugFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = PlanSlug
+
+    slug = factory.Sequence('this-is-a-slug-{}'.format)
+    plan = factory.SubFactory(PlanFactory)
 
 
 register(UserFactory)

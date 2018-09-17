@@ -1,8 +1,23 @@
+import itertools
+
 from django.db import models
+from django.utils.text import slugify
 
 from model_utils import Choices
 
 from colorfield.fields import ColorField
+
+
+def find_unique_slug(original, slug_class):
+    max_length = 50  # This from SlugField
+
+    candidate = original
+    for i in itertools.count(1):
+        if not slug_class.objects.filter(slug=candidate).exists():
+            return candidate
+
+        suffix = f'-{i}'
+        candidate = candidate[:max_length - len(suffix)] + suffix
 
 
 class Product(models.Model):
@@ -62,12 +77,24 @@ class Product(models.Model):
             }
         return None
 
+    # TODO This should be extracted and abstracted:
     @property
     def slug(self):
         slug = self.productslug_set.filter(is_active=True).last()
         if slug:
             return slug.slug
         return None
+
+    # TODO This should be extracted and abstracted:
+    def ensure_slug(self):
+        if not self.productslug_set.filter(is_active=True).exists():
+            slug = slugify(self.title)
+            slug = find_unique_slug(slug, ProductSlug)
+            ProductSlug.objects.create(
+                product=self,
+                slug=slug,
+                is_active=True,
+            )
 
 
 class ProductSlug(models.Model):
@@ -143,3 +170,40 @@ class Plan(models.Model):
 
     def __str__(self):
         return "{}, Plan {}".format(self.version, self.title)
+
+    # TODO This should be extracted and abstracted:
+    @property
+    def slug(self):
+        slug = self.planslug_set.filter(is_active=True).last()
+        if slug:
+            return slug.slug
+        return None
+
+    # TODO This should be extracted and abstracted:
+    def ensure_slug(self):
+        if not self.planslug_set.filter(is_active=True).exists():
+            slug = slugify(self.title)
+            slug = find_unique_slug(slug, PlanSlug)
+            PlanSlug.objects.create(
+                plan=self,
+                slug=slug,
+                is_active=True,
+            )
+
+
+class PlanSlug(models.Model):
+    """
+    Rather than have a slugfield directly on the Plan model, we have
+    a related model. That way, we can have a bunch of slugs that pertain
+    to a particular model, and even if the slug changes and someone uses
+    an old slug, we can redirect them appropriately.
+    """
+    slug = models.SlugField(unique=True)
+    plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
+    is_active = models.BooleanField(
+        default=True,
+        help_text=(
+            'The most recently-created active slug for a Plan is the '
+            'default slug.'
+        ),
+    )
