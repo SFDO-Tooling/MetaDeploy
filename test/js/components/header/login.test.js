@@ -4,14 +4,26 @@ import { render, fireEvent } from 'react-testing-library';
 import Login from 'components/header/login';
 
 describe('<Login />', () => {
-  test('updates `window.location.href` on login click', () => {
-    const { getByText } = render(<Login />);
-    window.location.assign = jest.fn();
-    fireEvent.click(getByText('Log In'));
-    fireEvent.click(getByText('Sandbox or Scratch Org'));
-    const expected = window.api_urls.salesforce_test_login();
+  describe('login click', () => {
+    test('updates `window.location.href` on login click', () => {
+      const { getByText } = render(<Login />);
+      window.location.assign = jest.fn();
+      fireEvent.click(getByText('Log In'));
+      fireEvent.click(getByText('Sandbox or Scratch Org'));
+      const expected = window.api_urls.salesforce_test_login();
 
-    expect(window.location.assign).toHaveBeenCalledWith(expected);
+      expect(window.location.assign).toHaveBeenCalledWith(expected);
+    });
+  });
+
+  describe('custom domain click', () => {
+    test('opens modal', () => {
+      const { getByText, getByLabelText } = render(<Login />);
+      fireEvent.click(getByText('Log In'));
+      fireEvent.click(getByText('Use Custom Domain'));
+
+      expect(getByLabelText('Custom Domain')).toBeVisible();
+    });
   });
 
   describe('URLs not found', () => {
@@ -27,9 +39,14 @@ describe('<Login />', () => {
     });
 
     test('logs error to console', () => {
-      render(<Login />);
+      const { getByText, queryByLabelText } = render(<Login />);
 
       expect(window.console.error).toHaveBeenCalled();
+
+      fireEvent.click(getByText('Log In'));
+      fireEvent.click(getByText('Use Custom Domain'));
+
+      expect(queryByLabelText('Custom Domain')).toBeNull();
     });
   });
 });

@@ -64,12 +64,12 @@ declare module '@salesforce/design-system-react/components/input' {
   declare export default Component;
 }
 
-declare module '@salesforce/design-system-react/components/menu-list/list' {
+declare module '@salesforce/design-system-react/components/modal' {
   import typeof { Component } from 'react';
 
   declare export default Component;
 }
 
-declare module '@salesforce/design-system-react/utilities/key-code' {
-  declare export default { [string]: number };
+declare module '@salesforce/design-system-react/components/settings' {
+  declare export default { [string]: Function };
 }
