@@ -38,7 +38,7 @@ def forwards(apps, schema_editor):  # pragma: nocover
             slug = slugify(product.title)
             slug = find_unique_slug(slug, ProductSlug)
             ProductSlug.objects.create(
-                plan=product,
+                product=product,
                 slug=slug,
                 is_active=True,
             )
