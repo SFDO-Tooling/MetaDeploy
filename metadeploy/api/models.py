@@ -28,7 +28,6 @@ class Product(models.Model):
     description = models.TextField()
     category = models.ForeignKey(
         ProductCategory,
-        null=True,
         on_delete=models.PROTECT,
     )
     color = ColorField(blank=True)
