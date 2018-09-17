@@ -1,6 +1,7 @@
 import itertools
 
 from django.conf import settings
+from django.core.validators import RegexValidator
 from django.db import models
 from django.utils.text import slugify
 
@@ -150,7 +151,10 @@ class Version(models.Model):
     objects = VersionManager()
 
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
-    label = models.CharField(max_length=1024)
+    label = models.CharField(
+        max_length=1024,
+        validators=[RegexValidator(regex=r'^[a-zA-Z0-9._+-]+$')],
+    )
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     is_production = models.BooleanField(default=True)
