@@ -35,7 +35,7 @@ let ProductDetail = ({ product }: { product: ProductType | null }) => {
     return <Redirect to={routes.product_list()} />;
   }
   const version = product.most_recent_version;
-  return <Redirect to={routes.version_detail(product.slug, version.slug)} />;
+  return <Redirect to={routes.version_detail(product.slug, version.label)} />;
 };
 
 let VersionDetail = ({
@@ -141,24 +141,24 @@ const selectProduct = (
   return product;
 };
 
-const selectVersionSlug = (
+const selectVersionLabel = (
   appState,
   { match: { params } }: { match: Match },
-): ?string => params.versionSlug;
+): ?string => params.versionLabel;
 
 const selectVersion = createSelector(
-  [selectProduct, selectVersionSlug],
-  (product: ProductType | null, versionSlug: ?string): VersionType | null => {
+  [selectProduct, selectVersionLabel],
+  (product: ProductType | null, versionLabel: ?string): VersionType | null => {
     if (!product) {
       // Will redirect back to products-list
       return null;
     }
-    if (product.most_recent_version.slug === versionSlug) {
+    if (product.most_recent_version.label === versionLabel) {
       // Will display version-detail
       return product.most_recent_version;
     }
     if (product.versions) {
-      const version = product.versions.find(v => v.slug === versionSlug);
+      const version = product.versions.find(v => v.label === versionLabel);
       if (!version) {
         // Will redirect back to product-detail
         return null;

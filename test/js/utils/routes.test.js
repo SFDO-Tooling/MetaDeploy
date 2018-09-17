@@ -8,13 +8,13 @@ describe('routes', () => {
     {
       name: 'version_detail',
       args: [],
-      expected: '/products/:productSlug/:versionSlug',
+      expected: '/products/:productSlug/:versionLabel',
     },
     { name: 'plan_detail', args: [1, 2, 3], expected: '/products/1/2/3' },
     {
       name: 'plan_detail',
       args: [],
-      expected: '/products/:productSlug/:versionSlug/:planSlug',
+      expected: '/products/:productSlug/:versionLabel/:planSlug',
     },
   ].forEach(({ name, args, expected }) => {
     test(`${name} returns path with args: ${args.join(', ')}`, () => {

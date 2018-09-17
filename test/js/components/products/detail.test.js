@@ -20,7 +20,6 @@ const defaultState = {
       image: 'http://foo.bar',
       most_recent_version: {
         id: 1,
-        slug: '1.0.0',
         product: 1,
         label: '1.0.0',
         description: 'This is a test product version.',
@@ -77,13 +76,13 @@ describe('<VersionDetail />', () => {
     const defaults = {
       initialState: defaultState,
       productSlug: 'product-1',
-      versionSlug: '1.0.0',
+      versionLabel: '1.0.0',
     };
     const opts = Object.assign({}, defaults, options);
-    const { productSlug, versionSlug } = opts;
+    const { productSlug, versionLabel } = opts;
     const { getByText, queryByText, getByAltText } = renderWithRedux(
       <MemoryRouter>
-        <VersionDetail match={{ params: { productSlug, versionSlug } }} />
+        <VersionDetail match={{ params: { productSlug, versionLabel } }} />
       </MemoryRouter>,
       opts.initialState,
       opts.customStore,
@@ -122,7 +121,6 @@ describe('<VersionDetail />', () => {
         category: 'salesforce',
         most_recent_version: {
           id: 1,
-          slug: '1.0.0',
           product: 1,
           label: '1.0.0',
           description: 'This is a test product version.',
@@ -150,7 +148,6 @@ describe('<VersionDetail />', () => {
   describe('version is not most_recent_version', () => {
     const version = {
       id: 2,
-      slug: '2.0.0',
       product: 1,
       label: '2.0.0',
       description: 'This is another test product version.',
@@ -168,7 +165,7 @@ describe('<VersionDetail />', () => {
     test('renders version detail', () => {
       const { getByText } = setup({
         initialState: { products: [product] },
-        versionSlug: '2.0.0',
+        versionLabel: '2.0.0',
       });
 
       expect(getByText('Product 1')).toBeVisible();
@@ -183,7 +180,7 @@ describe('<VersionDetail />', () => {
       fetchMock.spy();
 
       const { getByText, queryByText } = setup({
-        versionSlug: '2.0.0',
+        versionLabel: '2.0.0',
         customStore: storeWithApi,
       });
 
@@ -201,7 +198,7 @@ describe('<VersionDetail />', () => {
       jest.spyOn(routes, 'product_detail');
       setup({
         initialState: { products: [product] },
-        versionSlug: '2.0.0',
+        versionLabel: '2.0.0',
       });
 
       expect(routes.product_detail).toHaveBeenCalledTimes(1);

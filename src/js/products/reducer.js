@@ -5,7 +5,6 @@ import type { ProductsAction } from 'products/actions';
 
 export type Version = {
   +id: number,
-  +slug: string,
   +product: number,
   +label: string,
   +description: string,

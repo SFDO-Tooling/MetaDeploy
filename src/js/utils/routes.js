@@ -7,13 +7,13 @@ const routes = {
     `/products/${productSlug}`,
   version_detail: (
     productSlug?: string = ':productSlug',
-    versionSlug?: string = ':versionSlug',
-  ) => `/products/${productSlug}/${versionSlug}`,
+    versionLabel?: string = ':versionLabel',
+  ) => `/products/${productSlug}/${versionLabel}`,
   plan_detail: (
     productSlug?: string = ':productSlug',
-    versionSlug?: string = ':versionSlug',
+    versionLabel?: string = ':versionLabel',
     planSlug?: string = ':planSlug',
-  ) => `/products/${productSlug}/${versionSlug}/${planSlug}`,
+  ) => `/products/${productSlug}/${versionLabel}/${planSlug}`,
 };
 
 export default routes;
