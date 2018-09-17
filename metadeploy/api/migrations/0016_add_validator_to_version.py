@@ -11,10 +11,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterModelOptions(
-            name='productcategory',
-            options={'verbose_name_plural': 'product categories'},
-        ),
         migrations.AlterField(
             model_name='version',
             name='label',
