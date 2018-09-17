@@ -9,6 +9,7 @@ pyopenssl==18.0.0
 django-js-reverse==0.8.2
 djangorestframework==3.8.2
 django-colorfield==0.1.15
+django-filters==2.0.0
 raven==6.9.0
 Pillow==5.2.0
 django-model-utils==3.1.2
