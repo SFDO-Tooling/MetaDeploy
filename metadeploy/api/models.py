@@ -24,6 +24,12 @@ def find_unique_slug(original, slug_class):
 class ProductCategory(models.Model):
     title = models.CharField(max_length=256)
 
+    class Meta:
+        verbose_name_plural = "product categories"
+
+    def __str__(self):
+        return self.title
+
 
 class Product(models.Model):
     CATEGORY_CHOICES = (
@@ -118,6 +124,9 @@ class ProductSlug(models.Model):
             'default slug.'
         ),
     )
+
+    def __str__(self):
+        return self.slug
 
 
 class Job(models.Model):
@@ -224,3 +233,6 @@ class PlanSlug(models.Model):
             'default slug.'
         ),
     )
+
+    def __str__(self):
+        return self.slug
