@@ -57,7 +57,7 @@ def env(name, default=NoDefaultValue, type_=str):
     except KeyError:
         if default == NoDefaultValue:
             raise ImproperlyConfigured(
-                f"Missing environment variable: {name}."
+                f'Missing environment variable: {name}.'
             )
         val = default
     val = type_(val)
@@ -106,6 +106,8 @@ INSTALLED_APPS = [
     'django_extensions',
     'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
+    'django_rq',
+    'scheduler',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -127,8 +129,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
-ROOT_URLCONF = 'metadeploy.urls'
 
 TEMPLATES = [
     {
@@ -170,6 +170,12 @@ DATABASES = {
     ),
 }
 
+
+# URL configuration:
+ROOT_URLCONF = 'metadeploy.urls'
+
+# Must end in a /, or you will experience surprises:
+ADMIN_AREA_PREFIX = 'admin/'
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
@@ -267,6 +273,41 @@ JS_REVERSE_JS_VAR_NAME = 'api_urls'
 JS_REVERSE_EXCLUDE_NAMESPACES = ['admin']
 
 
+# Redis configuration:
+
+REDIS_LOCATION = '{0}/{1}'.format(
+    env('REDIS_URL', default='redis://localhost:6379'),
+    0,
+)
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': REDIS_LOCATION,
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'IGNORE_EXCEPTIONS': True,
+        },
+    },
+}
+RQ_QUEUES = {
+    'default': {
+        'USE_REDIS_CACHE': 'default',
+        'DEFAULT_TIMEOUT': 360,
+    },
+    'short': {
+        'USE_REDIS_CACHE': 'default',
+        'DEFAULT_TIMEOUT': 10,
+    },
+}
+
+
+# SF Connected App and GitHub configuration:
+CONNECTED_APP_CLIENT_SECRET = env('CONNECTED_APP_CLIENT_SECRET')
+CONNECTED_APP_CALLBACK_URL = env('CONNECTED_APP_CALLBACK_URL')
+CONNECTED_APP_CLIENT_ID = env('CONNECTED_APP_CLIENT_ID')
+GITHUB_TOKEN = env('GITHUB_TOKEN')
+
+
 # Raven / Sentry
 SENTRY_DSN = env('SENTRY_DSN', default='')
 
@@ -297,6 +338,10 @@ if SENTRY_DSN:
                         '%(thread)d %(message)s'
                     ),
                 },
+                "rq_console": {
+                    "format": "%(asctime)s %(message)s",
+                    "datefmt": "%H:%M:%S",
+                },
             },
             'handlers': {
                 'sentry': {
@@ -311,7 +356,13 @@ if SENTRY_DSN:
                     'level': 'DEBUG',
                     'class': 'logging.StreamHandler',
                     'formatter': 'verbose'
-                }
+                },
+                "rq_console": {
+                    "level": "DEBUG",
+                    "class": "rq.utils.ColorizingStreamHandler",
+                    "formatter": "rq_console",
+                    "exclude": ["%(asctime)s"],
+                },
             },
             'loggers': {
                 'django.db.backends': {
@@ -328,6 +379,10 @@ if SENTRY_DSN:
                     'level': 'DEBUG',
                     'handlers': ['console'],
                     'propagate': False,
+                },
+                "rq.worker": {
+                    "handlers": ["rq_console", "sentry"],
+                    "level": "DEBUG"
                 },
             },
         }
