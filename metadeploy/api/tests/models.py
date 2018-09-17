@@ -69,6 +69,12 @@ class TestPlansProperties:
 
 
 @pytest.mark.django_db
+def test_product_category_str(product_category_factory):
+    product_category = product_category_factory(title='My Category')
+    assert str(product_category) == 'My Category'
+
+
+@pytest.mark.django_db
 def test_product_str(product_factory):
     product = product_factory(title='My Product')
     assert str(product) == 'My Product'
@@ -99,6 +105,10 @@ class TestProductSlug:
         product.ensure_slug()
 
         assert product.slug == 'a-product'
+
+    def test_str(self, product_slug_factory):
+        product_slug = product_slug_factory(slug='a-slug')
+        assert str(product_slug) == 'a-slug'
 
 
 @pytest.mark.django_db
@@ -135,6 +145,10 @@ class TestPlanSlug:
         plan.ensure_slug()
 
         assert plan.slug == 'a-plan'
+
+    def test_str(self, plan_slug_factory):
+        plan_slug = plan_slug_factory(slug='a-slug')
+        assert str(plan_slug) == 'a-slug'
 
 
 @pytest.mark.django_db
