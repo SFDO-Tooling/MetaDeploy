@@ -53,7 +53,7 @@ class VersionSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    category = serializers.CharField(source='category__title')
+    category = serializers.CharField(source='category.title')
     most_recent_version = VersionSerializer()
 
     class Meta:
