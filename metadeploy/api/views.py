@@ -35,4 +35,5 @@ class VersionViewSet(viewsets.ModelViewSet):
     )
     filterset_fields = (
         'product',
+        'label',
     )
