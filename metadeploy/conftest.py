@@ -106,7 +106,7 @@ class ProductSlugFactory(factory.django.DjangoModelFactory):
         model = ProductSlug
 
     slug = factory.Sequence('this-is-a-slug-{}'.format)
-    product = factory.SubFactory(ProductFactory)
+    parent = factory.SubFactory(ProductFactory)
 
 
 @register
@@ -135,7 +135,7 @@ class PlanSlugFactory(factory.django.DjangoModelFactory):
         model = PlanSlug
 
     slug = factory.Sequence('this-is-a-slug-{}'.format)
-    plan = factory.SubFactory(PlanFactory)
+    parent = factory.SubFactory(PlanFactory)
 
 
 # TODO: We will need these eventually, but not yet:

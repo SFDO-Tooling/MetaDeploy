@@ -14,16 +14,42 @@ from colorfield.fields import ColorField
 VERSION_STRING = r'^[a-zA-Z0-9._+-]+$'
 
 
-def find_unique_slug(original, slug_class):
-    max_length = 50  # This from SlugField
+class SlugMixin:
+    """
+    Please provide:
 
-    candidate = original
-    for i in itertools.count(1):
-        if not slug_class.objects.filter(slug=candidate).exists():
-            return candidate
+        self.slug_class: the class that implements slugs for this model.
+        self.slug_queryset: the name of the queryset for slugs for this
+            model.
+    """
 
-        suffix = f'-{i}'
-        candidate = candidate[:max_length - len(suffix)] + suffix
+    def _find_unique_slug(self, original):
+        max_length = 50  # This from SlugField
+
+        candidate = original
+        for i in itertools.count(1):
+            if not self.slug_class.objects.filter(slug=candidate).exists():
+                return candidate
+
+            suffix = f'-{i}'
+            candidate = candidate[:max_length - len(suffix)] + suffix
+
+    @property
+    def slug(self):
+        slug = self.slug_queryset.filter(is_active=True).first()
+        if slug:
+            return slug.slug
+        return None
+
+    def ensure_slug(self):
+        if not self.slug_queryset.filter(is_active=True).exists():
+            slug = slugify(self.title)
+            slug = self._find_unique_slug(slug)
+            self.slug_class.objects.create(
+                parent=self,
+                slug=slug,
+                is_active=True,
+            )
 
 
 class ProductCategory(models.Model):
@@ -36,6 +62,31 @@ class ProductCategory(models.Model):
         return self.title
 
 
+class ProductSlug(models.Model):
+    """
+    Rather than have a slugfield directly on the Product model, we have
+    a related model. That way, we can have a bunch of slugs that pertain
+    to a particular model, and even if the slug changes and someone uses
+    an old slug, we can redirect them appropriately.
+    """
+    slug = models.SlugField(unique=True)
+    parent = models.ForeignKey('Product', on_delete=models.PROTECT)
+    is_active = models.BooleanField(
+        default=True,
+        help_text=(
+            'If multiple slugs are active, we will default to the most '
+            'recent.'
+        ),
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ('-created_at',)
+
+    def __str__(self):
+        return self.slug
+
+
 class ProductQuerySet(models.QuerySet):
     def published(self):
         return self.annotate(
@@ -43,7 +94,7 @@ class ProductQuerySet(models.QuerySet):
         ).filter(version__count__gte=1)
 
 
-class Product(models.Model):
+class Product(SlugMixin, models.Model):
     SLDS_ICON_CHOICES = (
         ('', ''),
         ('action', 'action'),
@@ -77,6 +128,12 @@ class Product(models.Model):
     )
     slds_icon_name = models.CharField(max_length=64, blank=True)
 
+    slug_class = ProductSlug
+
+    @property
+    def slug_queryset(self):
+        return self.productslug_set
+
     def __str__(self):
         return self.title
 
@@ -98,50 +155,6 @@ class Product(models.Model):
                 'name': self.slds_icon_name,
             }
         return None
-
-    # TODO This should be extracted and abstracted:
-    @property
-    def slug(self):
-        slug = self.productslug_set.filter(is_active=True).last()
-        if slug:
-            return slug.slug
-        return None
-
-    # TODO This should be extracted and abstracted:
-    def ensure_slug(self):
-        if not self.productslug_set.filter(is_active=True).exists():
-            slug = slugify(self.title)
-            slug = find_unique_slug(slug, ProductSlug)
-            ProductSlug.objects.create(
-                product=self,
-                slug=slug,
-                is_active=True,
-            )
-
-
-class ProductSlug(models.Model):
-    """
-    Rather than have a slugfield directly on the Product model, we have
-    a related model. That way, we can have a bunch of slugs that pertain
-    to a particular model, and even if the slug changes and someone uses
-    an old slug, we can redirect them appropriately.
-    """
-    slug = models.SlugField(unique=True)
-    product = models.ForeignKey(Product, on_delete=models.PROTECT)
-    is_active = models.BooleanField(
-        default=True,
-        help_text=(
-            'If multiple slugs are active, we will default to the most '
-            'recent.'
-        ),
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ('-created_at',)
-
-    def __str__(self):
-        return self.slug
 
 
 class Job(models.Model):
@@ -198,43 +211,6 @@ class Version(models.Model):
         return self.plan_set.filter(tier=Plan.Tier.additional).order_by('id')
 
 
-class Plan(models.Model):
-    Tier = Choices('primary', 'secondary', 'additional')
-
-    title = models.CharField(max_length=128)
-    version = models.ForeignKey(Version, on_delete=models.PROTECT)
-    tier = models.CharField(
-        choices=Tier,
-        default=Tier.primary,
-        max_length=64,
-    )
-
-    def natural_key(self):
-        return (self.version, self.title)
-
-    def __str__(self):
-        return "{}, Plan {}".format(self.version, self.title)
-
-    # TODO This should be extracted and abstracted:
-    @property
-    def slug(self):
-        slug = self.planslug_set.filter(is_active=True).last()
-        if slug:
-            return slug.slug
-        return None
-
-    # TODO This should be extracted and abstracted:
-    def ensure_slug(self):
-        if not self.planslug_set.filter(is_active=True).exists():
-            slug = slugify(self.title)
-            slug = find_unique_slug(slug, PlanSlug)
-            PlanSlug.objects.create(
-                plan=self,
-                slug=slug,
-                is_active=True,
-            )
-
-
 class PlanSlug(models.Model):
     """
     Rather than have a slugfield directly on the Plan model, we have
@@ -243,7 +219,7 @@ class PlanSlug(models.Model):
     an old slug, we can redirect them appropriately.
     """
     slug = models.SlugField()
-    plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
+    parent = models.ForeignKey('Plan', on_delete=models.PROTECT)
     is_active = models.BooleanField(
         default=True,
         help_text=(
@@ -255,9 +231,33 @@ class PlanSlug(models.Model):
 
     class Meta:
         unique_together = (
-            ('slug', 'plan'),
+            ('slug', 'parent'),
         )
         ordering = ('-created_at',)
 
     def __str__(self):
         return self.slug
+
+
+class Plan(SlugMixin, models.Model):
+    Tier = Choices('primary', 'secondary', 'additional')
+
+    title = models.CharField(max_length=128)
+    version = models.ForeignKey(Version, on_delete=models.PROTECT)
+    tier = models.CharField(
+        choices=Tier,
+        default=Tier.primary,
+        max_length=64,
+    )
+
+    slug_class = PlanSlug
+
+    @property
+    def slug_queryset(self):
+        return self.planslug_set
+
+    def natural_key(self):
+        return (self.version, self.title)
+
+    def __str__(self):
+        return "{}, Plan {}".format(self.version, self.title)

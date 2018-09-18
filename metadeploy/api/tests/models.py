@@ -85,10 +85,10 @@ class TestProductSlug:
     def test_present(self, product_factory, product_slug_factory):
         product = product_factory(title='a product')
         product.productslug_set.all().delete()
-        product_slug_factory(product=product, slug='a-slug-1', is_active=False)
-        product_slug_factory(product=product, slug='a-slug-2', is_active=True)
-        product_slug_factory(product=product, slug='a-slug-3', is_active=True)
-        product_slug_factory(product=product, slug='a-slug-4', is_active=False)
+        product_slug_factory(parent=product, slug='a-slug-1', is_active=False)
+        product_slug_factory(parent=product, slug='a-slug-2', is_active=True)
+        product_slug_factory(parent=product, slug='a-slug-3', is_active=True)
+        product_slug_factory(parent=product, slug='a-slug-4', is_active=False)
 
         assert product.slug == 'a-slug-3'
 
@@ -125,10 +125,10 @@ class TestPlanSlug:
     def test_present(self, plan_factory, plan_slug_factory):
         plan = plan_factory(title='a plan')
         plan.planslug_set.all().delete()
-        plan_slug_factory(plan=plan, slug='a-slug-1', is_active=False)
-        plan_slug_factory(plan=plan, slug='a-slug-2', is_active=True)
-        plan_slug_factory(plan=plan, slug='a-slug-3', is_active=True)
-        plan_slug_factory(plan=plan, slug='a-slug-4', is_active=False)
+        plan_slug_factory(parent=plan, slug='a-slug-1', is_active=False)
+        plan_slug_factory(parent=plan, slug='a-slug-2', is_active=True)
+        plan_slug_factory(parent=plan, slug='a-slug-3', is_active=True)
+        plan_slug_factory(parent=plan, slug='a-slug-4', is_active=False)
 
         assert plan.slug == 'a-slug-3'
 
