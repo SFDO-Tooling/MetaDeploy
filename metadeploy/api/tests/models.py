@@ -3,6 +3,7 @@ import pytest
 from django.core.exceptions import (
     ObjectDoesNotExist,
     MultipleObjectsReturned,
+    ValidationError,
 )
 
 from ..models import Version
@@ -149,6 +150,15 @@ class TestPlanSlug:
     def test_str(self, plan_slug_factory):
         plan_slug = plan_slug_factory(slug='a-slug')
         assert str(plan_slug) == 'a-slug'
+
+    def test_unique_per_version(self, plan_slug_factory, version_factory):
+        v1 = version_factory()
+        v2 = version_factory()
+        plan_slug_factory(slug='test', parent__version=v1)
+        plan_slug_factory(slug='test', parent__version=v2)
+        pslug = plan_slug_factory(slug='test', parent__version=v1)
+        with pytest.raises(ValidationError):
+            pslug.validate_unique()
 
 
 @pytest.mark.django_db

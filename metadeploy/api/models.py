@@ -2,6 +2,7 @@ import itertools
 
 from django.conf import settings
 from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Count
 from django.utils.text import slugify
@@ -229,10 +230,18 @@ class PlanSlug(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        unique_together = (
-            ('slug', 'parent'),
+    def validate_unique(self, *args, **kwargs):
+        super().validate_unique(*args, **kwargs)
+        qs = PlanSlug.objects.filter(
+            parent__version=self.parent.version,
+            slug=self.slug,
         )
+        if qs.exists():
+            raise ValidationError({
+                'slug': ["This must be unique for the Plan's Version."],
+            })
+
+    class Meta:
         ordering = ('-created_at',)
 
     def __str__(self):
