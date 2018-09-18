@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from ...models import Product, Version, Plan
+from ...models import Product, ProductCategory, Version, Plan
 
 
 class Command(BaseCommand):
@@ -21,6 +21,8 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        sf_category = ProductCategory.objects.create(title='salesforce')
+        co_category = ProductCategory.objects.create(title='community')
         product1 = Product.objects.create(
             title=f'Sample Salesforce Product',
             description=(
@@ -33,7 +35,7 @@ class Command(BaseCommand):
                     'id ornare arcu. Viverra tellus in hac habitasse platea '
                     'dictumst. Nulla facilisi etiam dignissim diam.'
                 ),
-            category='salesforce',
+            category=sf_category,
         )
         version1 = self.create_version(product1)
         self.create_plan(version1)
@@ -56,7 +58,7 @@ class Command(BaseCommand):
         product2 = Product.objects.create(
             title=f'Red Salesforce Product',
             description=f'This product should have a red icon.',
-            category='salesforce',
+            category=sf_category,
             color='#c23934',
         )
         version2 = self.create_version(product2)
@@ -65,7 +67,7 @@ class Command(BaseCommand):
         product3 = Product.objects.create(
             title=f'Custom Icon Salesforce Product',
             description=f'This product should have a custom icon.',
-            category='salesforce',
+            category=sf_category,
             icon_url=(
                     'https://lightningdesignsystem.com/assets/images'
                     '/avatar3.jpg'
@@ -77,7 +79,7 @@ class Command(BaseCommand):
         product4 = Product.objects.create(
             title=f'Custom SLDS Icon Salesforce Product',
             description=f'This product should have a custom SLDS icon.',
-            category='salesforce',
+            category=sf_category,
             slds_icon_category='utility',
             slds_icon_name='world',
         )
@@ -98,7 +100,7 @@ class Command(BaseCommand):
                         'hac habitasse platea dictumst. Nulla facilisi etiam '
                         'dignissim diam.'
                     ),
-                category='community',
+                category=co_category,
             )
             version = self.create_version(product)
             self.create_plan(version)

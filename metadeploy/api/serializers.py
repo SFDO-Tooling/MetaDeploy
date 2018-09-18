@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from .models import (
     Product,
+    Job,
     Version,
     Plan,
 )
@@ -52,7 +53,7 @@ class VersionSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    category = serializers.CharField(source='get_category_display')
+    category = serializers.CharField(source='category.title')
     most_recent_version = VersionSerializer()
 
     class Meta:
@@ -66,4 +67,19 @@ class ProductSerializer(serializers.ModelSerializer):
             'icon',
             'image',
             'most_recent_version',
+        )
+
+
+class JobSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(
+        default=serializers.CurrentUserDefault(),
+    )
+
+    class Meta:
+        model = Job
+        fields = (
+            'user',
+            'instance_url',
+            'repo_url',
+            'flow_name',
         )

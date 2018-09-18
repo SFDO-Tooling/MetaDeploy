@@ -1,8 +1,13 @@
+from django.conf import settings
 from django.db import models
 
 from model_utils import Choices
 
 from colorfield.fields import ColorField
+
+
+class ProductCategory(models.Model):
+    title = models.CharField(max_length=256)
 
 
 class Product(models.Model):
@@ -21,10 +26,9 @@ class Product(models.Model):
 
     title = models.CharField(max_length=256)
     description = models.TextField()
-    category = models.CharField(
-        choices=CATEGORY_CHOICES,
-        default='salesforce',
-        max_length=256,
+    category = models.ForeignKey(
+        ProductCategory,
+        on_delete=models.PROTECT,
     )
     color = ColorField(blank=True)
     image = models.ImageField()
@@ -61,6 +65,18 @@ class Product(models.Model):
                 'name': self.slds_icon_name,
             }
         return None
+
+
+class Job(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+    )
+    instance_url = models.URLField()
+    repo_url = models.URLField()
+    flow_name = models.CharField(max_length=64)
+    enqueued_at = models.DateTimeField(null=True)
+    job_id = models.UUIDField(null=True)
 
 
 class VersionManager(models.Manager):
