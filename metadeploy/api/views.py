@@ -1,5 +1,3 @@
-from django.db.models import Count
-
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import (
     permissions,
@@ -20,9 +18,7 @@ from .models import (
 
 class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
-    queryset = Product.objects.annotate(
-        version__count=Count('version'),
-    ).filter(version__count__gte=1)
+    queryset = Product.objects.published()
 
 
 class JobViewSet(viewsets.ModelViewSet):

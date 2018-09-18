@@ -3,11 +3,15 @@ import itertools
 from django.conf import settings
 from django.core.validators import RegexValidator
 from django.db import models
+from django.db.models import Count
 from django.utils.text import slugify
 
 from model_utils import Choices
 
 from colorfield.fields import ColorField
+
+
+VERSION_STRING = r'^[a-zA-Z0-9._+-]+$'
 
 
 def find_unique_slug(original, slug_class):
@@ -32,11 +36,14 @@ class ProductCategory(models.Model):
         return self.title
 
 
+class ProductQuerySet(models.QuerySet):
+    def published(self):
+        return self.annotate(
+            version__count=Count('version'),
+        ).filter(version__count__gte=1)
+
+
 class Product(models.Model):
-    CATEGORY_CHOICES = (
-        ('salesforce', "Salesforce"),
-        ('community', "Community"),
-    )
     SLDS_ICON_CHOICES = (
         ('', ''),
         ('action', 'action'),
@@ -45,6 +52,8 @@ class Product(models.Model):
         ('standard', 'standard'),
         ('utility', 'utility'),
     )
+
+    objects = ProductQuerySet.as_manager()
 
     title = models.CharField(max_length=256)
     description = models.TextField()
@@ -56,7 +65,9 @@ class Product(models.Model):
     image = models.ImageField()
     icon_url = models.URLField(
         blank=True,
-        help_text='This will take precedence over Color and the SLDS Icons.',
+        help_text=(
+            'This will take precedence over Color and the SLDS Icons.'
+        ),
     )
     slds_icon_category = models.CharField(
         choices=SLDS_ICON_CHOICES,
@@ -120,10 +131,14 @@ class ProductSlug(models.Model):
     is_active = models.BooleanField(
         default=True,
         help_text=(
-            'The most recently-created active slug for a Product is the '
-            'default slug.'
+            'If multiple slugs are active, we will default to the most '
+            'recent.'
         ),
     )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ('-created_at',)
 
     def __str__(self):
         return self.slug
@@ -152,7 +167,7 @@ class Version(models.Model):
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
     label = models.CharField(
         max_length=1024,
-        validators=[RegexValidator(regex=r'^[a-zA-Z0-9._+-]+$')],
+        validators=[RegexValidator(regex=VERSION_STRING)],
     )
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -227,15 +242,22 @@ class PlanSlug(models.Model):
     to a particular model, and even if the slug changes and someone uses
     an old slug, we can redirect them appropriately.
     """
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField()
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
     is_active = models.BooleanField(
         default=True,
         help_text=(
-            'The most recently-created active slug for a Plan is the '
-            'default slug.'
+            'If multiple slugs are active, we will default to the most '
+            'recent.'
         ),
     )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = (
+            ('slug', 'plan'),
+        )
+        ordering = ('-created_at',)
 
     def __str__(self):
         return self.slug
