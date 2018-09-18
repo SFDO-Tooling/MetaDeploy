@@ -314,6 +314,54 @@ GITHUB_TOKEN = env('GITHUB_TOKEN')
 # Raven / Sentry
 SENTRY_DSN = env('SENTRY_DSN', default='')
 
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'verbose': {
+            '()': 'metadeploy.logfmt.LogfmtFormatter',
+            'format': (
+                '%(levelname)s %(asctime)s %(module)s %(process)d '
+                '%(thread)d %(message)s'
+            ),
+        },
+        "rq_console": {
+            "format": "%(asctime)s %(message)s",
+            "datefmt": "%H:%M:%S",
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
+        "rq_console": {
+            "level": "DEBUG",
+            "class": "rq.utils.ColorizingStreamHandler",
+            "formatter": "rq_console",
+            "exclude": ["%(asctime)s"],
+        },
+    },
+    'loggers': {
+        'django.db.backends': {
+            'level': 'ERROR',
+            'handlers': ['console'],
+            'propagate': False,
+        },
+        'django.server': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'rq.worker': {
+            "handlers": ["rq_console"],
+            "level": "DEBUG"
+        }
+    },
+}
+
 if SENTRY_DSN:
     INSTALLED_APPS += ['raven.contrib.django.raven_compat']
     RAVEN_CONFIG = {
@@ -327,65 +375,22 @@ if SENTRY_DSN:
     ] + MIDDLEWARE
 
     if not DEBUG:
-        LOGGING = {
-            'version': 1,
-            'disable_existing_loggers': True,
-            'root': {
-                'level': 'WARNING',
-                'handlers': ['sentry'],
-            },
-            'formatters': {
-                'verbose': {
-                    'format': (
-                        '%(levelname)s %(asctime)s %(module)s %(process)d '
-                        '%(thread)d %(message)s'
-                    ),
-                },
-                "rq_console": {
-                    "format": "%(asctime)s %(message)s",
-                    "datefmt": "%H:%M:%S",
-                },
-            },
-            'handlers': {
-                'sentry': {
-                    'level': 'ERROR',
-                    'class': (
-                        'raven.contrib.django.raven_compat.handlers.'
-                        'SentryHandler'
-                    ),
-                    'tags': {'custom-tag': 'x'},
-                },
-                'console': {
-                    'level': 'DEBUG',
-                    'class': 'logging.StreamHandler',
-                    'formatter': 'verbose'
-                },
-                "rq_console": {
-                    "level": "DEBUG",
-                    "class": "rq.utils.ColorizingStreamHandler",
-                    "formatter": "rq_console",
-                    "exclude": ["%(asctime)s"],
-                },
-            },
-            'loggers': {
-                'django.db.backends': {
-                    'level': 'ERROR',
-                    'handlers': ['console'],
-                    'propagate': False,
-                },
-                'raven': {
-                    'level': 'DEBUG',
-                    'handlers': ['console'],
-                    'propagate': False,
-                },
-                'sentry.errors': {
-                    'level': 'DEBUG',
-                    'handlers': ['console'],
-                    'propagate': False,
-                },
-                "rq.worker": {
-                    "handlers": ["rq_console", "sentry"],
-                    "level": "DEBUG"
-                },
-            },
+        # Extend the logging dict with Sentry settings:
+        LOGGING['root'] = {
+            'level': 'WARNING',
+            'handlers': ['sentry'],
         }
+        LOGGING['handlers']['sentry'] = {
+            'level': 'ERROR',
+            'class': (
+                'raven.contrib.django.raven_compat.handlers.'
+                'SentryHandler'
+            ),
+            'tags': {'custom-tag': 'x'},
+        }
+        LOGGING['loggers']['raven'] = {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+            'propagate': False,
+        }
+        LOGGING['loggers']['rq.worker']['handlers'].append('sentry')
