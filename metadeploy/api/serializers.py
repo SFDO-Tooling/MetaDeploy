@@ -30,6 +30,7 @@ class PlanSerializer(serializers.ModelSerializer):
             'title',
             'version',
             'tier',
+            'slug',
         )
 
 
