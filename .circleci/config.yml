@@ -136,11 +136,13 @@ jobs:
       - run:
           name: Wait for postgres server
           command: |
-            TIMEOUT=5
-            until psql -h $PG_HOST -U $PG_USER -d $PG_DATABASE -c "select 1" > /dev/null 2>&1 || [ $TIMEOUT -eq 0 ]; do
-              echo "Waiting for postgres server, $((TIMEOUT--)) remaining attempts..."
+            for i in `seq 1 10`;
+            do
+              nc -z localhost 5432 && echo Success && exit 0
+              echo -n .
               sleep 1
             done
+            echo Failed waiting for Postgres && exit 1
       - run:
           name: Run Database Migrations
           command: |
