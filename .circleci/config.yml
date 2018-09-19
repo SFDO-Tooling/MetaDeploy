@@ -134,6 +134,13 @@ jobs:
       - restore_cache:
           key: v1-metadeploy-py-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
       - run:
+          name: Wait for postgres server
+          command: |
+            TIMEOUT=5 until psql -h $PG_HOST -U $PG_USER -d $PG_DATABASE -c "select 1" > /dev/null 2>&1 || [ $TIMEOUT -eq 0 ]; do
+              echo "Waiting for postgres server, $((TIMEOUT--)) remaining attempts..."
+              sleep 1
+            done
+      - run:
           name: Run Database Migrations
           command: |
             . venv/bin/activate
