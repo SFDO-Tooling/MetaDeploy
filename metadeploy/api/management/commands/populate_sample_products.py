@@ -1,10 +1,12 @@
 from django.core.management.base import BaseCommand
+from django.utils.text import slugify
 
 from ...models import (
     Product,
     ProductCategory,
     Version,
     Plan,
+    PlanSlug,
 )
 
 
@@ -34,10 +36,10 @@ class Command(BaseCommand):
         product.ensure_slug()
         return product
 
-    def create_version(self, product):
+    def create_version(self, product, label='0.3.1'):
         return Version.objects.create(
             product=product,
-            label='0.3.1',
+            label=label,
             description='This is a description of the product version.',
         )
 
@@ -47,7 +49,10 @@ class Command(BaseCommand):
             title=title,
             tier=tier,
         )
-        plan.ensure_slug()
+        PlanSlug.objects.create(
+            parent=plan,
+            slug=slugify(title),
+        )
         return plan
 
     def handle(self, *args, **options):
@@ -57,6 +62,8 @@ class Command(BaseCommand):
             title=f'Sample Salesforce Product',
             category=sf_category,
         )
+        old_version = self.create_version(product1, '0.2.0')
+        self.create_plan(old_version)
         version1 = self.create_version(product1)
         self.create_plan(version1)
         self.create_plan(

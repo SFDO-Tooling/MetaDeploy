@@ -160,7 +160,7 @@ describe('<VersionDetail />', () => {
       additional_plans: [],
     };
     const product = Object.assign({}, defaultState.products[0]);
-    product.versions = [version];
+    product.versions = { [version.label]: version };
 
     test('renders version detail', () => {
       const { getByText } = setup({
@@ -174,9 +174,12 @@ describe('<VersionDetail />', () => {
     });
   });
 
-  describe('versions not yet fetched, and version is not found', () => {
-    test('GETs product versions from api', () => {
-      const url = addUrlParams(window.api_urls.version_list(), { product: 1 });
+  describe('version not yet fetched, and version is not found', () => {
+    test('GETs product version from api', () => {
+      const url = addUrlParams(window.api_urls.version_list(), {
+        product: 1,
+        label: '2.0.0',
+      });
       fetchMock.spy();
 
       const { getByText, queryByText } = setup({
@@ -190,9 +193,9 @@ describe('<VersionDetail />', () => {
     });
   });
 
-  describe('versions already fetched, and version is not found', () => {
+  describe('version already fetched, and version is not found', () => {
     const product = Object.assign({}, defaultState.products[0]);
-    product.versions = [];
+    product.versions = { '2.0.0': null };
 
     test('redirects to product_detail', () => {
       jest.spyOn(routes, 'product_detail');

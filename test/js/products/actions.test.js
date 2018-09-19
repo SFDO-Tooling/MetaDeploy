@@ -60,31 +60,51 @@ describe('fetchProducts', () => {
   });
 });
 
-describe('fetchVersions', () => {
-  let url;
+describe('fetchVersion', () => {
+  let baseUrl;
 
   beforeAll(() => {
-    url = addUrlParams(window.api_urls.version_list(), { product: 1 });
+    baseUrl = window.api_urls.version_list();
   });
 
   afterEach(fetchMock.restore);
 
   describe('success', () => {
-    test('GETs versions from api', () => {
+    test('GETs version from api', () => {
       const store = storeWithApi({});
-      const version = { id: 2 };
-      fetchMock.getOnce(url, [version]);
+      const filters = { product: 1, label: '2' };
+      const version = { id: 2, label: '2' };
+      fetchMock.getOnce(addUrlParams(baseUrl, filters), [version]);
       const started = {
-        type: 'FETCH_VERSIONS_STARTED',
-        payload: 1,
+        type: 'FETCH_VERSION_STARTED',
+        payload: filters,
       };
       const succeeded = {
-        type: 'FETCH_VERSIONS_SUCCEEDED',
-        payload: { id: 1, versions: [version] },
+        type: 'FETCH_VERSION_SUCCEEDED',
+        payload: { ...filters, version },
       };
 
       expect.assertions(1);
-      return store.dispatch(actions.fetchVersions(1)).then(() => {
+      return store.dispatch(actions.fetchVersion(filters)).then(() => {
+        expect(store.getActions()).toEqual([started, succeeded]);
+      });
+    });
+
+    test('stores null if no version returned from api', () => {
+      const store = storeWithApi({});
+      const filters = { product: 1, label: '2' };
+      fetchMock.getOnce(addUrlParams(baseUrl, filters), []);
+      const started = {
+        type: 'FETCH_VERSION_STARTED',
+        payload: filters,
+      };
+      const succeeded = {
+        type: 'FETCH_VERSION_SUCCEEDED',
+        payload: { ...filters, version: null },
+      };
+
+      expect.assertions(1);
+      return store.dispatch(actions.fetchVersion(filters)).then(() => {
         expect(store.getActions()).toEqual([started, succeeded]);
       });
     });
@@ -93,26 +113,30 @@ describe('fetchVersions', () => {
   describe('error', () => {
     test('throws Error', () => {
       const store = storeWithApi({});
-      fetchMock.getOnce(url, 'string');
+      const filters = { product: 1, label: '2' };
+      fetchMock.getOnce(addUrlParams(baseUrl, filters), 'string');
 
       expect.assertions(1);
-      return expect(store.dispatch(actions.fetchVersions(1))).rejects.toThrow();
+      return expect(
+        store.dispatch(actions.fetchVersion(filters)),
+      ).rejects.toThrow();
     });
 
-    test('dispatches FETCH_VERSIONS_FAILED action', () => {
+    test('dispatches FETCH_VERSION_FAILED action', () => {
       const store = storeWithApi({});
-      fetchMock.getOnce(url, 500);
+      const filters = { product: 1, label: '2' };
+      fetchMock.getOnce(addUrlParams(baseUrl, filters), 500);
       const started = {
-        type: 'FETCH_VERSIONS_STARTED',
-        payload: 1,
+        type: 'FETCH_VERSION_STARTED',
+        payload: filters,
       };
       const failed = {
-        type: 'FETCH_VERSIONS_FAILED',
-        payload: 1,
+        type: 'FETCH_VERSION_FAILED',
+        payload: filters,
       };
 
       expect.assertions(2);
-      return store.dispatch(actions.fetchVersions(1)).catch(() => {
+      return store.dispatch(actions.fetchVersion(filters)).catch(() => {
         expect(store.getActions()).toEqual([started, failed]);
         expect(window.console.error).toHaveBeenCalled();
       });

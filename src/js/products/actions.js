@@ -4,27 +4,34 @@ import { addUrlParams } from 'utils/api';
 
 import type { ThunkAction } from 'redux-thunk';
 
-import type { Products, Versions } from 'products/reducer';
+import type { Products, Version } from 'products/reducer';
 
+type VersionFilters = {| product: number, label: string |};
 type FetchProductsStarted = { type: 'FETCH_PRODUCTS_STARTED' };
 type FetchProductsSucceeded = {
   type: 'FETCH_PRODUCTS_SUCCEEDED',
   payload: Products,
 };
 type FetchProductsFailed = { type: 'FETCH_PRODUCTS_FAILED' };
-type FetchVersionsStarted = { type: 'FETCH_VERSIONS_STARTED', payload: number };
-type FetchVersionsSucceeded = {
-  type: 'FETCH_VERSIONS_SUCCEEDED',
-  payload: { id: number, versions: Versions },
+type FetchVersionStarted = {
+  type: 'FETCH_VERSION_STARTED',
+  payload: VersionFilters,
 };
-type FetchVersionsFailed = { type: 'FETCH_VERSIONS_FAILED', payload: number };
+type FetchVersionSucceeded = {
+  type: 'FETCH_VERSION_SUCCEEDED',
+  payload: { ...VersionFilters, version: Version | null },
+};
+type FetchVersionFailed = {
+  type: 'FETCH_VERSION_FAILED',
+  payload: VersionFilters,
+};
 export type ProductsAction =
   | FetchProductsStarted
   | FetchProductsSucceeded
   | FetchProductsFailed
-  | FetchVersionsStarted
-  | FetchVersionsSucceeded
-  | FetchVersionsFailed;
+  | FetchVersionStarted
+  | FetchVersionSucceeded
+  | FetchVersionFailed;
 
 export const fetchProducts = (): ThunkAction => (
   dispatch,
@@ -49,14 +56,14 @@ export const fetchProducts = (): ThunkAction => (
     });
 };
 
-export const fetchVersions = (productId: number): ThunkAction => (
+export const fetchVersion = (filters: VersionFilters): ThunkAction => (
   dispatch,
   getState,
   { apiFetch },
 ) => {
-  dispatch({ type: 'FETCH_VERSIONS_STARTED', payload: productId });
+  dispatch({ type: 'FETCH_VERSION_STARTED', payload: filters });
   const baseUrl = window.api_urls.version_list();
-  return apiFetch(addUrlParams(baseUrl, { product: productId }))
+  return apiFetch(addUrlParams(baseUrl, { ...filters }))
     .then(response => {
       if (!Array.isArray(response)) {
         const error = (new Error('Invalid response received'): {
@@ -66,12 +73,12 @@ export const fetchVersions = (productId: number): ThunkAction => (
         throw error;
       }
       return dispatch({
-        type: 'FETCH_VERSIONS_SUCCEEDED',
-        payload: { id: productId, versions: response },
+        type: 'FETCH_VERSION_SUCCEEDED',
+        payload: { ...filters, version: response[0] || null },
       });
     })
     .catch(err => {
-      dispatch({ type: 'FETCH_VERSIONS_FAILED', payload: productId });
+      dispatch({ type: 'FETCH_VERSION_FAILED', payload: filters });
       throw err;
     });
 };

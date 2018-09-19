@@ -9,7 +9,7 @@ import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
 import routes from 'utils/routes';
-import { fetchVersions } from 'products/actions';
+import { fetchVersion } from 'products/actions';
 
 import ProductIcon from 'components/products/icon';
 
@@ -41,23 +41,28 @@ let ProductDetail = ({ product }: { product: ProductType | null }) => {
 let VersionDetail = ({
   product,
   version,
-  doFetchVersions,
+  versionLabel,
+  doFetchVersion,
 }: {
   product: ProductType | null,
   version: VersionType | null,
-  doFetchVersions: typeof fetchVersions,
+  versionLabel: ?string,
+  doFetchVersion: typeof fetchVersion,
 }) => {
   if (!product) {
     // No product... redirect to products-list
     return <Redirect to={routes.product_list()} />;
   }
   if (!version) {
-    if (product.versions) {
+    if (
+      !versionLabel ||
+      (product.versions && product.versions[versionLabel] === null)
+    ) {
       // Versions have already been fetched... redirect to product-detail
       return <Redirect to={routes.product_detail(product.slug)} />;
     }
     // Fetch version from API
-    doFetchVersions(product.id);
+    doFetchVersion({ product: product.id, label: versionLabel });
     return <Spinner />;
   }
   return (
@@ -149,22 +154,18 @@ const selectVersionLabel = (
 const selectVersion = createSelector(
   [selectProduct, selectVersionLabel],
   (product: ProductType | null, versionLabel: ?string): VersionType | null => {
-    if (!product) {
-      // Will redirect back to products-list
+    if (!product || !versionLabel) {
+      // Will redirect back to products-list if no product,
+      // or product-detail if no versionLabel
       return null;
     }
     if (product.most_recent_version.label === versionLabel) {
       // Will display version-detail
       return product.most_recent_version;
     }
-    if (product.versions) {
-      const version = product.versions.find(v => v.label === versionLabel);
-      if (!version) {
-        // Will redirect back to product-detail
-        return null;
-      }
-      // Will display version-detail
-      return version;
+    if (product.versions && product.versions[versionLabel]) {
+      // Will display version-detail (or redirect to product-detail if `null`)
+      return product.versions[versionLabel];
     }
     // Will fetch product versions from API
     return null;
@@ -178,10 +179,11 @@ const selectProductDetail = (appState, props) => ({
 const selectVersionDetail = (appState, props) => ({
   product: selectProduct(appState, props),
   version: selectVersion(appState, props),
+  versionLabel: selectVersionLabel(appState, props),
 });
 
 const actions = {
-  doFetchVersions: fetchVersions,
+  doFetchVersion: fetchVersion,
 };
 
 ProductDetail = connect(selectProductDetail)(ProductDetail);

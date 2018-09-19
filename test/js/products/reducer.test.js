@@ -30,7 +30,7 @@ describe('reducer', () => {
     expect(actual).toEqual(expected);
   });
 
-  test('handles FETCH_VERSIONS_SUCCEEDED action', () => {
+  test('handles FETCH_VERSION_SUCCEEDED action', () => {
     const product1 = {
       id: 1,
       title: 'Product 1',
@@ -44,12 +44,12 @@ describe('reducer', () => {
       label: 'A Version',
     };
     const modifiedProduct2 = Object.assign({}, product2, {
-      versions: [version],
+      versions: { [version.label]: version },
     });
     const expected = [product1, modifiedProduct2];
     const actual = reducer([product1, product2], {
-      type: 'FETCH_VERSIONS_SUCCEEDED',
-      payload: { id: 2, versions: [version] },
+      type: 'FETCH_VERSION_SUCCEEDED',
+      payload: { product: 2, label: version.label, version },
     });
 
     expect(actual).toEqual(expected);

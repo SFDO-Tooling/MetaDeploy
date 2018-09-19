@@ -29,7 +29,7 @@ export type Product = {
   } | null,
   +image: string | null,
   +most_recent_version: Version,
-  +versions?: Versions,
+  +versions?: { [string]: Version | null },
 };
 export type Products = Array<Product>;
 
@@ -37,15 +37,18 @@ const reducer = (products: Products = [], action: ProductsAction): Products => {
   switch (action.type) {
     case 'FETCH_PRODUCTS_SUCCEEDED':
       return action.payload;
-    case 'FETCH_VERSIONS_SUCCEEDED': {
-      const { id, versions } = action.payload;
-      return products.map(product => {
-        if (product.id === id) {
-          return Object.assign({}, product, {
+    case 'FETCH_VERSION_SUCCEEDED': {
+      const { product, label, version } = action.payload;
+      return products.map(p => {
+        if (p.id === product) {
+          const versions = Object.assign({}, p.versions, {
+            [label]: version,
+          });
+          return Object.assign({}, p, {
             versions,
           });
         }
-        return product;
+        return p;
       });
     }
   }

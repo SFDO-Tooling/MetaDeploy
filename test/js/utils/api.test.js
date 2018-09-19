@@ -51,4 +51,11 @@ describe('addUrlParams', () => {
 
     return expect(actual).toBe(expected);
   });
+
+  test('handles empty params', () => {
+    const expected = `${window.location.origin}/foobar`;
+    const actual = addUrlParams('/foobar');
+
+    return expect(actual).toBe(expected);
+  });
 });
