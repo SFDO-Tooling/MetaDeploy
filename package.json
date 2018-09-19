@@ -39,6 +39,7 @@
     "file-loader": "^2.0.0",
     "flow-bin": "^0.80.0",
     "flow-types": "^1.0.0",
+    "git-format-staged": "^2.1.0",
     "html-webpack-plugin": "^3.2.0",
     "http-proxy-middleware": "^0.19.0",
     "husky": "^0.14.3",
@@ -46,7 +47,6 @@
     "jest-dom": "^1.12.0",
     "jest-junit": "^5.1.0",
     "koa-connect": "^2.0.1",
-    "lint-staged": "^7.2.2",
     "mini-css-extract-plugin": "^0.4.2",
     "node-sass": "^4.9.3",
     "npm-run-all": "^4.1.3",
@@ -89,7 +89,11 @@
     "whatwg-fetch": "^3.0.0"
   },
   "scripts": {
-    "precommit": "lint-staged",
+    "precommit:flake8": "git-format-staged --no-write -f 'flake8 -' '*.py'",
+    "precommit:prettier": "git-format-staged -f 'prettier --stdin --stdin-filepath \"{}\"' '*.js' '*.scss'",
+    "precommit:eslint": "git-format-staged --no-write -f 'eslint --stdin' '*.js'",
+    "precommit:stylelint": "git-format-staged --no-write -f 'stylelint' '*.scss'",
+    "precommit": "npm-run-all -p precommit:prettier precommit:flake8 -p precommit:eslint precommit:stylelint",
     "preparecommitmsg": "./bin/prepare-commit-msg",
     "webpack:serve": "webpack-serve --config webpack.dev.js",
     "django:serve": "python manage.py runserver_plus --cert-file cert",
@@ -110,21 +114,5 @@
     "build": "webpack --config webpack.dev.js",
     "prod": "webpack --config webpack.prod.js",
     "heroku-postbuild": "yarn prod"
-  },
-  "lint-staged": {
-    "*.js": [
-      "prettier --write",
-      "eslint",
-      "git add"
-    ],
-    "*.scss": [
-      "prettier --write",
-      "stylelint",
-      "git add"
-    ],
-    "*.py": [
-      "flake8",
-      "git add"
-    ]
   }
 }
