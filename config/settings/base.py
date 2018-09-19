@@ -120,6 +120,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'log_request_id.middleware.RequestIDMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -314,10 +315,16 @@ GITHUB_TOKEN = env('GITHUB_TOKEN')
 # Raven / Sentry
 SENTRY_DSN = env('SENTRY_DSN', default='')
 
-
+LOG_REQUEST_ID_HEADER = "HTTP_X_REQUEST_ID"
+LOG_REQUESTS = True
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
+    'filters': {
+        'request_id': {
+            '()': 'log_request_id.filters.RequestIDFilter'
+        }
+    },
     'formatters': {
         'verbose': {
             '()': 'metadeploy.logfmt.LogfmtFormatter',
@@ -326,22 +333,19 @@ LOGGING = {
                 '%(thread)d %(message)s'
             ),
         },
-        "rq_console": {
-            "format": "%(asctime)s %(message)s",
-            "datefmt": "%H:%M:%S",
-        },
     },
     'handlers': {
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
+            'filters': ['request_id'],
             'formatter': 'verbose'
         },
         "rq_console": {
             "level": "DEBUG",
             "class": "rq.utils.ColorizingStreamHandler",
-            "formatter": "rq_console",
-            "exclude": ["%(asctime)s"],
+            'filters': [],
+            "formatter": "verbose",
         },
     },
     'loggers': {
