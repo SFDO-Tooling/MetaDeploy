@@ -13,7 +13,6 @@ export type Version = {
   +secondary_plan: Plan | null,
   +additional_plans: Plans,
 };
-export type Versions = Array<Version>;
 export type Product = {
   +id: number,
   +slug: string,
