@@ -47,8 +47,7 @@ class SalesforceOAuth2CustomAdapter(
     def base_url(self):
         custom_domain = self.request.GET.get(
             'custom_domain',
-            # XXX To test social login failure, comment this out:
-            # self.request.session.get('custom_domain'),
+            self.request.session.get('custom_domain'),
         )
         self.request.session['custom_domain'] = custom_domain
         return 'https://{}.my.salesforce.com'.format(custom_domain)
