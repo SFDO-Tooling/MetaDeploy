@@ -6,17 +6,21 @@ import { Link } from 'react-router-dom';
 
 import routes from 'utils/routes';
 
-const FourOhFour = () => (
+const FourOhFour = ({ children }: { children?: React.Node }) => (
   <DocumentTitle title="404 | MetaDeploy">
     <div
       className="slds-text-longform
         slds-p-around_x-large"
     >
       <h1 className="slds-text-heading_large">Oh No!</h1>
-      <p>
-        That page cannot be found. Try the&nbsp;
-        <Link to={routes.home()}>home page</Link>?
-      </p>
+      {children === undefined ? (
+        <p>
+          That page cannot be found. Try the&nbsp;
+          <Link to={routes.home()}>home page</Link>?
+        </p>
+      ) : (
+        children
+      )}
     </div>
   </DocumentTitle>
 );

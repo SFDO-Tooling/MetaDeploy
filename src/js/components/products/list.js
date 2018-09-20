@@ -39,7 +39,7 @@ class ProductsList extends React.Component<{
         // No products; show empty message
         contents = (
           <div className="slds-text-longform">
-            <h1 className="slds-text-heading_large">Uh oh.</h1>
+            <h1 className="slds-text-heading_large">¯\_(ツ)_/¯</h1>
             <p>We couldn&rsquo;t find any products.</p>
           </div>
         );

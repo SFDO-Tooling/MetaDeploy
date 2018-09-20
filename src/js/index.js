@@ -9,7 +9,7 @@ import logger from 'redux-logger';
 import thunk from 'redux-thunk';
 import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import { combineReducers, createStore, applyMiddleware } from 'redux';
+import { createStore, applyMiddleware } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 
 import actionSprite from '@salesforce-ux/design-system/assets/icons/action-sprite/svg/symbols.svg';
@@ -23,16 +23,17 @@ import routes from 'utils/routes';
 import { cache, persistMiddleware } from 'utils/caching';
 import { logError } from 'utils/logging';
 
-import userReducer from 'accounts/reducer';
+import reducer from 'app/reducer';
+
 import { login, doLocalLogout } from 'accounts/actions';
 
-import productsReducer from 'products/reducer';
 import { fetchProducts } from 'products/actions';
 
 import ErrorBoundary from 'components/error';
 import Footer from 'components/footer';
 import FourOhFour from 'components/404';
 import Header from 'components/header';
+import PlanDetail from 'components/plans/detail';
 import ProductsList from 'components/products/list';
 import { ProductDetail, VersionDetail } from 'components/products/detail';
 
@@ -63,6 +64,7 @@ const App = () => (
                 path={routes.product_list()}
                 component={ProductsList}
               />
+              <Route path={routes.plan_detail()} component={PlanDetail} />
               <Route path={routes.version_detail()} component={VersionDetail} />
               <Route path={routes.product_detail()} component={ProductDetail} />
               <Route component={FourOhFour} />
@@ -82,10 +84,7 @@ cache
     if (el) {
       // Create store
       const appStore = createStore(
-        combineReducers({
-          user: userReducer,
-          products: productsReducer,
-        }),
+        reducer,
         data,
         composeWithDevTools(
           applyMiddleware(
