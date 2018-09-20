@@ -50,10 +50,10 @@ class LogfmtFormatter(ServerFormatter):
             record,
             'request_id',
             None,
-        ) or getattr(
-            record,
-            'msg',  # TODO: Parse the Job ID out of the msg :(
-            None,
+            # ) or getattr(
+            #     record,
+            #     'msg',  # TODO: Parse the Job ID out of the msg :(
+            #     None,
         ) or 'unknown'
 
     def _get_tag(self, record):
@@ -68,7 +68,7 @@ class LogfmtFormatter(ServerFormatter):
         msg = self._escape_quotes(record.getMessage())
         tag = self._get_tag(record)
         rest = self.format_line(getattr(record, 'context', {}))
-        return ' '.join([
+        return ' '.join(filter(None, [
             f'id={id_}',  # TODO: get-id method
             f'at={record.levelname}',
             f'time={time}',
@@ -76,4 +76,4 @@ class LogfmtFormatter(ServerFormatter):
             f'tag={tag}',
             f'module={record.module}',
             f'{rest}',
-        ])
+        ]))
