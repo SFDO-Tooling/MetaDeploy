@@ -5,13 +5,13 @@ import DocumentTitle from 'react-document-title';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
+import { fetchVersion } from 'products/actions';
+import { gatekeeper } from 'products/utils';
 import {
-  gatekeeper,
   selectProduct,
   selectVersion,
   selectVersionLabel,
 } from 'components/products/detail';
-import { fetchVersion } from 'products/actions';
 
 import BodyContainer from 'components/bodyContainer';
 import ProductHeader from 'components/products/header';

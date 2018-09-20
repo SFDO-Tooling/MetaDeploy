@@ -2,66 +2,25 @@
 
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
-import Spinner from '@salesforce/design-system-react/components/spinner';
 import { Redirect, Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
 import routes from 'utils/routes';
 import { fetchVersion } from 'products/actions';
+import { gatekeeper } from 'products/utils';
 
 import BodyContainer from 'components/bodyContainer';
-import PlanNotFound from 'components/plans/plan404';
 import ProductHeader from 'components/products/header';
 import ProductNotFound from 'components/products/product404';
-import VersionNotFound from 'components/products/version404';
 
 import type { Match } from 'react-router-dom';
 
 import type { AppState } from 'app/reducer';
-import type { Plan as PlanType } from 'plans/reducer';
 import type {
   Product as ProductType,
   Version as VersionType,
 } from 'products/reducer';
-
-export const gatekeeper = ({
-  product,
-  version,
-  versionLabel,
-  plan,
-  doFetchVersion,
-}: {
-  product: ProductType | null,
-  version?: VersionType | null,
-  versionLabel?: ?string,
-  plan?: PlanType | null,
-  doFetchVersion?: typeof fetchVersion,
-}): React.Node | false => {
-  if (product === null) {
-    return <ProductNotFound />;
-  }
-  if (version === null) {
-    if (
-      !versionLabel ||
-      !doFetchVersion ||
-      (product.versions && product.versions[versionLabel] === null)
-    ) {
-      // Versions have already been fetched...
-      return <VersionNotFound product={product} />;
-    }
-    // Fetch version from API
-    doFetchVersion({ product: product.id, label: versionLabel });
-    return <Spinner />;
-  }
-  if (plan === null) {
-    if (!version) {
-      return <VersionNotFound product={product} />;
-    }
-    return <PlanNotFound product={product} version={version} />;
-  }
-  return false;
-};
 
 let ProductDetail = ({ product }: { product: ProductType | null }) => {
   const blocked = gatekeeper({ product });

@@ -22,7 +22,7 @@ describe('<Products />', () => {
     };
     const { getByText } = setup(initialState);
 
-    expect(getByText('Uh oh.')).toBeVisible();
+    expect(getByText('¯\\_(ツ)_/¯')).toBeVisible();
   });
 
   test('renders products list (1 category)', () => {
