@@ -3,6 +3,7 @@ import pytest
 from django.core.exceptions import (
     ObjectDoesNotExist,
     MultipleObjectsReturned,
+    ValidationError,
 )
 
 from ..models import Version
@@ -69,9 +70,46 @@ class TestPlansProperties:
 
 
 @pytest.mark.django_db
+def test_product_category_str(product_category_factory):
+    product_category = product_category_factory(title='My Category')
+    assert str(product_category) == 'My Category'
+
+
+@pytest.mark.django_db
 def test_product_str(product_factory):
     product = product_factory(title='My Product')
     assert str(product) == 'My Product'
+
+
+@pytest.mark.django_db
+class TestProductSlug:
+    def test_present(self, product_factory, product_slug_factory):
+        product = product_factory(title='a product')
+        product.productslug_set.all().delete()
+        product_slug_factory(parent=product, slug='a-slug-1', is_active=False)
+        product_slug_factory(parent=product, slug='a-slug-2', is_active=True)
+        product_slug_factory(parent=product, slug='a-slug-3', is_active=True)
+        product_slug_factory(parent=product, slug='a-slug-4', is_active=False)
+
+        assert product.slug == 'a-slug-3'
+
+    def test_absent(self, product_factory):
+        product = product_factory(title='a product')
+        product.productslug_set.all().delete()
+
+        assert product.slug is None
+
+    def test_ensure_slug(self, product_factory):
+        product = product_factory(title='a product')
+        product.productslug_set.all().delete()
+
+        product.ensure_slug()
+
+        assert product.slug == 'a-product'
+
+    def test_str(self, product_slug_factory):
+        product_slug = product_slug_factory(slug='a-slug')
+        assert str(product_slug) == 'a-slug'
 
 
 @pytest.mark.django_db
@@ -81,6 +119,46 @@ def test_product_most_recent_version(product_factory, version_factory):
     v2 = version_factory(label='v0.2.0', product=product)
 
     assert product.most_recent_version == v2
+
+
+@pytest.mark.django_db
+class TestPlanSlug:
+    def test_present(self, plan_factory, plan_slug_factory):
+        plan = plan_factory(title='a plan')
+        plan.planslug_set.all().delete()
+        plan_slug_factory(parent=plan, slug='a-slug-1', is_active=False)
+        plan_slug_factory(parent=plan, slug='a-slug-2', is_active=True)
+        plan_slug_factory(parent=plan, slug='a-slug-3', is_active=True)
+        plan_slug_factory(parent=plan, slug='a-slug-4', is_active=False)
+
+        assert plan.slug == 'a-slug-3'
+
+    def test_absent(self, plan_factory):
+        plan = plan_factory(title='a plan')
+        plan.planslug_set.all().delete()
+
+        assert plan.slug is None
+
+    def test_ensure_slug(self, plan_factory):
+        plan = plan_factory(title='a plan')
+        plan.planslug_set.all().delete()
+
+        plan.ensure_slug()
+
+        assert plan.slug == 'a-plan'
+
+    def test_str(self, plan_slug_factory):
+        plan_slug = plan_slug_factory(slug='a-slug')
+        assert str(plan_slug) == 'a-slug'
+
+    def test_unique_per_version(self, plan_slug_factory, version_factory):
+        v1 = version_factory()
+        v2 = version_factory()
+        plan_slug_factory(slug='test', parent__version=v1)
+        plan_slug_factory(slug='test', parent__version=v2)
+        pslug = plan_slug_factory(slug='test', parent__version=v1)
+        with pytest.raises(ValidationError):
+            pslug.validate_unique()
 
 
 @pytest.mark.django_db

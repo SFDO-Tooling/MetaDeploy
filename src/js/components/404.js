@@ -12,7 +12,7 @@ const FourOhFour = () => (
       className="slds-text-longform
         slds-p-around_x-large"
     >
-      <h1 className="slds-text-heading_large">Oh Noes!</h1>
+      <h1 className="slds-text-heading_large">Oh No!</h1>
       <p>
         That page cannot be found. Try the&nbsp;
         <Link to={routes.home()}>home page</Link>?

@@ -1,8 +1,6 @@
-/* eslint-disable max-len, react/no-deprecated */
-
+import 'isomorphic-fetch';
 import 'jest-dom/extend-expect';
 import 'react-testing-library/cleanup-after-each';
-import React from 'react';
 
 beforeAll(() => {
   window.api_urls = {
@@ -11,24 +9,8 @@ beforeAll(() => {
     salesforce_test_login: () => '/accounts/salesforce-test/login/',
     salesforce_custom_login: () => '/accounts/salesforce-custom/login/',
     product_list: () => '/api/products/',
+    version_list: () => '/api/versions/',
   };
   window.console.error = jest.fn();
+  window.console.warn = jest.fn();
 });
-
-/**
- * Since React v15.5, there's a warning printed if you access `React.createClass` or `React.PropTypes`
- * https://reactjs.org/blog/2017/04/07/react-v15.5.0.html#new-deprecation-warnings
- *
- * `import * as React from 'react'` is required by Flowtype https://flow.org/en/docs/react/types/ ,
- * but the * causes both those deprecated getters to be called.
- * This is particularly annoying in Jest since every test prints two useless warnings.
- *
- * This file can be used as a Jest setup file to simply delete those features of the `react` package.
- * You don't need the deprecation warning. Your tests will simply fail if you're still using the old ways.
- * https://facebook.github.io/jest/docs/en/configuration.html#setupfiles-array
- *
- * HT: https://gist.github.com/turadg/9bcf08a7279e82a030a645250639fe6e
- */
-
-delete React.createClass;
-delete React.PropTypes;

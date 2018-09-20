@@ -18,16 +18,14 @@ describe('logError', () => {
       const err = new Error('foobar');
       logError(err);
 
-      expect(window.Raven.captureException).toHaveBeenCalledWith(err);
+      expect(window.Raven.captureException).toHaveBeenCalledWith(err, {});
     });
 
     test('captures message', () => {
       const extra = { foo: 'bar' };
       logError('foobar', extra);
 
-      expect(window.Raven.captureMessage).toHaveBeenCalledWith('foobar', {
-        extra,
-      });
+      expect(window.Raven.captureMessage).toHaveBeenCalledWith('foobar', extra);
     });
   });
 

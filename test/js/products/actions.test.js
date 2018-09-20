@@ -3,6 +3,7 @@ import fetchMock from 'fetch-mock';
 import { storeWithApi } from './../utils';
 
 import * as actions from 'products/actions';
+import { addUrlParams } from 'utils/api';
 
 describe('fetchProducts', () => {
   afterEach(fetchMock.restore);
@@ -24,6 +25,7 @@ describe('fetchProducts', () => {
         payload: [product],
       };
 
+      expect.assertions(1);
       return store.dispatch(actions.fetchProducts()).then(() => {
         expect(store.getActions()).toEqual([started, succeeded]);
       });
@@ -51,6 +53,90 @@ describe('fetchProducts', () => {
 
       expect.assertions(2);
       return store.dispatch(actions.fetchProducts()).catch(() => {
+        expect(store.getActions()).toEqual([started, failed]);
+        expect(window.console.error).toHaveBeenCalled();
+      });
+    });
+  });
+});
+
+describe('fetchVersion', () => {
+  let baseUrl;
+
+  beforeAll(() => {
+    baseUrl = window.api_urls.version_list();
+  });
+
+  afterEach(fetchMock.restore);
+
+  describe('success', () => {
+    test('GETs version from api', () => {
+      const store = storeWithApi({});
+      const filters = { product: 1, label: '2' };
+      const version = { id: 2, label: '2' };
+      fetchMock.getOnce(addUrlParams(baseUrl, filters), [version]);
+      const started = {
+        type: 'FETCH_VERSION_STARTED',
+        payload: filters,
+      };
+      const succeeded = {
+        type: 'FETCH_VERSION_SUCCEEDED',
+        payload: { ...filters, version },
+      };
+
+      expect.assertions(1);
+      return store.dispatch(actions.fetchVersion(filters)).then(() => {
+        expect(store.getActions()).toEqual([started, succeeded]);
+      });
+    });
+
+    test('stores null if no version returned from api', () => {
+      const store = storeWithApi({});
+      const filters = { product: 1, label: '2' };
+      fetchMock.getOnce(addUrlParams(baseUrl, filters), []);
+      const started = {
+        type: 'FETCH_VERSION_STARTED',
+        payload: filters,
+      };
+      const succeeded = {
+        type: 'FETCH_VERSION_SUCCEEDED',
+        payload: { ...filters, version: null },
+      };
+
+      expect.assertions(1);
+      return store.dispatch(actions.fetchVersion(filters)).then(() => {
+        expect(store.getActions()).toEqual([started, succeeded]);
+      });
+    });
+  });
+
+  describe('error', () => {
+    test('throws Error', () => {
+      const store = storeWithApi({});
+      const filters = { product: 1, label: '2' };
+      fetchMock.getOnce(addUrlParams(baseUrl, filters), 'string');
+
+      expect.assertions(1);
+      return expect(
+        store.dispatch(actions.fetchVersion(filters)),
+      ).rejects.toThrow();
+    });
+
+    test('dispatches FETCH_VERSION_FAILED action', () => {
+      const store = storeWithApi({});
+      const filters = { product: 1, label: '2' };
+      fetchMock.getOnce(addUrlParams(baseUrl, filters), 500);
+      const started = {
+        type: 'FETCH_VERSION_STARTED',
+        payload: filters,
+      };
+      const failed = {
+        type: 'FETCH_VERSION_FAILED',
+        payload: filters,
+      };
+
+      expect.assertions(2);
+      return store.dispatch(actions.fetchVersion(filters)).catch(() => {
         expect(store.getActions()).toEqual([started, failed]);
         expect(window.console.error).toHaveBeenCalled();
       });

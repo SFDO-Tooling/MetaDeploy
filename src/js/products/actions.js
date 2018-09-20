@@ -1,19 +1,37 @@
 // @flow
 
+import { addUrlParams } from 'utils/api';
+
 import type { ThunkAction } from 'redux-thunk';
 
-import type { Products } from 'products/reducer';
+import type { Products, Version } from 'products/reducer';
 
+type VersionFilters = {| product: number, label: string |};
 type FetchProductsStarted = { type: 'FETCH_PRODUCTS_STARTED' };
 type FetchProductsSucceeded = {
   type: 'FETCH_PRODUCTS_SUCCEEDED',
   payload: Products,
 };
 type FetchProductsFailed = { type: 'FETCH_PRODUCTS_FAILED' };
+type FetchVersionStarted = {
+  type: 'FETCH_VERSION_STARTED',
+  payload: VersionFilters,
+};
+type FetchVersionSucceeded = {
+  type: 'FETCH_VERSION_SUCCEEDED',
+  payload: { ...VersionFilters, version: Version | null },
+};
+type FetchVersionFailed = {
+  type: 'FETCH_VERSION_FAILED',
+  payload: VersionFilters,
+};
 export type ProductsAction =
   | FetchProductsStarted
   | FetchProductsSucceeded
-  | FetchProductsFailed;
+  | FetchProductsFailed
+  | FetchVersionStarted
+  | FetchVersionSucceeded
+  | FetchVersionFailed;
 
 export const fetchProducts = (): ThunkAction => (
   dispatch,
@@ -34,6 +52,33 @@ export const fetchProducts = (): ThunkAction => (
     })
     .catch(err => {
       dispatch({ type: 'FETCH_PRODUCTS_FAILED' });
+      throw err;
+    });
+};
+
+export const fetchVersion = (filters: VersionFilters): ThunkAction => (
+  dispatch,
+  getState,
+  { apiFetch },
+) => {
+  dispatch({ type: 'FETCH_VERSION_STARTED', payload: filters });
+  const baseUrl = window.api_urls.version_list();
+  return apiFetch(addUrlParams(baseUrl, { ...filters }))
+    .then(response => {
+      if (!Array.isArray(response)) {
+        const error = (new Error('Invalid response received'): {
+          [string]: mixed,
+        });
+        error.response = response;
+        throw error;
+      }
+      return dispatch({
+        type: 'FETCH_VERSION_SUCCEEDED',
+        payload: { ...filters, version: response[0] || null },
+      });
+    })
+    .catch(err => {
+      dispatch({ type: 'FETCH_VERSION_FAILED', payload: filters });
       throw err;
     });
 };

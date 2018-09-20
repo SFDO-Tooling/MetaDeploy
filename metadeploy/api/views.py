@@ -1,3 +1,4 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import (
     permissions,
     viewsets,
@@ -17,7 +18,7 @@ from .models import (
 
 class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
-    queryset = Product.objects.all()
+    queryset = Product.objects.published()
 
 
 class JobViewSet(viewsets.ModelViewSet):
@@ -29,3 +30,10 @@ class JobViewSet(viewsets.ModelViewSet):
 class VersionViewSet(viewsets.ModelViewSet):
     serializer_class = VersionSerializer
     queryset = Version.objects.all()
+    filter_backends = (
+        DjangoFilterBackend,
+    )
+    filterset_fields = (
+        'product',
+        'label',
+    )

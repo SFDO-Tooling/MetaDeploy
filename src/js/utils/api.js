@@ -55,4 +55,16 @@ const getApiFetch = (onAuthFailure: () => void) => (
     });
 };
 
+// Based on https://fetch.spec.whatwg.org/#fetch-api
+export const addUrlParams = (
+  baseUrl: string,
+  params: { [string]: string | number } = {},
+) => {
+  const url = new URL(baseUrl, window.location.origin);
+  Object.keys(params).forEach(key =>
+    url.searchParams.append(key, params[key].toString()),
+  );
+  return url.toString();
+};
+
 export default getApiFetch;
