@@ -113,6 +113,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'colorfield',
     'rest_framework',
+    'django_filters',
     'metadeploy',
     'metadeploy.multisalesforce',
     'metadeploy.api',

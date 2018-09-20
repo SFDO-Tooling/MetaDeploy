@@ -19,7 +19,7 @@ module.exports = {
   // cacheDirectory: "/var/folders/76/9qsnnbp12fz9v1n_0kns7fgh0000gn/T/jest_dx",
 
   // Automatically clear mock calls and instances between every test
-  clearMocks: true,
+  // clearMocks: true,
 
   // Indicates whether the coverage information should be collected while executing the test
   collectCoverage: true,
@@ -105,7 +105,7 @@ module.exports = {
   // resolver: null,
 
   // Automatically restore mock state between every test
-  // restoreMocks: false,
+  restoreMocks: true,
 
   // The root directory that Jest should scan for tests and modules within
   // rootDir: null,

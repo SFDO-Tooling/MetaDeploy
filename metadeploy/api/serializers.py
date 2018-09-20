@@ -30,6 +30,7 @@ class PlanSerializer(serializers.ModelSerializer):
             'title',
             'version',
             'tier',
+            'slug',
         )
 
 
@@ -67,6 +68,7 @@ class ProductSerializer(serializers.ModelSerializer):
             'icon',
             'image',
             'most_recent_version',
+            'slug',
         )
 
 

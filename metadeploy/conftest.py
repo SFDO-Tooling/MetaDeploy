@@ -11,10 +11,12 @@ from allauth.socialaccount.models import (
 
 from metadeploy.api.models import (
     Product,
+    ProductSlug,
     ProductCategory,
     Job,
     Version,
     Plan,
+    PlanSlug,
 )
 
 User = get_user_model()
@@ -95,6 +97,16 @@ class ProductFactory(factory.django.DjangoModelFactory):
     icon_url = ''
     slds_icon_category = ''
     slds_icon_name = ''
+    _ensure_slug = factory.PostGenerationMethodCall('ensure_slug')
+
+
+@register
+class ProductSlugFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = ProductSlug
+
+    slug = factory.Sequence('this-is-a-slug-{}'.format)
+    parent = factory.SubFactory(ProductFactory)
 
 
 @register
@@ -114,6 +126,16 @@ class PlanFactory(factory.django.DjangoModelFactory):
 
     title = 'Sample plan'
     version = factory.SubFactory(VersionFactory)
+    _ensure_slug = factory.PostGenerationMethodCall('ensure_slug')
+
+
+@register
+class PlanSlugFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = PlanSlug
+
+    slug = factory.Sequence('this-is-a-slug-{}'.format)
+    parent = factory.SubFactory(PlanFactory)
 
 
 # TODO: We will need these eventually, but not yet:

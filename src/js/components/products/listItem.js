@@ -12,7 +12,7 @@ import type { Product as ProductType } from 'products/reducer';
 
 const ProductItem = ({ item }: { item: ProductType }) => (
   <Link
-    to={routes.product_detail(item.id)}
+    to={routes.product_detail(item.slug)}
     className="slds-text-link_reset
       slds-p-around_small
       slds-size_1-of-1

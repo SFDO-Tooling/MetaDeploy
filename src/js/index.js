@@ -29,11 +29,12 @@ import { login, doLocalLogout } from 'accounts/actions';
 import productsReducer from 'products/reducer';
 import { fetchProducts } from 'products/actions';
 
+import ErrorBoundary from 'components/error';
 import Footer from 'components/footer';
 import FourOhFour from 'components/404';
 import Header from 'components/header';
-import ProductDetail from 'components/products/detail';
 import ProductsList from 'components/products/list';
+import { ProductDetail, VersionDetail } from 'components/products/detail';
 
 const SF_logo = require('images/salesforce-logo.png');
 
@@ -44,23 +45,32 @@ const App = () => (
         slds-grid_frame
         slds-grid_vertical"
     >
-      <Header />
-      <div
-        className="slds-grow
-          slds-shrink-none"
-      >
-        <Switch>
-          <Route
-            exact
-            path={routes.home()}
-            render={() => <Redirect to={routes.product_list()} />}
-          />
-          <Route exact path={routes.product_list()} component={ProductsList} />
-          <Route path={routes.product_detail()} component={ProductDetail} />
-          <Route component={FourOhFour} />
-        </Switch>
-      </div>
-      <Footer logoSrc={SF_logo} />
+      <ErrorBoundary>
+        <Header />
+        <div
+          className="slds-grow
+            slds-shrink-none"
+        >
+          <ErrorBoundary>
+            <Switch>
+              <Route
+                exact
+                path={routes.home()}
+                render={() => <Redirect to={routes.product_list()} />}
+              />
+              <Route
+                exact
+                path={routes.product_list()}
+                component={ProductsList}
+              />
+              <Route path={routes.version_detail()} component={VersionDetail} />
+              <Route path={routes.product_detail()} component={ProductDetail} />
+              <Route component={FourOhFour} />
+            </Switch>
+          </ErrorBoundary>
+        </div>
+        <Footer logoSrc={SF_logo} />
+      </ErrorBoundary>
     </div>
   </DocumentTitle>
 );

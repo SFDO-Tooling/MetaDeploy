@@ -7,7 +7,7 @@ describe('<Login />', () => {
   describe('login click', () => {
     test('updates `window.location.href` on login click', () => {
       const { getByText } = render(<Login />);
-      window.location.assign = jest.fn();
+      jest.spyOn(window.location, 'assign');
       fireEvent.click(getByText('Log In'));
       fireEvent.click(getByText('Sandbox or Scratch Org'));
       const expected = window.api_urls.salesforce_test_login();

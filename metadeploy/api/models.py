@@ -1,20 +1,101 @@
+import itertools
+
 from django.conf import settings
+from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Count
+from django.utils.text import slugify
 
 from model_utils import Choices
 
 from colorfield.fields import ColorField
 
 
+VERSION_STRING = r'^[a-zA-Z0-9._+-]+$'
+
+
+class SlugMixin:
+    """
+    Please provide:
+
+        self.slug_class: the class that implements slugs for this model.
+        self.slug_queryset: the name of the queryset for slugs for this
+            model.
+    """
+
+    def _find_unique_slug(self, original):
+        max_length = 50  # This from SlugField
+
+        candidate = original
+        for i in itertools.count(1):
+            if not self.slug_class.objects.filter(slug=candidate).exists():
+                return candidate
+
+            suffix = f'-{i}'
+            candidate = candidate[:max_length - len(suffix)] + suffix
+
+    @property
+    def slug(self):
+        slug = self.slug_queryset.filter(is_active=True).first()
+        if slug:
+            return slug.slug
+        return None
+
+    def ensure_slug(self):
+        if not self.slug_queryset.filter(is_active=True).exists():
+            slug = slugify(self.title)
+            slug = self._find_unique_slug(slug)
+            self.slug_class.objects.create(
+                parent=self,
+                slug=slug,
+                is_active=True,
+            )
+
+
 class ProductCategory(models.Model):
     title = models.CharField(max_length=256)
 
+    class Meta:
+        verbose_name_plural = "product categories"
 
-class Product(models.Model):
-    CATEGORY_CHOICES = (
-        ('salesforce', "Salesforce"),
-        ('community', "Community"),
+    def __str__(self):
+        return self.title
+
+
+class ProductSlug(models.Model):
+    """
+    Rather than have a slugfield directly on the Product model, we have
+    a related model. That way, we can have a bunch of slugs that pertain
+    to a particular model, and even if the slug changes and someone uses
+    an old slug, we can redirect them appropriately.
+    """
+    slug = models.SlugField(unique=True)
+    parent = models.ForeignKey('Product', on_delete=models.PROTECT)
+    is_active = models.BooleanField(
+        default=True,
+        help_text=(
+            'If multiple slugs are active, we will default to the most '
+            'recent.'
+        ),
     )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ('-created_at',)
+
+    def __str__(self):
+        return self.slug
+
+
+class ProductQuerySet(models.QuerySet):
+    def published(self):
+        return self.annotate(
+            version__count=Count('version'),
+        ).filter(version__count__gte=1)
+
+
+class Product(SlugMixin, models.Model):
     SLDS_ICON_CHOICES = (
         ('', ''),
         ('action', 'action'),
@@ -23,6 +104,8 @@ class Product(models.Model):
         ('standard', 'standard'),
         ('utility', 'utility'),
     )
+
+    objects = ProductQuerySet.as_manager()
 
     title = models.CharField(max_length=256)
     description = models.TextField()
@@ -34,7 +117,9 @@ class Product(models.Model):
     image = models.ImageField()
     icon_url = models.URLField(
         blank=True,
-        help_text='This will take precedence over Color and the SLDS Icons.',
+        help_text=(
+            'This will take precedence over Color and the SLDS Icons.'
+        ),
     )
     slds_icon_category = models.CharField(
         choices=SLDS_ICON_CHOICES,
@@ -43,6 +128,12 @@ class Product(models.Model):
         max_length=32,
     )
     slds_icon_name = models.CharField(max_length=64, blank=True)
+
+    slug_class = ProductSlug
+
+    @property
+    def slug_queryset(self):
+        return self.productslug_set
 
     def __str__(self):
         return self.title
@@ -88,7 +179,10 @@ class Version(models.Model):
     objects = VersionManager()
 
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
-    label = models.CharField(max_length=1024)
+    label = models.CharField(
+        max_length=1024,
+        validators=[RegexValidator(regex=VERSION_STRING)],
+    )
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     is_production = models.BooleanField(default=True)
@@ -118,7 +212,43 @@ class Version(models.Model):
         return self.plan_set.filter(tier=Plan.Tier.additional).order_by('id')
 
 
-class Plan(models.Model):
+class PlanSlug(models.Model):
+    """
+    Rather than have a slugfield directly on the Plan model, we have
+    a related model. That way, we can have a bunch of slugs that pertain
+    to a particular model, and even if the slug changes and someone uses
+    an old slug, we can redirect them appropriately.
+    """
+    slug = models.SlugField()
+    parent = models.ForeignKey('Plan', on_delete=models.PROTECT)
+    is_active = models.BooleanField(
+        default=True,
+        help_text=(
+            'If multiple slugs are active, we will default to the most '
+            'recent.'
+        ),
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def validate_unique(self, *args, **kwargs):
+        super().validate_unique(*args, **kwargs)
+        qs = PlanSlug.objects.filter(
+            parent__version=self.parent.version,
+            slug=self.slug,
+        )
+        if qs.exists():
+            raise ValidationError({
+                'slug': ["This must be unique for the Plan's Version."],
+            })
+
+    class Meta:
+        ordering = ('-created_at',)
+
+    def __str__(self):
+        return self.slug
+
+
+class Plan(SlugMixin, models.Model):
     Tier = Choices('primary', 'secondary', 'additional')
 
     title = models.CharField(max_length=128)
@@ -128,6 +258,12 @@ class Plan(models.Model):
         default=Tier.primary,
         max_length=64,
     )
+
+    slug_class = PlanSlug
+
+    @property
+    def slug_queryset(self):
+        return self.planslug_set
 
     def natural_key(self):
         return (self.version, self.title)
