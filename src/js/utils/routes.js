@@ -3,17 +3,21 @@
 const routes = {
   home: () => '/',
   product_list: () => '/products',
-  product_detail: (productSlug?: string = ':productSlug') =>
-    `/products/${productSlug}`,
-  version_detail: (
-    productSlug?: string = ':productSlug',
-    versionLabel?: string = ':versionLabel',
-  ) => `/products/${productSlug}/${versionLabel}`,
-  plan_detail: (
-    productSlug?: string = ':productSlug',
-    versionLabel?: string = ':versionLabel',
-    planSlug?: string = ':planSlug',
-  ) => `/products/${productSlug}/${versionLabel}/${planSlug}`,
+  product_detail: (productSlug: string) => `/products/${productSlug}`,
+  version_detail: (productSlug: string, versionLabel: string) =>
+    `/products/${productSlug}/${versionLabel}`,
+  plan_detail: (productSlug: string, versionLabel: string, planSlug: string) =>
+    `/products/${productSlug}/${versionLabel}/${planSlug}`,
+};
+
+export const routePatterns = {
+  home: () => '/',
+  auth_error: () =>
+    '/accounts/salesforce-(custom|production|test)/login/callback',
+  product_list: () => '/products',
+  product_detail: () => '/products/:productSlug',
+  version_detail: () => `/products/:productSlug/:versionLabel`,
+  plan_detail: () => '/products/:productSlug/:versionLabel/:planSlug',
 };
 
 export default routes;
