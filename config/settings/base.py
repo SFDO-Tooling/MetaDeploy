@@ -121,6 +121,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'log_request_id.middleware.RequestIDMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -136,6 +137,7 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             str(PROJECT_ROOT / 'dist'),
+            str(PROJECT_ROOT / 'templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -268,7 +270,9 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = False
-
+SOCIALACCOUNT_ADAPTER = (
+    'metadeploy.multisalesforce.adapter.CustomSocialAccountAdapter'
+)
 
 JS_REVERSE_JS_VAR_NAME = 'api_urls'
 JS_REVERSE_EXCLUDE_NAMESPACES = ['admin']
@@ -312,6 +316,60 @@ GITHUB_TOKEN = env('GITHUB_TOKEN')
 # Raven / Sentry
 SENTRY_DSN = env('SENTRY_DSN', default='')
 
+LOG_REQUESTS = True
+LOG_REQUEST_ID_HEADER = "HTTP_X_REQUEST_ID"
+GENERATE_REQUEST_ID_IF_NOT_IN_HEADER = True
+REQUEST_ID_RESPONSE_HEADER = "X-Request-ID"
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'filters': {
+        'request_id': {
+            '()': 'log_request_id.filters.RequestIDFilter'
+        }
+    },
+    'formatters': {
+        'verbose': {
+            '()': 'metadeploy.logfmt.LogfmtFormatter',
+            'format': (
+                '%(levelname)s %(asctime)s %(module)s %(process)d '
+                '%(thread)d %(message)s'
+            ),
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'filters': ['request_id'],
+            'formatter': 'verbose'
+        },
+        "rq_console": {
+            "level": "DEBUG",
+            "class": "rq.utils.ColorizingStreamHandler",
+            'filters': [],
+            "formatter": "verbose",
+        },
+    },
+    'loggers': {
+        'django.db.backends': {
+            'level': 'ERROR',
+            'handlers': ['console'],
+            'propagate': False,
+        },
+        'django.server': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'rq.worker': {
+            "handlers": ["rq_console"],
+            "level": "DEBUG"
+        }
+    },
+}
+
 if SENTRY_DSN:
     INSTALLED_APPS += ['raven.contrib.django.raven_compat']
     RAVEN_CONFIG = {
@@ -325,65 +383,22 @@ if SENTRY_DSN:
     ] + MIDDLEWARE
 
     if not DEBUG:
-        LOGGING = {
-            'version': 1,
-            'disable_existing_loggers': True,
-            'root': {
-                'level': 'WARNING',
-                'handlers': ['sentry'],
-            },
-            'formatters': {
-                'verbose': {
-                    'format': (
-                        '%(levelname)s %(asctime)s %(module)s %(process)d '
-                        '%(thread)d %(message)s'
-                    ),
-                },
-                "rq_console": {
-                    "format": "%(asctime)s %(message)s",
-                    "datefmt": "%H:%M:%S",
-                },
-            },
-            'handlers': {
-                'sentry': {
-                    'level': 'ERROR',
-                    'class': (
-                        'raven.contrib.django.raven_compat.handlers.'
-                        'SentryHandler'
-                    ),
-                    'tags': {'custom-tag': 'x'},
-                },
-                'console': {
-                    'level': 'DEBUG',
-                    'class': 'logging.StreamHandler',
-                    'formatter': 'verbose'
-                },
-                "rq_console": {
-                    "level": "DEBUG",
-                    "class": "rq.utils.ColorizingStreamHandler",
-                    "formatter": "rq_console",
-                    "exclude": ["%(asctime)s"],
-                },
-            },
-            'loggers': {
-                'django.db.backends': {
-                    'level': 'ERROR',
-                    'handlers': ['console'],
-                    'propagate': False,
-                },
-                'raven': {
-                    'level': 'DEBUG',
-                    'handlers': ['console'],
-                    'propagate': False,
-                },
-                'sentry.errors': {
-                    'level': 'DEBUG',
-                    'handlers': ['console'],
-                    'propagate': False,
-                },
-                "rq.worker": {
-                    "handlers": ["rq_console", "sentry"],
-                    "level": "DEBUG"
-                },
-            },
+        # Extend the logging dict with Sentry settings:
+        LOGGING['root'] = {
+            'level': 'WARNING',
+            'handlers': ['sentry'],
         }
+        LOGGING['handlers']['sentry'] = {
+            'level': 'ERROR',
+            'class': (
+                'raven.contrib.django.raven_compat.handlers.'
+                'SentryHandler'
+            ),
+            'tags': {'custom-tag': 'x'},
+        }
+        LOGGING['loggers']['raven'] = {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+            'propagate': False,
+        }
+        LOGGING['loggers']['rq.worker']['handlers'].append('sentry')

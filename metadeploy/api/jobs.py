@@ -15,6 +15,7 @@ import os
 import sys
 import contextlib
 from tempfile import TemporaryDirectory
+import logging
 
 import git
 
@@ -33,6 +34,7 @@ from django.utils import timezone
 from .models import Job
 
 
+logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
@@ -145,6 +147,7 @@ run_flow_job = job(run_flow)
 
 
 def enqueuer():
+    logger.debug('Enqueuer live', extra={'tag': 'jobs.enqueuer'})
     for j in Job.objects.filter(enqueued_at=None):
         j.job_id = run_flow_job.delay(
             j.user,
