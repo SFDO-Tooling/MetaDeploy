@@ -19,9 +19,9 @@ import standardSprite from '@salesforce-ux/design-system/assets/icons/standard-s
 import utilitySprite from '@salesforce-ux/design-system/assets/icons/utility-sprite/svg/symbols.svg';
 
 import getApiFetch from 'utils/api';
-import routes from 'utils/routes';
 import { cache, persistMiddleware } from 'utils/caching';
 import { logError } from 'utils/logging';
+import { routePatterns } from 'utils/routes';
 
 import userReducer from 'accounts/reducer';
 import { login, doLocalLogout } from 'accounts/actions';
@@ -29,6 +29,7 @@ import { login, doLocalLogout } from 'accounts/actions';
 import productsReducer from 'products/reducer';
 import { fetchProducts } from 'products/actions';
 
+import AuthError from 'components/authError';
 import ErrorBoundary from 'components/error';
 import Footer from 'components/footer';
 import FourOhFour from 'components/404';
@@ -55,16 +56,25 @@ const App = () => (
             <Switch>
               <Route
                 exact
-                path={routes.home()}
-                render={() => <Redirect to={routes.product_list()} />}
+                path={routePatterns.home()}
+                render={() => <Redirect to={routePatterns.product_list()} />}
               />
               <Route
                 exact
-                path={routes.product_list()}
+                path={routePatterns.product_list()}
                 component={ProductsList}
               />
-              <Route path={routes.version_detail()} component={VersionDetail} />
-              <Route path={routes.product_detail()} component={ProductDetail} />
+              <Route
+                exact
+                path={routePatterns.version_detail()}
+                component={VersionDetail}
+              />
+              <Route
+                exact
+                path={routePatterns.product_detail()}
+                component={ProductDetail}
+              />
+              <Route path={routePatterns.auth_error()} component={AuthError} />
               <Route component={FourOhFour} />
             </Switch>
           </ErrorBoundary>
