@@ -66,6 +66,7 @@ const PlanDetail = ({
           >
             <h3 className="slds-text-heading_small">Preflight</h3>
             <p>{plan.preflight_message}</p>
+            <p>{plan.title}</p>
           </div>
         </BodyContainer>
       </div>
