@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Count
 from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
 
 from model_utils import Choices
 
@@ -274,9 +275,29 @@ class Plan(SlugMixin, models.Model):
 
 
 class Step(models.Model):
+    Kind = Choices(
+        ('metadata', _('Metadata')),
+        ('onetime', _('One Time Apex')),
+        ('managed', _('Managed Package')),
+        ('data', _('Data')),
+    )
+    KindIcon = Choices(
+        'metadata',
+        'onetime',
+        'managed',
+        'data',
+    )
+
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
     name = models.CharField(max_length=1024)
     is_required = models.BooleanField(default=True)
+    is_recommended = models.BooleanField(default=True)
+    kind = models.CharField(choices=Kind, default=Kind.metadata, max_length=64)
+    kind_icon = models.CharField(
+        choices=KindIcon,
+        default=KindIcon.metadata,
+        max_length=64,
+    )
     order_key = models.PositiveIntegerField(default=0)
 
     class Meta:

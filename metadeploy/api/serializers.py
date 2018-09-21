@@ -30,6 +30,9 @@ class StepSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'is_required',
+            'is_recommended',
+            'kind',
+            'kind_icon',
         )
 
 
