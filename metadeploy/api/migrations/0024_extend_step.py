@@ -29,18 +29,4 @@ class Migration(migrations.Migration):
                 max_length=64,
             ),
         ),
-        migrations.AddField(
-            model_name='step',
-            name='kind_icon',
-            field=models.CharField(
-                choices=[
-                    ('metadata', 'metadata'),
-                    ('onetime', 'onetime'),
-                    ('managed', 'managed'),
-                    ('data', 'data'),
-                ],
-                default='metadata',
-                max_length=64,
-            ),
-        ),
     ]

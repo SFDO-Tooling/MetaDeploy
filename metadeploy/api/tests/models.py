@@ -182,6 +182,29 @@ def test_step_str(step_factory):
 
 
 @pytest.mark.django_db
+class TestStepKindIcon:
+    def test_metadata(self, step_factory):
+        step = step_factory(kind='metadata')
+        assert step.kind_icon == 'metadata'
+
+    def test_onetime(self, step_factory):
+        step = step_factory(kind='onetime')
+        assert step.kind_icon == 'onetime'
+
+    def test_managed(self, step_factory):
+        step = step_factory(kind='managed')
+        assert step.kind_icon == 'managed'
+
+    def test_data(self, step_factory):
+        step = step_factory(kind='data')
+        assert step.kind_icon == 'data'
+
+    def test_unknown(self, step_factory):
+        step = step_factory(kind='unknown')
+        assert step.kind_icon == 'unknown'
+
+
+@pytest.mark.django_db
 class TestVersionNaturalKey:
     def test_version_natural_key(self, version_factory):
         version = version_factory(label='v0.1.0')

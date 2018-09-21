@@ -281,23 +281,12 @@ class Step(models.Model):
         ('managed', _('Managed Package')),
         ('data', _('Data')),
     )
-    KindIcon = Choices(
-        'metadata',
-        'onetime',
-        'managed',
-        'data',
-    )
 
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
     name = models.CharField(max_length=1024)
     is_required = models.BooleanField(default=True)
     is_recommended = models.BooleanField(default=True)
     kind = models.CharField(choices=Kind, default=Kind.metadata, max_length=64)
-    kind_icon = models.CharField(
-        choices=KindIcon,
-        default=KindIcon.metadata,
-        max_length=64,
-    )
     order_key = models.PositiveIntegerField(default=0)
 
     class Meta:
@@ -305,6 +294,19 @@ class Step(models.Model):
             'order_key',
             'name'
         )
+
+    @property
+    def kind_icon(self):
+        # TODO: what should these values actually be?
+        if self.kind == self.Kind.metadata:
+            return 'metadata'
+        if self.kind == self.Kind.onetime:
+            return 'onetime'
+        if self.kind == self.Kind.managed:
+            return 'managed'
+        if self.kind == self.Kind.data:
+            return 'data'
+        return 'unknown'
 
     def __str__(self):
         return f'Step {self.name} of {self.plan.title} ({self.order_key})'
