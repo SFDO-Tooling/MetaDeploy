@@ -34,7 +34,7 @@ class StepSerializer(serializers.ModelSerializer):
 
 
 class PlanSerializer(serializers.ModelSerializer):
-    steps = StepSerializer(many=True)
+    steps = StepSerializer(many=True, source='step_set')
 
     class Meta:
         model = Plan

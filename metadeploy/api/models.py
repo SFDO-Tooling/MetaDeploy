@@ -277,3 +277,13 @@ class Step(models.Model):
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
     name = models.CharField(max_length=1024)
     is_required = models.BooleanField(default=True)
+    order_key = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = (
+            'order_key',
+            'name'
+        )
+
+    def __str__(self):
+        return f'Step {self.name} of {self.plan.title} ({self.order_key})'
