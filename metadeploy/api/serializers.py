@@ -5,6 +5,7 @@ from .models import (
     Job,
     Version,
     Plan,
+    Step,
 )
 
 from django.contrib.auth import get_user_model
@@ -22,15 +23,29 @@ class FullUserSerializer(serializers.ModelSerializer):
         )
 
 
+class StepSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Step
+        fields = (
+            'id',
+            'name',
+            'is_required',
+        )
+
+
 class PlanSerializer(serializers.ModelSerializer):
+    steps = StepSerializer(many=True)
+
     class Meta:
         model = Plan
         fields = (
             'id',
             'title',
             'version',
+            'preflight_message',
             'tier',
             'slug',
+            'steps',
         )
 
 

@@ -253,6 +253,7 @@ class Plan(SlugMixin, models.Model):
 
     title = models.CharField(max_length=128)
     version = models.ForeignKey(Version, on_delete=models.PROTECT)
+    preflight_message = models.CharField(blank=True, max_length=2048)
     tier = models.CharField(
         choices=Tier,
         default=Tier.primary,
@@ -270,3 +271,9 @@ class Plan(SlugMixin, models.Model):
 
     def __str__(self):
         return "{}, Plan {}".format(self.version, self.title)
+
+
+class Step(models.Model):
+    plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
+    name = models.CharField(max_length=1024)
+    is_required = models.BooleanField(default=True)
