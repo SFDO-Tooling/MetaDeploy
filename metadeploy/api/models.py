@@ -297,16 +297,15 @@ class Step(models.Model):
 
     @property
     def kind_icon(self):
-        # TODO: what should these values actually be?
         if self.kind == self.Kind.metadata:
-            return 'metadata'
+            return 'package'
         if self.kind == self.Kind.onetime:
-            return 'onetime'
+            return 'apex'
         if self.kind == self.Kind.managed:
-            return 'managed'
+            return 'archive'
         if self.kind == self.Kind.data:
-            return 'data'
-        return 'unknown'
+            return 'paste'
+        return None
 
     def __str__(self):
         return f'Step {self.name} of {self.plan.title} ({self.order_key})'

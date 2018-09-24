@@ -24,6 +24,8 @@ class FullUserSerializer(serializers.ModelSerializer):
 
 
 class StepSerializer(serializers.ModelSerializer):
+    kind = serializers.CharField(source='get_kind_display')
+
     class Meta:
         model = Step
         fields = (
