@@ -2,6 +2,9 @@
 
 import * as React from 'react';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
+import { Link } from 'react-router-dom';
+
+import routes from 'utils/routes';
 
 import ProductIcon from 'components/products/icon';
 
@@ -17,13 +20,18 @@ const ProductHeader = ({
   product: ProductType,
   version: VersionType,
 }) => (
-  <PageHeader
-    className="page-header
-      slds-p-around_x-large"
-    title={product.title}
-    info={version.label}
-    icon={<ProductIcon item={product} />}
-  />
+  <Link
+    to={routes.version_detail(product.slug, version.label)}
+    className="slds-text-link_reset"
+  >
+    <PageHeader
+      className="page-header
+        slds-p-around_x-large"
+      title={product.title}
+      info={version.label}
+      icon={<ProductIcon item={product} />}
+    />
+  </Link>
 );
 
 export default ProductHeader;
