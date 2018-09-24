@@ -31,6 +31,7 @@ class StepSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'name',
+            'description',
             'is_required',
             'is_recommended',
             'kind',

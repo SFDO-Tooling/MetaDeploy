@@ -1,6 +1,8 @@
 // @flow
 
 import * as React from 'react';
+import Accordion from '@salesforce/design-system-react/components/accordion';
+import AccordionPanel from '@salesforce/design-system-react/components/accordion/panel';
 import Card from '@salesforce/design-system-react/components/card';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import DataTable from '@salesforce/design-system-react/components/data-table';
@@ -12,6 +14,42 @@ import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import type { Plan as PlanType, Step as StepType } from 'plans/reducer';
 
 type DataCellProps = { [string]: mixed, item?: StepType };
+
+class NameDataCell extends React.Component<
+  DataCellProps,
+  { expanded: boolean },
+> {
+  constructor(props: DataCellProps) {
+    super(props);
+    this.state = { expanded: false };
+  }
+
+  render(): React.Node {
+    const name = this.props.item && this.props.item.name;
+    const description = this.props.item && this.props.item.description;
+    return (
+      <DataTableCell title={name} {...this.props}>
+        {description ? (
+          <Accordion className="slds-cell-wrap">
+            <AccordionPanel
+              id={this.props.item && this.props.item.id.toString()}
+              summary={name}
+              expanded={this.state.expanded}
+              onTogglePanel={() => {
+                this.setState({ expanded: !this.state.expanded });
+              }}
+            >
+              {description}
+            </AccordionPanel>
+          </Accordion>
+        ) : (
+          name
+        )}
+      </DataTableCell>
+    );
+  }
+}
+NameDataCell.displayName = DataTableCell.displayName;
 
 const KindDataCell = (props: DataCellProps): React.Node => {
   const value = props.item && props.item.kind;
@@ -58,7 +96,7 @@ const InstallDataCell = (props: DataCellProps): React.Node => {
       <Checkbox
         checked={required || recommended}
         disabled={required}
-        className="slds-p-vertical_xx-small"
+        className="slds-p-vertical_x-small"
         labels={{ label: recommended ? 'recommended' : '' }}
       />
     </DataTableCell>
@@ -113,7 +151,9 @@ const StepsTable = ({ plan }: { plan: PlanType }) => (
         property="name"
         primaryColumn
         truncate
-      />
+      >
+        <NameDataCell />
+      </DataTableColumn>
       <DataTableColumn key="kind" label="Type" property="kind" truncate>
         <KindDataCell />
       </DataTableColumn>

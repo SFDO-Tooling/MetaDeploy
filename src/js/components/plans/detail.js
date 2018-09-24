@@ -82,8 +82,7 @@ const PlanDetail = ({
           </div>
           {plan.steps.length ? (
             <div
-              className="slds-text-longform
-                slds-p-around_medium
+              className="slds-p-around_medium
                 slds-size_1-of-1"
             >
               <StepsTable plan={plan} />

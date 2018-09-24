@@ -81,6 +81,10 @@ class Command(BaseCommand):
         self.create_step(
             plan=plan,
             name='Opportunity Record Types',
+            description=(
+                f'This is a description of the step. Could be any step, '
+                'optional or required. The description wraps.'
+            ),
             is_recommended=False,
         )
         self.create_step(

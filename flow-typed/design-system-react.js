@@ -106,6 +106,18 @@ declare module '@salesforce/design-system-react/components/tooltip' {
   declare export default Component;
 }
 
+declare module '@salesforce/design-system-react/components/accordion' {
+  import typeof { Component } from 'react';
+
+  declare export default Component;
+}
+
+declare module '@salesforce/design-system-react/components/accordion/panel' {
+  import typeof { Component } from 'react';
+
+  declare export default Component;
+}
+
 declare module '@salesforce/design-system-react/components/settings' {
   declare export default { [string]: Function };
 }

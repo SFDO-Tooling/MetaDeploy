@@ -7,6 +7,7 @@ export type Step = {
   +kind_icon: string | null,
   +is_required: boolean,
   +is_recommended: boolean,
+  +description: string,
 };
 export type Plan = {
   +id: number,

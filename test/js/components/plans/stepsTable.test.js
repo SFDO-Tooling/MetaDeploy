@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from 'react-testing-library';
+import { render, fireEvent } from 'react-testing-library';
 
 import StepsTable from 'components/plans/stepsTable';
 
@@ -11,6 +11,7 @@ const defaultPlan = {
     {
       id: 1,
       name: 'Step 1',
+      description: 'This is a step description.',
       kind: 'Metadata',
       kind_icon: 'package',
       is_required: true,
@@ -59,5 +60,14 @@ describe('<StepsTable />', () => {
     expect(getByText('Step 2')).toBeVisible();
     expect(getByText('Step 3')).toBeVisible();
     expect(getByText('Step 4')).toBeVisible();
+  });
+
+  describe('<NameDataCell> click', () => {
+    test('expands accordion', () => {
+      const { getByText } = setup();
+      fireEvent.click(getByText('Step 1'));
+
+      expect(getByText('This is a step description.')).toBeVisible();
+    });
   });
 });
