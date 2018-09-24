@@ -185,23 +185,23 @@ def test_step_str(step_factory):
 class TestStepKindIcon:
     def test_metadata(self, step_factory):
         step = step_factory(kind='metadata')
-        assert step.kind_icon == 'metadata'
+        assert step.kind_icon == 'package'
 
     def test_onetime(self, step_factory):
         step = step_factory(kind='onetime')
-        assert step.kind_icon == 'onetime'
+        assert step.kind_icon == 'apex'
 
     def test_managed(self, step_factory):
         step = step_factory(kind='managed')
-        assert step.kind_icon == 'managed'
+        assert step.kind_icon == 'archive'
 
     def test_data(self, step_factory):
         step = step_factory(kind='data')
-        assert step.kind_icon == 'data'
+        assert step.kind_icon == 'paste'
 
     def test_unknown(self, step_factory):
         step = step_factory(kind='unknown')
-        assert step.kind_icon == 'unknown'
+        assert step.kind_icon is None
 
 
 @pytest.mark.django_db
