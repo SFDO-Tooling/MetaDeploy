@@ -21,11 +21,11 @@ const PlanNotFound = ({
 }) => (
   <FourOhFour>
     <p>
-      We can&rsquo;t find the plan you&rsquo;re looking for. Try&nbsp;
+      We can’t find the plan you’re looking for. Try{' '}
       <Link to={routes.version_detail(product.slug, version.label)}>
         another plan
-      </Link>
-      &nbsp;from that product version?
+      </Link>{' '}
+      from that product version?
     </p>
   </FourOhFour>
 );

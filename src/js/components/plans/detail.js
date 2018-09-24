@@ -1,6 +1,7 @@
 // @flow
 
 import * as React from 'react';
+import Button from '@salesforce/design-system-react/components/button';
 import DocumentTitle from 'react-document-title';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
@@ -16,6 +17,7 @@ import {
 import BodyContainer from 'components/bodyContainer';
 import ProductHeader from 'components/products/header';
 import ProductNotFound from 'components/products/product404';
+import StepsTable from 'components/plans/stepsTable';
 
 import type { Match } from 'react-router-dom';
 import type { Plan as PlanType } from 'plans/reducer';
@@ -55,7 +57,7 @@ const PlanDetail = ({
   }
   return (
     <DocumentTitle title={`${plan.title} | ${product.title} | MetaDeploy`}>
-      <div>
+      <>
         <ProductHeader product={product} version={version} />
         <BodyContainer>
           <div
@@ -64,12 +66,31 @@ const PlanDetail = ({
               slds-size_1-of-1
               slds-medium-size_1-of-2"
           >
-            <h3 className="slds-text-heading_small">Preflight</h3>
-            <p>{plan.preflight_message}</p>
-            <p>{plan.title}</p>
+            {plan.preflight_message ? (
+              <>
+                <h3 className="slds-text-heading_small">Preflight</h3>
+                <p>{plan.preflight_message}</p>
+              </>
+            ) : null}
+            <Button
+              className="slds-size_full
+                slds-p-vertical_xx-small"
+              label="Install"
+              variant="brand"
+              disabled={!plan.steps.length}
+            />
           </div>
+          {plan.steps.length ? (
+            <div
+              className="slds-text-longform
+                slds-p-around_medium
+                slds-size_1-of-1"
+            >
+              <StepsTable plan={plan} />
+            </div>
+          ) : null}
         </BodyContainer>
-      </div>
+      </>
     </DocumentTitle>
   );
 };

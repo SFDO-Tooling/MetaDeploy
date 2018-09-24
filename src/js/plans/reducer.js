@@ -3,7 +3,10 @@
 export type Step = {
   +id: number,
   +name: string,
-  +required: boolean,
+  +kind: string,
+  +kind_icon: string | null,
+  +is_required: boolean,
+  +is_recommended: boolean,
 };
 export type Plan = {
   +id: number,

@@ -15,7 +15,7 @@ const FourOhFour = ({ children }: { children?: React.Node }) => (
       <h1 className="slds-text-heading_large">Oh No!</h1>
       {children === undefined ? (
         <p>
-          That page cannot be found. Try the&nbsp;
+          That page cannot be found. Try the{' '}
           <Link to={routes.home()}>home page</Link>?
         </p>
       ) : (

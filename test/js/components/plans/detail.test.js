@@ -24,12 +24,14 @@ const defaultState = {
           slug: 'my-plan',
           title: 'My Plan',
           preflight_message: 'Preflight text...',
+          steps: [{ id: 1, name: 'My Step' }],
         },
         secondary_plan: {
           id: 2,
           slug: 'other-plan',
           title: 'My Other Plan',
-          preflight_message: 'Other preflight text...',
+          preflight_message: '',
+          steps: [{ id: 2, name: 'My Other Step' }],
         },
         additional_plans: [
           {
@@ -37,6 +39,7 @@ const defaultState = {
             slug: 'third-plan',
             title: 'My Third Plan',
             preflight_message: 'Third preflight text...',
+            steps: [],
           },
         ],
       },
@@ -81,9 +84,10 @@ describe('<PlanDetail />', () => {
     expect(getByText('1.0.0')).toBeVisible();
     expect(getByText('My Plan')).toBeVisible();
     expect(getByText('Preflight text...')).toBeVisible();
+    expect(getByText('My Step')).toBeVisible();
   });
 
-  test('renders secondary_plan detail', () => {
+  test('renders secondary_plan detail (no preflight)', () => {
     const { getByText } = setup({
       planSlug: 'other-plan',
     });
@@ -91,17 +95,16 @@ describe('<PlanDetail />', () => {
     expect(getByText('Product 1')).toBeVisible();
     expect(getByText('1.0.0')).toBeVisible();
     expect(getByText('My Other Plan')).toBeVisible();
-    expect(getByText('Other preflight text...')).toBeVisible();
+    expect(getByText('My Other Step')).toBeVisible();
   });
 
-  test('renders additional_plan detail', () => {
+  test('renders additional_plan detail (no steps)', () => {
     const { getByText } = setup({
       planSlug: 'third-plan',
     });
 
     expect(getByText('Product 1')).toBeVisible();
     expect(getByText('1.0.0')).toBeVisible();
-    expect(getByText('My Third Plan')).toBeVisible();
     expect(getByText('Third preflight text...')).toBeVisible();
   });
 

@@ -12,7 +12,7 @@ import type { Product as ProductType } from 'products/reducer';
 const VersionNotFound = ({ product }: { product: ProductType }) => (
   <FourOhFour>
     <p>
-      We can&rsquo;t find the version you&rsquo;re looking for. Try the&nbsp;
+      We can’t find the version you’re looking for. Try the{' '}
       <Link
         to={routes.version_detail(
           product.slug,
@@ -20,8 +20,8 @@ const VersionNotFound = ({ product }: { product: ProductType }) => (
         )}
       >
         most recent version
-      </Link>
-      &nbsp;of that product, or the&nbsp;
+      </Link>{' '}
+      of that product, or the{' '}
       <Link to={routes.product_list()}>list of all products</Link>?
     </p>
   </FourOhFour>

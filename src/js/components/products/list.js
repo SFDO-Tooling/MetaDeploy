@@ -40,7 +40,7 @@ class ProductsList extends React.Component<{
         contents = (
           <div className="slds-text-longform">
             <h1 className="slds-text-heading_large">¯\_(ツ)_/¯</h1>
-            <p>We couldn&rsquo;t find any products.</p>
+            <p>We couldn’t find any products.</p>
           </div>
         );
         break;

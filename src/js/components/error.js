@@ -28,8 +28,7 @@ class ErrorBoundary extends React.Component<Props, { hasError: boolean }> {
         >
           <h1 className="slds-text-heading_large">Oh No!</h1>
           <p>
-            An error occured. Try the&nbsp;
-            <a href={routes.home()}>home page</a>?
+            An error occured. Try the <a href={routes.home()}>home page</a>?
           </p>
         </div>
       );

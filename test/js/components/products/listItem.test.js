@@ -8,11 +8,11 @@ describe('<ProductItem />', () => {
   const setup = initialState => {
     const { getByText } = render(
       <MemoryRouter>
-        <div>
+        <>
           {initialState.products.map(item => (
             <ProductItem item={item} key={item.id} />
           ))}
-        </div>
+        </>
       </MemoryRouter>,
     );
     return { getByText };

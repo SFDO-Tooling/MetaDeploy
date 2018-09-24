@@ -76,7 +76,7 @@ let VersionDetail = ({
   }
   return (
     <DocumentTitle title={`${product.title} | MetaDeploy`}>
-      <div>
+      <>
         <ProductHeader product={product} version={version} />
         <BodyContainer>
           <BodySection>
@@ -145,7 +145,7 @@ let VersionDetail = ({
             <p>{product.description}</p>
           </BodySection>
         </BodyContainer>
-      </div>
+      </>
     </DocumentTitle>
   );
 };
