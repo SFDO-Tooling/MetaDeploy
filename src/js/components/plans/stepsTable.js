@@ -3,7 +3,6 @@
 import * as React from 'react';
 import Accordion from '@salesforce/design-system-react/components/accordion';
 import AccordionPanel from '@salesforce/design-system-react/components/accordion/panel';
-import Card from '@salesforce/design-system-react/components/card';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
@@ -115,6 +114,7 @@ const InstallDataColumnLabel = (): React.Node => (
         </span>
       }
       triggerClassName="slds-p-left_x-small"
+      position="overflowBoundaryElement"
     >
       {/* This should not be necessary...
           https://github.com/salesforce/design-system-react/issues/1578 */}
@@ -133,43 +133,38 @@ const InstallDataColumnLabel = (): React.Node => (
 );
 
 const StepsTable = ({ plan }: { plan: PlanType }) => (
-  <Card
-    heading={<span className="slds-p-left_x-small">{plan.title}</span>}
-    className="slds-scrollable_x"
-    bodyClassName="slds-m-bottom_none"
+  // DataTable uses step IDs internally to construct unique keys,
+  // and they must be strings (not integers)
+  <DataTable
+    className="slds-card"
+    items={plan.steps.map(step =>
+      Object.assign({}, step, { id: step.id.toString() }),
+    )}
+    id="plan-steps-table"
   >
-    {/* DataTable uses step IDs internally to construct unique keys,
-        and they must be strings (not integers) */}
-    <DataTable
-      items={plan.steps.map(step =>
-        Object.assign({}, step, { id: step.id.toString() }),
-      )}
-      id="plan-steps-table"
+    <DataTableColumn
+      key="name"
+      label="Steps"
+      property="name"
+      primaryColumn
+      truncate
     >
-      <DataTableColumn
-        key="name"
-        label="Steps"
-        property="name"
-        primaryColumn
-        truncate
-      >
-        <NameDataCell />
-      </DataTableColumn>
-      <DataTableColumn key="kind" label="Type" property="kind" truncate>
-        <KindDataCell />
-      </DataTableColumn>
-      <DataTableColumn key="is_required" property="is_required">
-        <RequiredDataCell />
-      </DataTableColumn>
-      <DataTableColumn
-        key="is_recommended"
-        label={<InstallDataColumnLabel />}
-        property="is_recommended"
-      >
-        <InstallDataCell />
-      </DataTableColumn>
-    </DataTable>
-  </Card>
+      <NameDataCell />
+    </DataTableColumn>
+    <DataTableColumn key="kind" label="Type" property="kind" truncate>
+      <KindDataCell />
+    </DataTableColumn>
+    <DataTableColumn key="is_required" property="is_required">
+      <RequiredDataCell />
+    </DataTableColumn>
+    <DataTableColumn
+      key="is_recommended"
+      label={<InstallDataColumnLabel />}
+      property="is_recommended"
+    >
+      <InstallDataCell />
+    </DataTableColumn>
+  </DataTable>
 );
 
 export default StepsTable;

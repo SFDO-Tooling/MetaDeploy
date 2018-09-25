@@ -55,7 +55,6 @@ describe('<StepsTable />', () => {
   test('renders steps', () => {
     const { getByText } = setup();
 
-    expect(getByText('My Plan')).toBeVisible();
     expect(getByText('Step 1')).toBeVisible();
     expect(getByText('Step 2')).toBeVisible();
     expect(getByText('Step 3')).toBeVisible();

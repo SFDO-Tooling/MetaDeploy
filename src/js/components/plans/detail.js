@@ -66,12 +66,8 @@ const PlanDetail = ({
               slds-size_1-of-1
               slds-medium-size_1-of-2"
           >
-            {plan.preflight_message ? (
-              <>
-                <h3 className="slds-text-heading_small">Preflight</h3>
-                <p>{plan.preflight_message}</p>
-              </>
-            ) : null}
+            <h3 className="slds-text-heading_small">{plan.title}</h3>
+            {plan.preflight_message ? <p>{plan.preflight_message}</p> : null}
             <Button
               className="slds-size_full
                 slds-p-vertical_xx-small"
@@ -83,7 +79,8 @@ const PlanDetail = ({
           {plan.steps.length ? (
             <div
               className="slds-p-around_medium
-                slds-size_1-of-1"
+                slds-size_1-of-1
+                slds-scrollable_x"
             >
               <StepsTable plan={plan} />
             </div>
