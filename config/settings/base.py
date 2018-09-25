@@ -135,6 +135,7 @@ MIDDLEWARE = [
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        # This gets overridden in settings.production:
         'DIRS': [
             str(PROJECT_ROOT / 'dist'),
             str(PROJECT_ROOT / 'templates'),
