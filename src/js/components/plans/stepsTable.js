@@ -108,7 +108,7 @@ const InstallDataColumnLabel = (): React.Node => (
   <>
     <span title="Install">Install</span>
     <Tooltip
-      align="top left"
+      align="top right"
       content={
         <span style={{ textTransform: 'none', letterSpacing: 0 }}>
           Select steps to install.
