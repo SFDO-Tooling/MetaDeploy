@@ -64,10 +64,10 @@ class LogfmtFormatter(ServerFormatter):
             record,
             'request_id',
             None,
-            ) or getattr(
-                record,
-                'job_id',
-                None,
+        ) or getattr(
+            record,
+            'job_id',
+            None,
         ) or 'unknown'
 
     def _get_tag(self, record):
