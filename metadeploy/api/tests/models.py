@@ -177,8 +177,8 @@ def test_plan_str(product_factory, version_factory, plan_factory):
 
 @pytest.mark.django_db
 def test_step_str(step_factory):
-    step = step_factory(name='Test step', order_key=3, plan__title='The Plan')
-    assert str(step) == 'Step Test step of The Plan (3)'
+    step = step_factory(name='Test step', plan__title='The Plan')
+    assert str(step) == 'Step Test step of The Plan'
 
 
 @pytest.mark.django_db
