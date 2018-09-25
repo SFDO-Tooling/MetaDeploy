@@ -8,6 +8,7 @@ from ...models import (
     Version,
     PlanSlug,
     Plan,
+    Step,
 )
 
 
@@ -16,6 +17,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         ordered_models = [
+            Step,
             PlanSlug,
             Plan,
             Version,
