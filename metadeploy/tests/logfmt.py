@@ -4,6 +4,7 @@ from types import SimpleNamespace
 
 from ..logfmt import LogfmtFormatter, JobIDFilter
 
+
 def test_job_id_filter(mocker):
     get_id = mocker.patch('metadeploy.logfmt.get_current_job')
     get_id.return_value.id = 123
