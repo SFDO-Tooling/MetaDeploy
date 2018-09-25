@@ -13,6 +13,7 @@ class JobIDFilter(logging.Filter):
             record.job_id = get_current_job().id
         else:
             record.job_id = NO_JOB_ID
+        return True
 
 class LogfmtFormatter(ServerFormatter):
     """
@@ -61,9 +62,9 @@ class LogfmtFormatter(ServerFormatter):
             'request_id',
             None,
             ) or getattr(
-                 record,
-                 'job_id',
-                 None,
+                record,
+                'job_id',
+                None,
         ) or 'unknown'
 
     def _get_tag(self, record):
