@@ -75,7 +75,7 @@ KindDataCell.displayName = DataTableCell.displayName;
 
 const RequiredDataCell = (props: DataCellProps): React.Node => {
   const required = props.item && props.item.is_required;
-  let classes = 'slds-align-middle slds-badge';
+  let classes = 'slds-align-middle slds-badge slds-m-horizontal_large';
   if (!required) {
     classes = `${classes} slds-badge_inverse`;
   }
