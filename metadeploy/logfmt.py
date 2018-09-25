@@ -5,7 +5,9 @@ import datetime
 from django.utils.log import ServerFormatter
 from rq import get_current_job
 
+
 NO_JOB_ID = 'no-job-id'
+
 
 class JobIDFilter(logging.Filter):
     def filter(self, record):
@@ -14,6 +16,7 @@ class JobIDFilter(logging.Filter):
         else:
             record.job_id = NO_JOB_ID
         return True
+
 
 class LogfmtFormatter(ServerFormatter):
     """
@@ -80,7 +83,7 @@ class LogfmtFormatter(ServerFormatter):
         tag = self._get_tag(record)
         rest = self.format_line(getattr(record, 'context', {}))
         return ' '.join(filter(None, [
-            f'id={id_}',  # TODO: get-id method
+            f'id={id_}',
             f'at={record.levelname}',
             f'time={time}',
             f'msg={msg}',
