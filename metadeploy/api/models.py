@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Count
 from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
 
 from model_utils import Choices
 
@@ -253,6 +254,7 @@ class Plan(SlugMixin, models.Model):
 
     title = models.CharField(max_length=128)
     version = models.ForeignKey(Version, on_delete=models.PROTECT)
+    preflight_message = models.TextField(blank=True)
     tier = models.CharField(
         choices=Tier,
         default=Tier.primary,
@@ -270,3 +272,41 @@ class Plan(SlugMixin, models.Model):
 
     def __str__(self):
         return "{}, Plan {}".format(self.version, self.title)
+
+
+class Step(models.Model):
+    Kind = Choices(
+        ('metadata', _('Metadata')),
+        ('onetime', _('One Time Apex')),
+        ('managed', _('Managed Package')),
+        ('data', _('Data')),
+    )
+
+    plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
+    name = models.CharField(max_length=1024)
+    description = models.TextField()
+    is_required = models.BooleanField(default=True)
+    is_recommended = models.BooleanField(default=True)
+    kind = models.CharField(choices=Kind, default=Kind.metadata, max_length=64)
+    order_key = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = (
+            'order_key',
+            'name',
+        )
+
+    @property
+    def kind_icon(self):
+        if self.kind == self.Kind.metadata:
+            return 'package'
+        if self.kind == self.Kind.onetime:
+            return 'apex'
+        if self.kind == self.Kind.managed:
+            return 'archive'
+        if self.kind == self.Kind.data:
+            return 'paste'
+        return None
+
+    def __str__(self):
+        return f'Step {self.name} of {self.plan.title} ({self.order_key})'

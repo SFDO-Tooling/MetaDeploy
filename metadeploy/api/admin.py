@@ -7,6 +7,7 @@ from .models import (
     Version,
     Plan,
     PlanSlug,
+    Step,
 )
 
 
@@ -16,3 +17,4 @@ admin.site.register(ProductCategory)
 admin.site.register(Version)
 admin.site.register(Plan)
 admin.site.register(PlanSlug)
+admin.site.register(Step)

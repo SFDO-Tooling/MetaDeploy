@@ -36,7 +36,7 @@ const Header = ({
       </Link>
     }
     navRight={
-      <div>
+      <>
         <Link
           to={routes.product_list()}
           className="slds-text-heading_small
@@ -47,7 +47,7 @@ const Header = ({
           Products
         </Link>
         {user ? <Logout user={user} doLogout={doLogout} /> : <Login />}
-      </div>
+      </>
     }
     variant="objectHome"
   />

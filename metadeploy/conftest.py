@@ -17,6 +17,7 @@ from metadeploy.api.models import (
     Version,
     Plan,
     PlanSlug,
+    Step,
 )
 
 User = get_user_model()
@@ -127,6 +128,15 @@ class PlanFactory(factory.django.DjangoModelFactory):
     title = 'Sample plan'
     version = factory.SubFactory(VersionFactory)
     _ensure_slug = factory.PostGenerationMethodCall('ensure_slug')
+
+
+@register
+class StepFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Step
+
+    name = 'Sample step'
+    plan = factory.SubFactory(PlanFactory)
 
 
 @register

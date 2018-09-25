@@ -8,18 +8,19 @@ from ....models import (
     Version,
     PlanSlug,
     Plan,
+    Step,
 )
 
 
 @pytest.mark.django_db
-def test_truncate_data(product_factory, plan_factory):
+def test_truncate_data(product_factory, step_factory):
     p1 = product_factory()
     p2 = product_factory()
     p3 = product_factory()
 
-    plan_factory(version__product=p1)
-    plan_factory(version__product=p2)
-    plan_factory(version__product=p3)
+    step_factory(plan__version__product=p1)
+    step_factory(plan__version__product=p2)
+    step_factory(plan__version__product=p3)
 
     assert ProductCategory.objects.count() == 3
     assert ProductSlug.objects.count() == 3
@@ -27,6 +28,7 @@ def test_truncate_data(product_factory, plan_factory):
     assert Version.objects.count() == 3
     assert PlanSlug.objects.count() == 3
     assert Plan.objects.count() == 3
+    assert Step.objects.count() == 3
 
     call_command('truncate_data')
 

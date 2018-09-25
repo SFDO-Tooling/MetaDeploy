@@ -1,11 +1,9 @@
 import React from 'react';
-import fetchMock from 'fetch-mock';
 import { MemoryRouter } from 'react-router-dom';
 
-import { renderWithRedux, storeWithApi } from './../../utils';
+import { renderWithRedux } from './../../utils';
 
 import routes from 'utils/routes';
-import { addUrlParams } from 'utils/api';
 
 import { ProductDetail, VersionDetail } from 'components/products/detail';
 
@@ -47,12 +45,13 @@ const defaultState = {
 
 describe('<ProductDetail />', () => {
   const setup = (initialState = defaultState, productSlug = 'product-1') => {
-    renderWithRedux(
+    const { getByText } = renderWithRedux(
       <MemoryRouter>
         <ProductDetail match={{ params: { productSlug } }} />
       </MemoryRouter>,
       initialState,
     );
+    return { getByText };
   };
 
   test('redirects to version_detail', () => {
@@ -63,11 +62,12 @@ describe('<ProductDetail />', () => {
     expect(routes.version_detail).toHaveBeenCalledWith('product-1', '1.0.0');
   });
 
-  test('redirects to products_list if no product found with slug', () => {
-    jest.spyOn(routes, 'product_list');
-    setup({ products: [] });
+  describe('no product', () => {
+    test('renders <ProductNotFound />', () => {
+      const { getByText } = setup({ products: [] });
 
-    expect(routes.product_list).toHaveBeenCalledTimes(1);
+      expect(getByText('list of all products')).toBeVisible();
+    });
   });
 });
 
@@ -90,11 +90,12 @@ describe('<VersionDetail />', () => {
     return { getByText, queryByText, getByAltText };
   };
 
-  test('redirects to products_list if no product found with slug', () => {
-    jest.spyOn(routes, 'product_list');
-    setup({ initialState: { products: [] } });
+  describe('no product', () => {
+    test('renders <ProductNotFound />', () => {
+      const { getByText } = setup({ initialState: { products: [] } });
 
-    expect(routes.product_list).toHaveBeenCalledTimes(1);
+      expect(getByText('list of all products')).toBeVisible();
+    });
   });
 
   describe('version is most_recent_version', () => {
@@ -174,38 +175,16 @@ describe('<VersionDetail />', () => {
     });
   });
 
-  describe('version not yet fetched, and version is not found', () => {
-    test('GETs product version from api', () => {
-      const url = addUrlParams(window.api_urls.version_list(), {
-        product: 1,
-        label: '2.0.0',
-      });
-      fetchMock.spy();
-
-      const { getByText, queryByText } = setup({
-        versionLabel: '2.0.0',
-        customStore: storeWithApi,
-      });
-
-      expect(queryByText('Product 1')).toBeNull();
-      expect(getByText('Loading...')).toBeVisible();
-      expect(fetchMock.called(url)).toBe(true);
-    });
-  });
-
-  describe('version already fetched, and version is not found', () => {
-    const product = Object.assign({}, defaultState.products[0]);
-    product.versions = { '2.0.0': null };
-
-    test('redirects to product_detail', () => {
-      jest.spyOn(routes, 'product_detail');
-      setup({
+  describe('no version', () => {
+    test('renders <VersionNotFound />', () => {
+      const product = Object.assign({}, defaultState.products[0]);
+      product.versions = { '2.0.0': null };
+      const { getByText } = setup({
         initialState: { products: [product] },
         versionLabel: '2.0.0',
       });
 
-      expect(routes.product_detail).toHaveBeenCalledTimes(1);
-      expect(routes.product_detail).toHaveBeenCalledWith('product-1');
+      expect(getByText('most recent version')).toBeVisible();
     });
   });
 });

@@ -7,6 +7,7 @@ from ...models import (
     Version,
     Plan,
     PlanSlug,
+    Step,
 )
 
 
@@ -48,12 +49,22 @@ class Command(BaseCommand):
             version=version,
             title=title,
             tier=tier,
+            preflight_message=(
+                f'Preflight message consists of generic product message and '
+                'step pre-check info — run in one operation before the '
+                'install begins. Preflight includes the name of what is being '
+                "installed. Lorem Ipsum has been the industry's standard "
+                'dummy text ever since the 1500s.'
+            ),
         )
         PlanSlug.objects.create(
             parent=plan,
             slug=slugify(title),
         )
         return plan
+
+    def create_step(self, **kwargs):
+        return Step.objects.create(**kwargs)
 
     def handle(self, *args, **options):
         sf_category = ProductCategory.objects.create(title='salesforce')
@@ -64,8 +75,83 @@ class Command(BaseCommand):
         )
         old_version = self.create_version(product1, '0.2.0')
         self.create_plan(old_version)
+
         version1 = self.create_version(product1)
-        self.create_plan(version1)
+        plan = self.create_plan(version1)
+        self.create_step(
+            plan=plan,
+            name='Opportunity Record Types',
+            description=(
+                f'This is a description of the step. Could be any step, '
+                'optional or required. The description wraps.'
+            ),
+            is_recommended=False,
+        )
+        self.create_step(
+            plan=plan,
+            name='Households',
+            is_required=False,
+            is_recommended=False,
+            order_key=1,
+        )
+        self.create_step(
+            plan=plan,
+            name='Recurring Donations',
+            kind='onetime',
+            is_recommended=False,
+            order_key=2,
+        )
+        self.create_step(
+            plan=plan,
+            name='Relationships',
+            kind='managed',
+            is_required=False,
+            is_recommended=False,
+            order_key=3,
+        )
+        self.create_step(
+            plan=plan,
+            name='Affiliations',
+            kind='managed',
+            is_required=False,
+            order_key=4,
+        )
+        self.create_step(
+            plan=plan,
+            name='Account Record Types',
+            kind='managed',
+            is_recommended=False,
+            order_key=5,
+        )
+        self.create_step(
+            plan=plan,
+            name='Nonprofit Success Pack',
+            kind='managed',
+            is_recommended=False,
+            order_key=6,
+        )
+        self.create_step(
+            plan=plan,
+            name='NPSP Config for Salesforce1',
+            kind='data',
+            is_recommended=False,
+            order_key=7,
+        )
+        self.create_step(
+            plan=plan,
+            name='Contacts and Organizations',
+            kind='managed',
+            is_recommended=False,
+            order_key=8,
+        )
+        self.create_step(
+            plan=plan,
+            name='Another Ordered Step',
+            kind='managed',
+            is_required=False,
+            order_key=8,
+        )
+
         self.create_plan(
             version1,
             title='Reports and Dashboards',

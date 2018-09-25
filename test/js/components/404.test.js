@@ -11,6 +11,17 @@ describe('<404 />', () => {
         <FourOhFour />
       </MemoryRouter>,
     );
+
     expect(getByText('home page')).toBeVisible();
+  });
+
+  test('renders with custom children', () => {
+    const { getByText } = render(
+      <FourOhFour>
+        <p>This is custom</p>
+      </FourOhFour>,
+    );
+
+    expect(getByText('This is custom')).toBeVisible();
   });
 });

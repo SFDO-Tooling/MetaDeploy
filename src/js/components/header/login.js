@@ -52,7 +52,7 @@ class Login extends React.Component<{}, { modalOpen: boolean }> {
       },
     ];
     return (
-      <div>
+      <>
         <Dropdown
           id="login"
           label="Log In"
@@ -76,7 +76,7 @@ class Login extends React.Component<{}, { modalOpen: boolean }> {
           isOpen={this.state.modalOpen}
           toggleModal={this.toggleModal}
         />
-      </div>
+      </>
     );
   }
 }

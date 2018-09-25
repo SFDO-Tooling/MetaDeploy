@@ -57,8 +57,7 @@ class CustomDomainModal extends React.Component<Props, { url: string }> {
             className="slds-form-element__help
               slds-p-bottom_small"
           >
-            To go to your company&rsquo;s login page, enter the custom domain
-            name.
+            To go to your company’s login page, enter the custom domain name.
           </p>
           <Input
             id="login-custom-domain"

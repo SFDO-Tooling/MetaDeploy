@@ -176,6 +176,35 @@ def test_plan_str(product_factory, version_factory, plan_factory):
 
 
 @pytest.mark.django_db
+def test_step_str(step_factory):
+    step = step_factory(name='Test step', order_key=3, plan__title='The Plan')
+    assert str(step) == 'Step Test step of The Plan (3)'
+
+
+@pytest.mark.django_db
+class TestStepKindIcon:
+    def test_metadata(self, step_factory):
+        step = step_factory(kind='metadata')
+        assert step.kind_icon == 'package'
+
+    def test_onetime(self, step_factory):
+        step = step_factory(kind='onetime')
+        assert step.kind_icon == 'apex'
+
+    def test_managed(self, step_factory):
+        step = step_factory(kind='managed')
+        assert step.kind_icon == 'archive'
+
+    def test_data(self, step_factory):
+        step = step_factory(kind='data')
+        assert step.kind_icon == 'paste'
+
+    def test_unknown(self, step_factory):
+        step = step_factory(kind='unknown')
+        assert step.kind_icon is None
+
+
+@pytest.mark.django_db
 class TestVersionNaturalKey:
     def test_version_natural_key(self, version_factory):
         version = version_factory(label='v0.1.0')
