@@ -217,7 +217,7 @@ LOGIN_REDIRECT_URL = '/'
 # Use HTTPS:
 SECURE_PROXY_SSL_HEADER = env(
     'SECURE_PROXY_SSL_HEADER',
-    default=None,
+    default='HTTP_X_FORWARDED_PROTO:https',
     type_=(
         lambda v:
         tuple(v.split(':', 1))
@@ -225,7 +225,7 @@ SECURE_PROXY_SSL_HEADER = env(
         else None
     ),
 )
-SECURE_SSL_REDIRECT = env('SECURE_SSL_REDIRECT', default=False, type_=boolish)
+SECURE_SSL_REDIRECT = env('SECURE_SSL_REDIRECT', default=True, type_=boolish)
 SESSION_COOKIE_SECURE = env(
     'SESSION_COOKIE_SECURE',
     default=False,
