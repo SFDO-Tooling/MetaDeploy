@@ -19,6 +19,10 @@ from django.core.exceptions import ImproperlyConfigured
 BOOLS = ('True', 'true', 'T', 't', '1', 1)
 
 
+def boolish(val):
+    return val in BOOLS
+
+
 class NoDefaultValue:
     pass
 
@@ -75,7 +79,7 @@ PROJECT_ROOT = Path(__file__).absolute().parent.parent.parent
 SECRET_KEY = ']0sSXX^7>L2J9Jn(F9=oA/:&T:MRSxl^L@a~|[kYxHp;YIzF`;'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DJANGO_DEBUG', default=False, type_=lambda x: x in BOOLS)
+DEBUG = env('DJANGO_DEBUG', default=False, type_=boolish)
 
 MODE = env('DJANGO_MODE', default='dev' if DEBUG else 'prod')
 
@@ -210,6 +214,32 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LOGIN_REDIRECT_URL = '/'
 
+# Use HTTPS:
+SECURE_PROXY_SSL_HEADER = env(
+    'SECURE_PROXY_SSL_HEADER',
+    default='HTTP_X_FORWARDED_PROTO:https',
+    type_=(
+        lambda v:
+        tuple(v.split(':', 1))
+        if (v is not None and ':' in v)
+        else None
+    ),
+)
+SECURE_SSL_REDIRECT = env('SECURE_SSL_REDIRECT', default=True, type_=boolish)
+SESSION_COOKIE_SECURE = env(
+    'SESSION_COOKIE_SECURE',
+    default=False,
+    type_=boolish,
+)
+CSRF_COOKIE_SECURE = env('CSRF_COOKIE_SECURE', default=False, type_=boolish)
+SECURE_HSTS_SECONDS = env('SECURE_HSTS_SECONDS', default=0, type_=int)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env(
+    'SECURE_HSTS_INCLUDE_SUBDOMAINS',
+    default=False,
+    type_=boolish,
+)
+SECURE_HSTS_PRELOAD = env('SECURE_HSTS_PRELOAD', default=False, type_=boolish)
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
@@ -328,6 +358,9 @@ LOGGING = {
     'filters': {
         'request_id': {
             '()': 'log_request_id.filters.RequestIDFilter'
+        },
+        'job_id': {
+            '()': 'metadeploy.logfmt.JobIDFilter'
         }
     },
     'formatters': {
@@ -349,7 +382,7 @@ LOGGING = {
         "rq_console": {
             "level": "DEBUG",
             "class": "rq.utils.ColorizingStreamHandler",
-            'filters': [],
+            'filters': ["job_id"],
             "formatter": "verbose",
         },
     },
