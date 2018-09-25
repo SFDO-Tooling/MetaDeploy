@@ -358,6 +358,9 @@ LOGGING = {
     'filters': {
         'request_id': {
             '()': 'log_request_id.filters.RequestIDFilter'
+        },
+        'job_id': {
+            '()': 'metadeploy.logfmt.JobIDFilter'
         }
     },
     'formatters': {
@@ -379,7 +382,7 @@ LOGGING = {
         "rq_console": {
             "level": "DEBUG",
             "class": "rq.utils.ColorizingStreamHandler",
-            'filters': [],
+            'filters': ["job_id"],
             "formatter": "verbose",
         },
     },

@@ -1,7 +1,55 @@
 import datetime
 import logging
+from types import SimpleNamespace
 
-from ..logfmt import LogfmtFormatter
+from ..logfmt import LogfmtFormatter, JobIDFilter
+
+def test_job_id_filter(mocker):
+    get_id = mocker.patch('metadeploy.logfmt.get_current_job')
+    get_id.return_value.id = 123
+    log_filter = JobIDFilter()
+    record = SimpleNamespace()
+    log_filter.filter(record)
+    assert record.job_id == 123
+
+
+def test_job_id_filter__no_job(mocker):
+    get_id = mocker.patch('metadeploy.logfmt.get_current_job')
+    get_id.return_value = None
+    log_filter = JobIDFilter()
+    record = SimpleNamespace()
+    log_filter.filter(record)
+    assert record.job_id == 'no-job-id'
+
+
+def test_formatter__record_id():
+    record = logging.LogRecord(
+        'name',
+        logging.INFO,
+        '/path/name',
+        1,
+        'Some message',
+        (),
+        None,
+    )
+    record.request_id = 123
+    result = LogfmtFormatter().format(record)
+    assert 'id=123' in result
+
+
+def test_formatter__job_id():
+    record = logging.LogRecord(
+        'name',
+        logging.INFO,
+        '/path/name',
+        1,
+        'Some message',
+        (),
+        None,
+    )
+    record.job_id = 321
+    result = LogfmtFormatter().format(record)
+    assert 'id=321' in result
 
 
 def test_formatter_format():
