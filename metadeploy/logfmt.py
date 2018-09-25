@@ -1,8 +1,18 @@
-import datetime
 import numbers
+import logging
+import datetime
 
 from django.utils.log import ServerFormatter
+from rq import get_current_job
 
+NO_JOB_ID = 'no-job-id'
+
+class JobIDFilter(logging.Filter):
+    def filter(self, record):
+        if get_current_job():
+            record.job_id = get_current_job().id
+        else:
+            record.job_id = NO_JOB_ID
 
 class LogfmtFormatter(ServerFormatter):
     """
@@ -50,10 +60,10 @@ class LogfmtFormatter(ServerFormatter):
             record,
             'request_id',
             None,
-            # ) or getattr(
-            #     record,
-            #     'msg',  # TODO: Parse the Job ID out of the msg :(
-            #     None,
+            ) or getattr(
+                 record,
+                 'job_id',
+                 None,
         ) or 'unknown'
 
     def _get_tag(self, record):
