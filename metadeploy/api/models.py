@@ -288,9 +288,13 @@ class Step(models.Model):
     is_required = models.BooleanField(default=True)
     is_recommended = models.BooleanField(default=True)
     kind = models.CharField(choices=Kind, default=Kind.metadata, max_length=64)
+    order_key = models.PositiveIntegerField(default=0)
 
     class Meta:
-        order_with_respect_to = 'plan'
+        ordering = (
+            'order_key',
+            'name',
+        )
 
     @property
     def kind_icon(self):
@@ -305,4 +309,4 @@ class Step(models.Model):
         return None
 
     def __str__(self):
-        return f'Step {self.name} of {self.plan.title}'
+        return f'Step {self.name} of {self.plan.title} ({self.order_key})'

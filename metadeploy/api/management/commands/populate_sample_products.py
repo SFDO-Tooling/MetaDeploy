@@ -92,12 +92,14 @@ class Command(BaseCommand):
             name='Households',
             is_required=False,
             is_recommended=False,
+            order_key=1,
         )
         self.create_step(
             plan=plan,
             name='Recurring Donations',
             kind='onetime',
             is_recommended=False,
+            order_key=2,
         )
         self.create_step(
             plan=plan,
@@ -105,42 +107,49 @@ class Command(BaseCommand):
             kind='managed',
             is_required=False,
             is_recommended=False,
+            order_key=3,
         )
         self.create_step(
             plan=plan,
             name='Affiliations',
             kind='managed',
             is_required=False,
+            order_key=4,
         )
         self.create_step(
             plan=plan,
             name='Account Record Types',
             kind='managed',
             is_recommended=False,
+            order_key=5,
         )
         self.create_step(
             plan=plan,
             name='Nonprofit Success Pack',
             kind='managed',
             is_recommended=False,
+            order_key=6,
         )
         self.create_step(
             plan=plan,
             name='NPSP Config for Salesforce1',
             kind='data',
             is_recommended=False,
+            order_key=7,
         )
         self.create_step(
             plan=plan,
             name='Contacts and Organizations',
             kind='managed',
             is_recommended=False,
+            order_key=8,
         )
         self.create_step(
             plan=plan,
             name='Another Ordered Step',
             kind='managed',
             is_required=False,
+            order_key=8,
         )
 
         self.create_plan(

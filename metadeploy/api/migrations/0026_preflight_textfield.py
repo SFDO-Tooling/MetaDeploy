@@ -10,21 +10,9 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterModelOptions(
-            name='step',
-            options={},
-        ),
         migrations.AlterField(
             model_name='plan',
             name='preflight_message',
             field=models.TextField(blank=True),
-        ),
-        migrations.RemoveField(
-            model_name='step',
-            name='order_key',
-        ),
-        migrations.AlterOrderWithRespectTo(
-            name='step',
-            order_with_respect_to='plan',
         ),
     ]
