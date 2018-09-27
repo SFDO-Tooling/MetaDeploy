@@ -1,6 +1,6 @@
 #!/bin/sh
 
-GIT_PARAMS_ARRAY=($GIT_PARAMS)
+GIT_PARAMS_ARRAY=($HUSKY_GIT_PARAMS)
 MSG_FILE=${GIT_PARAMS_ARRAY[0]}
 COMMIT_MSG=`cat $MSG_FILE`
 CHANGED=$(git diff --cached --name-only)
