@@ -19,7 +19,15 @@ VERSION_STRING = r'^[a-zA-Z0-9._+-]+$'
 
 
 class User(AbstractUser):
-    pass
+    @property
+    def instance_url(self):
+        if self.social_account:
+            return self.social_account.extra_data.get('instance_url', None)
+        return None
+
+    @property
+    def social_account(self):
+        return self.socialaccount_set.first()
 
 
 class SlugMixin:

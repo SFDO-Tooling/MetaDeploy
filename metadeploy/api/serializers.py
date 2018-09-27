@@ -95,17 +95,10 @@ class ProductSerializer(serializers.ModelSerializer):
 
 class InstanceUrl:
     def set_context(self, serializer_field):
-        # TODO: This is brittle, has room for runtime errors.
-        self.instance_url = (
-            serializer_field
-            .context['request']
-            .user
-            .socialaccount_set.first()
-            .extra_data['instance_url']
-        )
+        self.url = serializer_field.context['request'].user.instance_url
 
     def __call__(self):
-        return self.instance_url
+        return self.url
 
 
 class JobSerializer(serializers.ModelSerializer):

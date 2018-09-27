@@ -10,6 +10,24 @@ from ..models import Version
 
 
 @pytest.mark.django_db
+class TestUser:
+    def test_social_account(self, user_factory):
+        user = user_factory()
+        assert user.social_account is not None
+        assert user.social_account == user.socialaccount_set.first()
+
+        user.socialaccount_set.all().delete()
+        assert user.social_account is None
+
+    def test_instance_url(self, user_factory):
+        user = user_factory()
+        assert user.instance_url == 'https://example.com'
+
+        user.socialaccount_set.all().delete()
+        assert user.instance_url is None
+
+
+@pytest.mark.django_db
 class TestIconProperty:
     def test_uses_icon_url(self, product_factory):
         product = product_factory(icon_url='https://example.com/example.png')
