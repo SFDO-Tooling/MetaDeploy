@@ -73,7 +73,7 @@ class JobFactory(factory.django.DjangoModelFactory):
 
     user = factory.SubFactory(UserFactory)
     repo_url = 'https://example.com/'
-    flow_name = 'sample_flow'
+    flow_names = ['sample_flow']
     enqueued_at = None
     job_id = None
 
@@ -99,6 +99,7 @@ class ProductFactory(factory.django.DjangoModelFactory):
     slds_icon_category = ''
     slds_icon_name = ''
     _ensure_slug = factory.PostGenerationMethodCall('ensure_slug')
+    repo_url = 'https://github.com/some/repo.git'
 
 
 @register
@@ -137,6 +138,7 @@ class StepFactory(factory.django.DjangoModelFactory):
 
     name = 'Sample step'
     plan = factory.SubFactory(PlanFactory)
+    flow_name = 'install_prod'
 
 
 @register

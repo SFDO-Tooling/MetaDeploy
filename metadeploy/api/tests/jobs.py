@@ -17,9 +17,9 @@ def test_run_flow(mocker, user_factory):
 
     user = user_factory()
     package_url = 'https://example.com/'
-    flow_name = 'test_flow'
+    flow_names = ['test_flow']
 
-    run_flow(user, package_url, flow_name)
+    run_flow(user, package_url, flow_names)
 
     # TODO assert? What we really need to assert is a change in the SF
     # org, but that'd be an integration test.

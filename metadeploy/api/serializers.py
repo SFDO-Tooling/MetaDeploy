@@ -93,10 +93,42 @@ class ProductSerializer(serializers.ModelSerializer):
         )
 
 
+class InstanceUrl:
+    def set_context(self, serializer_field):
+        # TODO: This is brittle, has room for runtime errors.
+        self.instance_url = (
+            serializer_field
+            .context['request']
+            .user
+            .socialaccount_set.first()
+            .extra_data['instance_url']
+        )
+
+    def __call__(self):
+        return self.instance_url
+
+
 class JobSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault(),
     )
+    instance_url = serializers.HiddenField(
+        default=InstanceUrl(),
+    )
+    plan = serializers.PrimaryKeyRelatedField(
+        queryset=Plan.objects.all(),
+    )
+    steps = serializers.PrimaryKeyRelatedField(
+        queryset=Step.objects.all(),
+        many=True,
+    )
+
+    def create(self, validated_data):
+        repo_url = validated_data.pop('plan').version.product.repo_url
+        validated_data['repo_url'] = repo_url
+        flow_names = [step.flow_name for step in validated_data.pop('steps')]
+        validated_data['flow_names'] = flow_names
+        return super().create(validated_data)
 
     class Meta:
         model = Job
@@ -104,5 +136,15 @@ class JobSerializer(serializers.ModelSerializer):
             'user',
             'instance_url',
             'repo_url',
-            'flow_name',
+            'steps',
+            'flow_names',
+            'plan',
         )
+        extra_kwargs = {
+            'repo_url': {
+                'read_only': True,
+            },
+            'flow_names': {
+                'read_only': True,
+            },
+        }

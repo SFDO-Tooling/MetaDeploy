@@ -67,7 +67,7 @@ def get_instance_url_off_user(user):
     return user.socialaccount_set.first().extra_data['instance_url']
 
 
-def run_flow(user, repo_url, flow_name):
+def run_flow(user, repo_url, flow_names):
     # TODO:
     #
     # We'll want to subclass BaseFlow and add logic in the progress
@@ -130,17 +130,18 @@ def run_flow(user, repo_url, flow_name):
         })
         proj_config.keychain.set_service('github', github_app, True)
 
-        # Make and run the flow:
-        flow_config = proj_config.get_flow(flow_name)
-        flowinstance = flows.BaseFlow(
-            proj_config,
-            flow_config,
-            proj_keychain.get_org(current_org),
-            options={},
-            skip=[],
-            name=flow_name,
-        )
-        flowinstance()
+        # Make and run the flows:
+        for flow_name in flow_names:
+            flow_config = proj_config.get_flow(flow_name)
+            flowinstance = flows.BaseFlow(
+                proj_config,
+                flow_config,
+                proj_keychain.get_org(current_org),
+                options={},
+                skip=[],
+                name=flow_name,
+            )
+            flowinstance()
 
 
 run_flow_job = job(run_flow)
@@ -152,7 +153,7 @@ def enqueuer():
         j.job_id = run_flow_job.delay(
             j.user,
             j.repo_url,
-            j.flow_name,
+            j.flow_names,
         ).id
         j.enqueued_at = timezone.now()
         j.save()

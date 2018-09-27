@@ -1,6 +1,7 @@
 import itertools
 
 from django.conf import settings
+from django.contrib.postgres.fields import ArrayField
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -129,6 +130,7 @@ class Product(SlugMixin, models.Model):
         max_length=32,
     )
     slds_icon_name = models.CharField(max_length=64, blank=True)
+    repo_url = models.URLField(blank=True)
 
     slug_class = ProductSlug
 
@@ -166,7 +168,10 @@ class Job(models.Model):
     )
     instance_url = models.URLField()
     repo_url = models.URLField()
-    flow_name = models.CharField(max_length=64)
+    flow_names = ArrayField(
+        models.CharField(max_length=64),
+        default=list,
+    )
     enqueued_at = models.DateTimeField(null=True)
     job_id = models.UUIDField(null=True)
 
@@ -289,6 +294,7 @@ class Step(models.Model):
     is_recommended = models.BooleanField(default=True)
     kind = models.CharField(choices=Kind, default=Kind.metadata, max_length=64)
     order_key = models.PositiveIntegerField(default=0)
+    flow_name = models.CharField(max_length=64, blank=True)
 
     class Meta:
         ordering = (
