@@ -1,6 +1,7 @@
 import itertools
 
 from django.conf import settings
+from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import ArrayField
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
@@ -15,6 +16,10 @@ from colorfield.fields import ColorField
 
 
 VERSION_STRING = r'^[a-zA-Z0-9._+-]+$'
+
+
+class User(AbstractUser):
+    pass
 
 
 class SlugMixin:
