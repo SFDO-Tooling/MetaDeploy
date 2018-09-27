@@ -80,7 +80,7 @@ describe('doLocalLogout', () => {
 });
 
 describe('logout', () => {
-  afterEach(fetchMock.restore);
+  afterEach(fetchMock.reset);
 
   test('POSTs logout then dispatches LogoutAction', () => {
     fetchMock.postOnce(window.api_urls.account_logout(), {
