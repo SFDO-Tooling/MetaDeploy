@@ -5,7 +5,7 @@ import getApiFetch, { addUrlParams } from 'utils/api';
 describe('apiFetch', () => {
   const apiFetch = getApiFetch();
 
-  afterEach(fetchMock.restore);
+  afterEach(fetchMock.reset);
 
   test('200: returns response', () => {
     const expected = { foo: 'bar' };
@@ -34,12 +34,10 @@ describe('apiFetch', () => {
   });
 
   test('network error: throws Error', () => {
-    fetchMock.getOnce('/test/url/', { throws: 'not cool' });
+    fetchMock.getOnce('/test/url/', { throws: new Error('not cool') });
 
     expect.assertions(1);
-    return expect(() => {
-      apiFetch('/test/url/');
-    }).toThrow('not cool');
+    return expect(apiFetch('/test/url/')).rejects.toThrow('not cool');
   });
 });
 
