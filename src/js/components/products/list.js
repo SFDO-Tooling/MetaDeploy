@@ -7,18 +7,35 @@ import TabsPanel from '@salesforce/design-system-react/components/tabs/panel';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
+import { saveActiveTab } from 'settings/actions';
+
 import ProductItem from 'components/products/listItem';
 
 import type {
   Products as ProductsType,
   Product as ProductType,
 } from 'products/reducer';
+import type {
+  Settings as SettingsType,
+  ActiveProductsTab as ActiveProductsTabType,
+} from 'settings/reducer';
 
 type ProductsMapType = Map<string, Array<ProductType>>;
 
-class ProductsList extends React.Component<{
-  productsByCategory: ProductsMapType,
-}> {
+class ProductsList extends React.Component<
+  {
+    productsByCategory: ProductsMapType,
+    productCategories: Array<string>,
+    activeProductsTab: ActiveProductsTabType,
+    doSaveActiveTab: typeof saveActiveTab,
+  },
+  { activeProductsTab: ActiveProductsTabType },
+> {
+  constructor(props) {
+    super(props);
+    this.state = { activeProductsTab: props.activeProductsTab };
+  }
+
   static getProductsList(products: ProductsType): React.Node {
     return (
       <div
@@ -31,6 +48,14 @@ class ProductsList extends React.Component<{
       </div>
     );
   }
+
+  handleSelect = (index: number) => {
+    /* istanbul ignore next */
+    const category = this.props.productCategories[index] || null;
+    if (category !== this.props.activeProductsTab) {
+      this.props.doSaveActiveTab(category);
+    }
+  };
 
   render(): React.Node {
     let contents;
@@ -62,7 +87,18 @@ class ProductsList extends React.Component<{
           );
           tabs.push(panel);
         }
-        contents = <Tabs variant="scoped">{tabs}</Tabs>;
+        const savedTabIndex = this.props.productCategories.indexOf(
+          this.state.activeProductsTab,
+        );
+        contents = (
+          <Tabs
+            variant="scoped"
+            onSelect={this.handleSelect}
+            defaultSelectedIndex={savedTabIndex === -1 ? 0 : savedTabIndex}
+          >
+            {tabs}
+          </Tabs>
+        );
         break;
       }
     }
@@ -90,8 +126,31 @@ const selectProductsByCategory = createSelector(
   },
 );
 
+const selectProductCategories = createSelector(
+  selectProductsByCategory,
+  (productsByCategory: ProductsMapType): Array<string> => [
+    ...productsByCategory.keys(),
+  ],
+);
+
+const selectSettingsState = (appState): SettingsType => appState.settings;
+
+const selectActiveProductsTab = createSelector(
+  selectSettingsState,
+  (settings: SettingsType): ActiveProductsTabType => settings.activeProductsTab,
+);
+
 const select = appState => ({
   productsByCategory: selectProductsByCategory(appState),
+  productCategories: selectProductCategories(appState),
+  activeProductsTab: selectActiveProductsTab(appState),
 });
 
-export default connect(select)(ProductsList);
+const actions = {
+  doSaveActiveTab: saveActiveTab,
+};
+
+export default connect(
+  select,
+  actions,
+)(ProductsList);

@@ -1,5 +1,6 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { fireEvent } from 'react-testing-library';
 
 import { renderWithRedux } from './../../utils';
 
@@ -7,18 +8,19 @@ import ProductsList from 'components/products/list';
 
 describe('<Products />', () => {
   const setup = initialState => {
-    const { getByText, queryByText } = renderWithRedux(
+    const { store, getByText, queryByText } = renderWithRedux(
       <MemoryRouter>
         <ProductsList />
       </MemoryRouter>,
       initialState,
     );
-    return { getByText, queryByText };
+    return { store, getByText, queryByText };
   };
 
   test('renders products list (empty)', () => {
     const initialState = {
       products: [],
+      settings: { activeProductsTab: null },
     };
     const { getByText } = setup(initialState);
 
@@ -46,6 +48,7 @@ describe('<Products />', () => {
           },
         },
       ],
+      settings: { activeProductsTab: null },
     };
     const { getByText, queryByText } = setup(initialState);
 
@@ -53,7 +56,7 @@ describe('<Products />', () => {
     expect(queryByText('salesforce')).toBeNull();
   });
 
-  test('renders products list (2 categories)', () => {
+  describe('2 categories', () => {
     const initialState = {
       products: [
         {
@@ -97,12 +100,60 @@ describe('<Products />', () => {
           },
         },
       ],
+      settings: { activeProductsTab: null },
     };
-    const { getByText } = setup(initialState);
 
-    expect(getByText('Product 1')).toBeVisible();
-    expect(getByText('Product 2')).toBeInTheDocument();
-    expect(getByText('salesforce')).toBeVisible();
-    expect(getByText('community')).toBeVisible();
+    test('renders products list', () => {
+      const { getByText } = setup(initialState);
+      const activeTab = getByText('salesforce');
+
+      expect(getByText('Product 1')).toBeVisible();
+      expect(getByText('Product 2')).toBeInTheDocument();
+      expect(activeTab).toBeVisible();
+      expect(getByText('community')).toBeVisible();
+      expect(activeTab).toHaveClass('slds-active');
+    });
+
+    test('uses saved active tab', () => {
+      const state = {
+        ...initialState,
+        settings: { activeProductsTab: 'community' },
+      };
+      const { getByText } = setup(state);
+      const activeTab = getByText('community');
+
+      expect(getByText('Product 1')).toBeVisible();
+      expect(getByText('Product 2')).toBeInTheDocument();
+      expect(getByText('salesforce')).toBeVisible();
+      expect(activeTab).toBeVisible();
+      expect(activeTab).toHaveClass('slds-active');
+    });
+
+    describe('tab onSelect', () => {
+      test('saves new activeProductsTab', () => {
+        const { store, getByText } = setup(initialState);
+        const communityTab = getByText('community');
+        fireEvent.click(communityTab);
+
+        const action = {
+          type: 'PRODUCTS_TAB_ACTIVE',
+          payload: 'community',
+        };
+
+        expect(store.getActions()).toEqual([action]);
+      });
+
+      test('does no re-save if activeProductsTab is unchanged', () => {
+        const state = {
+          ...initialState,
+          settings: { activeProductsTab: 'community' },
+        };
+        const { store, getByText } = setup(state);
+        const communityTab = getByText('community');
+        fireEvent.click(communityTab);
+
+        expect(store.getActions()).toEqual([]);
+      });
+    });
   });
 });

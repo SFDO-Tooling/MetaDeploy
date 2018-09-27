@@ -43,9 +43,10 @@ describe('reducer', () => {
       id: 3,
       label: 'A Version',
     };
-    const modifiedProduct2 = Object.assign({}, product2, {
+    const modifiedProduct2 = {
+      ...product2,
       versions: { [version.label]: version },
-    });
+    };
     const expected = [product1, modifiedProduct2];
     const actual = reducer([product1, product2], {
       type: 'FETCH_VERSION_SUCCEEDED',
