@@ -38,8 +38,8 @@ class SocialTokenFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = SocialToken
 
-    token = factory.Sequence('0123456789abcdef{}'.format)
-    token_secret = factory.Sequence('secret.0123456789abcdef{}'.format)
+    token = '0123456789abcdef'
+    token_secret = 'secret.0123456789abcdef'
     app = factory.SubFactory(SocialAppFactory)
 
 
@@ -64,18 +64,6 @@ class UserFactory(factory.django.DjangoModelFactory):
     username = factory.Sequence("user_{}@example.com".format)
     password = factory.PostGenerationMethodCall('set_password', 'foobar')
     socialaccount_set = factory.RelatedFactory(SocialAccountFactory, 'user')
-
-
-@register
-class JobFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = Job
-
-    user = factory.SubFactory(UserFactory)
-    repo_url = 'https://example.com/#master'
-    flow_names = ['sample_flow']
-    enqueued_at = None
-    job_id = None
 
 
 @register
@@ -148,6 +136,28 @@ class PlanSlugFactory(factory.django.DjangoModelFactory):
 
     slug = factory.Sequence('this-is-a-slug-{}'.format)
     parent = factory.SubFactory(PlanFactory)
+
+
+@register
+class JobFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Job
+
+    user = factory.SubFactory(UserFactory)
+    plan = factory.SubFactory(PlanFactory)
+    enqueued_at = None
+    job_id = None
+
+    @factory.post_generation
+    def steps(self, create, extracted, **kwargs):  # pragma: nocover
+        if not create:
+            # Simple build, do nothing.
+            return
+
+        if extracted:
+            # A list of steps was passed in, use it
+            for step in extracted:
+                self.steps.add(step)
 
 
 # TODO: We will need these eventually, but not yet:

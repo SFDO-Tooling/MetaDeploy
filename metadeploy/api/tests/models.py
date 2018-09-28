@@ -26,6 +26,13 @@ class TestUser:
         user.socialaccount_set.all().delete()
         assert user.instance_url is None
 
+    def test_token(self, user_factory):
+        user = user_factory()
+        assert user.token == ('0123456789abcdef', 'secret.0123456789abcdef')
+
+        user.socialaccount_set.all().delete()
+        assert user.token == (None, None)
+
 
 @pytest.mark.django_db
 class TestIconProperty:

@@ -4,7 +4,7 @@ from ..jobs import run_flows, enqueuer
 
 
 @pytest.mark.django_db
-def test_run_flows(mocker, user_factory):
+def test_run_flows(mocker, user_factory, plan_factory, step_factory):
     # TODO: I don't like this test at all. But there's a lot of IO that
     # this code causes, so I'm mocking it out.
     mocker.patch('git.Repo.clone_from')
@@ -16,10 +16,10 @@ def test_run_flows(mocker, user_factory):
     base_flow = mocker.patch('cumulusci.core.flows.BaseFlow')
 
     user = user_factory()
-    repo_url = 'https://example.com/#master'
-    flow_names = ['test_flow']
+    plan = plan_factory()
+    steps = [step_factory(plan=plan)]
 
-    run_flows(user, repo_url, flow_names)
+    run_flows(user, plan, steps)
 
     # TODO assert? What we really need to assert is a change in the SF
     # org, but that'd be an integration test.

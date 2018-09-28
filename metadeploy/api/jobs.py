@@ -58,16 +58,7 @@ def prepend_python_path(path):
         sys.path = prev_path
 
 
-def get_token_off_user(user):
-    token = user.socialaccount_set.first().socialtoken_set.first()
-    return token.token, token.token_secret
-
-
-def get_instance_url_off_user(user):
-    return user.socialaccount_set.first().extra_data['instance_url']
-
-
-def run_flows(user, repo_url, flow_names):
+def run_flows(user, plan, steps):
     # TODO:
     #
     # We'll want to subclass BaseFlow and add logic in the progress
@@ -78,8 +69,11 @@ def run_flows(user, repo_url, flow_names):
     # Can we do anything meaningful with a return value from a @job,
     # too?
 
-    token, token_secret = get_token_off_user(user)
-    instance_url = get_instance_url_off_user(user)
+    token, token_secret = user.token
+    instance_url = user.instance_url
+    repo_url = plan.version.product.repo_url
+    commit_ish = plan.version.commit_ish
+    flow_names = [step.flow_name for step in steps]
 
     with contextlib.ExitStack() as stack:
         tmpdirname = stack.enter_context(TemporaryDirectory())
@@ -91,8 +85,8 @@ def run_flows(user, repo_url, flow_names):
 
         # Let's clone the repo locally:
         # Split commit-ish off:
-        repo_url, commit_ish = repo_url.split('#', 1)
         repo = git.Repo.clone_from(repo_url, tmpdirname)
+        # Uncertain about this line; is there a better way?
         getattr(repo.heads, commit_ish).checkout()
 
         # There's a lot of setup to make configs and keychains, link
@@ -155,8 +149,8 @@ def enqueuer():
     for j in Job.objects.filter(enqueued_at=None):
         j.job_id = run_flows_job.delay(
             j.user,
-            j.repo_url,
-            j.flow_names,
+            j.plan,
+            j.steps,
         ).id
         j.enqueued_at = timezone.now()
         j.save()

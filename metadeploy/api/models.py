@@ -2,7 +2,6 @@ import itertools
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
-from django.contrib.postgres.fields import ArrayField
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -24,6 +23,13 @@ class User(AbstractUser):
         if self.social_account:
             return self.social_account.extra_data.get('instance_url', None)
         return None
+
+    @property
+    def token(self):
+        if self.social_account:
+            token = self.social_account.socialtoken_set.first()
+            return (token.token, token.token_secret)
+        return (None, None)
 
     @property
     def social_account(self):
@@ -174,21 +180,6 @@ class Product(SlugMixin, models.Model):
         return None
 
 
-class Job(models.Model):
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.PROTECT,
-    )
-    instance_url = models.URLField()
-    repo_url = models.URLField()
-    flow_names = ArrayField(
-        models.CharField(max_length=64),
-        default=list,
-    )
-    enqueued_at = models.DateTimeField(null=True)
-    job_id = models.UUIDField(null=True)
-
-
 class VersionManager(models.Manager):
     def get_by_natural_key(self, *, product, label):
         return self.get(product=product, label=label)
@@ -330,3 +321,14 @@ class Step(models.Model):
 
     def __str__(self):
         return f'Step {self.name} of {self.plan.title} ({self.order_key})'
+
+
+class Job(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+    )
+    plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
+    steps = models.ManyToManyField(Step)
+    enqueued_at = models.DateTimeField(null=True)
+    job_id = models.UUIDField(null=True)
