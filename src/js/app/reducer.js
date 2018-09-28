@@ -2,9 +2,9 @@
 
 import { combineReducers } from 'redux';
 
-import productsReducer from 'products/reducer';
-import settingsReducer from 'settings/reducer';
-import userReducer from 'accounts/reducer';
+import products from 'products/reducer';
+import settings from 'settings/reducer';
+import user from 'accounts/reducer';
 
 import type { Products } from 'products/reducer';
 import type { Settings } from 'settings/reducer';
@@ -17,9 +17,9 @@ export type AppState = {
 };
 
 const reducer = combineReducers({
-  user: userReducer,
-  products: productsReducer,
-  settings: settingsReducer,
+  user,
+  products,
+  settings,
 });
 
 export default reducer;
