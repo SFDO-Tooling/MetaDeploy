@@ -3,9 +3,12 @@
 import * as React from 'react';
 import Button from '@salesforce/design-system-react/components/button';
 import DocumentTitle from 'react-document-title';
+import PageHeader from '@salesforce/design-system-react/components/page-header';
+import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
+import routes from 'utils/routes';
 import { fetchVersion } from 'products/actions';
 import { gatekeeper } from 'products/utils';
 import {
@@ -15,7 +18,7 @@ import {
 } from 'components/products/detail';
 
 import BodyContainer from 'components/bodyContainer';
-import ProductHeader from 'components/products/header';
+import ProductIcon from 'components/products/icon';
 import ProductNotFound from 'components/products/product404';
 import StepsTable from 'components/plans/stepsTable';
 
@@ -58,7 +61,21 @@ const PlanDetail = ({
   return (
     <DocumentTitle title={`${plan.title} | ${product.title} | MetaDeploy`}>
       <>
-        <ProductHeader product={product} version={version} />
+        <PageHeader
+          className="page-header
+            slds-p-around_x-large"
+          title={plan.title}
+          trail={[
+            <Link
+              to={routes.version_detail(product.slug, version.label)}
+              key={product.slug}
+            >
+              {product.title}, {version.label}
+            </Link>,
+          ]}
+          icon={<ProductIcon item={product} />}
+          variant="objectHome"
+        />
         <BodyContainer>
           <div
             className="slds-text-longform
@@ -79,8 +96,7 @@ const PlanDetail = ({
           {plan.steps.length ? (
             <div
               className="slds-p-around_medium
-                slds-size_1-of-1
-                slds-scrollable_x"
+                slds-size_1-of-1"
             >
               <StepsTable plan={plan} />
             </div>
