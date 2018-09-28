@@ -47,7 +47,7 @@ class TestJobSerializer:
 
         job = Job.objects.first()
         assert job.instance_url == 'https://example.com'
-        assert job.repo_url == 'https://github.com/some/repo.git'
+        assert job.repo_url == 'https://github.com/some/repo.git#master'
         assert job.flow_names == [
             step1.flow_name,
             step2.flow_name,

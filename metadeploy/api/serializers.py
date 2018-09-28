@@ -117,7 +117,8 @@ class JobSerializer(serializers.ModelSerializer):
     )
 
     def create(self, validated_data):
-        repo_url = validated_data.pop('plan').version.product.repo_url
+        plan = validated_data.pop('plan')
+        repo_url = f'{plan.version.product.repo_url}#{plan.version.commit_ish}'
         validated_data['repo_url'] = repo_url
         flow_names = [step.flow_name for step in validated_data.pop('steps')]
         validated_data['flow_names'] = flow_names

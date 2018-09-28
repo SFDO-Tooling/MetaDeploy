@@ -72,7 +72,7 @@ class JobFactory(factory.django.DjangoModelFactory):
         model = Job
 
     user = factory.SubFactory(UserFactory)
-    repo_url = 'https://example.com/'
+    repo_url = 'https://example.com/#master'
     flow_names = ['sample_flow']
     enqueued_at = None
     job_id = None

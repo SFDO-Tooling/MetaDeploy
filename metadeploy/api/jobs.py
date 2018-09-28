@@ -8,7 +8,7 @@ in the same transaction as the data it relies on is written, it may try
 to run before that data is actually visible in the database.
 
 To get around this, we have a single periodic enqueuer job that picks up
-instances of the Job model and triggers the run_flow_job.
+instances of the Job model and triggers the run_flows_job.
 """
 
 import os
@@ -67,7 +67,7 @@ def get_instance_url_off_user(user):
     return user.socialaccount_set.first().extra_data['instance_url']
 
 
-def run_flow(user, repo_url, flow_names):
+def run_flows(user, repo_url, flow_names):
     # TODO:
     #
     # We'll want to subclass BaseFlow and add logic in the progress
@@ -90,7 +90,10 @@ def run_flow(user, repo_url, flow_names):
         stack.enter_context(prepend_python_path(os.path.abspath(tmpdirname)))
 
         # Let's clone the repo locally:
-        git.Repo.clone_from(repo_url, tmpdirname)
+        # Split commit-ish off:
+        repo_url, commit_ish = repo_url.split('#', 1)
+        repo = git.Repo.clone_from(repo_url, tmpdirname)
+        getattr(repo.heads, commit_ish).checkout()
 
         # There's a lot of setup to make configs and keychains, link
         # them properly, and then eventually pass them into a flow,
@@ -144,13 +147,13 @@ def run_flow(user, repo_url, flow_names):
             flowinstance()
 
 
-run_flow_job = job(run_flow)
+run_flows_job = job(run_flows)
 
 
 def enqueuer():
     logger.debug('Enqueuer live', extra={'tag': 'jobs.enqueuer'})
     for j in Job.objects.filter(enqueued_at=None):
-        j.job_id = run_flow_job.delay(
+        j.job_id = run_flows_job.delay(
             j.user,
             j.repo_url,
             j.flow_names,

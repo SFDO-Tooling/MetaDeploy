@@ -205,6 +205,7 @@ class Version(models.Model):
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     is_production = models.BooleanField(default=True)
+    commit_ish = models.CharField(max_length=256, default='master')
 
     class Meta:
         unique_together = (
@@ -307,7 +308,7 @@ class Step(models.Model):
     is_recommended = models.BooleanField(default=True)
     kind = models.CharField(choices=Kind, default=Kind.metadata, max_length=64)
     order_key = models.PositiveIntegerField(default=0)
-    flow_name = models.CharField(max_length=64, blank=True)
+    flow_name = models.CharField(max_length=64)
 
     class Meta:
         ordering = (

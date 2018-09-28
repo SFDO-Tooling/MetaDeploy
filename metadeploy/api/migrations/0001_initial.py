@@ -404,7 +404,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ('order_key', models.PositiveIntegerField(default=0)),
-                ('flow_name', models.CharField(blank=True, max_length=64)),
+                ('flow_name', models.CharField(max_length=64)),
                 (
                     'plan',
                     models.ForeignKey(
@@ -449,6 +449,10 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.PROTECT,
                         to='api.Product',
                     ),
+                ),
+                (
+                    'commit_ish',
+                    models.CharField(max_length=256, default='master'),
                 ),
             ],
         ),
