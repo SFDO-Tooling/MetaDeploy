@@ -107,7 +107,6 @@
     "pytest:report-coverage": "$VIRTUAL_ENV/bin/coveralls",
     "pytest:check-coverage": "coverage3 report --fail-under=100",
     "build": "webpack --config webpack.dev.js",
-    "prod": "webpack --config webpack.prod.js",
     "heroku-postbuild": "yarn prod"
   },
   "husky": {

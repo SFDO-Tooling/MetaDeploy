@@ -4,13 +4,13 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import DocumentTitle from 'react-document-title';
 import IconSettings from '@salesforce/design-system-react/components/icon-settings';
-import settings from '@salesforce/design-system-react/components/settings';
 import logger from 'redux-logger';
+import settings from '@salesforce/design-system-react/components/settings';
 import thunk from 'redux-thunk';
 import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import { createStore, applyMiddleware } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
+import { createStore, applyMiddleware } from 'redux';
 
 import actionSprite from '@salesforce-ux/design-system/assets/icons/action-sprite/svg/symbols.svg';
 import customSprite from '@salesforce-ux/design-system/assets/icons/custom-sprite/svg/symbols.svg';
