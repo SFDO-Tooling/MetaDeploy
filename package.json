@@ -74,7 +74,7 @@
     "@salesforce-ux/design-system": "^2.7.2",
     "@salesforce/design-system-react": "^0.8.27",
     "js-cookie": "^2.2.0",
-    "money-clip": "^2.1.0",
+    "money-clip": "^3.0.0",
     "raven-js": "^3.27.0",
     "react": "^16.5.2",
     "react-document-title": "^2.0.3",
