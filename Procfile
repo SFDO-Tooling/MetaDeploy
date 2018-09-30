@@ -1,3 +1,3 @@
 web: newrelic-admin run-program gunicorn metadeploy.wsgi:application --preload
-worker: python manage.py rqworker default short
-scheduler: python manage.py rqscheduler default short
+worker: newrelic-admin run-python manage.py rqworker default short
+scheduler: newrelic-admin run-python manage.py rqscheduler default short
