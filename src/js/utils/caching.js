@@ -8,7 +8,7 @@ export const cache = getConfiguredCache({
 });
 
 const actionsToPersist = {
-  PRODUCTS_TAB_ACTIVE: ['settings'],
+  // ...
 };
 
 export const persistMiddleware = getPersistMiddleware({
