@@ -410,7 +410,11 @@ class Migration(migrations.Migration):
                 ("is_production", models.BooleanField(default=True)),
                 (
                     "commit_ish",
-                    models.CharField(default="master", max_length=256),
+                    models.CharField(
+                        default="master",
+                        max_length=256,
+                        help_text="This is usually a tag, sometimes a branch.",
+                    ),
                 ),
                 (
                     "product",

@@ -196,7 +196,11 @@ class Version(models.Model):
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     is_production = models.BooleanField(default=True)
-    commit_ish = models.CharField(max_length=256, default='master')
+    commit_ish = models.CharField(
+        max_length=256,
+        default='master',
+        help_text='This is usually a tag, sometimes a branch.',
+    )
 
     class Meta:
         unique_together = (
