@@ -16,9 +16,26 @@ import type {
 
 type ProductsMapType = Map<string, Array<ProductType>>;
 
-class ProductsList extends React.Component<{
-  productsByCategory: ProductsMapType,
-}> {
+class ProductsList extends React.Component<
+  {
+    productsByCategory: ProductsMapType,
+    productCategories: Array<string>,
+  },
+  {
+    activeProductsTab: string | null,
+  },
+> {
+  constructor(props) {
+    super(props);
+    let activeProductsTab = null;
+    try {
+      activeProductsTab = window.sessionStorage.getItem('activeProductsTab');
+    } catch (e) {
+      // swallow error
+    }
+    this.state = { activeProductsTab };
+  }
+
   static getProductsList(products: ProductsType): React.Node {
     return (
       <div
@@ -31,6 +48,20 @@ class ProductsList extends React.Component<{
       </div>
     );
   }
+
+  handleSelect = (index: number) => {
+    try {
+      const category = this.props.productCategories[index];
+      /* istanbul ignore else */
+      if (category) {
+        window.sessionStorage.setItem('activeProductsTab', category);
+      } else {
+        window.sessionStorage.removeItem('activeProductsTab');
+      }
+    } catch (e) {
+      // swallor error
+    }
+  };
 
   render(): React.Node {
     let contents;
@@ -62,7 +93,18 @@ class ProductsList extends React.Component<{
           );
           tabs.push(panel);
         }
-        contents = <Tabs variant="scoped">{tabs}</Tabs>;
+        const savedTabIndex = this.props.productCategories.indexOf(
+          this.state.activeProductsTab,
+        );
+        contents = (
+          <Tabs
+            variant="scoped"
+            onSelect={this.handleSelect}
+            defaultSelectedIndex={savedTabIndex === -1 ? 0 : savedTabIndex}
+          >
+            {tabs}
+          </Tabs>
+        );
         break;
       }
     }
@@ -90,8 +132,16 @@ const selectProductsByCategory = createSelector(
   },
 );
 
+const selectProductCategories = createSelector(
+  selectProductsByCategory,
+  (productsByCategory: ProductsMapType): Array<string> => [
+    ...productsByCategory.keys(),
+  ],
+);
+
 const select = appState => ({
   productsByCategory: selectProductsByCategory(appState),
+  productCategories: selectProductCategories(appState),
 });
 
 export default connect(select)(ProductsList);

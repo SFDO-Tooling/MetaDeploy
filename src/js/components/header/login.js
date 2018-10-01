@@ -3,6 +3,7 @@
 import * as React from 'react';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 
+import { addUrlParams } from 'utils/api';
 import { logError } from 'utils/logging';
 
 import CustomDomainModal from 'components/header/customDomainModal';
@@ -68,7 +69,9 @@ class Login extends React.Component<{}, { modalOpen: boolean }> {
               return;
             }
             if (opt.href) {
-              window.location.assign(opt.href);
+              window.location.assign(
+                addUrlParams(opt.href, { next: window.location.pathname }),
+              );
             }
           }}
         />

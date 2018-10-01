@@ -1,15 +1,16 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { fireEvent } from 'react-testing-library';
 
 import { renderWithRedux } from './../../utils';
 
 import ProductsList from 'components/products/list';
 
 describe('<Products />', () => {
-  const setup = initialState => {
+  const setup = (initialState, props = {}) => {
     const { getByText, queryByText } = renderWithRedux(
       <MemoryRouter>
-        <ProductsList />
+        <ProductsList {...props} />
       </MemoryRouter>,
       initialState,
     );
@@ -53,7 +54,7 @@ describe('<Products />', () => {
     expect(queryByText('salesforce')).toBeNull();
   });
 
-  test('renders products list (2 categories)', () => {
+  describe('2 categories', () => {
     const initialState = {
       products: [
         {
@@ -98,11 +99,43 @@ describe('<Products />', () => {
         },
       ],
     };
-    const { getByText } = setup(initialState);
 
-    expect(getByText('Product 1')).toBeVisible();
-    expect(getByText('Product 2')).toBeInTheDocument();
-    expect(getByText('salesforce')).toBeVisible();
-    expect(getByText('community')).toBeVisible();
+    afterEach(() => {
+      window.sessionStorage.removeItem('activeProductsTab');
+    });
+
+    test('renders products list', () => {
+      const { getByText } = setup(initialState);
+      const activeTab = getByText('salesforce');
+
+      expect(getByText('Product 1')).toBeVisible();
+      expect(getByText('Product 2')).toBeInTheDocument();
+      expect(activeTab).toBeVisible();
+      expect(getByText('community')).toBeVisible();
+      expect(activeTab).toHaveClass('slds-active');
+    });
+
+    test('uses saved active tab', () => {
+      window.sessionStorage.setItem('activeProductsTab', 'community');
+      const { getByText } = setup(initialState);
+      const activeTab = getByText('community');
+
+      expect(getByText('Product 1')).toBeVisible();
+      expect(getByText('Product 2')).toBeInTheDocument();
+      expect(getByText('salesforce')).toBeVisible();
+      expect(activeTab).toBeVisible();
+      expect(activeTab).toHaveClass('slds-active');
+    });
+
+    describe('tab onSelect', () => {
+      test('saves new activeProductsTab', () => {
+        const { getByText } = setup(initialState);
+        const communityTab = getByText('community');
+        fireEvent.click(communityTab);
+        const actual = window.sessionStorage.getItem('activeProductsTab');
+
+        expect(actual).toEqual('community');
+      });
+    });
   });
 });

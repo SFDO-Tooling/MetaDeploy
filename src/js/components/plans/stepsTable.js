@@ -137,9 +137,7 @@ const StepsTable = ({ plan }: { plan: PlanType }) => (
   // and they must be strings (not integers)
   <DataTable
     className="slds-card"
-    items={plan.steps.map(step =>
-      Object.assign({}, step, { id: step.id.toString() }),
-    )}
+    items={plan.steps.map(step => ({ ...step, id: step.id.toString() }))}
     id="plan-steps-table"
   >
     <DataTableColumn

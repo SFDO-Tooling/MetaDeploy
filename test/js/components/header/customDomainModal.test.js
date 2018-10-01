@@ -1,6 +1,8 @@
 import React from 'react';
 import { render, fireEvent } from 'react-testing-library';
 
+import { addUrlParams } from 'utils/api';
+
 import CustomDomainModal from 'components/header/customDomainModal';
 
 describe('<CustomDomainModal />', () => {
@@ -42,7 +44,10 @@ describe('<CustomDomainModal />', () => {
     fireEvent.change(input, { target: { value: 'foobar' } });
     fireEvent.click(getByText('Continue'));
     const baseUrl = window.api_urls.salesforce_custom_login();
-    const expected = `${baseUrl}?custom_domain=foobar`;
+    const expected = addUrlParams(baseUrl, {
+      custom_domain: 'foobar',
+      next: window.location.pathname,
+    });
 
     expect(window.location.assign).toHaveBeenCalledWith(expected);
   });
