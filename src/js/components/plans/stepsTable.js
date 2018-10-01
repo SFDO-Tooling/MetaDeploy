@@ -116,7 +116,7 @@ const InstallDataColumnLabel = (): React.Node => (
       triggerClassName="slds-p-left_x-small"
       position="overflowBoundaryElement"
     >
-      {/* This should not be necessary...
+      {/* @@@ This should not be necessary...
           https://github.com/salesforce/design-system-react/issues/1578 */}
       <a>
         <Icon
@@ -135,34 +135,35 @@ const InstallDataColumnLabel = (): React.Node => (
 const StepsTable = ({ plan }: { plan: PlanType }) => (
   // DataTable uses step IDs internally to construct unique keys,
   // and they must be strings (not integers)
-  <DataTable
-    className="slds-card"
-    items={plan.steps.map(step => ({ ...step, id: step.id.toString() }))}
-    id="plan-steps-table"
-  >
-    <DataTableColumn
-      key="name"
-      label="Steps"
-      property="name"
-      primaryColumn
-      truncate
+  <article className="slds-card slds-scrollable_x">
+    <DataTable
+      items={plan.steps.map(step => ({ ...step, id: step.id.toString() }))}
+      id="plan-steps-table"
     >
-      <NameDataCell />
-    </DataTableColumn>
-    <DataTableColumn key="kind" label="Type" property="kind" truncate>
-      <KindDataCell />
-    </DataTableColumn>
-    <DataTableColumn key="is_required" property="is_required">
-      <RequiredDataCell />
-    </DataTableColumn>
-    <DataTableColumn
-      key="is_recommended"
-      label={<InstallDataColumnLabel />}
-      property="is_recommended"
-    >
-      <InstallDataCell />
-    </DataTableColumn>
-  </DataTable>
+      <DataTableColumn
+        key="name"
+        label="Steps"
+        property="name"
+        primaryColumn
+        truncate
+      >
+        <NameDataCell />
+      </DataTableColumn>
+      <DataTableColumn key="kind" label="Type" property="kind" truncate>
+        <KindDataCell />
+      </DataTableColumn>
+      <DataTableColumn key="is_required" property="is_required">
+        <RequiredDataCell />
+      </DataTableColumn>
+      <DataTableColumn
+        key="is_recommended"
+        label={<InstallDataColumnLabel />}
+        property="is_recommended"
+      >
+        <InstallDataCell />
+      </DataTableColumn>
+    </DataTable>
+  </article>
 );
 
 export default StepsTable;
