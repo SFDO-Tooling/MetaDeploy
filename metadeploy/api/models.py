@@ -330,5 +330,6 @@ class Job(models.Model):
     )
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
     steps = models.ManyToManyField(Step)
+    created_at = models.DateTimeField(auto_now_add=True)
     enqueued_at = models.DateTimeField(null=True)
     job_id = models.UUIDField(null=True)

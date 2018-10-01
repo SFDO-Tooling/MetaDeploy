@@ -166,6 +166,11 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
+
+                (
+                    "created_at",
+                    models.DateTimeField(auto_now_add=True),
+                ),
                 ("enqueued_at", models.DateTimeField(null=True)),
                 ("job_id", models.UUIDField(null=True)),
             ],
