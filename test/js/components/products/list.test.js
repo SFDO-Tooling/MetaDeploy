@@ -116,9 +116,8 @@ describe('<Products />', () => {
     });
 
     test('uses saved active tab', () => {
-      const { getByText } = setup(initialState, {
-        activeProductsTab: 'community',
-      });
+      window.sessionStorage.setItem('activeProductsTab', 'community');
+      const { getByText } = setup(initialState);
       const activeTab = getByText('community');
 
       expect(getByText('Product 1')).toBeVisible();
