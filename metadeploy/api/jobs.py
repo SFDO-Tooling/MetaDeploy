@@ -29,7 +29,6 @@ from django_rq import job
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.utils import timezone
 
 from .models import Job
 
@@ -147,12 +146,13 @@ run_flows_job = job(run_flows)
 def enqueuer():
     logger.debug('Enqueuer live', extra={'tag': 'jobs.enqueuer'})
     for j in Job.objects.filter(enqueued_at=None):
-        j.job_id = run_flows_job.delay(
+        rq_job = run_flows_job.delay(
             j.user,
             j.plan,
             j.steps,
-        ).id
-        j.enqueued_at = timezone.now()
+        )
+        j.job_id = rq_job.id
+        j.enqueued_at = rq_job.enqueued_at
         j.save()
 
 

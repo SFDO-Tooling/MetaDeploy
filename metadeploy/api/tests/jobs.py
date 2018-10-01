@@ -1,3 +1,6 @@
+from datetime import datetime
+import pytz
+
 import pytest
 
 from ..jobs import run_flows, enqueuer
@@ -32,6 +35,8 @@ def test_enqueuer(mocker, job_factory):
     delay = mocker.patch('metadeploy.api.jobs.run_flows_job.delay')
     # Just a random UUID:
     delay.return_value.id = '294fc6d2-0f3c-4877-b849-54184724b6b2'
+    october_first = datetime(2018, 10, 1, 12, 0, 0, 0, pytz.UTC)
+    delay.return_value.enqueued_at = october_first
     job = job_factory()
     enqueuer()
 
