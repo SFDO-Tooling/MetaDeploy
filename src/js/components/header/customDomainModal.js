@@ -5,6 +5,8 @@ import Button from '@salesforce/design-system-react/components/button';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 
+import { addUrlParams } from 'utils/api';
+
 type Props = {
   isOpen: boolean,
   toggleModal: boolean => void,
@@ -28,7 +30,12 @@ class CustomDomainModal extends React.Component<Props, { url: string }> {
       return;
     }
     const baseUrl = window.api_urls.salesforce_custom_login();
-    window.location.assign(`${baseUrl}?custom_domain=${val}`);
+    window.location.assign(
+      addUrlParams(baseUrl, {
+        custom_domain: val,
+        next: window.location.pathname,
+      }),
+    );
   };
 
   handleChange = (event: SyntheticInputEvent<HTMLInputElement>) => {

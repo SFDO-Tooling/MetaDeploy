@@ -44,9 +44,10 @@ describe('gatekeeper', () => {
 
   describe('no version, already fetched', () => {
     test('renders <VersionNotFound />', () => {
-      const product = Object.assign({}, defaultProduct, {
+      const product = {
+        ...defaultProduct,
         versions: { '2.0.0': null },
-      });
+      };
       const { getByText } = setup({
         product,
         version: null,
@@ -59,9 +60,10 @@ describe('gatekeeper', () => {
 
   describe('version not yet fetched', () => {
     test('renders <Spinner /> while fetching', () => {
-      const product = Object.assign({}, defaultProduct, {
+      const product = {
+        ...defaultProduct,
         versions: { '2.0.0': 'not null' },
-      });
+      };
       const doFetchVersion = jest.fn();
       const { getByText } = setup({
         product,

@@ -2,8 +2,8 @@
 
 import { combineReducers } from 'redux';
 
-import userReducer from 'accounts/reducer';
-import productsReducer from 'products/reducer';
+import products from 'products/reducer';
+import user from 'accounts/reducer';
 
 import type { Products } from 'products/reducer';
 import type { User } from 'accounts/reducer';
@@ -14,8 +14,8 @@ export type AppState = {
 };
 
 const reducer = combineReducers({
-  user: userReducer,
-  products: productsReducer,
+  user,
+  products,
 });
 
 export default reducer;

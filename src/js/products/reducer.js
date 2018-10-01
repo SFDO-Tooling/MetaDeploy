@@ -40,12 +40,8 @@ const reducer = (products: Products = [], action: ProductsAction): Products => {
       const { product, label, version } = action.payload;
       return products.map(p => {
         if (p.id === product) {
-          const versions = Object.assign({}, p.versions, {
-            [label]: version,
-          });
-          return Object.assign({}, p, {
-            versions,
-          });
+          const versions = { ...p.versions, [label]: version };
+          return { ...p, versions };
         }
         return p;
       });
