@@ -7,35 +7,20 @@ import TabsPanel from '@salesforce/design-system-react/components/tabs/panel';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
-import { saveActiveTab } from 'settings/actions';
-
 import ProductItem from 'components/products/listItem';
 
 import type {
   Products as ProductsType,
   Product as ProductType,
 } from 'products/reducer';
-import type {
-  Settings as SettingsType,
-  ActiveProductsTab as ActiveProductsTabType,
-} from 'settings/reducer';
 
 type ProductsMapType = Map<string, Array<ProductType>>;
 
-class ProductsList extends React.Component<
-  {
-    productsByCategory: ProductsMapType,
-    productCategories: Array<string>,
-    activeProductsTab: ActiveProductsTabType,
-    doSaveActiveTab: typeof saveActiveTab,
-  },
-  { activeProductsTab: ActiveProductsTabType },
-> {
-  constructor(props) {
-    super(props);
-    this.state = { activeProductsTab: props.activeProductsTab };
-  }
-
+class ProductsList extends React.Component<{
+  productsByCategory: ProductsMapType,
+  productCategories: Array<string>,
+  activeProductsTab: string | null,
+}> {
   static getProductsList(products: ProductsType): React.Node {
     return (
       <div
@@ -50,10 +35,16 @@ class ProductsList extends React.Component<
   }
 
   handleSelect = (index: number) => {
-    /* istanbul ignore next */
-    const category = this.props.productCategories[index] || null;
-    if (category !== this.props.activeProductsTab) {
-      this.props.doSaveActiveTab(category);
+    try {
+      const category = this.props.productCategories[index];
+      /* istanbul ignore else */
+      if (category) {
+        window.sessionStorage.setItem('activeProductsTab', category);
+      } else {
+        window.sessionStorage.removeItem('activeProductsTab');
+      }
+    } catch (e) {
+      // swallor error
     }
   };
 
@@ -88,7 +79,7 @@ class ProductsList extends React.Component<
           tabs.push(panel);
         }
         const savedTabIndex = this.props.productCategories.indexOf(
-          this.state.activeProductsTab,
+          this.props.activeProductsTab,
         );
         contents = (
           <Tabs
@@ -133,24 +124,9 @@ const selectProductCategories = createSelector(
   ],
 );
 
-const selectSettingsState = (appState): SettingsType => appState.settings;
-
-const selectActiveProductsTab = createSelector(
-  selectSettingsState,
-  (settings: SettingsType): ActiveProductsTabType => settings.activeProductsTab,
-);
-
 const select = appState => ({
   productsByCategory: selectProductsByCategory(appState),
   productCategories: selectProductCategories(appState),
-  activeProductsTab: selectActiveProductsTab(appState),
 });
 
-const actions = {
-  doSaveActiveTab: saveActiveTab,
-};
-
-export default connect(
-  select,
-  actions,
-)(ProductsList);
+export default connect(select)(ProductsList);

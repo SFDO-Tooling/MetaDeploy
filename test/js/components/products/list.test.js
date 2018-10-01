@@ -7,20 +7,19 @@ import { renderWithRedux } from './../../utils';
 import ProductsList from 'components/products/list';
 
 describe('<Products />', () => {
-  const setup = initialState => {
-    const { store, getByText, queryByText } = renderWithRedux(
+  const setup = (initialState, props = {}) => {
+    const { getByText, queryByText } = renderWithRedux(
       <MemoryRouter>
-        <ProductsList />
+        <ProductsList {...props} />
       </MemoryRouter>,
       initialState,
     );
-    return { store, getByText, queryByText };
+    return { getByText, queryByText };
   };
 
   test('renders products list (empty)', () => {
     const initialState = {
       products: [],
-      settings: { activeProductsTab: null },
     };
     const { getByText } = setup(initialState);
 
@@ -48,7 +47,6 @@ describe('<Products />', () => {
           },
         },
       ],
-      settings: { activeProductsTab: null },
     };
     const { getByText, queryByText } = setup(initialState);
 
@@ -100,8 +98,11 @@ describe('<Products />', () => {
           },
         },
       ],
-      settings: { activeProductsTab: null },
     };
+
+    afterEach(() => {
+      window.sessionStorage.removeItem('activeProductsTab');
+    });
 
     test('renders products list', () => {
       const { getByText } = setup(initialState);
@@ -115,11 +116,9 @@ describe('<Products />', () => {
     });
 
     test('uses saved active tab', () => {
-      const state = {
-        ...initialState,
-        settings: { activeProductsTab: 'community' },
-      };
-      const { getByText } = setup(state);
+      const { getByText } = setup(initialState, {
+        activeProductsTab: 'community',
+      });
       const activeTab = getByText('community');
 
       expect(getByText('Product 1')).toBeVisible();
@@ -131,28 +130,12 @@ describe('<Products />', () => {
 
     describe('tab onSelect', () => {
       test('saves new activeProductsTab', () => {
-        const { store, getByText } = setup(initialState);
+        const { getByText } = setup(initialState);
         const communityTab = getByText('community');
         fireEvent.click(communityTab);
+        const actual = window.sessionStorage.getItem('activeProductsTab');
 
-        const action = {
-          type: 'PRODUCTS_TAB_ACTIVE',
-          payload: 'community',
-        };
-
-        expect(store.getActions()).toEqual([action]);
-      });
-
-      test('does no re-save if activeProductsTab is unchanged', () => {
-        const state = {
-          ...initialState,
-          settings: { activeProductsTab: 'community' },
-        };
-        const { store, getByText } = setup(state);
-        const communityTab = getByText('community');
-        fireEvent.click(communityTab);
-
-        expect(store.getActions()).toEqual([]);
+        expect(actual).toEqual('community');
       });
     });
   });
