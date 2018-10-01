@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
+import PageHeader from '@salesforce/design-system-react/components/page-header';
 import { Redirect, Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
@@ -11,7 +12,7 @@ import { fetchVersion } from 'products/actions';
 import { gatekeeper } from 'products/utils';
 
 import BodyContainer from 'components/bodyContainer';
-import ProductHeader from 'components/products/header';
+import ProductIcon from 'components/products/icon';
 import ProductNotFound from 'components/products/product404';
 
 import type { Match } from 'react-router-dom';
@@ -77,7 +78,13 @@ let VersionDetail = ({
   return (
     <DocumentTitle title={`${product.title} | MetaDeploy`}>
       <>
-        <ProductHeader product={product} version={version} />
+        <PageHeader
+          className="page-header
+            slds-p-around_x-large"
+          title={product.title}
+          info={version.label}
+          icon={<ProductIcon item={product} />}
+        />
         <BodyContainer>
           <BodySection>
             <h3 className="slds-text-heading_small">
