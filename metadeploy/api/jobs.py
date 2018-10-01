@@ -8,7 +8,7 @@ in the same transaction as the data it relies on is written, it may try
 to run before that data is actually visible in the database.
 
 To get around this, we have a single periodic enqueuer job that picks up
-instances of the Job model and triggers the run_flow_job.
+instances of the Job model and triggers the run_flows_job.
 """
 
 import os
@@ -29,7 +29,6 @@ from django_rq import job
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.utils import timezone
 
 from .models import Job
 
@@ -58,16 +57,7 @@ def prepend_python_path(path):
         sys.path = prev_path
 
 
-def get_token_off_user(user):
-    token = user.socialaccount_set.first().socialtoken_set.first()
-    return token.token, token.token_secret
-
-
-def get_instance_url_off_user(user):
-    return user.socialaccount_set.first().extra_data['instance_url']
-
-
-def run_flow(user, repo_url, flow_name):
+def run_flows(user, plan, steps):
     # TODO:
     #
     # We'll want to subclass BaseFlow and add logic in the progress
@@ -78,8 +68,11 @@ def run_flow(user, repo_url, flow_name):
     # Can we do anything meaningful with a return value from a @job,
     # too?
 
-    token, token_secret = get_token_off_user(user)
-    instance_url = get_instance_url_off_user(user)
+    token, token_secret = user.token
+    instance_url = user.instance_url
+    repo_url = plan.version.product.repo_url
+    commit_ish = plan.version.commit_ish
+    flow_names = [step.flow_name for step in steps]
 
     with contextlib.ExitStack() as stack:
         tmpdirname = stack.enter_context(TemporaryDirectory())
@@ -90,7 +83,10 @@ def run_flow(user, repo_url, flow_name):
         stack.enter_context(prepend_python_path(os.path.abspath(tmpdirname)))
 
         # Let's clone the repo locally:
-        git.Repo.clone_from(repo_url, tmpdirname)
+        # Split commit-ish off:
+        repo = git.Repo.clone_from(repo_url, tmpdirname)
+        # Uncertain about this line; is there a better way?
+        getattr(repo.heads, commit_ish).checkout()
 
         # There's a lot of setup to make configs and keychains, link
         # them properly, and then eventually pass them into a flow,
@@ -130,31 +126,33 @@ def run_flow(user, repo_url, flow_name):
         })
         proj_config.keychain.set_service('github', github_app, True)
 
-        # Make and run the flow:
-        flow_config = proj_config.get_flow(flow_name)
-        flowinstance = flows.BaseFlow(
-            proj_config,
-            flow_config,
-            proj_keychain.get_org(current_org),
-            options={},
-            skip=[],
-            name=flow_name,
-        )
-        flowinstance()
+        # Make and run the flows:
+        for flow_name in flow_names:
+            flow_config = proj_config.get_flow(flow_name)
+            flowinstance = flows.BaseFlow(
+                proj_config,
+                flow_config,
+                proj_keychain.get_org(current_org),
+                options={},
+                skip=[],
+                name=flow_name,
+            )
+            flowinstance()
 
 
-run_flow_job = job(run_flow)
+run_flows_job = job(run_flows)
 
 
 def enqueuer():
     logger.debug('Enqueuer live', extra={'tag': 'jobs.enqueuer'})
     for j in Job.objects.filter(enqueued_at=None):
-        j.job_id = run_flow_job.delay(
+        rq_job = run_flows_job.delay(
             j.user,
-            j.repo_url,
-            j.flow_name,
-        ).id
-        j.enqueued_at = timezone.now()
+            j.plan,
+            j.steps,
+        )
+        j.job_id = rq_job.id
+        j.enqueued_at = rq_job.enqueued_at
         j.save()
 
 

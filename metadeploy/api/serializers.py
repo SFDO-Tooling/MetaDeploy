@@ -97,12 +97,26 @@ class JobSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault(),
     )
+    plan = serializers.PrimaryKeyRelatedField(
+        queryset=Plan.objects.all(),
+    )
+    steps = serializers.PrimaryKeyRelatedField(
+        queryset=Step.objects.all(),
+        many=True,
+    )
 
     class Meta:
         model = Job
         fields = (
             'user',
-            'instance_url',
-            'repo_url',
-            'flow_name',
+            'plan',
+            'steps',
+            'created_at',
+            'enqueued_at',
+            'job_id',
         )
+        extra_kwargs = {
+            'created_at': {'read_only': True},
+            'enqueued_at': {'read_only': True},
+            'job_id': {'read_only': True},
+        }

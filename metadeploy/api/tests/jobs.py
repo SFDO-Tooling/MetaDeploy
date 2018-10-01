@@ -1,10 +1,13 @@
+from datetime import datetime
+import pytz
+
 import pytest
 
-from ..jobs import run_flow, enqueuer
+from ..jobs import run_flows, enqueuer
 
 
 @pytest.mark.django_db
-def test_run_flow(mocker, user_factory):
+def test_run_flows(mocker, user_factory, plan_factory, step_factory):
     # TODO: I don't like this test at all. But there's a lot of IO that
     # this code causes, so I'm mocking it out.
     mocker.patch('git.Repo.clone_from')
@@ -16,10 +19,10 @@ def test_run_flow(mocker, user_factory):
     base_flow = mocker.patch('cumulusci.core.flows.BaseFlow')
 
     user = user_factory()
-    package_url = 'https://example.com/'
-    flow_name = 'test_flow'
+    plan = plan_factory()
+    steps = [step_factory(plan=plan)]
 
-    run_flow(user, package_url, flow_name)
+    run_flows(user, plan, steps)
 
     # TODO assert? What we really need to assert is a change in the SF
     # org, but that'd be an integration test.
@@ -29,9 +32,11 @@ def test_run_flow(mocker, user_factory):
 
 @pytest.mark.django_db
 def test_enqueuer(mocker, job_factory):
-    delay = mocker.patch('metadeploy.api.jobs.run_flow_job.delay')
+    delay = mocker.patch('metadeploy.api.jobs.run_flows_job.delay')
     # Just a random UUID:
     delay.return_value.id = '294fc6d2-0f3c-4877-b849-54184724b6b2'
+    october_first = datetime(2018, 10, 1, 12, 0, 0, 0, pytz.UTC)
+    delay.return_value.enqueued_at = october_first
     job = job_factory()
     enqueuer()
 

@@ -1,6 +1,7 @@
 import itertools
 
 from django.conf import settings
+from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -14,6 +15,25 @@ from colorfield.fields import ColorField
 
 
 VERSION_STRING = r'^[a-zA-Z0-9._+-]+$'
+
+
+class User(AbstractUser):
+    @property
+    def instance_url(self):
+        if self.social_account:
+            return self.social_account.extra_data.get('instance_url', None)
+        return None
+
+    @property
+    def token(self):
+        if self.social_account:
+            token = self.social_account.socialtoken_set.first()
+            return (token.token, token.token_secret)
+        return (None, None)
+
+    @property
+    def social_account(self):
+        return self.socialaccount_set.first()
 
 
 class SlugMixin:
@@ -129,6 +149,7 @@ class Product(SlugMixin, models.Model):
         max_length=32,
     )
     slds_icon_name = models.CharField(max_length=64, blank=True)
+    repo_url = models.URLField(blank=True)
 
     slug_class = ProductSlug
 
@@ -159,18 +180,6 @@ class Product(SlugMixin, models.Model):
         return None
 
 
-class Job(models.Model):
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.PROTECT,
-    )
-    instance_url = models.URLField()
-    repo_url = models.URLField()
-    flow_name = models.CharField(max_length=64)
-    enqueued_at = models.DateTimeField(null=True)
-    job_id = models.UUIDField(null=True)
-
-
 class VersionManager(models.Manager):
     def get_by_natural_key(self, *, product, label):
         return self.get(product=product, label=label)
@@ -187,6 +196,11 @@ class Version(models.Model):
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     is_production = models.BooleanField(default=True)
+    commit_ish = models.CharField(
+        max_length=256,
+        default='master',
+        help_text='This is usually a tag, sometimes a branch.',
+    )
 
     class Meta:
         unique_together = (
@@ -289,6 +303,7 @@ class Step(models.Model):
     is_recommended = models.BooleanField(default=True)
     kind = models.CharField(choices=Kind, default=Kind.metadata, max_length=64)
     order_key = models.PositiveIntegerField(default=0)
+    flow_name = models.CharField(max_length=64)
 
     class Meta:
         ordering = (
@@ -310,3 +325,15 @@ class Step(models.Model):
 
     def __str__(self):
         return f'Step {self.name} of {self.plan.title} ({self.order_key})'
+
+
+class Job(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+    )
+    plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
+    steps = models.ManyToManyField(Step)
+    created_at = models.DateTimeField(auto_now_add=True)
+    enqueued_at = models.DateTimeField(null=True)
+    job_id = models.UUIDField(null=True)

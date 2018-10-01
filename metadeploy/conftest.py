@@ -38,8 +38,8 @@ class SocialTokenFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = SocialToken
 
-    token = factory.Sequence('0123456789abcdef{}'.format)
-    token_secret = factory.Sequence('secret.0123456789abcdef{}'.format)
+    token = '0123456789abcdef'
+    token_secret = 'secret.0123456789abcdef'
     app = factory.SubFactory(SocialAppFactory)
 
 
@@ -67,18 +67,6 @@ class UserFactory(factory.django.DjangoModelFactory):
 
 
 @register
-class JobFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = Job
-
-    user = factory.SubFactory(UserFactory)
-    repo_url = 'https://example.com/'
-    flow_name = 'sample_flow'
-    enqueued_at = None
-    job_id = None
-
-
-@register
 class ProductCategoryFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = ProductCategory
@@ -99,6 +87,7 @@ class ProductFactory(factory.django.DjangoModelFactory):
     slds_icon_category = ''
     slds_icon_name = ''
     _ensure_slug = factory.PostGenerationMethodCall('ensure_slug')
+    repo_url = 'https://github.com/some/repo.git'
 
 
 @register
@@ -137,6 +126,7 @@ class StepFactory(factory.django.DjangoModelFactory):
 
     name = 'Sample step'
     plan = factory.SubFactory(PlanFactory)
+    flow_name = 'install_prod'
 
 
 @register
@@ -146,6 +136,28 @@ class PlanSlugFactory(factory.django.DjangoModelFactory):
 
     slug = factory.Sequence('this-is-a-slug-{}'.format)
     parent = factory.SubFactory(PlanFactory)
+
+
+@register
+class JobFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Job
+
+    user = factory.SubFactory(UserFactory)
+    plan = factory.SubFactory(PlanFactory)
+    enqueued_at = None
+    job_id = None
+
+    @factory.post_generation
+    def steps(self, create, extracted, **kwargs):  # pragma: nocover
+        if not create:
+            # Simple build, do nothing.
+            return
+
+        if extracted:
+            # A list of steps was passed in, use it
+            for step in extracted:
+                self.steps.add(step)
 
 
 # TODO: We will need these eventually, but not yet:
