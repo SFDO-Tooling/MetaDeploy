@@ -16,11 +16,26 @@ import type {
 
 type ProductsMapType = Map<string, Array<ProductType>>;
 
-class ProductsList extends React.Component<{
-  productsByCategory: ProductsMapType,
-  productCategories: Array<string>,
-  activeProductsTab: string | null,
-}> {
+class ProductsList extends React.Component<
+  {
+    productsByCategory: ProductsMapType,
+    productCategories: Array<string>,
+  },
+  {
+    activeProductsTab: string | null,
+  },
+> {
+  constructor(props) {
+    super(props);
+    let activeProductsTab = null;
+    try {
+      activeProductsTab = window.sessionStorage.getItem('activeProductsTab');
+    } catch (e) {
+      // swallow error
+    }
+    this.state = { activeProductsTab };
+  }
+
   static getProductsList(products: ProductsType): React.Node {
     return (
       <div
@@ -79,7 +94,7 @@ class ProductsList extends React.Component<{
           tabs.push(panel);
         }
         const savedTabIndex = this.props.productCategories.indexOf(
-          this.props.activeProductsTab,
+          this.state.activeProductsTab,
         );
         contents = (
           <Tabs

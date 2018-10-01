@@ -63,22 +63,7 @@ const App = () => (
               <Route
                 exact
                 path={routePatterns.product_list()}
-                render={props => {
-                  let activeProductsTab = null;
-                  try {
-                    activeProductsTab = window.sessionStorage.getItem(
-                      'activeProductsTab',
-                    );
-                  } catch (e) {
-                    // swallow error
-                  }
-                  return (
-                    <ProductsList
-                      {...props}
-                      activeProductsTab={activeProductsTab}
-                    />
-                  );
-                }}
+                component={ProductsList}
               />
               <Route
                 exact
