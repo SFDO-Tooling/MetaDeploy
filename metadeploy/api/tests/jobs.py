@@ -1,5 +1,6 @@
 from datetime import datetime
 import pytz
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -10,7 +11,8 @@ from ..jobs import run_flows, enqueuer
 def test_run_flows(mocker, user_factory, plan_factory, step_factory):
     # TODO: I don't like this test at all. But there's a lot of IO that
     # this code causes, so I'm mocking it out.
-    mocker.patch('git.Repo.clone_from')
+    mocker.patch('github3.login')
+    mocker.patch('zipfile.ZipFile')
     mocker.patch('cumulusci.core.config.OrgConfig')
     mocker.patch('cumulusci.core.config.ServiceConfig')
     mocker.patch('cumulusci.core.config.YamlGlobalConfig')

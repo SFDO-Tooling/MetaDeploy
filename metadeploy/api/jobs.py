@@ -16,8 +16,10 @@ import sys
 import contextlib
 from tempfile import TemporaryDirectory
 import logging
+from urllib.parse import urlparse
+import zipfile
 
-import git
+import github3
 
 from cumulusci.core import (
     config,
@@ -35,6 +37,12 @@ from .models import Job
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
+
+
+def extract_user_and_repo(gh_url):
+    path = urlparse(gh_url).path
+    _, user, repo, *_ = path.split('/')
+    return user, repo
 
 
 @contextlib.contextmanager
@@ -83,10 +91,14 @@ def run_flows(user, plan, steps):
         stack.enter_context(prepend_python_path(os.path.abspath(tmpdirname)))
 
         # Let's clone the repo locally:
-        # Split commit-ish off:
-        repo = git.Repo.clone_from(repo_url, tmpdirname)
-        # Uncertain about this line; is there a better way?
-        getattr(repo.heads, commit_ish).checkout()
+        gh = github3.login(token=settings.GITHUB_TOKEN)
+        user, repo_name = extract_user_and_repo(repo_url)
+        repo = gh.repository(user, repo_name)
+        zip_file_name = 'archive.zip'
+        repo.archive('zipball', path=zip_file_name, ref=commit_ish)
+        # TODO: This is not actually safe! It's safe by accident of
+        # trusting GitHub, but I don't like relying on that:
+        zipfile.ZipFile(zip_file_name).extractall()
 
         # There's a lot of setup to make configs and keychains, link
         # them properly, and then eventually pass them into a flow,
