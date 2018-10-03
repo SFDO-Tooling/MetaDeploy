@@ -149,7 +149,7 @@ def enqueuer():
         rq_job = run_flows_job.delay(
             j.user,
             j.plan,
-            j.steps,
+            list(j.steps.all()),
         )
         j.job_id = rq_job.id
         j.enqueued_at = rq_job.enqueued_at
