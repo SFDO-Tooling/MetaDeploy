@@ -16,8 +16,10 @@ import sys
 import contextlib
 from tempfile import TemporaryDirectory
 import logging
+from urllib.parse import urlparse
+import zipfile
 
-import git
+import github3
 
 from cumulusci.core import (
     config,
@@ -35,6 +37,12 @@ from .models import Job
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
+
+
+def extract_user_and_repo(gh_url):
+    path = urlparse(gh_url).path
+    _, user, repo, *_ = path.split('/')
+    return user, repo
 
 
 @contextlib.contextmanager
@@ -55,6 +63,18 @@ def prepend_python_path(path):
         yield
     finally:
         sys.path = prev_path
+
+
+def is_safe_path(path):
+    return not os.path.isabs(path) and not path.startswith('..')
+
+
+def zip_file_is_safe(zip_file):
+    return all(
+        is_safe_path(info.filename)
+        for info
+        in zip_file.infolist()
+    )
 
 
 def run_flows(user, plan, steps):
@@ -83,10 +103,19 @@ def run_flows(user, plan, steps):
         stack.enter_context(prepend_python_path(os.path.abspath(tmpdirname)))
 
         # Let's clone the repo locally:
-        # Split commit-ish off:
-        repo = git.Repo.clone_from(repo_url, tmpdirname)
-        # Uncertain about this line; is there a better way?
-        getattr(repo.heads, commit_ish).checkout()
+        gh = github3.login(token=settings.GITHUB_TOKEN)
+        user, repo_name = extract_user_and_repo(repo_url)
+        repo = gh.repository(user, repo_name)
+        zip_file_name = 'archive.zip'
+        repo.archive('zipball', path=zip_file_name, ref=commit_ish)
+        zip_file = zipfile.ZipFile(zip_file_name)
+        if not zip_file_is_safe(zip_file):
+            # This is very unlikely, as we get the zipfile from GitHub,
+            # but must be considered:
+            url = f'https://github.com/{user}/{repo_name}#{commit_ish}'
+            logger.error(f'Malformed or malicious zip file from {url}.')
+            return
+        zip_file.extractall()
 
         # There's a lot of setup to make configs and keychains, link
         # them properly, and then eventually pass them into a flow,
