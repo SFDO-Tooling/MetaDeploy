@@ -2,6 +2,7 @@ import itertools
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.contrib.postgres.fields import JSONField
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -338,3 +339,20 @@ class Job(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     enqueued_at = models.DateTimeField(null=True)
     job_id = models.UUIDField(null=True)
+
+
+class PreflightResult(models.Model):
+    organization_url = models.URLField()
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    # Maybe we don't use foreign keys here because we want the result to
+    # remain static even if steps are subsequently changed:
+    step_results = JSONField(default=dict)
+    # It should take the shape of:
+    # {
+    #   <step_id>: [... errors],
+    #   ...
+    # }
