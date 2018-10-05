@@ -1,5 +1,8 @@
 from django.core.management.base import BaseCommand
 from django.utils.text import slugify
+from django.utils import timezone
+
+from scheduler.models import RepeatableJob
 
 from ...models import (
     Product,
@@ -66,7 +69,18 @@ class Command(BaseCommand):
     def create_step(self, **kwargs):
         return Step.objects.create(**kwargs)
 
+    def create_enqueuer_job(self):
+        RepeatableJob.objects.create(
+            callable='metadeploy.api.jobs.enqueuer_job',
+            name='Enqueuer',
+            interval=1,
+            interval_unit='minutes',
+            queue='default',
+            scheduled_time=timezone.now(),
+        )
+
     def handle(self, *args, **options):
+        self.create_enqueuer_job()
         sf_category = ProductCategory.objects.create(title='salesforce')
         co_category = ProductCategory.objects.create(title='community')
         product1 = self.create_product(

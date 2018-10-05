@@ -131,6 +131,7 @@ jobs:
     working_directory: ~/metadeploy
     docker:
       - image: circleci/python:3.6.6
+      - image: circleci/redis:latest
       - image: circleci/postgres:latest
         environment:
           POSTGRES_USER: ubuntu

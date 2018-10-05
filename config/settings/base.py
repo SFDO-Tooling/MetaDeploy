@@ -338,6 +338,9 @@ RQ_QUEUES = {
         'DEFAULT_TIMEOUT': 10,
     },
 }
+RQ = {
+    'WORKER_CLASS': 'metadeploy.rq_worker.ConnectionClosingWorker',
+}
 
 
 # SF Connected App and GitHub configuration:
