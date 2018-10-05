@@ -66,7 +66,10 @@ def prepend_python_path(path):
 
 
 def is_safe_path(path):
-    return not os.path.isabs(path) and not path.startswith('..')
+    return (
+        not os.path.isabs(path)
+        and '..' not in path.split(os.path.sep)
+    )
 
 
 def zip_file_is_safe(zip_file):
