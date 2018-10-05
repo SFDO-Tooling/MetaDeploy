@@ -269,6 +269,7 @@ class Plan(SlugMixin, models.Model):
     title = models.CharField(max_length=128)
     version = models.ForeignKey(Version, on_delete=models.PROTECT)
     preflight_message = models.TextField(blank=True)
+    preflight_flow_name = models.CharField(max_length=256, blank=True)
     tier = models.CharField(
         choices=Tier,
         default=Tier.primary,
