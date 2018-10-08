@@ -110,6 +110,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
+    'channels',
     'django_rq',
     'scheduler',
     'allauth',
@@ -166,6 +167,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 WSGI_APPLICATION = 'metadeploy.wsgi.application'
+ASGI_APPLICATION = 'metadeploy.routing.application'
 
 SITE_ID = 1
 
@@ -340,6 +342,15 @@ RQ_QUEUES = {
 }
 RQ = {
     'WORKER_CLASS': 'metadeploy.rq_worker.ConnectionClosingWorker',
+}
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            # TODO: make this come from REDIS_LOCATION
+            "hosts": [("redis-server-name", 6379)],
+        },
+    },
 }
 
 
