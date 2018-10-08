@@ -26,7 +26,8 @@ class User(AbstractUser):
 
     @property
     def token(self):
-        if self.social_account:
+        account = self.social_account
+        if account and account.socialtoken_set.exists():
             token = self.social_account.socialtoken_set.first()
             return (token.token, token.token_secret)
         return (None, None)
@@ -34,6 +35,12 @@ class User(AbstractUser):
     @property
     def social_account(self):
         return self.socialaccount_set.first()
+
+    @property
+    def valid_token_for(self):
+        if all(self.token) and self.instance_url:
+            return self.instance_url
+        return None
 
 
 class SlugMixin:

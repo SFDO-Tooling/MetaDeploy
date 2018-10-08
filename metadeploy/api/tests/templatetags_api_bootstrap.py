@@ -1,3 +1,6 @@
+import json
+from django.utils.html import escape
+
 import pytest
 
 from ..templatetags.api_bootstrap import serialize
@@ -10,5 +13,9 @@ def test_serialize(user_factory):
         username='template_tags@example.com',
     )
     actual = serialize(user)
-    expected = "{&quot;username&quot;: &quot;template_tags@example.com&quot;, &quot;email&quot;: &quot;template_tags@example.com&quot;}"  # noqa
+    expected = escape(json.dumps({
+        'username': 'template_tags@example.com',
+        'email': 'template_tags@example.com',
+        'valid_token_for': 'https://example.com',
+    }))
     assert actual == expected
