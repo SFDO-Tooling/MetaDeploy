@@ -9,6 +9,7 @@ import DataTableCell from '@salesforce/design-system-react/components/data-table
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import Icon from '@salesforce/design-system-react/components/icon';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
+import classNames from 'classnames';
 
 import type { Plan as PlanType, Step as StepType } from 'plans/reducer';
 
@@ -74,10 +75,12 @@ KindDataCell.displayName = DataTableCell.displayName;
 
 const RequiredDataCell = (props: DataCellProps): React.Node => {
   const required = props.item && props.item.is_required;
-  let classes = 'slds-align-middle slds-badge slds-m-horizontal_large';
-  if (!required) {
-    classes = `${classes} slds-badge_inverse`;
-  }
+  const classes = classNames(
+    'slds-align-middle',
+    'slds-badge',
+    'slds-m-horizontal_large',
+    { 'slds-badge_inverse': !required },
+  );
   const text = required ? 'Required' : 'Optional';
   return (
     <DataTableCell title={text} {...props}>

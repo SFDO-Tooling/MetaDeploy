@@ -11,6 +11,7 @@ import { logout } from 'accounts/actions';
 import Login from 'components/header/login';
 import Logout from 'components/header/logout';
 
+import type { AppState } from 'app/reducer';
 import type { User } from 'accounts/reducer';
 
 const Header = ({
@@ -53,7 +54,7 @@ const Header = ({
   />
 );
 
-const selectUserState = (appState): User => appState.user;
+export const selectUserState = (appState: AppState): User => appState.user;
 
 const select = appState => ({
   user: selectUserState(appState),

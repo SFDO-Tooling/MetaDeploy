@@ -8,8 +8,22 @@ import { logError } from 'utils/logging';
 
 import CustomDomainModal from 'components/header/customDomainModal';
 
-class Login extends React.Component<{}, { modalOpen: boolean }> {
-  constructor(props: {}) {
+type Props = {
+  id: string,
+  label: string,
+  buttonClassName?: string,
+  triggerClassName?: string,
+  disabled: boolean,
+};
+
+class Login extends React.Component<Props, { modalOpen: boolean }> {
+  static defaultProps = {
+    id: 'login',
+    label: 'Log In',
+    disabled: false,
+  };
+
+  constructor(props: Props) {
     super(props);
     this.state = { modalOpen: false };
     if (!window.api_urls.salesforce_production_login) {
@@ -55,10 +69,13 @@ class Login extends React.Component<{}, { modalOpen: boolean }> {
     return (
       <>
         <Dropdown
-          id="login"
-          label="Log In"
+          id={this.props.id}
+          label={this.props.label}
           className="slds-dropdown_actions
             slds-dropdown_medium"
+          buttonClassName={this.props.buttonClassName}
+          triggerClassName={this.props.triggerClassName}
+          disabled={this.props.disabled}
           buttonVariant="brand"
           menuPosition="relative"
           nubbinPosition="top right"
