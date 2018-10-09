@@ -1,12 +1,12 @@
-from channels.consumer import SyncConsumer
+from channels.generic.websocket import WebsocketConsumer
 
 
-class EchoConsumer(SyncConsumer):
-    def websocket_connect(self, event):
-        self.send({"type": "websocket.accept"})
+class EchoConsumer(WebsocketConsumer):
+    def connect(self):
+        self.accept()
 
-    def websocket_disconnect(self, event):
+    def disconnect(self, close_code):
         pass
 
-    def websocket_receive(self, event):
-        self.send({"type": "websocket.send", "text": event["text"]})
+    def receive(self, text_data):
+        self.send(text_data=text_data)
