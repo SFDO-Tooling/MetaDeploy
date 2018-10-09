@@ -9,7 +9,6 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const SizePlugin = require('size-plugin');
 const common = require('./webpack.common.js');
 const convert = require('koa-connect');
-const fs = require('fs');
 const merge = require('webpack-merge');
 const path = require('path');
 const proxy = require('http-proxy-middleware');
@@ -24,12 +23,6 @@ module.exports = merge(common, {
   devtool: 'cheap-module-inline-source-map',
   serve: {
     devMiddleware: { writeToDisk: true },
-    https: {
-      // eslint-disable-next-line no-sync
-      key: fs.readFileSync(path.join(__dirname, 'cert.key')),
-      // eslint-disable-next-line no-sync
-      cert: fs.readFileSync(path.join(__dirname, 'cert.crt')),
-    },
     hotClient: {
       port: 5000,
     },
@@ -43,7 +36,7 @@ module.exports = merge(common, {
       app.use(
         convert(
           proxy({
-            target: 'https://localhost:8000',
+            target: 'http://localhost:8000',
             secure: false,
           }),
         ),

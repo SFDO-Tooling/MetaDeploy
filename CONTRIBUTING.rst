@@ -108,16 +108,7 @@ To run the local development server::
 
     yarn serve
 
-The running server will be available at `<https://localhost:8080/>`_.
-
-We need to serve local development on HTTPS to support Salesforce's requirement
-for an HTTPS callback for OAuth. In most browsers, on your first visit you'll
-have to add a local certificate exception (following the browser prompts), as
-they'll be self-signed and not automatically trusted.
-
-The WebSocket server (to live-reload on file changes) listens on
-``wss://localhost:5000``. In Firefox, this requires first visiting
-`<https://localhost:5000/>`_ to add another local certificate exception.
+The running server will be available at `<http://localhost:8080/>`_.
 
 Logging in with Salesforce
 --------------------------
@@ -147,7 +138,7 @@ Development Tasks
 -----------------
 
 - ``yarn serve``: starts development server (with watcher) at
-  `<https://localhost:8080/>`_ (assets are served from ``dist/`` dir)
+  `<http://localhost:8080/>`_ (assets are served from ``dist/`` dir)
 - ``yarn pytest``: run Python tests
 - ``yarn test``: run JS tests
 - ``yarn test:watch``: run JS tests with a watcher for development

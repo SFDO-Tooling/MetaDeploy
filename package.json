@@ -92,7 +92,7 @@
   },
   "scripts": {
     "webpack:serve": "webpack-serve --config webpack.dev.js",
-    "django:serve": "python manage.py runserver_plus --cert-file cert",
+    "django:serve": "python manage.py runserver",
     "serve": "run-p django:serve webpack:serve",
     "prettier": "prettier --write '*.js' '.*.js' 'src/js/*.js' 'src/js/**/*.js' 'test/js/*.js' 'test/js/**/*.js' 'src/sass/**/*.scss'",
     "eslint": "eslint '*.js' 'src/js/*.js' 'src/js/**/*.js' 'test/js/*.js' 'test/js/**/*.js'",
