@@ -107,7 +107,6 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django_extensions',
     'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
     'channels',
