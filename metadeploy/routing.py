@@ -1,6 +1,14 @@
-from channels.routing import ProtocolTypeRouter
+from django.urls import path
+
+from channels.auth import AuthMiddlewareStack
+from channels.routing import ProtocolTypeRouter, URLRouter
+
+from .consumers import EchoConsumer
 
 
 application = ProtocolTypeRouter({
-    # Empty for now (http->django views is added by default)
+    # (http->django views is added by default)
+    "websocket": AuthMiddlewareStack(URLRouter([
+        path("ws/echo/", EchoConsumer),
+    ])),
 })
