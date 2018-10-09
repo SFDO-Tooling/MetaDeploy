@@ -10,4 +10,13 @@
   .slds-accordion__summary-heading {
     font-size: $font-size-medium;
   }
+
+  .step-column-tooltip {
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .step-name {
+    margin-left: 1.375rem;
+  }
 }

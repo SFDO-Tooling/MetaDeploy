@@ -11,7 +11,8 @@ import CustomDomainModal from 'components/header/customDomainModal';
 type Props = {
   id: string,
   label: string,
-  buttonClassName?: string,
+  buttonClassName: string,
+  buttonVariant: string,
   triggerClassName?: string,
   disabled: boolean,
 };
@@ -20,6 +21,8 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
   static defaultProps = {
     id: 'login',
     label: 'Log In',
+    buttonClassName: 'slds-button_outline-brand',
+    buttonVariant: 'base',
     disabled: false,
   };
 
@@ -73,12 +76,15 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
           label={this.props.label}
           className="slds-dropdown_actions
             slds-dropdown_medium"
-          buttonClassName={this.props.buttonClassName}
           triggerClassName={this.props.triggerClassName}
+          buttonClassName={this.props.buttonClassName}
+          buttonVariant={this.props.buttonVariant}
           disabled={this.props.disabled}
-          buttonVariant="brand"
           menuPosition="relative"
           nubbinPosition="top right"
+          iconCategory="utility"
+          iconName="down"
+          iconPosition="right"
           options={menuOpts}
           onSelect={opt => {
             if (opt.modal) {

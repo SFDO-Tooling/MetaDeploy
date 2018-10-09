@@ -12,8 +12,9 @@ import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
 
 import type { Plan as PlanType, Step as StepType } from 'plans/reducer';
+import type { User as UserType } from 'accounts/reducer';
 
-type DataCellProps = { [string]: mixed, item?: StepType };
+type DataCellProps = { [string]: mixed, user?: UserType, item?: StepType };
 
 class NameDataCell extends React.Component<
   DataCellProps,
@@ -43,7 +44,7 @@ class NameDataCell extends React.Component<
             </AccordionPanel>
           </Accordion>
         ) : (
-          name
+          <span className="step-name">{name}</span>
         )}
       </DataTableCell>
     );
@@ -93,11 +94,13 @@ RequiredDataCell.displayName = DataTableCell.displayName;
 const InstallDataCell = (props: DataCellProps): React.Node => {
   const required = props.item && props.item.is_required;
   const recommended = !required && props.item && props.item.is_recommended;
+  const disabled =
+    !(props.user && props.user.valid_token_for !== null) || required;
   return (
     <DataTableCell {...props}>
       <Checkbox
         checked={required || recommended}
-        disabled={required}
+        disabled={disabled}
         className="slds-p-vertical_x-small"
         labels={{ label: recommended ? 'recommended' : '' }}
       />
@@ -112,9 +115,7 @@ const InstallDataColumnLabel = (): React.Node => (
     <Tooltip
       align="top right"
       content={
-        <span style={{ textTransform: 'none', letterSpacing: 0 }}>
-          Select steps to install.
-        </span>
+        <span className="step-column-tooltip">Select steps to install.</span>
       }
       triggerClassName="slds-p-left_x-small"
       position="overflowBoundaryElement"
@@ -135,7 +136,7 @@ const InstallDataColumnLabel = (): React.Node => (
   </>
 );
 
-const StepsTable = ({ plan }: { plan: PlanType }) => (
+const StepsTable = ({ user, plan }: { user: UserType, plan: PlanType }) => (
   // DataTable uses step IDs internally to construct unique keys,
   // and they must be strings (not integers)
   <article className="slds-card slds-scrollable_x">
@@ -163,7 +164,7 @@ const StepsTable = ({ plan }: { plan: PlanType }) => (
         label={<InstallDataColumnLabel />}
         property="is_recommended"
       >
-        <InstallDataCell />
+        <InstallDataCell user={user} />
       </DataTableColumn>
     </DataTable>
   </article>

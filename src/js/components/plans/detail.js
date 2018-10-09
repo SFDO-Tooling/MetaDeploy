@@ -104,6 +104,7 @@ const PlanDetail = ({
                 id="plan-detail-login"
                 buttonClassName="slds-size_full
                   slds-p-vertical_xx-small"
+                buttonVariant="brand"
                 triggerClassName="slds-size_full"
                 label="Log In to Start Pre-Install Validation"
                 disabled={!plan.steps.length}
@@ -115,7 +116,7 @@ const PlanDetail = ({
               className="slds-p-around_medium
                 slds-size_1-of-1"
             >
-              <StepsTable plan={plan} />
+              <StepsTable user={user} plan={plan} />
             </div>
           ) : null}
         </BodyContainer>
