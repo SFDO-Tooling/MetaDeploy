@@ -67,7 +67,8 @@ class Command(BaseCommand):
         return plan
 
     def create_step(self, **kwargs):
-        return Step.objects.create(**kwargs)
+        flow_name = kwargs.pop('flow_name', 'install_prod')
+        return Step.objects.create(flow_name=flow_name, **kwargs)
 
     def create_enqueuer_job(self):
         RepeatableJob.objects.create(
@@ -111,6 +112,7 @@ class Command(BaseCommand):
         self.create_step(
             plan=plan,
             name='Recurring Donations',
+            description='This is a step description.',
             kind='onetime',
             is_recommended=False,
             order_key=2,
@@ -126,6 +128,7 @@ class Command(BaseCommand):
         self.create_step(
             plan=plan,
             name='Affiliations',
+            description='This is a step description.',
             kind='managed',
             is_required=False,
             order_key=4,
@@ -147,6 +150,7 @@ class Command(BaseCommand):
         self.create_step(
             plan=plan,
             name='NPSP Config for Salesforce1',
+            description='This is a step description.',
             kind='data',
             is_recommended=False,
             order_key=7,
@@ -154,6 +158,7 @@ class Command(BaseCommand):
         self.create_step(
             plan=plan,
             name='Contacts and Organizations',
+            description='This is a step description.',
             kind='managed',
             is_recommended=False,
             order_key=8,
@@ -161,6 +166,7 @@ class Command(BaseCommand):
         self.create_step(
             plan=plan,
             name='Another Ordered Step',
+            description='This is a step description.',
             kind='managed',
             is_required=False,
             order_key=8,

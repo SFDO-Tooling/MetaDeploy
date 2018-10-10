@@ -1,5 +1,7 @@
 from django.core.management.base import BaseCommand
 
+from scheduler.models import RepeatableJob
+
 from ...models import (
     ProductCategory,
     ProductSlug,
@@ -25,6 +27,7 @@ class Command(BaseCommand):
             Product,
             ProductCategory,
             Job,
+            RepeatableJob,
         ]
 
         for model_class in ordered_models:
