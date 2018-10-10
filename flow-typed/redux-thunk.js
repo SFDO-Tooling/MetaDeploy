@@ -4,7 +4,7 @@ declare module 'redux-thunk' {
   declare type Action = { +type: string };
   declare type GetState = () => any;
   declare type PromiseAction = Promise<Action>;
-  declare type Dispatch = (
+  declare export type Dispatch = (
     action: Action | ThunkAction | PromiseAction | Array<Action>,
   ) => DispatchAPI<Action | ThunkAction>;
   declare export type ThunkAction = (

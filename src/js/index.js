@@ -20,6 +20,7 @@ import utilitySprite from '@salesforce-ux/design-system/assets/icons/utility-spr
 
 import getApiFetch from 'utils/api';
 import { cache, persistMiddleware } from 'utils/caching';
+import { createSocket } from 'utils/websockets';
 import { logError } from 'utils/logging';
 import { routePatterns } from 'utils/routes';
 
@@ -125,6 +126,11 @@ cache
         if (user) {
           // Login
           appStore.dispatch(login(user));
+          // Connect to WebSocket server
+          createSocket({
+            url: 'ws://localhost:8080/ws/notifications/',
+            dispatch: appStore.dispatch,
+          });
         }
       }
       el.removeAttribute('data-user');

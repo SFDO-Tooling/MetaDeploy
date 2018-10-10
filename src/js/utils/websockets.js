@@ -4,9 +4,19 @@ import Sockette from 'sockette';
 
 import { log } from 'utils/logging';
 
-export const createSocket = (options: { [string]: mixed } = {}) => {
+import type { Dispatch } from 'redux-thunk';
+
+export const createSocket = ({
+  url,
+  options,
+  dispatch,
+}: {
+  url: string,
+  options?: { [string]: mixed },
+  dispatch: Dispatch,
+}) => {
   const defaults = {
-    maxAttempts: 10,
+    maxAttempts: 25,
     onopen: () => {},
     onmessage: () => {},
     onreconnect: () => {},
@@ -15,7 +25,7 @@ export const createSocket = (options: { [string]: mixed } = {}) => {
     onerror: () => {},
   };
   const opts = { ...defaults, ...options };
-  const ws = new Sockette('ws://localhost:8080/ws/notifications/', {
+  const ws = new Sockette(url, {
     protocols: opts.protocols,
     timeout: opts.timeout,
     maxAttempts: opts.maxAttempts,
@@ -24,7 +34,11 @@ export const createSocket = (options: { [string]: mixed } = {}) => {
       opts.onopen(e);
     },
     onmessage: e => {
-      log('[WebSocket] received:', e.data);
+      const msg = JSON.parse(e.data);
+      log('[WebSocket] received:', msg);
+      if (msg.type) {
+        dispatch(msg);
+      }
       opts.onmessage(e);
     },
     onreconnect: e => {

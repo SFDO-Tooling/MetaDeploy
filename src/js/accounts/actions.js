@@ -1,7 +1,6 @@
 // @flow
 
 import { cache } from 'utils/caching';
-import { createSocket } from 'utils/websockets';
 
 import type { ThunkAction } from 'redux-thunk';
 import type { User } from 'accounts/reducer';
@@ -14,8 +13,6 @@ export const login = (payload: User): LoginAction => {
   if (window.Raven && window.Raven.isSetup()) {
     window.Raven.setUserContext(payload);
   }
-  // @@@
-  window.ws = createSocket();
   return {
     type: 'USER_LOGGED_IN',
     payload,
