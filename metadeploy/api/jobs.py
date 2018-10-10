@@ -33,6 +33,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 
 from .models import Job
+from .push import push_message_to_user
 
 
 logger = logging.getLogger(__name__)
@@ -178,6 +179,9 @@ run_flows_job = job(run_flows)
 def enqueuer():
     logger.debug('Enqueuer live', extra={'tag': 'jobs.enqueuer'})
     for j in Job.objects.filter(enqueued_at=None):
+        # XXX
+        push_message_to_user(j.user, {'msg': f'Starting job {j.id}'})
+        # XXX
         rq_job = run_flows_job.delay(
             j.user,
             j.plan,

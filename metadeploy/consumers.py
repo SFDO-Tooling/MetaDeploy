@@ -1,12 +1,29 @@
-from channels.generic.websocket import WebsocketConsumer
+from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
 
-class EchoConsumer(WebsocketConsumer):
-    def connect(self):
-        self.accept()
+class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
+    async def connect(self):
+        """
+        Called when the websocket is handshaking as part of initial
+        connection.
+        """
+        if self.scope["user"].is_anonymous:
+            await self.close()
+        else:
+            await self.accept()
+        # Add this channel to the user-id group, so all browser windows
+        # where they're logged in will get notifcations:
+        user_id = self.scope["user"].id
+        await self.channel_layer.group_add(
+            f'user-{user_id}',
+            self.channel_name,
+        )
 
-    def disconnect(self, close_code):
+    async def receive_json(self, content):
         pass
 
-    def receive(self, text_data):
-        self.send(text_data=text_data)
+    async def disconnect(self, code):
+        pass
+
+    async def notify(self, event):
+        self.send_json(event['content'])
