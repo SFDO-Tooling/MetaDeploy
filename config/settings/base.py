@@ -359,6 +359,10 @@ CONNECTED_APP_CLIENT_ID = env('CONNECTED_APP_CLIENT_ID')
 GITHUB_TOKEN = env('GITHUB_TOKEN')
 
 
+# Token expiration
+TOKEN_LIFETIME_MINUTES = env('TOKEN_LIFETIME_MINUTES', type_=int, default=10)
+
+
 # Raven / Sentry
 SENTRY_DSN = env('SENTRY_DSN', default='')
 

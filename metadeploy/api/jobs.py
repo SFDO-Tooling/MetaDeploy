@@ -18,6 +18,7 @@ from tempfile import TemporaryDirectory
 import logging
 from urllib.parse import urlparse
 import zipfile
+from datetime import timedelta
 
 import github3
 
@@ -31,9 +32,14 @@ from django_rq import job
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.utils import timezone
+
+from asgiref.sync import async_to_sync
+
+from allauth.socialaccount.models import SocialAccount
 
 from .models import Job
-from .push import push_message_to_user
+from .push import user_token_expired
 
 
 logger = logging.getLogger(__name__)
@@ -179,13 +185,6 @@ run_flows_job = job(run_flows)
 def enqueuer():
     logger.debug('Enqueuer live', extra={'tag': 'jobs.enqueuer'})
     for j in Job.objects.filter(enqueued_at=None):
-        # XXX
-        from asgiref.sync import async_to_sync
-        async_to_sync(push_message_to_user)(
-            j.user,
-            {'msg': f'Starting job {j.id}'},
-        )
-        # XXX
         rq_job = run_flows_job.delay(
             j.user,
             j.plan,
@@ -197,3 +196,18 @@ def enqueuer():
 
 
 enqueuer_job = job(enqueuer)
+
+
+def expire_user_tokens():
+    token_lifetime_ago = timezone.now() - timedelta(
+        minutes=settings.TOKEN_LIFETIME_MINUTES,
+    )
+    tokens_to_expire = SocialAccount.objects.filter(
+        last_login__lte=token_lifetime_ago,
+    )
+    for sa in tokens_to_expire:
+        sa.socialtoken_set.all().delete()
+        async_to_sync(user_token_expired)(sa.user)
+
+
+expire_user_tokens_job = job(expire_user_tokens)
