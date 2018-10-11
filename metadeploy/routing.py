@@ -6,9 +6,16 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 from .consumers import PushNotificationConsumer
 
 
+websockets = URLRouter([
+    path(
+        "ws/notifications/",
+        PushNotificationConsumer,
+        name="ws_notifications",
+    ),
+])
+
+
 application = ProtocolTypeRouter({
     # (http->django views is added by default)
-    "websocket": AuthMiddlewareStack(URLRouter([
-        path("ws/notifications/", PushNotificationConsumer),
-    ])),
+    "websocket": AuthMiddlewareStack(websockets),
 })
