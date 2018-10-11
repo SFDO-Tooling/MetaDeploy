@@ -1,7 +1,5 @@
 from channels.layers import get_channel_layer
 
-from .serializers import FullUserSerializer
-
 
 async def push_message_to_user(user, json_message):
     user_id = user.id
@@ -15,6 +13,5 @@ async def push_message_to_user(user, json_message):
 async def user_token_expired(user):
     message = {
         'type': 'USER_TOKEN_INVALID',
-        'payload': FullUserSerializer(user).data,
     }
     await push_message_to_user(user, message)

@@ -22,11 +22,6 @@ async def test_push_notification_consumer__user_token_invalid(user_factory):
     response = await communicator.receive_json_from()
     assert response == {
         "type": "USER_TOKEN_INVALID",
-        "payload": {
-            "username": user.username,
-            "email": user.email,
-            "valid_token_for": 'https://example.com',
-        },
     }
 
     await communicator.disconnect()
