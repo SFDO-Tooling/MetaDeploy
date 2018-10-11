@@ -44,7 +44,7 @@ class NameDataCell extends React.Component<
             </AccordionPanel>
           </Accordion>
         ) : (
-          <span className="step-name">{name}</span>
+          <span className="step-name-no-icon">{name}</span>
         )}
       </DataTableCell>
     );

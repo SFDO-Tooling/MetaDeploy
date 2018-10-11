@@ -59,6 +59,15 @@ describe('doLocalLogout', () => {
     expect(cache.clear).toHaveBeenCalled();
   });
 
+  test('closes socket', () => {
+    const close = jest.fn();
+    window.socket = { close };
+    actions.doLocalLogout();
+
+    expect(close).toHaveBeenCalled();
+    expect(window).not.toHaveProperty('socket');
+  });
+
   describe('with Raven', () => {
     beforeEach(() => {
       window.Raven = {
@@ -95,5 +104,13 @@ describe('logout', () => {
     return store.dispatch(actions.logout()).then(() => {
       expect(store.getActions()).toEqual([expected]);
     });
+  });
+});
+
+describe('invalidateToken', () => {
+  test('returns TokenInvalidAction', () => {
+    const expected = { type: 'USER_TOKEN_INVALIDATED' };
+
+    expect(actions.invalidateToken()).toEqual(expected);
   });
 });

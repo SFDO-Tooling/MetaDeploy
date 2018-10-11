@@ -2,14 +2,20 @@
 
 import Sockette from 'sockette';
 
+import { invalidateToken } from 'accounts/actions';
 import { log } from 'utils/logging';
 
 import type { Dispatch } from 'redux-thunk';
+import type { TokenInvalidAction } from 'accounts/actions';
 
-const translator = msg => {
+export const translator = (
+  msg: {
+    [string]: mixed,
+  } = {},
+): TokenInvalidAction | null => {
   switch (msg.type) {
-    case 'token_invalid':
-      return { type: 'USER_TOKEN_INVALIDATED' };
+    case 'USER_TOKEN_INVALID':
+      return invalidateToken();
   }
   return null;
 };
@@ -22,7 +28,7 @@ export const createSocket = ({
   url: string,
   options?: { [string]: mixed },
   dispatch: Dispatch,
-}) => {
+}): Sockette => {
   const defaults = {
     maxAttempts: 25,
     onopen: () => {},
@@ -42,7 +48,12 @@ export const createSocket = ({
       opts.onopen(e);
     },
     onmessage: e => {
-      const msg = JSON.parse(e.data);
+      let msg = e.data;
+      try {
+        msg = JSON.parse(e.data);
+      } catch (err) {
+        // swallow error
+      }
       log('[WebSocket] received:', msg);
       const action = translator(msg);
       if (action) {

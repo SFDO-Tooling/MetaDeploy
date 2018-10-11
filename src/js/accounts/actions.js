@@ -7,7 +7,7 @@ import type { User } from 'accounts/reducer';
 
 type LoginAction = { type: 'USER_LOGGED_IN', payload: User };
 type LogoutAction = { type: 'USER_LOGGED_OUT' };
-type TokenInvalidAction = { type: 'USER_TOKEN_INVALIDATED' };
+export type TokenInvalidAction = { type: 'USER_TOKEN_INVALIDATED' };
 export type UserAction = LoginAction | LogoutAction | TokenInvalidAction;
 
 export const login = (payload: User): LoginAction => {
@@ -38,3 +38,7 @@ export const logout = (): ThunkAction => (dispatch, getState, { apiFetch }) =>
   apiFetch(window.api_urls.account_logout(), {
     method: 'POST',
   }).then(() => dispatch(doLocalLogout()));
+
+export const invalidateToken = (): TokenInvalidAction => ({
+  type: 'USER_TOKEN_INVALIDATED',
+});
