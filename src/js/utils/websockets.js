@@ -6,6 +6,14 @@ import { log } from 'utils/logging';
 
 import type { Dispatch } from 'redux-thunk';
 
+const translator = msg => {
+  switch (msg.type) {
+    case 'token_invalid':
+      return { type: 'USER_TOKEN_INVALIDATED' };
+  }
+  return null;
+};
+
 export const createSocket = ({
   url,
   options,
@@ -25,7 +33,7 @@ export const createSocket = ({
     onerror: () => {},
   };
   const opts = { ...defaults, ...options };
-  const ws = new Sockette(url, {
+  return new Sockette(url, {
     protocols: opts.protocols,
     timeout: opts.timeout,
     maxAttempts: opts.maxAttempts,
@@ -36,8 +44,9 @@ export const createSocket = ({
     onmessage: e => {
       const msg = JSON.parse(e.data);
       log('[WebSocket] received:', msg);
-      if (msg.type) {
-        dispatch(msg);
+      const action = translator(msg);
+      if (action) {
+        dispatch(action);
       }
       opts.onmessage(e);
     },
@@ -58,5 +67,4 @@ export const createSocket = ({
       opts.onerror(e);
     },
   });
-  return ws;
 };
