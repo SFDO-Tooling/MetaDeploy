@@ -180,7 +180,11 @@ def enqueuer():
     logger.debug('Enqueuer live', extra={'tag': 'jobs.enqueuer'})
     for j in Job.objects.filter(enqueued_at=None):
         # XXX
-        push_message_to_user(j.user, {'msg': f'Starting job {j.id}'})
+        from asgiref.sync import async_to_sync
+        async_to_sync(push_message_to_user)(
+            j.user,
+            {'msg': f'Starting job {j.id}'},
+        )
         # XXX
         rq_job = run_flows_job.delay(
             j.user,

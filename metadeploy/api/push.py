@@ -1,12 +1,20 @@
 from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
+
+from .serializers import FullUserSerializer
 
 
-def push_message_to_user(user, json_message):
+async def push_message_to_user(user, json_message):
     user_id = user.id
     channel_layer = get_channel_layer()
-    sync_group_send = async_to_sync(channel_layer.group_send)
-    sync_group_send(f'user-{user_id}', {
+    await channel_layer.group_send(f'user-{user_id}', {
         'type': 'notify',
         'content': json_message,
     })
+
+
+async def user_token_expired(user):
+    message = {
+        'type': 'USER_TOKEN_INVALID',
+        'payload': FullUserSerializer(user).data,
+    }
+    await push_message_to_user(user, message)
