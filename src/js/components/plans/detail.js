@@ -106,7 +106,7 @@ const PlanDetail = ({
                   slds-p-vertical_xx-small"
                 buttonVariant="brand"
                 triggerClassName="slds-size_full"
-                label="Log In to Start Pre-Install Validation"
+                label="Start Pre-Install Validation"
                 disabled={!plan.steps.length}
               />
             )}
