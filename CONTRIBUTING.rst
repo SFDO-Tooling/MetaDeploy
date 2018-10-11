@@ -110,6 +110,17 @@ To run the local development server::
 
 The running server will be available at `<http://localhost:8080/>`_.
 
+Running the background worker
+-----------------------------
+
+To run the background worker tasks, ensure you have Redis running
+(possibly installing it via ``brew install redis``), then run each of
+the following in separate terminals, with the virtualenvironment
+active::
+
+   python manage.py rqworker default short
+   python manage.py rqscheduler default short
+
 Logging in with Salesforce
 --------------------------
 
