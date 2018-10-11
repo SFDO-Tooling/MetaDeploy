@@ -8,7 +8,7 @@ import { log } from 'utils/logging';
 import type { Dispatch } from 'redux-thunk';
 import type { TokenInvalidAction } from 'accounts/actions';
 
-export const translator = (
+export const getAction = (
   msg: {
     [string]: mixed,
   } = {},
@@ -39,6 +39,7 @@ export const createSocket = ({
     onerror: () => {},
   };
   const opts = { ...defaults, ...options };
+
   return new Sockette(url, {
     protocols: opts.protocols,
     timeout: opts.timeout,
@@ -55,7 +56,7 @@ export const createSocket = ({
         // swallow error
       }
       log('[WebSocket] received:', msg);
-      const action = translator(msg);
+      const action = getAction(msg);
       if (action) {
         dispatch(action);
       }

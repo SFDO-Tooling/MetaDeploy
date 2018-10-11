@@ -4,13 +4,12 @@ import * as sockets from 'utils/websockets';
 import { invalidateToken } from 'accounts/actions';
 
 jest.mock('sockette');
-jest.mock('sockette');
 
-describe('translator', () => {
+describe('getAction', () => {
   test('handles USER_TOKEN_INVALID msg', () => {
     const msg = { type: 'USER_TOKEN_INVALID' };
     const expected = invalidateToken();
-    const actual = sockets.translator(msg);
+    const actual = sockets.getAction(msg);
 
     expect(actual).toEqual(expected);
   });
@@ -18,7 +17,7 @@ describe('translator', () => {
   test('handles unknown msg', () => {
     const msg = { foo: 'bar' };
     const expected = null;
-    const actual = sockets.translator(msg);
+    const actual = sockets.getAction(msg);
 
     expect(actual).toEqual(expected);
   });
