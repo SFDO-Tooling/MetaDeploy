@@ -78,13 +78,10 @@ class CustomDomainModal extends React.Component<Props, { url: string }> {
               className="slds-form-element__help
                 slds-truncate
                 slds-p-top_small"
+              data-testid="custom-domain"
             >
               https://
-              {this.state.url.trim() ? (
-                this.state.url.trim()
-              ) : (
-                <em data-testid="custom-domain">domain</em>
-              )}
+              {this.state.url.trim() ? this.state.url.trim() : <em>domain</em>}
               .my.salesforce.com
             </p>
           </Input>
