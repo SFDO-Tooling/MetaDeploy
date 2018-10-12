@@ -18,7 +18,6 @@ from tempfile import TemporaryDirectory
 import logging
 from urllib.parse import urlparse
 import zipfile
-from datetime import timedelta
 
 import github3
 
@@ -32,14 +31,8 @@ from django_rq import job
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.utils import timezone
-
-from asgiref.sync import async_to_sync
-
-from allauth.socialaccount.models import SocialAccount
 
 from .models import Job
-from .push import user_token_expired
 
 
 logger = logging.getLogger(__name__)
@@ -201,15 +194,8 @@ enqueuer_job = job(enqueuer)
 # TODO: Make sure this doesn't pull a token out from under a pending or
 # running job, when we get to that bit of implementation:
 def expire_user_tokens():
-    token_lifetime_ago = timezone.now() - timedelta(
-        minutes=settings.TOKEN_LIFETIME_MINUTES,
-    )
-    tokens_to_expire = SocialAccount.objects.filter(
-        last_login__lte=token_lifetime_ago,
-    )
-    for sa in tokens_to_expire:
-        sa.socialtoken_set.all().delete()
-        async_to_sync(user_token_expired)(sa.user)
+    for user in User.objects.with_expired_tokens():
+        user.expire_token()
 
 
 expire_user_tokens_job = job(expire_user_tokens)
