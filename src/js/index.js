@@ -127,8 +127,11 @@ cache
           // Login
           appStore.dispatch(login(user));
           // Connect to WebSocket server
+          const protocol =
+            window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+          const host = window.location.host;
           window.socket = createSocket({
-            url: 'ws://localhost:8080/ws/notifications/',
+            url: `${protocol}//${host}${window.api_urls.ws_notifications()}`,
             dispatch: appStore.dispatch,
           });
         }
