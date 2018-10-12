@@ -27,6 +27,7 @@ User = get_user_model()
 class SocialAppFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = SocialApp
+        django_get_or_create = ('provider',)
 
     name = 'Salesforce Production'
     provider = 'salesforce-production'
@@ -49,6 +50,7 @@ class SocialAccountFactory(factory.django.DjangoModelFactory):
         model = SocialAccount
 
     provider = 'salesforce-production'
+    uid = factory.Sequence('https://example.com/{}'.format)
     socialtoken_set = factory.RelatedFactory(SocialTokenFactory, 'account')
     extra_data = {
         'instance_url': 'https://example.com',

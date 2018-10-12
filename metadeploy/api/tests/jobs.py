@@ -1,10 +1,11 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from unittest.mock import MagicMock
 import pytz
+from django.utils import timezone
 
 import pytest
 
-from ..jobs import run_flows, enqueuer
+from ..jobs import run_flows, enqueuer, expire_user_tokens
 
 
 @pytest.mark.django_db
@@ -76,3 +77,21 @@ def test_malicious_zip_file(mocker, user_factory, plan_factory, step_factory):
     # org, but that'd be an integration test.
 
     assert not base_flow.called
+
+
+@pytest.mark.django_db
+def test_expire_user_tokens(user_factory):
+    user1 = user_factory()
+    user1.socialaccount_set.update(last_login=timezone.now())
+    user2 = user_factory()
+    user2.socialaccount_set.update(
+        last_login=timezone.now() - timedelta(minutes=30),
+    )
+
+    expire_user_tokens()
+
+    user1.refresh_from_db()
+    user2.refresh_from_db()
+
+    assert user1.valid_token_for == 'https://example.com'
+    assert user2.valid_token_for is None

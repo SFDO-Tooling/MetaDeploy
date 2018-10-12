@@ -20,6 +20,8 @@ from django.urls import path, re_path, include
 from django.contrib import admin
 from django.views.generic import TemplateView
 
+from .routing import websockets
+
 
 PREFIX = settings.ADMIN_AREA_PREFIX
 
@@ -38,4 +40,4 @@ urlpatterns = [
         TemplateView.as_view(template_name='index.html'),
         name='frontend',
     ),
-]
+] + websockets.routes

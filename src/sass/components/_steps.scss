@@ -10,4 +10,15 @@
   .slds-accordion__summary-heading {
     font-size: $font-size-medium;
   }
+
+  .step-column-tooltip {
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .step-name-no-icon {
+    // Line up text of step names, with or without accordion icon:
+    // .slds-button__icon width (0.875rem) + margin-right (0.5rem)
+    margin-left: 1.375rem;
+  }
 }

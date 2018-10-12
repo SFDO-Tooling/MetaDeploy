@@ -16,8 +16,10 @@ import {
   selectVersion,
   selectVersionLabel,
 } from 'components/products/detail';
+import { selectUserState } from 'components/header';
 
 import BodyContainer from 'components/bodyContainer';
+import Login from 'components/header/login';
 import ProductIcon from 'components/products/icon';
 import ProductNotFound from 'components/products/product404';
 import StepsTable from 'components/plans/stepsTable';
@@ -28,14 +30,17 @@ import type {
   Product as ProductType,
   Version as VersionType,
 } from 'products/reducer';
+import type { User as UserType } from 'accounts/reducer';
 
 const PlanDetail = ({
+  user,
   product,
   version,
   versionLabel,
   plan,
   doFetchVersion,
 }: {
+  user: UserType,
   product: ProductType | null,
   version: VersionType | null,
   versionLabel: ?string,
@@ -78,27 +83,40 @@ const PlanDetail = ({
         />
         <BodyContainer>
           <div
-            className="slds-text-longform
-              slds-p-around_medium
+            className="slds-p-around_medium
               slds-size_1-of-1
               slds-medium-size_1-of-2"
           >
-            <h3 className="slds-text-heading_small">{plan.title}</h3>
-            {plan.preflight_message ? <p>{plan.preflight_message}</p> : null}
-            <Button
-              className="slds-size_full
-                slds-p-vertical_xx-small"
-              label="Install"
-              variant="brand"
-              disabled={!plan.steps.length}
-            />
+            <div className="slds-text-longform">
+              <h3 className="slds-text-heading_small">{plan.title}</h3>
+              {plan.preflight_message ? <p>{plan.preflight_message}</p> : null}
+            </div>
+            {user && user.valid_token_for !== null ? (
+              <Button
+                className="slds-size_full
+                  slds-p-vertical_xx-small"
+                label="Start Pre-Install Validation"
+                variant="brand"
+                disabled={!plan.steps.length}
+              />
+            ) : (
+              <Login
+                id="plan-detail-login"
+                buttonClassName="slds-size_full
+                  slds-p-vertical_xx-small"
+                buttonVariant="brand"
+                triggerClassName="slds-size_full"
+                label="Start Pre-Install Validation"
+                disabled={!plan.steps.length}
+              />
+            )}
           </div>
           {plan.steps.length ? (
             <div
               className="slds-p-around_medium
                 slds-size_1-of-1"
             >
-              <StepsTable plan={plan} />
+              <StepsTable user={user} plan={plan} />
             </div>
           ) : null}
         </BodyContainer>
@@ -134,6 +152,7 @@ const selectPlan = createSelector(
 );
 
 const select = (appState, props) => ({
+  user: selectUserState(appState),
   product: selectProduct(appState, props),
   version: selectVersion(appState, props),
   versionLabel: selectVersionLabel(appState, props),

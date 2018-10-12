@@ -20,6 +20,7 @@ class FullUserSerializer(serializers.ModelSerializer):
         fields = (
             'username',
             'email',
+            'valid_token_for',
         )
 
 
