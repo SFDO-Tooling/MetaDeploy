@@ -104,9 +104,9 @@ To populate the database with sample data for development, run::
 Running the server
 ------------------
 
-The local development server requires `redis <https://redis.io/>`_ to manage
+The local development server requires `Redis <https://redis.io/>`_ to manage
 background worker tasks. If you can successfully run ``redis-cli ping`` and see
-output ``PONG``, then you have redis installed and running. Otherwise, run
+output ``PONG``, then you have Redis installed and running. Otherwise, run
 ``brew install redis`` (followed by ``brew services start redis``) or refer to
 the `Redis Quick Start`_.
 
