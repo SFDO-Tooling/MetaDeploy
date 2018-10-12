@@ -1,4 +1,5 @@
 import itertools
+from datetime import timedelta
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -7,18 +8,32 @@ from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Count
+from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
+from allauth.socialaccount.models import SocialToken
+from asgiref.sync import async_to_sync
+from colorfield.fields import ColorField
 from model_utils import Choices
 
-from colorfield.fields import ColorField
+from .push import user_token_expired
 
 
 VERSION_STRING = r'^[a-zA-Z0-9._+-]+$'
 
 
+class UserQuerySet(models.QuerySet):
+    def with_expired_tokens(self):
+        token_lifetime_ago = timezone.now() - timedelta(
+            minutes=settings.TOKEN_LIFETIME_MINUTES,
+        )
+        return self.filter(socialaccount__last_login__lte=token_lifetime_ago)
+
+
 class User(AbstractUser):
+    objects = UserQuerySet.as_manager()
+
     @property
     def instance_url(self):
         if self.social_account:
@@ -27,7 +42,8 @@ class User(AbstractUser):
 
     @property
     def token(self):
-        if self.social_account:
+        account = self.social_account
+        if account and account.socialtoken_set.exists():
             token = self.social_account.socialtoken_set.first()
             return (token.token, token.token_secret)
         return (None, None)
@@ -35,6 +51,17 @@ class User(AbstractUser):
     @property
     def social_account(self):
         return self.socialaccount_set.first()
+
+    @property
+    def valid_token_for(self):
+        if all(self.token) and self.instance_url:
+            return self.instance_url
+        return None
+
+    def expire_token(self):
+        count, _ = SocialToken.objects.filter(account__user=self).delete()
+        if count:
+            async_to_sync(user_token_expired)(self)
 
 
 class SlugMixin:

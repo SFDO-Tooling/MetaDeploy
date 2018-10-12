@@ -7,13 +7,10 @@ process.env.NODE_ENV = 'development';
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const SizePlugin = require('size-plugin');
+const WriteFilePlugin = require('write-file-webpack-plugin');
 const common = require('./webpack.common.js');
-const convert = require('koa-connect');
-const fs = require('fs');
 const merge = require('webpack-merge');
 const path = require('path');
-const proxy = require('http-proxy-middleware');
-const webpackServeWaitpage = require('webpack-serve-waitpage');
 
 module.exports = merge(common, {
   mode: 'development',
@@ -22,33 +19,16 @@ module.exports = merge(common, {
     path: path.join(__dirname, 'dist'),
   },
   devtool: 'cheap-module-inline-source-map',
-  serve: {
-    devMiddleware: { writeToDisk: true },
-    https: {
-      // eslint-disable-next-line no-sync
-      key: fs.readFileSync(path.join(__dirname, 'cert.key')),
-      // eslint-disable-next-line no-sync
-      cert: fs.readFileSync(path.join(__dirname, 'cert.crt')),
+  devServer: {
+    index: '',
+    proxy: {
+      '**': 'http://localhost:8000',
+      '/ws': {
+        target: 'http://localhost:8000',
+        ws: true,
+      },
     },
-    hotClient: {
-      port: 5000,
-    },
-    add: (app, middleware, options) => {
-      app.use(
-        webpackServeWaitpage(options, {
-          title: 'MetaDeploy',
-          theme: 'material',
-        }),
-      );
-      app.use(
-        convert(
-          proxy({
-            target: 'https://localhost:8000',
-            secure: false,
-          }),
-        ),
-      );
-    },
+    hot: false,
   },
   plugins: [
     new CleanWebpackPlugin(['dist/*.*']),
@@ -56,5 +36,6 @@ module.exports = merge(common, {
       filename: '[name].css',
     }),
     new SizePlugin(),
+    new WriteFilePlugin(),
   ],
 });

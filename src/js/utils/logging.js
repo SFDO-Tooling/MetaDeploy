@@ -13,3 +13,7 @@ export const logError = (
   }
   window.console.error(message, data);
 };
+
+export const log = (...args: Array<mixed>) => {
+  window.console.info(...args);
+};

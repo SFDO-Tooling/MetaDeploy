@@ -107,7 +107,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django_extensions',
+    'channels',
     'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
     'django_rq',
@@ -165,7 +165,7 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-WSGI_APPLICATION = 'metadeploy.wsgi.application'
+ASGI_APPLICATION = 'metadeploy.routing.application'
 
 SITE_ID = 1
 
@@ -341,6 +341,14 @@ RQ_QUEUES = {
 RQ = {
     'WORKER_CLASS': 'metadeploy.rq_worker.ConnectionClosingWorker',
 }
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [REDIS_LOCATION],
+        },
+    },
+}
 
 
 # SF Connected App and GitHub configuration:
@@ -348,6 +356,10 @@ CONNECTED_APP_CLIENT_SECRET = env('CONNECTED_APP_CLIENT_SECRET')
 CONNECTED_APP_CALLBACK_URL = env('CONNECTED_APP_CALLBACK_URL')
 CONNECTED_APP_CLIENT_ID = env('CONNECTED_APP_CLIENT_ID')
 GITHUB_TOKEN = env('GITHUB_TOKEN')
+
+
+# Token expiration
+TOKEN_LIFETIME_MINUTES = env('TOKEN_LIFETIME_MINUTES', type_=int, default=10)
 
 
 # Raven / Sentry

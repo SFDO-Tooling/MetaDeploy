@@ -33,6 +33,13 @@ class TestUser:
         user.socialaccount_set.all().delete()
         assert user.token == (None, None)
 
+    def test_valid_token_for(self, user_factory):
+        user = user_factory()
+        assert user.valid_token_for == 'https://example.com'
+
+        user.socialaccount_set.first().socialtoken_set.all().delete()
+        assert user.valid_token_for is None
+
 
 @pytest.mark.django_db
 class TestIconProperty:

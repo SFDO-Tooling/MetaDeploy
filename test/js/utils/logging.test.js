@@ -1,4 +1,4 @@
-import { logError } from 'utils/logging';
+import * as logging from 'utils/logging';
 
 describe('logError', () => {
   describe('with Raven', () => {
@@ -16,14 +16,14 @@ describe('logError', () => {
 
     test('captures Error', () => {
       const err = new Error('foobar');
-      logError(err);
+      logging.logError(err);
 
       expect(window.Raven.captureException).toHaveBeenCalledWith(err, {});
     });
 
     test('captures message', () => {
       const extra = { foo: 'bar' };
-      logError('foobar', extra);
+      logging.logError('foobar', extra);
 
       expect(window.Raven.captureMessage).toHaveBeenCalledWith('foobar', extra);
     });
@@ -31,8 +31,16 @@ describe('logError', () => {
 
   test('logs error to console', () => {
     const extra = { foo: 'bar' };
-    logError('foobar', extra);
+    logging.logError('foobar', extra);
 
     expect(window.console.error).toHaveBeenCalledWith('foobar', extra);
+  });
+});
+
+describe('log', () => {
+  test('logs info to console', () => {
+    logging.log('foobar');
+
+    expect(window.console.info).toHaveBeenCalledWith('foobar');
   });
 });
