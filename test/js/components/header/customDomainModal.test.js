@@ -16,7 +16,7 @@ describe('<CustomDomainModal />', () => {
   };
 
   test('updates label when input changes', () => {
-    const { getByLabelText, getByText, getByTestId } = setup();
+    const { getByLabelText, getByTestId } = setup();
     const input = getByLabelText('Custom Domain');
 
     expect(input).toBeVisible();
@@ -28,7 +28,7 @@ describe('<CustomDomainModal />', () => {
 
     fireEvent.change(input, { target: { value: ' foobar' } });
 
-    expect(getByText('https://foobar.my.salesforce.com')).toBeVisible();
+    expect(getByTestId('custom-domain')).toHaveTextContent('foobar');
   });
 
   test('updates window.location.href on submit', () => {
