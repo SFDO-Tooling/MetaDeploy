@@ -165,7 +165,6 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-WSGI_APPLICATION = 'metadeploy.wsgi.application'
 ASGI_APPLICATION = 'metadeploy.routing.application'
 
 SITE_ID = 1

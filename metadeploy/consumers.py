@@ -6,8 +6,8 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         if self.scope["user"].is_anonymous:
             await self.close()
             return
-        else:
-            await self.accept()
+
+        await self.accept()
         # Add this channel to the user-id group, so all browser windows
         # where that user is logged in will get notifications:
         user_id = self.scope["user"].id

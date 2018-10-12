@@ -198,6 +198,8 @@ def enqueuer():
 enqueuer_job = job(enqueuer)
 
 
+# TODO: Make sure this doesn't pull a token out from under a pending or
+# running job, when we get to that bit of implementation:
 def expire_user_tokens():
     token_lifetime_ago = timezone.now() - timedelta(
         minutes=settings.TOKEN_LIFETIME_MINUTES,
