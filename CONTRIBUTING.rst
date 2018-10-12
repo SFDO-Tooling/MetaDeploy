@@ -104,22 +104,19 @@ To populate the database with sample data for development, run::
 Running the server
 ------------------
 
+The local development server requires `redis <https://redis.io/>`_ to manage
+background worker tasks. If you can successfully run ``redis-cli ping`` and see
+output ``PONG``, then you have redis installed and running. Otherwise, run
+``brew install redis`` (followed by ``brew services start redis``) or refer to
+the `Redis Quick Start`_.
+
 To run the local development server::
 
     yarn serve
 
 The running server will be available at `<http://localhost:8080/>`_.
 
-Running the background worker
------------------------------
-
-To run the background worker tasks, ensure you have Redis running
-(possibly installing it via ``brew install redis``), then run each of
-the following in separate terminals, with the virtualenvironment
-active::
-
-   python manage.py rqworker default short
-   python manage.py rqscheduler default short
+.. _Redis Quick Start: https://redis.io/topics/quickstart
 
 Logging in with Salesforce
 --------------------------
