@@ -16,8 +16,9 @@ export const getAction = (
   switch (msg.type) {
     case 'USER_TOKEN_INVALID':
       return invalidateToken();
+    default:
+      return null;
   }
-  return null;
 };
 
 export const createSocket = ({
