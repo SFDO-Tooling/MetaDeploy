@@ -17,6 +17,7 @@ import {
   selectVersionLabel,
 } from 'components/products/detail';
 import { selectUserState } from 'components/header';
+import { startPreflight } from 'plans/actions';
 
 import BodyContainer from 'components/bodyContainer';
 import Login from 'components/header/login';
@@ -39,6 +40,7 @@ const PlanDetail = ({
   versionLabel,
   plan,
   doFetchVersion,
+  doStartPreflight,
 }: {
   user: UserType,
   product: ProductType | null,
@@ -46,6 +48,7 @@ const PlanDetail = ({
   versionLabel: ?string,
   plan: PlanType | null,
   doFetchVersion: typeof fetchVersion,
+  doStartPreflight: typeof startPreflight,
 }) => {
   const blocked = gatekeeper({
     product,
@@ -98,6 +101,9 @@ const PlanDetail = ({
                 label="Start Pre-Install Validation"
                 variant="brand"
                 disabled={!plan.steps.length}
+                onClick={() => {
+                  doStartPreflight(plan.id);
+                }}
               />
             ) : (
               <Login
@@ -161,6 +167,7 @@ const select = (appState, props) => ({
 
 const actions = {
   doFetchVersion: fetchVersion,
+  doStartPreflight: startPreflight,
 };
 
 export default connect(
