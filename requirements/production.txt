@@ -2,5 +2,5 @@
 # production that isn't in development.
 
 -r base.txt
-gunicorn==19.8.1
+gunicorn==19.9.0
 newrelic==4.4.1.104
