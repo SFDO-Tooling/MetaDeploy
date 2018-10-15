@@ -378,9 +378,9 @@ class PreflightResult(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     # Maybe we don't use foreign keys here because we want the result to
     # remain static even if steps are subsequently changed:
-    step_results = JSONField(default=dict)
+    results = JSONField(default=dict)
     # It should take the shape of:
     # {
-    #   <step_id>: [... errors],
+    #   <definitive name>: [... errors],
     #   ...
     # }

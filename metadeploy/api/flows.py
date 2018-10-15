@@ -11,13 +11,20 @@ class BasicFlow(flows.BaseFlow):
 
 
 class PreflightFlow(flows.BaseFlow):
-    pass
+    def __init__(self, *args, preflight_result=None, **kwargs):
+        self.preflight_result = preflight_result
+        return super().__init__(*args, **kwargs)
 
     # def pre_flow(self, *args, **kwargs):
     #     pass
 
-    # def post_flow(self, *args, **kwargs):
-    #     pass
+    def post_flow(self):
+        results = {
+            k: v
+            for return_value in self.step_return_values
+            for k, v in return_value.items()
+        }
+        self.preflight_result.results = results
 
     # def pre_task(self, *args, **kwargs):
     #     pass
