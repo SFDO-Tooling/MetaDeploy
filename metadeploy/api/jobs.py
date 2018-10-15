@@ -23,7 +23,6 @@ import github3
 
 from cumulusci.core import (
     config,
-    flows,
     keychain,
 )
 
@@ -32,7 +31,14 @@ from django_rq import job
 from django.conf import settings
 from django.contrib.auth import get_user_model
 
-from .models import Job
+from .models import (
+    Job,
+    PreflightResult,
+)
+from .flows import (
+    BasicFlow,
+    PreflightFlow,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -80,16 +86,15 @@ def zip_file_is_safe(zip_file):
     )
 
 
-def run_flows(user, plan, steps):
+def run_flows(user, plan, steps, flow_class=None, preflight_result=None):
     # TODO:
     #
-    # We'll want to subclass BaseFlow and add logic in the progress
-    # callbacks to record and possibly push progress:
-    # pre_flow, post_flow, pre_task, post_task, pre_subflow,
-    # post_subflow
-    #
-    # Can we do anything meaningful with a return value from a @job,
-    # too?
+    # Can we do anything meaningful with a return value from a @job?
+
+    # This is a little stupid, but it lets us mock out BasicFlow in the
+    # tests better than if we put this straight in the kwargs:
+    if flow_class is None:
+        flow_class = BasicFlow
 
     token, token_secret = user.token
     instance_url = user.instance_url
@@ -161,14 +166,21 @@ def run_flows(user, plan, steps):
         # Make and run the flows:
         for flow_name in flow_names:
             flow_config = proj_config.get_flow(flow_name)
-            flowinstance = flows.BaseFlow(
+
+            args = (
                 proj_config,
                 flow_config,
                 proj_keychain.get_org(current_org),
+            )
+            kwargs = dict(
                 options={},
                 skip=[],
                 name=flow_name,
             )
+            if preflight_result:
+                kwargs['preflight_result'] = preflight_result
+
+            flowinstance = flow_class(*args, **kwargs)
             flowinstance()
 
 
@@ -199,3 +211,34 @@ def expire_user_tokens():
 
 
 expire_user_tokens_job = job(expire_user_tokens)
+
+
+def preflight(user, plan):
+    preflight_steps = [
+        step
+        for step
+        in plan.step_set.all()
+        if plan.preflight_flow_name == step.flow_name
+    ]
+    if not preflight_steps:
+        logger.error(
+            "No matching preflight step for plan {plan.id}. "
+            "(Tried to find {plan.preflight_flow_name}.)"
+        )
+        return
+
+    preflight_result = PreflightResult(
+        user=user,
+        organization_url=user.instance_url,
+    )
+    run_flows(
+        user,
+        plan,
+        preflight_steps,
+        flow_class=PreflightFlow,
+        preflight_result=preflight_result,
+    )
+    preflight_result.save()
+
+
+preflight_job = job(preflight)

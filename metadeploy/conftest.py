@@ -1,5 +1,7 @@
-import factory
 from pytest_factoryboy import register
+from rest_framework.test import APIClient
+import factory
+import pytest
 
 from django.contrib.auth import get_user_model
 
@@ -162,17 +164,15 @@ class JobFactory(factory.django.DjangoModelFactory):
                 self.steps.add(step)
 
 
+@pytest.fixture
+def client(user_factory):
+    user = user_factory()
+    client = APIClient()
+    client.force_login(user)
+    return client
+
+
 # TODO: We will need these eventually, but not yet:
-#
-# import pytest
-# from rest_framework.test import APIClient
-#
-# @pytest.fixture
-# def client(user_factory):
-#     user = user_factory()
-#     client = APIClient()
-#     client.force_login(user)
-#     return client
 #
 # @pytest.fixture
 # def anon_client():
