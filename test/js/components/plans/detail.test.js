@@ -83,7 +83,7 @@ describe('<PlanDetail />', () => {
     expect(getByText('Product 1, 1.0.0')).toBeVisible();
     expect(getByText('My Plan')).toBeVisible();
     expect(getByText('Preflight text...')).toBeVisible();
-    expect(getByText('Start Pre-Install Validation')).toBeVisible();
+    expect(getByText('Log In to Start Pre-Install Validation')).toBeVisible();
     expect(getByText('My Step')).toBeVisible();
   });
 
