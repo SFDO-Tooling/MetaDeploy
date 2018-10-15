@@ -376,6 +376,7 @@ class PreflightResult(models.Model):
         on_delete=models.PROTECT,
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    is_valid = models.BooleanField(default=True)
     # Maybe we don't use foreign keys here because we want the result to
     # remain static even if steps are subsequently changed:
     results = JSONField(default=dict)
