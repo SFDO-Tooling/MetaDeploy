@@ -40,4 +40,8 @@ urlpatterns = [
         TemplateView.as_view(template_name='index.html'),
         name='frontend',
     ),
+    # Add WebSocket routes so that non-HTTP paths can be accessible by
+    # `reverse` in Python and `window.api_urls` in JavaScript. These will
+    # usually only be the path component, not a full URL, and so the caller
+    # will have to build them with the right scheme and authority sections.
 ] + websockets.routes
