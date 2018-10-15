@@ -5,9 +5,9 @@ from ....models import Product
 
 
 @pytest.mark.django_db
-def test_populate_sample_products():
+def test_populate_data():
     assert Product.objects.count() == 0
 
-    call_command('populate_sample_products')
+    call_command('populate_data')
 
     assert Product.objects.count() == 8
