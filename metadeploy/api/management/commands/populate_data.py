@@ -52,6 +52,8 @@ class Command(BaseCommand):
             version=version,
             title=title,
             tier=tier,
+            preflight_flow_name='preflight_flow',
+            flow_name='main_flow',
             preflight_message=(
                 f'Preflight message consists of generic product message and '
                 'step pre-check info — run in one operation before the '
@@ -67,8 +69,8 @@ class Command(BaseCommand):
         return plan
 
     def create_step(self, **kwargs):
-        flow_name = kwargs.pop('flow_name', 'install_prod')
-        return Step.objects.create(flow_name=flow_name, **kwargs)
+        task_name = kwargs.pop('task_name', 'main_task')
+        return Step.objects.create(task_name=task_name, **kwargs)
 
     def create_enqueuer_job(self):
         RepeatableJob.objects.get_or_create(

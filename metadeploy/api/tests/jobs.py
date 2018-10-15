@@ -98,7 +98,7 @@ def test_expire_user_tokens(user_factory):
 
 
 @pytest.mark.django_db
-def test_preflight__good(mocker, user_factory, plan_factory, step_factory):
+def test_preflight(mocker, user_factory, plan_factory):
     mocker.patch('github3.login')
     mocker.patch('zipfile.ZipFile')
     mocker.patch('cumulusci.core.config.OrgConfig')
@@ -110,25 +110,6 @@ def test_preflight__good(mocker, user_factory, plan_factory, step_factory):
 
     user = user_factory()
     plan = plan_factory()
-    step_factory(flow_name=plan.preflight_flow_name, plan=plan)
     preflight(user, plan)
 
     assert preflight_flow.called
-
-
-@pytest.mark.django_db
-def test_preflight__bad(mocker, user_factory, plan_factory):
-    mocker.patch('github3.login')
-    mocker.patch('zipfile.ZipFile')
-    mocker.patch('cumulusci.core.config.OrgConfig')
-    mocker.patch('cumulusci.core.config.ServiceConfig')
-    mocker.patch('cumulusci.core.config.YamlGlobalConfig')
-    mocker.patch('cumulusci.core.config.YamlProjectConfig')
-    mocker.patch('cumulusci.core.keychain.BaseProjectKeychain')
-    preflight_flow = mocker.patch('metadeploy.api.jobs.PreflightFlow')
-
-    user = user_factory()
-    plan = plan_factory()
-    preflight(user, plan)
-
-    assert not preflight_flow.called

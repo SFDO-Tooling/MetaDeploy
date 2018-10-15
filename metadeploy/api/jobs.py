@@ -86,7 +86,7 @@ def zip_file_is_safe(zip_file):
     )
 
 
-def run_flows(user, plan, steps, flow_class=None, preflight_result=None):
+def run_flows(user, plan, skip_tasks, flow_class=None, preflight_result=None):
     # TODO:
     #
     # Can we do anything meaningful with a return value from a @job?
@@ -100,7 +100,11 @@ def run_flows(user, plan, steps, flow_class=None, preflight_result=None):
     instance_url = user.instance_url
     repo_url = plan.version.product.repo_url
     commit_ish = plan.version.commit_ish
-    flow_names = [step.flow_name for step in steps]
+
+    if preflight_result:
+        flow_name = plan.preflight_flow_name
+    else:
+        flow_name = plan.flow_name
 
     with contextlib.ExitStack() as stack:
         tmpdirname = stack.enter_context(TemporaryDirectory())
@@ -163,38 +167,42 @@ def run_flows(user, plan, steps, flow_class=None, preflight_result=None):
         })
         proj_config.keychain.set_service('github', github_app, True)
 
-        # Make and run the flows:
-        for flow_name in flow_names:
-            flow_config = proj_config.get_flow(flow_name)
+        # Make and run the flow:
+        flow_config = proj_config.get_flow(flow_name)
 
-            args = (
-                proj_config,
-                flow_config,
-                proj_keychain.get_org(current_org),
-            )
-            kwargs = dict(
-                options={},
-                skip=[],
-                name=flow_name,
-            )
-            if preflight_result:
-                kwargs['preflight_result'] = preflight_result
+        args = (
+            proj_config,
+            flow_config,
+            proj_keychain.get_org(current_org),
+        )
+        kwargs = dict(
+            options={},
+            skip=skip_tasks,
+            name=flow_name,
+        )
+        if preflight_result:
+            kwargs['preflight_result'] = preflight_result
 
-            flowinstance = flow_class(*args, **kwargs)
-            flowinstance()
+        flowinstance = flow_class(*args, **kwargs)
+        flowinstance()
 
 
 run_flows_job = job(run_flows)
 
 
+def calculate_skips_for_plan(plan, steps):
+    return [
+        step.task_name
+        for step
+        in set(plan.step_set.all()) - set(steps)
+    ]
+
+
 def enqueuer():
     logger.debug('Enqueuer live', extra={'tag': 'jobs.enqueuer'})
     for j in Job.objects.filter(enqueued_at=None):
-        rq_job = run_flows_job.delay(
-            j.user,
-            j.plan,
-            list(j.steps.all()),
-        )
+        skip_tasks = calculate_skips_for_plan(j.plan, j.steps.all())
+        rq_job = run_flows_job.delay(j.user, j.plan, skip_tasks)
         j.job_id = rq_job.id
         j.enqueued_at = rq_job.enqueued_at
         j.save()
@@ -214,19 +222,6 @@ expire_user_tokens_job = job(expire_user_tokens)
 
 
 def preflight(user, plan):
-    preflight_steps = [
-        step
-        for step
-        in plan.step_set.all()
-        if plan.preflight_flow_name == step.flow_name
-    ]
-    if not preflight_steps:
-        logger.error(
-            "No matching preflight step for plan {plan.id}. "
-            "(Tried to find {plan.preflight_flow_name}.)"
-        )
-        return
-
     preflight_result = PreflightResult(
         user=user,
         organization_url=user.instance_url,
@@ -234,7 +229,7 @@ def preflight(user, plan):
     run_flows(
         user,
         plan,
-        preflight_steps,
+        [],
         flow_class=PreflightFlow,
         preflight_result=preflight_result,
     )

@@ -298,6 +298,7 @@ class Plan(SlugMixin, models.Model):
     version = models.ForeignKey(Version, on_delete=models.PROTECT)
     preflight_message = models.TextField(blank=True)
     preflight_flow_name = models.CharField(max_length=256, blank=True)
+    flow_name = models.CharField(max_length=64)
     tier = models.CharField(
         choices=Tier,
         default=Tier.primary,
@@ -332,7 +333,7 @@ class Step(models.Model):
     is_recommended = models.BooleanField(default=True)
     kind = models.CharField(choices=Kind, default=Kind.metadata, max_length=64)
     order_key = models.PositiveIntegerField(default=0)
-    flow_name = models.CharField(max_length=64)
+    task_name = models.CharField(max_length=64)
 
     class Meta:
         ordering = (

@@ -121,6 +121,8 @@ class PlanFactory(factory.django.DjangoModelFactory):
     title = 'Sample plan'
     version = factory.SubFactory(VersionFactory)
     _ensure_slug = factory.PostGenerationMethodCall('ensure_slug')
+    preflight_flow_name = 'preflight_flow'
+    flow_name = 'main_flow'
 
 
 @register
@@ -130,7 +132,7 @@ class StepFactory(factory.django.DjangoModelFactory):
 
     name = 'Sample step'
     plan = factory.SubFactory(PlanFactory)
-    flow_name = 'install_prod'
+    task_name = 'main_task'
 
 
 @register
