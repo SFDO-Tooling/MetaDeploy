@@ -128,6 +128,14 @@ class PreflightResultSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault(),
     )
+    is_ready = serializers.SerializerMethodField()
+
+    def get_is_ready(self, obj):
+        return (
+            obj.is_valid
+            and obj.status == PreflightResult.Status.complete
+            and obj.results == {}
+        )
 
     class Meta:
         model = PreflightResult
@@ -139,6 +147,7 @@ class PreflightResultSerializer(serializers.ModelSerializer):
             'is_valid',
             'status',
             'results',
+            'is_ready',
         )
         extra_kwargs = {
             'organization_url': {'read_only': True},
