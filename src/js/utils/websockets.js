@@ -21,10 +21,7 @@ export const getAction = (
     case 'USER_TOKEN_INVALID':
       return invalidateToken();
     case 'PREFLIGHT_COMPLETED':
-      if (msg.payload) {
-        return completePreflight(msg.payload);
-      }
-      return null;
+      return msg.payload ? completePreflight(msg.payload) : null;
   }
   return null;
 };

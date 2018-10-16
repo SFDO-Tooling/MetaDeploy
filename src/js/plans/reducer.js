@@ -29,7 +29,7 @@ type PreflightErrors = {
   [number]: Array<PreflightError>,
 };
 export type Preflight = {
-  +plan: number,
+  +plan?: number,
   +status: 'started' | 'complete',
   +results?: PreflightErrors,
   +is_valid?: boolean,
