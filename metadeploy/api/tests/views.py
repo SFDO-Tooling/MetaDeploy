@@ -34,6 +34,7 @@ class TestPreflight:
         assert response.status_code == 200
         assert response.json() == {
             'organization_url': client.user.instance_url,
+            'plan': plan.id,
             'created_at': format_timestamp(preflight.created_at),
             'is_valid': True,
             'status': 'started',

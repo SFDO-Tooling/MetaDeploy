@@ -134,6 +134,7 @@ class PreflightResultSerializer(serializers.ModelSerializer):
         fields = (
             'organization_url',
             'user',
+            'plan',
             'created_at',
             'is_valid',
             'status',
@@ -141,6 +142,7 @@ class PreflightResultSerializer(serializers.ModelSerializer):
         )
         extra_kwargs = {
             'organization_url': {'read_only': True},
+            'plan': {'read_only': True},
             'created_at': {'read_only': True},
             'is_valid': {'read_only': True},
             'status': {'read_only': True},

@@ -15,3 +15,14 @@ async def user_token_expired(user):
         'type': 'USER_TOKEN_INVALID',
     }
     await push_message_to_user(user, message)
+
+
+async def preflight_completed(preflight):
+    from .serializers import PreflightResultSerializer
+
+    payload = PreflightResultSerializer(instance=preflight).data
+    message = {
+        'type': 'PREFLIGHT_COMPLETED',
+        'payload': payload,
+    }
+    await push_message_to_user(preflight.user, message)

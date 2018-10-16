@@ -234,6 +234,7 @@ def preflight(user, plan):
         flow_class=PreflightFlow,
         preflight_result=preflight_result,
     )
+    preflight_result.status = PreflightResult.Status.complete
     preflight_result.save()
 
 

@@ -15,9 +15,9 @@ from django.utils.translation import gettext_lazy as _
 from allauth.socialaccount.models import SocialToken
 from asgiref.sync import async_to_sync
 from colorfield.fields import ColorField
-from model_utils import Choices
+from model_utils import Choices, FieldTracker
 
-from .push import user_token_expired
+from .push import user_token_expired, preflight_completed
 
 
 VERSION_STRING = r'^[a-zA-Z0-9._+-]+$'
@@ -375,7 +375,9 @@ class Job(models.Model):
 
 
 class PreflightResult(models.Model):
-    Status = Choices('started', 'complete')
+    Status = Choices("started", "complete")
+
+    tracker = FieldTracker(fields=("status",))
 
     organization_url = models.URLField()
     user = models.ForeignKey(
@@ -398,3 +400,13 @@ class PreflightResult(models.Model):
     #   <definitive name>: [... errors],
     #   ...
     # }
+
+    def save(self, *args, **kwargs):
+        ret = super().save(*args, **kwargs)
+        has_completed = (
+            self.tracker.has_changed('status')
+            and self.status == PreflightResult.Status.complete
+        )
+        if has_completed:
+            async_to_sync(preflight_completed)(self)
+        return ret
