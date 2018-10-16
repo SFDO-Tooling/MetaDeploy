@@ -19,25 +19,46 @@ export type Plan = {
   +steps: Array<Step>,
 };
 export type Plans = Array<Plan>;
-export type Preflight = { +status: 'requested' | 'started' | 'rejected' };
-export type Preflights = {
+
+type PreflightError = {
+  +status: 'warning' | 'error' | 'skipped',
+  +message?: string,
+};
+type PreflightErrors = {
+  +plan_errors?: Array<PreflightError>,
+  [number]: Array<PreflightError>,
+};
+export type Preflight = {
+  +plan: number,
+  +status: 'started' | 'complete',
+  +results?: PreflightErrors,
+  +is_valid?: boolean,
+  +is_ready?: boolean,
+};
+export type PreflightsState = {
   [number]: Preflight,
 };
-export type PlansState = { preflights?: Preflights };
 
-const reducer = (plans: PlansState = {}, action: PlansAction): PlansState => {
-  const planId = action.payload;
+const reducer = (
+  preflights: PreflightsState = {},
+  action: PlansAction,
+): PreflightsState => {
   switch (action.type) {
-    case 'PREFLIGHT_REQUESTED':
-      return { ...plans, preflights: { [planId]: { status: 'requested' } } };
-    case 'PREFLIGHT_STARTED': {
-      return { ...plans, preflights: { [planId]: { status: 'started' } } };
+    case 'FETCH_PREFLIGHT_SUCCEEDED': {
+      const { plan, preflight } = action.payload;
+      return { ...preflights, [plan]: preflight };
     }
-    case 'PREFLIGHT_REJECTED': {
-      return { ...plans, preflights: { [planId]: { status: 'rejected' } } };
+    case 'PREFLIGHT_STARTED': {
+      const plan = action.payload;
+      return { ...preflights, [plan]: { status: 'started' } };
+    }
+    case 'PREFLIGHT_COMPLETED': {
+      const preflight = action.payload;
+      const { plan } = preflight;
+      return { ...preflights, [plan]: preflight };
     }
   }
-  return plans;
+  return preflights;
 };
 
 export default reducer;

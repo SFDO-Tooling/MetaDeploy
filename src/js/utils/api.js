@@ -46,6 +46,9 @@ const getApiFetch = (onAuthFailure: () => void) => (
           onAuthFailure();
           return getResponse(response);
         }
+        if (response.status === 404) {
+          return null;
+        }
         const error = (new Error(response.statusText): { [string]: mixed });
         error.response = response;
         throw error;

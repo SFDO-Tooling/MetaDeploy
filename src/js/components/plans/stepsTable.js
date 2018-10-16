@@ -11,10 +11,19 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
 
-import type { Plan as PlanType, Step as StepType } from 'plans/reducer';
+import type {
+  Plan as PlanType,
+  Step as StepType,
+  Preflight as PreflightType,
+} from 'plans/reducer';
 import type { User as UserType } from 'accounts/reducer';
 
-type DataCellProps = { [string]: mixed, user?: UserType, item?: StepType };
+type DataCellProps = {
+  [string]: mixed,
+  user?: UserType,
+  preflight?: ?PreflightType,
+  item?: StepType,
+};
 
 class NameDataCell extends React.Component<
   DataCellProps,
@@ -94,8 +103,10 @@ RequiredDataCell.displayName = DataTableCell.displayName;
 const InstallDataCell = (props: DataCellProps): React.Node => {
   const required = props.item && props.item.is_required;
   const recommended = !required && props.item && props.item.is_recommended;
+  const hasValidToken = props.user && props.user.valid_token_for !== null;
+  const preflight = props.preflight;
   const disabled =
-    !(props.user && props.user.valid_token_for !== null) || required;
+    required || !hasValidToken || !(preflight && preflight.is_ready);
   return (
     <DataTableCell {...props}>
       <Checkbox
@@ -136,7 +147,15 @@ const InstallDataColumnLabel = (): React.Node => (
   </>
 );
 
-const StepsTable = ({ user, plan }: { user: UserType, plan: PlanType }) => (
+const StepsTable = ({
+  user,
+  plan,
+  preflight,
+}: {
+  user: UserType,
+  plan: PlanType,
+  preflight: ?PreflightType,
+}) => (
   // DataTable uses step IDs internally to construct unique keys,
   // and they must be strings (not integers)
   <article className="slds-card slds-scrollable_x">
@@ -164,7 +183,7 @@ const StepsTable = ({ user, plan }: { user: UserType, plan: PlanType }) => (
         label={<InstallDataColumnLabel />}
         property="is_recommended"
       >
-        <InstallDataCell user={user} />
+        <InstallDataCell user={user} preflight={preflight} />
       </DataTableColumn>
     </DataTable>
   </article>

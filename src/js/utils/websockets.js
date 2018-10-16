@@ -2,20 +2,29 @@
 
 import Sockette from 'sockette';
 
+import { completePreflight } from 'plans/actions';
 import { invalidateToken } from 'accounts/actions';
 import { log } from 'utils/logging';
 
 import type { Dispatch } from 'redux-thunk';
+import type { Preflight } from 'plans/reducer';
+import type { PreflightCompleted } from 'plans/actions';
 import type { TokenInvalidAction } from 'accounts/actions';
 
 export const getAction = (
   msg: {
-    [string]: mixed,
+    type?: string,
+    payload?: Preflight,
   } = {},
-): TokenInvalidAction | null => {
+): TokenInvalidAction | PreflightCompleted | null => {
   switch (msg.type) {
     case 'USER_TOKEN_INVALID':
       return invalidateToken();
+    case 'PREFLIGHT_COMPLETED':
+      if (msg.payload) {
+        return completePreflight(msg.payload);
+      }
+      return null;
   }
   return null;
 };
