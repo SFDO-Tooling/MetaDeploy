@@ -394,7 +394,7 @@ class PreflightResult(models.Model):
     )
     # Maybe we don't use foreign keys here because we want the result to
     # remain static even if steps are subsequently changed:
-    results = JSONField(default=dict)
+    results = JSONField(default=dict, blank=True)
     # It should take the shape of:
     # {
     #   <definitive name>: [... errors],
