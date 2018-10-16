@@ -222,8 +222,9 @@ expire_user_tokens_job = job(expire_user_tokens)
 
 
 def preflight(user, plan):
-    preflight_result = PreflightResult(
+    preflight_result = PreflightResult.objects.create(
         user=user,
+        plan=plan,
         organization_url=user.instance_url,
     )
     run_flows(

@@ -20,6 +20,7 @@ from metadeploy.api.models import (
     Plan,
     PlanSlug,
     Step,
+    PreflightResult,
 )
 
 User = get_user_model()
@@ -166,11 +167,18 @@ class JobFactory(factory.django.DjangoModelFactory):
                 self.steps.add(step)
 
 
+@register
+class PreflightResultFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = PreflightResult
+
+
 @pytest.fixture
 def client(user_factory):
     user = user_factory()
     client = APIClient()
     client.force_login(user)
+    client.user = user
     return client
 
 

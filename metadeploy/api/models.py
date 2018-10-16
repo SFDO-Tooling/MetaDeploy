@@ -317,6 +317,11 @@ class Plan(SlugMixin, models.Model):
     def __str__(self):
         return "{}, Plan {}".format(self.version, self.title)
 
+    def get_most_recent_preflight_for(self, user):
+        return self.preflightresult_set.filter(
+            user=user,
+        ).order_by('-created_at').first()
+
 
 class Step(models.Model):
     Kind = Choices(
@@ -370,13 +375,21 @@ class Job(models.Model):
 
 
 class PreflightResult(models.Model):
+    Status = Choices('started', 'complete')
+
     organization_url = models.URLField()
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
     )
+    plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True)
     is_valid = models.BooleanField(default=True)
+    status = models.CharField(
+        choices=Status,
+        max_length=64,
+        default=Status.started,
+    )
     # Maybe we don't use foreign keys here because we want the result to
     # remain static even if steps are subsequently changed:
     results = JSONField(default=dict)

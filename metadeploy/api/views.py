@@ -12,6 +12,7 @@ from .serializers import (
     ProductSerializer,
     VersionSerializer,
     PlanSerializer,
+    PreflightResultSerializer,
 )
 from .models import (
     Job,
@@ -49,11 +50,22 @@ class PlanViewSet(viewsets.ModelViewSet):
     serializer_class = PlanSerializer
     queryset = Plan.objects.all()
 
-    @action(detail=True, methods=['post'])
-    def preflight(self, request, pk=None):
+    def handle_preflight_get(self, request):
         plan = self.get_object()
-        preflight_job.delay(
-            request.user,
-            plan,
-        )
+        preflight = plan.get_most_recent_preflight_for(request.user)
+        if preflight is None:
+            return Response('', status=status.HTTP_404_NOT_FOUND)
+        serializer = PreflightResultSerializer(instance=preflight)
+        return Response(serializer.data)
+
+    def handle_preflight_post(self, request):
+        plan = self.get_object()
+        preflight_job.delay(request.user, plan)
         return Response('', status=status.HTTP_202_ACCEPTED)
+
+    @action(detail=True, methods=['post', 'get'])
+    def preflight(self, request, pk=None):
+        if request.method == 'GET':
+            return self.handle_preflight_get(request)
+        if request.method == 'POST':
+            return self.handle_preflight_post(request)
