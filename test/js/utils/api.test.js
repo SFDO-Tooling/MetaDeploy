@@ -26,6 +26,12 @@ describe('apiFetch', () => {
     });
   });
 
+  test('404: returns null', () => {
+    fetchMock.getOnce('/test/url/', 404);
+
+    return expect(apiFetch('/test/url/')).resolves.toBeNull();
+  });
+
   test('500: throws Error', () => {
     fetchMock.getOnce('/test/url/', 500);
 

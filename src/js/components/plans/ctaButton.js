@@ -49,10 +49,13 @@ const CtaButton = ({
   preflight: ?PreflightType,
   doFetchPreflight: FetchPreflightType,
   doStartPreflight: StartPreflightType,
-}) => {
+}): React.Node => {
   if (!user) {
+    // Require login first...
     return <LoginBtn label="Log In to Start Pre-Install Validation" />;
   }
+  const hasValidToken = user.valid_token_for !== null;
+
   if (preflight === undefined) {
     // Fetch most recent preflight result (if any exists)
     doFetchPreflight(plan.id);
@@ -66,33 +69,13 @@ const CtaButton = ({
     );
   }
 
-  const hasValidToken = user.valid_token_for !== null;
-  if (preflight && preflight.status === 'started') {
-    // In progress...
-    return (
-      <Button
-        className={btnClasses}
-        label={<LabelWithSpinner label="Pre-Install Validation In Progress" />}
-        variant="brand"
-      />
-    );
-  }
-  if (preflight && preflight.status === 'complete') {
-    if (preflight.is_ready) {
-      if (hasValidToken) {
-        // Allow installation
-        return (
-          <Button className={btnClasses} label="Install" variant="brand" />
-        );
-      }
-      return <LoginBtn label="Log In to Install" />;
-    }
+  if (preflight === null) {
+    // No prior preflight exists
     if (hasValidToken) {
-      // Prior preflight exists, but is no longer valid or has errors
       return (
         <Button
           className={btnClasses}
-          label="Re-Run Pre-Install Validation"
+          label="Start Pre-Install Validation"
           variant="brand"
           onClick={() => {
             doStartPreflight(plan.id);
@@ -100,21 +83,53 @@ const CtaButton = ({
         />
       );
     }
-    return <LoginBtn label="Log In to Re-Run Pre-Install Validation" />;
+    // Require login first...
+    return <LoginBtn label="Log In to Start Pre-Install Validation" />;
   }
-  if (hasValidToken) {
-    return (
-      <Button
-        className={btnClasses}
-        label="Start Pre-Install Validation"
-        variant="brand"
-        onClick={() => {
-          doStartPreflight(plan.id);
-        }}
-      />
-    );
+
+  switch (preflight.status) {
+    case 'started': {
+      // Preflight in progress...
+      return (
+        <Button
+          className={btnClasses}
+          label={
+            <LabelWithSpinner label="Pre-Install Validation In Progress" />
+          }
+          variant="brand"
+        />
+      );
+    }
+    case 'complete': {
+      if (preflight.is_ready) {
+        if (hasValidToken) {
+          // Preflight is done, valid, and has no errors -- allow installation
+          return (
+            <Button className={btnClasses} label="Install" variant="brand" />
+          );
+        }
+        // Require login first...
+        return <LoginBtn label="Log In to Install" />;
+      }
+
+      if (hasValidToken) {
+        // Prior preflight exists, but is no longer valid or has errors
+        return (
+          <Button
+            className={btnClasses}
+            label="Re-Run Pre-Install Validation"
+            variant="brand"
+            onClick={() => {
+              doStartPreflight(plan.id);
+            }}
+          />
+        );
+      }
+      // Require login first...
+      return <LoginBtn label="Log In to Re-Run Pre-Install Validation" />;
+    }
   }
-  return <LoginBtn label="Log In to Start Pre-Install Validation" />;
+  return null;
 };
 
 export default CtaButton;

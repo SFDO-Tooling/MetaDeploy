@@ -45,11 +45,17 @@ const defaultPlan = {
 };
 
 describe('<StepsTable />', () => {
-  const setup = (plan = defaultPlan) => {
-    const { getByText, queryByText, getByAltText } = render(
-      <StepsTable plan={plan} />,
+  const setup = options => {
+    const defaults = { plan: defaultPlan, user: null };
+    const opts = { ...defaults, ...options };
+    const { getByText, container } = render(
+      <StepsTable
+        plan={opts.plan}
+        user={opts.user}
+        preflight={opts.preflight}
+      />,
     );
-    return { getByText, queryByText, getByAltText };
+    return { getByText, container };
   };
 
   test('renders steps', () => {
@@ -59,6 +65,43 @@ describe('<StepsTable />', () => {
     expect(getByText('Step 2')).toBeVisible();
     expect(getByText('Step 3')).toBeVisible();
     expect(getByText('Step 4')).toBeVisible();
+  });
+
+  describe('<InstallDataCell>', () => {
+    test('disabled if no user', () => {
+      const { container } = setup();
+
+      expect(
+        container.querySelectorAll('input[type="checkbox"][disabled]'),
+      ).toHaveLength(4);
+    });
+
+    test('disabled if no valid token', () => {
+      const { container } = setup({ user: {} });
+
+      expect(
+        container.querySelectorAll('input[type="checkbox"][disabled]'),
+      ).toHaveLength(4);
+    });
+
+    test('disabled if no ready preflight', () => {
+      const { container } = setup({ user: { valid_token_for: 'foo' } });
+
+      expect(
+        container.querySelectorAll('input[type="checkbox"][disabled]'),
+      ).toHaveLength(4);
+    });
+
+    test('disabled if required', () => {
+      const { container } = setup({
+        user: { valid_token_for: 'foo' },
+        preflight: { is_ready: true },
+      });
+
+      expect(
+        container.querySelectorAll('input[type="checkbox"][disabled]'),
+      ).toHaveLength(2);
+    });
   });
 
   describe('<NameDataCell> click', () => {
