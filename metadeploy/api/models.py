@@ -163,7 +163,7 @@ class Product(SlugMixin, models.Model):
         on_delete=models.PROTECT,
     )
     color = ColorField(blank=True)
-    image = models.ImageField()
+    image = models.ImageField(blank=True)
     icon_url = models.URLField(
         blank=True,
         help_text=(
