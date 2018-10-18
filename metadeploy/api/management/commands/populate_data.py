@@ -17,6 +17,25 @@ from ...models import (
 class Command(BaseCommand):
     help = 'Add some sample data to the database.'
 
+    def create_preflightable(self, category):
+        product = self.create_product(
+            title='Preflightable',
+            description='Preflightable product',
+            repo_url='https://github.com/SFDO-Tooling/CumulusCI-Test',
+            category=category,
+        )
+        version = self.create_version(
+            product,
+            label='preflightable',
+            commit_ish='feature/preflight',
+        )
+        self.create_plan(
+            version,
+            title='Preflightable',
+            preflight_flow_name='static_preflight',
+            flow_name='ci_test_concurrency',
+        )
+
     def create_product(self, **kwargs):
         title = kwargs.pop('title', 'Sample Product')
         description = kwargs.pop(
@@ -40,27 +59,33 @@ class Command(BaseCommand):
         product.ensure_slug()
         return product
 
-    def create_version(self, product, label='0.3.1'):
+    def create_version(self, product, label='0.3.1', **kwargs):
         return Version.objects.create(
             product=product,
             label=label,
             description='This is a description of the product version.',
+            **kwargs,
         )
 
-    def create_plan(self, version, title='Full Install', tier='primary'):
-        plan = Plan.objects.create(
-            version=version,
-            title=title,
-            tier=tier,
-            preflight_flow_name='preflight_flow',
-            flow_name='main_flow',
-            preflight_message=(
-                f'Preflight message consists of generic product message and '
+    def create_plan(
+            self, version, title='Full Install', tier='primary', **kwargs):
+        combined_kwargs = {
+            'preflight_flow_name': 'preflight_flow',
+            'flow_name': 'main_flow',
+            'preflight_message': (
+                'Preflight message consists of generic product message and '
                 'step pre-check info — run in one operation before the '
                 'install begins. Preflight includes the name of what is being '
                 "installed. Lorem Ipsum has been the industry's standard "
                 'dummy text ever since the 1500s.'
             ),
+        }
+        combined_kwargs.update(kwargs)
+        plan = Plan.objects.create(
+            version=version,
+            title=title,
+            tier=tier,
+            **kwargs,
         )
         PlanSlug.objects.create(
             parent=plan,
@@ -243,3 +268,5 @@ class Command(BaseCommand):
             )
             version = self.create_version(product)
             self.create_plan(version)
+
+        self.create_preflightable(category=sf_category)
