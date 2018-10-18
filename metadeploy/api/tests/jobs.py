@@ -5,20 +5,29 @@ from django.utils import timezone
 
 import pytest
 
-from ..jobs import run_flows, enqueuer, expire_user_tokens, preflight
+from ..jobs import (
+    run_flows,
+    enqueuer,
+    expire_user_tokens,
+    preflight,
+)
 
 
 @pytest.mark.django_db
 def test_run_flows(mocker, user_factory, plan_factory, step_factory):
     # TODO: I don't like this test at all. But there's a lot of IO that
     # this code causes, so I'm mocking it out.
+    mocker.patch('shutil.move')
+    mocker.patch('shutil.rmtree')
+    glob = mocker.patch('metadeploy.api.jobs.glob')
+    glob.return_value = ['test']
     mocker.patch('github3.login')
     mocker.patch('zipfile.ZipFile')
-    mocker.patch('cumulusci.core.config.OrgConfig')
-    mocker.patch('cumulusci.core.config.ServiceConfig')
-    mocker.patch('cumulusci.core.config.YamlGlobalConfig')
-    mocker.patch('cumulusci.core.config.YamlProjectConfig')
-    mocker.patch('cumulusci.core.keychain.BaseProjectKeychain')
+    mocker.patch('metadeploy.api.jobs.OrgConfig')
+    mocker.patch('metadeploy.api.jobs.ServiceConfig')
+    mocker.patch('metadeploy.api.jobs.YamlGlobalConfig')
+    mocker.patch('metadeploy.api.jobs.YamlProjectConfig')
+    mocker.patch('metadeploy.api.jobs.BaseProjectKeychain')
     basic_flow = mocker.patch('metadeploy.api.jobs.BasicFlow')
 
     user = user_factory()
@@ -53,6 +62,10 @@ def test_enqueuer(mocker, job_factory):
 def test_malicious_zip_file(mocker, user_factory, plan_factory, step_factory):
     # TODO: I don't like this test at all. But there's a lot of IO that
     # this code causes, so I'm mocking it out.
+    mocker.patch('shutil.move')
+    mocker.patch('shutil.rmtree')
+    glob = mocker.patch('metadeploy.api.jobs.glob')
+    glob.return_value = ['test']
     mocker.patch('github3.login')
     zip_info = MagicMock()
     zip_info.filename = '/etc/passwd'
@@ -60,12 +73,14 @@ def test_malicious_zip_file(mocker, user_factory, plan_factory, step_factory):
     zip_file_instance.infolist.return_value = [zip_info]
     zip_file = mocker.patch('zipfile.ZipFile')
     zip_file.return_value = zip_file_instance
-    mocker.patch('cumulusci.core.config.OrgConfig')
-    mocker.patch('cumulusci.core.config.ServiceConfig')
-    mocker.patch('cumulusci.core.config.YamlGlobalConfig')
-    mocker.patch('cumulusci.core.config.YamlProjectConfig')
-    mocker.patch('cumulusci.core.keychain.BaseProjectKeychain')
+    mocker.patch('metadeploy.api.jobs.OrgConfig')
+    mocker.patch('metadeploy.api.jobs.ServiceConfig')
+    mocker.patch('metadeploy.api.jobs.YamlGlobalConfig')
+    mocker.patch('metadeploy.api.jobs.YamlProjectConfig')
+    mocker.patch('metadeploy.api.jobs.BaseProjectKeychain')
     basic_flow = mocker.patch('metadeploy.api.jobs.BasicFlow')
+
+    from ..jobs import run_flows
 
     user = user_factory()
     plan = plan_factory()
@@ -99,13 +114,17 @@ def test_expire_user_tokens(user_factory):
 
 @pytest.mark.django_db
 def test_preflight(mocker, user_factory, plan_factory):
+    mocker.patch('shutil.move')
+    mocker.patch('shutil.rmtree')
+    glob = mocker.patch('metadeploy.api.jobs.glob')
+    glob.return_value = ['test']
     mocker.patch('github3.login')
     mocker.patch('zipfile.ZipFile')
-    mocker.patch('cumulusci.core.config.OrgConfig')
-    mocker.patch('cumulusci.core.config.ServiceConfig')
-    mocker.patch('cumulusci.core.config.YamlGlobalConfig')
-    mocker.patch('cumulusci.core.config.YamlProjectConfig')
-    mocker.patch('cumulusci.core.keychain.BaseProjectKeychain')
+    mocker.patch('metadeploy.api.jobs.OrgConfig')
+    mocker.patch('metadeploy.api.jobs.ServiceConfig')
+    mocker.patch('metadeploy.api.jobs.YamlGlobalConfig')
+    mocker.patch('metadeploy.api.jobs.YamlProjectConfig')
+    mocker.patch('metadeploy.api.jobs.BaseProjectKeychain')
     preflight_flow = mocker.patch('metadeploy.api.jobs.PreflightFlow')
 
     user = user_factory()

@@ -13,7 +13,10 @@ instances of the Job model and triggers the run_flows_job.
 
 import os
 import sys
+import shutil
 import contextlib
+from itertools import chain
+from glob import glob
 from tempfile import TemporaryDirectory
 import logging
 from urllib.parse import urlparse
@@ -21,9 +24,12 @@ import zipfile
 
 import github3
 
-from cumulusci.core import (
-    config,
-    keychain,
+from cumulusci.core.keychain import BaseProjectKeychain
+from cumulusci.core.config import (
+    OrgConfig,
+    ServiceConfig,
+    YamlGlobalConfig,
+    YamlProjectConfig,
 )
 
 from django_rq import job
@@ -43,6 +49,52 @@ from .flows import (
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
+
+
+def get_metadeploy_project_config():
+    """
+    This is a very stupid workaround for the sake of tests. I want to be
+    able to easily mock out the parent class here, YamlProjectConfig,
+    which is easiest done if I defer definition of this class until the
+    function below runs. This may be less efficient, but probably not
+    show-stoppingly. Mostly, it's unintuitive and weird, and I would
+    like to undo it if I can.
+    """
+
+    class MetadeployProjectConfig(YamlProjectConfig):
+        def __init__(self, *args, repo_root=None, **kwargs):  # pragma: nocover
+            self._repo_root = repo_root
+            super().__init__(*args, **kwargs)
+
+        @property
+        def repo_root(self):  # pragma: nocover
+            return self._repo_root
+
+        @property
+        def config_project_local_path(self):  # pragma: nocover
+            return
+
+        @property
+        def repo_name(self):  # pragma: nocover
+            return
+
+        @property
+        def repo_url(self):  # pragma: nocover
+            return
+
+        @property
+        def repo_owner(self):  # pragma: nocover
+            return
+
+        @property
+        def repo_branch(self):  # pragma: nocover
+            return
+
+        @property
+        def repo_commit(self):  # pragma: nocover
+            return
+
+    return MetadeployProjectConfig
 
 
 def extract_user_and_repo(gh_url):
@@ -128,23 +180,37 @@ def run_flows(user, plan, skip_tasks, flow_class=None, preflight_result=None):
             logger.error(f'Malformed or malicious zip file from {url}.')
             return
         zip_file.extractall()
+        # We know that the zipball contains a root directory named
+        # something like this by GitHub's convention. If that ever
+        # breaks, this will break:
+        zipball_root = glob(f"{user}-{repo_name}-*")[0]
+        # It's not unlikely that the zipball root contains a directory
+        # with the same name, so we pre-emptively rename it to probably
+        # avoid collisions:
+        shutil.move(zipball_root, "zipball_root")
+        for path in chain(glob("zipball_root/*"), glob("zipball_root/.*")):
+            shutil.move(path, ".")
+        shutil.rmtree("zipball_root")
 
         # There's a lot of setup to make configs and keychains, link
         # them properly, and then eventually pass them into a flow,
         # which we then run:
         current_org = 'current_org'
-        org_config = config.OrgConfig({
+        org_config = OrgConfig({
             'access_token': token,
             'instance_url': instance_url,
             'refresh_token': token_secret,
         }, current_org)
-        proj_config = config.YamlProjectConfig(config.YamlGlobalConfig())
-        proj_keychain = keychain.BaseProjectKeychain(proj_config, None)
+        proj_config = get_metadeploy_project_config()(
+            YamlGlobalConfig(),
+            repo_root=tmpdirname,
+        )
+        proj_keychain = BaseProjectKeychain(proj_config, None)
         proj_keychain.set_org(org_config)
         proj_config.set_keychain(proj_keychain)
 
         # Set up the connected_app:
-        connected_app = config.ServiceConfig({
+        connected_app = ServiceConfig({
             'client_secret': settings.CONNECTED_APP_CLIENT_SECRET,
             'callback_url': settings.CONNECTED_APP_CALLBACK_URL,
             'client_id': settings.CONNECTED_APP_CLIENT_ID,
@@ -156,7 +222,7 @@ def run_flows(user, plan, skip_tasks, flow_class=None, preflight_result=None):
         )
 
         # Set up github:
-        github_app = config.ServiceConfig({
+        github_app = ServiceConfig({
             # It would be nice to only need the token:
             'token': settings.GITHUB_TOKEN,
             # The following three values don't matter and aren't used,
