@@ -95,7 +95,7 @@ describe('<StepsTable />', () => {
     test('disabled if required', () => {
       const { container } = setup({
         user: { valid_token_for: 'foo' },
-        preflight: { is_ready: true },
+        preflight: { is_valid: true, has_errors: false },
       });
 
       expect(

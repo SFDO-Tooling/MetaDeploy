@@ -33,7 +33,7 @@ export type Preflight = {
   +status: 'started' | 'complete',
   +results?: PreflightErrors,
   +is_valid?: boolean,
-  +is_ready?: boolean,
+  +has_errors?: boolean,
 };
 export type PreflightsState = {
   [number]: Preflight,

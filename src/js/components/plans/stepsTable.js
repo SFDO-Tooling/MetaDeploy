@@ -104,7 +104,8 @@ const InstallDataCell = (props: DataCellProps): React.Node => {
   const required = props.item && props.item.is_required;
   const recommended = !required && props.item && props.item.is_recommended;
   const hasValidToken = props.user && props.user.valid_token_for !== null;
-  const hasReadyPreflight = props.preflight && props.preflight.is_ready;
+  const hasReadyPreflight =
+    props.preflight && props.preflight.is_valid && !props.preflight.has_errors;
   const disabled = required || !hasValidToken || !hasReadyPreflight;
   return (
     <DataTableCell {...props}>

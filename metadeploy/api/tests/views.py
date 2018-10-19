@@ -39,7 +39,7 @@ class TestPreflight:
             'is_valid': True,
             'status': 'started',
             'results': {},
-            'is_ready': False,
+            'has_errors': False,
         }
 
     def test_get__bad(self, client, plan_factory):

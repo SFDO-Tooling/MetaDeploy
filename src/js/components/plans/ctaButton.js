@@ -101,7 +101,7 @@ const CtaButton = ({
       );
     }
     case 'complete': {
-      if (preflight.is_ready) {
+      if (preflight.is_valid && !preflight.has_errors) {
         if (hasValidToken) {
           // Preflight is done, valid, and has no errors -- allow installation
           return (

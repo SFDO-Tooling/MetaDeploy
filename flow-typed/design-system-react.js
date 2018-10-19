@@ -118,6 +118,18 @@ declare module '@salesforce/design-system-react/components/accordion/panel' {
   declare export default Component;
 }
 
+declare module '@salesforce/design-system-react/components/toast' {
+  import typeof { Component } from 'react';
+
+  declare export default Component;
+}
+
+declare module '@salesforce/design-system-react/components/toast/container' {
+  import typeof { Component } from 'react';
+
+  declare export default Component;
+}
+
 declare module '@salesforce/design-system-react/components/settings' {
   declare export default { [string]: Function };
 }

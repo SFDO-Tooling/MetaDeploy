@@ -20,9 +20,11 @@ import { selectUserState } from 'components/header';
 
 import BodyContainer from 'components/bodyContainer';
 import CtaButton from 'components/plans/ctaButton';
+import PreflightResults from 'components/plans/preflightResults';
 import ProductIcon from 'components/products/icon';
 import ProductNotFound from 'components/products/product404';
 import StepsTable from 'components/plans/stepsTable';
+import Toasts from 'components/plans/toasts';
 
 import type { Match } from 'react-router-dom';
 import type {
@@ -92,6 +94,7 @@ const PlanDetail = ({
           variant="objectHome"
         />
         <BodyContainer>
+          {preflight && user ? <Toasts preflight={preflight} /> : null}
           <div
             className="slds-p-around_medium
               slds-size_1-of-1
@@ -99,6 +102,9 @@ const PlanDetail = ({
           >
             <div className="slds-text-longform">
               <h3 className="slds-text-heading_small">{plan.title}</h3>
+              {preflight && user ? (
+                <PreflightResults preflight={preflight} />
+              ) : null}
               {plan.preflight_message ? <p>{plan.preflight_message}</p> : null}
             </div>
             {plan.steps.length ? (
