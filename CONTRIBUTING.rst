@@ -99,7 +99,7 @@ Then run the initial migrations::
 
 To populate the database with sample data for development, run::
 
-    python manage.py populate_sample_products
+    python manage.py populate_data
 
 Running the server
 ------------------

@@ -40,25 +40,33 @@ class Command(BaseCommand):
         product.ensure_slug()
         return product
 
-    def create_version(self, product, label='0.3.1'):
+    def create_version(self, product, label='0.3.1', **kwargs):
         return Version.objects.create(
             product=product,
             label=label,
             description='This is a description of the product version.',
+            **kwargs,
         )
 
-    def create_plan(self, version, title='Full Install', tier='primary'):
-        plan = Plan.objects.create(
-            version=version,
-            title=title,
-            tier=tier,
-            preflight_message=(
-                f'Preflight message consists of generic product message and '
+    def create_plan(
+            self, version, title='Full Install', tier='primary', **kwargs):
+        combined_kwargs = {
+            'preflight_flow_name': 'preflight_flow',
+            'flow_name': 'main_flow',
+            'preflight_message': (
+                'Preflight message consists of generic product message and '
                 'step pre-check info — run in one operation before the '
                 'install begins. Preflight includes the name of what is being '
                 "installed. Lorem Ipsum has been the industry's standard "
                 'dummy text ever since the 1500s.'
             ),
+        }
+        combined_kwargs.update(kwargs)
+        plan = Plan.objects.create(
+            version=version,
+            title=title,
+            tier=tier,
+            **combined_kwargs,
         )
         PlanSlug.objects.create(
             parent=plan,
@@ -67,47 +75,10 @@ class Command(BaseCommand):
         return plan
 
     def create_step(self, **kwargs):
-        flow_name = kwargs.pop('flow_name', 'install_prod')
-        return Step.objects.create(flow_name=flow_name, **kwargs)
+        task_name = kwargs.pop('task_name', 'main_task')
+        return Step.objects.create(task_name=task_name, **kwargs)
 
-    def create_enqueuer_job(self):
-        RepeatableJob.objects.get_or_create(
-            callable='metadeploy.api.jobs.enqueuer_job',
-            defaults=dict(
-                name='Enqueuer',
-                interval=1,
-                interval_unit='minutes',
-                queue='default',
-                scheduled_time=timezone.now(),
-            ),
-        )
-
-    def create_token_expiry_job(self):
-        RepeatableJob.objects.get_or_create(
-            callable='metadeploy.api.jobs.expire_user_tokens_job',
-            defaults=dict(
-                name='Expire User Tokens',
-                interval=1,
-                interval_unit='minutes',
-                queue='default',
-                scheduled_time=timezone.now(),
-            ),
-        )
-
-    def handle(self, *args, **options):
-        self.create_enqueuer_job()
-        self.create_token_expiry_job()
-        sf_category = ProductCategory.objects.create(title='salesforce')
-        co_category = ProductCategory.objects.create(title='community')
-        product1 = self.create_product(
-            title=f'Sample Salesforce Product',
-            category=sf_category,
-        )
-        old_version = self.create_version(product1, '0.2.0')
-        self.create_plan(old_version)
-
-        version1 = self.create_version(product1)
-        plan = self.create_plan(version1)
+    def add_steps(self, plan):
         self.create_step(
             plan=plan,
             name='Opportunity Record Types',
@@ -187,11 +158,63 @@ class Command(BaseCommand):
             order_key=8,
         )
 
-        self.create_plan(
-            version1,
-            title='Reports and Dashboards',
-            tier='secondary',
+    def create_enqueuer_job(self):
+        RepeatableJob.objects.get_or_create(
+            callable='metadeploy.api.jobs.enqueuer_job',
+            defaults=dict(
+                name='Enqueuer',
+                interval=1,
+                interval_unit='minutes',
+                queue='default',
+                scheduled_time=timezone.now(),
+            ),
         )
+
+    def create_token_expiry_job(self):
+        RepeatableJob.objects.get_or_create(
+            callable='metadeploy.api.jobs.expire_user_tokens_job',
+            defaults=dict(
+                name='Expire User Tokens',
+                interval=1,
+                interval_unit='minutes',
+                queue='default',
+                scheduled_time=timezone.now(),
+            ),
+        )
+
+    def handle(self, *args, **options):
+        self.create_enqueuer_job()
+        self.create_token_expiry_job()
+        sf_category = ProductCategory.objects.create(title='salesforce')
+        co_category = ProductCategory.objects.create(title='community')
+        product1 = self.create_product(
+            title='Product With Useful Data',
+            repo_url='https://github.com/SFDO-Tooling/CumulusCI-Test',
+            category=sf_category,
+        )
+        old_version = self.create_version(product1, '0.2.0')
+        self.create_plan(old_version)
+
+        version1 = self.create_version(
+            product1,
+            commit_ish='feature/preflight',
+        )
+        plan = self.create_plan(
+            version1,
+            preflight_flow_name='static_preflight',
+            flow_name='ci_test_concurrency',
+        )
+        self.add_steps(plan)
+
+        plan2 = self.create_plan(
+            version1,
+            title='Failing Preflight',
+            tier='secondary',
+            preflight_flow_name='failing_preflight',
+            flow_name='ci_test_concurrency',
+        )
+        self.add_steps(plan2)
+
         self.create_plan(
             version1,
             title='Account Record Types',

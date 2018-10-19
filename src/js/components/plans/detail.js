@@ -1,7 +1,6 @@
 // @flow
 
 import * as React from 'react';
-import Button from '@salesforce/design-system-react/components/button';
 import DocumentTitle from 'react-document-title';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import { Link } from 'react-router-dom';
@@ -9,6 +8,7 @@ import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
 import routes from 'utils/routes';
+import { fetchPreflight, startPreflight } from 'plans/actions';
 import { fetchVersion } from 'products/actions';
 import { gatekeeper } from 'products/utils';
 import {
@@ -19,13 +19,17 @@ import {
 import { selectUserState } from 'components/header';
 
 import BodyContainer from 'components/bodyContainer';
-import Login from 'components/header/login';
+import CtaButton from 'components/plans/ctaButton';
 import ProductIcon from 'components/products/icon';
 import ProductNotFound from 'components/products/product404';
 import StepsTable from 'components/plans/stepsTable';
 
 import type { Match } from 'react-router-dom';
-import type { Plan as PlanType } from 'plans/reducer';
+import type {
+  Plan as PlanType,
+  Preflight as PreflightType,
+  PreflightsState,
+} from 'plans/reducer';
 import type {
   Product as ProductType,
   Version as VersionType,
@@ -38,14 +42,20 @@ const PlanDetail = ({
   version,
   versionLabel,
   plan,
+  preflight,
   doFetchVersion,
+  doFetchPreflight,
+  doStartPreflight,
 }: {
   user: UserType,
   product: ProductType | null,
   version: VersionType | null,
   versionLabel: ?string,
   plan: PlanType | null,
+  preflight: ?PreflightType,
   doFetchVersion: typeof fetchVersion,
+  doFetchPreflight: typeof fetchPreflight,
+  doStartPreflight: typeof startPreflight,
 }) => {
   const blocked = gatekeeper({
     product,
@@ -91,32 +101,22 @@ const PlanDetail = ({
               <h3 className="slds-text-heading_small">{plan.title}</h3>
               {plan.preflight_message ? <p>{plan.preflight_message}</p> : null}
             </div>
-            {user && user.valid_token_for !== null ? (
-              <Button
-                className="slds-size_full
-                  slds-p-vertical_xx-small"
-                label="Start Pre-Install Validation"
-                variant="brand"
-                disabled={!plan.steps.length}
+            {plan.steps.length ? (
+              <CtaButton
+                user={user}
+                plan={plan}
+                preflight={preflight}
+                doFetchPreflight={doFetchPreflight}
+                doStartPreflight={doStartPreflight}
               />
-            ) : (
-              <Login
-                id="plan-detail-login"
-                buttonClassName="slds-size_full
-                  slds-p-vertical_xx-small"
-                buttonVariant="brand"
-                triggerClassName="slds-size_full"
-                label="Start Pre-Install Validation"
-                disabled={!plan.steps.length}
-              />
-            )}
+            ) : null}
           </div>
           {plan.steps.length ? (
             <div
               className="slds-p-around_medium
                 slds-size_1-of-1"
             >
-              <StepsTable user={user} plan={plan} />
+              <StepsTable user={user} plan={plan} preflight={preflight} />
             </div>
           ) : null}
         </BodyContainer>
@@ -151,16 +151,32 @@ const selectPlan = createSelector(
   },
 );
 
+const selectPreflightsState = (appState): PreflightsState =>
+  appState.preflights;
+
+const selectPreflight = createSelector(
+  [selectPreflightsState, selectPlan],
+  (preflights: PreflightsState, plan: PlanType | null): ?PreflightType => {
+    if (!plan) {
+      return null;
+    }
+    return preflights[plan.id];
+  },
+);
+
 const select = (appState, props) => ({
   user: selectUserState(appState),
   product: selectProduct(appState, props),
   version: selectVersion(appState, props),
   versionLabel: selectVersionLabel(appState, props),
   plan: selectPlan(appState, props),
+  preflight: selectPreflight(appState, props),
 });
 
 const actions = {
   doFetchVersion: fetchVersion,
+  doFetchPreflight: fetchPreflight,
+  doStartPreflight: startPreflight,
 };
 
 export default connect(

@@ -3,6 +3,7 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.contrib.postgres.fields import JSONField
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -14,9 +15,9 @@ from django.utils.translation import gettext_lazy as _
 from allauth.socialaccount.models import SocialToken
 from asgiref.sync import async_to_sync
 from colorfield.fields import ColorField
-from model_utils import Choices
+from model_utils import Choices, FieldTracker
 
-from .push import user_token_expired
+from .push import user_token_expired, preflight_completed
 
 
 VERSION_STRING = r'^[a-zA-Z0-9._+-]+$'
@@ -162,7 +163,7 @@ class Product(SlugMixin, models.Model):
         on_delete=models.PROTECT,
     )
     color = ColorField(blank=True)
-    image = models.ImageField()
+    image = models.ImageField(blank=True)
     icon_url = models.URLField(
         blank=True,
         help_text=(
@@ -296,6 +297,8 @@ class Plan(SlugMixin, models.Model):
     title = models.CharField(max_length=128)
     version = models.ForeignKey(Version, on_delete=models.PROTECT)
     preflight_message = models.TextField(blank=True)
+    preflight_flow_name = models.CharField(max_length=256, blank=True)
+    flow_name = models.CharField(max_length=64)
     tier = models.CharField(
         choices=Tier,
         default=Tier.primary,
@@ -314,6 +317,11 @@ class Plan(SlugMixin, models.Model):
     def __str__(self):
         return "{}, Plan {}".format(self.version, self.title)
 
+    def get_most_recent_preflight_for(self, user):
+        return self.preflightresult_set.filter(
+            user=user,
+        ).order_by('-created_at').first()
+
 
 class Step(models.Model):
     Kind = Choices(
@@ -330,7 +338,7 @@ class Step(models.Model):
     is_recommended = models.BooleanField(default=True)
     kind = models.CharField(choices=Kind, default=Kind.metadata, max_length=64)
     order_key = models.PositiveIntegerField(default=0)
-    flow_name = models.CharField(max_length=64)
+    task_name = models.CharField(max_length=64)
 
     class Meta:
         ordering = (
@@ -364,3 +372,41 @@ class Job(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     enqueued_at = models.DateTimeField(null=True)
     job_id = models.UUIDField(null=True)
+
+
+class PreflightResult(models.Model):
+    Status = Choices("started", "complete")
+
+    tracker = FieldTracker(fields=("status",))
+
+    organization_url = models.URLField()
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+    )
+    plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_valid = models.BooleanField(default=True)
+    status = models.CharField(
+        choices=Status,
+        max_length=64,
+        default=Status.started,
+    )
+    # Maybe we don't use foreign keys here because we want the result to
+    # remain static even if steps are subsequently changed:
+    results = JSONField(default=dict, blank=True)
+    # It should take the shape of:
+    # {
+    #   <definitive name>: [... errors],
+    #   ...
+    # }
+
+    def save(self, *args, **kwargs):
+        ret = super().save(*args, **kwargs)
+        has_completed = (
+            self.tracker.has_changed('status')
+            and self.status == PreflightResult.Status.complete
+        )
+        if has_completed:
+            async_to_sync(preflight_completed)(self)
+        return ret

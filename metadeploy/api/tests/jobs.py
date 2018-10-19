@@ -5,21 +5,30 @@ from django.utils import timezone
 
 import pytest
 
-from ..jobs import run_flows, enqueuer, expire_user_tokens
+from ..jobs import (
+    run_flows,
+    enqueuer,
+    expire_user_tokens,
+    preflight,
+)
 
 
 @pytest.mark.django_db
 def test_run_flows(mocker, user_factory, plan_factory, step_factory):
     # TODO: I don't like this test at all. But there's a lot of IO that
     # this code causes, so I'm mocking it out.
+    mocker.patch('shutil.move')
+    mocker.patch('shutil.rmtree')
+    glob = mocker.patch('metadeploy.api.jobs.glob')
+    glob.return_value = ['test']
     mocker.patch('github3.login')
     mocker.patch('zipfile.ZipFile')
-    mocker.patch('cumulusci.core.config.OrgConfig')
-    mocker.patch('cumulusci.core.config.ServiceConfig')
-    mocker.patch('cumulusci.core.config.YamlGlobalConfig')
-    mocker.patch('cumulusci.core.config.YamlProjectConfig')
-    mocker.patch('cumulusci.core.keychain.BaseProjectKeychain')
-    base_flow = mocker.patch('cumulusci.core.flows.BaseFlow')
+    mocker.patch('metadeploy.api.jobs.OrgConfig')
+    mocker.patch('metadeploy.api.jobs.ServiceConfig')
+    mocker.patch('metadeploy.api.jobs.YamlGlobalConfig')
+    mocker.patch('metadeploy.api.jobs.cci_configs')
+    mocker.patch('metadeploy.api.jobs.BaseProjectKeychain')
+    basic_flow = mocker.patch('metadeploy.api.jobs.BasicFlow')
 
     user = user_factory()
     plan = plan_factory()
@@ -30,7 +39,7 @@ def test_run_flows(mocker, user_factory, plan_factory, step_factory):
     # TODO assert? What we really need to assert is a change in the SF
     # org, but that'd be an integration test.
 
-    assert base_flow.called
+    assert basic_flow.called
 
 
 @pytest.mark.django_db
@@ -53,6 +62,10 @@ def test_enqueuer(mocker, job_factory):
 def test_malicious_zip_file(mocker, user_factory, plan_factory, step_factory):
     # TODO: I don't like this test at all. But there's a lot of IO that
     # this code causes, so I'm mocking it out.
+    mocker.patch('shutil.move')
+    mocker.patch('shutil.rmtree')
+    glob = mocker.patch('metadeploy.api.jobs.glob')
+    glob.return_value = ['test']
     mocker.patch('github3.login')
     zip_info = MagicMock()
     zip_info.filename = '/etc/passwd'
@@ -60,12 +73,14 @@ def test_malicious_zip_file(mocker, user_factory, plan_factory, step_factory):
     zip_file_instance.infolist.return_value = [zip_info]
     zip_file = mocker.patch('zipfile.ZipFile')
     zip_file.return_value = zip_file_instance
-    mocker.patch('cumulusci.core.config.OrgConfig')
-    mocker.patch('cumulusci.core.config.ServiceConfig')
-    mocker.patch('cumulusci.core.config.YamlGlobalConfig')
-    mocker.patch('cumulusci.core.config.YamlProjectConfig')
-    mocker.patch('cumulusci.core.keychain.BaseProjectKeychain')
-    base_flow = mocker.patch('cumulusci.core.flows.BaseFlow')
+    mocker.patch('metadeploy.api.jobs.OrgConfig')
+    mocker.patch('metadeploy.api.jobs.ServiceConfig')
+    mocker.patch('metadeploy.api.jobs.YamlGlobalConfig')
+    mocker.patch('metadeploy.api.jobs.cci_configs')
+    mocker.patch('metadeploy.api.jobs.BaseProjectKeychain')
+    basic_flow = mocker.patch('metadeploy.api.jobs.BasicFlow')
+
+    from ..jobs import run_flows
 
     user = user_factory()
     plan = plan_factory()
@@ -76,7 +91,7 @@ def test_malicious_zip_file(mocker, user_factory, plan_factory, step_factory):
     # TODO assert? What we really need to assert is a change in the SF
     # org, but that'd be an integration test.
 
-    assert not base_flow.called
+    assert not basic_flow.called
 
 
 @pytest.mark.django_db
@@ -95,3 +110,25 @@ def test_expire_user_tokens(user_factory):
 
     assert user1.valid_token_for == 'https://example.com'
     assert user2.valid_token_for is None
+
+
+@pytest.mark.django_db
+def test_preflight(mocker, user_factory, plan_factory):
+    mocker.patch('shutil.move')
+    mocker.patch('shutil.rmtree')
+    glob = mocker.patch('metadeploy.api.jobs.glob')
+    glob.return_value = ['test']
+    mocker.patch('github3.login')
+    mocker.patch('zipfile.ZipFile')
+    mocker.patch('metadeploy.api.jobs.OrgConfig')
+    mocker.patch('metadeploy.api.jobs.ServiceConfig')
+    mocker.patch('metadeploy.api.jobs.YamlGlobalConfig')
+    mocker.patch('metadeploy.api.jobs.cci_configs')
+    mocker.patch('metadeploy.api.jobs.BaseProjectKeychain')
+    preflight_flow = mocker.patch('metadeploy.api.jobs.PreflightFlow')
+
+    user = user_factory()
+    plan = plan_factory()
+    preflight(user, plan)
+
+    assert preflight_flow.called

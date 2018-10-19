@@ -10,6 +10,7 @@ from .models import (
     PlanSlug,
     Step,
     Job,
+    PreflightResult,
 )
 
 
@@ -22,3 +23,4 @@ admin.site.register(Plan)
 admin.site.register(PlanSlug)
 admin.site.register(Step)
 admin.site.register(Job)
+admin.site.register(PreflightResult)

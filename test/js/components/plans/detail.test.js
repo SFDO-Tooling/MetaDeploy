@@ -1,7 +1,7 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import { renderWithRedux } from './../../utils';
+import { renderWithRedux, storeWithApi } from './../../utils';
 
 import PlanDetail from 'components/plans/detail';
 
@@ -45,6 +45,7 @@ const defaultState = {
       },
     },
   ],
+  preflights: { 1: null },
 };
 
 describe('<PlanDetail />', () => {
@@ -64,7 +65,7 @@ describe('<PlanDetail />', () => {
         />
       </MemoryRouter>,
       opts.initialState,
-      opts.customStore,
+      storeWithApi,
     );
     return { getByText, queryByText, getByAltText };
   };
@@ -77,27 +78,12 @@ describe('<PlanDetail />', () => {
     });
   });
 
-  test('renders primary_plan detail (logged out)', () => {
+  test('renders primary_plan detail', () => {
     const { getByText } = setup();
 
     expect(getByText('Product 1, 1.0.0')).toBeVisible();
     expect(getByText('My Plan')).toBeVisible();
     expect(getByText('Preflight text...')).toBeVisible();
-    expect(getByText('Start Pre-Install Validation')).toBeVisible();
-    expect(getByText('My Step')).toBeVisible();
-  });
-
-  test('renders primary_plan detail (logged in)', () => {
-    const state = {
-      ...defaultState,
-      user: { valid_token_for: 'https://example.com' },
-    };
-    const { getByText } = setup({ initialState: state });
-
-    expect(getByText('Product 1, 1.0.0')).toBeVisible();
-    expect(getByText('My Plan')).toBeVisible();
-    expect(getByText('Preflight text...')).toBeVisible();
-    expect(getByText('Start Pre-Install Validation')).toBeVisible();
     expect(getByText('My Step')).toBeVisible();
   });
 

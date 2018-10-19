@@ -10,6 +10,7 @@ beforeAll(() => {
     salesforce_custom_login: () => '/accounts/salesforce-custom/login/',
     product_list: () => '/api/products/',
     version_list: () => '/api/versions/',
+    plan_preflight: id => `/api/plans/${id}/preflight/`,
   };
   window.console.error = jest.fn();
   window.console.warn = jest.fn();

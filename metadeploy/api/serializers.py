@@ -6,6 +6,7 @@ from .models import (
     Version,
     Plan,
     Step,
+    PreflightResult,
 )
 
 from django.contrib.auth import get_user_model
@@ -120,4 +121,39 @@ class JobSerializer(serializers.ModelSerializer):
             'created_at': {'read_only': True},
             'enqueued_at': {'read_only': True},
             'job_id': {'read_only': True},
+        }
+
+
+class PreflightResultSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(
+        default=serializers.CurrentUserDefault(),
+    )
+    is_ready = serializers.SerializerMethodField()
+
+    def get_is_ready(self, obj):
+        return (
+            obj.is_valid
+            and obj.status == PreflightResult.Status.complete
+            and obj.results == {}
+        )
+
+    class Meta:
+        model = PreflightResult
+        fields = (
+            'organization_url',
+            'user',
+            'plan',
+            'created_at',
+            'is_valid',
+            'status',
+            'results',
+            'is_ready',
+        )
+        extra_kwargs = {
+            'organization_url': {'read_only': True},
+            'plan': {'read_only': True},
+            'created_at': {'read_only': True},
+            'is_valid': {'read_only': True},
+            'status': {'read_only': True},
+            'results': {'read_only': True},
         }

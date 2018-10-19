@@ -1,5 +1,7 @@
 // @flow
 
+import type { PlansAction } from 'plans/actions';
+
 export type Step = {
   +id: number,
   +name: string,
@@ -17,3 +19,46 @@ export type Plan = {
   +steps: Array<Step>,
 };
 export type Plans = Array<Plan>;
+
+type PreflightError = {
+  +status: 'warning' | 'error' | 'skipped',
+  +message?: string,
+};
+type PreflightErrors = {
+  +plan_errors?: Array<PreflightError>,
+  [number]: Array<PreflightError>,
+};
+export type Preflight = {
+  +plan?: number,
+  +status: 'started' | 'complete',
+  +results?: PreflightErrors,
+  +is_valid?: boolean,
+  +is_ready?: boolean,
+};
+export type PreflightsState = {
+  [number]: Preflight,
+};
+
+const reducer = (
+  preflights: PreflightsState = {},
+  action: PlansAction,
+): PreflightsState => {
+  switch (action.type) {
+    case 'FETCH_PREFLIGHT_SUCCEEDED': {
+      const { plan, preflight } = action.payload;
+      return { ...preflights, [plan]: preflight };
+    }
+    case 'PREFLIGHT_STARTED': {
+      const plan = action.payload;
+      return { ...preflights, [plan]: { status: 'started' } };
+    }
+    case 'PREFLIGHT_COMPLETED': {
+      const preflight = action.payload;
+      const { plan } = preflight;
+      return { ...preflights, [plan]: preflight };
+    }
+  }
+  return preflights;
+};
+
+export default reducer;

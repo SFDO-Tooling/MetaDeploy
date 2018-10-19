@@ -1,5 +1,7 @@
-import factory
 from pytest_factoryboy import register
+from rest_framework.test import APIClient
+import factory
+import pytest
 
 from django.contrib.auth import get_user_model
 
@@ -18,6 +20,7 @@ from metadeploy.api.models import (
     Plan,
     PlanSlug,
     Step,
+    PreflightResult,
 )
 
 User = get_user_model()
@@ -119,6 +122,8 @@ class PlanFactory(factory.django.DjangoModelFactory):
     title = 'Sample plan'
     version = factory.SubFactory(VersionFactory)
     _ensure_slug = factory.PostGenerationMethodCall('ensure_slug')
+    preflight_flow_name = 'preflight_flow'
+    flow_name = 'main_flow'
 
 
 @register
@@ -128,7 +133,7 @@ class StepFactory(factory.django.DjangoModelFactory):
 
     name = 'Sample step'
     plan = factory.SubFactory(PlanFactory)
-    flow_name = 'install_prod'
+    task_name = 'main_task'
 
 
 @register
@@ -162,17 +167,22 @@ class JobFactory(factory.django.DjangoModelFactory):
                 self.steps.add(step)
 
 
+@register
+class PreflightResultFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = PreflightResult
+
+
+@pytest.fixture
+def client(user_factory):
+    user = user_factory()
+    client = APIClient()
+    client.force_login(user)
+    client.user = user
+    return client
+
+
 # TODO: We will need these eventually, but not yet:
-#
-# import pytest
-# from rest_framework.test import APIClient
-#
-# @pytest.fixture
-# def client(user_factory):
-#     user = user_factory()
-#     client = APIClient()
-#     client.force_login(user)
-#     return client
 #
 # @pytest.fixture
 # def anon_client():

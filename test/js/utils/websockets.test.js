@@ -1,6 +1,7 @@
 import Sockette from 'sockette';
 
 import * as sockets from 'utils/websockets';
+import { completePreflight } from 'plans/actions';
 import { invalidateToken } from 'accounts/actions';
 
 jest.mock('sockette');
@@ -9,6 +10,23 @@ describe('getAction', () => {
   test('handles USER_TOKEN_INVALID msg', () => {
     const msg = { type: 'USER_TOKEN_INVALID' };
     const expected = invalidateToken();
+    const actual = sockets.getAction(msg);
+
+    expect(actual).toEqual(expected);
+  });
+
+  test('handles PREFLIGHT_COMPLETED msg', () => {
+    const preflight = { status: 'complete' };
+    const msg = { type: 'PREFLIGHT_COMPLETED', payload: preflight };
+    const expected = completePreflight(preflight);
+    const actual = sockets.getAction(msg);
+
+    expect(actual).toEqual(expected);
+  });
+
+  test('handles PREFLIGHT_COMPLETED msg (no payload)', () => {
+    const msg = { type: 'PREFLIGHT_COMPLETED' };
+    const expected = null;
     const actual = sockets.getAction(msg);
 
     expect(actual).toEqual(expected);

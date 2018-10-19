@@ -1,14 +1,16 @@
 from rest_framework import routers
 
 from .views import (
-    ProductViewSet,
     JobViewSet,
+    ProductViewSet,
     VersionViewSet,
+    PlanViewSet,
 )
 
 
 router = routers.DefaultRouter()
-router.register(r'products', ProductViewSet)
 router.register(r'jobs', JobViewSet)
+router.register(r'products', ProductViewSet)
 router.register(r'versions', VersionViewSet)
+router.register(r'plans', PlanViewSet)
 urlpatterns = router.urls

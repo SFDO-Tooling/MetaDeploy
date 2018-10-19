@@ -10,7 +10,7 @@ import CustomDomainModal from 'components/header/customDomainModal';
 
 type Props = {
   id: string,
-  label: string,
+  label: string | React.Node,
   buttonClassName: string,
   buttonVariant: string,
   triggerClassName?: string,

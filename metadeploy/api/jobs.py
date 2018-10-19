@@ -13,7 +13,10 @@ instances of the Job model and triggers the run_flows_job.
 
 import os
 import sys
+import shutil
 import contextlib
+from itertools import chain
+from glob import glob
 from tempfile import TemporaryDirectory
 import logging
 from urllib.parse import urlparse
@@ -21,10 +24,11 @@ import zipfile
 
 import github3
 
-from cumulusci.core import (
-    config,
-    flows,
-    keychain,
+from cumulusci.core.keychain import BaseProjectKeychain
+from cumulusci.core.config import (
+    OrgConfig,
+    ServiceConfig,
+    YamlGlobalConfig,
 )
 
 from django_rq import job
@@ -32,7 +36,15 @@ from django_rq import job
 from django.conf import settings
 from django.contrib.auth import get_user_model
 
-from .models import Job
+from .models import (
+    Job,
+    PreflightResult,
+)
+from . import cci_configs
+from .flows import (
+    BasicFlow,
+    PreflightFlow,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -80,22 +92,25 @@ def zip_file_is_safe(zip_file):
     )
 
 
-def run_flows(user, plan, steps):
+def run_flows(user, plan, skip_tasks, flow_class=None, preflight_result=None):
     # TODO:
     #
-    # We'll want to subclass BaseFlow and add logic in the progress
-    # callbacks to record and possibly push progress:
-    # pre_flow, post_flow, pre_task, post_task, pre_subflow,
-    # post_subflow
-    #
-    # Can we do anything meaningful with a return value from a @job,
-    # too?
+    # Can we do anything meaningful with a return value from a @job?
+
+    # This is a little stupid, but it lets us mock out BasicFlow in the
+    # tests better than if we put this straight in the kwargs:
+    if flow_class is None:
+        flow_class = BasicFlow
 
     token, token_secret = user.token
     instance_url = user.instance_url
     repo_url = plan.version.product.repo_url
     commit_ish = plan.version.commit_ish
-    flow_names = [step.flow_name for step in steps]
+
+    if preflight_result:
+        flow_name = plan.preflight_flow_name
+    else:
+        flow_name = plan.flow_name
 
     with contextlib.ExitStack() as stack:
         tmpdirname = stack.enter_context(TemporaryDirectory())
@@ -119,23 +134,37 @@ def run_flows(user, plan, steps):
             logger.error(f'Malformed or malicious zip file from {url}.')
             return
         zip_file.extractall()
+        # We know that the zipball contains a root directory named
+        # something like this by GitHub's convention. If that ever
+        # breaks, this will break:
+        zipball_root = glob(f"{user}-{repo_name}-*")[0]
+        # It's not unlikely that the zipball root contains a directory
+        # with the same name, so we pre-emptively rename it to probably
+        # avoid collisions:
+        shutil.move(zipball_root, "zipball_root")
+        for path in chain(glob("zipball_root/*"), glob("zipball_root/.*")):
+            shutil.move(path, ".")
+        shutil.rmtree("zipball_root")
 
         # There's a lot of setup to make configs and keychains, link
         # them properly, and then eventually pass them into a flow,
         # which we then run:
         current_org = 'current_org'
-        org_config = config.OrgConfig({
+        org_config = OrgConfig({
             'access_token': token,
             'instance_url': instance_url,
             'refresh_token': token_secret,
         }, current_org)
-        proj_config = config.YamlProjectConfig(config.YamlGlobalConfig())
-        proj_keychain = keychain.BaseProjectKeychain(proj_config, None)
+        proj_config = cci_configs.MetadeployProjectConfig(
+            YamlGlobalConfig(),
+            repo_root=tmpdirname,
+        )
+        proj_keychain = BaseProjectKeychain(proj_config, None)
         proj_keychain.set_org(org_config)
         proj_config.set_keychain(proj_keychain)
 
         # Set up the connected_app:
-        connected_app = config.ServiceConfig({
+        connected_app = ServiceConfig({
             'client_secret': settings.CONNECTED_APP_CLIENT_SECRET,
             'callback_url': settings.CONNECTED_APP_CALLBACK_URL,
             'client_id': settings.CONNECTED_APP_CLIENT_ID,
@@ -147,7 +176,7 @@ def run_flows(user, plan, steps):
         )
 
         # Set up github:
-        github_app = config.ServiceConfig({
+        github_app = ServiceConfig({
             # It would be nice to only need the token:
             'token': settings.GITHUB_TOKEN,
             # The following three values don't matter and aren't used,
@@ -158,31 +187,42 @@ def run_flows(user, plan, steps):
         })
         proj_config.keychain.set_service('github', github_app, True)
 
-        # Make and run the flows:
-        for flow_name in flow_names:
-            flow_config = proj_config.get_flow(flow_name)
-            flowinstance = flows.BaseFlow(
-                proj_config,
-                flow_config,
-                proj_keychain.get_org(current_org),
-                options={},
-                skip=[],
-                name=flow_name,
-            )
-            flowinstance()
+        # Make and run the flow:
+        flow_config = proj_config.get_flow(flow_name)
+
+        args = (
+            proj_config,
+            flow_config,
+            proj_keychain.get_org(current_org),
+        )
+        kwargs = dict(
+            options={},
+            skip=skip_tasks,
+            name=flow_name,
+        )
+        if preflight_result:
+            kwargs['preflight_result'] = preflight_result
+
+        flowinstance = flow_class(*args, **kwargs)
+        flowinstance()
 
 
 run_flows_job = job(run_flows)
 
 
+def calculate_skips_for_plan(plan, steps):
+    return [
+        step.task_name
+        for step
+        in set(plan.step_set.all()) - set(steps)
+    ]
+
+
 def enqueuer():
     logger.debug('Enqueuer live', extra={'tag': 'jobs.enqueuer'})
     for j in Job.objects.filter(enqueued_at=None):
-        rq_job = run_flows_job.delay(
-            j.user,
-            j.plan,
-            list(j.steps.all()),
-        )
+        skip_tasks = calculate_skips_for_plan(j.plan, j.steps.all())
+        rq_job = run_flows_job.delay(j.user, j.plan, skip_tasks)
         j.job_id = rq_job.id
         j.enqueued_at = rq_job.enqueued_at
         j.save()
@@ -199,3 +239,23 @@ def expire_user_tokens():
 
 
 expire_user_tokens_job = job(expire_user_tokens)
+
+
+def preflight(user, plan):
+    preflight_result = PreflightResult.objects.create(
+        user=user,
+        plan=plan,
+        organization_url=user.instance_url,
+    )
+    run_flows(
+        user,
+        plan,
+        [],
+        flow_class=PreflightFlow,
+        preflight_result=preflight_result,
+    )
+    preflight_result.status = PreflightResult.Status.complete
+    preflight_result.save()
+
+
+preflight_job = job(preflight)

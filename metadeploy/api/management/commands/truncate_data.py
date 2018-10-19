@@ -11,6 +11,7 @@ from ...models import (
     PlanSlug,
     Plan,
     Step,
+    PreflightResult,
 )
 
 
@@ -19,6 +20,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         ordered_models = [
+            PreflightResult,
             Step,
             PlanSlug,
             Plan,
