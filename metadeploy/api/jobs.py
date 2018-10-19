@@ -29,7 +29,6 @@ from cumulusci.core.config import (
     OrgConfig,
     ServiceConfig,
     YamlGlobalConfig,
-    YamlProjectConfig,
 )
 
 from django_rq import job
@@ -41,6 +40,7 @@ from .models import (
     Job,
     PreflightResult,
 )
+from . import cci_configs
 from .flows import (
     BasicFlow,
     PreflightFlow,
@@ -49,52 +49,6 @@ from .flows import (
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
-
-
-def get_metadeploy_project_config():
-    """
-    This is a very stupid workaround for the sake of tests. I want to be
-    able to easily mock out the parent class here, YamlProjectConfig,
-    which is easiest done if I defer definition of this class until the
-    function below runs. This may be less efficient, but probably not
-    show-stoppingly. Mostly, it's unintuitive and weird, and I would
-    like to undo it if I can.
-    """
-
-    class MetadeployProjectConfig(YamlProjectConfig):
-        def __init__(self, *args, repo_root=None, **kwargs):  # pragma: nocover
-            self._repo_root = repo_root
-            super().__init__(*args, **kwargs)
-
-        @property
-        def repo_root(self):  # pragma: nocover
-            return self._repo_root
-
-        @property
-        def config_project_local_path(self):  # pragma: nocover
-            return
-
-        @property
-        def repo_name(self):  # pragma: nocover
-            return
-
-        @property
-        def repo_url(self):  # pragma: nocover
-            return
-
-        @property
-        def repo_owner(self):  # pragma: nocover
-            return
-
-        @property
-        def repo_branch(self):  # pragma: nocover
-            return
-
-        @property
-        def repo_commit(self):  # pragma: nocover
-            return
-
-    return MetadeployProjectConfig
 
 
 def extract_user_and_repo(gh_url):
@@ -201,7 +155,7 @@ def run_flows(user, plan, skip_tasks, flow_class=None, preflight_result=None):
             'instance_url': instance_url,
             'refresh_token': token_secret,
         }, current_org)
-        proj_config = get_metadeploy_project_config()(
+        proj_config = cci_configs.MetadeployProjectConfig(
             YamlGlobalConfig(),
             repo_root=tmpdirname,
         )

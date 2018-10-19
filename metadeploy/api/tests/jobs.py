@@ -26,7 +26,7 @@ def test_run_flows(mocker, user_factory, plan_factory, step_factory):
     mocker.patch('metadeploy.api.jobs.OrgConfig')
     mocker.patch('metadeploy.api.jobs.ServiceConfig')
     mocker.patch('metadeploy.api.jobs.YamlGlobalConfig')
-    mocker.patch('metadeploy.api.jobs.YamlProjectConfig')
+    mocker.patch('metadeploy.api.jobs.cci_configs')
     mocker.patch('metadeploy.api.jobs.BaseProjectKeychain')
     basic_flow = mocker.patch('metadeploy.api.jobs.BasicFlow')
 
@@ -76,7 +76,7 @@ def test_malicious_zip_file(mocker, user_factory, plan_factory, step_factory):
     mocker.patch('metadeploy.api.jobs.OrgConfig')
     mocker.patch('metadeploy.api.jobs.ServiceConfig')
     mocker.patch('metadeploy.api.jobs.YamlGlobalConfig')
-    mocker.patch('metadeploy.api.jobs.YamlProjectConfig')
+    mocker.patch('metadeploy.api.jobs.cci_configs')
     mocker.patch('metadeploy.api.jobs.BaseProjectKeychain')
     basic_flow = mocker.patch('metadeploy.api.jobs.BasicFlow')
 
@@ -123,7 +123,7 @@ def test_preflight(mocker, user_factory, plan_factory):
     mocker.patch('metadeploy.api.jobs.OrgConfig')
     mocker.patch('metadeploy.api.jobs.ServiceConfig')
     mocker.patch('metadeploy.api.jobs.YamlGlobalConfig')
-    mocker.patch('metadeploy.api.jobs.YamlProjectConfig')
+    mocker.patch('metadeploy.api.jobs.cci_configs')
     mocker.patch('metadeploy.api.jobs.BaseProjectKeychain')
     preflight_flow = mocker.patch('metadeploy.api.jobs.PreflightFlow')
 
