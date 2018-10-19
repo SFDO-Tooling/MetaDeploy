@@ -17,12 +17,13 @@ class TestPreflightFlow:
         pfr.results = {}
         preflight_flow = PreflightFlow(preflight_result=pfr)
         preflight_flow.step_return_values = [
-            {'name 1': ['error 1']},
-            {'name 2': ['error 2']},
+            {'msg': 'error 1', 'status_code': 'error', 'task_name': 'name 1'},
+            {'msg': '', 'status_code': 'ok', 'task_name': 'name 2'},
+            {'msg': 'error 2', 'status_code': 'error', 'task_name': 'name 3'},
         ]
-        preflight_flow.post_flow()
+        preflight_flow._post_flow()
 
         assert pfr.results == {
             'name 1': ['error 1'],
-            'name 2': ['error 2'],
+            'name 3': ['error 2'],
         }

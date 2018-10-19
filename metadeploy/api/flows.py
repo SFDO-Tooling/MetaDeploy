@@ -18,13 +18,21 @@ class PreflightFlow(flows.BaseFlow):
     # def pre_flow(self, *args, **kwargs):
     #     pass
 
-    def post_flow(self):
-        results = {
-            k: v
-            for return_value in self.step_return_values
-            for k, v in return_value.items()
-        }
+    def _post_flow(self):
+        results = dict([
+            self._emit_k_v_for_status_dict(status)
+            for status
+            in self.step_return_values
+            if self._emit_k_v_for_status_dict(status) is not None
+        ])
         self.preflight_result.results = results
+
+    def _emit_k_v_for_status_dict(self, status):
+        if status['status_code'] == 'ok':
+            return None
+
+        # Else, status_code == 'error'
+        return (status['task_name'], [status['msg']])
 
     # def pre_task(self, *args, **kwargs):
     #     pass
