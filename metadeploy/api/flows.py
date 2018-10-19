@@ -15,9 +15,6 @@ class PreflightFlow(flows.BaseFlow):
         self.preflight_result = preflight_result
         return super().__init__(*args, **kwargs)
 
-    # def pre_flow(self, *args, **kwargs):
-    #     pass
-
     def _post_flow(self):
         results = dict([
             self._emit_k_v_for_status_dict(status)
@@ -31,8 +28,16 @@ class PreflightFlow(flows.BaseFlow):
         if status['status_code'] == 'ok':
             return None
 
-        # Else, status_code == 'error'
-        return (status['task_name'], [status['msg']])
+        if status['status_code'] == 'error':
+            step_id = self.preflight_result.plan.step_set.filter(
+                task_name=status['task_name'],
+            ).first().id  # Right now, we just trust it exists!
+            return (step_id, [{'status': 'error', 'message': status['msg']}])
+
+        # Else status_code == 'warning', and we don't have that yet
+
+    # def pre_flow(self, *args, **kwargs):
+    #     pass
 
     # def pre_task(self, *args, **kwargs):
     #     pass
