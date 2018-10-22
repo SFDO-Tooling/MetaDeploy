@@ -14,6 +14,18 @@ from ..jobs import (
 
 
 @pytest.mark.django_db
+def test_report_error(mocker, user_factory, plan_factory, step_factory):
+    report_error = mocker.patch('metadeploy.api.jobs.sync_report_error')
+    user = user_factory()
+    plan = plan_factory()
+    steps = [step_factory(plan=plan)]
+
+    run_flows(user, plan, steps)
+
+    assert report_error.called
+
+
+@pytest.mark.django_db
 def test_run_flows(mocker, user_factory, plan_factory, step_factory):
     # TODO: I don't like this test at all. But there's a lot of IO that
     # this code causes, so I'm mocking it out.

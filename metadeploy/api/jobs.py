@@ -21,6 +21,7 @@ from tempfile import TemporaryDirectory
 import logging
 from urllib.parse import urlparse
 import zipfile
+from asgiref.sync import async_to_sync
 
 import github3
 
@@ -45,16 +46,26 @@ from .flows import (
     BasicFlow,
     PreflightFlow,
 )
+from .push import report_error
 
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
+sync_report_error = async_to_sync(report_error)
 
 
 def extract_user_and_repo(gh_url):
     path = urlparse(gh_url).path
     _, user, repo, *_ = path.split('/')
     return user, repo
+
+
+@contextlib.contextmanager
+def report_errors_to(user):
+    try:
+        yield
+    except Exception as e:
+        sync_report_error(user, str(e))
 
 
 @contextlib.contextmanager
@@ -113,6 +124,7 @@ def run_flows(user, plan, skip_tasks, flow_class=None, preflight_result=None):
         flow_name = plan.flow_name
 
     with contextlib.ExitStack() as stack:
+        stack.enter_context(report_errors_to(user))
         tmpdirname = stack.enter_context(TemporaryDirectory())
         stack.enter_context(cd(tmpdirname))
 

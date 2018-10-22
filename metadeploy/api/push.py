@@ -26,3 +26,11 @@ async def preflight_completed(preflight):
         'payload': payload,
     }
     await push_message_to_user(preflight.user, message)
+
+
+async def report_error(user, error_msg):
+    message = {
+        'type': 'BACKEND_ERROR',
+        'payload': {'message': error_msg},
+    }
+    await push_message_to_user(user, message)
