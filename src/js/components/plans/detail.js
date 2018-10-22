@@ -102,10 +102,10 @@ const PlanDetail = ({
           >
             <div className="slds-text-longform">
               <h3 className="slds-text-heading_small">{plan.title}</h3>
+              {plan.preflight_message ? <p>{plan.preflight_message}</p> : null}
               {preflight && user ? (
                 <PreflightResults preflight={preflight} />
               ) : null}
-              {plan.preflight_message ? <p>{plan.preflight_message}</p> : null}
             </div>
             {plan.steps.length ? (
               <CtaButton

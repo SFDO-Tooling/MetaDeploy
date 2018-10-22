@@ -11,6 +11,8 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
 
+import { PlanErrors } from 'components/plans/preflightResults';
+
 import type {
   Plan as PlanType,
   Step as StepType,
@@ -23,6 +25,7 @@ type DataCellProps = {
   user?: UserType,
   preflight?: ?PreflightType,
   item?: StepType,
+  className?: string,
 };
 
 class NameDataCell extends React.Component<
@@ -35,25 +38,70 @@ class NameDataCell extends React.Component<
   }
 
   render(): React.Node {
-    const name = this.props.item && this.props.item.name;
-    const description = this.props.item && this.props.item.description;
+    const { preflight, item, className, ...otherProps } = this.props;
+    if (!item) {
+      return null;
+    }
+    const name = item.name;
+    const description = item.description;
+    const id = item.id.toString();
+    const errors =
+      preflight &&
+      preflight.has_errors &&
+      preflight.results &&
+      preflight.results[id];
+    const hasError =
+      errors &&
+      errors.length > 0 &&
+      errors.find(err => err.status === 'error') !== undefined;
+    const hasWarning =
+      errors &&
+      errors.length > 0 &&
+      errors.find(err => err.status === 'warning') !== undefined;
+    const classes = classNames(className, {
+      'has-warning': hasWarning,
+      'has-error': hasError,
+    });
+    const errorList =
+      errors && (hasError || hasWarning) ? (
+        <PlanErrors errorList={errors} />
+      ) : null;
     return (
-      <DataTableCell title={name} {...this.props}>
+      <DataTableCell title={name} className={classes} {...otherProps}>
         {description ? (
-          <Accordion className="slds-cell-wrap">
-            <AccordionPanel
-              id={this.props.item && this.props.item.id.toString()}
-              summary={name}
-              expanded={this.state.expanded}
-              onTogglePanel={() => {
-                this.setState({ expanded: !this.state.expanded });
-              }}
-            >
-              {description}
-            </AccordionPanel>
-          </Accordion>
+          <>
+            <Accordion className="slds-cell-wrap">
+              <AccordionPanel
+                id={id}
+                title={name}
+                summary={<p className="slds-cell-wrap">{name}</p>}
+                expanded={this.state.expanded}
+                onTogglePanel={() => {
+                  this.setState({ expanded: !this.state.expanded });
+                }}
+              >
+                {description}
+              </AccordionPanel>
+            </Accordion>
+            {errorList ? (
+              <div
+                className="step-name-no-icon
+                  slds-p-bottom_small
+                  slds-cell-wrap"
+              >
+                {errorList}
+              </div>
+            ) : null}
+          </>
         ) : (
-          <span className="step-name-no-icon">{name}</span>
+          <div
+            className="step-name-no-icon
+              slds-p-vertical_small
+              slds-cell-wrap"
+          >
+            <p className={errorList ? 'slds-p-bottom_small' : ''}>{name}</p>
+            {errorList}
+          </div>
         )}
       </DataTableCell>
     );
@@ -163,16 +211,10 @@ const StepsTable = ({
       items={plan.steps.map(step => ({ ...step, id: step.id.toString() }))}
       id="plan-steps-table"
     >
-      <DataTableColumn
-        key="name"
-        label="Steps"
-        property="name"
-        primaryColumn
-        truncate
-      >
-        <NameDataCell />
+      <DataTableColumn key="name" label="Steps" property="name" primaryColumn>
+        <NameDataCell preflight={preflight} />
       </DataTableColumn>
-      <DataTableColumn key="kind" label="Type" property="kind" truncate>
+      <DataTableColumn key="kind" label="Type" property="kind">
         <KindDataCell />
       </DataTableColumn>
       <DataTableColumn key="is_required" property="is_required">

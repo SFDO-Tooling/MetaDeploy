@@ -20,13 +20,13 @@ export type Plan = {
 };
 export type Plans = Array<Plan>;
 
-type PreflightError = {
+export type PreflightError = {
   +status: 'warning' | 'error' | 'skipped',
   +message?: string,
 };
 type PreflightErrors = {
   +plan_errors?: Array<PreflightError>,
-  [number]: Array<PreflightError>,
+  [string]: Array<PreflightError>,
 };
 export type Preflight = {
   +plan?: number,
