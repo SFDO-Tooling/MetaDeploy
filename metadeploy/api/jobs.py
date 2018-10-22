@@ -66,6 +66,7 @@ def report_errors_to(user):
         yield
     except Exception as e:
         sync_report_error(user, str(e))
+        raise
 
 
 @contextlib.contextmanager

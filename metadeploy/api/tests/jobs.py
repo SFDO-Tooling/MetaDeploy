@@ -20,7 +20,8 @@ def test_report_error(mocker, user_factory, plan_factory, step_factory):
     plan = plan_factory()
     steps = [step_factory(plan=plan)]
 
-    run_flows(user, plan, steps)
+    with pytest.raises(AttributeError):
+        run_flows(user, plan, steps)
 
     assert report_error.called
 
