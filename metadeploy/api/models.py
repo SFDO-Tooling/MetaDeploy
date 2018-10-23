@@ -17,7 +17,11 @@ from asgiref.sync import async_to_sync
 from colorfield.fields import ColorField
 from model_utils import Choices, FieldTracker
 
-from .push import user_token_expired, preflight_completed
+from .push import (
+    user_token_expired,
+    preflight_completed,
+    preflight_invalidated,
+)
 
 
 VERSION_STRING = r'^[a-zA-Z0-9._+-]+$'
@@ -384,7 +388,7 @@ class Job(models.Model):
 class PreflightResult(models.Model):
     Status = Choices("started", "complete")
 
-    tracker = FieldTracker(fields=("status",))
+    tracker = FieldTracker(fields=("status", "is_valid"))
 
     organization_url = models.URLField()
     user = models.ForeignKey(
@@ -410,10 +414,19 @@ class PreflightResult(models.Model):
 
     def save(self, *args, **kwargs):
         ret = super().save(*args, **kwargs)
+
         has_completed = (
-            self.tracker.has_changed('status')
+            self.tracker.has_changed("status")
             and self.status == PreflightResult.Status.complete
         )
         if has_completed:
             async_to_sync(preflight_completed)(self)
+
+        is_invalidated = (
+            self.tracker.has_changed("is_valid")
+            and not self.is_valid
+        )
+        if is_invalidated:
+            async_to_sync(preflight_invalidated)(self)
+
         return ret

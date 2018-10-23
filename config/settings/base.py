@@ -360,6 +360,11 @@ GITHUB_TOKEN = env('GITHUB_TOKEN')
 
 # Token expiration
 TOKEN_LIFETIME_MINUTES = env('TOKEN_LIFETIME_MINUTES', type_=int, default=10)
+PREFLIGHT_LIFETIME_MINUTES = env(
+    'PREFLIGHT_LIFETIME_MINUTES',
+    type_=int,
+    default=10,
+)
 
 
 # Raven / Sentry

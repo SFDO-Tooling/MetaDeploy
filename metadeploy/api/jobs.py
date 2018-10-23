@@ -269,11 +269,16 @@ preflight_job = job(preflight)
 
 def expire_preflights():
     now = timezone.now()
-    ten_minutes_ago = now - timedelta(minutes=10)
-    PreflightResult.objects.filter(
+    ten_minutes_ago = now - timedelta(
+        minutes=settings.PREFLIGHT_LIFETIME_MINUTES,
+    )
+    preflights_to_invalidate = PreflightResult.objects.filter(
         status=PreflightResult.Status.complete,
         created_at__lte=ten_minutes_ago,
-    ).update(is_valid=False)
+    )
+    for preflight in preflights_to_invalidate:
+        preflight.is_valid = False
+        preflight.save()
 
 
 expire_preflights_job = job(expire_preflights)

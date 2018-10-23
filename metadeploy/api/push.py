@@ -28,6 +28,17 @@ async def preflight_completed(preflight):
     await push_message_to_user(preflight.user, message)
 
 
+async def preflight_invalidated(preflight):
+    from .serializers import PreflightResultSerializer
+
+    payload = PreflightResultSerializer(instance=preflight).data
+    message = {
+        'type': 'PREFLIGHT_INVALIDATED',
+        'payload': payload,
+    }
+    await push_message_to_user(preflight.user, message)
+
+
 async def report_error(user, error_msg):
     message = {
         'type': 'BACKEND_ERROR',
