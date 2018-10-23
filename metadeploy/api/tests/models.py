@@ -269,3 +269,17 @@ class TestVersionNaturalKey:
         version = version_factory(label='v0.1.0', product=product)
 
         assert str(version) == 'My Product, Version v0.1.0'
+
+
+@pytest.mark.django_db
+def test_job_skip_tasks(plan_factory, step_factory, job_factory):
+    plan = plan_factory()
+    step1 = step_factory(plan=plan, task_name='task1')
+    step2 = step_factory(plan=plan, task_name='task2')
+    step3 = step_factory(plan=plan, task_name='task3')
+    job = job_factory(
+        plan=plan,
+        steps=[step1, step3],
+    )
+
+    assert job.skip_tasks() == [step2.task_name]

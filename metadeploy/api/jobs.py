@@ -225,19 +225,10 @@ def run_flows(user, plan, skip_tasks, flow_class=None, preflight_result=None):
 run_flows_job = job(run_flows)
 
 
-def calculate_skips_for_plan(plan, steps):
-    return [
-        step.task_name
-        for step
-        in set(plan.step_set.all()) - set(steps)
-    ]
-
-
 def enqueuer():
     logger.debug('Enqueuer live', extra={'tag': 'jobs.enqueuer'})
     for j in Job.objects.filter(enqueued_at=None):
-        skip_tasks = calculate_skips_for_plan(j.plan, j.steps.all())
-        rq_job = run_flows_job.delay(j.user, j.plan, skip_tasks)
+        rq_job = run_flows_job.delay(j.user, j.plan, j.skip_tasks())
         j.job_id = rq_job.id
         j.enqueued_at = rq_job.enqueued_at
         j.save()

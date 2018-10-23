@@ -373,6 +373,13 @@ class Job(models.Model):
     enqueued_at = models.DateTimeField(null=True)
     job_id = models.UUIDField(null=True)
 
+    def skip_tasks(self):
+        return [
+            step.task_name
+            for step
+            in set(self.plan.step_set.all()) - set(self.steps.all())
+        ]
+
 
 class PreflightResult(models.Model):
     Status = Choices("started", "complete")
