@@ -5,11 +5,13 @@ from django.utils import timezone
 
 import pytest
 
+from ..models import PreflightResult
 from ..jobs import (
     run_flows,
     enqueuer,
     expire_user_tokens,
     preflight,
+    expire_preflights,
 )
 
 
@@ -145,3 +147,43 @@ def test_preflight(mocker, user_factory, plan_factory):
     preflight(user, plan)
 
     assert preflight_flow.called
+
+
+@pytest.mark.django_db
+def test_expire_preflights(
+        user_factory, plan_factory, preflight_result_factory):
+    now = timezone.now()
+    eleven_minutes_ago = now - timedelta(minutes=11)
+    user = user_factory()
+    plan = plan_factory()
+    preflight1 = preflight_result_factory(
+        user=user,
+        plan=plan,
+        status=PreflightResult.Status.complete,
+    )
+    preflight2 = preflight_result_factory(
+        user=user,
+        plan=plan,
+        status=PreflightResult.Status.started,
+    )
+    PreflightResult.objects.filter(id__in=[
+        preflight1.id,
+        preflight2.id,
+    ]).update(
+        created_at=eleven_minutes_ago,
+    )
+    preflight3 = preflight_result_factory(
+        user=user,
+        plan=plan,
+        status=PreflightResult.Status.complete,
+    )
+
+    expire_preflights()
+
+    preflight1.refresh_from_db()
+    preflight2.refresh_from_db()
+    preflight3.refresh_from_db()
+
+    assert not preflight1.is_valid
+    assert preflight2.is_valid
+    assert preflight3.is_valid

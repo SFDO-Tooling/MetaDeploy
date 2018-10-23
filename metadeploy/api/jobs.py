@@ -15,6 +15,7 @@ import os
 import sys
 import shutil
 import contextlib
+from datetime import timedelta
 from itertools import chain
 from glob import glob
 from tempfile import TemporaryDirectory
@@ -36,6 +37,7 @@ from django_rq import job
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 from .models import (
     Job,
@@ -272,3 +274,15 @@ def preflight(user, plan):
 
 
 preflight_job = job(preflight)
+
+
+def expire_preflights():
+    now = timezone.now()
+    ten_minutes_ago = now - timedelta(minutes=10)
+    PreflightResult.objects.filter(
+        status=PreflightResult.Status.complete,
+        created_at__lte=ten_minutes_ago,
+    ).update(is_valid=False)
+
+
+expire_preflights_job = job(expire_preflights)

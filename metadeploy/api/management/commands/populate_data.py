@@ -182,9 +182,22 @@ class Command(BaseCommand):
             ),
         )
 
+    def create_preflight_expiry_job(self):
+        RepeatableJob.objects.get_or_create(
+            callable='metadeploy.api.jobs.expire_preflights_job',
+            defaults=dict(
+                name='Expire Preflight Results',
+                interval=1,
+                interval_unit='minutes',
+                queue='default',
+                scheduled_time=timezone.now(),
+            ),
+        )
+
     def handle(self, *args, **options):
         self.create_enqueuer_job()
         self.create_token_expiry_job()
+        self.create_preflight_expiry_job()
         sf_category = ProductCategory.objects.create(title='salesforce')
         co_category = ProductCategory.objects.create(title='community')
         product1 = self.create_product(
