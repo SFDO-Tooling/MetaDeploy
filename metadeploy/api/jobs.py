@@ -66,8 +66,8 @@ def extract_user_and_repo(gh_url):
 def report_errors_to(user):
     try:
         yield
-    except Exception as e:
-        sync_report_error(user, str(e))
+    except Exception:
+        sync_report_error(user)
         raise
 
 

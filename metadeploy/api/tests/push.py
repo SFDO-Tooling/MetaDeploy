@@ -17,5 +17,5 @@ async def test_report_error(mocker, user_factory):
         new=AsyncMock(),
     )
     user = user_factory()
-    await report_error(user, 'I am an error')
+    await report_error(user)
     assert push_message.called

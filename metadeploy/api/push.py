@@ -28,6 +28,17 @@ async def preflight_completed(preflight):
     await push_message_to_user(preflight.user, message)
 
 
+async def preflight_failed(preflight):
+    from .serializers import PreflightResultSerializer
+
+    payload = PreflightResultSerializer(instance=preflight).data
+    message = {
+        'type': 'PREFLIGHT_FAILED',
+        'payload': payload,
+    }
+    await push_message_to_user(preflight.user, message)
+
+
 async def preflight_invalidated(preflight):
     from .serializers import PreflightResultSerializer
 
@@ -39,9 +50,11 @@ async def preflight_invalidated(preflight):
     await push_message_to_user(preflight.user, message)
 
 
-async def report_error(user, error_msg):
+async def report_error(user):
     message = {
         'type': 'BACKEND_ERROR',
-        'payload': {'message': error_msg},
+        # We don't pass the message through to the frontend in case it
+        # contains sensitive material:
+        'payload': {'message': 'There was an error'},
     }
     await push_message_to_user(user, message)

@@ -20,6 +20,7 @@ from model_utils import Choices, FieldTracker
 from .push import (
     user_token_expired,
     preflight_completed,
+    preflight_failed,
     preflight_invalidated,
 )
 
@@ -412,21 +413,36 @@ class PreflightResult(models.Model):
     #   ...
     # }
 
-    def save(self, *args, **kwargs):
-        ret = super().save(*args, **kwargs)
+    def _push_if_condition(self, condition, fn):
+        if condition:
+            async_to_sync(fn)(self)
 
+    def push_if_completed(self):
         has_completed = (
             self.tracker.has_changed("status")
             and self.status == PreflightResult.Status.complete
         )
-        if has_completed:
-            async_to_sync(preflight_completed)(self)
+        self._push_if_condition(has_completed, preflight_completed)
 
+    def push_if_failed(self):
+        has_failed = (
+            self.tracker.has_changed("status")
+            and self.status == PreflightResult.Status.failed
+        )
+        self._push_if_condition(has_failed, preflight_failed)
+
+    def push_if_invalidated(self):
         is_invalidated = (
             self.tracker.has_changed("is_valid")
             and not self.is_valid
         )
-        if is_invalidated:
-            async_to_sync(preflight_invalidated)(self)
+        self._push_if_condition(is_invalidated, preflight_invalidated)
+
+    def save(self, *args, **kwargs):
+        ret = super().save(*args, **kwargs)
+
+        self.push_if_completed()
+        self.push_if_failed()
+        self.push_if_invalidated()
 
         return ret
