@@ -150,6 +150,20 @@ def test_preflight(mocker, user_factory, plan_factory):
 
 
 @pytest.mark.django_db
+def test_preflight_failure(mocker, user_factory, plan_factory):
+    glob = mocker.patch('metadeploy.api.jobs.glob')
+    glob.side_effect = Exception
+    mocker.patch('github3.login')
+
+    user = user_factory()
+    plan = plan_factory()
+    preflight(user, plan)
+
+    preflight_result = PreflightResult.objects.last()
+    assert preflight_result.status == PreflightResult.Status.failed
+
+
+@pytest.mark.django_db
 def test_expire_preflights(
         user_factory, plan_factory, preflight_result_factory):
     now = timezone.now()

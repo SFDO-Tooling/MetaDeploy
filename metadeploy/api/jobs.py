@@ -253,14 +253,18 @@ def preflight(user, plan):
         plan=plan,
         organization_url=user.instance_url,
     )
-    run_flows(
-        user,
-        plan,
-        [],
-        flow_class=PreflightFlow,
-        preflight_result=preflight_result,
-    )
-    preflight_result.status = PreflightResult.Status.complete
+    try:
+        run_flows(
+            user,
+            plan,
+            [],
+            flow_class=PreflightFlow,
+            preflight_result=preflight_result,
+        )
+        final_status = PreflightResult.Status.complete
+    except Exception:
+        final_status = PreflightResult.Status.failed
+    preflight_result.status = final_status
     preflight_result.save()
 
 
@@ -275,6 +279,7 @@ def expire_preflights():
     preflights_to_invalidate = PreflightResult.objects.filter(
         status=PreflightResult.Status.complete,
         created_at__lte=ten_minutes_ago,
+        is_valid=True,
     )
     for preflight in preflights_to_invalidate:
         preflight.is_valid = False

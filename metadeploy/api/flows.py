@@ -36,17 +36,17 @@ class PreflightFlow(flows.BaseFlow):
 
         # Else status_code == 'warning', and we don't have that yet
 
-    # def pre_flow(self, *args, **kwargs):
+    # def _pre_flow(self, *args, **kwargs):
     #     pass
 
-    # def pre_task(self, *args, **kwargs):
+    # def _pre_task(self, *args, **kwargs):
     #     pass
 
-    # def post_task(self, *args, **kwargs):
+    # def _post_task(self, *args, **kwargs):
     #     pass
 
-    # def pre_subflow(self, *args, **kwargs):
+    # def _pre_subflow(self, *args, **kwargs):
     #     pass
 
-    # def post_subflow(self, *args, **kwargs):
+    # def _post_subflow(self, *args, **kwargs):
     #     pass

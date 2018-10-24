@@ -386,7 +386,7 @@ class Job(models.Model):
 
 
 class PreflightResult(models.Model):
-    Status = Choices("started", "complete")
+    Status = Choices("started", "complete", "failed")
 
     tracker = FieldTracker(fields=("status", "is_valid"))
 
