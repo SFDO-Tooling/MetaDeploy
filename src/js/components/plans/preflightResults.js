@@ -73,6 +73,15 @@ const PreflightResults = ({
 }: {
   preflight: PreflightType,
 }): React.Node => {
+  if (preflight.status === 'failed') {
+    return (
+      <p className="slds-text-color_error">
+        <ErrorIcon />
+        Pre-install validation has failed. Please try again.
+      </p>
+    );
+  }
+
   if (preflight.status !== 'complete') {
     return null;
   }

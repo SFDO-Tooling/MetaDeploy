@@ -30,7 +30,7 @@ type PreflightErrors = {
 };
 export type Preflight = {
   +plan?: number,
-  +status: 'started' | 'complete',
+  +status: 'started' | 'complete' | 'failed',
   +results?: PreflightErrors,
   +is_valid?: boolean,
   +has_errors?: boolean,
@@ -53,6 +53,11 @@ const reducer = (
       return { ...preflights, [plan]: { status: 'started' } };
     }
     case 'PREFLIGHT_COMPLETED': {
+      const preflight = action.payload;
+      const { plan } = preflight;
+      return { ...preflights, [plan]: preflight };
+    }
+    case 'PREFLIGHT_FAILED': {
       const preflight = action.payload;
       const { plan } = preflight;
       return { ...preflights, [plan]: preflight };

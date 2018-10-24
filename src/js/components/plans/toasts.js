@@ -26,6 +26,18 @@ class Toasts extends React.Component<Props, State> {
 
   getToast(): React.Node {
     const { preflight } = this.props;
+    if (preflight.status === 'failed') {
+      return (
+        <Toast
+          labels={{
+            heading: ['Pre-install validation has failed.'],
+          }}
+          variant="error"
+          duration={20 * 1000}
+          onRequestClose={this.handleClose}
+        />
+      );
+    }
     if (preflight.status !== 'complete') {
       return null;
     }

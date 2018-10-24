@@ -128,6 +128,23 @@ const CtaButton = ({
       // Require login first...
       return <LoginBtn label="Log In to Re-Run Pre-Install Validation" />;
     }
+    case 'failed': {
+      if (hasValidToken) {
+        // Prior preflight exists, but failed for unknown reason
+        return (
+          <Button
+            className={btnClasses}
+            label="Re-Run Pre-Install Validation"
+            variant="brand"
+            onClick={() => {
+              doStartPreflight(plan.id);
+            }}
+          />
+        );
+      }
+      // Require login first...
+      return <LoginBtn label="Log In to Re-Run Pre-Install Validation" />;
+    }
   }
   return null;
 };
