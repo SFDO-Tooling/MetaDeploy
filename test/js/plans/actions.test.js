@@ -62,7 +62,10 @@ describe('startPreflight', () => {
   describe('success', () => {
     test('dispatches PREFLIGHT_STARTED action', () => {
       const store = storeWithApi({});
-      fetchMock.postOnce(window.api_urls.plan_preflight(1), 202);
+      fetchMock.postOnce(window.api_urls.plan_preflight(1), {
+        status: 202,
+        sendAsJson: false,
+      });
       const started = {
         type: 'PREFLIGHT_REQUESTED',
         payload: 1,
