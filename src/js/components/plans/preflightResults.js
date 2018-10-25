@@ -54,7 +54,7 @@ export const PlanErrors = ({
               />
             </li>
           );
-        case 'warning':
+        case 'warn':
           return (
             <li key={idx}>
               <WarningIcon />
@@ -97,7 +97,7 @@ const PreflightResults = ({
               case 'error':
                 errorCount = errorCount + 1;
                 break;
-              case 'warning':
+              case 'warn':
                 warningCount = warningCount + 1;
                 break;
             }

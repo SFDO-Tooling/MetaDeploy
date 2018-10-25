@@ -57,7 +57,7 @@ class NameDataCell extends React.Component<
     const hasWarning =
       errors &&
       errors.length > 0 &&
-      errors.find(err => err.status === 'warning') !== undefined;
+      errors.find(err => err.status === 'warn') !== undefined;
     const classes = classNames(className, {
       'has-warning': hasWarning,
       'has-error': hasError,

@@ -21,7 +21,7 @@ export type Plan = {
 export type Plans = Array<Plan>;
 
 export type PreflightError = {
-  +status: 'warning' | 'error' | 'skipped',
+  +status: 'warn' | 'error' | 'skip' | 'optional',
   +message?: string,
 };
 type PreflightErrors = {
@@ -43,25 +43,22 @@ const reducer = (
   preflights: PreflightsState = {},
   action: PlansAction,
 ): PreflightsState => {
-  switch (action.type) {
-    case 'FETCH_PREFLIGHT_SUCCEEDED': {
-      const { plan, preflight } = action.payload;
-      return { ...preflights, [plan]: preflight };
-    }
-    case 'PREFLIGHT_STARTED': {
-      const plan = action.payload;
-      return { ...preflights, [plan]: { status: 'started' } };
-    }
-    case 'PREFLIGHT_COMPLETED': {
-      const preflight = action.payload;
-      const { plan } = preflight;
-      return { ...preflights, [plan]: preflight };
-    }
-    case 'PREFLIGHT_FAILED': {
-      const preflight = action.payload;
-      const { plan } = preflight;
-      return { ...preflights, [plan]: preflight };
-    }
+  if (action.type === 'FETCH_PREFLIGHT_SUCCEEDED') {
+    const { plan, preflight } = action.payload;
+    return { ...preflights, [plan]: preflight };
+  }
+  if (action.type === 'PREFLIGHT_STARTED') {
+    const plan = action.payload;
+    return { ...preflights, [plan]: { status: 'started' } };
+  }
+  if (
+    action.type === 'PREFLIGHT_COMPLETED' ||
+    action.type === 'PREFLIGHT_FAILED' ||
+    action.type === 'PREFLIGHT_INVALIDATED'
+  ) {
+    const preflight = action.payload;
+    const { plan } = preflight;
+    return { ...preflights, [plan]: preflight };
   }
   return preflights;
 };
