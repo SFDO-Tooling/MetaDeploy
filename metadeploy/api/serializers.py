@@ -123,6 +123,21 @@ class JobSerializer(serializers.ModelSerializer):
             'job_id': {'read_only': True},
         }
 
+    @staticmethod
+    def has_valid_preflight(plan, user):
+        return PreflightResult.objects.filter(
+            plan=plan,
+            user=user,
+            is_valid=True,
+            results={},
+            status=PreflightResult.Status.complete,
+        ).exists()
+
+    def validate(self, data):
+        if not self.has_valid_preflight(data['plan'], data['user']):
+            raise serializers.ValidationError("No valid preflight.")
+        return data
+
 
 class PreflightResultSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(
