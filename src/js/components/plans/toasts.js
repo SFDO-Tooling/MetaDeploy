@@ -45,7 +45,7 @@ class Toasts extends React.Component<Props, State> {
       return (
         <Toast
           labels={{
-            heading: ['Pre-install validation has completed with errors.'],
+            heading: ['Pre-install validation completed with errors.'],
           }}
           variant="error"
           duration={20 * 1000}
@@ -56,7 +56,7 @@ class Toasts extends React.Component<Props, State> {
     return (
       <Toast
         labels={{
-          heading: ['Pre-install validation has completed successfully.'],
+          heading: ['Pre-install validation completed successfully.'],
         }}
         variant="success"
         duration={20 * 1000}

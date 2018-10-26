@@ -121,7 +121,7 @@ const PreflightResults = ({
       <>
         <p className={errorCount > 0 ? 'slds-text-color_error' : ''}>
           {errorCount > 0 ? <ErrorIcon /> : <WarningIcon />}
-          Pre-install validation has completed with {msg}.
+          Pre-install validation found {msg}.
         </p>
         {errorCount > 0 ? (
           <p>
@@ -140,7 +140,7 @@ const PreflightResults = ({
   if (preflight.is_valid) {
     return (
       <p className="slds-text-color_success">
-        Pre-install validation has completed successfully.
+        Pre-install validation completed successfully.
       </p>
     );
   }

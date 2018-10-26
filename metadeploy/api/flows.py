@@ -22,7 +22,13 @@ class PreflightFlow(flows.BaseFlow):
             in self.step_return_values
             if self._emit_k_v_for_status_dict(status) is not None
         ])
-        self.preflight_result.results = results
+        self.preflight_result.results.update(results)
+
+    def _post_task_exception(self, task, e):
+        error_result = {
+            'plan': [{'status': 'error', 'message': str(e)}],
+        }
+        self.preflight_result.results.update(error_result)
 
     def _get_step_id(self, task_name):
         return self.preflight_result.plan.step_set.filter(
@@ -35,21 +41,30 @@ class PreflightFlow(flows.BaseFlow):
 
         if status['status_code'] == 'error':
             step_id = self._get_step_id(status['task_name'])
-            return (step_id, [{'status': 'error', 'message': status['msg']}])
+            return (
+                step_id,
+                [{'status': 'error', 'message': status.get('msg', '')}],
+            )
 
         if status['status_code'] == 'warn':
             step_id = self._get_step_id(status['task_name'])
-            return (step_id, [{'status': 'warn', 'message': status['msg']}])
+            return (
+                step_id,
+                [{'status': 'warn', 'message': status.get('msg', '')}],
+            )
 
         if status['status_code'] == 'skip':
             step_id = self._get_step_id(status['task_name'])
-            return (step_id, [{'status': 'skip', 'message': status['msg']}])
+            return (
+                step_id,
+                [{'status': 'skip', 'message': status.get('msg', '')}],
+            )
 
         if status['status_code'] == 'optional':
             step_id = self._get_step_id(status['task_name'])
             return (
                 step_id,
-                [{'status': 'optional', 'message': status['msg']}],
+                [{'status': 'optional', 'message': status.get('msg', '')}],
             )
 
     # def _pre_flow(self, *args, **kwargs):
