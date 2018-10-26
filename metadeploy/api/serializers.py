@@ -132,7 +132,7 @@ class PreflightResultSerializer(serializers.ModelSerializer):
 
     def get_has_errors(self, obj):
         return (
-            obj.status == PreflightResult.Status.complete
+            obj.status != PreflightResult.Status.started
             and obj.results != {}
         )
 

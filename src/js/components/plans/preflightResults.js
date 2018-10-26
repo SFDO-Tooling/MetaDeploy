@@ -73,20 +73,11 @@ const PreflightResults = ({
 }: {
   preflight: PreflightType,
 }): React.Node => {
-  if (preflight.status === 'failed') {
-    return (
-      <p className="slds-text-color_error">
-        <ErrorIcon />
-        Pre-install validation has failed. Please try again.
-      </p>
-    );
-  }
-
-  if (preflight.status !== 'complete') {
+  if (preflight.status !== 'complete' && preflight.status !== 'failed') {
     return null;
   }
 
-  if (preflight.has_errors) {
+  if (preflight.has_errors || preflight.status === 'failed') {
     let errorCount = 0;
     let warningCount = 0;
     if (preflight.results) {
@@ -117,13 +108,14 @@ const PreflightResults = ({
     } else if (warningCount > 0) {
       msg = warningMsg;
     }
+    const isError = errorCount > 0 || preflight.status === 'failed';
     return (
       <>
-        <p className={errorCount > 0 ? 'slds-text-color_error' : ''}>
-          {errorCount > 0 ? <ErrorIcon /> : <WarningIcon />}
+        <p className={isError ? 'slds-text-color_error' : ''}>
+          {isError ? <ErrorIcon /> : <WarningIcon />}
           Pre-install validation found {msg}.
         </p>
-        {errorCount > 0 ? (
+        {isError ? (
           <p>
             After resolving all errors, run the pre-install validation again.
           </p>

@@ -241,16 +241,14 @@ class Command(BaseCommand):
         )
         self.add_steps(plan3)
 
-        self.create_plan(
+        plan4 = self.create_plan(
             version1,
-            title='Account Record Types',
+            title='Plan-Level Failing Preflight',
             tier='additional',
+            preflight_flow_name='error_preflight',
+            flow_name='ci_test_concurrency',
         )
-        self.create_plan(
-            version1,
-            title='Mobile Configuration',
-            tier='additional',
-        )
+        self.add_steps(plan4)
 
         product2 = self.create_product(
             title=f'Red Salesforce Product',
