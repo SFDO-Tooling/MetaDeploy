@@ -32,7 +32,7 @@ class TestPreflightFlow:
             {'task_name': 'name_2', 'status_code': 'ok'},
             {'task_name': 'name_3', 'status_code': 'warn', 'msg': 'warn 1'},
             {'task_name': 'name_4', 'status_code': 'optional'},
-            {'task_name': 'name_5', 'status_code': 'skip'},
+            {'task_name': 'name_5', 'status_code': 'skip', 'msg': 'skip 1'},
         ]
 
         preflight_flow._post_flow()
@@ -40,6 +40,6 @@ class TestPreflightFlow:
         assert pfr.results == {
             step1.id: [{'status': 'error', 'message': 'error 1'}],
             step3.id: [{'status': 'warn', 'message': 'warn 1'}],
-            step4.id: [{'status': 'optional'}],
-            step5.id: [{'status': 'skip'}],
+            step4.id: [{'status': 'optional', 'message': ''}],
+            step5.id: [{'status': 'skip', 'message': 'skip 1'}],
         }

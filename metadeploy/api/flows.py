@@ -35,21 +35,30 @@ class PreflightFlow(flows.BaseFlow):
 
         if status['status_code'] == 'error':
             step_id = self._get_step_id(status['task_name'])
-            return (step_id, [{'status': 'error', 'message': status['msg']}])
+            return (
+                step_id,
+                [{'status': 'error', 'message': status.get('msg', '')}],
+            )
 
         if status['status_code'] == 'warn':
             step_id = self._get_step_id(status['task_name'])
-            return (step_id, [{'status': 'warn', 'message': status['msg']}])
+            return (
+                step_id,
+                [{'status': 'warn', 'message': status.get('msg', '')}],
+            )
 
         if status['status_code'] == 'skip':
             step_id = self._get_step_id(status['task_name'])
-            return (step_id, [{'status': 'skip', 'message': status['msg']}])
+            return (
+                step_id,
+                [{'status': 'skip', 'message': status.get('msg', '')}],
+            )
 
         if status['status_code'] == 'optional':
             step_id = self._get_step_id(status['task_name'])
             return (
                 step_id,
-                [{'status': 'optional', 'message': status['msg']}],
+                [{'status': 'optional', 'message': status.get('msg', '')}],
             )
 
     # def _pre_flow(self, *args, **kwargs):
