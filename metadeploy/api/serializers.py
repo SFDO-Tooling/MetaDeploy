@@ -1,3 +1,5 @@
+from itertools import chain
+
 from rest_framework import serializers
 
 from .models import (
@@ -125,16 +127,22 @@ class JobSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def has_valid_preflight(plan, user):
-        return PreflightResult.objects.filter(
+        potential_preflights = PreflightResult.objects.filter(
             plan=plan,
             user=user,
             is_valid=True,
-            results={},
             status=PreflightResult.Status.complete,
-        ).exists()
+        ).values_list("results", flat=True)
+        preflights_with_errors = [
+            val
+            for val
+            in chain(*chain(*[pre.values() for pre in potential_preflights]))
+            if val.get("status", None) == "error"
+        ]
+        return not any(preflights_with_errors) and potential_preflights
 
     def validate(self, data):
-        if not self.has_valid_preflight(data['plan'], data['user']):
+        if not self.has_valid_preflight(data["plan"], data["user"]):
             raise serializers.ValidationError("No valid preflight.")
         return data
 

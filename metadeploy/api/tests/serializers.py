@@ -45,19 +45,28 @@ def test_preflight_has_errors(
 @pytest.mark.django_db
 class TestJob:
     def test_create_good(
-            self, rf, user_factory, plan_factory, preflight_result_factory):
+            self, rf, user_factory, plan_factory, step_factory,
+            preflight_result_factory):
         plan = plan_factory()
         user = user_factory()
+        step1 = step_factory(plan=plan)
+        step2 = step_factory(plan=plan)
+        step3 = step_factory(plan=plan)
         request = rf.get('/')
         request.user = user
         preflight_result_factory(
             plan=plan,
             user=user,
             status=PreflightResult.Status.complete,
+            results={
+                step1.id: [{'status': 'warn', 'message': ''}],
+                step2.id: [{'status': 'skip', 'message': ''}],
+                step3.id: [{'status': 'optional', 'message': ''}],
+            },
         )
         data = {
             'plan': plan.id,
-            'steps': [],
+            'steps': [step1.id, step2.id, step3.id],
         }
         serializer = JobSerializer(data=data, context=dict(request=request))
 
