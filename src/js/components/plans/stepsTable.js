@@ -42,38 +42,43 @@ class NameDataCell extends React.Component<
     if (!item) {
       return null;
     }
-    const name = item.name;
+    const title = item.name;
+    let name = item.name;
     const description = item.description;
     const id = item.id.toString();
-    const errors =
-      preflight &&
-      preflight.has_errors &&
-      preflight.results &&
-      preflight.results[id];
+    const result = preflight && preflight.results && preflight.results[id];
     const hasError =
-      errors &&
-      errors.length > 0 &&
-      errors.find(err => err.status === 'error') !== undefined;
+      result &&
+      result.length > 0 &&
+      result.find(err => err.status === 'error') !== undefined;
     const hasWarning =
-      errors &&
-      errors.length > 0 &&
-      errors.find(err => err.status === 'warn') !== undefined;
+      result &&
+      result.length > 0 &&
+      result.find(err => err.status === 'warn') !== undefined;
+    const optional =
+      result &&
+      result.length > 0 &&
+      result.find(res => res.status === 'optional');
+    const optionalMsg = optional && optional.message;
+    if (optionalMsg) {
+      name = `${name} — ${optionalMsg}`;
+    }
     const classes = classNames(className, {
       'has-warning': hasWarning,
       'has-error': hasError,
     });
     const errorList =
-      errors && (hasError || hasWarning) ? (
-        <PlanErrors errorList={errors} />
+      result && (hasError || hasWarning) ? (
+        <PlanErrors errorList={result} />
       ) : null;
     return (
-      <DataTableCell title={name} className={classes} {...otherProps}>
+      <DataTableCell title={title} className={classes} {...otherProps}>
         {description ? (
           <>
             <Accordion className="slds-cell-wrap">
               <AccordionPanel
                 id={id}
-                title={name}
+                title={title}
                 summary={<p className="slds-cell-wrap">{name}</p>}
                 expanded={this.state.expanded}
                 onTogglePanel={() => {
@@ -110,8 +115,11 @@ class NameDataCell extends React.Component<
 NameDataCell.displayName = DataTableCell.displayName;
 
 const KindDataCell = (props: DataCellProps): React.Node => {
-  const value = props.item && props.item.kind;
-  const iconName = props.item && props.item.kind_icon;
+  if (!props.item) {
+    return null;
+  }
+  const value = props.item.kind;
+  const iconName = props.item.kind_icon;
   return (
     <DataTableCell title={value} {...props}>
       {iconName ? (
@@ -132,7 +140,17 @@ const KindDataCell = (props: DataCellProps): React.Node => {
 KindDataCell.displayName = DataTableCell.displayName;
 
 const RequiredDataCell = (props: DataCellProps): React.Node => {
-  const required = props.item && props.item.is_required;
+  const { preflight, item } = props;
+  if (!item) {
+    return null;
+  }
+  const id = item.id.toString();
+  const result = preflight && preflight.results && preflight.results[id];
+  const optional =
+    result &&
+    result.length > 0 &&
+    result.find(res => res.status === 'optional');
+  const required = item.is_required && !optional;
   const classes = classNames(
     'slds-align-middle',
     'slds-badge',
@@ -149,19 +167,38 @@ const RequiredDataCell = (props: DataCellProps): React.Node => {
 RequiredDataCell.displayName = DataTableCell.displayName;
 
 const InstallDataCell = (props: DataCellProps): React.Node => {
-  const required = props.item && props.item.is_required;
-  const recommended = !required && props.item && props.item.is_recommended;
+  const { preflight, item } = props;
+  if (!item) {
+    return null;
+  }
   const hasValidToken = props.user && props.user.valid_token_for !== null;
   const hasReadyPreflight =
-    props.preflight && props.preflight.is_valid && !props.preflight.has_errors;
-  const disabled = required || !hasValidToken || !hasReadyPreflight;
+    preflight && preflight.is_valid && !preflight.has_errors;
+  const id = item.id.toString();
+  const result = preflight && preflight.results && preflight.results[id];
+  const skipped =
+    result && result.length > 0 && result.find(res => res.status === 'skip');
+  const optional =
+    result &&
+    result.length > 0 &&
+    result.find(res => res.status === 'optional');
+  const required = item.is_required && !optional;
+  const recommended = !required && item.is_recommended;
+  const disabled =
+    Boolean(skipped) || required || !hasValidToken || !hasReadyPreflight;
+  let label = '';
+  if (skipped) {
+    label = skipped.message || 'skipped';
+  } else if (recommended) {
+    label = 'recommended';
+  }
   return (
     <DataTableCell {...props}>
       <Checkbox
-        checked={required || recommended}
+        checked={!skipped && (required || recommended)}
         disabled={disabled}
         className="slds-p-vertical_x-small"
-        labels={{ label: recommended ? 'recommended' : '' }}
+        labels={{ label }}
       />
     </DataTableCell>
   );
@@ -218,7 +255,7 @@ const StepsTable = ({
         <KindDataCell />
       </DataTableColumn>
       <DataTableColumn key="is_required" property="is_required">
-        <RequiredDataCell />
+        <RequiredDataCell preflight={preflight} />
       </DataTableColumn>
       <DataTableColumn
         key="is_recommended"
