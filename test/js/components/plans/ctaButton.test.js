@@ -93,7 +93,7 @@ describe('<CtaButton />', () => {
     test('renders progress btn', () => {
       const { getByText } = setup({ preflight: { status: 'started' } });
 
-      expect(getByText('Pre-Install Validation In Progress')).toBeVisible();
+      expect(getByText('Pre-Install Validation In Progress...')).toBeVisible();
     });
   });
 

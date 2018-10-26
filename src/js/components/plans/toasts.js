@@ -24,44 +24,35 @@ class Toasts extends React.Component<Props, State> {
     this.setState({ isOpen: false });
   };
 
-  getToast(): React.Node {
+  getToastComponent(label: string, variant: string = 'error'): React.Node {
+    return (
+      <Toast
+        labels={{
+          heading: [label],
+        }}
+        variant={variant}
+        duration={20 * 1000}
+        onRequestClose={this.handleClose}
+      />
+    );
+  }
+
+  getToast(): React.Node | null {
     const { preflight } = this.props;
     if (preflight.status === 'failed') {
-      return (
-        <Toast
-          labels={{
-            heading: ['Pre-install validation has failed.'],
-          }}
-          variant="error"
-          duration={20 * 1000}
-          onRequestClose={this.handleClose}
-        />
-      );
+      return this.getToastComponent('Pre-install validation has failed.');
     }
     if (preflight.status !== 'complete') {
       return null;
     }
     if (preflight.has_errors) {
-      return (
-        <Toast
-          labels={{
-            heading: ['Pre-install validation completed with errors.'],
-          }}
-          variant="error"
-          duration={20 * 1000}
-          onRequestClose={this.handleClose}
-        />
+      return this.getToastComponent(
+        'Pre-install validation completed with errors.',
       );
     }
-    return (
-      <Toast
-        labels={{
-          heading: ['Pre-install validation completed successfully.'],
-        }}
-        variant="success"
-        duration={20 * 1000}
-        onRequestClose={this.handleClose}
-      />
+    return this.getToastComponent(
+      'Pre-install validation completed successfully.',
+      'success',
     );
   }
 

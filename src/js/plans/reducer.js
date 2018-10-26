@@ -25,7 +25,7 @@ export type PreflightError = {
   +message?: string,
 };
 type PreflightErrors = {
-  +plan_errors?: Array<PreflightError>,
+  +plan?: Array<PreflightError>,
   [string]: Array<PreflightError>,
 };
 export type Preflight = {

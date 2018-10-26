@@ -47,19 +47,16 @@ class NameDataCell extends React.Component<
     const description = item.description;
     const id = item.id.toString();
     const result = preflight && preflight.results && preflight.results[id];
-    const hasError =
-      result &&
-      result.length > 0 &&
-      result.find(err => err.status === 'error') !== undefined;
-    const hasWarning =
-      result &&
-      result.length > 0 &&
-      result.find(err => err.status === 'warn') !== undefined;
-    const optional =
-      result &&
-      result.length > 0 &&
-      result.find(res => res.status === 'optional');
-    const optionalMsg = optional && optional.message;
+    let hasError = false;
+    let hasWarning = false;
+    let optional;
+    let optionalMsg = '';
+    if (result && result.length > 0) {
+      hasError = result.find(err => err.status === 'error') !== undefined;
+      hasWarning = result.find(err => err.status === 'warn') !== undefined;
+      optional = result.find(res => res.status === 'optional');
+      optionalMsg = optional && optional.message;
+    }
     if (optionalMsg) {
       name = `${name} — ${optionalMsg}`;
     }
@@ -176,12 +173,11 @@ const InstallDataCell = (props: DataCellProps): React.Node => {
     preflight && preflight.is_valid && !preflight.has_errors;
   const id = item.id.toString();
   const result = preflight && preflight.results && preflight.results[id];
-  const skipped =
-    result && result.length > 0 && result.find(res => res.status === 'skip');
-  const optional =
-    result &&
-    result.length > 0 &&
-    result.find(res => res.status === 'optional');
+  let skipped, optional;
+  if (result && result.length > 0) {
+    skipped = result.find(res => res.status === 'skip');
+    optional = result.find(res => res.status === 'optional');
+  }
   const required = item.is_required && !optional;
   const recommended = !required && item.is_recommended;
   const disabled =

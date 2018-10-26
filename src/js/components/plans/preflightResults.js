@@ -129,9 +129,9 @@ const PreflightResults = ({
           </p>
         ) : null}
         {preflight.results &&
-        preflight.results.plan_errors &&
-        preflight.results.plan_errors.length ? (
-          <PlanErrors errorList={preflight.results.plan_errors} />
+        preflight.results.plan &&
+        preflight.results.plan.length ? (
+          <PlanErrors errorList={preflight.results.plan} />
         ) : null}
       </>
     );
