@@ -30,6 +30,10 @@ export type PreflightFailed = {
   type: 'PREFLIGHT_FAILED',
   payload: Preflight,
 };
+export type PreflightInvalid = {
+  type: 'PREFLIGHT_INVALIDATED',
+  payload: Preflight,
+};
 export type PlansAction =
   | FetchPreflightStarted
   | FetchPreflightSucceeded
@@ -38,7 +42,8 @@ export type PlansAction =
   | PreflightStarted
   | PreflightRejected
   | PreflightCompleted
-  | PreflightFailed;
+  | PreflightFailed
+  | PreflightInvalid;
 
 export const fetchPreflight = (planId: number): ThunkAction => (
   dispatch,
@@ -81,5 +86,10 @@ export const completePreflight = (payload: Preflight): PreflightCompleted => ({
 
 export const failPreflight = (payload: Preflight): PreflightFailed => ({
   type: 'PREFLIGHT_FAILED',
+  payload,
+});
+
+export const invalidatePreflight = (payload: Preflight): PreflightInvalid => ({
+  type: 'PREFLIGHT_INVALIDATED',
   payload,
 });

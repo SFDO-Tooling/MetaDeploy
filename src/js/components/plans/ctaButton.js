@@ -97,6 +97,7 @@ const CtaButton = ({
             <LabelWithSpinner label="Pre-Install Validation In Progress" />
           }
           variant="brand"
+          disabled
         />
       );
     }

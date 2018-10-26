@@ -43,11 +43,14 @@ class PreflightFlow(flows.BaseFlow):
 
         if status['status_code'] == 'skip':
             step_id = self._get_step_id(status['task_name'])
-            return (step_id, [{'status': 'skip'}])
+            return (step_id, [{'status': 'skip', 'message': status['msg']}])
 
         if status['status_code'] == 'optional':
             step_id = self._get_step_id(status['task_name'])
-            return (step_id, [{'status': 'optional'}])
+            return (
+                step_id,
+                [{'status': 'optional', 'message': status['msg']}],
+            )
 
     # def _pre_flow(self, *args, **kwargs):
     #     pass

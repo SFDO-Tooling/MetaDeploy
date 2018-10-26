@@ -120,6 +120,7 @@ class Command(BaseCommand):
             order_key=4,
         )
         self.create_step(
+            task_name='update_admin_profile',
             plan=plan,
             name='Account Record Types',
             kind='managed',
@@ -127,6 +128,7 @@ class Command(BaseCommand):
             order_key=5,
         )
         self.create_step(
+            task_name='install_managed',
             plan=plan,
             name='Nonprofit Success Pack',
             kind='managed',
@@ -134,6 +136,7 @@ class Command(BaseCommand):
             order_key=6,
         )
         self.create_step(
+            task_name='deploy_pre',
             plan=plan,
             name='NPSP Config for Salesforce1',
             description='This is a step description.',
@@ -142,6 +145,7 @@ class Command(BaseCommand):
             order_key=7,
         )
         self.create_step(
+            task_name='deploy_post',
             plan=plan,
             name='Contacts and Organizations',
             description='This is a step description.',
@@ -155,7 +159,7 @@ class Command(BaseCommand):
             description='This is a step description.',
             kind='managed',
             is_required=False,
-            order_key=8,
+            order_key=9,
         )
 
     def create_enqueuer_job(self):
@@ -227,6 +231,15 @@ class Command(BaseCommand):
             flow_name='ci_test_concurrency',
         )
         self.add_steps(plan2)
+
+        plan3 = self.create_plan(
+            version1,
+            title='Messy Preflight',
+            tier='additional',
+            preflight_flow_name='messy_preflight',
+            flow_name='ci_test_concurrency',
+        )
+        self.add_steps(plan3)
 
         self.create_plan(
             version1,
