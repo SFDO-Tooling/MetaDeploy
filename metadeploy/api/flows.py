@@ -22,7 +22,13 @@ class PreflightFlow(flows.BaseFlow):
             in self.step_return_values
             if self._emit_k_v_for_status_dict(status) is not None
         ])
-        self.preflight_result.results = results
+        self.preflight_result.results.update(results)
+
+    def _post_task_exception(self, task, e):
+        error_result = {
+            'plan': [{'status': 'error', 'message': str(e)}],
+        }
+        self.preflight_result.results.update(error_result)
 
     def _get_step_id(self, task_name):
         return self.preflight_result.plan.step_set.filter(

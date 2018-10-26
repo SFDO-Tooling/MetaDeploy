@@ -43,3 +43,21 @@ class TestPreflightFlow:
             step4.id: [{'status': 'optional', 'message': ''}],
             step5.id: [{'status': 'skip', 'message': 'skip 1'}],
         }
+
+    @pytest.mark.django_db
+    def test_post_task_exception(
+            self, mocker, user_factory, plan_factory,
+            preflight_result_factory):
+        init = mocker.patch('cumulusci.core.flows.BaseFlow.__init__')
+        init.return_value = None
+        user = user_factory()
+        plan = plan_factory()
+        pfr = preflight_result_factory(user=user, plan=plan)
+        preflight_flow = PreflightFlow(preflight_result=pfr)
+
+        exc = ValueError('A value error.')
+        preflight_flow._post_task_exception(None, exc)
+
+        assert pfr.results == {
+            'plan': [{'status': 'error', 'message': 'A value error.'}],
+        }

@@ -66,8 +66,9 @@ def extract_user_and_repo(gh_url):
 def report_errors_to(user):
     try:
         yield
-    except Exception:
+    except Exception as e:
         sync_report_error(user)
+        logger.error(e)
         raise
 
 
@@ -263,6 +264,7 @@ def preflight(user, plan):
         )
         final_status = PreflightResult.Status.complete
     except Exception:
+        logger.error(f"Preflight {preflight_result.id} failed.")
         final_status = PreflightResult.Status.failed
     preflight_result.status = final_status
     preflight_result.save()
