@@ -18,10 +18,4 @@
   border-radius: 0;
   background: $color-background-reminder;
   box-shadow: none;
-
-  // @@@ Ideally this would be applied consistently to page-header components...
-  // https://github.com/salesforce/design-system-react/issues/1583
-  .slds-media {
-    align-items: center;
-  }
 }
