@@ -48,14 +48,14 @@ describe('<StepsTable />', () => {
   const setup = options => {
     const defaults = { plan: defaultPlan, user: null };
     const opts = { ...defaults, ...options };
-    const { getByText, container } = render(
+    const { getByText, queryByText, container } = render(
       <StepsTable
         plan={opts.plan}
         user={opts.user}
         preflight={opts.preflight}
       />,
     );
-    return { getByText, container };
+    return { getByText, queryByText, container };
   };
 
   test('renders steps', () => {
@@ -65,6 +65,69 @@ describe('<StepsTable />', () => {
     expect(getByText('Step 2')).toBeVisible();
     expect(getByText('Step 3')).toBeVisible();
     expect(getByText('Step 4')).toBeVisible();
+  });
+
+  describe('<NameDataCell>', () => {
+    describe('existing preflight', () => {
+      test('displays optional message', () => {
+        const { getByText } = setup({
+          preflight: {
+            status: 'complete',
+            results: {
+              1: [{ status: 'optional', message: 'This became optional.' }],
+            },
+          },
+        });
+
+        expect(getByText('Step 1 — This became optional.')).toBeVisible();
+      });
+
+      test('displays error/warning messages', () => {
+        const { getByText } = setup({
+          preflight: {
+            status: 'complete',
+            results: {
+              1: [
+                { status: 'error', message: 'This error.' },
+                { status: 'warn', message: 'This warning.' },
+              ],
+              2: [
+                { status: 'error', message: 'This other error.' },
+                { status: 'warn', message: 'This other warning.' },
+              ],
+            },
+          },
+        });
+
+        expect(getByText('This error.')).toBeVisible();
+        expect(getByText('This warning.')).toBeVisible();
+        expect(getByText('This other error.')).toBeVisible();
+        expect(getByText('This other warning.')).toBeVisible();
+      });
+    });
+
+    test('click expands accordion', () => {
+      const { getByText } = setup();
+      fireEvent.click(getByText('Step 1'));
+
+      expect(getByText('This is a step description.')).toBeVisible();
+    });
+  });
+
+  describe('<RequiredDataCell>', () => {
+    test('becomes optional if preflight result specifies', () => {
+      const { queryByText } = setup({
+        preflight: {
+          status: 'complete',
+          results: {
+            1: [{ status: 'optional' }],
+            2: [{ status: 'optional' }],
+          },
+        },
+      });
+
+      expect(queryByText('Required')).toBeNull();
+    });
   });
 
   describe('<InstallDataCell>', () => {
@@ -102,14 +165,25 @@ describe('<StepsTable />', () => {
         container.querySelectorAll('input[type="checkbox"][disabled]'),
       ).toHaveLength(2);
     });
-  });
 
-  describe('<NameDataCell> click', () => {
-    test('expands accordion', () => {
-      const { getByText } = setup();
-      fireEvent.click(getByText('Step 1'));
+    test('disabled if skipped, enabled if optional', () => {
+      const { container, getByText } = setup({
+        user: { valid_token_for: 'foo' },
+        preflight: {
+          is_valid: true,
+          has_errors: false,
+          results: {
+            1: [{ status: 'optional' }],
+            3: [{ status: 'skip', message: 'This was skipped.' }],
+            4: [{ status: 'skip' }],
+          },
+        },
+      });
 
-      expect(getByText('This is a step description.')).toBeVisible();
+      expect(
+        container.querySelectorAll('input[type="checkbox"][disabled]'),
+      ).toHaveLength(3);
+      expect(getByText('This was skipped.')).toBeVisible();
     });
   });
 });

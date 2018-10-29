@@ -138,6 +138,29 @@ describe('<CtaButton />', () => {
     });
   });
 
+  describe('failed preflight', () => {
+    test('renders re-run-preflight btn', () => {
+      const { getByText } = setup({
+        preflight: { status: 'failed', is_valid: true, has_errors: false },
+      });
+
+      expect(getByText('Re-Run Pre-Install Validation')).toBeVisible();
+    });
+
+    describe('no valid token', () => {
+      test('renders login btn', () => {
+        const { getByText } = setup({
+          preflight: { status: 'failed', is_valid: true, has_errors: false },
+          user: { valid_token_for: null },
+        });
+
+        expect(
+          getByText('Log In to Re-Run Pre-Install Validation'),
+        ).toBeVisible();
+      });
+    });
+  });
+
   describe('unknown preflight status', () => {
     test('renders nothing', () => {
       const { container } = setup({ preflight: { status: 'foo' } });

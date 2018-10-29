@@ -39,12 +39,11 @@ class NameDataCell extends React.Component<
 
   render(): React.Node {
     const { preflight, item, className, ...otherProps } = this.props;
+    /* istanbul ignore if */
     if (!item) {
       return null;
     }
-    const title = item.name;
-    let name = item.name;
-    const description = item.description;
+    const { name, description } = item;
     const id = item.id.toString();
     const result = preflight && preflight.results && preflight.results[id];
     let hasError = false;
@@ -57,8 +56,9 @@ class NameDataCell extends React.Component<
       optional = result.find(res => res.status === 'optional');
       optionalMsg = optional && optional.message;
     }
+    let display = name;
     if (optionalMsg) {
-      name = `${name} — ${optionalMsg}`;
+      display = `${name} — ${optionalMsg}`;
     }
     const classes = classNames(className, {
       'has-warning': hasWarning,
@@ -69,14 +69,14 @@ class NameDataCell extends React.Component<
         <PlanErrors errorList={result} />
       ) : null;
     return (
-      <DataTableCell title={title} className={classes} {...otherProps}>
+      <DataTableCell title={name} className={classes} {...otherProps}>
         {description ? (
           <>
             <Accordion className="slds-cell-wrap">
               <AccordionPanel
                 id={id}
-                title={title}
-                summary={<p className="slds-cell-wrap">{name}</p>}
+                title={name}
+                summary={<p className="slds-cell-wrap">{display}</p>}
                 expanded={this.state.expanded}
                 onTogglePanel={() => {
                   this.setState({ expanded: !this.state.expanded });
@@ -101,7 +101,7 @@ class NameDataCell extends React.Component<
               slds-p-vertical_small
               slds-cell-wrap"
           >
-            <p className={errorList ? 'slds-p-bottom_small' : ''}>{name}</p>
+            <p className={errorList ? 'slds-p-bottom_small' : ''}>{display}</p>
             {errorList}
           </div>
         )}
@@ -112,6 +112,7 @@ class NameDataCell extends React.Component<
 NameDataCell.displayName = DataTableCell.displayName;
 
 const KindDataCell = (props: DataCellProps): React.Node => {
+  /* istanbul ignore if */
   if (!props.item) {
     return null;
   }
@@ -138,6 +139,7 @@ KindDataCell.displayName = DataTableCell.displayName;
 
 const RequiredDataCell = (props: DataCellProps): React.Node => {
   const { preflight, item } = props;
+  /* istanbul ignore if */
   if (!item) {
     return null;
   }
@@ -165,6 +167,7 @@ RequiredDataCell.displayName = DataTableCell.displayName;
 
 const InstallDataCell = (props: DataCellProps): React.Node => {
   const { preflight, item } = props;
+  /* istanbul ignore if */
   if (!item) {
     return null;
   }

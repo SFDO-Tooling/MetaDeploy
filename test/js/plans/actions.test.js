@@ -112,3 +112,21 @@ describe('completePreflight', () => {
     expect(actions.completePreflight(payload)).toEqual(expected);
   });
 });
+
+describe('failPreflight', () => {
+  test('returns PreflightFailed', () => {
+    const payload = { foo: 'bar' };
+    const expected = { type: 'PREFLIGHT_FAILED', payload };
+
+    expect(actions.failPreflight(payload)).toEqual(expected);
+  });
+});
+
+describe('invalidatePreflight', () => {
+  test('returns PreflightInvalid', () => {
+    const payload = { foo: 'bar' };
+    const expected = { type: 'PREFLIGHT_INVALIDATED', payload };
+
+    expect(actions.invalidatePreflight(payload)).toEqual(expected);
+  });
+});
