@@ -17,7 +17,7 @@ from asgiref.sync import async_to_sync
 from colorfield.fields import ColorField
 from model_utils import Choices, FieldTracker
 
-from .push import user_token_expired, preflight_completed
+from .push import user_token_expired, preflight_completed, notify_post_task
 
 
 VERSION_STRING = r'^[a-zA-Z0-9._+-]+$'
@@ -363,15 +363,25 @@ class Step(models.Model):
 
 
 class Job(models.Model):
+    tracker = FieldTracker(fields=("completed_steps",))
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
     )
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
     steps = models.ManyToManyField(Step)
+    completed_steps = JSONField(default=list, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     enqueued_at = models.DateTimeField(null=True)
     job_id = models.UUIDField(null=True)
+
+    def save(self, *args, **kwargs):
+        ret = super().save(*args, **kwargs)
+        has_changed = self.tracker.has_changed("completed_steps")
+        if has_changed:
+            async_to_sync(notify_post_task)(self)
+        return ret
 
 
 class PreflightResult(models.Model):

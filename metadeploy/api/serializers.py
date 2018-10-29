@@ -113,6 +113,7 @@ class JobSerializer(serializers.ModelSerializer):
             'user',
             'plan',
             'steps',
+            'completed_steps',
             'created_at',
             'enqueued_at',
             'job_id',
@@ -120,6 +121,7 @@ class JobSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'created_at': {'read_only': True},
             'enqueued_at': {'read_only': True},
+            'completed_steps': {'read_only': True},
             'job_id': {'read_only': True},
         }
 

@@ -1,8 +1,47 @@
 import pytest
 
-from unittest.mock import sentinel
+from unittest.mock import sentinel, MagicMock
 
-from ..flows import PreflightFlow
+from ..flows import BasicFlow, PreflightFlow
+
+
+class TestBasicFlow:
+    def test_init(self, mocker):
+        init = mocker.patch('cumulusci.core.flows.BaseFlow.__init__')
+        init.return_value = None
+        flow = BasicFlow(job=sentinel.job)
+        assert flow.job == sentinel.job
+
+    @pytest.mark.django_db
+    def test_post_task(
+            self, mocker, user_factory, plan_factory, step_factory,
+            job_factory):
+        init = mocker.patch('cumulusci.core.flows.BaseFlow.__init__')
+        init.return_value = None
+        user = user_factory()
+        plan = plan_factory()
+        steps = [
+            step_factory(plan=plan, task_name=f'task_{i}')
+            for i
+            in range(3)
+        ]
+
+        job = job_factory(user=user, plan=plan, steps=steps)
+
+        flow = BasicFlow(job=job)
+
+        tasks = [MagicMock() for _ in range(3)]
+        for i, task in enumerate(tasks):
+            task.name = f'task_{i}'
+
+        for task in tasks:
+            flow._post_task(task)
+
+        assert job.completed_steps == [
+            'task_0',
+            'task_1',
+            'task_2',
+        ]
 
 
 class TestPreflightFlow:
