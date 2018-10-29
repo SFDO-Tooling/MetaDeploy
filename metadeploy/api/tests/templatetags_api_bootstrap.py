@@ -17,5 +17,6 @@ def test_serialize(user_factory):
         'username': 'template_tags@example.com',
         'email': 'template_tags@example.com',
         'valid_token_for': 'https://example.com',
+        'is_staff': False,
     }))
     assert actual == expected

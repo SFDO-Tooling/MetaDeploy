@@ -24,6 +24,16 @@ class FullUserSerializer(serializers.ModelSerializer):
             'username',
             'email',
             'valid_token_for',
+            'is_staff',
+        )
+
+
+class LimitedUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            'is_staff',
         )
 
 
@@ -108,11 +118,16 @@ class JobSerializer(serializers.ModelSerializer):
         queryset=Step.objects.all(),
         many=True,
     )
+    creator = LimitedUserSerializer(
+        read_only=True,
+        source='user',
+    )
 
     class Meta:
         model = Job
         fields = (
             'user',
+            'creator',
             'plan',
             'steps',
             'created_at',
