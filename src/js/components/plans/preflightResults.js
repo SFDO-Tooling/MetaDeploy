@@ -3,6 +3,8 @@
 import * as React from 'react';
 import Icon from '@salesforce/design-system-react/components/icon';
 
+import { CONSTANTS } from 'plans/reducer';
+
 import type {
   Preflight as PreflightType,
   PreflightError as PreflightErrorType,
@@ -32,7 +34,8 @@ const WarningIcon = (): React.Node => (
   />
 );
 
-export const PlanErrors = ({
+// List of preflight "error" and "warning" messages
+export const ErrorsList = ({
   errorList,
 }: {
   errorList: Array<PreflightErrorType>,
@@ -43,7 +46,7 @@ export const PlanErrors = ({
         return null;
       }
       switch (err.status) {
-        case 'error':
+        case CONSTANTS.RESULT_STATUS.ERROR:
           return (
             <li key={idx}>
               <ErrorIcon />
@@ -54,7 +57,7 @@ export const PlanErrors = ({
               />
             </li>
           );
-        case 'warn':
+        case CONSTANTS.RESULT_STATUS.WARN:
           return (
             <li key={idx}>
               <WarningIcon />
@@ -73,7 +76,10 @@ const PreflightResults = ({
 }: {
   preflight: PreflightType,
 }): React.Node => {
-  if (preflight.status !== 'complete' && preflight.status !== 'failed') {
+  if (
+    preflight.status !== CONSTANTS.STATUS.COMPLETE &&
+    preflight.status !== CONSTANTS.STATUS.FAILED
+  ) {
     return null;
   }
 
@@ -81,7 +87,12 @@ const PreflightResults = ({
     preflight.error_count !== undefined && preflight.error_count > 0;
   const hasWarnings =
     preflight.warning_count !== undefined && preflight.warning_count > 0;
-  if (hasErrors || hasWarnings || preflight.status === 'failed') {
+  if (
+    hasErrors ||
+    hasWarnings ||
+    preflight.status === CONSTANTS.STATUS.FAILED
+  ) {
+    // Show errors/warnings
     const errorCount = preflight.error_count || 0;
     const warningCount = preflight.warning_count || 0;
     let msg = 'errors';
@@ -96,29 +107,28 @@ const PreflightResults = ({
     } else if (warningCount > 0) {
       msg = warningMsg;
     }
-    const isError = errorCount > 0 || preflight.status === 'failed';
+    const planErrors = preflight.results && preflight.results.plan;
+    const failed =
+      errorCount > 0 || preflight.status === CONSTANTS.STATUS.FAILED;
     return (
       <>
-        <p className={isError ? 'slds-text-color_error' : ''}>
-          {isError ? <ErrorIcon /> : <WarningIcon />}
-          {isError || preflight.is_valid
+        <p className={failed ? 'slds-text-color_error' : ''}>
+          {failed ? <ErrorIcon /> : <WarningIcon />}
+          {failed || preflight.is_valid
             ? `Pre-install validation found ${msg}.`
             : 'Pre-install validation has expired; please run it again.'}
         </p>
-        {isError ? (
+        {failed ? (
           <p>
             After resolving all errors, run the pre-install validation again.
           </p>
         ) : null}
-        {preflight.results &&
-        preflight.results.plan &&
-        preflight.results.plan.length ? (
-          <PlanErrors errorList={preflight.results.plan} />
-        ) : null}
+        {planErrors ? <ErrorsList errorList={planErrors} /> : null}
       </>
     );
   }
 
+  // Valid preflight without errors/warnings
   if (preflight.is_valid) {
     return (
       <p className="slds-text-color_success">
@@ -127,6 +137,7 @@ const PreflightResults = ({
     );
   }
 
+  // Invalid preflight
   return (
     <p>
       <WarningIcon />

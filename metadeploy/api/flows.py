@@ -1,7 +1,7 @@
 import bleach
 from cumulusci.core import flows
 
-from .constants import WARN, ERROR
+from .constants import WARN, ERROR, SKIP, OPTIONAL
 
 
 class BasicFlow(flows.BaseFlow):
@@ -76,22 +76,22 @@ class PreflightFlow(flows.BaseFlow):
                 }],
             )
 
-        if status['status_code'] == 'skip':
+        if status['status_code'] == SKIP:
             step_id = self._get_step_id(status['task_name'])
             return (
                 step_id,
                 [{
-                    'status': 'skip',
+                    'status': SKIP,
                     'message': bleach.clean(status.get('msg', '')),
                 }],
             )
 
-        if status['status_code'] == 'optional':
+        if status['status_code'] == OPTIONAL:
             step_id = self._get_step_id(status['task_name'])
             return (
                 step_id,
                 [{
-                    'status': 'optional',
+                    'status': OPTIONAL,
                     'message': bleach.clean(status.get('msg', '')),
                 }],
             )

@@ -41,6 +41,20 @@ export type PreflightsState = {
   [number]: Preflight,
 };
 
+export const CONSTANTS = {
+  STATUS: {
+    STARTED: 'started',
+    COMPLETE: 'complete',
+    FAILED: 'failed',
+  },
+  RESULT_STATUS: {
+    WARN: 'warn',
+    ERROR: 'error',
+    SKIP: 'skip',
+    OPTIONAL: 'optional',
+  },
+};
+
 const reducer = (
   preflights: PreflightsState = {},
   action: PlansAction,
@@ -51,7 +65,7 @@ const reducer = (
   }
   if (action.type === 'PREFLIGHT_STARTED') {
     const plan = action.payload;
-    return { ...preflights, [plan]: { status: 'started' } };
+    return { ...preflights, [plan]: { status: CONSTANTS.STATUS.STARTED } };
   }
   if (
     action.type === 'PREFLIGHT_COMPLETED' ||

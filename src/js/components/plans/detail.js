@@ -170,6 +170,8 @@ const selectPreflight = createSelector(
     if (!plan) {
       return null;
     }
+    // A `null` preflight means we already fetched and no prior preflight exists
+    // An `undefined` preflight means we don't know whether a preflight exists
     return preflights[plan.id];
   },
 );

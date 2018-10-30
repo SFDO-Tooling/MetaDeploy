@@ -11,7 +11,9 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
 
-import { PlanErrors } from 'components/plans/preflightResults';
+import { CONSTANTS } from 'plans/reducer';
+
+import { ErrorsList } from 'components/plans/preflightResults';
 
 import type {
   Plan as PlanType,
@@ -27,6 +29,8 @@ type DataCellProps = {
   item?: StepType,
   className?: string,
 };
+
+const { RESULT_STATUS } = CONSTANTS;
 
 class NameDataCell extends React.Component<
   DataCellProps,
@@ -50,10 +54,12 @@ class NameDataCell extends React.Component<
     let hasWarning = false;
     let optional;
     let optionalMsg = '';
-    if (result && result.length > 0) {
-      hasError = result.find(err => err.status === 'error') !== undefined;
-      hasWarning = result.find(err => err.status === 'warn') !== undefined;
-      optional = result.find(res => res.status === 'optional');
+    if (result) {
+      hasError =
+        result.find(err => err.status === RESULT_STATUS.ERROR) !== undefined;
+      hasWarning =
+        result.find(err => err.status === RESULT_STATUS.WARN) !== undefined;
+      optional = result.find(res => res.status === RESULT_STATUS.OPTIONAL);
       optionalMsg = optional && optional.message;
     }
     let display = name;
@@ -66,7 +72,7 @@ class NameDataCell extends React.Component<
     });
     const errorList =
       result && (hasError || hasWarning) ? (
-        <PlanErrors errorList={result} />
+        <ErrorsList errorList={result} />
       ) : null;
     return (
       <DataTableCell title={name} className={classes} {...otherProps}>
@@ -146,9 +152,7 @@ const RequiredDataCell = (props: DataCellProps): React.Node => {
   const id = item.id.toString();
   const result = preflight && preflight.results && preflight.results[id];
   const optional =
-    result &&
-    result.length > 0 &&
-    result.find(res => res.status === 'optional');
+    result && result.find(res => res.status === RESULT_STATUS.OPTIONAL);
   const required = item.is_required && !optional;
   const classes = classNames(
     'slds-align-middle',
@@ -176,9 +180,9 @@ const InstallDataCell = (props: DataCellProps): React.Node => {
   const id = item.id.toString();
   const result = preflight && preflight.results && preflight.results[id];
   let skipped, optional;
-  if (result && result.length > 0) {
-    skipped = result.find(res => res.status === 'skip');
-    optional = result.find(res => res.status === 'optional');
+  if (result) {
+    skipped = result.find(res => res.status === RESULT_STATUS.SKIP);
+    optional = result.find(res => res.status === RESULT_STATUS.OPTIONAL);
   }
   const required = item.is_required && !optional;
   const recommended = !required && item.is_recommended;

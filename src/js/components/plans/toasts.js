@@ -4,6 +4,8 @@ import * as React from 'react';
 import Toast from '@salesforce/design-system-react/components/toast';
 import ToastContainer from '@salesforce/design-system-react/components/toast/container';
 
+import { CONSTANTS } from 'plans/reducer';
+
 import type { Preflight as PreflightType } from 'plans/reducer';
 
 type Props = {
@@ -13,6 +15,8 @@ type Props = {
 type State = {
   isOpen: boolean,
 };
+
+const { STATUS } = CONSTANTS;
 
 class Toasts extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -39,10 +43,10 @@ class Toasts extends React.Component<Props, State> {
 
   getToast(): React.Node | null {
     const { preflight } = this.props;
-    if (preflight.status === 'failed') {
+    if (preflight.status === STATUS.FAILED) {
       return this.getToastComponent('Pre-install validation has failed.');
     }
-    if (preflight.status !== 'complete') {
+    if (preflight.status !== STATUS.COMPLETE) {
       return null;
     }
     const hasErrors =
@@ -66,10 +70,14 @@ class Toasts extends React.Component<Props, State> {
     );
   }
 
+  // Using this is often discouraged, but we only want to show toasts if the
+  // preflight is *changing* from `started` to `complete` or `failed` -- we use
+  // this to show the Toast only once we've seen the preflight is `started`.
+  // https://reactjs.org/docs/react-component.html#static-getderivedstatefromprops
   static getDerivedStateFromProps(props: Props, state: State) {
     const { preflight } = props;
-    // Only show toasts if the preflight status was 'started' at some point.
-    if (preflight.status === 'started' && !state.isOpen) {
+    // Only show toasts if the preflight status was `started` at some point.
+    if (preflight.status === STATUS.STARTED && !state.isOpen) {
       return { isOpen: true };
     }
     return null;
