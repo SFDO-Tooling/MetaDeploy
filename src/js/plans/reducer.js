@@ -35,6 +35,7 @@ export type Preflight = {
   +is_valid?: boolean,
   +error_count?: number,
   +warning_count?: number,
+  +is_ready?: boolean,
 };
 export type PreflightsState = {
   [number]: Preflight,

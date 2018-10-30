@@ -47,7 +47,7 @@ export const PlanErrors = ({
           return (
             <li key={idx}>
               <ErrorIcon />
-              {/* @@@ Is this a good idea? */}
+              {/* These messages are pre-cleaned by the API */}
               <span
                 className="slds-text-color_error"
                 dangerouslySetInnerHTML={{ __html: err.message }}
@@ -58,7 +58,7 @@ export const PlanErrors = ({
           return (
             <li key={idx}>
               <WarningIcon />
-              {/* @@@ Is this a good idea? */}
+              {/* These messages are pre-cleaned by the API */}
               <span dangerouslySetInnerHTML={{ __html: err.message }} />
             </li>
           );
@@ -78,9 +78,9 @@ const PreflightResults = ({
   }
 
   const hasErrors =
-    typeof preflight.error_count === 'number' && preflight.error_count > 0;
+    preflight.error_count !== undefined && preflight.error_count > 0;
   const hasWarnings =
-    typeof preflight.warning_count === 'number' && preflight.warning_count > 0;
+    preflight.warning_count !== undefined && preflight.warning_count > 0;
   if (hasErrors || hasWarnings || preflight.status === 'failed') {
     const errorCount = preflight.error_count || 0;
     const warningCount = preflight.warning_count || 0;

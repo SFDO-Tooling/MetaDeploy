@@ -46,15 +46,14 @@ class Toasts extends React.Component<Props, State> {
       return null;
     }
     const hasErrors =
-      typeof preflight.error_count === 'number' && preflight.error_count > 0;
+      preflight.error_count !== undefined && preflight.error_count > 0;
     if (hasErrors) {
       return this.getToastComponent(
         'Pre-install validation completed with errors.',
       );
     }
     const hasWarnings =
-      typeof preflight.warning_count === 'number' &&
-      preflight.warning_count > 0;
+      preflight.warning_count !== undefined && preflight.warning_count > 0;
     if (hasWarnings) {
       return this.getToastComponent(
         'Pre-install validation completed with warnings.',
