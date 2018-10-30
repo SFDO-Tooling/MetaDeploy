@@ -157,7 +157,7 @@ class PreflightResultSerializer(serializers.ModelSerializer):
         return (
             obj.is_valid
             and obj.status == PreflightResult.Status.complete
-            and self._count_status_in_results(obj.results, 'error') == 0
+            and self._count_status_in_results(obj.results, ERROR) == 0
         )
 
     class Meta:
