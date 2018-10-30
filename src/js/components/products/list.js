@@ -9,22 +9,22 @@ import { createSelector } from 'reselect';
 
 import ProductItem from 'components/products/listItem';
 
+import type { AppState } from 'app/reducer';
 import type {
   Products as ProductsType,
   Product as ProductType,
 } from 'products/reducer';
 
 type ProductsMapType = Map<string, Array<ProductType>>;
+type Props = {
+  productsByCategory: ProductsMapType,
+  productCategories: Array<string>,
+};
+type State = {
+  activeProductsTab: string | null,
+};
 
-class ProductsList extends React.Component<
-  {
-    productsByCategory: ProductsMapType,
-    productCategories: Array<string>,
-  },
-  {
-    activeProductsTab: string | null,
-  },
-> {
+class ProductsList extends React.Component<Props, State> {
   constructor(props) {
     super(props);
     let activeProductsTab = null;
@@ -116,7 +116,8 @@ class ProductsList extends React.Component<
   }
 }
 
-const selectProductsState = (appState): ProductsType => appState.products;
+const selectProductsState = (appState: AppState): ProductsType =>
+  appState.products;
 
 const selectProductsByCategory = createSelector(
   selectProductsState,
@@ -139,9 +140,13 @@ const selectProductCategories = createSelector(
   ],
 );
 
-const select = appState => ({
-  productsByCategory: selectProductsByCategory(appState),
+const select = (appState: AppState): Props => ({
   productCategories: selectProductCategories(appState),
+  productsByCategory: selectProductsByCategory(appState),
 });
 
-export default connect(select)(ProductsList);
+const WrappedProductsList: React.ComponentType<{}> = connect(select)(
+  ProductsList,
+);
+
+export default WrappedProductsList;

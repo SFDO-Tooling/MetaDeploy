@@ -16,14 +16,22 @@ import ProductIcon from 'components/products/icon';
 import ProductNotFound from 'components/products/product404';
 
 import type { Match } from 'react-router-dom';
-
 import type { AppState } from 'app/reducer';
 import type {
   Product as ProductType,
   Version as VersionType,
 } from 'products/reducer';
 
-let ProductDetail = ({ product }: { product: ProductType | null }) => {
+type InitialProps = { match: Match };
+type ProductDetailProps = { product: ProductType | null };
+type VersionDetailProps = {
+  product: ProductType | null,
+  version: VersionType | null,
+  versionLabel: ?string,
+  doFetchVersion: typeof fetchVersion,
+};
+
+const ProductDetail = ({ product }: ProductDetailProps) => {
   const blocked = gatekeeper({ product });
   if (blocked !== false) {
     return blocked;
@@ -49,17 +57,12 @@ const BodySection = ({ children }: { children: React.Node }) => (
   </div>
 );
 
-let VersionDetail = ({
+const VersionDetail = ({
   product,
   version,
   versionLabel,
   doFetchVersion,
-}: {
-  product: ProductType | null,
-  version: VersionType | null,
-  versionLabel: ?string,
-  doFetchVersion: typeof fetchVersion,
-}) => {
+}: VersionDetailProps) => {
   const blocked = gatekeeper({
     product,
     version,
@@ -159,7 +162,7 @@ let VersionDetail = ({
 
 export const selectProduct = (
   appState: AppState,
-  { match: { params } }: { match: Match },
+  { match: { params } }: InitialProps,
 ): ProductType | null => {
   const product = appState.products.find(p => p.slug === params.productSlug);
   return product || null;
@@ -167,10 +170,13 @@ export const selectProduct = (
 
 export const selectVersionLabel = (
   appState: AppState,
-  { match: { params } }: { match: Match },
+  { match: { params } }: InitialProps,
 ): ?string => params.versionLabel;
 
-export const selectVersion = createSelector(
+export const selectVersion: (
+  AppState,
+  InitialProps,
+) => VersionType | null = createSelector(
   [selectProduct, selectVersionLabel],
   (product: ProductType | null, versionLabel: ?string): VersionType | null => {
     if (!product || !versionLabel) {
@@ -186,11 +192,11 @@ export const selectVersion = createSelector(
   },
 );
 
-const selectProductDetail = (appState, props) => ({
+const selectProductDetail = (appState: AppState, props: InitialProps) => ({
   product: selectProduct(appState, props),
 });
 
-const selectVersionDetail = (appState, props) => ({
+const selectVersionDetail = (appState: AppState, props: InitialProps) => ({
   product: selectProduct(appState, props),
   version: selectVersion(appState, props),
   versionLabel: selectVersionLabel(appState, props),
@@ -200,10 +206,15 @@ const actions = {
   doFetchVersion: fetchVersion,
 };
 
-ProductDetail = connect(selectProductDetail)(ProductDetail);
-VersionDetail = connect(
+const WrappedProductDetail: React.ComponentType<InitialProps> = connect(
+  selectProductDetail,
+)(ProductDetail);
+const WrappedVersionDetail: React.ComponentType<InitialProps> = connect(
   selectVersionDetail,
   actions,
 )(VersionDetail);
 
-export { ProductDetail, VersionDetail };
+export {
+  WrappedProductDetail as ProductDetail,
+  WrappedVersionDetail as VersionDetail,
+};
