@@ -49,10 +49,10 @@ describe('<Toasts />', () => {
     });
   });
 
-  describe('preflight completes has errors', () => {
+  describe('preflight completes with errors', () => {
     test('renders toast with message', () => {
       const { getByText, rerender } = setup();
-      const preflight = { status: 'complete', has_errors: true };
+      const preflight = { status: 'complete', error_count: 1 };
       rerender(<Toasts preflight={preflight} />);
 
       expect(
@@ -61,10 +61,26 @@ describe('<Toasts />', () => {
     });
   });
 
+  describe('preflight completes with warnings', () => {
+    test('renders toast with message', () => {
+      const { getByText, rerender } = setup();
+      const preflight = {
+        status: 'complete',
+        error_count: 0,
+        warning_count: 1,
+      };
+      rerender(<Toasts preflight={preflight} />);
+
+      expect(
+        getByText('Pre-install validation completed with warnings.'),
+      ).toBeVisible();
+    });
+  });
+
   describe('preflight completes successfully', () => {
     test('renders toast with message', () => {
       const { getByText, rerender } = setup();
-      const preflight = { status: 'complete', has_errors: false };
+      const preflight = { status: 'complete', error_count: 0 };
       rerender(<Toasts preflight={preflight} />);
 
       expect(
@@ -76,7 +92,7 @@ describe('<Toasts />', () => {
   describe('close-toast click', () => {
     test('removes toast', () => {
       const { getByText, container, rerender } = setup();
-      const preflight = { status: 'complete', has_errors: false };
+      const preflight = { status: 'complete', error_count: 0 };
       rerender(<Toasts preflight={preflight} />);
       fireEvent.click(getByText('Close'));
 

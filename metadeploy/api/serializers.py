@@ -136,21 +136,19 @@ class PreflightResultSerializer(serializers.ModelSerializer):
         count = 0
         for val in results.values():
             for status in val:
-                if status["status"] == status_name:
+                if status['status'] == status_name:
                     count += 1
         return count
 
     def get_error_count(self, obj):
-        return int(
-            obj.status != PreflightResult.Status.started
-            and self._count_status_in_results(obj.results, "error")
-        )
+        if obj.status == PreflightResult.Status.started:
+            return 0
+        return self._count_status_in_results(obj.results, 'error')
 
     def get_warning_count(self, obj):
-        return int(
-            obj.status != PreflightResult.Status.started
-            and self._count_status_in_results(obj.results, "warning")
-        )
+        if obj.status == PreflightResult.Status.started:
+            return 0
+        return self._count_status_in_results(obj.results, 'warn')
 
     class Meta:
         model = PreflightResult

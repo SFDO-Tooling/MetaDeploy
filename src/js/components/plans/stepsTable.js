@@ -173,7 +173,10 @@ const InstallDataCell = (props: DataCellProps): React.Node => {
   }
   const hasValidToken = props.user && props.user.valid_token_for !== null;
   const hasReadyPreflight =
-    preflight && preflight.is_valid && !preflight.has_errors;
+    preflight &&
+    preflight.status === 'complete' &&
+    preflight.is_valid &&
+    preflight.error_count === 0;
   const id = item.id.toString();
   const result = preflight && preflight.results && preflight.results[id];
   let skipped, optional;

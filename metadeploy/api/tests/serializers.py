@@ -32,7 +32,7 @@ class TestPreflightSerializer:
             organization_url=user.instance_url,
             plan=plan,
             results={
-                0: [{'status': 'warning'}],
+                0: [{'status': 'warn'}],
             },
             status=PreflightResult.Status.complete,
         )

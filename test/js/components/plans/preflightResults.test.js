@@ -5,7 +5,8 @@ import PreflightResults from 'components/plans/preflightResults';
 
 const defaultPreflight = {
   status: 'complete',
-  has_errors: true,
+  error_count: 4,
+  warning_count: 3,
   is_valid: true,
   results: {
     plan: [
@@ -50,7 +51,8 @@ describe('<PreflightResults />', () => {
     test('displays error message', () => {
       const preflight = {
         status: 'complete',
-        has_errors: true,
+        error_count: 1,
+        warning_count: 0,
         is_valid: true,
         results: {
           1: [{ status: 'error', message: 'This error.' }],
@@ -66,7 +68,8 @@ describe('<PreflightResults />', () => {
     test('displays warning message', () => {
       const preflight = {
         status: 'complete',
-        has_errors: true,
+        error_count: 0,
+        warning_count: 1,
         is_valid: true,
         results: {
           1: [{ status: 'warn', message: 'This warning.' }],
@@ -77,6 +80,25 @@ describe('<PreflightResults />', () => {
       expect(
         getByText('Pre-install validation found 1 warning.'),
       ).toBeVisible();
+    });
+
+    describe('invalid preflight', () => {
+      test('displays invalid message', () => {
+        const preflight = {
+          status: 'complete',
+          error_count: 0,
+          warning_count: 1,
+          is_valid: false,
+          results: {
+            1: [{ status: 'warn', message: 'This warning.' }],
+          },
+        };
+        const { getByText } = setup({ preflight });
+
+        expect(
+          getByText('Pre-install validation has expired; please run it again.'),
+        ).toBeVisible();
+      });
     });
   });
 
@@ -97,7 +119,8 @@ describe('<PreflightResults />', () => {
     test('displays error message', () => {
       const preflight = {
         status: 'failed',
-        has_errors: false,
+        error_count: 0,
+        warning_count: 0,
         is_valid: true,
       };
       const { getByText } = setup({ preflight });
@@ -110,7 +133,8 @@ describe('<PreflightResults />', () => {
     test('displays success message', () => {
       const preflight = {
         status: 'complete',
-        has_errors: false,
+        error_count: 0,
+        warning_count: 0,
         is_valid: true,
         results: {},
       };
@@ -126,7 +150,8 @@ describe('<PreflightResults />', () => {
     test('displays invalid message', () => {
       const preflight = {
         status: 'complete',
-        has_errors: false,
+        error_count: 0,
+        warning_count: 0,
         is_valid: false,
         results: {},
       };

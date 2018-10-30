@@ -15,7 +15,8 @@ describe('fetchPreflight', () => {
         status: 'complete',
         results: {},
         is_valid: true,
-        has_errors: false,
+        error_count: 0,
+        warning_count: 0,
       };
       fetchMock.getOnce(window.api_urls.plan_preflight(1), preflight);
       const started = {

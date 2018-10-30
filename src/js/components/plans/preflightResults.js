@@ -77,25 +77,13 @@ const PreflightResults = ({
     return null;
   }
 
-  if (preflight.has_errors || preflight.status === 'failed') {
-    let errorCount = 0;
-    let warningCount = 0;
-    if (preflight.results) {
-      for (const key of Object.keys(preflight.results)) {
-        if (Array.isArray(preflight.results[key])) {
-          for (const err of preflight.results[key]) {
-            switch (err.status) {
-              case 'error':
-                errorCount = errorCount + 1;
-                break;
-              case 'warn':
-                warningCount = warningCount + 1;
-                break;
-            }
-          }
-        }
-      }
-    }
+  const hasErrors =
+    typeof preflight.error_count === 'number' && preflight.error_count > 0;
+  const hasWarnings =
+    typeof preflight.warning_count === 'number' && preflight.warning_count > 0;
+  if (hasErrors || hasWarnings || preflight.status === 'failed') {
+    const errorCount = preflight.error_count || 0;
+    const warningCount = preflight.warning_count || 0;
     let msg = 'errors';
     const errorMsg = `${errorCount} error${errorCount === 1 ? '' : 's'}`;
     const warningMsg = `${warningCount} warning${
@@ -113,7 +101,9 @@ const PreflightResults = ({
       <>
         <p className={isError ? 'slds-text-color_error' : ''}>
           {isError ? <ErrorIcon /> : <WarningIcon />}
-          Pre-install validation found {msg}.
+          {isError || preflight.is_valid
+            ? `Pre-install validation found ${msg}.`
+            : 'Pre-install validation has expired; please run it again.'}
         </p>
         {isError ? (
           <p>

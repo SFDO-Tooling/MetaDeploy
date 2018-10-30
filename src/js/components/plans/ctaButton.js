@@ -126,7 +126,7 @@ class CtaButton extends React.Component<{
         );
       }
       case 'complete': {
-        if (preflight.is_valid && !preflight.has_errors) {
+        if (preflight.is_valid && preflight.error_count === 0) {
           // Preflight is done, valid, and has no errors -- allow installation
           return this.getPreflightBtn('Install', hasValidToken);
         }
