@@ -25,7 +25,7 @@ export type PreflightError = {
   +message?: string,
 };
 type PreflightErrors = {
-  +plan_errors?: Array<PreflightError>,
+  +plan?: Array<PreflightError>,
   [string]: Array<PreflightError>,
 };
 export type Preflight = {
@@ -33,7 +33,8 @@ export type Preflight = {
   +status: 'started' | 'complete' | 'failed',
   +results?: PreflightErrors,
   +is_valid?: boolean,
-  +has_errors?: boolean,
+  +error_count?: number,
+  +warning_count?: number,
 };
 export type PreflightsState = {
   [number]: Preflight,

@@ -338,7 +338,7 @@ class Step(models.Model):
 
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
     name = models.CharField(max_length=1024)
-    description = models.TextField()
+    description = models.TextField(blank=True)
     is_required = models.BooleanField(default=True)
     is_recommended = models.BooleanField(default=True)
     kind = models.CharField(choices=Kind, default=Kind.metadata, max_length=64)

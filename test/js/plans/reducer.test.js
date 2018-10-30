@@ -40,4 +40,29 @@ describe('reducer', () => {
 
     expect(actual).toEqual(expected);
   });
+
+  test('handles PREFLIGHT_FAILED action', () => {
+    const initial = { 1: null, 2: { status: 'started' } };
+    const expected = { 1: null, 2: { plan: 2, status: 'failed' } };
+    const actual = reducer(initial, {
+      type: 'PREFLIGHT_FAILED',
+      payload: { plan: 2, status: 'failed' },
+    });
+
+    expect(actual).toEqual(expected);
+  });
+
+  test('handles PREFLIGHT_FAILED action', () => {
+    const initial = { 1: null, 2: { status: 'complete', is_valid: true } };
+    const expected = {
+      1: null,
+      2: { plan: 2, status: 'complete', is_valid: false },
+    };
+    const actual = reducer(initial, {
+      type: 'PREFLIGHT_FAILED',
+      payload: { plan: 2, status: 'complete', is_valid: false },
+    });
+
+    expect(actual).toEqual(expected);
+  });
 });

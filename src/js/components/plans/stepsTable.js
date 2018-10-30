@@ -39,29 +39,26 @@ class NameDataCell extends React.Component<
 
   render(): React.Node {
     const { preflight, item, className, ...otherProps } = this.props;
+    /* istanbul ignore if */
     if (!item) {
       return null;
     }
-    const title = item.name;
-    let name = item.name;
-    const description = item.description;
+    const { name, description } = item;
     const id = item.id.toString();
     const result = preflight && preflight.results && preflight.results[id];
-    const hasError =
-      result &&
-      result.length > 0 &&
-      result.find(err => err.status === 'error') !== undefined;
-    const hasWarning =
-      result &&
-      result.length > 0 &&
-      result.find(err => err.status === 'warn') !== undefined;
-    const optional =
-      result &&
-      result.length > 0 &&
-      result.find(res => res.status === 'optional');
-    const optionalMsg = optional && optional.message;
+    let hasError = false;
+    let hasWarning = false;
+    let optional;
+    let optionalMsg = '';
+    if (result && result.length > 0) {
+      hasError = result.find(err => err.status === 'error') !== undefined;
+      hasWarning = result.find(err => err.status === 'warn') !== undefined;
+      optional = result.find(res => res.status === 'optional');
+      optionalMsg = optional && optional.message;
+    }
+    let display = name;
     if (optionalMsg) {
-      name = `${name} — ${optionalMsg}`;
+      display = `${name} — ${optionalMsg}`;
     }
     const classes = classNames(className, {
       'has-warning': hasWarning,
@@ -72,14 +69,14 @@ class NameDataCell extends React.Component<
         <PlanErrors errorList={result} />
       ) : null;
     return (
-      <DataTableCell title={title} className={classes} {...otherProps}>
+      <DataTableCell title={name} className={classes} {...otherProps}>
         {description ? (
           <>
             <Accordion className="slds-cell-wrap">
               <AccordionPanel
                 id={id}
-                title={title}
-                summary={<p className="slds-cell-wrap">{name}</p>}
+                title={name}
+                summary={<p className="slds-cell-wrap">{display}</p>}
                 expanded={this.state.expanded}
                 onTogglePanel={() => {
                   this.setState({ expanded: !this.state.expanded });
@@ -104,7 +101,7 @@ class NameDataCell extends React.Component<
               slds-p-vertical_small
               slds-cell-wrap"
           >
-            <p className={errorList ? 'slds-p-bottom_small' : ''}>{name}</p>
+            <p className={errorList ? 'slds-p-bottom_small' : ''}>{display}</p>
             {errorList}
           </div>
         )}
@@ -115,6 +112,7 @@ class NameDataCell extends React.Component<
 NameDataCell.displayName = DataTableCell.displayName;
 
 const KindDataCell = (props: DataCellProps): React.Node => {
+  /* istanbul ignore if */
   if (!props.item) {
     return null;
   }
@@ -141,6 +139,7 @@ KindDataCell.displayName = DataTableCell.displayName;
 
 const RequiredDataCell = (props: DataCellProps): React.Node => {
   const { preflight, item } = props;
+  /* istanbul ignore if */
   if (!item) {
     return null;
   }
@@ -168,20 +167,23 @@ RequiredDataCell.displayName = DataTableCell.displayName;
 
 const InstallDataCell = (props: DataCellProps): React.Node => {
   const { preflight, item } = props;
+  /* istanbul ignore if */
   if (!item) {
     return null;
   }
   const hasValidToken = props.user && props.user.valid_token_for !== null;
   const hasReadyPreflight =
-    preflight && preflight.is_valid && !preflight.has_errors;
+    preflight &&
+    preflight.status === 'complete' &&
+    preflight.is_valid &&
+    preflight.error_count === 0;
   const id = item.id.toString();
   const result = preflight && preflight.results && preflight.results[id];
-  const skipped =
-    result && result.length > 0 && result.find(res => res.status === 'skip');
-  const optional =
-    result &&
-    result.length > 0 &&
-    result.find(res => res.status === 'optional');
+  let skipped, optional;
+  if (result && result.length > 0) {
+    skipped = result.find(res => res.status === 'skip');
+    optional = result.find(res => res.status === 'optional');
+  }
   const required = item.is_required && !optional;
   const recommended = !required && item.is_recommended;
   const disabled =

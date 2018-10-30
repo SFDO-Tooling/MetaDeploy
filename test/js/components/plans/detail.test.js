@@ -45,7 +45,8 @@ const defaultState = {
       },
     },
   ],
-  preflights: { 1: null },
+  preflights: { 1: {} },
+  user: {},
 };
 
 describe('<PlanDetail />', () => {

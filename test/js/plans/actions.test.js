@@ -15,7 +15,8 @@ describe('fetchPreflight', () => {
         status: 'complete',
         results: {},
         is_valid: true,
-        has_errors: false,
+        error_count: 0,
+        warning_count: 0,
       };
       fetchMock.getOnce(window.api_urls.plan_preflight(1), preflight);
       const started = {
@@ -110,5 +111,23 @@ describe('completePreflight', () => {
     const expected = { type: 'PREFLIGHT_COMPLETED', payload };
 
     expect(actions.completePreflight(payload)).toEqual(expected);
+  });
+});
+
+describe('failPreflight', () => {
+  test('returns PreflightFailed', () => {
+    const payload = { foo: 'bar' };
+    const expected = { type: 'PREFLIGHT_FAILED', payload };
+
+    expect(actions.failPreflight(payload)).toEqual(expected);
+  });
+});
+
+describe('invalidatePreflight', () => {
+  test('returns PreflightInvalid', () => {
+    const payload = { foo: 'bar' };
+    const expected = { type: 'PREFLIGHT_INVALIDATED', payload };
+
+    expect(actions.invalidatePreflight(payload)).toEqual(expected);
   });
 });

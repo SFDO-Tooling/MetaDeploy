@@ -166,13 +166,27 @@ class PreflightResultSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault(),
     )
-    has_errors = serializers.SerializerMethodField()
+    error_count = serializers.SerializerMethodField()
+    warning_count = serializers.SerializerMethodField()
 
-    def get_has_errors(self, obj):
-        return (
-            obj.status == PreflightResult.Status.complete
-            and obj.results != {}
-        )
+    @staticmethod
+    def _count_status_in_results(results, status_name):
+        count = 0
+        for val in results.values():
+            for status in val:
+                if status['status'] == status_name:
+                    count += 1
+        return count
+
+    def get_error_count(self, obj):
+        if obj.status == PreflightResult.Status.started:
+            return 0
+        return self._count_status_in_results(obj.results, 'error')
+
+    def get_warning_count(self, obj):
+        if obj.status == PreflightResult.Status.started:
+            return 0
+        return self._count_status_in_results(obj.results, 'warn')
 
     class Meta:
         model = PreflightResult
@@ -184,7 +198,8 @@ class PreflightResultSerializer(serializers.ModelSerializer):
             'is_valid',
             'status',
             'results',
-            'has_errors',
+            'error_count',
+            'warning_count',
         )
         extra_kwargs = {
             'organization_url': {'read_only': True},
