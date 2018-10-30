@@ -1,6 +1,8 @@
 import bleach
 from cumulusci.core import flows
 
+from .constants import WARN, ERROR
+
 
 class BasicFlow(flows.BaseFlow):
     # TODO:
@@ -41,7 +43,7 @@ class PreflightFlow(flows.BaseFlow):
 
     def _post_task_exception(self, task, e):
         error_result = {
-            'plan': [{'status': 'error', 'message': str(e)}],
+            'plan': [{'status': ERROR, 'message': str(e)}],
         }
         self.preflight_result.results.update(error_result)
 
@@ -54,22 +56,22 @@ class PreflightFlow(flows.BaseFlow):
         if status['status_code'] == 'ok':
             return None
 
-        if status['status_code'] == 'error':
+        if status['status_code'] == ERROR:
             step_id = self._get_step_id(status['task_name'])
             return (
                 step_id,
                 [{
-                    'status': 'error',
+                    'status': ERROR,
                     'message': bleach.clean(status.get('msg', '')),
                 }],
             )
 
-        if status['status_code'] == 'warn':
+        if status['status_code'] == WARN:
             step_id = self._get_step_id(status['task_name'])
             return (
                 step_id,
                 [{
-                    'status': 'warn',
+                    'status': WARN,
                     'message': bleach.clean(status.get('msg', '')),
                 }],
             )

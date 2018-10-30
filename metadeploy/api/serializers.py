@@ -11,6 +11,8 @@ from .models import (
 
 from django.contrib.auth import get_user_model
 
+from .constants import WARN, ERROR
+
 
 User = get_user_model()
 
@@ -143,12 +145,12 @@ class PreflightResultSerializer(serializers.ModelSerializer):
     def get_error_count(self, obj):
         if obj.status == PreflightResult.Status.started:
             return 0
-        return self._count_status_in_results(obj.results, 'error')
+        return self._count_status_in_results(obj.results, ERROR)
 
     def get_warning_count(self, obj):
         if obj.status == PreflightResult.Status.started:
             return 0
-        return self._count_status_in_results(obj.results, 'warn')
+        return self._count_status_in_results(obj.results, WARN)
 
     class Meta:
         model = PreflightResult
