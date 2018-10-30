@@ -361,6 +361,13 @@ GITHUB_TOKEN = env('GITHUB_TOKEN')
 # Token expiration
 TOKEN_LIFETIME_MINUTES = env('TOKEN_LIFETIME_MINUTES', type_=int, default=10)
 
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': (
+        'rest_framework.pagination.LimitOffsetPagination'
+    ),
+    'PAGE_SIZE': 100,
+}
+
 
 # Raven / Sentry
 SENTRY_DSN = env('SENTRY_DSN', default='')
