@@ -144,19 +144,24 @@ class JobSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def has_valid_preflight(plan, user):
-        potential_preflights = PreflightResult.objects.filter(
+        most_recent_preflight = PreflightResult.objects.filter(
             plan=plan,
             user=user,
             is_valid=True,
             status=PreflightResult.Status.complete,
-        ).values_list("results", flat=True)
-        preflights_with_errors = [
+        ).order_by(
+            '-created_at',
+        ).first()
+        if not most_recent_preflight:
+            return False
+
+        preflight_errors = [
             val
             for val
-            in chain(*chain(*[pre.values() for pre in potential_preflights]))
+            in chain(*most_recent_preflight.results.values())
             if val.get("status", None) == "error"
         ]
-        return not any(preflights_with_errors) and potential_preflights
+        return not any(preflight_errors)
 
     def validate(self, data):
         if not self.has_valid_preflight(data["plan"], data["user"]):

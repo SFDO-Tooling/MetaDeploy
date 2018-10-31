@@ -93,6 +93,14 @@ class TestJob:
             user=user,
             status=PreflightResult.Status.complete,
             results={
+                step2.id: [{'status': 'error', 'message': ''}],
+            },
+        )
+        preflight_result_factory(
+            plan=plan,
+            user=user,
+            status=PreflightResult.Status.complete,
+            results={
                 step1.id: [{'status': 'warn', 'message': ''}],
                 step2.id: [{'status': 'skip', 'message': ''}],
                 step3.id: [{'status': 'optional', 'message': ''}],
@@ -106,7 +114,33 @@ class TestJob:
 
         assert serializer.is_valid()
 
-    def test_create_bad(self, rf, user_factory, plan_factory):
+    def test_create_bad_preflight(
+            self, rf, user_factory, plan_factory, step_factory,
+            preflight_result_factory):
+        plan = plan_factory()
+        user = user_factory()
+        step1 = step_factory(plan=plan)
+        step2 = step_factory(plan=plan)
+        step3 = step_factory(plan=plan)
+        request = rf.get('/')
+        request.user = user
+        preflight_result_factory(
+            plan=plan,
+            user=user,
+            status=PreflightResult.Status.complete,
+            results={
+                step2.id: [{'status': 'error', 'message': ''}],
+            },
+        )
+        data = {
+            'plan': plan.id,
+            'steps': [step1.id, step2.id, step3.id],
+        }
+        serializer = JobSerializer(data=data, context=dict(request=request))
+
+        assert not serializer.is_valid()
+
+    def test_create_bad_no_preflight(self, rf, user_factory, plan_factory):
         plan = plan_factory()
         user = user_factory()
         request = rf.get('/')
