@@ -25,25 +25,12 @@ jobs:
             echo 'export PATH=~/metadeploy/node/bin:$PATH' >> $BASH_ENV
             source $BASH_ENV
       - run:
-          name: Update yarn.lock [greenkeeper]
-          command: |
-            if [[ "${CIRCLE_BRANCH}" =~ greenkeeper\/.* ]]; then
-              yarn global add greenkeeper-lockfile@2 --prefix ~/metadeploy/node
-              greenkeeper-lockfile-update
-            fi
-      - run:
           name: Install Dependencies
           command: |
             yarn
             python3 -m venv venv
             . venv/bin/activate
             pip install -r requirements/local.txt
-      - run:
-          name: Upload yarn.lock [greenkeeper]
-          command: |
-            if [[ "${CIRCLE_BRANCH}" =~ greenkeeper\/.* ]]; then
-              greenkeeper-lockfile-upload
-            fi
       - run:
           name: Check that yarn.lock matches package.json
           command: |

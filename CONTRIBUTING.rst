@@ -97,6 +97,10 @@ Then run the initial migrations::
 
     python manage.py migrate
 
+If your database has outdated sample data for development, remove it with::
+
+    python manage.py truncate_data
+
 To populate the database with sample data for development, run::
 
     python manage.py populate_data
