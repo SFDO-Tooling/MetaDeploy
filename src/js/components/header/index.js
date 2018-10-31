@@ -14,13 +14,12 @@ import Logout from 'components/header/logout';
 import type { AppState } from 'app/reducer';
 import type { User } from 'accounts/reducer';
 
-const Header = ({
-  user,
-  doLogout,
-}: {
+type Props = {
   user: User,
   doLogout: typeof logout,
-}) => (
+};
+
+const Header = ({ user, doLogout }: Props) => (
   <PageHeader
     className="global-header
       slds-p-horizontal_x-large
@@ -56,7 +55,7 @@ const Header = ({
 
 export const selectUserState = (appState: AppState): User => appState.user;
 
-const select = appState => ({
+const select = (appState: AppState) => ({
   user: selectUserState(appState),
 });
 
@@ -64,7 +63,9 @@ const actions = {
   doLogout: logout,
 };
 
-export default connect(
+const WrappedHeader: React.ComponentType<{}> = connect(
   select,
   actions,
 )(Header);
+
+export default WrappedHeader;

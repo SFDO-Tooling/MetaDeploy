@@ -27,6 +27,7 @@ import StepsTable from 'components/plans/stepsTable';
 import Toasts from 'components/plans/toasts';
 
 import type { Match } from 'react-router-dom';
+import type { AppState } from 'app/reducer';
 import type {
   Plan as PlanType,
   Preflight as PreflightType,
@@ -38,6 +39,19 @@ import type {
 } from 'products/reducer';
 import type { User as UserType } from 'accounts/reducer';
 
+type InitialProps = { match: Match };
+type Props = {
+  user: UserType,
+  product: ProductType | null,
+  version: VersionType | null,
+  versionLabel: ?string,
+  plan: PlanType | null,
+  preflight: ?PreflightType,
+  doFetchVersion: typeof fetchVersion,
+  doFetchPreflight: typeof fetchPreflight,
+  doStartPreflight: typeof startPreflight,
+};
+
 const PlanDetail = ({
   user,
   product,
@@ -48,17 +62,7 @@ const PlanDetail = ({
   doFetchVersion,
   doFetchPreflight,
   doStartPreflight,
-}: {
-  user: UserType,
-  product: ProductType | null,
-  version: VersionType | null,
-  versionLabel: ?string,
-  plan: PlanType | null,
-  preflight: ?PreflightType,
-  doFetchVersion: typeof fetchVersion,
-  doFetchPreflight: typeof fetchPreflight,
-  doStartPreflight: typeof startPreflight,
-}) => {
+}: Props) => {
   const blocked = gatekeeper({
     product,
     version,
@@ -132,8 +136,8 @@ const PlanDetail = ({
 };
 
 const selectPlanSlug = (
-  appState,
-  { match: { params } }: { match: Match },
+  appState: AppState,
+  { match: { params } }: InitialProps,
 ): ?string => params.planSlug;
 
 const selectPlan = createSelector(
@@ -157,7 +161,7 @@ const selectPlan = createSelector(
   },
 );
 
-const selectPreflightsState = (appState): PreflightsState =>
+const selectPreflightsState = (appState: AppState): PreflightsState =>
   appState.preflights;
 
 const selectPreflight = createSelector(
@@ -166,11 +170,13 @@ const selectPreflight = createSelector(
     if (!plan) {
       return null;
     }
+    // A `null` preflight means we already fetched and no prior preflight exists
+    // An `undefined` preflight means we don't know whether a preflight exists
     return preflights[plan.id];
   },
 );
 
-const select = (appState, props) => ({
+const select = (appState: AppState, props: InitialProps) => ({
   user: selectUserState(appState),
   product: selectProduct(appState, props),
   version: selectVersion(appState, props),
@@ -185,7 +191,9 @@ const actions = {
   doStartPreflight: startPreflight,
 };
 
-export default connect(
+const WrappedPlanDetail: React.ComponentType<InitialProps> = connect(
   select,
   actions,
 )(PlanDetail);
+
+export default WrappedPlanDetail;

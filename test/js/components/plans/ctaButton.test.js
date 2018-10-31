@@ -27,6 +27,7 @@ const defaultPreflight = {
   is_valid: true,
   error_count: 0,
   warning_count: 0,
+  is_ready: true,
 };
 
 describe('<CtaButton />', () => {

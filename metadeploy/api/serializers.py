@@ -13,6 +13,8 @@ from .models import (
 
 from django.contrib.auth import get_user_model
 
+from .constants import WARN, ERROR
+
 
 User = get_user_model()
 
@@ -168,6 +170,7 @@ class PreflightResultSerializer(serializers.ModelSerializer):
     )
     error_count = serializers.SerializerMethodField()
     warning_count = serializers.SerializerMethodField()
+    is_ready = serializers.SerializerMethodField()
 
     @staticmethod
     def _count_status_in_results(results, status_name):
@@ -181,12 +184,19 @@ class PreflightResultSerializer(serializers.ModelSerializer):
     def get_error_count(self, obj):
         if obj.status == PreflightResult.Status.started:
             return 0
-        return self._count_status_in_results(obj.results, 'error')
+        return self._count_status_in_results(obj.results, ERROR)
 
     def get_warning_count(self, obj):
         if obj.status == PreflightResult.Status.started:
             return 0
-        return self._count_status_in_results(obj.results, 'warn')
+        return self._count_status_in_results(obj.results, WARN)
+
+    def get_is_ready(self, obj):
+        return (
+            obj.is_valid
+            and obj.status == PreflightResult.Status.complete
+            and self._count_status_in_results(obj.results, ERROR) == 0
+        )
 
     class Meta:
         model = PreflightResult
@@ -200,6 +210,7 @@ class PreflightResultSerializer(serializers.ModelSerializer):
             'results',
             'error_count',
             'warning_count',
+            'is_ready',
         )
         extra_kwargs = {
             'organization_url': {'read_only': True},

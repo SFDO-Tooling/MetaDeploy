@@ -158,7 +158,7 @@ describe('<StepsTable />', () => {
     test('disabled if required', () => {
       const { container } = setup({
         user: { valid_token_for: 'foo' },
-        preflight: { status: 'complete', is_valid: true, error_count: 0 },
+        preflight: { status: 'complete', is_valid: true, is_ready: true },
       });
 
       expect(
@@ -179,6 +179,7 @@ describe('<StepsTable />', () => {
             3: [{ status: 'skip', message: 'This was skipped.' }],
             4: [{ status: 'skip' }],
           },
+          is_ready: true,
         },
       });
 

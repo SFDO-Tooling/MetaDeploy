@@ -1,4 +1,7 @@
+import bleach
 from cumulusci.core import flows
+
+from .constants import WARN, ERROR, SKIP, OPTIONAL
 
 
 class BasicFlow(flows.BaseFlow):
@@ -16,17 +19,31 @@ class PreflightFlow(flows.BaseFlow):
         return super().__init__(*args, **kwargs)
 
     def _post_flow(self):
-        results = dict([
-            self._emit_k_v_for_status_dict(status)
-            for status
-            in self.step_return_values
-            if self._emit_k_v_for_status_dict(status) is not None
-        ])
+        """
+        Turn the step_return_values into a merged error dict.
+
+        Each value in step_return_values gets turned into a (key,
+        [error_dict]) pair. This is then turned into a dict, merging any
+        identical keys by combining their lists of error dicts.
+
+        Finally, this is attached to the preflight_result object, which
+        the caller must then save.
+        """
+        results = {}
+        for status in self.step_return_values:
+            kv = self._emit_k_v_for_status_dict(status)
+            if kv is None:
+                continue
+            k, v = kv
+            try:
+                results[k].extend(v)
+            except KeyError:
+                results[k] = v
         self.preflight_result.results.update(results)
 
     def _post_task_exception(self, task, e):
         error_result = {
-            'plan': [{'status': 'error', 'message': str(e)}],
+            'plan': [{'status': ERROR, 'message': str(e)}],
         }
         self.preflight_result.results.update(error_result)
 
@@ -39,32 +56,44 @@ class PreflightFlow(flows.BaseFlow):
         if status['status_code'] == 'ok':
             return None
 
-        if status['status_code'] == 'error':
+        if status['status_code'] == ERROR:
             step_id = self._get_step_id(status['task_name'])
             return (
                 step_id,
-                [{'status': 'error', 'message': status.get('msg', '')}],
+                [{
+                    'status': ERROR,
+                    'message': bleach.clean(status.get('msg', '')),
+                }],
             )
 
-        if status['status_code'] == 'warn':
+        if status['status_code'] == WARN:
             step_id = self._get_step_id(status['task_name'])
             return (
                 step_id,
-                [{'status': 'warn', 'message': status.get('msg', '')}],
+                [{
+                    'status': WARN,
+                    'message': bleach.clean(status.get('msg', '')),
+                }],
             )
 
-        if status['status_code'] == 'skip':
+        if status['status_code'] == SKIP:
             step_id = self._get_step_id(status['task_name'])
             return (
                 step_id,
-                [{'status': 'skip', 'message': status.get('msg', '')}],
+                [{
+                    'status': SKIP,
+                    'message': bleach.clean(status.get('msg', '')),
+                }],
             )
 
-        if status['status_code'] == 'optional':
+        if status['status_code'] == OPTIONAL:
             step_id = self._get_step_id(status['task_name'])
             return (
                 step_id,
-                [{'status': 'optional', 'message': status.get('msg', '')}],
+                [{
+                    'status': OPTIONAL,
+                    'message': bleach.clean(status.get('msg', '')),
+                }],
             )
 
     # def _pre_flow(self, *args, **kwargs):
