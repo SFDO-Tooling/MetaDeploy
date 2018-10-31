@@ -250,6 +250,15 @@ class Command(BaseCommand):
         )
         self.add_steps(plan4)
 
+        plan5 = self.create_plan(
+            version1,
+            title='Preflight With Warnings',
+            tier='additional',
+            preflight_flow_name='warn_preflight',
+            flow_name='ci_test_concurrency',
+        )
+        self.add_steps(plan5)
+
         product2 = self.create_product(
             title=f'Red Salesforce Product',
             description=f'This product should have a red icon.',
