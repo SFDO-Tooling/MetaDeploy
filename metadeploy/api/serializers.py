@@ -13,7 +13,7 @@ from .models import (
 
 from django.contrib.auth import get_user_model
 
-from .constants import WARN, ERROR
+from .constants import WARN, ERROR, OPTIONAL
 
 
 User = get_user_model()
@@ -143,8 +143,8 @@ class JobSerializer(serializers.ModelSerializer):
         }
 
     @staticmethod
-    def has_valid_preflight(plan, user):
-        most_recent_preflight = PreflightResult.objects.filter(
+    def get_most_recent_preflight(user, plan):
+        return PreflightResult.objects.filter(
             plan=plan,
             user=user,
             is_valid=True,
@@ -152,6 +152,9 @@ class JobSerializer(serializers.ModelSerializer):
         ).order_by(
             '-created_at',
         ).first()
+
+    @staticmethod
+    def has_valid_preflight(most_recent_preflight):
         if not most_recent_preflight:
             return False
 
@@ -163,9 +166,32 @@ class JobSerializer(serializers.ModelSerializer):
         ]
         return not any(preflight_errors)
 
+    @staticmethod
+    def has_valid_steps(steps, plan, preflight):
+        preflight_optional_steps = set(
+            int(k)  # Why is this a string? Accident of pytest-django?
+            for k, v
+            in preflight.results.items()
+            if any([
+                status["status"] == OPTIONAL
+                for status
+                in v
+            ])
+        )
+        required_steps = set(
+            plan.step_set.filter(is_required=True).values_list("id", flat=True)
+        ) - preflight_optional_steps
+        return not set(required_steps) - set([s.id for s in steps])
+
     def validate(self, data):
-        if not self.has_valid_preflight(data["plan"], data["user"]):
+        most_recent_preflight = self.get_most_recent_preflight(
+            data["user"],
+            data["plan"],
+        )
+        if not self.has_valid_preflight(most_recent_preflight):
             raise serializers.ValidationError("No valid preflight.")
+        if not self.has_valid_steps(data["steps"], data["plan"], most_recent_preflight):  # noqa
+            raise serializers.ValidationError("Invalid steps for plan.")
         return data
 
 
