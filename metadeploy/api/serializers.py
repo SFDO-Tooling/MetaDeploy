@@ -112,6 +112,7 @@ class JobSerializer(serializers.ModelSerializer):
     class Meta:
         model = Job
         fields = (
+            'id',
             'user',
             'plan',
             'steps',
