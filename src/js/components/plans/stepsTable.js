@@ -151,8 +151,11 @@ const RequiredDataCell = (props: DataCellProps): React.Node => {
   }
   const id = item.id.toString();
   const result = preflight && preflight.results && preflight.results[id];
-  const optional =
-    result && result.find(res => res.status === RESULT_STATUS.OPTIONAL);
+  let skipped, optional;
+  if (result) {
+    skipped = result.find(res => res.status === RESULT_STATUS.SKIP);
+    optional = result.find(res => res.status === RESULT_STATUS.OPTIONAL);
+  }
   const required = item.is_required && !optional;
   const classes = classNames(
     'slds-align-middle',
@@ -160,7 +163,12 @@ const RequiredDataCell = (props: DataCellProps): React.Node => {
     'slds-m-horizontal_large',
     { 'slds-badge_inverse': !required },
   );
-  const text = required ? 'Required' : 'Optional';
+  let text = 'Optional';
+  if (skipped) {
+    text = 'Skipped';
+  } else if (required) {
+    text = 'Required';
+  }
   return (
     <DataTableCell title={text} {...props}>
       <span className={classes}>{text}</span>
@@ -189,8 +197,8 @@ const InstallDataCell = (props: DataCellProps): React.Node => {
   const disabled =
     Boolean(skipped) || required || !hasValidToken || !hasReadyPreflight;
   let label = '';
-  if (skipped) {
-    label = skipped.message || 'skipped';
+  if (skipped && skipped.message) {
+    label = skipped.message;
   } else if (recommended) {
     label = 'recommended';
   }
