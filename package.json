@@ -44,7 +44,7 @@
     "jest": "^23.6.0",
     "jest-dom": "^2.1.0",
     "jest-junit": "^5.2.0",
-    "lint-staged": "^8.0.3",
+    "lint-staged": "^8.0.4",
     "mini-css-extract-plugin": "^0.4.4",
     "node-sass": "^4.9.4",
     "npm-run-all": "^4.1.3",
