@@ -39,6 +39,8 @@ class TestPreflight:
             'is_valid': True,
             'status': 'started',
             'results': {},
+            'error_count': 0,
+            'warning_count': 0,
             'is_ready': False,
         }
 

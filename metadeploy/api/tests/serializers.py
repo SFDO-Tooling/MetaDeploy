@@ -5,31 +5,69 @@ from ..serializers import PreflightResultSerializer
 
 
 @pytest.mark.django_db
-def test_preflight_is_not_ready(
-        user_factory, plan_factory, preflight_result_factory):
-    user = user_factory()
-    plan = plan_factory()
-    preflight = preflight_result_factory(
-        user=user,
-        organization_url=user.instance_url,
-        plan=plan,
-    )
-    serializer = PreflightResultSerializer(instance=preflight).data
-    assert not serializer["is_ready"]
+class TestPreflightSerializer:
+    def test_preflight_error_count(
+            self, user_factory, plan_factory, preflight_result_factory):
+        user = user_factory()
+        plan = plan_factory()
+        preflight = preflight_result_factory(
+            user=user,
+            organization_url=user.instance_url,
+            plan=plan,
+            results={
+                0: [{'status': 'error'}],
+            },
+            status=PreflightResult.Status.complete,
+        )
+        serializer = PreflightResultSerializer(instance=preflight).data
+        assert serializer["error_count"] == 1
+        assert serializer["warning_count"] == 0
 
+    def test_preflight_warning_count(
+            self, user_factory, plan_factory, preflight_result_factory):
+        user = user_factory()
+        plan = plan_factory()
+        preflight = preflight_result_factory(
+            user=user,
+            organization_url=user.instance_url,
+            plan=plan,
+            results={
+                0: [{'status': 'warn'}],
+            },
+            status=PreflightResult.Status.complete,
+        )
+        serializer = PreflightResultSerializer(instance=preflight).data
+        assert serializer["error_count"] == 0
+        assert serializer["warning_count"] == 1
 
-@pytest.mark.django_db
-def test_preflight_is_ready(
-        user_factory, plan_factory, preflight_result_factory):
-    user = user_factory()
-    plan = plan_factory()
-    preflight = preflight_result_factory(
-        user=user,
-        organization_url=user.instance_url,
-        plan=plan,
-        results={},
-        is_valid=True,
-        status=PreflightResult.Status.complete,
-    )
-    serializer = PreflightResultSerializer(instance=preflight).data
-    assert serializer["is_ready"]
+    def test_preflight_is_ready(
+            self, user_factory, plan_factory, preflight_result_factory):
+        user = user_factory()
+        plan = plan_factory()
+        preflight = preflight_result_factory(
+            user=user,
+            organization_url=user.instance_url,
+            plan=plan,
+            results={
+                0: [{'status': 'warn'}],
+            },
+            status=PreflightResult.Status.complete,
+        )
+        serializer = PreflightResultSerializer(instance=preflight).data
+        assert serializer["is_ready"]
+
+    def test_preflight_is_not_ready(
+            self, user_factory, plan_factory, preflight_result_factory):
+        user = user_factory()
+        plan = plan_factory()
+        preflight = preflight_result_factory(
+            user=user,
+            organization_url=user.instance_url,
+            plan=plan,
+            results={
+                0: [{'status': 'error'}],
+            },
+            status=PreflightResult.Status.complete,
+        )
+        serializer = PreflightResultSerializer(instance=preflight).data
+        assert not serializer["is_ready"]

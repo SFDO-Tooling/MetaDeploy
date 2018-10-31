@@ -11,6 +11,10 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
 
+import { CONSTANTS } from 'plans/reducer';
+
+import { ErrorsList } from 'components/plans/preflightResults';
+
 import type {
   Plan as PlanType,
   Step as StepType,
@@ -23,7 +27,10 @@ type DataCellProps = {
   user?: UserType,
   preflight?: ?PreflightType,
   item?: StepType,
+  className?: string,
 };
+
+const { RESULT_STATUS } = CONSTANTS;
 
 class NameDataCell extends React.Component<
   DataCellProps,
@@ -35,25 +42,74 @@ class NameDataCell extends React.Component<
   }
 
   render(): React.Node {
-    const name = this.props.item && this.props.item.name;
-    const description = this.props.item && this.props.item.description;
+    const { preflight, item, className, ...otherProps } = this.props;
+    /* istanbul ignore if */
+    if (!item) {
+      return null;
+    }
+    const { name, description } = item;
+    const id = item.id.toString();
+    const result = preflight && preflight.results && preflight.results[id];
+    let hasError = false;
+    let hasWarning = false;
+    let optional;
+    let optionalMsg = '';
+    if (result) {
+      hasError =
+        result.find(err => err.status === RESULT_STATUS.ERROR) !== undefined;
+      hasWarning =
+        result.find(err => err.status === RESULT_STATUS.WARN) !== undefined;
+      optional = result.find(res => res.status === RESULT_STATUS.OPTIONAL);
+      optionalMsg = optional && optional.message;
+    }
+    let display = name;
+    if (optionalMsg) {
+      display = `${name} — ${optionalMsg}`;
+    }
+    const classes = classNames(className, {
+      'has-warning': hasWarning,
+      'has-error': hasError,
+    });
+    const errorList =
+      result && (hasError || hasWarning) ? (
+        <ErrorsList errorList={result} />
+      ) : null;
     return (
-      <DataTableCell title={name} {...this.props}>
+      <DataTableCell title={name} className={classes} {...otherProps}>
         {description ? (
-          <Accordion className="slds-cell-wrap">
-            <AccordionPanel
-              id={this.props.item && this.props.item.id.toString()}
-              summary={name}
-              expanded={this.state.expanded}
-              onTogglePanel={() => {
-                this.setState({ expanded: !this.state.expanded });
-              }}
-            >
-              {description}
-            </AccordionPanel>
-          </Accordion>
+          <>
+            <Accordion className="slds-cell-wrap">
+              <AccordionPanel
+                id={id}
+                title={name}
+                summary={<p className="slds-cell-wrap">{display}</p>}
+                expanded={this.state.expanded}
+                onTogglePanel={() => {
+                  this.setState({ expanded: !this.state.expanded });
+                }}
+              >
+                {description}
+              </AccordionPanel>
+            </Accordion>
+            {errorList ? (
+              <div
+                className="step-name-no-icon
+                  slds-p-bottom_small
+                  slds-cell-wrap"
+              >
+                {errorList}
+              </div>
+            ) : null}
+          </>
         ) : (
-          <span className="step-name-no-icon">{name}</span>
+          <div
+            className="step-name-no-icon
+              slds-p-vertical_small
+              slds-cell-wrap"
+          >
+            <p className={errorList ? 'slds-p-bottom_small' : ''}>{display}</p>
+            {errorList}
+          </div>
         )}
       </DataTableCell>
     );
@@ -62,8 +118,12 @@ class NameDataCell extends React.Component<
 NameDataCell.displayName = DataTableCell.displayName;
 
 const KindDataCell = (props: DataCellProps): React.Node => {
-  const value = props.item && props.item.kind;
-  const iconName = props.item && props.item.kind_icon;
+  /* istanbul ignore if */
+  if (!props.item) {
+    return null;
+  }
+  const value = props.item.kind;
+  const iconName = props.item.kind_icon;
   return (
     <DataTableCell title={value} {...props}>
       {iconName ? (
@@ -84,7 +144,16 @@ const KindDataCell = (props: DataCellProps): React.Node => {
 KindDataCell.displayName = DataTableCell.displayName;
 
 const RequiredDataCell = (props: DataCellProps): React.Node => {
-  const required = props.item && props.item.is_required;
+  const { preflight, item } = props;
+  /* istanbul ignore if */
+  if (!item) {
+    return null;
+  }
+  const id = item.id.toString();
+  const result = preflight && preflight.results && preflight.results[id];
+  const optional =
+    result && result.find(res => res.status === RESULT_STATUS.OPTIONAL);
+  const required = item.is_required && !optional;
   const classes = classNames(
     'slds-align-middle',
     'slds-badge',
@@ -101,18 +170,37 @@ const RequiredDataCell = (props: DataCellProps): React.Node => {
 RequiredDataCell.displayName = DataTableCell.displayName;
 
 const InstallDataCell = (props: DataCellProps): React.Node => {
-  const required = props.item && props.item.is_required;
-  const recommended = !required && props.item && props.item.is_recommended;
+  const { preflight, item } = props;
+  /* istanbul ignore if */
+  if (!item) {
+    return null;
+  }
   const hasValidToken = props.user && props.user.valid_token_for !== null;
-  const hasReadyPreflight = props.preflight && props.preflight.is_ready;
-  const disabled = required || !hasValidToken || !hasReadyPreflight;
+  const hasReadyPreflight = preflight && preflight.is_ready;
+  const id = item.id.toString();
+  const result = preflight && preflight.results && preflight.results[id];
+  let skipped, optional;
+  if (result) {
+    skipped = result.find(res => res.status === RESULT_STATUS.SKIP);
+    optional = result.find(res => res.status === RESULT_STATUS.OPTIONAL);
+  }
+  const required = item.is_required && !optional;
+  const recommended = !required && item.is_recommended;
+  const disabled =
+    Boolean(skipped) || required || !hasValidToken || !hasReadyPreflight;
+  let label = '';
+  if (skipped) {
+    label = skipped.message || 'skipped';
+  } else if (recommended) {
+    label = 'recommended';
+  }
   return (
     <DataTableCell {...props}>
       <Checkbox
-        checked={required || recommended}
+        checked={!skipped && (required || recommended)}
         disabled={disabled}
         className="slds-p-vertical_x-small"
-        labels={{ label: recommended ? 'recommended' : '' }}
+        labels={{ label }}
       />
     </DataTableCell>
   );
@@ -162,20 +250,14 @@ const StepsTable = ({
       items={plan.steps.map(step => ({ ...step, id: step.id.toString() }))}
       id="plan-steps-table"
     >
-      <DataTableColumn
-        key="name"
-        label="Steps"
-        property="name"
-        primaryColumn
-        truncate
-      >
-        <NameDataCell />
+      <DataTableColumn key="name" label="Steps" property="name" primaryColumn>
+        <NameDataCell preflight={preflight} />
       </DataTableColumn>
-      <DataTableColumn key="kind" label="Type" property="kind" truncate>
+      <DataTableColumn key="kind" label="Type" property="kind">
         <KindDataCell />
       </DataTableColumn>
       <DataTableColumn key="is_required" property="is_required">
-        <RequiredDataCell />
+        <RequiredDataCell preflight={preflight} />
       </DataTableColumn>
       <DataTableColumn
         key="is_recommended"

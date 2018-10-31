@@ -17,7 +17,13 @@ from asgiref.sync import async_to_sync
 from colorfield.fields import ColorField
 from model_utils import Choices, FieldTracker
 
-from .push import user_token_expired, preflight_completed, notify_post_task
+from .push import (
+    user_token_expired,
+    preflight_completed,
+    preflight_failed,
+    preflight_invalidated,
+    notify_post_task,
+)
 
 
 VERSION_STRING = r'^[a-zA-Z0-9._+-]+$'
@@ -333,7 +339,7 @@ class Step(models.Model):
 
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
     name = models.CharField(max_length=1024)
-    description = models.TextField()
+    description = models.TextField(blank=True)
     is_required = models.BooleanField(default=True)
     is_recommended = models.BooleanField(default=True)
     kind = models.CharField(choices=Kind, default=Kind.metadata, max_length=64)
@@ -376,6 +382,13 @@ class Job(models.Model):
     enqueued_at = models.DateTimeField(null=True)
     job_id = models.UUIDField(null=True)
 
+    def skip_tasks(self):
+        return [
+            step.task_name
+            for step
+            in set(self.plan.step_set.all()) - set(self.steps.all())
+        ]
+
     def save(self, *args, **kwargs):
         ret = super().save(*args, **kwargs)
         has_changed = self.tracker.has_changed("completed_steps")
@@ -385,9 +398,9 @@ class Job(models.Model):
 
 
 class PreflightResult(models.Model):
-    Status = Choices("started", "complete")
+    Status = Choices("started", "complete", "failed")
 
-    tracker = FieldTracker(fields=("status",))
+    tracker = FieldTracker(fields=("status", "is_valid"))
 
     organization_url = models.URLField()
     user = models.ForeignKey(
@@ -411,12 +424,36 @@ class PreflightResult(models.Model):
     #   ...
     # }
 
-    def save(self, *args, **kwargs):
-        ret = super().save(*args, **kwargs)
+    def _push_if_condition(self, condition, fn):
+        if condition:
+            async_to_sync(fn)(self)
+
+    def push_if_completed(self):
         has_completed = (
-            self.tracker.has_changed('status')
+            self.tracker.has_changed("status")
             and self.status == PreflightResult.Status.complete
         )
-        if has_completed:
-            async_to_sync(preflight_completed)(self)
+        self._push_if_condition(has_completed, preflight_completed)
+
+    def push_if_failed(self):
+        has_failed = (
+            self.tracker.has_changed("status")
+            and self.status == PreflightResult.Status.failed
+        )
+        self._push_if_condition(has_failed, preflight_failed)
+
+    def push_if_invalidated(self):
+        is_invalidated = (
+            self.tracker.has_changed("is_valid")
+            and not self.is_valid
+        )
+        self._push_if_condition(is_invalidated, preflight_invalidated)
+
+    def save(self, *args, **kwargs):
+        ret = super().save(*args, **kwargs)
+
+        self.push_if_completed()
+        self.push_if_failed()
+        self.push_if_invalidated()
+
         return ret
