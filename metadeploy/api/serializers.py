@@ -170,7 +170,7 @@ class JobSerializer(serializers.ModelSerializer):
         return not any(preflight_errors)
 
     @staticmethod
-    def has_valid_steps(steps, plan, preflight):
+    def has_valid_steps(user, plan, steps, preflight):
         preflight_optional_steps = set(
             int(k)  # Why is this a string? Accident of pytest-django?
             for k, v
@@ -181,9 +181,13 @@ class JobSerializer(serializers.ModelSerializer):
                 in v
             ])
         )
+        job_completed_steps = set(chain(*Job.objects.filter(
+            user=user,
+            plan=plan,
+        ).order_by('-created_at').values_list('completed_steps', flat=True)))
         required_steps = set(
             plan.step_set.filter(is_required=True).values_list("id", flat=True)
-        ) - preflight_optional_steps
+        ) - preflight_optional_steps - job_completed_steps
         return not set(required_steps) - set([s.id for s in steps])
 
     def validate(self, data):
@@ -193,7 +197,13 @@ class JobSerializer(serializers.ModelSerializer):
         )
         if not self.has_valid_preflight(most_recent_preflight):
             raise serializers.ValidationError("No valid preflight.")
-        if not self.has_valid_steps(data["steps"], data["plan"], most_recent_preflight):  # noqa
+        has_valid_steps = self.has_valid_steps(
+            data["user"],
+            data["plan"],
+            data["steps"],
+            most_recent_preflight,
+        )
+        if not has_valid_steps:
             raise serializers.ValidationError("Invalid steps for plan.")
         return data
 
