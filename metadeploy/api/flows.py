@@ -10,7 +10,14 @@ class BasicFlow(flows.BaseFlow):
     # callbacks to record and possibly push progress:
     # pre_flow, post_flow, pre_task, post_task, pre_subflow,
     # post_subflow
-    pass
+    def __init__(self, *args, job=None, **kwargs):
+        self.job = job
+        return super().__init__(*args, **kwargs)
+
+    def _post_task(self, task):
+        self.job.completed_steps.append(task.name)
+        self.job.save()
+        return super()._post_task(task)
 
 
 class PreflightFlow(flows.BaseFlow):
