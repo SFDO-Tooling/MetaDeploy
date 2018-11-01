@@ -17,15 +17,27 @@ from .provider import (
 
 class SaveInstanceUrlMixin:
     def complete_login(self, request, app, token, **kwargs):
-        resp = requests.get(self.userinfo_url, params={'oauth_token': token})
+        resp = requests.get(self.userinfo_url, params={"oauth_token": token})
         resp.raise_for_status()
         extra_data = resp.json()
-        instance_url = kwargs.get('response', {}).get('instance_url', None)
+        instance_url = kwargs.get("response", {}).get("instance_url", None)
         ret = self.get_provider().sociallogin_from_response(
             request,
             extra_data,
         )
-        ret.account.extra_data['instance_url'] = instance_url
+        ret.account.extra_data["instance_url"] = instance_url
+        org_url = (
+            extra_data["urls"]["sobjects"] + "Organization/{org_id}"
+        ).format(
+            version="44.0",
+            org_id=extra_data["organization_id"],
+        )
+        headers = {
+            "Authorization": "Bearer {}".format(token),
+        }
+        resp = requests.get(org_url, headers=headers)
+        resp.raise_for_status()
+        ret.account.extra_data["organization_details"] = resp.json()
         return ret
 
 

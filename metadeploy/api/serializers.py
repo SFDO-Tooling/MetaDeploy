@@ -24,6 +24,8 @@ class FullUserSerializer(serializers.ModelSerializer):
             'username',
             'email',
             'valid_token_for',
+            'org_name',
+            'org_type',
         )
 
 
