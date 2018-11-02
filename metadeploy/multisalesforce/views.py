@@ -16,6 +16,33 @@ from .provider import (
 
 
 class SaveInstanceUrlMixin:
+    def get_org_details(self, extra_data, token):
+        headers = {
+            "Authorization": "Bearer {}".format(token),
+        }
+        sobjects_url = extra_data["urls"]["sobjects"].format(version="44.0")
+
+        # Check permissions:
+        user_url = (sobjects_url + "User/{user_id}").format(
+            user_id=extra_data["user_id"],
+        )
+        resp = requests.get(user_url, headers=headers)
+        resp.raise_for_status()
+        profile_id = resp.json()["ProfileId"]
+        profile_url = (sobjects_url + "Profile/{profile_id}").format(
+            profile_id=profile_id,
+        )
+        resp = requests.get(profile_url, headers=headers)
+        resp.raise_for_status()
+        # TODO: Don"t use assert outside of tests.
+        assert resp.json()["PermissionsModifyAllData"]
+        org_url = (sobjects_url + "Organization/{org_id}").format(
+            org_id=extra_data["organization_id"],
+        )
+        resp = requests.get(org_url, headers=headers)
+        resp.raise_for_status()
+        return resp.json()
+
     def complete_login(self, request, app, token, **kwargs):
         resp = requests.get(self.userinfo_url, params={"oauth_token": token})
         resp.raise_for_status()
@@ -26,38 +53,12 @@ class SaveInstanceUrlMixin:
             extra_data,
         )
         ret.account.extra_data["instance_url"] = instance_url
-        headers = {
-            "Authorization": "Bearer {}".format(token),
-        }
+        try:
+            org_details = self.get_org_details(extra_data, token)
+        except (requests.HTTPError, AssertionError):
+            org_details = None
 
-        # Check permissions:
-        user_url = (extra_data["urls"]["sobjects"] + "User/{user_id}").format(
-            version="44.0",
-            user_id=extra_data["user_id"],
-        )
-        resp = requests.get(user_url, headers=headers)
-        resp.raise_for_status()
-        profile_id = resp.json()["ProfileId"]
-        profile_url = (
-            extra_data["urls"]["sobjects"] + "Profile/{profile_id}"
-        ).format(
-            version="44.0",
-            profile_id=profile_id,
-        )
-        resp = requests.get(profile_url, headers=headers)
-        resp.raise_for_status()
-        # TODO: Don"t use assert outside of tests.
-        assert resp.json()["PermissionsModifyAllData"]
-
-        org_url = (
-            extra_data["urls"]["sobjects"] + "Organization/{org_id}"
-        ).format(
-            version="44.0",
-            org_id=extra_data["organization_id"],
-        )
-        resp = requests.get(org_url, headers=headers)
-        resp.raise_for_status()
-        ret.account.extra_data["organization_details"] = resp.json()
+        ret.account.extra_data["organization_details"] = org_details
         return ret
 
 
