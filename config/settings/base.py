@@ -332,10 +332,12 @@ RQ_QUEUES = {
     'default': {
         'USE_REDIS_CACHE': 'default',
         'DEFAULT_TIMEOUT': 360,
+        'DEFAULT_RESULT_TTL': 720,
     },
     'short': {
         'USE_REDIS_CACHE': 'default',
         'DEFAULT_TIMEOUT': 10,
+        'DEFAULT_RESULT_TTL': 300,
     },
 }
 RQ = {
