@@ -25,6 +25,7 @@ import ProductIcon from 'components/products/icon';
 import ProductNotFound from 'components/products/product404';
 import StepsTable from 'components/plans/stepsTable';
 import Toasts from 'components/plans/toasts';
+import UserInfo from 'components/plans/userInfo';
 
 import type { Match } from 'react-router-dom';
 import type { AppState } from 'app/reducer';
@@ -120,6 +121,13 @@ const PlanDetail = ({
                 doStartPreflight={doStartPreflight}
               />
             ) : null}
+          </div>
+          <div
+            className="slds-p-around_medium
+              slds-size_1-of-1
+              slds-medium-size_1-of-2"
+          >
+            <UserInfo user={user} />
           </div>
           {plan.steps.length ? (
             <div
