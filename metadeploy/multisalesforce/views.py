@@ -55,7 +55,7 @@ class SaveInstanceUrlMixin:
         ret.account.extra_data["instance_url"] = instance_url
         try:
             org_details = self.get_org_details(extra_data, token)
-        except (requests.HTTPError, AssertionError):
+        except (requests.HTTPError, KeyError, AssertionError):
             org_details = None
 
         ret.account.extra_data["organization_details"] = org_details
