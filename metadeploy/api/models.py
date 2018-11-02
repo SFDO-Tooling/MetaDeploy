@@ -22,6 +22,7 @@ from .push import (
     preflight_completed,
     preflight_failed,
     preflight_invalidated,
+    notify_post_task,
 )
 
 
@@ -386,12 +387,15 @@ class Step(models.Model):
 
 
 class Job(models.Model):
+    tracker = FieldTracker(fields=("completed_steps",))
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
     )
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
     steps = models.ManyToManyField(Step)
+    completed_steps = JSONField(default=list, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     enqueued_at = models.DateTimeField(null=True)
     job_id = models.UUIDField(null=True)
@@ -402,6 +406,13 @@ class Job(models.Model):
             for step
             in set(self.plan.step_set.all()) - set(self.steps.all())
         ]
+
+    def save(self, *args, **kwargs):
+        ret = super().save(*args, **kwargs)
+        has_changed = self.tracker.has_changed("completed_steps")
+        if has_changed:
+            async_to_sync(notify_post_task)(self)
+        return ret
 
 
 class PreflightResult(models.Model):
