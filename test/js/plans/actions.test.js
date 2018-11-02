@@ -5,8 +5,6 @@ import { storeWithApi } from './../utils';
 import * as actions from 'plans/actions';
 
 describe('fetchPreflight', () => {
-  afterEach(fetchMock.reset);
-
   describe('success', () => {
     test('GETs preflight from api', () => {
       const store = storeWithApi({});
@@ -58,8 +56,6 @@ describe('fetchPreflight', () => {
 });
 
 describe('startPreflight', () => {
-  afterEach(fetchMock.reset);
-
   describe('success', () => {
     test('dispatches PREFLIGHT_STARTED action', () => {
       const store = storeWithApi({});

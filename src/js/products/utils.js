@@ -12,20 +12,39 @@ import type {
   Product as ProductType,
   Version as VersionType,
 } from 'products/reducer';
-import typeof { fetchVersion as FetchVersionType } from 'products/actions';
+
+export const shouldFetchVersion = ({
+  product,
+  version,
+  versionLabel,
+}: {
+  product: ProductType | null,
+  version?: VersionType | null,
+  versionLabel?: ?string,
+}): boolean => {
+  const hasProduct = product !== null;
+  const hasVersion = version !== null;
+  if (hasProduct && !hasVersion && versionLabel) {
+    const version404 =
+      product && product.versions && product.versions[versionLabel] === null;
+    if (!version404) {
+      // Fetch version from API
+      return true;
+    }
+  }
+  return false;
+};
 
 export const gatekeeper = ({
   product,
   version,
   versionLabel,
   plan,
-  doFetchVersion,
 }: {
   product: ProductType | null,
   version?: VersionType | null,
   versionLabel?: ?string,
   plan?: PlanType | null,
-  doFetchVersion?: FetchVersionType,
 }): React.Node | false => {
   if (product === null) {
     return <ProductNotFound />;
@@ -33,14 +52,12 @@ export const gatekeeper = ({
   if (version === null) {
     if (
       !versionLabel ||
-      !doFetchVersion ||
       (product.versions && product.versions[versionLabel] === null)
     ) {
       // Versions have already been fetched...
       return <VersionNotFound product={product} />;
     }
-    // Fetch version from API
-    doFetchVersion({ product: product.id, label: versionLabel });
+    // Fetching version from API
     return <Spinner />;
   }
   if (plan === null) {

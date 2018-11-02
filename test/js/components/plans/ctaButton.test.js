@@ -31,7 +31,6 @@ const defaultPreflight = {
 };
 
 describe('<CtaButton />', () => {
-  const doFetchPreflight = jest.fn();
   const doStartPreflight = jest.fn();
 
   const setup = options => {
@@ -46,7 +45,6 @@ describe('<CtaButton />', () => {
         plan={opts.plan}
         user={opts.user}
         preflight={opts.preflight}
-        doFetchPreflight={doFetchPreflight}
         doStartPreflight={doStartPreflight}
       />,
     );
@@ -62,10 +60,9 @@ describe('<CtaButton />', () => {
   });
 
   describe('unknown preflight', () => {
-    test('fetches preflight, renders loading btn', () => {
+    test('renders loading btn', () => {
       const { getByText } = setup({ preflight: undefined });
 
-      expect(doFetchPreflight).toHaveBeenCalledWith(1);
       expect(getByText('Loading...')).toBeVisible();
     });
   });
