@@ -15,6 +15,10 @@ from .provider import (
 )
 
 
+class SalesforcePermissionsError(Exception):
+    pass
+
+
 class SaveInstanceUrlMixin:
     def get_org_details(self, extra_data, token):
         headers = {
@@ -27,10 +31,11 @@ class SaveInstanceUrlMixin:
         ).format(version="44.0")
         resp = requests.get(org_info_url, headers=headers)
         resp.raise_for_status()
-        # TODO: Don't use assert outside of tests.
-        assert resp.json()["userSettings"]["canModifyAllData"]
-        # XXX: Also contains resp.json()["name"], but not ["type"], so
+
+        # Also contains resp.json()["name"], but not ["type"], so it's
         # insufficient to just call this endpoint.
+        if not resp.json()["userSettings"]["canModifyAllData"]:
+            raise SalesforcePermissionsError
 
         # Get org name and type:
         org_url = (
@@ -55,7 +60,7 @@ class SaveInstanceUrlMixin:
         ret.account.extra_data["instance_url"] = instance_url
         try:
             org_details = self.get_org_details(extra_data, token)
-        except (requests.HTTPError, KeyError, AssertionError):
+        except (requests.HTTPError, KeyError, SalesforcePermissionsError):
             org_details = None
 
         ret.account.extra_data["organization_details"] = org_details
