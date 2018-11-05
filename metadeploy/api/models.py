@@ -17,7 +17,15 @@ from asgiref.sync import async_to_sync
 from colorfield.fields import ColorField
 from model_utils import Choices, FieldTracker
 
-from .push import user_token_expired, preflight_completed
+from .push import (
+    user_token_expired,
+    preflight_completed,
+    preflight_failed,
+    preflight_invalidated,
+    notify_post_task,
+)
+
+from .constants import ORGANIZATION_DETAILS
 
 
 VERSION_STRING = r'^[a-zA-Z0-9._+-]+$'
@@ -33,6 +41,24 @@ class UserQuerySet(models.QuerySet):
 
 class User(AbstractUser):
     objects = UserQuerySet.as_manager()
+
+    @property
+    def org_name(self):
+        if self.social_account:
+            return self.social_account.extra_data.get(
+                ORGANIZATION_DETAILS,
+                {},
+            ).get('Name')
+        return None
+
+    @property
+    def org_type(self):
+        if self.social_account:
+            return self.social_account.extra_data.get(
+                ORGANIZATION_DETAILS,
+                {},
+            ).get('OrganizationType')
+        return None
 
     @property
     def instance_url(self):
@@ -333,7 +359,7 @@ class Step(models.Model):
 
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
     name = models.CharField(max_length=1024)
-    description = models.TextField()
+    description = models.TextField(blank=True)
     is_required = models.BooleanField(default=True)
     is_recommended = models.BooleanField(default=True)
     kind = models.CharField(choices=Kind, default=Kind.metadata, max_length=64)
@@ -363,21 +389,38 @@ class Step(models.Model):
 
 
 class Job(models.Model):
+    tracker = FieldTracker(fields=("completed_steps",))
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
     )
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
     steps = models.ManyToManyField(Step)
+    completed_steps = JSONField(default=list, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     enqueued_at = models.DateTimeField(null=True)
     job_id = models.UUIDField(null=True)
 
+    def skip_tasks(self):
+        return [
+            step.task_name
+            for step
+            in set(self.plan.step_set.all()) - set(self.steps.all())
+        ]
+
+    def save(self, *args, **kwargs):
+        ret = super().save(*args, **kwargs)
+        has_changed = self.tracker.has_changed("completed_steps")
+        if has_changed:
+            async_to_sync(notify_post_task)(self)
+        return ret
+
 
 class PreflightResult(models.Model):
-    Status = Choices("started", "complete")
+    Status = Choices("started", "complete", "failed")
 
-    tracker = FieldTracker(fields=("status",))
+    tracker = FieldTracker(fields=("status", "is_valid"))
 
     organization_url = models.URLField()
     user = models.ForeignKey(
@@ -401,12 +444,36 @@ class PreflightResult(models.Model):
     #   ...
     # }
 
-    def save(self, *args, **kwargs):
-        ret = super().save(*args, **kwargs)
+    def _push_if_condition(self, condition, fn):
+        if condition:
+            async_to_sync(fn)(self)
+
+    def push_if_completed(self):
         has_completed = (
-            self.tracker.has_changed('status')
+            self.tracker.has_changed("status")
             and self.status == PreflightResult.Status.complete
         )
-        if has_completed:
-            async_to_sync(preflight_completed)(self)
+        self._push_if_condition(has_completed, preflight_completed)
+
+    def push_if_failed(self):
+        has_failed = (
+            self.tracker.has_changed("status")
+            and self.status == PreflightResult.Status.failed
+        )
+        self._push_if_condition(has_failed, preflight_failed)
+
+    def push_if_invalidated(self):
+        is_invalidated = (
+            self.tracker.has_changed("is_valid")
+            and not self.is_valid
+        )
+        self._push_if_condition(is_invalidated, preflight_invalidated)
+
+    def save(self, *args, **kwargs):
+        ret = super().save(*args, **kwargs)
+
+        self.push_if_completed()
+        self.push_if_failed()
+        self.push_if_invalidated()
+
         return ret

@@ -4,6 +4,8 @@ import * as React from 'react';
 import Button from '@salesforce/design-system-react/components/button';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 
+import { CONSTANTS } from 'plans/reducer';
+
 import Login from 'components/header/login';
 
 import type {
@@ -11,13 +13,12 @@ import type {
   Preflight as PreflightType,
 } from 'plans/reducer';
 import type { User as UserType } from 'accounts/reducer';
-import typeof {
-  fetchPreflight as FetchPreflightType,
-  startPreflight as StartPreflightType,
-} from 'plans/actions';
+import typeof { startPreflight as StartPreflightType } from 'plans/actions';
 
+const { STATUS } = CONSTANTS;
 const btnClasses = 'slds-size_full slds-p-vertical_xx-small';
 
+// For use as a "loading" button label
 const LabelWithSpinner = ({ label }: { label: string }): React.Node => (
   <>
     <span className="slds-is-relative slds-m-right_large">
@@ -27,6 +28,7 @@ const LabelWithSpinner = ({ label }: { label: string }): React.Node => (
   </>
 );
 
+// Generic "login" dropdown with custom label text
 const LoginBtn = ({ label }: { label: string }): React.Node => (
   <Login
     id="plan-detail-login"
@@ -37,99 +39,102 @@ const LoginBtn = ({ label }: { label: string }): React.Node => (
   />
 );
 
-const CtaButton = ({
-  user,
-  plan,
-  preflight,
-  doFetchPreflight,
-  doStartPreflight,
+// Primary CTA button
+const ActionBtn = ({
+  label,
+  disabled,
+  onClick,
 }: {
+  label: string | React.Node,
+  disabled?: boolean,
+  onClick?: () => void,
+}): React.Node => (
+  <Button
+    className={btnClasses}
+    label={label}
+    variant="brand"
+    onClick={onClick}
+    disabled={disabled}
+  />
+);
+
+class CtaButton extends React.Component<{
   user: UserType,
   plan: PlanType,
   preflight: ?PreflightType,
-  doFetchPreflight: FetchPreflightType,
   doStartPreflight: StartPreflightType,
-}): React.Node => {
-  if (!user) {
-    // Require login first...
-    return <LoginBtn label="Log In to Start Pre-Install Validation" />;
-  }
-  const hasValidToken = user.valid_token_for !== null;
-
-  if (preflight === undefined) {
-    // Fetch most recent preflight result (if any exists)
-    doFetchPreflight(plan.id);
-    return (
-      <Button
-        className={btnClasses}
-        label={<LabelWithSpinner label="Loading..." />}
-        variant="brand"
-        disabled
-      />
-    );
-  }
-
-  if (preflight === null) {
-    // No prior preflight exists
+}> {
+  // Returns an action btn if logged in with a valid token;
+  // otherwise returns a login dropdown
+  getLoginOrActionBtn(label: string, onClick?: () => void): React.Node {
+    const { user } = this.props;
+    const hasValidToken = user && user.valid_token_for !== null;
     if (hasValidToken) {
-      return (
-        <Button
-          className={btnClasses}
-          label="Start Pre-Install Validation"
-          variant="brand"
-          onClick={() => {
-            doStartPreflight(plan.id);
-          }}
-        />
-      );
+      return <ActionBtn label={label} onClick={onClick} />;
     }
     // Require login first...
-    return <LoginBtn label="Log In to Start Pre-Install Validation" />;
+    return <LoginBtn label={`Log In to ${label}`} />;
   }
 
-  switch (preflight.status) {
-    case 'started': {
-      // Preflight in progress...
+  render(): React.Node {
+    const { user, plan, preflight, doStartPreflight } = this.props;
+    if (!user) {
+      // Require login first...
+      return <LoginBtn label="Log In to Start Pre-Install Validation" />;
+    }
+
+    // An `undefined` preflight means we don't know whether a preflight exists
+    if (preflight === undefined) {
       return (
-        <Button
-          className={btnClasses}
-          label={
-            <LabelWithSpinner label="Pre-Install Validation In Progress" />
-          }
-          variant="brand"
-        />
+        <ActionBtn label={<LabelWithSpinner label="Loading..." />} disabled />
       );
     }
-    case 'complete': {
-      if (preflight.is_ready) {
-        if (hasValidToken) {
-          // Preflight is done, valid, and has no errors -- allow installation
-          return (
-            <Button className={btnClasses} label="Install" variant="brand" />
-          );
-        }
-        // Require login first...
-        return <LoginBtn label="Log In to Install" />;
-      }
 
-      if (hasValidToken) {
-        // Prior preflight exists, but is no longer valid or has errors
+    const startPreflight = () => {
+      doStartPreflight(plan.id);
+    };
+    // A `null` preflight means we already fetched and no prior preflight exists
+    if (preflight === null) {
+      // No prior preflight exists
+      return this.getLoginOrActionBtn(
+        'Start Pre-Install Validation',
+        startPreflight,
+      );
+    }
+
+    switch (preflight.status) {
+      case STATUS.STARTED: {
+        // Preflight in progress...
         return (
-          <Button
-            className={btnClasses}
-            label="Re-Run Pre-Install Validation"
-            variant="brand"
-            onClick={() => {
-              doStartPreflight(plan.id);
-            }}
+          <ActionBtn
+            label={
+              <LabelWithSpinner label="Pre-Install Validation In Progress..." />
+            }
+            disabled
           />
         );
       }
-      // Require login first...
-      return <LoginBtn label="Log In to Re-Run Pre-Install Validation" />;
+      case STATUS.COMPLETE: {
+        if (preflight.is_ready) {
+          // Preflight is done, valid, and has no errors -- allow installation
+          return this.getLoginOrActionBtn('Install');
+        }
+        // Prior preflight exists, but is no longer valid or has errors
+        return this.getLoginOrActionBtn(
+          'Re-Run Pre-Install Validation',
+          startPreflight,
+        );
+      }
+      case STATUS.FAILED: {
+        // Prior preflight exists, but failed or had plan-level errors
+        return this.getLoginOrActionBtn(
+          'Re-Run Pre-Install Validation',
+          startPreflight,
+        );
+      }
     }
+    return null;
   }
-  return null;
-};
+}
 
 export default CtaButton;

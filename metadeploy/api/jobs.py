@@ -15,12 +15,14 @@ import os
 import sys
 import shutil
 import contextlib
+from datetime import timedelta
 from itertools import chain
 from glob import glob
 from tempfile import TemporaryDirectory
 import logging
 from urllib.parse import urlparse
 import zipfile
+from asgiref.sync import async_to_sync
 
 import github3
 
@@ -35,6 +37,7 @@ from django_rq import job
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 from .models import (
     Job,
@@ -45,16 +48,28 @@ from .flows import (
     BasicFlow,
     PreflightFlow,
 )
+from .push import report_error
 
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
+sync_report_error = async_to_sync(report_error)
 
 
 def extract_user_and_repo(gh_url):
     path = urlparse(gh_url).path
     _, user, repo, *_ = path.split('/')
     return user, repo
+
+
+@contextlib.contextmanager
+def report_errors_to(user):
+    try:
+        yield
+    except Exception as e:
+        sync_report_error(user)
+        logger.error(e)
+        raise
 
 
 @contextlib.contextmanager
@@ -113,6 +128,7 @@ def run_flows(user, plan, skip_tasks, flow_class=None, preflight_result=None):
         flow_name = plan.flow_name
 
     with contextlib.ExitStack() as stack:
+        stack.enter_context(report_errors_to(user))
         tmpdirname = stack.enter_context(TemporaryDirectory())
         stack.enter_context(cd(tmpdirname))
 
@@ -210,19 +226,10 @@ def run_flows(user, plan, skip_tasks, flow_class=None, preflight_result=None):
 run_flows_job = job(run_flows)
 
 
-def calculate_skips_for_plan(plan, steps):
-    return [
-        step.task_name
-        for step
-        in set(plan.step_set.all()) - set(steps)
-    ]
-
-
 def enqueuer():
     logger.debug('Enqueuer live', extra={'tag': 'jobs.enqueuer'})
     for j in Job.objects.filter(enqueued_at=None):
-        skip_tasks = calculate_skips_for_plan(j.plan, j.steps.all())
-        rq_job = run_flows_job.delay(j.user, j.plan, skip_tasks)
+        rq_job = run_flows_job.delay(j.user, j.plan, j.skip_tasks())
         j.job_id = rq_job.id
         j.enqueued_at = rq_job.enqueued_at
         j.save()
@@ -247,15 +254,38 @@ def preflight(user, plan):
         plan=plan,
         organization_url=user.instance_url,
     )
-    run_flows(
-        user,
-        plan,
-        [],
-        flow_class=PreflightFlow,
-        preflight_result=preflight_result,
-    )
-    preflight_result.status = PreflightResult.Status.complete
+    try:
+        run_flows(
+            user,
+            plan,
+            [],
+            flow_class=PreflightFlow,
+            preflight_result=preflight_result,
+        )
+        final_status = PreflightResult.Status.complete
+    except Exception:
+        logger.error(f"Preflight {preflight_result.id} failed.")
+        final_status = PreflightResult.Status.failed
+    preflight_result.status = final_status
     preflight_result.save()
 
 
 preflight_job = job(preflight)
+
+
+def expire_preflights():
+    now = timezone.now()
+    preflight_lifetime_ago = now - timedelta(
+        minutes=settings.PREFLIGHT_LIFETIME_MINUTES,
+    )
+    preflights_to_invalidate = PreflightResult.objects.filter(
+        status=PreflightResult.Status.complete,
+        created_at__lte=preflight_lifetime_ago,
+        is_valid=True,
+    )
+    for preflight in preflights_to_invalidate:
+        preflight.is_valid = False
+        preflight.save()
+
+
+expire_preflights_job = job(expire_preflights)

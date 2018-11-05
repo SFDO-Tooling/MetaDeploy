@@ -2,7 +2,71 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { render } from 'react-testing-library';
 
-import { gatekeeper } from 'products/utils';
+import { shouldFetchVersion, gatekeeper } from 'products/utils';
+
+const defaultProduct = {
+  id: 1,
+  slug: 'product-1',
+  title: 'Product 1',
+  description: 'This is a test product.',
+  category: 'salesforce',
+  image: null,
+  most_recent_version: {
+    id: 1,
+    product: 1,
+    label: '1.0.0',
+    description: 'This is a test product version.',
+    primary_plan: {
+      id: 1,
+      slug: 'my-plan',
+      title: 'My Plan',
+    },
+    secondary_plan: null,
+    additional_plans: [],
+  },
+};
+
+describe('shouldFetchVersion', () => {
+  describe('no product', () => {
+    test('return false', () => {
+      const actual = shouldFetchVersion({ product: null });
+
+      expect(actual).toBe(false);
+    });
+  });
+
+  describe('no version, already fetched', () => {
+    test('returns false', () => {
+      const product = {
+        ...defaultProduct,
+        versions: { '2.0.0': null },
+      };
+      const actual = shouldFetchVersion({
+        product,
+        version: null,
+        versionLabel: '2.0.0',
+      });
+
+      expect(actual).toBe(false);
+    });
+  });
+
+  describe('version not yet fetched', () => {
+    test('returns true', () => {
+      const product = {
+        ...defaultProduct,
+        versions: { '2.0.0': 'not null' },
+      };
+      const actual = shouldFetchVersion({
+        product,
+        version: null,
+        versionLabel: '2.0.0',
+      });
+
+      expect(actual).toBe(true);
+    });
+  });
+});
 
 describe('gatekeeper', () => {
   const setup = opts => {
@@ -10,28 +74,6 @@ describe('gatekeeper', () => {
       <MemoryRouter>{gatekeeper(opts)}</MemoryRouter>,
     );
     return { getByText };
-  };
-
-  const defaultProduct = {
-    id: 1,
-    slug: 'product-1',
-    title: 'Product 1',
-    description: 'This is a test product.',
-    category: 'salesforce',
-    image: null,
-    most_recent_version: {
-      id: 1,
-      product: 1,
-      label: '1.0.0',
-      description: 'This is a test product version.',
-      primary_plan: {
-        id: 1,
-        slug: 'my-plan',
-        title: 'My Plan',
-      },
-      secondary_plan: null,
-      additional_plans: [],
-    },
   };
 
   describe('no product', () => {
@@ -59,21 +101,18 @@ describe('gatekeeper', () => {
   });
 
   describe('version not yet fetched', () => {
-    test('renders <Spinner /> while fetching', () => {
+    test('renders <Spinner />', () => {
       const product = {
         ...defaultProduct,
         versions: { '2.0.0': 'not null' },
       };
-      const doFetchVersion = jest.fn();
       const { getByText } = setup({
         product,
         version: null,
         versionLabel: '2.0.0',
-        doFetchVersion,
       });
 
       expect(getByText('Loading...')).toBeVisible();
-      expect(doFetchVersion).toHaveBeenCalled();
     });
   });
 

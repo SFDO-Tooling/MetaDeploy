@@ -6,8 +6,6 @@ import * as actions from 'products/actions';
 import { addUrlParams } from 'utils/api';
 
 describe('fetchProducts', () => {
-  afterEach(fetchMock.reset);
-
   describe('success', () => {
     test('GETs products from api', () => {
       const store = storeWithApi({});
@@ -66,8 +64,6 @@ describe('fetchVersion', () => {
   beforeAll(() => {
     baseUrl = window.api_urls.version_list();
   });
-
-  afterEach(fetchMock.reset);
 
   describe('success', () => {
     test('GETs version from api', () => {

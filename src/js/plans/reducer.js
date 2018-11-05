@@ -1,5 +1,6 @@
 // @flow
 
+import type { LogoutAction } from 'accounts/actions';
 import type { PlansAction } from 'plans/actions';
 
 export type Step = {
@@ -20,43 +21,64 @@ export type Plan = {
 };
 export type Plans = Array<Plan>;
 
-type PreflightError = {
-  +status: 'warning' | 'error' | 'skipped',
+export type PreflightError = {
+  +status: 'warn' | 'error' | 'skip' | 'optional',
   +message?: string,
 };
 type PreflightErrors = {
-  +plan_errors?: Array<PreflightError>,
-  [number]: Array<PreflightError>,
+  +plan?: Array<PreflightError>,
+  [string]: Array<PreflightError>,
 };
 export type Preflight = {
   +plan?: number,
-  +status: 'started' | 'complete',
+  +status: 'started' | 'complete' | 'failed',
   +results?: PreflightErrors,
   +is_valid?: boolean,
+  +error_count?: number,
+  +warning_count?: number,
   +is_ready?: boolean,
 };
 export type PreflightsState = {
   [number]: Preflight,
 };
 
+export const CONSTANTS = {
+  STATUS: {
+    STARTED: 'started',
+    COMPLETE: 'complete',
+    FAILED: 'failed',
+  },
+  RESULT_STATUS: {
+    WARN: 'warn',
+    ERROR: 'error',
+    SKIP: 'skip',
+    OPTIONAL: 'optional',
+  },
+};
+
 const reducer = (
   preflights: PreflightsState = {},
-  action: PlansAction,
+  action: PlansAction | LogoutAction,
 ): PreflightsState => {
-  switch (action.type) {
-    case 'FETCH_PREFLIGHT_SUCCEEDED': {
-      const { plan, preflight } = action.payload;
-      return { ...preflights, [plan]: preflight };
-    }
-    case 'PREFLIGHT_STARTED': {
-      const plan = action.payload;
-      return { ...preflights, [plan]: { status: 'started' } };
-    }
-    case 'PREFLIGHT_COMPLETED': {
-      const preflight = action.payload;
-      const { plan } = preflight;
-      return { ...preflights, [plan]: preflight };
-    }
+  if (action.type === 'USER_LOGGED_OUT') {
+    return {};
+  }
+  if (action.type === 'FETCH_PREFLIGHT_SUCCEEDED') {
+    const { plan, preflight } = action.payload;
+    return { ...preflights, [plan]: preflight };
+  }
+  if (action.type === 'PREFLIGHT_STARTED') {
+    const plan = action.payload;
+    return { ...preflights, [plan]: { status: CONSTANTS.STATUS.STARTED } };
+  }
+  if (
+    action.type === 'PREFLIGHT_COMPLETED' ||
+    action.type === 'PREFLIGHT_FAILED' ||
+    action.type === 'PREFLIGHT_INVALIDATED'
+  ) {
+    const preflight = action.payload;
+    const { plan } = preflight;
+    return { ...preflights, [plan]: preflight };
   }
   return preflights;
 };

@@ -11,6 +11,8 @@ from .models import (
 
 from django.contrib.auth import get_user_model
 
+from .constants import WARN, ERROR
+
 
 User = get_user_model()
 
@@ -22,6 +24,8 @@ class FullUserSerializer(serializers.ModelSerializer):
             'username',
             'email',
             'valid_token_for',
+            'org_name',
+            'org_type',
         )
 
 
@@ -110,9 +114,11 @@ class JobSerializer(serializers.ModelSerializer):
     class Meta:
         model = Job
         fields = (
+            'id',
             'user',
             'plan',
             'steps',
+            'completed_steps',
             'created_at',
             'enqueued_at',
             'job_id',
@@ -120,6 +126,7 @@ class JobSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'created_at': {'read_only': True},
             'enqueued_at': {'read_only': True},
+            'completed_steps': {'read_only': True},
             'job_id': {'read_only': True},
         }
 
@@ -128,13 +135,34 @@ class PreflightResultSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault(),
     )
+    error_count = serializers.SerializerMethodField()
+    warning_count = serializers.SerializerMethodField()
     is_ready = serializers.SerializerMethodField()
+
+    @staticmethod
+    def _count_status_in_results(results, status_name):
+        count = 0
+        for val in results.values():
+            for status in val:
+                if status['status'] == status_name:
+                    count += 1
+        return count
+
+    def get_error_count(self, obj):
+        if obj.status == PreflightResult.Status.started:
+            return 0
+        return self._count_status_in_results(obj.results, ERROR)
+
+    def get_warning_count(self, obj):
+        if obj.status == PreflightResult.Status.started:
+            return 0
+        return self._count_status_in_results(obj.results, WARN)
 
     def get_is_ready(self, obj):
         return (
             obj.is_valid
             and obj.status == PreflightResult.Status.complete
-            and obj.results == {}
+            and self._count_status_in_results(obj.results, ERROR) == 0
         )
 
     class Meta:
@@ -147,6 +175,8 @@ class PreflightResultSerializer(serializers.ModelSerializer):
             'is_valid',
             'status',
             'results',
+            'error_count',
+            'warning_count',
             'is_ready',
         )
         extra_kwargs = {

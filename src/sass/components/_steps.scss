@@ -21,4 +21,14 @@
     // .slds-button__icon width (0.875rem) + margin-right (0.5rem)
     margin-left: 1.375rem;
   }
+
+  .has-warning {
+    border-left: 1rem solid $color-border-warning;
+    padding-left: 0.5rem;
+  }
+
+  .has-error {
+    border-left: 1rem solid $color-border-error;
+    padding-left: 0.5rem;
+  }
 }

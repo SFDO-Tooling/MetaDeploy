@@ -25,11 +25,12 @@ const defaultPreflight = {
   status: 'complete',
   results: {},
   is_valid: true,
+  error_count: 0,
+  warning_count: 0,
   is_ready: true,
 };
 
 describe('<CtaButton />', () => {
-  const doFetchPreflight = jest.fn();
   const doStartPreflight = jest.fn();
 
   const setup = options => {
@@ -44,7 +45,6 @@ describe('<CtaButton />', () => {
         plan={opts.plan}
         user={opts.user}
         preflight={opts.preflight}
-        doFetchPreflight={doFetchPreflight}
         doStartPreflight={doStartPreflight}
       />,
     );
@@ -60,10 +60,9 @@ describe('<CtaButton />', () => {
   });
 
   describe('unknown preflight', () => {
-    test('fetches preflight, renders loading btn', () => {
+    test('renders loading btn', () => {
       const { getByText } = setup({ preflight: undefined });
 
-      expect(doFetchPreflight).toHaveBeenCalledWith(1);
       expect(getByText('Loading...')).toBeVisible();
     });
   });
@@ -93,7 +92,7 @@ describe('<CtaButton />', () => {
     test('renders progress btn', () => {
       const { getByText } = setup({ preflight: { status: 'started' } });
 
-      expect(getByText('Pre-Install Validation In Progress')).toBeVisible();
+      expect(getByText('Pre-Install Validation In Progress...')).toBeVisible();
     });
   });
 
@@ -118,7 +117,7 @@ describe('<CtaButton />', () => {
   describe('complete preflight, with errors', () => {
     test('renders re-run-preflight btn', () => {
       const { getByText } = setup({
-        preflight: { status: 'complete', is_ready: false },
+        preflight: { status: 'complete', is_valid: true, error_count: 1 },
       });
 
       expect(getByText('Re-Run Pre-Install Validation')).toBeVisible();
@@ -127,7 +126,30 @@ describe('<CtaButton />', () => {
     describe('no valid token', () => {
       test('renders login btn', () => {
         const { getByText } = setup({
-          preflight: { status: 'complete', is_ready: false },
+          preflight: { status: 'complete', is_valid: true, error_count: 1 },
+          user: { valid_token_for: null },
+        });
+
+        expect(
+          getByText('Log In to Re-Run Pre-Install Validation'),
+        ).toBeVisible();
+      });
+    });
+  });
+
+  describe('failed preflight', () => {
+    test('renders re-run-preflight btn', () => {
+      const { getByText } = setup({
+        preflight: { status: 'failed', is_valid: true, error_count: 0 },
+      });
+
+      expect(getByText('Re-Run Pre-Install Validation')).toBeVisible();
+    });
+
+    describe('no valid token', () => {
+      test('renders login btn', () => {
+        const { getByText } = setup({
+          preflight: { status: 'failed', is_valid: true, error_count: 0 },
           user: { valid_token_for: null },
         });
 
@@ -158,7 +180,7 @@ describe('<CtaButton />', () => {
   describe('re-run-preflight click', () => {
     test('calls doStartPreflight with plan id', () => {
       const { getByText } = setup({
-        preflight: { status: 'complete', is_ready: false },
+        preflight: { status: 'complete', is_valid: false, error_count: 0 },
       });
       fireEvent.click(getByText('Re-Run Pre-Install Validation'));
 

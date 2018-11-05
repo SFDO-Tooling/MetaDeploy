@@ -10,7 +10,7 @@ import { createSelector } from 'reselect';
 import routes from 'utils/routes';
 import { fetchPreflight, startPreflight } from 'plans/actions';
 import { fetchVersion } from 'products/actions';
-import { gatekeeper } from 'products/utils';
+import { shouldFetchVersion, gatekeeper } from 'products/utils';
 import {
   selectProduct,
   selectVersion,
@@ -20,11 +20,15 @@ import { selectUserState } from 'components/header';
 
 import BodyContainer from 'components/bodyContainer';
 import CtaButton from 'components/plans/ctaButton';
+import PreflightResults from 'components/plans/preflightResults';
 import ProductIcon from 'components/products/icon';
 import ProductNotFound from 'components/products/product404';
 import StepsTable from 'components/plans/stepsTable';
+import Toasts from 'components/plans/toasts';
+import UserInfo from 'components/plans/userInfo';
 
 import type { Match } from 'react-router-dom';
+import type { AppState } from 'app/reducer';
 import type {
   Plan as PlanType,
   Preflight as PreflightType,
@@ -36,17 +40,8 @@ import type {
 } from 'products/reducer';
 import type { User as UserType } from 'accounts/reducer';
 
-const PlanDetail = ({
-  user,
-  product,
-  version,
-  versionLabel,
-  plan,
-  preflight,
-  doFetchVersion,
-  doFetchPreflight,
-  doStartPreflight,
-}: {
+type InitialProps = { match: Match };
+type Props = {
   user: UserType,
   product: ProductType | null,
   version: VersionType | null,
@@ -56,78 +51,128 @@ const PlanDetail = ({
   doFetchVersion: typeof fetchVersion,
   doFetchPreflight: typeof fetchPreflight,
   doStartPreflight: typeof startPreflight,
-}) => {
-  const blocked = gatekeeper({
-    product,
-    version,
-    versionLabel,
-    plan,
-    doFetchVersion,
-  });
-  if (blocked !== false) {
-    return blocked;
-  }
-  // this redundant check is required to satisfy Flow:
-  // https://flow.org/en/docs/lang/refinements/#toc-refinement-invalidations
-  /* istanbul ignore if */
-  if (!product || !version || !plan) {
-    return <ProductNotFound />;
-  }
-  return (
-    <DocumentTitle title={`${plan.title} | ${product.title} | MetaDeploy`}>
-      <>
-        <PageHeader
-          className="page-header
-            slds-p-around_x-large"
-          title={plan.title}
-          trail={[
-            <Link
-              to={routes.version_detail(product.slug, version.label)}
-              key={product.slug}
-            >
-              {product.title}, {version.label}
-            </Link>,
-          ]}
-          icon={<ProductIcon item={product} />}
-          variant="objectHome"
-        />
-        <BodyContainer>
-          <div
-            className="slds-p-around_medium
-              slds-size_1-of-1
-              slds-medium-size_1-of-2"
-          >
-            <div className="slds-text-longform">
-              <h3 className="slds-text-heading_small">{plan.title}</h3>
-              {plan.preflight_message ? <p>{plan.preflight_message}</p> : null}
-            </div>
-            {plan.steps.length ? (
-              <CtaButton
-                user={user}
-                plan={plan}
-                preflight={preflight}
-                doFetchPreflight={doFetchPreflight}
-                doStartPreflight={doStartPreflight}
-              />
-            ) : null}
-          </div>
-          {plan.steps.length ? (
-            <div
-              className="slds-p-around_medium
-                slds-size_1-of-1"
-            >
-              <StepsTable user={user} plan={plan} preflight={preflight} />
-            </div>
-          ) : null}
-        </BodyContainer>
-      </>
-    </DocumentTitle>
-  );
 };
 
+class PlanDetail extends React.Component<Props> {
+  componentDidMount() {
+    const {
+      user,
+      product,
+      version,
+      versionLabel,
+      plan,
+      preflight,
+      doFetchVersion,
+      doFetchPreflight,
+    } = this.props;
+    if (
+      product &&
+      versionLabel &&
+      shouldFetchVersion({ product, version, versionLabel })
+    ) {
+      // Fetch version from API
+      doFetchVersion({ product: product.id, label: versionLabel });
+    }
+
+    if (user && plan && preflight === undefined) {
+      // Fetch most recent preflight result (if any exists)
+      doFetchPreflight(plan.id);
+    }
+  }
+
+  render(): React.Node {
+    const {
+      user,
+      product,
+      version,
+      versionLabel,
+      plan,
+      preflight,
+      doStartPreflight,
+    } = this.props;
+    const blocked = gatekeeper({
+      product,
+      version,
+      versionLabel,
+      plan,
+    });
+    if (blocked !== false) {
+      return blocked;
+    }
+    // this redundant check is required to satisfy Flow:
+    // https://flow.org/en/docs/lang/refinements/#toc-refinement-invalidations
+    /* istanbul ignore if */
+    if (!product || !version || !plan) {
+      return <ProductNotFound />;
+    }
+    return (
+      <DocumentTitle title={`${plan.title} | ${product.title} | MetaDeploy`}>
+        <>
+          <PageHeader
+            className="page-header
+              slds-p-around_x-large"
+            title={plan.title}
+            trail={[
+              <Link
+                to={routes.version_detail(product.slug, version.label)}
+                key={product.slug}
+              >
+                {product.title}, {version.label}
+              </Link>,
+            ]}
+            icon={<ProductIcon item={product} />}
+            variant="objectHome"
+          />
+          <BodyContainer>
+            {preflight && user ? <Toasts preflight={preflight} /> : null}
+            <div
+              className="slds-p-around_medium
+                slds-size_1-of-1
+                slds-medium-size_1-of-2"
+            >
+              <div className="slds-text-longform">
+                <h3 className="slds-text-heading_small">{plan.title}</h3>
+                {plan.preflight_message ? (
+                  <p>{plan.preflight_message}</p>
+                ) : null}
+                {preflight && user ? (
+                  <PreflightResults preflight={preflight} />
+                ) : null}
+              </div>
+              {plan.steps.length ? (
+                <CtaButton
+                  user={user}
+                  plan={plan}
+                  preflight={preflight}
+                  doStartPreflight={doStartPreflight}
+                />
+              ) : null}
+            </div>
+            <div
+              className="slds-p-around_medium
+                slds-size_1-of-1
+                slds-medium-size_1-of-2"
+            >
+              <UserInfo user={user} />
+            </div>
+            {plan.steps.length ? (
+              <div
+                className="slds-p-around_medium
+                  slds-size_1-of-1"
+              >
+                <StepsTable user={user} plan={plan} preflight={preflight} />
+              </div>
+            ) : null}
+          </BodyContainer>
+        </>
+      </DocumentTitle>
+    );
+  }
+}
+
 const selectPlanSlug = (
-  appState,
-  { match: { params } }: { match: Match },
+  appState: AppState,
+  { match: { params } }: InitialProps,
 ): ?string => params.planSlug;
 
 const selectPlan = createSelector(
@@ -151,7 +196,7 @@ const selectPlan = createSelector(
   },
 );
 
-const selectPreflightsState = (appState): PreflightsState =>
+const selectPreflightsState = (appState: AppState): PreflightsState =>
   appState.preflights;
 
 const selectPreflight = createSelector(
@@ -160,11 +205,13 @@ const selectPreflight = createSelector(
     if (!plan) {
       return null;
     }
+    // A `null` preflight means we already fetched and no prior preflight exists
+    // An `undefined` preflight means we don't know whether a preflight exists
     return preflights[plan.id];
   },
 );
 
-const select = (appState, props) => ({
+const select = (appState: AppState, props: InitialProps) => ({
   user: selectUserState(appState),
   product: selectProduct(appState, props),
   version: selectVersion(appState, props),
@@ -179,7 +226,9 @@ const actions = {
   doStartPreflight: startPreflight,
 };
 
-export default connect(
+const WrappedPlanDetail: React.ComponentType<InitialProps> = connect(
   select,
   actions,
 )(PlanDetail);
+
+export default WrappedPlanDetail;

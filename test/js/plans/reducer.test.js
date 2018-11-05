@@ -8,6 +8,16 @@ describe('reducer', () => {
     expect(actual).toEqual(expected);
   });
 
+  test('handles USER_LOGGED_OUT action', () => {
+    const initial = { 1: null, 2: { status: 'started' } };
+    const expected = {};
+    const actual = reducer(initial, {
+      type: 'USER_LOGGED_OUT',
+    });
+
+    expect(actual).toEqual(expected);
+  });
+
   test('handles FETCH_PREFLIGHT_SUCCEEDED action', () => {
     const initial = { 1: null, 2: { status: 'started' } };
     const expected = { 1: null, 2: { status: 'complete' } };
@@ -36,6 +46,31 @@ describe('reducer', () => {
     const actual = reducer(initial, {
       type: 'PREFLIGHT_COMPLETED',
       payload: { plan: 2, status: 'complete' },
+    });
+
+    expect(actual).toEqual(expected);
+  });
+
+  test('handles PREFLIGHT_FAILED action', () => {
+    const initial = { 1: null, 2: { status: 'started' } };
+    const expected = { 1: null, 2: { plan: 2, status: 'failed' } };
+    const actual = reducer(initial, {
+      type: 'PREFLIGHT_FAILED',
+      payload: { plan: 2, status: 'failed' },
+    });
+
+    expect(actual).toEqual(expected);
+  });
+
+  test('handles PREFLIGHT_FAILED action', () => {
+    const initial = { 1: null, 2: { status: 'complete', is_valid: true } };
+    const expected = {
+      1: null,
+      2: { plan: 2, status: 'complete', is_valid: false },
+    };
+    const actual = reducer(initial, {
+      type: 'PREFLIGHT_FAILED',
+      payload: { plan: 2, status: 'complete', is_valid: false },
     });
 
     expect(actual).toEqual(expected);
