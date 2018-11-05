@@ -25,6 +25,8 @@ from .push import (
     notify_post_task,
 )
 
+from .constants import ORGANIZATION_DETAILS
+
 
 VERSION_STRING = r'^[a-zA-Z0-9._+-]+$'
 
@@ -44,7 +46,7 @@ class User(AbstractUser):
     def org_name(self):
         if self.social_account:
             return self.social_account.extra_data.get(
-                'organization_details',
+                ORGANIZATION_DETAILS,
                 {},
             ).get('Name')
         return None
@@ -53,7 +55,7 @@ class User(AbstractUser):
     def org_type(self):
         if self.social_account:
             return self.social_account.extra_data.get(
-                'organization_details',
+                ORGANIZATION_DETAILS,
                 {},
             ).get('OrganizationType')
         return None

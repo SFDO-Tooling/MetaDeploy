@@ -14,6 +14,8 @@ from .provider import (
     SalesforceCustomProvider,
 )
 
+from metadeploy.api.constants import ORGANIZATION_DETAILS
+
 
 class SalesforcePermissionsError(Exception):
     pass
@@ -63,7 +65,7 @@ class SaveInstanceUrlMixin:
         except (requests.HTTPError, KeyError, SalesforcePermissionsError):
             org_details = None
 
-        ret.account.extra_data["organization_details"] = org_details
+        ret.account.extra_data[ORGANIZATION_DETAILS] = org_details
         return ret
 
 
