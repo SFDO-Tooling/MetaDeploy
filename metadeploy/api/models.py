@@ -25,6 +25,8 @@ from .push import (
     notify_post_task,
 )
 
+from .constants import ORGANIZATION_DETAILS
+
 
 VERSION_STRING = r'^[a-zA-Z0-9._+-]+$'
 
@@ -39,6 +41,24 @@ class UserQuerySet(models.QuerySet):
 
 class User(AbstractUser):
     objects = UserQuerySet.as_manager()
+
+    @property
+    def org_name(self):
+        if self.social_account:
+            return self.social_account.extra_data.get(
+                ORGANIZATION_DETAILS,
+                {},
+            ).get('Name')
+        return None
+
+    @property
+    def org_type(self):
+        if self.social_account:
+            return self.social_account.extra_data.get(
+                ORGANIZATION_DETAILS,
+                {},
+            ).get('OrganizationType')
+        return None
 
     @property
     def instance_url(self):

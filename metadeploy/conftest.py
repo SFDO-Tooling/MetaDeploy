@@ -57,6 +57,10 @@ class SocialAccountFactory(factory.django.DjangoModelFactory):
     socialtoken_set = factory.RelatedFactory(SocialTokenFactory, 'account')
     extra_data = {
         'instance_url': 'https://example.com',
+        'organization_details': {
+            'Name': 'Sample Org',
+            'OrganizationType': 'Developer Edition',
+        },
     }
 
 

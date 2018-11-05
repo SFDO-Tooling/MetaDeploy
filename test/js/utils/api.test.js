@@ -5,8 +5,6 @@ import getApiFetch, { addUrlParams } from 'utils/api';
 describe('apiFetch', () => {
   const apiFetch = getApiFetch();
 
-  afterEach(fetchMock.reset);
-
   test('200: returns response', () => {
     const expected = { foo: 'bar' };
     fetchMock.getOnce('/test/url/', expected);

@@ -6,6 +6,8 @@ export type User = {
   +username: string,
   +email: string,
   +valid_token_for: string | null,
+  +org_name: string | null,
+  +org_type: string | null,
 } | null;
 
 const reducer = (user: User = null, action: UserAction): User => {

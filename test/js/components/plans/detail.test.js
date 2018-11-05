@@ -1,9 +1,18 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
+import { fetchVersion } from 'products/actions';
+import { fetchPreflight } from 'plans/actions';
+
 import { renderWithRedux, storeWithApi } from './../../utils';
 
 import PlanDetail from 'components/plans/detail';
+
+jest.mock('products/actions');
+jest.mock('plans/actions');
+
+fetchVersion.mockReturnValue({ type: 'TEST' });
+fetchPreflight.mockReturnValue({ type: 'TEST' });
 
 const defaultState = {
   products: [
@@ -76,6 +85,24 @@ describe('<PlanDetail />', () => {
       const { getByText } = setup({ initialState: { products: [] } });
 
       expect(getByText('list of all products')).toBeVisible();
+    });
+  });
+
+  describe('unknown version', () => {
+    test('fetches version', () => {
+      setup({ versionLabel: '2.0.0' });
+
+      expect(fetchVersion).toHaveBeenCalledWith({ product: 1, label: '2.0.0' });
+    });
+  });
+
+  describe('unknown preflight', () => {
+    test('fetches preflight', () => {
+      setup({
+        initialState: { ...defaultState, preflights: {} },
+      });
+
+      expect(fetchPreflight).toHaveBeenCalledWith(1);
     });
   });
 

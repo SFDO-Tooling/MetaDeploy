@@ -1,11 +1,17 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
+import { fetchVersion } from 'products/actions';
+
 import { renderWithRedux } from './../../utils';
 
 import routes from 'utils/routes';
 
 import { ProductDetail, VersionDetail } from 'components/products/detail';
+
+jest.mock('products/actions');
+
+fetchVersion.mockReturnValue({ type: 'TEST' });
 
 const defaultState = {
   products: [
@@ -95,6 +101,16 @@ describe('<VersionDetail />', () => {
       const { getByText } = setup({ initialState: { products: [] } });
 
       expect(getByText('list of all products')).toBeVisible();
+    });
+  });
+
+  describe('unknown version', () => {
+    test('fetches version', () => {
+      setup({
+        versionLabel: '2.0.0',
+      });
+
+      expect(fetchVersion).toHaveBeenCalledWith({ product: 1, label: '2.0.0' });
     });
   });
 

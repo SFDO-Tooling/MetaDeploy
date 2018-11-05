@@ -1,5 +1,6 @@
 // @flow
 
+import type { LogoutAction } from 'accounts/actions';
 import type { PlansAction } from 'plans/actions';
 
 export type Step = {
@@ -57,8 +58,11 @@ export const CONSTANTS = {
 
 const reducer = (
   preflights: PreflightsState = {},
-  action: PlansAction,
+  action: PlansAction | LogoutAction,
 ): PreflightsState => {
+  if (action.type === 'USER_LOGGED_OUT') {
+    return {};
+  }
   if (action.type === 'FETCH_PREFLIGHT_SUCCEEDED') {
     const { plan, preflight } = action.payload;
     return { ...preflights, [plan]: preflight };

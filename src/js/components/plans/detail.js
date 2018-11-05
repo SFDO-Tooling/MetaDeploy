@@ -10,7 +10,7 @@ import { createSelector } from 'reselect';
 import routes from 'utils/routes';
 import { fetchPreflight, startPreflight } from 'plans/actions';
 import { fetchVersion } from 'products/actions';
-import { gatekeeper } from 'products/utils';
+import { shouldFetchVersion, gatekeeper } from 'products/utils';
 import {
   selectProduct,
   selectVersion,
@@ -25,6 +25,7 @@ import ProductIcon from 'components/products/icon';
 import ProductNotFound from 'components/products/product404';
 import StepsTable from 'components/plans/stepsTable';
 import Toasts from 'components/plans/toasts';
+import UserInfo from 'components/plans/userInfo';
 
 import type { Match } from 'react-router-dom';
 import type { AppState } from 'app/reducer';
@@ -52,88 +53,122 @@ type Props = {
   doStartPreflight: typeof startPreflight,
 };
 
-const PlanDetail = ({
-  user,
-  product,
-  version,
-  versionLabel,
-  plan,
-  preflight,
-  doFetchVersion,
-  doFetchPreflight,
-  doStartPreflight,
-}: Props) => {
-  const blocked = gatekeeper({
-    product,
-    version,
-    versionLabel,
-    plan,
-    doFetchVersion,
-  });
-  if (blocked !== false) {
-    return blocked;
+class PlanDetail extends React.Component<Props> {
+  componentDidMount() {
+    const {
+      user,
+      product,
+      version,
+      versionLabel,
+      plan,
+      preflight,
+      doFetchVersion,
+      doFetchPreflight,
+    } = this.props;
+    if (
+      product &&
+      versionLabel &&
+      shouldFetchVersion({ product, version, versionLabel })
+    ) {
+      // Fetch version from API
+      doFetchVersion({ product: product.id, label: versionLabel });
+    }
+
+    if (user && plan && preflight === undefined) {
+      // Fetch most recent preflight result (if any exists)
+      doFetchPreflight(plan.id);
+    }
   }
-  // this redundant check is required to satisfy Flow:
-  // https://flow.org/en/docs/lang/refinements/#toc-refinement-invalidations
-  /* istanbul ignore if */
-  if (!product || !version || !plan) {
-    return <ProductNotFound />;
-  }
-  return (
-    <DocumentTitle title={`${plan.title} | ${product.title} | MetaDeploy`}>
-      <>
-        <PageHeader
-          className="page-header
-            slds-p-around_x-large"
-          title={plan.title}
-          trail={[
-            <Link
-              to={routes.version_detail(product.slug, version.label)}
-              key={product.slug}
-            >
-              {product.title}, {version.label}
-            </Link>,
-          ]}
-          icon={<ProductIcon item={product} />}
-          variant="objectHome"
-        />
-        <BodyContainer>
-          {preflight && user ? <Toasts preflight={preflight} /> : null}
-          <div
-            className="slds-p-around_medium
-              slds-size_1-of-1
-              slds-medium-size_1-of-2"
-          >
-            <div className="slds-text-longform">
-              <h3 className="slds-text-heading_small">{plan.title}</h3>
-              {plan.preflight_message ? <p>{plan.preflight_message}</p> : null}
-              {preflight && user ? (
-                <PreflightResults preflight={preflight} />
-              ) : null}
-            </div>
-            {plan.steps.length ? (
-              <CtaButton
-                user={user}
-                plan={plan}
-                preflight={preflight}
-                doFetchPreflight={doFetchPreflight}
-                doStartPreflight={doStartPreflight}
-              />
-            ) : null}
-          </div>
-          {plan.steps.length ? (
+
+  render(): React.Node {
+    const {
+      user,
+      product,
+      version,
+      versionLabel,
+      plan,
+      preflight,
+      doStartPreflight,
+    } = this.props;
+    const blocked = gatekeeper({
+      product,
+      version,
+      versionLabel,
+      plan,
+    });
+    if (blocked !== false) {
+      return blocked;
+    }
+    // this redundant check is required to satisfy Flow:
+    // https://flow.org/en/docs/lang/refinements/#toc-refinement-invalidations
+    /* istanbul ignore if */
+    if (!product || !version || !plan) {
+      return <ProductNotFound />;
+    }
+    return (
+      <DocumentTitle title={`${plan.title} | ${product.title} | MetaDeploy`}>
+        <>
+          <PageHeader
+            className="page-header
+              slds-p-around_x-large"
+            title={plan.title}
+            trail={[
+              <Link
+                to={routes.version_detail(product.slug, version.label)}
+                key={product.slug}
+              >
+                {product.title}, {version.label}
+              </Link>,
+            ]}
+            icon={<ProductIcon item={product} />}
+            variant="objectHome"
+          />
+          <BodyContainer>
+            {preflight && user ? <Toasts preflight={preflight} /> : null}
             <div
               className="slds-p-around_medium
-                slds-size_1-of-1"
+                slds-size_1-of-1
+                slds-medium-size_1-of-2"
             >
-              <StepsTable user={user} plan={plan} preflight={preflight} />
+              <div className="slds-text-longform">
+                <h3 className="slds-text-heading_small">{plan.title}</h3>
+                {plan.preflight_message ? (
+                  <p>{plan.preflight_message}</p>
+                ) : null}
+                {preflight && user ? (
+                  <PreflightResults preflight={preflight} />
+                ) : null}
+              </div>
+              {plan.steps.length ? (
+                <CtaButton
+                  user={user}
+                  plan={plan}
+                  preflight={preflight}
+                  doStartPreflight={doStartPreflight}
+                />
+              ) : null}
             </div>
-          ) : null}
-        </BodyContainer>
-      </>
-    </DocumentTitle>
-  );
-};
+            <div
+              className="slds-p-around_medium
+                slds-size_1-of-1
+                slds-medium-size_1-of-2"
+            >
+              <UserInfo user={user} />
+            </div>
+            {plan.steps.length ? (
+              <div
+                className="slds-p-around_medium
+                  slds-size_1-of-1"
+              >
+                <StepsTable user={user} plan={plan} preflight={preflight} />
+              </div>
+            ) : null}
+          </BodyContainer>
+        </>
+      </DocumentTitle>
+    );
+  }
+}
 
 const selectPlanSlug = (
   appState: AppState,
