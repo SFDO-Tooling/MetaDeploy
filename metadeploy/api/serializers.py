@@ -144,34 +144,37 @@ class JobSerializer(serializers.ModelSerializer):
         }
 
     @staticmethod
-    def has_valid_preflight(most_recent_preflight):
+    def _has_valid_preflight(most_recent_preflight):
         if not most_recent_preflight:
             return False
 
         return not most_recent_preflight.has_any_errors()
 
     @staticmethod
-    def has_valid_steps(*, user, plan, steps, preflight):
-        preflight_optional_steps = set(preflight.optional_steps())
-        job_completed_steps = set(Job.objects.completed_steps(
+    def _has_valid_steps(*, user, plan, steps, preflight):
+        """
+        Every set in this method is a set of numeric Step PKs, from the
+        local database.
+        """
+        job_completed_steps = set(Job.objects.all_completed_step_ids(
             user=user,
             plan=plan,
         ))
         required_steps = (
             set(plan.required_step_ids)
-            - preflight_optional_steps
+            - set(preflight.optional_step_ids)
             - job_completed_steps
         )
-        return not set(required_steps) - set([s.id for s in steps])
+        return not set(required_steps) - set(s.id for s in steps)
 
     def validate(self, data):
         most_recent_preflight = PreflightResult.objects.most_recent(
             user=data["user"],
             plan=data["plan"],
         )
-        if not self.has_valid_preflight(most_recent_preflight):
+        if not self._has_valid_preflight(most_recent_preflight):
             raise serializers.ValidationError("No valid preflight.")
-        has_valid_steps = self.has_valid_steps(
+        has_valid_steps = self._has_valid_steps(
             user=data["user"],
             plan=data["plan"],
             steps=data["steps"],

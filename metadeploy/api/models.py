@@ -371,11 +371,14 @@ class Step(models.Model):
 
 
 class JobQuerySet(models.QuerySet):
-    def completed_steps(self, *, user, plan):
-        return itertools.chain(*self.filter(
+    def all_completed_step_ids(self, *, user, plan):
+        step_names = itertools.chain(*self.filter(
             user=user,
             plan=plan,
         ).order_by("-created_at").values_list("completed_steps", flat=True))
+        return Step.objects.filter(
+            name__in=step_names,
+        ).values_list("id", flat=True)
 
 
 class Job(models.Model):
@@ -389,6 +392,7 @@ class Job(models.Model):
     )
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
     steps = models.ManyToManyField(Step)
+    # This should be a list of step names:
     completed_steps = JSONField(default=list, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     enqueued_at = models.DateTimeField(null=True)
@@ -462,9 +466,21 @@ class PreflightResult(models.Model):
             if val.get("status", None) == ERROR
         ))
 
-    def optional_steps(self):
+    @property
+    def optional_step_ids(self):
+        """
+        self.results is a dict mapping a unique identifier for a step to
+        a list of errors, warnings, and other outcomes of preflighting
+        that step. Right now, the unique identifier is the step's PK in
+        the Metadeploy database, but we may change that if we reconsider
+        it. However, currently, this is most convenient for the
+        frontend. This key is set by PreflightFlow._get_step_id.
+
+        So this will return a list of step PKs, for now.
+        """
         return [
-            int(k)  # Why is this a string? Accident of pytest-django?
+            # Why is this a string in tests? Accident of pytest-django?
+            int(k)
             for k, v
             in self.results.items()
             if any([

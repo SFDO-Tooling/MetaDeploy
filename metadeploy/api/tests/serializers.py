@@ -224,13 +224,13 @@ class TestJob:
             plan=plan,
             user=user,
             steps=[step1, step2, step3],
-            completed_steps=[step1.id],
+            completed_steps=[step1.name],
         )
         job_factory(
             plan=plan,
             user=user,
             steps=[step1, step2, step3],
-            completed_steps=[step2.id],
+            completed_steps=[step2.name],
         )
         data = {
             'plan': plan.id,
