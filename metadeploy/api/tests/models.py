@@ -100,18 +100,6 @@ class TestPlansProperties:
         plan2 = plan_factory(version=version, tier='additional')
         assert list(version.additional_plans) == [plan1, plan2]
 
-    def test_get_most_recent_preflight_for(
-            self, user_factory, plan_factory, preflight_result_factory):
-        user = user_factory()
-        plan = plan_factory()
-        preflight = preflight_result_factory(
-            user=user,
-            plan=plan,
-            organization_url=user.instance_url,
-        )
-
-        assert plan.get_most_recent_preflight_for(user) == preflight
-
 
 @pytest.mark.django_db
 def test_product_category_str(product_category_factory):

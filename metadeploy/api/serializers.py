@@ -1,5 +1,3 @@
-from itertools import chain
-
 from rest_framework import serializers
 
 from .models import (
@@ -13,7 +11,7 @@ from .models import (
 
 from django.contrib.auth import get_user_model
 
-from .constants import WARN, ERROR, OPTIONAL
+from .constants import WARN, ERROR
 
 
 User = get_user_model()
@@ -146,62 +144,38 @@ class JobSerializer(serializers.ModelSerializer):
         }
 
     @staticmethod
-    def get_most_recent_preflight(user, plan):
-        return PreflightResult.objects.filter(
-            plan=plan,
-            user=user,
-            is_valid=True,
-            status=PreflightResult.Status.complete,
-        ).order_by(
-            '-created_at',
-        ).first()
-
-    @staticmethod
     def has_valid_preflight(most_recent_preflight):
         if not most_recent_preflight:
             return False
 
-        preflight_errors = [
-            val
-            for val
-            in chain(*most_recent_preflight.results.values())
-            if val.get("status", None) == "error"
-        ]
-        return not any(preflight_errors)
+        return not most_recent_preflight.has_any_errors()
 
     @staticmethod
-    def has_valid_steps(user, plan, steps, preflight):
-        preflight_optional_steps = set(
-            int(k)  # Why is this a string? Accident of pytest-django?
-            for k, v
-            in preflight.results.items()
-            if any([
-                status["status"] == OPTIONAL
-                for status
-                in v
-            ])
-        )
-        job_completed_steps = set(chain(*Job.objects.filter(
+    def has_valid_steps(*, user, plan, steps, preflight):
+        preflight_optional_steps = set(preflight.optional_steps())
+        job_completed_steps = set(Job.objects.completed_steps(
             user=user,
             plan=plan,
-        ).order_by('-created_at').values_list('completed_steps', flat=True)))
-        required_steps = set(
-            plan.step_set.filter(is_required=True).values_list("id", flat=True)
-        ) - preflight_optional_steps - job_completed_steps
+        ))
+        required_steps = (
+            set(plan.required_step_ids)
+            - preflight_optional_steps
+            - job_completed_steps
+        )
         return not set(required_steps) - set([s.id for s in steps])
 
     def validate(self, data):
-        most_recent_preflight = self.get_most_recent_preflight(
-            data["user"],
-            data["plan"],
+        most_recent_preflight = PreflightResult.objects.most_recent(
+            user=data["user"],
+            plan=data["plan"],
         )
         if not self.has_valid_preflight(most_recent_preflight):
             raise serializers.ValidationError("No valid preflight.")
         has_valid_steps = self.has_valid_steps(
-            data["user"],
-            data["plan"],
-            data["steps"],
-            most_recent_preflight,
+            user=data["user"],
+            plan=data["plan"],
+            steps=data["steps"],
+            preflight=most_recent_preflight,
         )
         if not has_valid_steps:
             raise serializers.ValidationError("Invalid steps for plan.")
