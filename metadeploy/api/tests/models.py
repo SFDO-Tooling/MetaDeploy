@@ -11,6 +11,20 @@ from ..models import Version
 
 @pytest.mark.django_db
 class TestUser:
+    def test_org_name(self, user_factory):
+        user = user_factory()
+        assert user.org_name == 'Sample Org'
+
+        user.socialaccount_set.all().delete()
+        assert user.org_name is None
+
+    def test_org_type(self, user_factory):
+        user = user_factory()
+        assert user.org_type == 'Developer Edition'
+
+        user.socialaccount_set.all().delete()
+        assert user.org_type is None
+
     def test_social_account(self, user_factory):
         user = user_factory()
         assert user.social_account is not None

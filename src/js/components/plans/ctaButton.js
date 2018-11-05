@@ -13,10 +13,7 @@ import type {
   Preflight as PreflightType,
 } from 'plans/reducer';
 import type { User as UserType } from 'accounts/reducer';
-import typeof {
-  fetchPreflight as FetchPreflightType,
-  startPreflight as StartPreflightType,
-} from 'plans/actions';
+import typeof { startPreflight as StartPreflightType } from 'plans/actions';
 
 const { STATUS } = CONSTANTS;
 const btnClasses = 'slds-size_full slds-p-vertical_xx-small';
@@ -65,7 +62,6 @@ class CtaButton extends React.Component<{
   user: UserType,
   plan: PlanType,
   preflight: ?PreflightType,
-  doFetchPreflight: FetchPreflightType,
   doStartPreflight: StartPreflightType,
 }> {
   // Returns an action btn if logged in with a valid token;
@@ -81,13 +77,7 @@ class CtaButton extends React.Component<{
   }
 
   render(): React.Node {
-    const {
-      user,
-      plan,
-      preflight,
-      doFetchPreflight,
-      doStartPreflight,
-    } = this.props;
+    const { user, plan, preflight, doStartPreflight } = this.props;
     if (!user) {
       // Require login first...
       return <LoginBtn label="Log In to Start Pre-Install Validation" />;
@@ -95,8 +85,6 @@ class CtaButton extends React.Component<{
 
     // An `undefined` preflight means we don't know whether a preflight exists
     if (preflight === undefined) {
-      // Fetch most recent preflight result (if any exists)
-      doFetchPreflight(plan.id);
       return (
         <ActionBtn label={<LabelWithSpinner label="Loading..." />} disabled />
       );

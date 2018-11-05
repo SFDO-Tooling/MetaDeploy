@@ -6,7 +6,7 @@ import type { ThunkAction } from 'redux-thunk';
 import type { User } from 'accounts/reducer';
 
 type LoginAction = { type: 'USER_LOGGED_IN', payload: User };
-type LogoutAction = { type: 'USER_LOGGED_OUT' };
+export type LogoutAction = { type: 'USER_LOGGED_OUT' };
 export type TokenInvalidAction = { type: 'USER_TOKEN_INVALIDATED' };
 export type UserAction = LoginAction | LogoutAction | TokenInvalidAction;
 

@@ -19,13 +19,15 @@ const ProductItem = ({ item }: { item: ProductType }) => (
       slds-medium-size_1-of-2
       slds-large-size_1-of-3"
   >
-    <Card heading={item.title} icon={<ProductIcon item={item} />}>
-      <div className="slds-card__body_inner">
-        <div className="slds-text-title">
-          Version {item.most_recent_version.label}
-        </div>
-        <p className="slds-truncate">{item.description}</p>
+    <Card
+      heading={item.title}
+      icon={<ProductIcon item={item} />}
+      bodyClassName="slds-card__body_inner"
+    >
+      <div className="slds-text-title">
+        Version {item.most_recent_version.label}
       </div>
+      <p className="slds-truncate">{item.description}</p>
     </Card>
   </Link>
 );

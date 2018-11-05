@@ -133,6 +133,12 @@ declare module '@salesforce/design-system-react/components/toast/container' {
   declare export default Component;
 }
 
+declare module '@salesforce/design-system-react/components/illustration' {
+  import typeof { Component } from 'react';
+
+  declare export default Component;
+}
+
 declare module '@salesforce/design-system-react/components/settings' {
   declare export default { [string]: Function };
 }

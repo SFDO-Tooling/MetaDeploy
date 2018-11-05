@@ -8,6 +8,16 @@ describe('reducer', () => {
     expect(actual).toEqual(expected);
   });
 
+  test('handles USER_LOGGED_OUT action', () => {
+    const initial = { 1: null, 2: { status: 'started' } };
+    const expected = {};
+    const actual = reducer(initial, {
+      type: 'USER_LOGGED_OUT',
+    });
+
+    expect(actual).toEqual(expected);
+  });
+
   test('handles FETCH_PREFLIGHT_SUCCEEDED action', () => {
     const initial = { 1: null, 2: { status: 'started' } };
     const expected = { 1: null, 2: { status: 'complete' } };

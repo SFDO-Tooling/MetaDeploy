@@ -9,7 +9,13 @@ import DropdownTrigger from '@salesforce/design-system-react/components/menu-dro
 import type { User } from 'accounts/reducer';
 import typeof { logout as LogoutType } from 'accounts/actions';
 
-const Logout = ({ user, doLogout }: { user: User, doLogout: LogoutType }) => (
+const Logout = ({
+  user,
+  doLogout,
+}: {
+  user: User,
+  doLogout: LogoutType,
+}): React.Node => (
   <Dropdown
     id="logout"
     options={[
@@ -17,6 +23,7 @@ const Logout = ({ user, doLogout }: { user: User, doLogout: LogoutType }) => (
         label: user && user.username,
         type: 'header',
       },
+      { type: 'divider' },
       {
         label: 'Log Out',
         leftIcon: {
