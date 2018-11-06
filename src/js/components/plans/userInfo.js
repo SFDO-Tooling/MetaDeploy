@@ -14,9 +14,6 @@ import type { User as UserType } from 'accounts/reducer';
 const LoggedOut = (): React.Node => (
   <Illustration
     heading="Not Connected to Salesforce"
-    messageBody={
-      'Connect to the org on which you would like to install this plan.'
-    }
     name="No Connection"
     path={`${svgPath}#no-connection`}
     style={{ height: '200px' }}

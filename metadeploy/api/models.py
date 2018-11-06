@@ -24,6 +24,7 @@ from .push import (
     preflight_invalidated,
     notify_post_task,
 )
+from .constants import ERROR, OPTIONAL
 
 from .constants import ORGANIZATION_DETAILS
 
@@ -334,6 +335,12 @@ class Plan(SlugMixin, models.Model):
     slug_class = PlanSlug
 
     @property
+    def required_step_ids(self):
+        return self.step_set.filter(
+            is_required=True,
+        ).values_list("id", flat=True)
+
+    @property
     def slug_queryset(self):
         return self.planslug_set
 
@@ -342,11 +349,6 @@ class Plan(SlugMixin, models.Model):
 
     def __str__(self):
         return "{}, Plan {}".format(self.version, self.title)
-
-    def get_most_recent_preflight_for(self, user):
-        return self.preflightresult_set.filter(
-            user=user,
-        ).order_by('-created_at').first()
 
 
 class Step(models.Model):
@@ -388,8 +390,21 @@ class Step(models.Model):
         return f'Step {self.name} of {self.plan.title} ({self.order_key})'
 
 
+class JobQuerySet(models.QuerySet):
+    def all_completed_step_ids(self, *, user, plan):
+        step_names = itertools.chain(*self.filter(
+            user=user,
+            plan=plan,
+        ).order_by("-created_at").values_list("completed_steps", flat=True))
+        return Step.objects.filter(
+            name__in=step_names,
+        ).values_list("id", flat=True)
+
+
 class Job(models.Model):
     tracker = FieldTracker(fields=("completed_steps",))
+
+    objects = JobQuerySet.as_manager()
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -397,6 +412,7 @@ class Job(models.Model):
     )
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
     steps = models.ManyToManyField(Step)
+    # This should be a list of step names:
     completed_steps = JSONField(default=list, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     enqueued_at = models.DateTimeField(null=True)
@@ -417,10 +433,28 @@ class Job(models.Model):
         return ret
 
 
+class PreflightResultQuerySet(models.QuerySet):
+    def most_recent(self, *, user, plan, is_valid_and_complete=True):
+        kwargs = {
+            "plan": plan,
+            "user": user,
+        }
+        if is_valid_and_complete:
+            kwargs.update({
+                "is_valid": True,
+                "status": PreflightResult.Status.complete,
+            })
+        return self.filter(**kwargs).order_by(
+            '-created_at',
+        ).first()
+
+
 class PreflightResult(models.Model):
     Status = Choices("started", "complete", "failed")
 
     tracker = FieldTracker(fields=("status", "is_valid"))
+
+    objects = PreflightResultQuerySet.as_manager()
 
     organization_url = models.URLField()
     user = models.ForeignKey(
@@ -443,6 +477,38 @@ class PreflightResult(models.Model):
     #   <definitive name>: [... errors],
     #   ...
     # }
+
+    def has_any_errors(self):
+        return any((
+            val
+            for val
+            in itertools.chain(*self.results.values())
+            if val.get("status", None) == ERROR
+        ))
+
+    @property
+    def optional_step_ids(self):
+        """
+        self.results is a dict mapping a unique identifier for a step to
+        a list of errors, warnings, and other outcomes of preflighting
+        that step. Right now, the unique identifier is the step's PK in
+        the Metadeploy database, but we may change that if we reconsider
+        it. However, currently, this is most convenient for the
+        frontend. This key is set by PreflightFlow._get_step_id.
+
+        So this will return a list of step PKs, for now.
+        """
+        return [
+            # Why is this a string in tests? Accident of pytest-django?
+            int(k)
+            for k, v
+            in self.results.items()
+            if any([
+                status["status"] == OPTIONAL
+                for status
+                in v
+            ])
+        ]
 
     def _push_if_condition(self, condition, fn):
         if condition:

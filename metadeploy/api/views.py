@@ -19,6 +19,7 @@ from .models import (
     Product,
     Version,
     Plan,
+    PreflightResult,
 )
 from .jobs import preflight_job
 
@@ -59,7 +60,11 @@ class PlanViewSet(viewsets.ModelViewSet):
 
     def preflight_get(self, request):
         plan = self.get_object()
-        preflight = plan.get_most_recent_preflight_for(request.user)
+        preflight = PreflightResult.objects.most_recent(
+            user=request.user,
+            plan=plan,
+            is_valid_and_complete=False,
+        )
         if preflight is None:
             return Response('', status=status.HTTP_404_NOT_FOUND)
         serializer = PreflightResultSerializer(instance=preflight)
