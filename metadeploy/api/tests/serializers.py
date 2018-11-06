@@ -1,7 +1,10 @@
 import pytest
 
 from ..models import PreflightResult
-from ..serializers import PreflightResultSerializer
+from ..serializers import (
+    PreflightResultSerializer,
+    JobSerializer,
+)
 
 
 @pytest.mark.django_db
@@ -71,3 +74,168 @@ class TestPreflightSerializer:
         )
         serializer = PreflightResultSerializer(instance=preflight).data
         assert not serializer["is_ready"]
+
+
+@pytest.mark.django_db
+class TestJob:
+    def test_create_good(
+            self, rf, user_factory, plan_factory, step_factory,
+            preflight_result_factory):
+        plan = plan_factory()
+        user = user_factory()
+        step1 = step_factory(plan=plan)
+        step2 = step_factory(plan=plan)
+        step3 = step_factory(plan=plan)
+        request = rf.get('/')
+        request.user = user
+        preflight_result_factory(
+            plan=plan,
+            user=user,
+            status=PreflightResult.Status.complete,
+            results={
+                step2.id: [{'status': 'error', 'message': ''}],
+            },
+        )
+        preflight_result_factory(
+            plan=plan,
+            user=user,
+            status=PreflightResult.Status.complete,
+            results={
+                step1.id: [{'status': 'warn', 'message': ''}],
+                step2.id: [{'status': 'skip', 'message': ''}],
+                step3.id: [{'status': 'optional', 'message': ''}],
+            },
+        )
+        data = {
+            'plan': plan.id,
+            'steps': [step1.id, step2.id, step3.id],
+        }
+        serializer = JobSerializer(data=data, context=dict(request=request))
+
+        assert serializer.is_valid()
+
+    def test_create_bad_preflight(
+            self, rf, user_factory, plan_factory, step_factory,
+            preflight_result_factory):
+        plan = plan_factory()
+        user = user_factory()
+        step1 = step_factory(plan=plan)
+        step2 = step_factory(plan=plan)
+        step3 = step_factory(plan=plan)
+        request = rf.get('/')
+        request.user = user
+        preflight_result_factory(
+            plan=plan,
+            user=user,
+            status=PreflightResult.Status.complete,
+            results={
+                step2.id: [{'status': 'error', 'message': ''}],
+            },
+        )
+        data = {
+            'plan': plan.id,
+            'steps': [step1.id, step2.id, step3.id],
+        }
+        serializer = JobSerializer(data=data, context=dict(request=request))
+
+        assert not serializer.is_valid()
+
+    def test_create_bad_no_preflight(self, rf, user_factory, plan_factory):
+        plan = plan_factory()
+        user = user_factory()
+        request = rf.get('/')
+        request.user = user
+        data = {
+            'plan': plan.id,
+            'steps': [],
+        }
+        serializer = JobSerializer(data=data, context=dict(request=request))
+
+        assert not serializer.is_valid()
+
+    def test_invalid_steps(
+            self, rf, plan_factory, user_factory, step_factory,
+            preflight_result_factory):
+        plan = plan_factory()
+        user = user_factory()
+        step_factory(is_required=True, plan=plan)
+        step2 = step_factory(is_required=False, plan=plan)
+
+        request = rf.get('/')
+        request.user = user
+        preflight_result_factory(
+            plan=plan,
+            user=user,
+            status=PreflightResult.Status.complete,
+            results={},
+        )
+        data = {
+            'plan': plan.id,
+            'steps': [step2.id],
+        }
+        serializer = JobSerializer(data=data, context=dict(request=request))
+
+        assert not serializer.is_valid()
+
+    def test_invalid_steps_made_valid_by_preflight(
+            self, rf, plan_factory, user_factory, step_factory,
+            preflight_result_factory):
+        plan = plan_factory()
+        user = user_factory()
+        step1 = step_factory(is_required=True, plan=plan)
+        step2 = step_factory(is_required=False, plan=plan)
+
+        request = rf.get('/')
+        request.user = user
+        preflight_result_factory(
+            plan=plan,
+            user=user,
+            status=PreflightResult.Status.complete,
+            results={
+                step1.id: [{'status': 'optional', 'message': ''}],
+            },
+        )
+        data = {
+            'plan': plan.id,
+            'steps': [step2.id],
+        }
+        serializer = JobSerializer(data=data, context=dict(request=request))
+
+        assert serializer.is_valid()
+
+    def test_invalid_steps_made_valid_by_previous_job(
+            self, rf, plan_factory, user_factory, step_factory,
+            preflight_result_factory, job_factory):
+        plan = plan_factory()
+        user = user_factory()
+        step1 = step_factory(is_required=True, plan=plan)
+        step2 = step_factory(is_required=True, plan=plan)
+        step3 = step_factory(is_required=False, plan=plan)
+
+        request = rf.get('/')
+        request.user = user
+        preflight_result_factory(
+            plan=plan,
+            user=user,
+            status=PreflightResult.Status.complete,
+            results={},
+        )
+        job_factory(
+            plan=plan,
+            user=user,
+            steps=[step1, step2, step3],
+            completed_steps=[step1.name],
+        )
+        job_factory(
+            plan=plan,
+            user=user,
+            steps=[step1, step2, step3],
+            completed_steps=[step2.name],
+        )
+        data = {
+            'plan': plan.id,
+            'steps': [step3.id],
+        }
+        serializer = JobSerializer(data=data, context=dict(request=request))
+
+        assert serializer.is_valid()

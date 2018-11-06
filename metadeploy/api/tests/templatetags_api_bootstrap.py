@@ -19,5 +19,6 @@ def test_serialize(user_factory):
         'valid_token_for': 'https://example.com',
         'org_name': 'Sample Org',
         'org_type': 'Developer Edition',
+        'is_staff': False,
     }))
     assert actual == expected

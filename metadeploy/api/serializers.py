@@ -26,6 +26,16 @@ class FullUserSerializer(serializers.ModelSerializer):
             'valid_token_for',
             'org_name',
             'org_type',
+            'is_staff',
+        )
+
+
+class LimitedUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            'is_staff',
         )
 
 
@@ -110,12 +120,17 @@ class JobSerializer(serializers.ModelSerializer):
         queryset=Step.objects.all(),
         many=True,
     )
+    creator = LimitedUserSerializer(
+        read_only=True,
+        source='user',
+    )
 
     class Meta:
         model = Job
         fields = (
             'id',
             'user',
+            'creator',
             'plan',
             'steps',
             'completed_steps',
@@ -129,6 +144,47 @@ class JobSerializer(serializers.ModelSerializer):
             'completed_steps': {'read_only': True},
             'job_id': {'read_only': True},
         }
+
+    @staticmethod
+    def _has_valid_preflight(most_recent_preflight):
+        if not most_recent_preflight:
+            return False
+
+        return not most_recent_preflight.has_any_errors()
+
+    @staticmethod
+    def _has_valid_steps(*, user, plan, steps, preflight):
+        """
+        Every set in this method is a set of numeric Step PKs, from the
+        local database.
+        """
+        job_completed_steps = set(Job.objects.all_completed_step_ids(
+            user=user,
+            plan=plan,
+        ))
+        required_steps = (
+            set(plan.required_step_ids)
+            - set(preflight.optional_step_ids)
+            - job_completed_steps
+        )
+        return not set(required_steps) - set(s.id for s in steps)
+
+    def validate(self, data):
+        most_recent_preflight = PreflightResult.objects.most_recent(
+            user=data["user"],
+            plan=data["plan"],
+        )
+        if not self._has_valid_preflight(most_recent_preflight):
+            raise serializers.ValidationError("No valid preflight.")
+        has_valid_steps = self._has_valid_steps(
+            user=data["user"],
+            plan=data["plan"],
+            steps=data["steps"],
+            preflight=most_recent_preflight,
+        )
+        if not has_valid_steps:
+            raise serializers.ValidationError("Invalid steps for plan.")
+        return data
 
 
 class PreflightResultSerializer(serializers.ModelSerializer):
