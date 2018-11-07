@@ -4,12 +4,12 @@ import { render, fireEvent } from 'react-testing-library';
 import CtaButton from 'components/plans/ctaButton';
 
 const defaultPlan = {
-  id: 1,
+  id: 'plan-1',
   slug: 'my-plan',
   title: 'My Plan',
   steps: [
     {
-      id: 1,
+      id: 'step-1',
       name: 'Step 1',
       description: 'This is a step description.',
       kind: 'Metadata',
@@ -21,7 +21,7 @@ const defaultPlan = {
 };
 
 const defaultPreflight = {
-  plan: 1,
+  plan: 'plan-1',
   status: 'complete',
   results: {},
   is_valid: true,
@@ -45,7 +45,7 @@ describe('<CtaButton />', () => {
         plan={opts.plan}
         user={opts.user}
         preflight={opts.preflight}
-        selectedSteps={new Set([1])}
+        selectedSteps={new Set(['step-1'])}
         doStartPreflight={opts.doStartPreflight}
         doStartJob={opts.doStartJob}
       />,
@@ -176,7 +176,7 @@ describe('<CtaButton />', () => {
       const { getByText } = setup({ preflight: null, doStartPreflight });
       fireEvent.click(getByText('Start Pre-Install Validation'));
 
-      expect(doStartPreflight).toHaveBeenCalledWith(1);
+      expect(doStartPreflight).toHaveBeenCalledWith('plan-1');
     });
   });
 
@@ -189,7 +189,7 @@ describe('<CtaButton />', () => {
       });
       fireEvent.click(getByText('Re-Run Pre-Install Validation'));
 
-      expect(doStartPreflight).toHaveBeenCalledWith(1);
+      expect(doStartPreflight).toHaveBeenCalledWith('plan-1');
     });
   });
 
@@ -203,7 +203,10 @@ describe('<CtaButton />', () => {
       fireEvent.click(getByText('Install'));
 
       expect.assertions(2);
-      expect(doStartJob).toHaveBeenCalledWith({ plan: 1, steps: [1] });
+      expect(doStartJob).toHaveBeenCalledWith({
+        plan: 'plan-1',
+        steps: ['step-1'],
+      });
       return jobStarted.then(() => {
         expect(history.push).not.toHaveBeenCalled();
       });
@@ -213,7 +216,7 @@ describe('<CtaButton />', () => {
       test('redirects to job-detail', () => {
         const jobStarted = Promise.resolve({
           type: 'JOB_STARTED',
-          payload: { id: 2 },
+          payload: { id: 'job-1' },
         });
         const doStartJob = jest.fn(() => jobStarted);
         const match = { url: '/test-url' };
@@ -222,9 +225,12 @@ describe('<CtaButton />', () => {
         fireEvent.click(getByText('Install'));
 
         expect.assertions(2);
-        expect(doStartJob).toHaveBeenCalledWith({ plan: 1, steps: [1] });
+        expect(doStartJob).toHaveBeenCalledWith({
+          plan: 'plan-1',
+          steps: ['step-1'],
+        });
         return jobStarted.then(() => {
-          expect(history.push).toHaveBeenCalledWith('/test-url/jobs/2');
+          expect(history.push).toHaveBeenCalledWith('/test-url/jobs/job-1');
         });
       });
     });

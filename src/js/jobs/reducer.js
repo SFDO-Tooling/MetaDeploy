@@ -3,14 +3,14 @@
 import type { JobsAction } from 'jobs/actions';
 
 export type Job = {
-  +id: number,
+  +id: string,
   +creator: {
     +username: string,
     +is_staff: boolean,
   },
-  +plan: number,
-  +steps: Array<number>,
-  +completed_steps: Array<number>,
+  +plan: string,
+  +steps: Array<string>,
+  +completed_steps: Array<string>,
 };
 export type JobsState = {
   [string]: Job,

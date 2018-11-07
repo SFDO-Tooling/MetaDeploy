@@ -11,7 +11,7 @@ describe('<ProductIcon />', () => {
 
   test('renders custom icon', () => {
     const item = {
-      id: 1,
+      id: 'p1',
       title: 'Product 1',
       description: 'This is a test product.',
       category: 'salesforce',

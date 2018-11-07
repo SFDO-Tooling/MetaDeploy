@@ -16,30 +16,30 @@ fetchVersion.mockReturnValue({ type: 'TEST' });
 const defaultState = {
   products: [
     {
-      id: 1,
+      id: 'p1',
       slug: 'product-1',
       title: 'Product 1',
       description: 'This is a test product.',
       category: 'salesforce',
       image: 'http://foo.bar',
       most_recent_version: {
-        id: 1,
-        product: 1,
+        id: 'v1',
+        product: 'p1',
         label: '1.0.0',
         description: 'This is a test product version.',
         primary_plan: {
-          id: 1,
+          id: 'plan-1',
           slug: 'my-plan',
           title: 'My Plan',
         },
         secondary_plan: {
-          id: 2,
+          id: 'plan-2',
           slug: 'my-secondary-plan',
           title: 'My Secondary Plan',
         },
         additional_plans: [
           {
-            id: 3,
+            id: 'plan-3',
             slug: 'my-additional-plan',
             title: 'My Additional Plan',
           },
@@ -110,7 +110,10 @@ describe('<VersionDetail />', () => {
         versionLabel: '2.0.0',
       });
 
-      expect(fetchVersion).toHaveBeenCalledWith({ product: 1, label: '2.0.0' });
+      expect(fetchVersion).toHaveBeenCalledWith({
+        product: 'p1',
+        label: '2.0.0',
+      });
     });
   });
 
@@ -131,18 +134,18 @@ describe('<VersionDetail />', () => {
 
     test('handles missing secondary/additional plans', () => {
       const product = {
-        id: 1,
+        id: 'p1',
         slug: 'product-1',
         title: 'Product 1',
         description: 'This is a test product.',
         category: 'salesforce',
         most_recent_version: {
-          id: 1,
-          product: 1,
+          id: 'v1',
+          product: 'p1',
           label: '1.0.0',
           description: 'This is a test product version.',
           primary_plan: {
-            id: 1,
+            id: 'plan-1',
             slug: 'my-plan',
             title: 'My Plan',
           },
@@ -164,12 +167,12 @@ describe('<VersionDetail />', () => {
 
   describe('version is not most_recent_version', () => {
     const version = {
-      id: 2,
-      product: 1,
+      id: 'v2',
+      product: 'p1',
       label: '2.0.0',
       description: 'This is another test product version.',
       primary_plan: {
-        id: 4,
+        id: 'plan-4',
         slug: 'my-plan-4',
         title: 'My Plan 4',
       },

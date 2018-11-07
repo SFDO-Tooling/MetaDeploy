@@ -4,7 +4,7 @@ import type { ThunkAction } from 'redux-thunk';
 
 import type { Job } from 'jobs/reducer';
 
-type JobData = { plan: number, steps: Array<number> };
+type JobData = { plan: string, steps: Array<string> };
 
 type JobRequested = { type: 'JOB_REQUESTED', payload: JobData };
 type JobStarted = {

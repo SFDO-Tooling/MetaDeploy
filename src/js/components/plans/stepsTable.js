@@ -30,7 +30,7 @@ type DataCellProps = {
   item?: {| ...StepType, +id: string |},
   className?: string,
   selectedSteps?: SelectedStepsType,
-  handleStepsChange?: (number, boolean) => void,
+  handleStepsChange?: (string, boolean) => void,
 };
 
 const { RESULT_STATUS } = CONSTANTS;
@@ -189,7 +189,6 @@ const InstallDataCell = (props: DataCellProps): React.Node => {
   const hasValidToken = props.user && props.user.valid_token_for !== null;
   const hasReadyPreflight = preflight && preflight.is_ready;
   const { id } = item;
-  const idInt = parseInt(id, 10);
   const result = preflight && preflight.results && preflight.results[id];
   let skipped, optional;
   if (result) {
@@ -210,7 +209,7 @@ const InstallDataCell = (props: DataCellProps): React.Node => {
     <DataTableCell {...props}>
       <Checkbox
         id={`step-${id}`}
-        checked={selectedSteps && selectedSteps.has(idInt)}
+        checked={selectedSteps && selectedSteps.has(id)}
         disabled={disabled}
         className="slds-p-vertical_x-small"
         labels={{ label }}
@@ -220,7 +219,7 @@ const InstallDataCell = (props: DataCellProps): React.Node => {
         ) => {
           /* istanbul ignore else */
           if (handleStepsChange) {
-            handleStepsChange(idInt, checked);
+            handleStepsChange(id, checked);
           }
         }}
       />
@@ -267,18 +266,10 @@ const StepsTable = ({
   plan: PlanType,
   preflight: ?PreflightType,
   selectedSteps: SelectedStepsType,
-  handleStepsChange: (number, boolean) => void,
+  handleStepsChange: (string, boolean) => void,
 }) => (
-  // DataTable uses step IDs internally to construct unique keys,
-  // and they must be strings (not integers)
   <article className="slds-card slds-scrollable_x">
-    <DataTable
-      items={plan.steps.map(step => ({
-        ...step,
-        id: step.id.toString(),
-      }))}
-      id="plan-steps-table"
-    >
+    <DataTable items={plan.steps} id="plan-steps-table">
       <DataTableColumn key="name" label="Steps" property="name" primaryColumn>
         <NameDataCell preflight={preflight} />
       </DataTableColumn>

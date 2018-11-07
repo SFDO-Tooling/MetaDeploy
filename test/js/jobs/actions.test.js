@@ -8,11 +8,11 @@ describe('startJob', () => {
   describe('success', () => {
     test('dispatches JOB_STARTED action', () => {
       const store = storeWithApi({});
-      const data = { plan: 1, steps: [3] };
+      const data = { plan: 'plan-1', steps: ['step-1'] };
       const response = {
-        id: 2,
-        plan: 1,
-        steps: [3],
+        id: 'job-1',
+        plan: 'plan-1',
+        steps: ['step-1'],
       };
       fetchMock.postOnce(window.api_urls.job_list(), {
         status: 201,
@@ -37,7 +37,7 @@ describe('startJob', () => {
   describe('error', () => {
     test('dispatches JOB_REJECTED action', () => {
       const store = storeWithApi({});
-      const data = { plan: 1, steps: [3] };
+      const data = { plan: 'plan-1', steps: ['step-1'] };
       fetchMock.postOnce(window.api_urls.job_list(), 500);
       const started = {
         type: 'JOB_REQUESTED',

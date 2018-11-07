@@ -137,11 +137,7 @@ class CtaButton extends React.Component<{
             doStartJob({ plan: plan.id, steps: [...selectedSteps] }).then(
               action => {
                 const { type, payload } = action;
-                if (
-                  type === 'JOB_STARTED' &&
-                  payload &&
-                  typeof payload.id === 'number'
-                ) {
+                if (type === 'JOB_STARTED' && payload && payload.id) {
                   const url = `${match.url}/jobs/${payload.id}`;
                   history.push(url);
                 }
