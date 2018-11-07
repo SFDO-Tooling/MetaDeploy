@@ -64,6 +64,10 @@ class StepSerializer(serializers.ModelSerializer):
 class PlanSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     steps = StepSerializer(many=True, source='step_set')
+    version = serializers.PrimaryKeyRelatedField(
+        read_only=True,
+        pk_field=serializers.CharField(),
+    )
 
     class Meta:
         model = Plan
@@ -80,6 +84,10 @@ class PlanSerializer(serializers.ModelSerializer):
 
 class VersionSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
+    product = serializers.PrimaryKeyRelatedField(
+        read_only=True,
+        pk_field=serializers.CharField(),
+    )
     primary_plan = PlanSerializer()
     secondary_plan = PlanSerializer()
     additional_plans = PlanSerializer(many=True)
@@ -125,10 +133,12 @@ class JobSerializer(serializers.ModelSerializer):
     )
     plan = serializers.PrimaryKeyRelatedField(
         queryset=Plan.objects.all(),
+        pk_field=serializers.CharField(),
     )
     steps = serializers.PrimaryKeyRelatedField(
         queryset=Step.objects.all(),
         many=True,
+        pk_field=serializers.CharField(),
     )
     creator = LimitedUserSerializer(
         read_only=True,
