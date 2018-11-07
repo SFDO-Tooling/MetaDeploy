@@ -8,6 +8,7 @@ import { CONSTANTS } from 'plans/reducer';
 
 import Login from 'components/header/login';
 
+import type { Match, RouterHistory } from 'react-router-dom';
 import type {
   Plan as PlanType,
   Preflight as PreflightType,
@@ -61,6 +62,8 @@ const ActionBtn = ({
 );
 
 class CtaButton extends React.Component<{
+  match: Match,
+  history: RouterHistory,
   user: UserType,
   plan: PlanType,
   preflight: ?PreflightType,
@@ -82,6 +85,8 @@ class CtaButton extends React.Component<{
 
   render(): React.Node {
     const {
+      match,
+      history,
       user,
       plan,
       preflight,
@@ -129,7 +134,19 @@ class CtaButton extends React.Component<{
         if (preflight.is_ready) {
           // Preflight is done, valid, and has no errors -- allow installation
           return this.getLoginOrActionBtn('Install', () => {
-            doStartJob({ plan: plan.id, steps: [...selectedSteps] });
+            doStartJob({ plan: plan.id, steps: [...selectedSteps] }).then(
+              action => {
+                const { type, payload } = action;
+                if (
+                  type === 'JOB_STARTED' &&
+                  payload &&
+                  typeof payload.id === 'number'
+                ) {
+                  const url = `${match.url}/jobs/${payload.id}`;
+                  history.push(url);
+                }
+              },
+            );
           });
         }
         // Prior preflight exists, but is no longer valid or has errors

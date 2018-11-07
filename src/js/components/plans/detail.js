@@ -29,7 +29,7 @@ import StepsTable from 'components/plans/stepsTable';
 import Toasts from 'components/plans/toasts';
 import UserInfo from 'components/plans/userInfo';
 
-import type { Match } from 'react-router-dom';
+import type { Match, RouterHistory } from 'react-router-dom';
 import type { AppState } from 'app/reducer';
 import type {
   Plan as PlanType,
@@ -43,8 +43,9 @@ import type {
 import type { User as UserType } from 'accounts/reducer';
 
 export type SelectedSteps = Set<number>;
-type InitialProps = { match: Match };
+type InitialProps = {| match: Match, history: RouterHistory |};
 type Props = {
+  ...InitialProps,
   user: UserType,
   product: ProductType | null,
   version: VersionType | null,
@@ -137,6 +138,8 @@ class PlanDetail extends React.Component<Props, State> {
 
   render(): React.Node {
     const {
+      match,
+      history,
       user,
       product,
       version,
@@ -198,6 +201,8 @@ class PlanDetail extends React.Component<Props, State> {
               </div>
               {plan.steps.length ? (
                 <CtaButton
+                  match={match}
+                  history={history}
                   user={user}
                   plan={plan}
                   preflight={preflight}

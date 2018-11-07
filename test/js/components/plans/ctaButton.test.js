@@ -31,9 +31,6 @@ const defaultPreflight = {
 };
 
 describe('<CtaButton />', () => {
-  const doStartPreflight = jest.fn();
-  const doStartJob = jest.fn();
-
   const setup = options => {
     const defaults = {
       plan: defaultPlan,
@@ -43,12 +40,14 @@ describe('<CtaButton />', () => {
     const opts = { ...defaults, ...options };
     const { getByText, container } = render(
       <CtaButton
+        match={opts.match}
+        history={opts.history}
         plan={opts.plan}
         user={opts.user}
         preflight={opts.preflight}
         selectedSteps={new Set([1])}
-        doStartPreflight={doStartPreflight}
-        doStartJob={doStartJob}
+        doStartPreflight={opts.doStartPreflight}
+        doStartJob={opts.doStartJob}
       />,
     );
     return { getByText, container };
@@ -173,7 +172,8 @@ describe('<CtaButton />', () => {
 
   describe('start-preflight click', () => {
     test('calls doStartPreflight with plan id', () => {
-      const { getByText } = setup({ preflight: null });
+      const doStartPreflight = jest.fn();
+      const { getByText } = setup({ preflight: null, doStartPreflight });
       fireEvent.click(getByText('Start Pre-Install Validation'));
 
       expect(doStartPreflight).toHaveBeenCalledWith(1);
@@ -182,8 +182,10 @@ describe('<CtaButton />', () => {
 
   describe('re-run-preflight click', () => {
     test('calls doStartPreflight with plan id', () => {
+      const doStartPreflight = jest.fn();
       const { getByText } = setup({
         preflight: { status: 'complete', is_valid: false, error_count: 0 },
+        doStartPreflight,
       });
       fireEvent.click(getByText('Re-Run Pre-Install Validation'));
 
@@ -193,10 +195,38 @@ describe('<CtaButton />', () => {
 
   describe('start-install click', () => {
     test('calls doStartJob with plan id and steps', () => {
-      const { getByText } = setup();
+      const jobStarted = Promise.resolve({});
+      const doStartJob = jest.fn(() => jobStarted);
+      const match = { url: '/test-url' };
+      const history = { push: jest.fn() };
+      const { getByText } = setup({ doStartJob, match, history });
       fireEvent.click(getByText('Install'));
 
+      expect.assertions(2);
       expect(doStartJob).toHaveBeenCalledWith({ plan: 1, steps: [1] });
+      return jobStarted.then(() => {
+        expect(history.push).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('start-install success', () => {
+      test('redirects to job-detail', () => {
+        const jobStarted = Promise.resolve({
+          type: 'JOB_STARTED',
+          payload: { id: 2 },
+        });
+        const doStartJob = jest.fn(() => jobStarted);
+        const match = { url: '/test-url' };
+        const history = { push: jest.fn() };
+        const { getByText } = setup({ doStartJob, match, history });
+        fireEvent.click(getByText('Install'));
+
+        expect.assertions(2);
+        expect(doStartJob).toHaveBeenCalledWith({ plan: 1, steps: [1] });
+        return jobStarted.then(() => {
+          expect(history.push).toHaveBeenCalledWith('/test-url/jobs/2');
+        });
+      });
     });
   });
 });
