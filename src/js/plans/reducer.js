@@ -3,7 +3,7 @@
 import type { LogoutAction } from 'accounts/actions';
 import type { PlansAction } from 'plans/actions';
 
-export type Step = {
+export type Step = {|
   +id: number,
   +name: string,
   +kind: string,
@@ -11,7 +11,7 @@ export type Step = {
   +is_required: boolean,
   +is_recommended: boolean,
   +description: string,
-};
+|};
 export type Plan = {
   +id: number,
   +slug: string,
@@ -39,7 +39,7 @@ export type Preflight = {
   +is_ready?: boolean,
 };
 export type PreflightsState = {
-  [number]: Preflight,
+  [string]: Preflight,
 };
 
 export const CONSTANTS = {

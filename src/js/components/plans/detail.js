@@ -8,15 +8,17 @@ import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
 import routes from 'utils/routes';
+import { CONSTANTS } from 'plans/reducer';
 import { fetchPreflight, startPreflight } from 'plans/actions';
 import { fetchVersion } from 'products/actions';
-import { shouldFetchVersion, gatekeeper } from 'products/utils';
 import {
   selectProduct,
   selectVersion,
   selectVersionLabel,
 } from 'components/products/detail';
 import { selectUserState } from 'components/header';
+import { shouldFetchVersion, gatekeeper } from 'products/utils';
+import { startJob } from 'jobs/actions';
 
 import BodyContainer from 'components/bodyContainer';
 import CtaButton from 'components/plans/ctaButton';
@@ -40,6 +42,7 @@ import type {
 } from 'products/reducer';
 import type { User as UserType } from 'accounts/reducer';
 
+export type SelectedSteps = Set<number>;
 type InitialProps = { match: Match };
 type Props = {
   user: UserType,
@@ -51,9 +54,20 @@ type Props = {
   doFetchVersion: typeof fetchVersion,
   doFetchPreflight: typeof fetchPreflight,
   doStartPreflight: typeof startPreflight,
+  doStartJob: typeof startJob,
+};
+type State = {
+  changedSteps: Map<number, boolean>,
 };
 
-class PlanDetail extends React.Component<Props> {
+const { RESULT_STATUS } = CONSTANTS;
+
+class PlanDetail extends React.Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = { changedSteps: new Map() };
+  }
+
   componentDidMount() {
     const {
       user,
@@ -80,6 +94,47 @@ class PlanDetail extends React.Component<Props> {
     }
   }
 
+  handleStepsChange = (stepId: number, checked: boolean) => {
+    const changedSteps = new Map(this.state.changedSteps);
+    changedSteps.set(stepId, checked);
+    this.setState({ changedSteps });
+  };
+
+  getSelectedSteps(): SelectedSteps {
+    const { plan, preflight } = this.props;
+    /* istanbul ignore if */
+    if (!plan) {
+      return new Set();
+    }
+    const { changedSteps } = this.state;
+    const selectedSteps = new Set();
+    for (const step of plan.steps) {
+      const { id } = step;
+      const idString = id.toString();
+      const result =
+        preflight && preflight.results && preflight.results[idString];
+      let skipped, optional;
+      if (result) {
+        skipped = result.find(res => res.status === RESULT_STATUS.SKIP);
+        optional = result.find(res => res.status === RESULT_STATUS.OPTIONAL);
+      }
+      if (!skipped) {
+        const required = step.is_required && !optional;
+        const recommended = !required && step.is_recommended;
+        const manuallyChecked = changedSteps.get(id) === true;
+        const manuallyUnchecked = changedSteps.get(id) === false;
+        if (
+          required ||
+          manuallyChecked ||
+          (recommended && !manuallyUnchecked)
+        ) {
+          selectedSteps.add(id);
+        }
+      }
+    }
+    return selectedSteps;
+  }
+
   render(): React.Node {
     const {
       user,
@@ -89,6 +144,7 @@ class PlanDetail extends React.Component<Props> {
       plan,
       preflight,
       doStartPreflight,
+      doStartJob,
     } = this.props;
     const blocked = gatekeeper({
       product,
@@ -105,6 +161,7 @@ class PlanDetail extends React.Component<Props> {
     if (!product || !version || !plan) {
       return <ProductNotFound />;
     }
+    const selectedSteps = this.getSelectedSteps();
     return (
       <DocumentTitle title={`${plan.title} | ${product.title} | MetaDeploy`}>
         <>
@@ -144,7 +201,9 @@ class PlanDetail extends React.Component<Props> {
                   user={user}
                   plan={plan}
                   preflight={preflight}
+                  selectedSteps={selectedSteps}
                   doStartPreflight={doStartPreflight}
+                  doStartJob={doStartJob}
                 />
               ) : null}
             </div>
@@ -160,7 +219,13 @@ class PlanDetail extends React.Component<Props> {
                 className="slds-p-around_medium
                   slds-size_1-of-1"
               >
-                <StepsTable user={user} plan={plan} preflight={preflight} />
+                <StepsTable
+                  user={user}
+                  plan={plan}
+                  preflight={preflight}
+                  selectedSteps={selectedSteps}
+                  handleStepsChange={this.handleStepsChange}
+                />
               </div>
             ) : null}
           </BodyContainer>
@@ -207,7 +272,7 @@ const selectPreflight = createSelector(
     }
     // A `null` preflight means we already fetched and no prior preflight exists
     // An `undefined` preflight means we don't know whether a preflight exists
-    return preflights[plan.id];
+    return preflights[plan.id.toString()];
   },
 );
 
@@ -224,6 +289,7 @@ const actions = {
   doFetchVersion: fetchVersion,
   doFetchPreflight: fetchPreflight,
   doStartPreflight: startPreflight,
+  doStartJob: startJob,
 };
 
 const WrappedPlanDetail: React.ComponentType<InitialProps> = connect(

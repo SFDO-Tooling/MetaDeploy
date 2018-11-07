@@ -1,5 +1,6 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { fireEvent } from 'react-testing-library';
 
 import { fetchVersion } from 'products/actions';
 import { fetchPreflight } from 'plans/actions';
@@ -33,7 +34,32 @@ const defaultState = {
           slug: 'my-plan',
           title: 'My Plan',
           preflight_message: 'Preflight text...',
-          steps: [{ id: 1, name: 'My Step' }],
+          steps: [
+            {
+              id: 1,
+              name: 'Step 1',
+              is_required: true,
+              is_recommended: true,
+            },
+            {
+              id: 2,
+              name: 'Step 2',
+              is_required: true,
+              is_recommended: false,
+            },
+            {
+              id: 3,
+              name: 'Step 3',
+              is_required: false,
+              is_recommended: true,
+            },
+            {
+              id: 4,
+              name: 'Step 4',
+              is_required: false,
+              is_recommended: false,
+            },
+          ],
         },
         secondary_plan: {
           id: 2,
@@ -54,8 +80,21 @@ const defaultState = {
       },
     },
   ],
-  preflights: { 1: {} },
-  user: {},
+  preflights: {
+    1: {
+      status: 'complete',
+      is_valid: true,
+      error_count: 0,
+      warning_count: 0,
+      results: {
+        1: [{ status: 'optional' }],
+        3: [{ status: 'skip' }],
+      },
+      is_ready: true,
+    },
+  },
+  user: { valid_token_for: 'foo' },
+  jobs: {},
 };
 
 describe('<PlanDetail />', () => {
@@ -68,7 +107,7 @@ describe('<PlanDetail />', () => {
     };
     const opts = Object.assign({}, defaults, options);
     const { productSlug, versionLabel, planSlug } = opts;
-    const { getByText, queryByText, getByAltText } = renderWithRedux(
+    const { getByText, queryByText, getByAltText, container } = renderWithRedux(
       <MemoryRouter>
         <PlanDetail
           match={{ params: { productSlug, versionLabel, planSlug } }}
@@ -77,7 +116,7 @@ describe('<PlanDetail />', () => {
       opts.initialState,
       storeWithApi,
     );
-    return { getByText, queryByText, getByAltText };
+    return { getByText, queryByText, getByAltText, container };
   };
 
   describe('no product', () => {
@@ -112,7 +151,7 @@ describe('<PlanDetail />', () => {
     expect(getByText('Product 1, 1.0.0')).toBeVisible();
     expect(getByText('My Plan')).toBeVisible();
     expect(getByText('Preflight text...')).toBeVisible();
-    expect(getByText('My Step')).toBeVisible();
+    expect(getByText('Step 1')).toBeVisible();
   });
 
   test('renders secondary_plan detail (no preflight)', () => {
@@ -141,6 +180,26 @@ describe('<PlanDetail />', () => {
       });
 
       expect(getByText('another plan')).toBeVisible();
+    });
+  });
+
+  describe('handleStepsChange', () => {
+    test('updates checkbox', () => {
+      const { container } = setup();
+      const checkbox1 = container.querySelector('#step-1');
+      const checkbox2 = container.querySelector('#step-2');
+      const checkbox3 = container.querySelector('#step-3');
+      const checkbox4 = container.querySelector('#step-4');
+
+      expect.assertions(5);
+      expect(checkbox1.checked).toBe(true);
+      expect(checkbox2.checked).toBe(true);
+      expect(checkbox3.checked).toBe(false);
+      expect(checkbox4.checked).toBe(false);
+
+      fireEvent.click(checkbox4);
+
+      expect(checkbox4.checked).toBe(true);
     });
   });
 });

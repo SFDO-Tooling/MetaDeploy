@@ -20,14 +20,17 @@ import type {
   Step as StepType,
   Preflight as PreflightType,
 } from 'plans/reducer';
+import type { SelectedSteps as SelectedStepsType } from 'components/plans/detail';
 import type { User as UserType } from 'accounts/reducer';
 
 type DataCellProps = {
   [string]: mixed,
   user?: UserType,
   preflight?: ?PreflightType,
-  item?: StepType,
+  item?: {| ...StepType, +id: string |},
   className?: string,
+  selectedSteps?: SelectedStepsType,
+  handleStepsChange?: (number, boolean) => void,
 };
 
 const { RESULT_STATUS } = CONSTANTS;
@@ -48,7 +51,7 @@ class NameDataCell extends React.Component<
       return null;
     }
     const { name, description } = item;
-    const id = item.id.toString();
+    const { id } = item;
     const result = preflight && preflight.results && preflight.results[id];
     let hasError = false;
     let hasWarning = false;
@@ -149,7 +152,7 @@ const RequiredDataCell = (props: DataCellProps): React.Node => {
   if (!item) {
     return null;
   }
-  const id = item.id.toString();
+  const { id } = item;
   const result = preflight && preflight.results && preflight.results[id];
   let skipped, optional;
   if (result) {
@@ -178,14 +181,15 @@ const RequiredDataCell = (props: DataCellProps): React.Node => {
 RequiredDataCell.displayName = DataTableCell.displayName;
 
 const InstallDataCell = (props: DataCellProps): React.Node => {
-  const { preflight, item } = props;
+  const { preflight, item, selectedSteps, handleStepsChange } = props;
   /* istanbul ignore if */
   if (!item) {
     return null;
   }
   const hasValidToken = props.user && props.user.valid_token_for !== null;
   const hasReadyPreflight = preflight && preflight.is_ready;
-  const id = item.id.toString();
+  const { id } = item;
+  const idInt = parseInt(id, 10);
   const result = preflight && preflight.results && preflight.results[id];
   let skipped, optional;
   if (result) {
@@ -205,10 +209,20 @@ const InstallDataCell = (props: DataCellProps): React.Node => {
   return (
     <DataTableCell {...props}>
       <Checkbox
-        checked={!skipped && (required || recommended)}
+        id={`step-${id}`}
+        checked={selectedSteps && selectedSteps.has(idInt)}
         disabled={disabled}
         className="slds-p-vertical_x-small"
         labels={{ label }}
+        onChange={(
+          event: SyntheticInputEvent<HTMLInputElement>,
+          { checked }: { checked: boolean },
+        ) => {
+          /* istanbul ignore else */
+          if (handleStepsChange) {
+            handleStepsChange(idInt, checked);
+          }
+        }}
       />
     </DataTableCell>
   );
@@ -246,16 +260,23 @@ const StepsTable = ({
   user,
   plan,
   preflight,
+  selectedSteps,
+  handleStepsChange,
 }: {
   user: UserType,
   plan: PlanType,
   preflight: ?PreflightType,
+  selectedSteps: SelectedStepsType,
+  handleStepsChange: (number, boolean) => void,
 }) => (
   // DataTable uses step IDs internally to construct unique keys,
   // and they must be strings (not integers)
   <article className="slds-card slds-scrollable_x">
     <DataTable
-      items={plan.steps.map(step => ({ ...step, id: step.id.toString() }))}
+      items={plan.steps.map(step => ({
+        ...step,
+        id: step.id.toString(),
+      }))}
       id="plan-steps-table"
     >
       <DataTableColumn key="name" label="Steps" property="name" primaryColumn>
@@ -272,7 +293,12 @@ const StepsTable = ({
         label={<InstallDataColumnLabel />}
         property="is_recommended"
       >
-        <InstallDataCell user={user} preflight={preflight} />
+        <InstallDataCell
+          user={user}
+          preflight={preflight}
+          selectedSteps={selectedSteps}
+          handleStepsChange={handleStepsChange}
+        />
       </DataTableColumn>
     </DataTable>
   </article>

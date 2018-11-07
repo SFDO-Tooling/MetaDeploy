@@ -32,6 +32,7 @@ const defaultPreflight = {
 
 describe('<CtaButton />', () => {
   const doStartPreflight = jest.fn();
+  const doStartJob = jest.fn();
 
   const setup = options => {
     const defaults = {
@@ -45,7 +46,9 @@ describe('<CtaButton />', () => {
         plan={opts.plan}
         user={opts.user}
         preflight={opts.preflight}
+        selectedSteps={new Set([1])}
         doStartPreflight={doStartPreflight}
+        doStartJob={doStartJob}
       />,
     );
     return { getByText, container };
@@ -185,6 +188,15 @@ describe('<CtaButton />', () => {
       fireEvent.click(getByText('Re-Run Pre-Install Validation'));
 
       expect(doStartPreflight).toHaveBeenCalledWith(1);
+    });
+  });
+
+  describe('start-install click', () => {
+    test('calls doStartJob with plan id and steps', () => {
+      const { getByText } = setup();
+      fireEvent.click(getByText('Install'));
+
+      expect(doStartJob).toHaveBeenCalledWith({ plan: 1, steps: [1] });
     });
   });
 });

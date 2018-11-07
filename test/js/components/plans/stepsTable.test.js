@@ -45,6 +45,8 @@ const defaultPlan = {
 };
 
 describe('<StepsTable />', () => {
+  const handleStepsChange = jest.fn();
+
   const setup = options => {
     const defaults = { plan: defaultPlan, user: null };
     const opts = { ...defaults, ...options };
@@ -53,6 +55,8 @@ describe('<StepsTable />', () => {
         plan={opts.plan}
         user={opts.user}
         preflight={opts.preflight}
+        selectedSteps={new Set([1, 2, 3])}
+        handleStepsChange={handleStepsChange}
       />,
     );
     return { getByText, queryByText, container };
@@ -187,6 +191,18 @@ describe('<StepsTable />', () => {
         container.querySelectorAll('input[type="checkbox"][disabled]'),
       ).toHaveLength(3);
       expect(getByText('This was skipped.')).toBeVisible();
+    });
+
+    describe('checkbox change', () => {
+      test('calls handleStepsChange with step id and checked boolean', () => {
+        const { container } = setup();
+        const checkbox = container.querySelector(
+          'input[type="checkbox"]:not(:checked)',
+        );
+        fireEvent.click(checkbox);
+
+        expect(handleStepsChange).toHaveBeenCalledWith(4, true);
+      });
     });
   });
 });
