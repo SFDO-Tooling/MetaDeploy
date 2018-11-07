@@ -93,7 +93,7 @@ class TestJob:
             user=user,
             status=PreflightResult.Status.complete,
             results={
-                step2.id: [{'status': 'error', 'message': ''}],
+                str(step2.id): [{'status': 'error', 'message': ''}],
             },
         )
         preflight_result_factory(
@@ -101,14 +101,14 @@ class TestJob:
             user=user,
             status=PreflightResult.Status.complete,
             results={
-                step1.id: [{'status': 'warn', 'message': ''}],
-                step2.id: [{'status': 'skip', 'message': ''}],
-                step3.id: [{'status': 'optional', 'message': ''}],
+                str(step1.id): [{'status': 'warn', 'message': ''}],
+                str(step2.id): [{'status': 'skip', 'message': ''}],
+                str(step3.id): [{'status': 'optional', 'message': ''}],
             },
         )
         data = {
-            'plan': plan.id,
-            'steps': [step1.id, step2.id, step3.id],
+            'plan': str(plan.id),
+            'steps': [str(step1.id), str(step2.id), str(step3.id)],
         }
         serializer = JobSerializer(data=data, context=dict(request=request))
 
@@ -129,12 +129,12 @@ class TestJob:
             user=user,
             status=PreflightResult.Status.complete,
             results={
-                step2.id: [{'status': 'error', 'message': ''}],
+                str(step2.id): [{'status': 'error', 'message': ''}],
             },
         )
         data = {
-            'plan': plan.id,
-            'steps': [step1.id, step2.id, step3.id],
+            'plan': str(plan.id),
+            'steps': [str(step1.id), str(step2.id), str(step3.id)],
         }
         serializer = JobSerializer(data=data, context=dict(request=request))
 
@@ -146,7 +146,7 @@ class TestJob:
         request = rf.get('/')
         request.user = user
         data = {
-            'plan': plan.id,
+            'plan': str(plan.id),
             'steps': [],
         }
         serializer = JobSerializer(data=data, context=dict(request=request))
@@ -170,8 +170,8 @@ class TestJob:
             results={},
         )
         data = {
-            'plan': plan.id,
-            'steps': [step2.id],
+            'plan': str(plan.id),
+            'steps': [str(step2.id)],
         }
         serializer = JobSerializer(data=data, context=dict(request=request))
 
@@ -192,12 +192,12 @@ class TestJob:
             user=user,
             status=PreflightResult.Status.complete,
             results={
-                step1.id: [{'status': 'optional', 'message': ''}],
+                str(step1.id): [{'status': 'optional', 'message': ''}],
             },
         )
         data = {
-            'plan': plan.id,
-            'steps': [step2.id],
+            'plan': str(plan.id),
+            'steps': [str(step2.id)],
         }
         serializer = JobSerializer(data=data, context=dict(request=request))
 
@@ -233,8 +233,8 @@ class TestJob:
             completed_steps=[step2.name],
         )
         data = {
-            'plan': plan.id,
-            'steps': [step3.id],
+            'plan': str(plan.id),
+            'steps': [str(step3.id)],
         }
         serializer = JobSerializer(data=data, context=dict(request=request))
 

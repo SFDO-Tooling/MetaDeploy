@@ -16,6 +16,7 @@ from allauth.socialaccount.models import SocialToken
 from asgiref.sync import async_to_sync
 from colorfield.fields import ColorField
 from model_utils import Choices, FieldTracker
+from hashid_field import HashidAutoField
 
 from .push import (
     user_token_expired,
@@ -30,6 +31,13 @@ from .constants import ORGANIZATION_DETAILS
 
 
 VERSION_STRING = r'^[a-zA-Z0-9._+-]+$'
+
+
+class HashIdMixin(models.Model):
+    class Meta:
+        abstract = True
+
+    id = HashidAutoField(primary_key=True)
 
 
 class UserQuerySet(models.QuerySet):
@@ -171,7 +179,7 @@ class ProductQuerySet(models.QuerySet):
         ).filter(version__count__gte=1)
 
 
-class Product(SlugMixin, models.Model):
+class Product(HashIdMixin, SlugMixin, models.Model):
     SLDS_ICON_CHOICES = (
         ('', ''),
         ('action', 'action'),
@@ -240,7 +248,7 @@ class VersionManager(models.Manager):
         return self.get(product=product, label=label)
 
 
-class Version(models.Model):
+class Version(HashIdMixin, models.Model):
     objects = VersionManager()
 
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
@@ -318,7 +326,7 @@ class PlanSlug(models.Model):
         return self.slug
 
 
-class Plan(SlugMixin, models.Model):
+class Plan(HashIdMixin, SlugMixin, models.Model):
     Tier = Choices('primary', 'secondary', 'additional')
 
     title = models.CharField(max_length=128)
@@ -351,7 +359,7 @@ class Plan(SlugMixin, models.Model):
         return "{}, Plan {}".format(self.version, self.title)
 
 
-class Step(models.Model):
+class Step(HashIdMixin, models.Model):
     Kind = Choices(
         ('metadata', _('Metadata')),
         ('onetime', _('One Time Apex')),
@@ -401,7 +409,7 @@ class JobQuerySet(models.QuerySet):
         ).values_list("id", flat=True)
 
 
-class Job(models.Model):
+class Job(HashIdMixin, models.Model):
     tracker = FieldTracker(fields=("completed_steps",))
 
     objects = JobQuerySet.as_manager()
@@ -499,8 +507,7 @@ class PreflightResult(models.Model):
         So this will return a list of step PKs, for now.
         """
         return [
-            # Why is this a string in tests? Accident of pytest-django?
-            int(k)
+            str(k)
             for k, v
             in self.results.items()
             if any([

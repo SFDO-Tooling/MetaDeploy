@@ -17,6 +17,11 @@ from .constants import WARN, ERROR
 User = get_user_model()
 
 
+class IdOnlyField(serializers.CharField):
+    def to_representation(self, value):
+        return str(value.id)
+
+
 class FullUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -40,6 +45,7 @@ class LimitedUserSerializer(serializers.ModelSerializer):
 
 
 class StepSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
     kind = serializers.CharField(source='get_kind_display')
 
     class Meta:
@@ -56,6 +62,7 @@ class StepSerializer(serializers.ModelSerializer):
 
 
 class PlanSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
     steps = StepSerializer(many=True, source='step_set')
 
     class Meta:
@@ -72,6 +79,7 @@ class PlanSerializer(serializers.ModelSerializer):
 
 
 class VersionSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
     primary_plan = PlanSerializer()
     secondary_plan = PlanSerializer()
     additional_plans = PlanSerializer(many=True)
@@ -91,6 +99,7 @@ class VersionSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
     category = serializers.CharField(source='category.title')
     most_recent_version = VersionSerializer()
 
@@ -110,6 +119,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class JobSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault(),
     )
@@ -191,6 +201,7 @@ class PreflightResultSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault(),
     )
+    plan = IdOnlyField(read_only=True)
     error_count = serializers.SerializerMethodField()
     warning_count = serializers.SerializerMethodField()
     is_ready = serializers.SerializerMethodField()
@@ -237,7 +248,6 @@ class PreflightResultSerializer(serializers.ModelSerializer):
         )
         extra_kwargs = {
             'organization_url': {'read_only': True},
-            'plan': {'read_only': True},
             'created_at': {'read_only': True},
             'is_valid': {'read_only': True},
             'status': {'read_only': True},
