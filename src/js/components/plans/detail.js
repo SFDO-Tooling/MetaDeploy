@@ -42,7 +42,7 @@ import type {
 } from 'products/reducer';
 import type { User as UserType } from 'accounts/reducer';
 
-export type SelectedSteps = Set<number>;
+export type SelectedSteps = Set<string>;
 type InitialProps = {| match: Match, history: RouterHistory |};
 type Props = {
   ...InitialProps,
@@ -58,7 +58,7 @@ type Props = {
   doStartJob: typeof startJob,
 };
 type State = {
-  changedSteps: Map<number, boolean>,
+  changedSteps: Map<string, boolean>,
 };
 
 const { RESULT_STATUS } = CONSTANTS;
@@ -95,7 +95,7 @@ class PlanDetail extends React.Component<Props, State> {
     }
   }
 
-  handleStepsChange = (stepId: number, checked: boolean) => {
+  handleStepsChange = (stepId: string, checked: boolean) => {
     const changedSteps = new Map(this.state.changedSteps);
     changedSteps.set(stepId, checked);
     this.setState({ changedSteps });
@@ -111,9 +111,7 @@ class PlanDetail extends React.Component<Props, State> {
     const selectedSteps = new Set();
     for (const step of plan.steps) {
       const { id } = step;
-      const idString = id.toString();
-      const result =
-        preflight && preflight.results && preflight.results[idString];
+      const result = preflight && preflight.results && preflight.results[id];
       let skipped, optional;
       if (result) {
         skipped = result.find(res => res.status === RESULT_STATUS.SKIP);
@@ -277,7 +275,7 @@ const selectPreflight = createSelector(
     }
     // A `null` preflight means we already fetched and no prior preflight exists
     // An `undefined` preflight means we don't know whether a preflight exists
-    return preflights[plan.id.toString()];
+    return preflights[plan.id];
   },
 );
 

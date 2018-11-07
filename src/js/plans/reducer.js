@@ -4,7 +4,7 @@ import type { LogoutAction } from 'accounts/actions';
 import type { PlansAction } from 'plans/actions';
 
 export type Step = {|
-  +id: number,
+  +id: string,
   +name: string,
   +kind: string,
   +kind_icon: string | null,
@@ -13,7 +13,7 @@ export type Step = {|
   +description: string,
 |};
 export type Plan = {
-  +id: number,
+  +id: string,
   +slug: string,
   +title: string,
   +preflight_message: string,
@@ -30,7 +30,7 @@ type PreflightErrors = {
   [string]: Array<PreflightError>,
 };
 export type Preflight = {
-  +plan?: number,
+  +plan?: string,
   +status: 'started' | 'complete' | 'failed',
   +results?: PreflightErrors,
   +is_valid?: boolean,
