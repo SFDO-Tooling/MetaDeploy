@@ -17,7 +17,7 @@ from channels.layers import get_channel_layer
 
 
 async def push_message_about_instance(instance, json_message):
-    model_name = instance.__class__.__name__.lower()
+    model_name = instance._meta.model_name
     id = str(instance.id)
     group_name = f"{model_name}-{id}"
     channel_layer = get_channel_layer()
