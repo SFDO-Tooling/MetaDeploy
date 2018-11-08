@@ -30,6 +30,8 @@ class TestBasicGetViews:
             'enqueued_at': None,
             'job_id': None,
             'status': 'started',
+            'org_name': '',
+            'org_type': '',
         }
 
     def test_product(self, client, product_factory, version_factory):
