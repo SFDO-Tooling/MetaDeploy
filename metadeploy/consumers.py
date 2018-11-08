@@ -7,21 +7,28 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
             await self.close()
             return
 
+        self.groups = set()
         await self.accept()
-        # Add this channel to the user-id group, so all browser windows
-        # where that user is logged in will get notifications:
-        user_id = self.scope["user"].id
-        await self.channel_layer.group_add(
-            f'user-{user_id}',
-            self.channel_name,
-        )
 
     async def disconnect(self, close_code):
-        user_id = self.scope["user"].id
-        await self.channel_layer.group_discard(
-            f'user-{user_id}',
-            self.channel_name,
-        )
+        for group_name in self.groups:
+            await self.channel_layer.group_discard(
+                group_name,
+                self.channel_name,
+            )
+        self.groups = set()
 
     async def notify(self, event):
         await self.send_json(event['content'])
+
+    async def receive_json(self, content, **kwargs):
+        # Just used to subscribe to notification channels.
+        # TODO confirm that this user has rights to see events on this
+        # model instance
+        if "model" in content and "id" in content:
+            group_name = f"{content['model']}-{content['id']}"
+            self.groups.add(group_name)
+            await self.channel_layer.group_add(
+                group_name,
+                self.channel_name,
+            )

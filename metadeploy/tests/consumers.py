@@ -18,6 +18,11 @@ async def test_push_notification_consumer__user_token_invalid(user_factory):
     connected, subprotocol = await communicator.connect()
     assert connected
 
+    await communicator.send_json_to({
+        "model": "user",
+        "id": str(user.id),
+    })
+
     await user_token_expired(user)
     response = await communicator.receive_json_from()
     assert response == {
