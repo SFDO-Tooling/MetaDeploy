@@ -6,22 +6,22 @@ import type { Preflight } from 'plans/reducer';
 
 type FetchPreflightStarted = {
   type: 'FETCH_PREFLIGHT_STARTED',
-  payload: number,
+  payload: string,
 };
 type FetchPreflightSucceeded = {
   type: 'FETCH_PREFLIGHT_SUCCEEDED',
-  payload: { plan: number, preflight: Preflight },
+  payload: { plan: string, preflight: Preflight },
 };
 type FetchPreflightFailed = {
   type: 'FETCH_PREFLIGHT_FAILED',
-  payload: number,
+  payload: string,
 };
-type PreflightRequested = { type: 'PREFLIGHT_REQUESTED', payload: number };
+type PreflightRequested = { type: 'PREFLIGHT_REQUESTED', payload: string };
 type PreflightStarted = {
   type: 'PREFLIGHT_STARTED',
-  payload: number,
+  payload: string,
 };
-type PreflightRejected = { type: 'PREFLIGHT_REJECTED', payload: number };
+type PreflightRejected = { type: 'PREFLIGHT_REJECTED', payload: string };
 export type PreflightCompleted = {
   type: 'PREFLIGHT_COMPLETED',
   payload: Preflight,
@@ -45,7 +45,7 @@ export type PlansAction =
   | PreflightFailed
   | PreflightInvalid;
 
-export const fetchPreflight = (planId: number): ThunkAction => (
+export const fetchPreflight = (planId: string): ThunkAction => (
   dispatch,
   getState,
   { apiFetch },
@@ -64,7 +64,7 @@ export const fetchPreflight = (planId: number): ThunkAction => (
     });
 };
 
-export const startPreflight = (planId: number): ThunkAction => (
+export const startPreflight = (planId: string): ThunkAction => (
   dispatch,
   getState,
   { apiFetch },

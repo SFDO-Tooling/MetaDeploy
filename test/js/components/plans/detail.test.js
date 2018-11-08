@@ -1,5 +1,6 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { fireEvent } from 'react-testing-library';
 
 import { fetchVersion } from 'products/actions';
 import { fetchPreflight } from 'plans/actions';
@@ -17,34 +18,59 @@ fetchPreflight.mockReturnValue({ type: 'TEST' });
 const defaultState = {
   products: [
     {
-      id: 1,
+      id: 'p1',
       slug: 'product-1',
       title: 'Product 1',
       description: 'This is a test product.',
       category: 'salesforce',
       image: null,
       most_recent_version: {
-        id: 1,
-        product: 1,
+        id: 'v1',
+        product: 'p1',
         label: '1.0.0',
         description: 'This is a test product version.',
         primary_plan: {
-          id: 1,
+          id: 'plan-1',
           slug: 'my-plan',
           title: 'My Plan',
           preflight_message: 'Preflight text...',
-          steps: [{ id: 1, name: 'My Step' }],
+          steps: [
+            {
+              id: 'step-1',
+              name: 'Step 1',
+              is_required: true,
+              is_recommended: true,
+            },
+            {
+              id: 'step-2',
+              name: 'Step 2',
+              is_required: true,
+              is_recommended: false,
+            },
+            {
+              id: 'step-3',
+              name: 'Step 3',
+              is_required: false,
+              is_recommended: true,
+            },
+            {
+              id: 'step-4',
+              name: 'Step 4',
+              is_required: false,
+              is_recommended: false,
+            },
+          ],
         },
         secondary_plan: {
-          id: 2,
+          id: 'plan-2',
           slug: 'other-plan',
           title: 'My Other Plan',
           preflight_message: '',
-          steps: [{ id: 2, name: 'My Other Step' }],
+          steps: [{ id: 'step-5', name: 'My Other Step' }],
         },
         additional_plans: [
           {
-            id: 3,
+            id: 'plan-3',
             slug: 'third-plan',
             title: 'My Third Plan',
             preflight_message: 'Third preflight text...',
@@ -54,8 +80,21 @@ const defaultState = {
       },
     },
   ],
-  preflights: { 1: {} },
-  user: {},
+  preflights: {
+    'plan-1': {
+      status: 'complete',
+      is_valid: true,
+      error_count: 0,
+      warning_count: 0,
+      results: {
+        'step-1': [{ status: 'optional' }],
+        'step-3': [{ status: 'skip' }],
+      },
+      is_ready: true,
+    },
+  },
+  user: { valid_token_for: 'foo' },
+  jobs: {},
 };
 
 describe('<PlanDetail />', () => {
@@ -68,7 +107,7 @@ describe('<PlanDetail />', () => {
     };
     const opts = Object.assign({}, defaults, options);
     const { productSlug, versionLabel, planSlug } = opts;
-    const { getByText, queryByText, getByAltText } = renderWithRedux(
+    const { getByText, queryByText, getByAltText, container } = renderWithRedux(
       <MemoryRouter>
         <PlanDetail
           match={{ params: { productSlug, versionLabel, planSlug } }}
@@ -77,7 +116,7 @@ describe('<PlanDetail />', () => {
       opts.initialState,
       storeWithApi,
     );
-    return { getByText, queryByText, getByAltText };
+    return { getByText, queryByText, getByAltText, container };
   };
 
   describe('no product', () => {
@@ -92,7 +131,10 @@ describe('<PlanDetail />', () => {
     test('fetches version', () => {
       setup({ versionLabel: '2.0.0' });
 
-      expect(fetchVersion).toHaveBeenCalledWith({ product: 1, label: '2.0.0' });
+      expect(fetchVersion).toHaveBeenCalledWith({
+        product: 'p1',
+        label: '2.0.0',
+      });
     });
   });
 
@@ -102,7 +144,7 @@ describe('<PlanDetail />', () => {
         initialState: { ...defaultState, preflights: {} },
       });
 
-      expect(fetchPreflight).toHaveBeenCalledWith(1);
+      expect(fetchPreflight).toHaveBeenCalledWith('plan-1');
     });
   });
 
@@ -112,7 +154,7 @@ describe('<PlanDetail />', () => {
     expect(getByText('Product 1, 1.0.0')).toBeVisible();
     expect(getByText('My Plan')).toBeVisible();
     expect(getByText('Preflight text...')).toBeVisible();
-    expect(getByText('My Step')).toBeVisible();
+    expect(getByText('Step 1')).toBeVisible();
   });
 
   test('renders secondary_plan detail (no preflight)', () => {
@@ -141,6 +183,25 @@ describe('<PlanDetail />', () => {
       });
 
       expect(getByText('another plan')).toBeVisible();
+    });
+  });
+
+  describe('handleStepsChange', () => {
+    test('updates checkbox', () => {
+      const { container } = setup();
+      const checkbox1 = container.querySelector('#step-step-1');
+      const checkbox2 = container.querySelector('#step-step-2');
+      const checkbox3 = container.querySelector('#step-step-3');
+      const checkbox4 = container.querySelector('#step-step-4');
+
+      expect(checkbox1.checked).toBe(true);
+      expect(checkbox2.checked).toBe(true);
+      expect(checkbox3.checked).toBe(false);
+      expect(checkbox4.checked).toBe(false);
+
+      fireEvent.click(checkbox4);
+
+      expect(checkbox4.checked).toBe(true);
     });
   });
 });

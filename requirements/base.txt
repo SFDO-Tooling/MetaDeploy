@@ -24,3 +24,4 @@ django-storages==1.7.1
 boto3==1.9.37
 github3.py==0.9.6  # pyup: ignore
 bleach==3.0.2
+django-hashid-field==2.1.5
