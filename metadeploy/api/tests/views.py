@@ -29,6 +29,7 @@ class TestBasicGetViews:
             'created_at': format_timestamp(job.created_at),
             'enqueued_at': None,
             'job_id': None,
+            'status': 'started',
         }
 
     def test_product(self, client, product_factory, version_factory):

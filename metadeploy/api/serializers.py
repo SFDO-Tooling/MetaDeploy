@@ -157,12 +157,16 @@ class JobSerializer(serializers.ModelSerializer):
             'created_at',
             'enqueued_at',
             'job_id',
+            'status',
+            'org_name',
+            'org_type',
         )
         extra_kwargs = {
             'created_at': {'read_only': True},
             'enqueued_at': {'read_only': True},
             'completed_steps': {'read_only': True},
             'job_id': {'read_only': True},
+            'status': {'read_only': True},
         }
 
     @staticmethod

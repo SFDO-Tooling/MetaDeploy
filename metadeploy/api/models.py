@@ -431,6 +431,8 @@ class Job(HashIdMixin, models.Model):
         max_length=64,
         default=Status.started,
     )
+    org_name = models.CharField(blank=True, max_length=256)
+    org_type = models.CharField(blank=True, max_length=256)
 
     def skip_tasks(self):
         return [
