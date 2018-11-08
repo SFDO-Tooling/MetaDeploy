@@ -14,6 +14,7 @@ def test_serialize(user_factory):
     )
     actual = serialize(user)
     expected = escape(json.dumps({
+        'id': str(user.id),
         'username': 'template_tags@example.com',
         'email': 'template_tags@example.com',
         'valid_token_for': 'https://example.com',

@@ -48,7 +48,7 @@ class UserQuerySet(models.QuerySet):
         return self.filter(socialaccount__last_login__lte=token_lifetime_ago)
 
 
-class User(AbstractUser):
+class User(HashIdMixin, AbstractUser):
     objects = UserQuerySet.as_manager()
 
     @property

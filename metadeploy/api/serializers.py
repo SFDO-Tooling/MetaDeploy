@@ -23,9 +23,12 @@ class IdOnlyField(serializers.CharField):
 
 
 class FullUserSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
+
     class Meta:
         model = User
         fields = (
+            'id',
             'username',
             'email',
             'valid_token_for',
