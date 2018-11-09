@@ -63,6 +63,25 @@ def extract_user_and_repo(gh_url):
 
 
 @contextlib.contextmanager
+def finalize_result(result):
+    if isinstance(result, PreflightResult):
+        error_status = PreflightResult.Status.failed
+        success_status = PreflightResult.Status.complete
+    else:
+        error_status = Job.Status.failed
+        success_status = Job.Status.complete
+
+    try:
+        yield
+        result.status = success_status
+    except Exception:
+        result.status = error_status
+        logger.error(f"{result._meta.model_name} {result.id} failed.")
+    finally:
+        result.save()
+
+
+@contextlib.contextmanager
 def report_errors_to(user):
     try:
         yield
@@ -107,7 +126,7 @@ def zip_file_is_safe(zip_file):
     )
 
 
-def run_flows(user, plan, skip_tasks, flow_class=None, preflight_result=None):
+def run_flows(user, plan, skip_tasks, flow_class=None, result=None):
     # TODO:
     #
     # Can we do anything meaningful with a return value from a @job?
@@ -117,17 +136,20 @@ def run_flows(user, plan, skip_tasks, flow_class=None, preflight_result=None):
     if flow_class is None:
         flow_class = BasicFlow
 
+    is_preflight = isinstance(result, PreflightResult)
+
     token, token_secret = user.token
     instance_url = user.instance_url
     repo_url = plan.version.product.repo_url
     commit_ish = plan.version.commit_ish
 
-    if preflight_result:
+    if is_preflight:
         flow_name = plan.preflight_flow_name
     else:
         flow_name = plan.flow_name
 
     with contextlib.ExitStack() as stack:
+        stack.enter_context(finalize_result(result))
         stack.enter_context(report_errors_to(user))
         tmpdirname = stack.enter_context(TemporaryDirectory())
         stack.enter_context(cd(tmpdirname))
@@ -216,8 +238,8 @@ def run_flows(user, plan, skip_tasks, flow_class=None, preflight_result=None):
             skip=skip_tasks,
             name=flow_name,
         )
-        if preflight_result:
-            kwargs['preflight_result'] = preflight_result
+        if is_preflight:
+            kwargs['preflight_result'] = result
 
         flowinstance = flow_class(*args, **kwargs)
         flowinstance()
@@ -229,7 +251,7 @@ run_flows_job = job(run_flows)
 def enqueuer():
     logger.debug('Enqueuer live', extra={'tag': 'jobs.enqueuer'})
     for j in Job.objects.filter(enqueued_at=None):
-        rq_job = run_flows_job.delay(j.user, j.plan, j.skip_tasks())
+        rq_job = run_flows_job.delay(j.user, j.plan, j.skip_tasks(), result=j)
         j.job_id = rq_job.id
         j.enqueued_at = rq_job.enqueued_at
         j.save()
@@ -254,20 +276,13 @@ def preflight(user, plan):
         plan=plan,
         organization_url=user.instance_url,
     )
-    try:
-        run_flows(
-            user,
-            plan,
-            [],
-            flow_class=PreflightFlow,
-            preflight_result=preflight_result,
-        )
-        final_status = PreflightResult.Status.complete
-    except Exception:
-        logger.error(f"Preflight {preflight_result.id} failed.")
-        final_status = PreflightResult.Status.failed
-    preflight_result.status = final_status
-    preflight_result.save()
+    run_flows(
+        user,
+        plan,
+        [],
+        flow_class=PreflightFlow,
+        result=preflight_result,
+    )
 
 
 preflight_job = job(preflight)

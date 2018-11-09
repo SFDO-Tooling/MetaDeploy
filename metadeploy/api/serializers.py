@@ -22,6 +22,14 @@ class IdOnlyField(serializers.CharField):
         return str(value.id)
 
 
+class OrgTypeDefault:
+    def set_context(self, serializer_field):
+        self.org_type = serializer_field.context['request'].user.org_type
+
+    def __call__(self):
+        return self.org_type
+
+
 class FullUserSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
 
@@ -134,6 +142,14 @@ class JobSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault(),
     )
+    org_name = serializers.SerializerMethodField(
+        read_only=True,
+    )
+    org_type = serializers.CharField(
+        default=OrgTypeDefault(),
+        read_only=True,
+    )
+
     plan = serializers.PrimaryKeyRelatedField(
         queryset=Plan.objects.all(),
         pk_field=serializers.CharField(),
@@ -143,10 +159,9 @@ class JobSerializer(serializers.ModelSerializer):
         many=True,
         pk_field=serializers.CharField(),
     )
-    creator = LimitedUserSerializer(
-        read_only=True,
-        source='user',
-    )
+
+    # Emitted fields:
+    creator = serializers.SerializerMethodField()
 
     class Meta:
         model = Job
@@ -160,13 +175,34 @@ class JobSerializer(serializers.ModelSerializer):
             'created_at',
             'enqueued_at',
             'job_id',
+            'status',
+            'org_name',
+            'org_type',
         )
         extra_kwargs = {
             'created_at': {'read_only': True},
             'enqueued_at': {'read_only': True},
             'completed_steps': {'read_only': True},
             'job_id': {'read_only': True},
+            'status': {'read_only': True},
         }
+
+    def requesting_user_has_rights(self):
+        try:
+            user = self.context['request'].user
+            return user.is_staff or user == self.instance.user
+        except (AttributeError, KeyError):
+            return False
+
+    def get_creator(self, obj):
+        if self.requesting_user_has_rights():
+            return LimitedUserSerializer(instance=obj.user).data
+        return None
+
+    def get_org_name(self, obj):
+        if self.requesting_user_has_rights():
+            return obj.org_name
+        return None
 
     @staticmethod
     def _has_valid_preflight(most_recent_preflight):

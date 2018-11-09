@@ -410,6 +410,7 @@ class JobQuerySet(models.QuerySet):
 
 
 class Job(HashIdMixin, models.Model):
+    Status = Choices("started", "complete", "failed")
     tracker = FieldTracker(fields=("completed_steps",))
 
     objects = JobQuerySet.as_manager()
@@ -425,6 +426,14 @@ class Job(HashIdMixin, models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     enqueued_at = models.DateTimeField(null=True)
     job_id = models.UUIDField(null=True)
+    status = models.CharField(
+        choices=Status,
+        max_length=64,
+        default=Status.started,
+    )
+    org_name = models.CharField(blank=True, max_length=256)
+    org_type = models.CharField(blank=True, max_length=256)
+    is_public = models.BooleanField(default=False)
 
     def visible_to(self, user):
         return self.is_public or user.is_staff or user == self.useer
