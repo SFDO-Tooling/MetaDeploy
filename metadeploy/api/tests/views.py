@@ -2,6 +2,8 @@ import pytest
 
 from django.urls import reverse
 
+from ..models import PreflightResult
+
 
 def format_timestamp(value):
     value = value.isoformat()
@@ -11,7 +13,7 @@ def format_timestamp(value):
 
 
 @pytest.mark.django_db
-class TestBasicGetViews:
+class TestJobViewset:
     def test_job__cannot_see(self, client, job_factory):
         job = job_factory()
         response = client.get(reverse('job-detail', kwargs={'pk': job.id}))
@@ -24,7 +26,7 @@ class TestBasicGetViews:
     def test_job__is_staff(self, client, user_factory, job_factory):
         user = user_factory(is_staff=True)
         client.force_login(user)
-        job = job_factory()
+        job = job_factory(org_name='Secret Org')
         response = client.get(reverse('job-detail', kwargs={'pk': job.id}))
 
         assert response.status_code == 200
@@ -41,12 +43,12 @@ class TestBasicGetViews:
             'enqueued_at': None,
             'job_id': None,
             'status': 'started',
-            'org_name': '',
+            'org_name': 'Secret Org',
             'org_type': '',
         }
 
     def test_job__your_own(self, client, job_factory):
-        job = job_factory(user=client.user)
+        job = job_factory(user=client.user, org_name='Secret Org')
         response = client.get(reverse('job-detail', kwargs={'pk': job.id}))
 
         assert response.status_code == 200
@@ -63,10 +65,47 @@ class TestBasicGetViews:
             'enqueued_at': None,
             'job_id': None,
             'status': 'started',
+            'org_name': 'Secret Org',
+            'org_type': '',
+        }
+
+    def test_job__is_public(self, client, job_factory):
+        job = job_factory(is_public=True, org_name='Secret Org')
+        response = client.get(reverse('job-detail', kwargs={'pk': job.id}))
+
+        assert response.status_code == 200
+        assert response.json() == {
+            'id': str(job.id),
+            'creator': None,
+            'plan': str(job.plan.id),
+            'steps': [],
+            'completed_steps': [],
+            'created_at': format_timestamp(job.created_at),
+            'enqueued_at': None,
+            'job_id': None,
+            'status': 'started',
             'org_name': '',
             'org_type': '',
         }
 
+    def test_create_job(self, client, plan_factory, preflight_result_factory):
+        plan = plan_factory()
+        preflight_result_factory(
+            plan=plan,
+            user=client.user,
+            status=PreflightResult.Status.complete,
+        )
+        data = {
+            'plan': str(plan.id),
+            'steps': [],
+        }
+        response = client.post(reverse('job-list'), data=data)
+
+        assert response.status_code == 201
+
+
+@pytest.mark.django_db
+class TestBasicGetViews:
     def test_product(self, client, product_factory, version_factory):
         product = product_factory()
         version = version_factory(product=product)
