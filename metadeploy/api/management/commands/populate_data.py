@@ -128,7 +128,7 @@ class Command(BaseCommand):
             order_key=5,
         )
         self.create_step(
-            task_name='install_managed',
+            task_name='quick_task',
             plan=plan,
             name='Nonprofit Success Pack',
             kind='managed',
@@ -136,7 +136,7 @@ class Command(BaseCommand):
             order_key=6,
         )
         self.create_step(
-            task_name='deploy_pre',
+            task_name='slow_task',
             plan=plan,
             name='NPSP Config for Salesforce1',
             description='This is a step description.',
@@ -145,7 +145,7 @@ class Command(BaseCommand):
             order_key=7,
         )
         self.create_step(
-            task_name='deploy_post',
+            task_name='medium_task',
             plan=plan,
             name='Contacts and Organizations',
             description='This is a step description.',
