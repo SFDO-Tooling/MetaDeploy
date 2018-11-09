@@ -52,7 +52,7 @@ class Command(BaseCommand):
             self, version, title='Full Install', tier='primary', **kwargs):
         combined_kwargs = {
             'preflight_flow_name': 'preflight_flow',
-            'flow_name': 'main_flow',
+            'flow_name': 'slow_steps_flow',
             'preflight_message': (
                 'Preflight message consists of generic product message and '
                 'step pre-check info — run in one operation before the '
@@ -219,7 +219,7 @@ class Command(BaseCommand):
         plan = self.create_plan(
             version1,
             preflight_flow_name='static_preflight',
-            flow_name='ci_test_concurrency',
+            flow_name='slow_steps_flow',
         )
         self.add_steps(plan)
 
@@ -228,7 +228,7 @@ class Command(BaseCommand):
             title='Failing Preflight',
             tier='secondary',
             preflight_flow_name='failing_preflight',
-            flow_name='ci_test_concurrency',
+            flow_name='slow_steps_flow',
         )
         self.add_steps(plan2)
 
@@ -237,7 +237,7 @@ class Command(BaseCommand):
             title='Messy Preflight',
             tier='additional',
             preflight_flow_name='messy_preflight',
-            flow_name='ci_test_concurrency',
+            flow_name='slow_steps_flow',
         )
         self.add_steps(plan3)
 
@@ -246,7 +246,7 @@ class Command(BaseCommand):
             title='Plan-Level Failing Preflight',
             tier='additional',
             preflight_flow_name='error_preflight',
-            flow_name='ci_test_concurrency',
+            flow_name='slow_steps_flow',
         )
         self.add_steps(plan4)
 
@@ -255,7 +255,7 @@ class Command(BaseCommand):
             title='Preflight With Warnings',
             tier='additional',
             preflight_flow_name='warn_preflight',
-            flow_name='ci_test_concurrency',
+            flow_name='slow_steps_flow',
         )
         self.add_steps(plan5)
 
