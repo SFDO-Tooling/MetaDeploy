@@ -16,6 +16,10 @@
       "description": "A secret key used to provide cryptographic signing",
       "generator": "secret"
     },
+    "DJANGO_HASHID_SALT": {
+      "description": "Salt used to hash IDs that get exposed publicly",
+      "generator": "secret"
+    },
     "DJANGO_SETTINGS_MODULE": {
       "description": "The site settings to use",
       "value": "config.settings.production"

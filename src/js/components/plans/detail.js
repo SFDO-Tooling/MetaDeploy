@@ -8,15 +8,17 @@ import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
 import routes from 'utils/routes';
+import { CONSTANTS } from 'plans/reducer';
 import { fetchPreflight, startPreflight } from 'plans/actions';
 import { fetchVersion } from 'products/actions';
-import { shouldFetchVersion, gatekeeper } from 'products/utils';
 import {
   selectProduct,
   selectVersion,
   selectVersionLabel,
 } from 'components/products/detail';
 import { selectUserState } from 'components/header';
+import { shouldFetchVersion, gatekeeper } from 'products/utils';
+import { startJob } from 'jobs/actions';
 
 import BodyContainer from 'components/bodyContainer';
 import CtaButton from 'components/plans/ctaButton';
@@ -27,7 +29,7 @@ import StepsTable from 'components/plans/stepsTable';
 import Toasts from 'components/plans/toasts';
 import UserInfo from 'components/plans/userInfo';
 
-import type { Match } from 'react-router-dom';
+import type { Match, RouterHistory } from 'react-router-dom';
 import type { AppState } from 'app/reducer';
 import type {
   Plan as PlanType,
@@ -40,8 +42,10 @@ import type {
 } from 'products/reducer';
 import type { User as UserType } from 'accounts/reducer';
 
-type InitialProps = { match: Match };
+export type SelectedSteps = Set<string>;
+type InitialProps = {| match: Match, history: RouterHistory |};
 type Props = {
+  ...InitialProps,
   user: UserType,
   product: ProductType | null,
   version: VersionType | null,
@@ -51,9 +55,20 @@ type Props = {
   doFetchVersion: typeof fetchVersion,
   doFetchPreflight: typeof fetchPreflight,
   doStartPreflight: typeof startPreflight,
+  doStartJob: typeof startJob,
+};
+type State = {
+  changedSteps: Map<string, boolean>,
 };
 
-class PlanDetail extends React.Component<Props> {
+const { RESULT_STATUS } = CONSTANTS;
+
+class PlanDetail extends React.Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = { changedSteps: new Map() };
+  }
+
   componentDidMount() {
     const {
       user,
@@ -80,8 +95,49 @@ class PlanDetail extends React.Component<Props> {
     }
   }
 
+  handleStepsChange = (stepId: string, checked: boolean) => {
+    const changedSteps = new Map(this.state.changedSteps);
+    changedSteps.set(stepId, checked);
+    this.setState({ changedSteps });
+  };
+
+  getSelectedSteps(): SelectedSteps {
+    const { plan, preflight } = this.props;
+    /* istanbul ignore if */
+    if (!plan) {
+      return new Set();
+    }
+    const { changedSteps } = this.state;
+    const selectedSteps = new Set();
+    for (const step of plan.steps) {
+      const { id } = step;
+      const result = preflight && preflight.results && preflight.results[id];
+      let skipped, optional;
+      if (result) {
+        skipped = result.find(res => res.status === RESULT_STATUS.SKIP);
+        optional = result.find(res => res.status === RESULT_STATUS.OPTIONAL);
+      }
+      if (!skipped) {
+        const required = step.is_required && !optional;
+        const recommended = !required && step.is_recommended;
+        const manuallyChecked = changedSteps.get(id) === true;
+        const manuallyUnchecked = changedSteps.get(id) === false;
+        if (
+          required ||
+          manuallyChecked ||
+          (recommended && !manuallyUnchecked)
+        ) {
+          selectedSteps.add(id);
+        }
+      }
+    }
+    return selectedSteps;
+  }
+
   render(): React.Node {
     const {
+      match,
+      history,
       user,
       product,
       version,
@@ -89,6 +145,7 @@ class PlanDetail extends React.Component<Props> {
       plan,
       preflight,
       doStartPreflight,
+      doStartJob,
     } = this.props;
     const blocked = gatekeeper({
       product,
@@ -105,6 +162,7 @@ class PlanDetail extends React.Component<Props> {
     if (!product || !version || !plan) {
       return <ProductNotFound />;
     }
+    const selectedSteps = this.getSelectedSteps();
     return (
       <DocumentTitle title={`${plan.title} | ${product.title} | MetaDeploy`}>
         <>
@@ -141,10 +199,14 @@ class PlanDetail extends React.Component<Props> {
               </div>
               {plan.steps.length ? (
                 <CtaButton
+                  match={match}
+                  history={history}
                   user={user}
                   plan={plan}
                   preflight={preflight}
+                  selectedSteps={selectedSteps}
                   doStartPreflight={doStartPreflight}
+                  doStartJob={doStartJob}
                 />
               ) : null}
             </div>
@@ -160,7 +222,13 @@ class PlanDetail extends React.Component<Props> {
                 className="slds-p-around_medium
                   slds-size_1-of-1"
               >
-                <StepsTable user={user} plan={plan} preflight={preflight} />
+                <StepsTable
+                  user={user}
+                  plan={plan}
+                  preflight={preflight}
+                  selectedSteps={selectedSteps}
+                  handleStepsChange={this.handleStepsChange}
+                />
               </div>
             ) : null}
           </BodyContainer>
@@ -224,6 +292,7 @@ const actions = {
   doFetchVersion: fetchVersion,
   doFetchPreflight: fetchPreflight,
   doStartPreflight: startPreflight,
+  doStartJob: startJob,
 };
 
 const WrappedPlanDetail: React.ComponentType<InitialProps> = connect(

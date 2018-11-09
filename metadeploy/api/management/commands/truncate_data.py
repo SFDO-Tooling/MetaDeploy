@@ -20,6 +20,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         ordered_models = [
+            Job,
+            RepeatableJob,
             PreflightResult,
             Step,
             PlanSlug,
@@ -28,8 +30,6 @@ class Command(BaseCommand):
             ProductSlug,
             Product,
             ProductCategory,
-            Job,
-            RepeatableJob,
         ]
 
         for model_class in ordered_models:

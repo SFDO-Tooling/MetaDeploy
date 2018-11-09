@@ -17,6 +17,11 @@ from .constants import WARN, ERROR
 User = get_user_model()
 
 
+class IdOnlyField(serializers.CharField):
+    def to_representation(self, value):
+        return str(value.id)
+
+
 class FullUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -40,6 +45,7 @@ class LimitedUserSerializer(serializers.ModelSerializer):
 
 
 class StepSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
     kind = serializers.CharField(source='get_kind_display')
 
     class Meta:
@@ -56,7 +62,12 @@ class StepSerializer(serializers.ModelSerializer):
 
 
 class PlanSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
     steps = StepSerializer(many=True, source='step_set')
+    version = serializers.PrimaryKeyRelatedField(
+        read_only=True,
+        pk_field=serializers.CharField(),
+    )
 
     class Meta:
         model = Plan
@@ -72,6 +83,11 @@ class PlanSerializer(serializers.ModelSerializer):
 
 
 class VersionSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
+    product = serializers.PrimaryKeyRelatedField(
+        read_only=True,
+        pk_field=serializers.CharField(),
+    )
     primary_plan = PlanSerializer()
     secondary_plan = PlanSerializer()
     additional_plans = PlanSerializer(many=True)
@@ -91,6 +107,7 @@ class VersionSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
     category = serializers.CharField(source='category.title')
     most_recent_version = VersionSerializer()
 
@@ -110,20 +127,26 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class JobSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault(),
     )
+    org_name = serializers.SerializerMethodField(
+        read_only=True,
+    )
+
     plan = serializers.PrimaryKeyRelatedField(
         queryset=Plan.objects.all(),
+        pk_field=serializers.CharField(),
     )
     steps = serializers.PrimaryKeyRelatedField(
         queryset=Step.objects.all(),
         many=True,
+        pk_field=serializers.CharField(),
     )
-    creator = LimitedUserSerializer(
-        read_only=True,
-        source='user',
-    )
+
+    # Emitted fields:
+    creator = serializers.SerializerMethodField()
 
     class Meta:
         model = Job
@@ -137,13 +160,35 @@ class JobSerializer(serializers.ModelSerializer):
             'created_at',
             'enqueued_at',
             'job_id',
+            'status',
+            'org_name',
+            'org_type',
         )
         extra_kwargs = {
             'created_at': {'read_only': True},
             'enqueued_at': {'read_only': True},
             'completed_steps': {'read_only': True},
             'job_id': {'read_only': True},
+            'status': {'read_only': True},
+            'org_type': {'read_only': True},
         }
+
+    def requesting_user_has_rights(self):
+        try:
+            user = self.context['request'].user
+            return user.is_staff or user == self.instance.user
+        except (AttributeError, KeyError):
+            return False
+
+    def get_creator(self, obj):
+        if self.requesting_user_has_rights():
+            return LimitedUserSerializer(instance=obj.user).data
+        return None
+
+    def get_org_name(self, obj):
+        if self.requesting_user_has_rights():
+            return obj.org_name
+        return None
 
     @staticmethod
     def _has_valid_preflight(most_recent_preflight):
@@ -184,6 +229,8 @@ class JobSerializer(serializers.ModelSerializer):
         )
         if not has_valid_steps:
             raise serializers.ValidationError("Invalid steps for plan.")
+        data["org_name"] = data["user"].org_name
+        data["org_type"] = data["user"].org_type
         return data
 
 
@@ -191,6 +238,7 @@ class PreflightResultSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault(),
     )
+    plan = IdOnlyField(read_only=True)
     error_count = serializers.SerializerMethodField()
     warning_count = serializers.SerializerMethodField()
     is_ready = serializers.SerializerMethodField()
@@ -237,7 +285,6 @@ class PreflightResultSerializer(serializers.ModelSerializer):
         )
         extra_kwargs = {
             'organization_url': {'read_only': True},
-            'plan': {'read_only': True},
             'created_at': {'read_only': True},
             'is_valid': {'read_only': True},
             'status': {'read_only': True},

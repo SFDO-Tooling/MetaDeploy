@@ -4,12 +4,12 @@ import { render, fireEvent } from 'react-testing-library';
 import StepsTable from 'components/plans/stepsTable';
 
 const defaultPlan = {
-  id: 1,
+  id: 'plan-1',
   slug: 'my-plan',
   title: 'My Plan',
   steps: [
     {
-      id: 1,
+      id: 'step-1',
       name: 'Step 1',
       description: 'This is a step description.',
       kind: 'Metadata',
@@ -18,7 +18,7 @@ const defaultPlan = {
       is_recommended: true,
     },
     {
-      id: 2,
+      id: 'step-2',
       name: 'Step 2',
       kind: 'One Time Apex',
       kind_icon: 'apex',
@@ -26,7 +26,7 @@ const defaultPlan = {
       is_recommended: false,
     },
     {
-      id: 3,
+      id: 'step-3',
       name: 'Step 3',
       kind: 'Managed Package',
       kind_icon: 'archive',
@@ -34,7 +34,7 @@ const defaultPlan = {
       is_recommended: true,
     },
     {
-      id: 4,
+      id: 'step-4',
       name: 'Step 4',
       kind: 'Data',
       kind_icon: 'paste',
@@ -45,6 +45,8 @@ const defaultPlan = {
 };
 
 describe('<StepsTable />', () => {
+  const handleStepsChange = jest.fn();
+
   const setup = options => {
     const defaults = { plan: defaultPlan, user: null };
     const opts = { ...defaults, ...options };
@@ -53,6 +55,8 @@ describe('<StepsTable />', () => {
         plan={opts.plan}
         user={opts.user}
         preflight={opts.preflight}
+        selectedSteps={new Set(['step-1', 'step-2', 'step-3'])}
+        handleStepsChange={handleStepsChange}
       />,
     );
     return { getByText, queryByText, container };
@@ -74,7 +78,9 @@ describe('<StepsTable />', () => {
           preflight: {
             status: 'complete',
             results: {
-              1: [{ status: 'optional', message: 'This became optional.' }],
+              'step-1': [
+                { status: 'optional', message: 'This became optional.' },
+              ],
             },
           },
         });
@@ -87,11 +93,11 @@ describe('<StepsTable />', () => {
           preflight: {
             status: 'complete',
             results: {
-              1: [
+              'step-1': [
                 { status: 'error', message: 'This error.' },
                 { status: 'warn', message: 'This warning.' },
               ],
-              2: [
+              'step-2': [
                 { status: 'error', message: 'This other error.' },
                 { status: 'warn', message: 'This other warning.' },
               ],
@@ -120,8 +126,8 @@ describe('<StepsTable />', () => {
         preflight: {
           status: 'complete',
           results: {
-            1: [{ status: 'optional' }],
-            2: [{ status: 'optional' }],
+            'step-1': [{ status: 'optional' }],
+            'step-2': [{ status: 'optional' }],
           },
         },
       });
@@ -175,9 +181,9 @@ describe('<StepsTable />', () => {
           error_count: 0,
           warning_count: 0,
           results: {
-            1: [{ status: 'optional' }],
-            3: [{ status: 'skip', message: 'This was skipped.' }],
-            4: [{ status: 'skip' }],
+            'step-1': [{ status: 'optional' }],
+            'step-3': [{ status: 'skip', message: 'This was skipped.' }],
+            'step-4': [{ status: 'skip' }],
           },
           is_ready: true,
         },
@@ -187,6 +193,18 @@ describe('<StepsTable />', () => {
         container.querySelectorAll('input[type="checkbox"][disabled]'),
       ).toHaveLength(3);
       expect(getByText('This was skipped.')).toBeVisible();
+    });
+
+    describe('checkbox change', () => {
+      test('calls handleStepsChange with step id and checked boolean', () => {
+        const { container } = setup();
+        const checkbox = container.querySelector(
+          'input[type="checkbox"]:not(:checked)',
+        );
+        fireEvent.click(checkbox);
+
+        expect(handleStepsChange).toHaveBeenCalledWith('step-4', true);
+      });
     });
   });
 });

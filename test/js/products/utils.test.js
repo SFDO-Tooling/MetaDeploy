@@ -5,19 +5,19 @@ import { render } from 'react-testing-library';
 import { shouldFetchVersion, gatekeeper } from 'products/utils';
 
 const defaultProduct = {
-  id: 1,
+  id: 'p1',
   slug: 'product-1',
   title: 'Product 1',
   description: 'This is a test product.',
   category: 'salesforce',
   image: null,
   most_recent_version: {
-    id: 1,
-    product: 1,
+    id: 'v1',
+    product: 'p1',
     label: '1.0.0',
     description: 'This is a test product version.',
     primary_plan: {
-      id: 1,
+      id: 'plan-1',
       slug: 'my-plan',
       title: 'My Plan',
     },

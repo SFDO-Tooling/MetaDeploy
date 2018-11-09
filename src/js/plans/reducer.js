@@ -3,17 +3,17 @@
 import type { LogoutAction } from 'accounts/actions';
 import type { PlansAction } from 'plans/actions';
 
-export type Step = {
-  +id: number,
+export type Step = {|
+  +id: string,
   +name: string,
   +kind: string,
   +kind_icon: string | null,
   +is_required: boolean,
   +is_recommended: boolean,
   +description: string,
-};
+|};
 export type Plan = {
-  +id: number,
+  +id: string,
   +slug: string,
   +title: string,
   +preflight_message: string,
@@ -30,7 +30,7 @@ type PreflightErrors = {
   [string]: Array<PreflightError>,
 };
 export type Preflight = {
-  +plan?: number,
+  +plan?: string,
   +status: 'started' | 'complete' | 'failed',
   +results?: PreflightErrors,
   +is_valid?: boolean,
@@ -39,7 +39,7 @@ export type Preflight = {
   +is_ready?: boolean,
 };
 export type PreflightsState = {
-  [number]: Preflight,
+  [string]: Preflight,
 };
 
 export const CONSTANTS = {

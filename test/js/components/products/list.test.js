@@ -30,17 +30,17 @@ describe('<Products />', () => {
     const initialState = {
       products: [
         {
-          id: 1,
+          id: 'p1',
           title: 'Product 1',
           description: 'This is a test product.',
           category: 'salesforce',
           most_recent_version: {
-            id: 1,
-            product: 1,
+            id: 'v1',
+            product: 'p1',
             label: '1.0.0',
             description: 'This is a test product version.',
             primary_plan: {
-              id: 1,
+              id: 'plan-1',
               title: 'My Plan',
             },
             additional_plans: [],
@@ -58,7 +58,7 @@ describe('<Products />', () => {
     const initialState = {
       products: [
         {
-          id: 1,
+          id: 'p1',
           title: 'Product 1',
           description: 'This is a test product.',
           category: 'salesforce',
@@ -68,30 +68,30 @@ describe('<Products />', () => {
             name: 'salesforce1',
           },
           most_recent_version: {
-            id: 1,
-            product: 1,
+            id: 'v1',
+            product: 'p1',
             label: '1.0.0',
             description: 'This is a test product version.',
             primary_plan: {
-              id: 1,
+              id: 'plan-1',
               title: 'My Plan',
             },
             additional_plans: [],
           },
         },
         {
-          id: 2,
+          id: 'p2',
           title: 'Product 2',
           description: 'This is another test product.',
           category: 'community',
           color: '#fff',
           most_recent_version: {
-            id: 2,
-            product: 2,
+            id: 'v2',
+            product: 'p2',
             label: '1.0.0',
             description: 'This is a test product version.',
             primary_plan: {
-              id: 2,
+              id: 'plan-2',
               title: 'My Plan',
             },
             additional_plans: [],
