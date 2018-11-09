@@ -22,14 +22,6 @@ class IdOnlyField(serializers.CharField):
         return str(value.id)
 
 
-class OrgTypeDefault:
-    def set_context(self, serializer_field):
-        self.org_type = serializer_field.context['request'].user.org_type
-
-    def __call__(self):
-        return self.org_type
-
-
 class FullUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -142,10 +134,6 @@ class JobSerializer(serializers.ModelSerializer):
     org_name = serializers.SerializerMethodField(
         read_only=True,
     )
-    org_type = serializers.CharField(
-        default=OrgTypeDefault(),
-        read_only=True,
-    )
 
     plan = serializers.PrimaryKeyRelatedField(
         queryset=Plan.objects.all(),
@@ -182,6 +170,7 @@ class JobSerializer(serializers.ModelSerializer):
             'completed_steps': {'read_only': True},
             'job_id': {'read_only': True},
             'status': {'read_only': True},
+            'org_type': {'read_only': True},
         }
 
     def requesting_user_has_rights(self):
@@ -240,6 +229,8 @@ class JobSerializer(serializers.ModelSerializer):
         )
         if not has_valid_steps:
             raise serializers.ValidationError("Invalid steps for plan.")
+        data["org_name"] = data["user"].org_name
+        data["org_type"] = data["user"].org_type
         return data
 
 

@@ -102,6 +102,8 @@ class TestJobViewset:
         response = client.post(reverse('job-list'), data=data)
 
         assert response.status_code == 201
+        assert response.json()["org_type"] == "Developer Edition"
+        assert response.json()["org_name"] == "Sample Org"
 
 
 @pytest.mark.django_db
