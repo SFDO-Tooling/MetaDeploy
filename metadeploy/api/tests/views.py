@@ -12,8 +12,41 @@ def format_timestamp(value):
 
 @pytest.mark.django_db
 class TestBasicGetViews:
-    def test_job(self, client, job_factory):
+    def test_job__cannot_see(self, client, job_factory):
         job = job_factory()
+        response = client.get(reverse('job-detail', kwargs={'pk': job.id}))
+
+        assert response.status_code == 404
+        assert response.json() == {
+            'detail': 'Not found.',
+        }
+
+    def test_job__is_staff(self, client, user_factory, job_factory):
+        user = user_factory(is_staff=True)
+        client.force_login(user)
+        job = job_factory()
+        response = client.get(reverse('job-detail', kwargs={'pk': job.id}))
+
+        assert response.status_code == 200
+        assert response.json() == {
+            'id': str(job.id),
+            'creator': {
+                'username': job.user.username,
+                'is_staff': False,
+            },
+            'plan': str(job.plan.id),
+            'steps': [],
+            'completed_steps': [],
+            'created_at': format_timestamp(job.created_at),
+            'enqueued_at': None,
+            'job_id': None,
+            'status': 'started',
+            'org_name': '',
+            'org_type': '',
+        }
+
+    def test_job__your_own(self, client, job_factory):
+        job = job_factory(user=client.user)
         response = client.get(reverse('job-detail', kwargs={'pk': job.id}))
 
         assert response.status_code == 200

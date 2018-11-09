@@ -433,6 +433,7 @@ class Job(HashIdMixin, models.Model):
     )
     org_name = models.CharField(blank=True, max_length=256)
     org_type = models.CharField(blank=True, max_length=256)
+    is_public = models.BooleanField(default=False)
 
     def skip_tasks(self):
         return [
