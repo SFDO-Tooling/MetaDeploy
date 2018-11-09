@@ -52,7 +52,7 @@ class Command(BaseCommand):
             self, version, title='Full Install', tier='primary', **kwargs):
         combined_kwargs = {
             'preflight_flow_name': 'static_preflight',
-            'flow_name': 'static_preflight',
+            'flow_name': 'slow_steps_flow',
             'preflight_message': (
                 'Preflight message consists of generic product message and '
                 'step pre-check info — run in one operation before the '
