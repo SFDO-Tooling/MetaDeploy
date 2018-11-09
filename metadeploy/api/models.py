@@ -426,6 +426,9 @@ class Job(HashIdMixin, models.Model):
     enqueued_at = models.DateTimeField(null=True)
     job_id = models.UUIDField(null=True)
 
+    def visible_to(self, user):
+        return self.is_public or user.is_staff or user == self.useer
+
     def skip_tasks(self):
         return [
             step.task_name

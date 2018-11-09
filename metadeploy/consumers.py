@@ -1,5 +1,7 @@
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
+from metadeploy.api.models import Job
+
 
 class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
@@ -25,10 +27,28 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         # Just used to subscribe to notification channels.
         # TODO confirm that this user has rights to see events on this
         # model instance
-        if "model" in content and "id" in content:
-            group_name = f"{content['model']}-{content['id']}"
-            self.groups.add(group_name)
-            await self.channel_layer.group_add(
-                group_name,
-                self.channel_name,
-            )
+        if not self.has_good_permissions(content):
+            return
+        group_name = f"{content['model']}-{content['id']}"
+        self.groups.add(group_name)
+        await self.channel_layer.group_add(
+            group_name,
+            self.channel_name,
+        )
+
+    def has_good_permissions(self, content):
+        known_models = {
+            "user",
+            "preflightrequest",
+            "job",
+        }
+        if not ("model" in content and "id" in content):
+            return False
+        model = content["model"]
+        if model not in known_models:
+            return False
+        if model == "job":
+            # Test job permissions:
+            job = Job.objects.get(pk=content["id"])
+            return job.visible_to(self.scope["user"])
+        return True
