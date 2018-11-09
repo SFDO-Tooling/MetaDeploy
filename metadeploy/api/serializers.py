@@ -199,7 +199,7 @@ class JobSerializer(serializers.ModelSerializer):
     def get_org_name(self, obj):
         if self.requesting_user_has_rights():
             return obj.org_name
-        return ''
+        return None
 
     @staticmethod
     def _has_valid_preflight(most_recent_preflight):

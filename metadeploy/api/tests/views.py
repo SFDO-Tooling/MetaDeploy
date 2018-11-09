@@ -84,7 +84,7 @@ class TestJobViewset:
             'enqueued_at': None,
             'job_id': None,
             'status': 'started',
-            'org_name': '',
+            'org_name': None,
             'org_type': '',
         }
 
