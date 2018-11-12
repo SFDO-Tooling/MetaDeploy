@@ -75,7 +75,7 @@ class Command(BaseCommand):
         return plan
 
     def create_step(self, **kwargs):
-        task_name = kwargs.pop('task_name', 'main_task')
+        task_name = kwargs.pop('task_name', 'quick_task')
         return Step.objects.create(task_name=task_name, **kwargs)
 
     def add_steps(self, plan):
@@ -128,7 +128,7 @@ class Command(BaseCommand):
             order_key=5,
         )
         self.create_step(
-            task_name='quick_task',
+            task_name='install_managed',
             plan=plan,
             name='Nonprofit Success Pack',
             kind='managed',
@@ -136,7 +136,7 @@ class Command(BaseCommand):
             order_key=6,
         )
         self.create_step(
-            task_name='slow_task',
+            task_name='deploy_pre',
             plan=plan,
             name='NPSP Config for Salesforce1',
             description='This is a step description.',
@@ -145,7 +145,7 @@ class Command(BaseCommand):
             order_key=7,
         )
         self.create_step(
-            task_name='medium_task',
+            task_name='deploy_post',
             plan=plan,
             name='Contacts and Organizations',
             description='This is a step description.',
@@ -218,7 +218,6 @@ class Command(BaseCommand):
         )
         plan = self.create_plan(
             version1,
-            preflight_flow_name='static_preflight',
         )
         self.add_steps(plan)
 
