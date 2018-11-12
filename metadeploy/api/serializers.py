@@ -131,9 +131,7 @@ class JobSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault(),
     )
-    org_name = serializers.SerializerMethodField(
-        read_only=True,
-    )
+    org_name = serializers.SerializerMethodField()
 
     plan = serializers.PrimaryKeyRelatedField(
         queryset=Plan.objects.all(),
@@ -174,6 +172,11 @@ class JobSerializer(serializers.ModelSerializer):
         }
 
     def requesting_user_has_rights(self):
+        """
+        Does the user making the request have rights to see this object?
+
+        The user is derived from the serializer context.
+        """
         try:
             user = self.context['request'].user
             return user.is_staff or user == self.instance.user
