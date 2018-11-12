@@ -13,6 +13,7 @@ from ..jobs import (
     preflight,
     expire_preflights,
 )
+from .flows import BasicFlow
 
 
 @pytest.mark.django_db
@@ -24,7 +25,7 @@ def test_report_error(
     job = job_factory(user=user)
     steps = [step_factory(plan=plan)]
 
-    run_flows(user, plan, steps, result=job)
+    run_flows(user, plan, steps, flow_class=BasicFlow, result=job)
 
     assert report_error.called
     assert job.status == Job.Status.failed
@@ -53,7 +54,7 @@ def test_run_flows(
     steps = [step_factory(plan=plan)]
     job = job_factory(user=user)
 
-    run_flows(user, plan, steps, result=job)
+    run_flows(user, plan, steps, flow_class=basic_flow, result=job)
 
     # TODO assert? What we really need to assert is a change in the SF
     # org, but that'd be an integration test.
@@ -100,14 +101,12 @@ def test_malicious_zip_file(
     mocker.patch('metadeploy.api.jobs.BaseProjectKeychain')
     basic_flow = mocker.patch('metadeploy.api.jobs.BasicFlow')
 
-    from ..jobs import run_flows
-
     user = user_factory()
     plan = plan_factory()
     steps = [step_factory(plan=plan)]
     job = job_factory(user=user)
 
-    run_flows(user, plan, steps, result=job)
+    run_flows(user, plan, steps, flow_class=basic_flow, result=job)
 
     # TODO assert? What we really need to assert is a change in the SF
     # org, but that'd be an integration test.

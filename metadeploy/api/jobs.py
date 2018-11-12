@@ -64,12 +64,8 @@ def extract_user_and_repo(gh_url):
 
 @contextlib.contextmanager
 def finalize_result(result):
-    if isinstance(result, PreflightResult):
-        error_status = PreflightResult.Status.failed
-        success_status = PreflightResult.Status.complete
-    else:
-        error_status = Job.Status.failed
-        success_status = Job.Status.complete
+    error_status = result.Status.failed
+    success_status = result.Status.complete
 
     try:
         yield
@@ -126,15 +122,27 @@ def zip_file_is_safe(zip_file):
     )
 
 
-def run_flows(user, plan, skip_tasks, flow_class=None, result=None):
+def run_flows(user, plan, skip_tasks, *, flow_class, result):
+    """
+    This operates with side effects; it changes things in a Salesforce
+    org, and then records the results of those operations on to a
+    `result`.
+
+    Args:
+        user (User): The User requesting this flow be run.
+        plan (Plan): The Plan instance for the flow you're running.
+        skip_tasks (List[str]): The strings in the list should be valid
+            task_name values for steps in this flow.
+        flow_class (Union[Type[PreflightFlow], Type[BasicFlow]]): Either the
+            class PreflightFlow or the class BasicFlow. This is the flow that
+            actually gets run inside this function.
+        result (Union[Job, PreflightResult]): The instance onto which to
+            record the results of running steps in the flow. Either a
+            PreflightResult or a Job, as appropriate.
+    """
     # TODO:
     #
     # Can we do anything meaningful with a return value from a @job?
-
-    # This is a little stupid, but it lets us mock out BasicFlow in the
-    # tests better than if we put this straight in the kwargs:
-    if flow_class is None:
-        flow_class = BasicFlow
 
     is_preflight = isinstance(result, PreflightResult)
 
@@ -251,7 +259,13 @@ run_flows_job = job(run_flows)
 def enqueuer():
     logger.debug('Enqueuer live', extra={'tag': 'jobs.enqueuer'})
     for j in Job.objects.filter(enqueued_at=None):
-        rq_job = run_flows_job.delay(j.user, j.plan, j.skip_tasks(), result=j)
+        rq_job = run_flows_job.delay(
+            j.user,
+            j.plan,
+            j.skip_tasks(),
+            flow_class=BasicFlow,
+            result=j,
+        )
         j.job_id = rq_job.id
         j.enqueued_at = rq_job.enqueued_at
         j.save()
