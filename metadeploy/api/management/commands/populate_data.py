@@ -81,27 +81,30 @@ class Command(BaseCommand):
     def add_steps(self, plan):
         self.create_step(
             plan=plan,
-            name='Opportunity Record Types',
+            name='Quick step',
             description=(
                 f'This is a description of the step. Could be any step, '
                 'optional or required. The description wraps.'
             ),
             is_recommended=False,
+            task_name='quick_task',
         )
         self.create_step(
             plan=plan,
-            name='Households',
+            name='Slow step',
             is_required=False,
             is_recommended=False,
             order_key=1,
+            task_name='slow_task',
         )
         self.create_step(
             plan=plan,
-            name='Recurring Donations',
+            name='Medium step',
             description='This is a step description.',
             kind='onetime',
             is_recommended=False,
             order_key=2,
+            task_name='medium_task',
         )
         self.create_step(
             plan=plan,
@@ -225,7 +228,8 @@ class Command(BaseCommand):
             version1,
             title='Failing Preflight',
             tier='secondary',
-            preflight_flow_name='failing_preflight',
+            preflight_flow_name='slow_steps_preflight_bad',
+            flow_name='slow_steps_flow',
         )
         self.add_steps(plan2)
 
@@ -249,7 +253,8 @@ class Command(BaseCommand):
             version1,
             title='Preflight With Warnings',
             tier='additional',
-            preflight_flow_name='warn_preflight',
+            preflight_flow_name='slow_steps_preflight_warn',
+            flow_name='slow_steps_flow',
         )
         self.add_steps(plan5)
 
@@ -267,9 +272,11 @@ class Command(BaseCommand):
             description=f'This product should have a custom icon.',
             category=sf_category,
             icon_url=(
-                    'https://lightningdesignsystem.com/assets/images'
-                    '/avatar3.jpg'
+                'https://lightningdesignsystem.com/assets/images'
+                '/avatar3.jpg'
             ),
+            preflight_flow_name='slow_steps_preflight_good',
+            flow_name='slow_steps_flow',
         )
         version3 = self.create_version(product3)
         self.create_plan(version3)
