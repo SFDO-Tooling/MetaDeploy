@@ -221,6 +221,8 @@ class Command(BaseCommand):
         )
         plan = self.create_plan(
             version1,
+            preflight_flow_name='slow_steps_preflight_good',
+            flow_name='slow_steps_flow',
         )
         self.add_steps(plan)
 
@@ -275,8 +277,6 @@ class Command(BaseCommand):
                 'https://lightningdesignsystem.com/assets/images'
                 '/avatar3.jpg'
             ),
-            preflight_flow_name='slow_steps_preflight_good',
-            flow_name='slow_steps_flow',
         )
         version3 = self.create_version(product3)
         self.create_plan(version3)
