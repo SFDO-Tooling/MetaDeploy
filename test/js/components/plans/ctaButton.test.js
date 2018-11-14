@@ -40,10 +40,11 @@ describe('<CtaButton />', () => {
     const opts = { ...defaults, ...options };
     const { getByText, container } = render(
       <CtaButton
-        match={opts.match}
         history={opts.history}
-        plan={opts.plan}
         user={opts.user}
+        productSlug="product"
+        versionLabel="version"
+        plan={opts.plan}
         preflight={opts.preflight}
         selectedSteps={new Set(['step-1'])}
         doStartPreflight={opts.doStartPreflight}
@@ -197,9 +198,8 @@ describe('<CtaButton />', () => {
     test('calls doStartJob with plan id and steps', () => {
       const jobStarted = Promise.resolve({});
       const doStartJob = jest.fn(() => jobStarted);
-      const match = { url: '/test-url' };
       const history = { push: jest.fn() };
-      const { getByText } = setup({ doStartJob, match, history });
+      const { getByText } = setup({ doStartJob, history });
       fireEvent.click(getByText('Install'));
 
       expect.assertions(2);
@@ -219,9 +219,8 @@ describe('<CtaButton />', () => {
           payload: { id: 'job-1' },
         });
         const doStartJob = jest.fn(() => jobStarted);
-        const match = { url: '/test-url' };
         const history = { push: jest.fn() };
-        const { getByText } = setup({ doStartJob, match, history });
+        const { getByText } = setup({ doStartJob, history });
         fireEvent.click(getByText('Install'));
 
         expect.assertions(2);
@@ -230,7 +229,9 @@ describe('<CtaButton />', () => {
           steps: ['step-1'],
         });
         return jobStarted.then(() => {
-          expect(history.push).toHaveBeenCalledWith('/test-url/jobs/job-1');
+          expect(history.push).toHaveBeenCalledWith(
+            '/products/product/version/my-plan/jobs/job-1',
+          );
         });
       });
     });

@@ -2,12 +2,9 @@
 
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
-import PageHeader from '@salesforce/design-system-react/components/page-header';
-import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
-import routes from 'utils/routes';
 import { CONSTANTS } from 'plans/reducer';
 import { fetchPreflight, startPreflight } from 'plans/actions';
 import { fetchVersion } from 'products/actions';
@@ -22,15 +19,15 @@ import { startJob } from 'jobs/actions';
 
 import BodyContainer from 'components/bodyContainer';
 import CtaButton from 'components/plans/ctaButton';
+import Header from 'components/plans/header';
 import PreflightResults from 'components/plans/preflightResults';
-import ProductIcon from 'components/products/icon';
 import ProductNotFound from 'components/products/product404';
 import StepsTable from 'components/plans/stepsTable';
 import Toasts from 'components/plans/toasts';
 import UserInfo from 'components/plans/userInfo';
 
-import type { Match, RouterHistory } from 'react-router-dom';
 import type { AppState } from 'app/reducer';
+import type { InitialProps } from 'components/utils';
 import type {
   Plan as PlanType,
   Preflight as PreflightType,
@@ -43,7 +40,6 @@ import type {
 import type { User as UserType } from 'accounts/reducer';
 
 export type SelectedSteps = Set<string>;
-type InitialProps = {| match: Match, history: RouterHistory |};
 type Props = {
   ...InitialProps,
   user: UserType,
@@ -69,17 +65,8 @@ class PlanDetail extends React.Component<Props, State> {
     this.state = { changedSteps: new Map() };
   }
 
-  componentDidMount() {
-    const {
-      user,
-      product,
-      version,
-      versionLabel,
-      plan,
-      preflight,
-      doFetchVersion,
-      doFetchPreflight,
-    } = this.props;
+  fetchVersionIfMissing() {
+    const { product, version, versionLabel, doFetchVersion } = this.props;
     if (
       product &&
       versionLabel &&
@@ -88,10 +75,43 @@ class PlanDetail extends React.Component<Props, State> {
       // Fetch version from API
       doFetchVersion({ product: product.id, label: versionLabel });
     }
+  }
 
+  fetchPreflightIfMissing() {
+    const { user, plan, preflight, doFetchPreflight } = this.props;
     if (user && plan && preflight === undefined) {
       // Fetch most recent preflight result (if any exists)
       doFetchPreflight(plan.id);
+    }
+  }
+
+  componentDidMount() {
+    this.fetchVersionIfMissing();
+    this.fetchPreflightIfMissing();
+  }
+
+  componentDidUpdate(prevProps) {
+    const {
+      product,
+      version,
+      versionLabel,
+      user,
+      plan,
+      preflight,
+    } = this.props;
+    if (
+      product !== prevProps.product ||
+      version !== prevProps.version ||
+      versionLabel !== prevProps.versionLabel
+    ) {
+      this.fetchVersionIfMissing();
+    }
+    if (
+      user !== prevProps.user ||
+      plan !== prevProps.plan ||
+      preflight !== prevProps.preflight
+    ) {
+      this.fetchPreflightIfMissing();
     }
   }
 
@@ -136,7 +156,6 @@ class PlanDetail extends React.Component<Props, State> {
 
   render(): React.Node {
     const {
-      match,
       history,
       user,
       product,
@@ -166,21 +185,7 @@ class PlanDetail extends React.Component<Props, State> {
     return (
       <DocumentTitle title={`${plan.title} | ${product.title} | MetaDeploy`}>
         <>
-          <PageHeader
-            className="page-header
-              slds-p-around_x-large"
-            title={plan.title}
-            trail={[
-              <Link
-                to={routes.version_detail(product.slug, version.label)}
-                key={product.slug}
-              >
-                {product.title}, {version.label}
-              </Link>,
-            ]}
-            icon={<ProductIcon item={product} />}
-            variant="objectHome"
-          />
+          <Header product={product} version={version} plan={plan} />
           <BodyContainer>
             {preflight && user ? <Toasts preflight={preflight} /> : null}
             <div
@@ -199,9 +204,10 @@ class PlanDetail extends React.Component<Props, State> {
               </div>
               {plan.steps.length ? (
                 <CtaButton
-                  match={match}
                   history={history}
                   user={user}
+                  productSlug={product.slug}
+                  versionLabel={version.label}
                   plan={plan}
                   preflight={preflight}
                   selectedSteps={selectedSteps}
@@ -243,7 +249,10 @@ const selectPlanSlug = (
   { match: { params } }: InitialProps,
 ): ?string => params.planSlug;
 
-const selectPlan = createSelector(
+export const selectPlan: (
+  AppState,
+  InitialProps,
+) => PlanType | null = createSelector(
   [selectProduct, selectVersion, selectPlanSlug],
   (
     product: ProductType | null,

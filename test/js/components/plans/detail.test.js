@@ -15,6 +15,11 @@ jest.mock('plans/actions');
 fetchVersion.mockReturnValue({ type: 'TEST' });
 fetchPreflight.mockReturnValue({ type: 'TEST' });
 
+afterEach(() => {
+  fetchVersion.mockClear();
+  fetchPreflight.mockClear();
+});
+
 const defaultState = {
   products: [
     {
@@ -105,9 +110,15 @@ describe('<PlanDetail />', () => {
       versionLabel: '1.0.0',
       planSlug: 'my-plan',
     };
-    const opts = Object.assign({}, defaults, options);
-    const { productSlug, versionLabel, planSlug } = opts;
-    const { getByText, queryByText, getByAltText, container } = renderWithRedux(
+    const opts = { ...defaults, ...options };
+    const { productSlug, versionLabel, planSlug, rerenderFn } = opts;
+    const {
+      getByText,
+      queryByText,
+      getByAltText,
+      container,
+      rerender,
+    } = renderWithRedux(
       <MemoryRouter>
         <PlanDetail
           match={{ params: { productSlug, versionLabel, planSlug } }}
@@ -115,8 +126,9 @@ describe('<PlanDetail />', () => {
       </MemoryRouter>,
       opts.initialState,
       storeWithApi,
+      rerenderFn,
     );
-    return { getByText, queryByText, getByAltText, container };
+    return { getByText, queryByText, getByAltText, container, rerender };
   };
 
   describe('no product', () => {
@@ -145,6 +157,38 @@ describe('<PlanDetail />', () => {
       });
 
       expect(fetchPreflight).toHaveBeenCalledWith('plan-1');
+    });
+  });
+
+  describe('componentDidUpdate', () => {
+    describe('version is removed', () => {
+      test('fetches version', () => {
+        const { rerender } = setup();
+
+        expect(fetchVersion).not.toHaveBeenCalled();
+
+        setup({ versionLabel: '2.0.0', rerenderFn: rerender });
+
+        expect(fetchVersion).toHaveBeenCalledWith({
+          product: 'p1',
+          label: '2.0.0',
+        });
+      });
+    });
+
+    describe('preflight is removed', () => {
+      test('fetches preflight', () => {
+        const { rerender } = setup();
+
+        expect(fetchPreflight).not.toHaveBeenCalled();
+
+        setup({
+          planSlug: 'other-plan',
+          rerenderFn: rerender,
+        });
+
+        expect(fetchPreflight).toHaveBeenCalledWith('plan-2');
+      });
     });
   });
 

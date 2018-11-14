@@ -138,4 +138,31 @@ describe('gatekeeper', () => {
       });
     });
   });
+
+  describe('jobId but no job', () => {
+    test('renders <JobNotFound />', () => {
+      const { getByText } = setup({
+        product: defaultProduct,
+        version: defaultProduct.most_recent_version,
+        plan: defaultProduct.most_recent_version.primary_plan,
+        jobId: 'job-1',
+        job: null,
+      });
+
+      expect(getByText('this plan')).toBeVisible();
+    });
+
+    describe('unknown job', () => {
+      test('renders <Spinner />', () => {
+        const { getByText } = setup({
+          product: defaultProduct,
+          version: defaultProduct.most_recent_version,
+          plan: defaultProduct.most_recent_version.primary_plan,
+          jobId: 'job-1',
+        });
+
+        expect(getByText('Loading...')).toBeVisible();
+      });
+    });
+  });
 });

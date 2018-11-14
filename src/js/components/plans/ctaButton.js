@@ -4,11 +4,12 @@ import * as React from 'react';
 import Button from '@salesforce/design-system-react/components/button';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 
+import routes from 'utils/routes';
 import { CONSTANTS } from 'plans/reducer';
 
 import Login from 'components/header/login';
 
-import type { Match, RouterHistory } from 'react-router-dom';
+import type { RouterHistory } from 'react-router-dom';
 import type {
   Plan as PlanType,
   Preflight as PreflightType,
@@ -22,7 +23,7 @@ const { STATUS } = CONSTANTS;
 const btnClasses = 'slds-size_full slds-p-vertical_xx-small';
 
 // For use as a "loading" button label
-const LabelWithSpinner = ({ label }: { label: string }): React.Node => (
+export const LabelWithSpinner = ({ label }: { label: string }): React.Node => (
   <>
     <span className="slds-is-relative slds-m-right_large">
       <Spinner variant="inverse" size="small" />
@@ -43,7 +44,7 @@ const LoginBtn = ({ label }: { label: string }): React.Node => (
 );
 
 // Primary CTA button
-const ActionBtn = ({
+export const ActionBtn = ({
   label,
   disabled,
   onClick,
@@ -62,9 +63,10 @@ const ActionBtn = ({
 );
 
 class CtaButton extends React.Component<{
-  match: Match,
   history: RouterHistory,
   user: UserType,
+  productSlug: string,
+  versionLabel: string,
   plan: PlanType,
   preflight: ?PreflightType,
   selectedSteps: SelectedStepsType,
@@ -85,9 +87,10 @@ class CtaButton extends React.Component<{
 
   render(): React.Node {
     const {
-      match,
       history,
       user,
+      productSlug,
+      versionLabel,
       plan,
       preflight,
       selectedSteps,
@@ -138,7 +141,12 @@ class CtaButton extends React.Component<{
               action => {
                 const { type, payload } = action;
                 if (type === 'JOB_STARTED' && payload && payload.id) {
-                  const url = `${match.url}/jobs/${payload.id}`;
+                  const url = routes.job_detail(
+                    productSlug,
+                    versionLabel,
+                    plan.slug,
+                    payload.id,
+                  );
                   history.push(url);
                 }
               },

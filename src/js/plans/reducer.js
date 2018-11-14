@@ -30,6 +30,7 @@ type PreflightErrors = {
   [string]: Array<PreflightError>,
 };
 export type Preflight = {
+  +id?: string,
   +plan?: string,
   +status: 'started' | 'complete' | 'failed',
   +results?: PreflightErrors,

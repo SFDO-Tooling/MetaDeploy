@@ -15,14 +15,13 @@ import BodyContainer from 'components/bodyContainer';
 import ProductIcon from 'components/products/icon';
 import ProductNotFound from 'components/products/product404';
 
-import type { Match } from 'react-router-dom';
 import type { AppState } from 'app/reducer';
+import type { InitialProps } from 'components/utils';
 import type {
   Product as ProductType,
   Version as VersionType,
 } from 'products/reducer';
 
-type InitialProps = { match: Match };
 type ProductDetailProps = { product: ProductType | null };
 type VersionDetailProps = {
   product: ProductType | null,
@@ -58,7 +57,7 @@ const BodySection = ({ children }: { children: React.Node }) => (
 );
 
 class VersionDetail extends React.Component<VersionDetailProps> {
-  componentDidMount() {
+  fetchVersionIfMissing() {
     const { product, version, versionLabel, doFetchVersion } = this.props;
     if (
       product &&
@@ -67,6 +66,21 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     ) {
       // Fetch version from API
       doFetchVersion({ product: product.id, label: versionLabel });
+    }
+  }
+
+  componentDidMount() {
+    this.fetchVersionIfMissing();
+  }
+
+  componentDidUpdate(prevProps) {
+    const { product, version, versionLabel } = this.props;
+    if (
+      product !== prevProps.product ||
+      version !== prevProps.version ||
+      versionLabel !== prevProps.versionLabel
+    ) {
+      this.fetchVersionIfMissing();
     }
   }
 

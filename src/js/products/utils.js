@@ -6,7 +6,9 @@ import Spinner from '@salesforce/design-system-react/components/spinner';
 import PlanNotFound from 'components/plans/plan404';
 import ProductNotFound from 'components/products/product404';
 import VersionNotFound from 'components/products/version404';
+import JobNotFound from 'components/jobs/job404';
 
+import type { Job as JobType } from 'jobs/reducer';
 import type { Plan as PlanType } from 'plans/reducer';
 import type {
   Product as ProductType,
@@ -40,11 +42,15 @@ export const gatekeeper = ({
   version,
   versionLabel,
   plan,
+  job,
+  jobId,
 }: {
   product: ProductType | null,
   version?: VersionType | null,
   versionLabel?: ?string,
   plan?: PlanType | null,
+  job?: JobType | null,
+  jobId?: ?string,
 }): React.Node | false => {
   if (product === null) {
     return <ProductNotFound />;
@@ -65,6 +71,13 @@ export const gatekeeper = ({
       return <VersionNotFound product={product} />;
     }
     return <PlanNotFound product={product} version={version} />;
+  }
+  if (version && plan && jobId && !job) {
+    if (job === null) {
+      return <JobNotFound product={product} version={version} plan={plan} />;
+    }
+    // Fetching job from API
+    return <Spinner />;
   }
   return false;
 };

@@ -4,6 +4,59 @@ import { storeWithApi } from './../utils';
 
 import * as actions from 'jobs/actions';
 
+describe('fetchJob', () => {
+  describe('success', () => {
+    test('GETs job from api', () => {
+      const store = storeWithApi({});
+      const job = {
+        id: 'job-1',
+        creator: null,
+        plan: 'plan-1',
+        status: 'complete',
+        steps: [],
+        completed_steps: [],
+        org_name: null,
+        org_type: null,
+      };
+      fetchMock.getOnce(window.api_urls.job_detail('job-1'), job);
+      const started = {
+        type: 'FETCH_JOB_STARTED',
+        payload: 'job-1',
+      };
+      const succeeded = {
+        type: 'FETCH_JOB_SUCCEEDED',
+        payload: { id: 'job-1', job },
+      };
+
+      expect.assertions(1);
+      return store.dispatch(actions.fetchJob('job-1')).then(() => {
+        expect(store.getActions()).toEqual([started, succeeded]);
+      });
+    });
+  });
+
+  describe('error', () => {
+    test('dispatches FETCH_JOB_FAILED action', () => {
+      const store = storeWithApi({});
+      fetchMock.getOnce(window.api_urls.job_detail('job-1'), 500);
+      const started = {
+        type: 'FETCH_JOB_STARTED',
+        payload: 'job-1',
+      };
+      const failed = {
+        type: 'FETCH_JOB_FAILED',
+        payload: 'job-1',
+      };
+
+      expect.assertions(2);
+      return store.dispatch(actions.fetchJob('job-1')).catch(() => {
+        expect(store.getActions()).toEqual([started, failed]);
+        expect(window.console.error).toHaveBeenCalled();
+      });
+    });
+  });
+});
+
 describe('startJob', () => {
   describe('success', () => {
     test('dispatches JOB_STARTED action', () => {
