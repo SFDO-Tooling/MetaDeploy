@@ -31,7 +31,19 @@ describe('reducer', () => {
 
   test('handles PREFLIGHT_STARTED action', () => {
     const initial = { 'plan-1': null };
-    const expected = { 'plan-1': null, 'plan-2': { status: 'started' } };
+    const expected = {
+      'plan-1': null,
+      'plan-2': {
+        id: null,
+        plan: 'plan-2',
+        status: 'started',
+        results: {},
+        is_valid: true,
+        error_count: 0,
+        warning_count: 0,
+        is_ready: false,
+      },
+    };
     const actual = reducer(initial, {
       type: 'PREFLIGHT_STARTED',
       payload: 'plan-2',

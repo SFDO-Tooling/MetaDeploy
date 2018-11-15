@@ -1,6 +1,7 @@
 import Sockette from 'sockette';
 
 import * as sockets from 'utils/websockets';
+import { completeJobStep } from 'jobs/actions';
 import {
   completePreflight,
   failPreflight,
@@ -21,7 +22,7 @@ describe('getAction', () => {
 
   describe('PREFLIGHT_COMPLETED', () => {
     test('handles msg', () => {
-      const preflight = { status: 'complete' };
+      const preflight = { status: 'complete', results: {} };
       const msg = { type: 'PREFLIGHT_COMPLETED', payload: preflight };
       const expected = completePreflight(preflight);
       const actual = sockets.getAction(msg);
@@ -40,7 +41,7 @@ describe('getAction', () => {
 
   describe('PREFLIGHT_FAILED', () => {
     test('handles msg', () => {
-      const preflight = { status: 'complete' };
+      const preflight = { status: 'complete', results: {} };
       const msg = { type: 'PREFLIGHT_FAILED', payload: preflight };
       const expected = failPreflight(preflight);
       const actual = sockets.getAction(msg);
@@ -59,7 +60,7 @@ describe('getAction', () => {
 
   describe('PREFLIGHT_INVALIDATED', () => {
     test('handles msg', () => {
-      const preflight = { status: 'complete' };
+      const preflight = { status: 'complete', results: {} };
       const msg = { type: 'PREFLIGHT_INVALIDATED', payload: preflight };
       const expected = invalidatePreflight(preflight);
       const actual = sockets.getAction(msg);
@@ -69,6 +70,25 @@ describe('getAction', () => {
 
     test('handles msg (no payload)', () => {
       const msg = { type: 'PREFLIGHT_INVALIDATED' };
+      const expected = null;
+      const actual = sockets.getAction(msg);
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('TASK_COMPLETED', () => {
+    test('handles msg', () => {
+      const job = { steps: [] };
+      const msg = { type: 'TASK_COMPLETED', payload: job };
+      const expected = completeJobStep(job);
+      const actual = sockets.getAction(msg);
+
+      expect(actual).toEqual(expected);
+    });
+
+    test('handles msg (no payload)', () => {
+      const msg = { type: 'TASK_COMPLETED' };
       const expected = null;
       const actual = sockets.getAction(msg);
 

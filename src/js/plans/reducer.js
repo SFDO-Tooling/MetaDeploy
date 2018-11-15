@@ -29,16 +29,16 @@ type PreflightErrors = {
   +plan?: Array<PreflightError>,
   [string]: Array<PreflightError>,
 };
-export type Preflight = {
-  +id?: string,
-  +plan?: string,
+export type Preflight = {|
+  +id: string | null,
+  +plan: string,
   +status: 'started' | 'complete' | 'failed',
-  +results?: PreflightErrors,
-  +is_valid?: boolean,
-  +error_count?: number,
-  +warning_count?: number,
-  +is_ready?: boolean,
-};
+  +results: PreflightErrors,
+  +is_valid: boolean,
+  +error_count: number,
+  +warning_count: number,
+  +is_ready: boolean,
+|};
 export type PreflightsState = {
   [string]: Preflight,
 };
@@ -70,7 +70,19 @@ const reducer = (
   }
   if (action.type === 'PREFLIGHT_STARTED') {
     const plan = action.payload;
-    return { ...preflights, [plan]: { status: CONSTANTS.STATUS.STARTED } };
+    return {
+      ...preflights,
+      [plan]: {
+        id: null,
+        plan,
+        status: CONSTANTS.STATUS.STARTED,
+        results: {},
+        is_valid: true,
+        error_count: 0,
+        warning_count: 0,
+        is_ready: false,
+      },
+    };
   }
   if (
     action.type === 'PREFLIGHT_COMPLETED' ||

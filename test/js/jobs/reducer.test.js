@@ -39,4 +39,15 @@ describe('reducer', () => {
 
     expect(actual).toEqual(expected);
   });
+
+  test('handles JOB_STEP_COMPLETED action', () => {
+    const initial = {};
+    const expected = { 'job-1': { id: 'job-1' } };
+    const actual = reducer(initial, {
+      type: 'JOB_STEP_COMPLETED',
+      payload: { id: 'job-1' },
+    });
+
+    expect(actual).toEqual(expected);
+  });
 });

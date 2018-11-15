@@ -109,3 +109,12 @@ describe('startJob', () => {
     });
   });
 });
+
+describe('completeJobStep', () => {
+  test('returns JobStepCompleted', () => {
+    const payload = { foo: 'bar' };
+    const expected = { type: 'JOB_STEP_COMPLETED', payload };
+
+    expect(actions.completeJobStep(payload)).toEqual(expected);
+  });
+});

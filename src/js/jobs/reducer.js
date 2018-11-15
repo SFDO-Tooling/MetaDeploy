@@ -3,7 +3,7 @@
 import type { JobsAction } from 'jobs/actions';
 import type { LogoutAction } from 'accounts/actions';
 
-export type Job = {
+export type Job = {|
   +id: string,
   +creator: {
     +username: string,
@@ -15,7 +15,7 @@ export type Job = {
   +completed_steps: Array<string>,
   +org_name: string | null,
   +org_type: string | null,
-};
+|};
 export type JobsState = {
   [string]: Job,
 };
@@ -31,7 +31,7 @@ const reducer = (
     const { id, job } = action.payload;
     return { ...jobs, [id]: job };
   }
-  if (action.type === 'JOB_STARTED') {
+  if (action.type === 'JOB_STARTED' || action.type === 'JOB_STEP_COMPLETED') {
     const job = action.payload;
     return { ...jobs, [job.id]: job };
   }

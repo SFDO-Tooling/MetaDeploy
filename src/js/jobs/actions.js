@@ -24,13 +24,15 @@ type JobStarted = {
   payload: Job,
 };
 type JobRejected = { type: 'JOB_REJECTED', payload: JobData };
+export type JobStepCompleted = { type: 'JOB_STEP_COMPLETED', payload: Job };
 export type JobsAction =
   | FetchJobStarted
   | FetchJobSucceeded
   | FetchJobFailed
   | JobRequested
   | JobStarted
-  | JobRejected;
+  | JobRejected
+  | JobStepCompleted;
 
 export const fetchJob = (jobId: string): ThunkAction => (
   dispatch,
@@ -71,3 +73,8 @@ export const startJob = (data: JobData): ThunkAction => (
       throw err;
     });
 };
+
+export const completeJobStep = (payload: Job): JobStepCompleted => ({
+  type: 'JOB_STEP_COMPLETED',
+  payload,
+});
