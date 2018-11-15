@@ -30,6 +30,7 @@ def test_report_error(
         plan,
         steps,
         flow_class=JobFlow,
+        flow_name=plan.flow_name,
         result_class=Job,
         result_id=job.id,
     )
@@ -67,6 +68,7 @@ def test_run_flows(
         plan,
         steps,
         flow_class=job_flow,
+        flow_name=plan.flow_name,
         result_class=Job,
         result_id=job.id,
     )
@@ -126,6 +128,7 @@ def test_malicious_zip_file(
         plan,
         steps,
         flow_class=job_flow,
+        flow_name=plan.flow_name,
         result_class=Job,
         result_id=job.id,
     )

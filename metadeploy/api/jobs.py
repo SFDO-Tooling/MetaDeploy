@@ -122,7 +122,9 @@ def zip_file_is_safe(zip_file):
     )
 
 
-def run_flows(user, plan, skip_tasks, *, flow_class, result_class, result_id):
+def run_flows(
+        user, plan, skip_tasks,
+        *, flow_class, flow_name, result_class, result_id):
     """
     This operates with side effects; it changes things in a Salesforce
     org, and then records the results of those operations on to a
@@ -136,28 +138,19 @@ def run_flows(user, plan, skip_tasks, *, flow_class, result_class, result_id):
         flow_class (Type[BasicFlow]): Either the class PreflightFlow or
             the class JobFlow. This is the flow that actually gets run
             inside this function.
+        flow_name (str): The plan.preflight_flow_name or plan.flow_name,
+            as appropriate.
         result_class (Union[Type[Job], Type[PreflightResult]]): The
             instance onto which to record the results of running steps
             in the flow. Either a PreflightResult or a Job, as
             appropriate.
         result_id (int): the PK of the result instance to get.
     """
-    # TODO:
-    #
-    # Can we do anything meaningful with a return value from a @job?
-
     result = result_class.objects.get(pk=result_id)
-    is_preflight = isinstance(result, PreflightResult)
-
     token, token_secret = user.token
     instance_url = user.instance_url
     repo_url = plan.version.product.repo_url
     commit_ish = plan.version.commit_ish
-
-    if is_preflight:
-        flow_name = plan.preflight_flow_name
-    else:
-        flow_name = plan.flow_name
 
     with contextlib.ExitStack() as stack:
         stack.enter_context(finalize_result(result))
@@ -266,6 +259,7 @@ def enqueuer():
             j.plan,
             j.skip_tasks(),
             flow_class=JobFlow,
+            flow_name=j.plan.flow_name,
             result_class=Job,
             result_id=j.id,
         )
@@ -298,6 +292,7 @@ def preflight(user, plan):
         plan,
         [],
         flow_class=PreflightFlow,
+        flow_name=plan.preflight_flow_name,
         result_class=PreflightResult,
         result_id=preflight_result.id,
     )
