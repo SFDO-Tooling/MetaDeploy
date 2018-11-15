@@ -24,6 +24,7 @@ from .push import (
     preflight_failed,
     preflight_invalidated,
     notify_post_task,
+    notify_post_job,
 )
 from .constants import ERROR, OPTIONAL
 
@@ -411,7 +412,7 @@ class JobQuerySet(models.QuerySet):
 
 class Job(HashIdMixin, models.Model):
     Status = Choices("started", "complete", "failed")
-    tracker = FieldTracker(fields=("completed_steps",))
+    tracker = FieldTracker(fields=("completed_steps", "status"))
 
     objects = JobQuerySet.as_manager()
 
@@ -444,9 +445,12 @@ class Job(HashIdMixin, models.Model):
 
     def save(self, *args, **kwargs):
         ret = super().save(*args, **kwargs)
-        has_changed = self.tracker.has_changed("completed_steps")
-        if has_changed:
+        steps_has_changed = self.tracker.has_changed("completed_steps")
+        if steps_has_changed:
             async_to_sync(notify_post_task)(self)
+        status_has_changed = self.tracker.has_changed("status")
+        if status_has_changed:
+            async_to_sync(notify_post_job)(self)
         return ret
 
 
