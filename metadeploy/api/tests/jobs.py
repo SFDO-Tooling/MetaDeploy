@@ -25,9 +25,17 @@ def test_report_error(
     job = job_factory(user=user)
     steps = [step_factory(plan=plan)]
 
-    run_flows(user, plan, steps, flow_class=BasicFlow, result=job)
+    run_flows(
+        user,
+        plan,
+        steps,
+        flow_class=BasicFlow,
+        result_class=Job,
+        result_id=job.id,
+    )
 
     assert report_error.called
+    job.refresh_from_db()
     assert job.status == Job.Status.failed
 
 
@@ -54,7 +62,14 @@ def test_run_flows(
     steps = [step_factory(plan=plan)]
     job = job_factory(user=user)
 
-    run_flows(user, plan, steps, flow_class=basic_flow, result=job)
+    run_flows(
+        user,
+        plan,
+        steps,
+        flow_class=basic_flow,
+        result_class=Job,
+        result_id=job.id,
+    )
 
     # TODO assert? What we really need to assert is a change in the SF
     # org, but that'd be an integration test.
@@ -106,7 +121,14 @@ def test_malicious_zip_file(
     steps = [step_factory(plan=plan)]
     job = job_factory(user=user)
 
-    run_flows(user, plan, steps, flow_class=basic_flow, result=job)
+    run_flows(
+        user,
+        plan,
+        steps,
+        flow_class=basic_flow,
+        result_class=Job,
+        result_id=job.id,
+    )
 
     # TODO assert? What we really need to assert is a change in the SF
     # org, but that'd be an integration test.

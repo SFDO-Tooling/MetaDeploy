@@ -55,9 +55,9 @@ class PreflightFlow(flows.BaseFlow):
         self.preflight_result.results.update(error_result)
 
     def _get_step_id(self, task_name):
-        return self.preflight_result.plan.step_set.filter(
+        return str(self.preflight_result.plan.step_set.filter(
             task_name=task_name,
-        ).first().id  # Right now, we just trust it exists!
+        ).first().id)  # Right now, we just trust it exists!
 
     def _emit_k_v_for_status_dict(self, status):
         if status['status_code'] == 'ok':

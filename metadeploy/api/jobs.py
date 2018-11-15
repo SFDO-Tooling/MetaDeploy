@@ -122,7 +122,7 @@ def zip_file_is_safe(zip_file):
     )
 
 
-def run_flows(user, plan, skip_tasks, *, flow_class, result):
+def run_flows(user, plan, skip_tasks, *, flow_class, result_class, result_id):
     """
     This operates with side effects; it changes things in a Salesforce
     org, and then records the results of those operations on to a
@@ -133,17 +133,20 @@ def run_flows(user, plan, skip_tasks, *, flow_class, result):
         plan (Plan): The Plan instance for the flow you're running.
         skip_tasks (List[str]): The strings in the list should be valid
             task_name values for steps in this flow.
-        flow_class (Union[Type[PreflightFlow], Type[BasicFlow]]): Either the
-            class PreflightFlow or the class BasicFlow. This is the flow that
-            actually gets run inside this function.
-        result (Union[Job, PreflightResult]): The instance onto which to
-            record the results of running steps in the flow. Either a
-            PreflightResult or a Job, as appropriate.
+        flow_class (Union[Type[PreflightFlow], Type[BasicFlow]]): Either
+            the class PreflightFlow or the class BasicFlow. This is the
+            flow that actually gets run inside this function.
+        result_class (Union[Type[Job], Type[PreflightResult]]): The
+            instance onto which to record the results of running steps
+            in the flow. Either a PreflightResult or a Job, as
+            appropriate.
+        result_id (int): the PK of the result instance to get.
     """
     # TODO:
     #
     # Can we do anything meaningful with a return value from a @job?
 
+    result = result_class.objects.get(pk=result_id)
     is_preflight = isinstance(result, PreflightResult)
 
     token, token_secret = user.token
@@ -248,6 +251,8 @@ def run_flows(user, plan, skip_tasks, *, flow_class, result):
         )
         if is_preflight:
             kwargs['preflight_result'] = result
+        else:
+            kwargs['job'] = result
 
         flowinstance = flow_class(*args, **kwargs)
         flowinstance()
@@ -264,7 +269,8 @@ def enqueuer():
             j.plan,
             j.skip_tasks(),
             flow_class=BasicFlow,
-            result=j,
+            result_class=Job,
+            result_id=j.id,
         )
         j.job_id = rq_job.id
         j.enqueued_at = rq_job.enqueued_at
@@ -295,7 +301,8 @@ def preflight(user, plan):
         plan,
         [],
         flow_class=PreflightFlow,
-        result=preflight_result,
+        result_class=PreflightResult,
+        result_id=preflight_result.id,
     )
 
 
