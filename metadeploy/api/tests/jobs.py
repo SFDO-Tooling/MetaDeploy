@@ -13,7 +13,7 @@ from ..jobs import (
     preflight,
     expire_preflights,
 )
-from .flows import BasicFlow
+from ..flows import JobFlow
 
 
 @pytest.mark.django_db
@@ -29,7 +29,7 @@ def test_report_error(
         user,
         plan,
         steps,
-        flow_class=BasicFlow,
+        flow_class=JobFlow,
         result_class=Job,
         result_id=job.id,
     )
@@ -55,7 +55,7 @@ def test_run_flows(
     mocker.patch('metadeploy.api.jobs.YamlGlobalConfig')
     mocker.patch('metadeploy.api.jobs.cci_configs')
     mocker.patch('metadeploy.api.jobs.BaseProjectKeychain')
-    basic_flow = mocker.patch('metadeploy.api.jobs.BasicFlow')
+    job_flow = mocker.patch('metadeploy.api.jobs.JobFlow')
 
     user = user_factory()
     plan = plan_factory()
@@ -66,7 +66,7 @@ def test_run_flows(
         user,
         plan,
         steps,
-        flow_class=basic_flow,
+        flow_class=job_flow,
         result_class=Job,
         result_id=job.id,
     )
@@ -74,7 +74,7 @@ def test_run_flows(
     # TODO assert? What we really need to assert is a change in the SF
     # org, but that'd be an integration test.
 
-    assert basic_flow.called
+    assert job_flow.called
 
 
 @pytest.mark.django_db
@@ -114,7 +114,7 @@ def test_malicious_zip_file(
     mocker.patch('metadeploy.api.jobs.YamlGlobalConfig')
     mocker.patch('metadeploy.api.jobs.cci_configs')
     mocker.patch('metadeploy.api.jobs.BaseProjectKeychain')
-    basic_flow = mocker.patch('metadeploy.api.jobs.BasicFlow')
+    job_flow = mocker.patch('metadeploy.api.jobs.JobFlow')
 
     user = user_factory()
     plan = plan_factory()
@@ -125,7 +125,7 @@ def test_malicious_zip_file(
         user,
         plan,
         steps,
-        flow_class=basic_flow,
+        flow_class=job_flow,
         result_class=Job,
         result_id=job.id,
     )
@@ -133,7 +133,7 @@ def test_malicious_zip_file(
     # TODO assert? What we really need to assert is a change in the SF
     # org, but that'd be an integration test.
 
-    assert not basic_flow.called
+    assert not job_flow.called
 
 
 @pytest.mark.django_db

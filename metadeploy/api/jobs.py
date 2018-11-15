@@ -45,7 +45,7 @@ from .models import (
 )
 from . import cci_configs
 from .flows import (
-    BasicFlow,
+    JobFlow,
     PreflightFlow,
 )
 from .push import report_error
@@ -133,9 +133,9 @@ def run_flows(user, plan, skip_tasks, *, flow_class, result_class, result_id):
         plan (Plan): The Plan instance for the flow you're running.
         skip_tasks (List[str]): The strings in the list should be valid
             task_name values for steps in this flow.
-        flow_class (Union[Type[PreflightFlow], Type[BasicFlow]]): Either
-            the class PreflightFlow or the class BasicFlow. This is the
-            flow that actually gets run inside this function.
+        flow_class (Type[BasicFlow]): Either the class PreflightFlow or
+            the class JobFlow. This is the flow that actually gets run
+            inside this function.
         result_class (Union[Type[Job], Type[PreflightResult]]): The
             instance onto which to record the results of running steps
             in the flow. Either a PreflightResult or a Job, as
@@ -248,11 +248,8 @@ def run_flows(user, plan, skip_tasks, *, flow_class, result_class, result_id):
             options={},
             skip=skip_tasks,
             name=flow_name,
+            result=result,
         )
-        if is_preflight:
-            kwargs['preflight_result'] = result
-        else:
-            kwargs['job'] = result
 
         flowinstance = flow_class(*args, **kwargs)
         flowinstance()
@@ -268,7 +265,7 @@ def enqueuer():
             j.user,
             j.plan,
             j.skip_tasks(),
-            flow_class=BasicFlow,
+            flow_class=JobFlow,
             result_class=Job,
             result_id=j.id,
         )

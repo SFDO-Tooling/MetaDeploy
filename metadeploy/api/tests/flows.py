@@ -2,15 +2,15 @@ import pytest
 
 from unittest.mock import sentinel, MagicMock
 
-from ..flows import BasicFlow, PreflightFlow
+from ..flows import JobFlow, PreflightFlow
 
 
-class TestBasicFlow:
+class TestJobFlow:
     def test_init(self, mocker):
         init = mocker.patch('cumulusci.core.flows.BaseFlow.__init__')
         init.return_value = None
-        flow = BasicFlow(job=sentinel.job)
-        assert flow.job == sentinel.job
+        flow = JobFlow(result=sentinel.job)
+        assert flow.result == sentinel.job
 
     @pytest.mark.django_db
     def test_post_task(
@@ -28,7 +28,7 @@ class TestBasicFlow:
 
         job = job_factory(user=user, plan=plan, steps=steps)
 
-        flow = BasicFlow(job=job)
+        flow = JobFlow(result=job)
 
         tasks = [MagicMock() for _ in range(3)]
         for i, task in enumerate(tasks):
@@ -37,19 +37,15 @@ class TestBasicFlow:
         for task in tasks:
             flow._post_task(task)
 
-        assert job.completed_steps == [
-            'task_0',
-            'task_1',
-            'task_2',
-        ]
+        assert job.completed_steps == [step.id for step in steps]
 
 
 class TestPreflightFlow:
     def test_init(self, mocker):
         init = mocker.patch('cumulusci.core.flows.BaseFlow.__init__')
         init.return_value = None
-        preflight_flow = PreflightFlow(preflight_result=sentinel.preflight)
-        assert preflight_flow.preflight_result == sentinel.preflight
+        preflight_flow = PreflightFlow(result=sentinel.preflight)
+        assert preflight_flow.result == sentinel.preflight
 
     @pytest.mark.django_db
     def test_post_flow(
@@ -65,7 +61,7 @@ class TestPreflightFlow:
         step4 = step_factory(plan=plan, task_name='name_4')
         step5 = step_factory(plan=plan, task_name='name_5')
         pfr = preflight_result_factory(user=user, plan=plan)
-        preflight_flow = PreflightFlow(preflight_result=pfr)
+        preflight_flow = PreflightFlow(result=pfr)
         preflight_flow.step_return_values = [
             {'task_name': 'name_1', 'status_code': 'error', 'msg': 'error 1'},
             {'task_name': 'name_2', 'status_code': 'ok'},
@@ -92,7 +88,7 @@ class TestPreflightFlow:
         user = user_factory()
         plan = plan_factory()
         pfr = preflight_result_factory(user=user, plan=plan)
-        preflight_flow = PreflightFlow(preflight_result=pfr)
+        preflight_flow = PreflightFlow(result=pfr)
 
         exc = ValueError('A value error.')
         preflight_flow._post_task_exception(None, exc)

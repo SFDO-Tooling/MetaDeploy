@@ -5,26 +5,39 @@ from .constants import WARN, ERROR, SKIP, OPTIONAL
 
 
 class BasicFlow(flows.BaseFlow):
+    """
+    Subclasses should implement a property _step_set that will return
+    the relevant steps for the flow based on the attached result.
+    """
+
     # TODO:
     # We'll want to subclass BaseFlow and add logic in the progress
     # callbacks to record and possibly push progress:
     # pre_flow, post_flow, pre_task, post_task, pre_subflow,
     # post_subflow
-    def __init__(self, *args, job=None, **kwargs):
-        self.job = job
+    def __init__(self, *args, result=None, **kwargs):
+        self.result = result
         return super().__init__(*args, **kwargs)
 
+    def _get_step_id(self, task_name):
+        return str(self._step_set.filter(
+            task_name=task_name,
+        ).first().id)  # Right now, we just trust it exists!
+
+
+class JobFlow(BasicFlow):
     def _post_task(self, task):
-        self.job.completed_steps.append(task.name)
-        self.job.save()
+        # TODO: Translate task.name to step.id
+        self.result.completed_steps.append(self._get_step_id(task.name))
+        self.result.save()
         return super()._post_task(task)
 
+    @property
+    def _step_set(self):
+        return self.result.steps.all()
 
-class PreflightFlow(flows.BaseFlow):
-    def __init__(self, *args, preflight_result=None, **kwargs):
-        self.preflight_result = preflight_result
-        return super().__init__(*args, **kwargs)
 
+class PreflightFlow(BasicFlow):
     def _post_flow(self):
         """
         Turn the step_return_values into a merged error dict.
@@ -33,8 +46,8 @@ class PreflightFlow(flows.BaseFlow):
         [error_dict]) pair. This is then turned into a dict, merging any
         identical keys by combining their lists of error dicts.
 
-        Finally, this is attached to the preflight_result object, which
-        the caller must then save.
+        Finally, this is attached to the result object, which the caller
+        must then save.
         """
         results = {}
         for status in self.step_return_values:
@@ -46,18 +59,17 @@ class PreflightFlow(flows.BaseFlow):
                 results[k].extend(v)
             except KeyError:
                 results[k] = v
-        self.preflight_result.results.update(results)
+        self.result.results.update(results)
 
     def _post_task_exception(self, task, e):
         error_result = {
             'plan': [{'status': ERROR, 'message': str(e)}],
         }
-        self.preflight_result.results.update(error_result)
+        self.result.results.update(error_result)
 
-    def _get_step_id(self, task_name):
-        return str(self.preflight_result.plan.step_set.filter(
-            task_name=task_name,
-        ).first().id)  # Right now, we just trust it exists!
+    @property
+    def _step_set(self):
+        return self.result.plan.step_set.all()
 
     def _emit_k_v_for_status_dict(self, status):
         if status['status_code'] == 'ok':
