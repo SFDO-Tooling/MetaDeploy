@@ -107,6 +107,7 @@ class Command(BaseCommand):
             task_name='medium_task',
         )
         self.create_step(
+            task_name='relationships',
             plan=plan,
             name='Relationships',
             kind='managed',
@@ -115,6 +116,7 @@ class Command(BaseCommand):
             order_key=3,
         )
         self.create_step(
+            task_name='affiliations',
             plan=plan,
             name='Affiliations',
             description='This is a step description.',
@@ -157,6 +159,7 @@ class Command(BaseCommand):
             order_key=8,
         )
         self.create_step(
+            task_name='ordered_step',
             plan=plan,
             name='Another Ordered Step',
             description='This is a step description.',
