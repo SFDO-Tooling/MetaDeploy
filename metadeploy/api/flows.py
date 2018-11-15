@@ -1,7 +1,11 @@
+import logging
 import bleach
 from cumulusci.core import flows
 
 from .constants import WARN, ERROR, SKIP, OPTIONAL
+
+
+logger = logging.getLogger(__name__)
 
 
 class BasicFlow(flows.BaseFlow):
@@ -20,16 +24,22 @@ class BasicFlow(flows.BaseFlow):
         return super().__init__(*args, **kwargs)
 
     def _get_step_id(self, task_name):
-        return str(self._step_set.filter(
-            task_name=task_name,
-        ).first().id)  # Right now, we just trust it exists!
+        try:
+            return str(self._step_set.filter(
+                task_name=task_name,
+            ).first().id)  # Right now, we just trust it exists!
+        except AttributeError:
+            logger.error(f"Unknown task name {task_name} for {self.result}")
+            return None
 
 
 class JobFlow(BasicFlow):
     def _post_task(self, task):
         # TODO: Translate task.name to step.id
-        self.result.completed_steps.append(self._get_step_id(task.name))
-        self.result.save()
+        step_id = self._get_step_id(task.name)
+        if step_id:
+            self.result.completed_steps.append(step_id)
+            self.result.save()
         return super()._post_task(task)
 
     @property

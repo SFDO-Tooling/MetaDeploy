@@ -2,7 +2,18 @@ import pytest
 
 from unittest.mock import sentinel, MagicMock
 
-from ..flows import JobFlow, PreflightFlow
+from ..models import Step
+from ..flows import BasicFlow, JobFlow, PreflightFlow
+
+
+def test_get_step_id(mocker):
+    init = mocker.patch('cumulusci.core.flows.BaseFlow.__init__')
+    init.return_value = None
+    basic_flow = BasicFlow()
+    basic_flow._step_set = Step.objects.none()
+    result = basic_flow._get_step_id("anything")
+
+    assert result is None
 
 
 class TestJobFlow:
