@@ -132,6 +132,7 @@ class JobSerializer(serializers.ModelSerializer):
         default=serializers.CurrentUserDefault(),
     )
     org_name = serializers.SerializerMethodField()
+    organization_url = serializers.SerializerMethodField()
 
     plan = serializers.PrimaryKeyRelatedField(
         queryset=Plan.objects.all(),
@@ -154,6 +155,7 @@ class JobSerializer(serializers.ModelSerializer):
             'creator',
             'plan',
             'steps',
+            'organization_url',
             'completed_steps',
             'created_at',
             'enqueued_at',
@@ -191,6 +193,11 @@ class JobSerializer(serializers.ModelSerializer):
     def get_org_name(self, obj):
         if self.requesting_user_has_rights():
             return obj.org_name
+        return None
+
+    def get_organization_url(self, obj):
+        if self.requesting_user_has_rights():
+            return obj.organization_url
         return None
 
     @staticmethod
@@ -234,6 +241,7 @@ class JobSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Invalid steps for plan.")
         data["org_name"] = data["user"].org_name
         data["org_type"] = data["user"].org_type
+        data["organization_url"] = data["user"].instance_url
         return data
 
 

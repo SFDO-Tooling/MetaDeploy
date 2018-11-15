@@ -26,9 +26,10 @@ def test_report_error(
     steps = [step_factory(plan=plan)]
 
     run_flows(
-        user,
-        plan,
-        steps,
+        user=user,
+        plan=plan,
+        skip_tasks=steps,
+        organization_url=job.organization_url,
         flow_class=JobFlow,
         flow_name=plan.flow_name,
         result_class=Job,
@@ -64,9 +65,10 @@ def test_run_flows(
     job = job_factory(user=user)
 
     run_flows(
-        user,
-        plan,
-        steps,
+        user=user,
+        plan=plan,
+        skip_tasks=steps,
+        organization_url=job.organization_url,
         flow_class=job_flow,
         flow_name=plan.flow_name,
         result_class=Job,
@@ -124,9 +126,10 @@ def test_malicious_zip_file(
     job = job_factory(user=user)
 
     run_flows(
-        user,
-        plan,
-        steps,
+        user=user,
+        plan=plan,
+        skip_tasks=steps,
+        organization_url=job.organization_url,
         flow_class=job_flow,
         flow_name=plan.flow_name,
         result_class=Job,

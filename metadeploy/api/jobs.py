@@ -123,8 +123,8 @@ def zip_file_is_safe(zip_file):
 
 
 def run_flows(
-        user, plan, skip_tasks,
-        *, flow_class, flow_name, result_class, result_id):
+        *, user, plan, skip_tasks, organization_url,
+        flow_class, flow_name, result_class, result_id):
     """
     This operates with side effects; it changes things in a Salesforce
     org, and then records the results of those operations on to a
@@ -148,7 +148,6 @@ def run_flows(
     """
     result = result_class.objects.get(pk=result_id)
     token, token_secret = user.token
-    instance_url = user.instance_url
     repo_url = plan.version.product.repo_url
     commit_ish = plan.version.commit_ish
 
@@ -194,7 +193,7 @@ def run_flows(
         current_org = 'current_org'
         org_config = OrgConfig({
             'access_token': token,
-            'instance_url': instance_url,
+            'instance_url': organization_url,
             'refresh_token': token_secret,
         }, current_org)
         proj_config = cci_configs.MetadeployProjectConfig(
@@ -255,9 +254,10 @@ def enqueuer():
     logger.debug('Enqueuer live', extra={'tag': 'jobs.enqueuer'})
     for j in Job.objects.filter(enqueued_at=None):
         rq_job = run_flows_job.delay(
-            j.user,
-            j.plan,
-            j.skip_tasks(),
+            user=j.user,
+            plan=j.plan,
+            skip_tasks=j.skip_tasks(),
+            organization_url=j.organization_url,
             flow_class=JobFlow,
             flow_name=j.plan.flow_name,
             result_class=Job,
@@ -288,9 +288,10 @@ def preflight(user, plan):
         organization_url=user.instance_url,
     )
     run_flows(
-        user,
-        plan,
-        [],
+        user=user,
+        plan=plan,
+        skip_tasks=[],
+        organization_url=preflight_result.organization_url,
         flow_class=PreflightFlow,
         flow_name=plan.preflight_flow_name,
         result_class=PreflightResult,

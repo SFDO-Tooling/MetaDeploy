@@ -422,6 +422,7 @@ class Job(HashIdMixin, models.Model):
     )
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
     steps = models.ManyToManyField(Step)
+    organization_url = models.URLField(blank=True)
     # This should be a list of step names:
     completed_steps = JSONField(default=list, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
