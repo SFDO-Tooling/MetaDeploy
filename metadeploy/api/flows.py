@@ -35,7 +35,6 @@ class BasicFlow(flows.BaseFlow):
 
 class JobFlow(BasicFlow):
     def _post_task(self, task):
-        # TODO: Translate task.name to step.id
         step_id = self._get_step_id(task.name)
         if step_id:
             self.result.completed_steps.append(step_id)
