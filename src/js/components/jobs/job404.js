@@ -22,16 +22,18 @@ const JobNotFound = ({
   version: VersionType,
   plan: PlanType,
 }) => (
-  <FourOhFour>
-    <p>
-      We can’t find the installation you’re looking for. Try running a new
-      installation on{' '}
-      <Link to={routes.plan_detail(product.slug, version.label, plan.slug)}>
-        this plan
-      </Link>
-      ?
-    </p>
-  </FourOhFour>
+  <FourOhFour
+    message={
+      <>
+        We can’t find the installation you’re looking for. Try running a new
+        installation on{' '}
+        <Link to={routes.plan_detail(product.slug, version.label, plan.slug)}>
+          this plan
+        </Link>
+        ?
+      </>
+    }
+  />
 );
 
 export default JobNotFound;
