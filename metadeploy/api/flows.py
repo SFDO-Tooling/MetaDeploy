@@ -9,11 +9,6 @@ logger = logging.getLogger(__name__)
 
 
 class BasicFlow(flows.BaseFlow):
-    """
-    Subclasses should implement a property _step_set that will return
-    the relevant steps for the flow based on the attached result.
-    """
-
     # TODO:
     # We'll want to subclass BaseFlow and add logic in the progress
     # callbacks to record and possibly push progress:
@@ -25,9 +20,9 @@ class BasicFlow(flows.BaseFlow):
 
     def _get_step_id(self, task_name):
         try:
-            return str(self._step_set.filter(
+            return str(self.result.plan.step_set.filter(
                 task_name=task_name,
-            ).first().id)  # Right now, we just trust it exists!
+            ).first().id)
         except AttributeError:
             logger.error(f"Unknown task name {task_name} for {self.result}")
             return None
@@ -40,10 +35,6 @@ class JobFlow(BasicFlow):
             self.result.completed_steps.append(step_id)
             self.result.save()
         return super()._post_task(task)
-
-    @property
-    def _step_set(self):
-        return self.result.steps.all()
 
 
 class PreflightFlow(BasicFlow):
@@ -75,10 +66,6 @@ class PreflightFlow(BasicFlow):
             'plan': [{'status': ERROR, 'message': str(e)}],
         }
         self.result.results.update(error_result)
-
-    @property
-    def _step_set(self):
-        return self.result.plan.step_set.all()
 
     def _emit_k_v_for_status_dict(self, status):
         if status['status_code'] == 'ok':
