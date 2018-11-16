@@ -20,7 +20,7 @@ import { startJob } from 'jobs/actions';
 import BodyContainer from 'components/bodyContainer';
 import CtaButton from 'components/plans/ctaButton';
 import Header from 'components/plans/header';
-import PreflightResults from 'components/plans/preflightResults';
+import JobResults from 'components/plans/jobResults';
 import ProductNotFound from 'components/products/product404';
 import StepsTable from 'components/plans/stepsTable';
 import Toasts from 'components/plans/toasts';
@@ -187,7 +187,9 @@ class PlanDetail extends React.Component<Props, State> {
         <>
           <Header product={product} version={version} plan={plan} />
           <BodyContainer>
-            {preflight && user ? <Toasts preflight={preflight} /> : null}
+            {preflight && user ? (
+              <Toasts model={preflight} label="Pre-install validation" />
+            ) : null}
             <div
               className="slds-p-around_medium
                 slds-size_1-of-1
@@ -199,7 +201,14 @@ class PlanDetail extends React.Component<Props, State> {
                   <p>{plan.preflight_message}</p>
                 ) : null}
                 {preflight && user ? (
-                  <PreflightResults preflight={preflight} />
+                  <JobResults
+                    job={preflight}
+                    label="Pre-install validation"
+                    failMessage={
+                      'After resolving all errors, ' +
+                      'run the pre-install validation again.'
+                    }
+                  />
                 ) : null}
               </div>
               {plan.steps.length ? (

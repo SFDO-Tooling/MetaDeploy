@@ -6,10 +6,12 @@ import ToastContainer from '@salesforce/design-system-react/components/toast/con
 
 import { CONSTANTS } from 'plans/reducer';
 
+import type { Job as JobType } from 'jobs/reducer';
 import type { Preflight as PreflightType } from 'plans/reducer';
 
 type Props = {
-  preflight: PreflightType,
+  model: PreflightType | JobType,
+  label: string,
 };
 
 type State = {
@@ -42,42 +44,39 @@ class Toasts extends React.Component<Props, State> {
   }
 
   getToast(): React.Node | null {
-    const { preflight } = this.props;
-    if (preflight.status === STATUS.FAILED) {
-      return this.getToastComponent('Pre-install validation has failed.');
+    const { model, label } = this.props;
+    if (model.status === STATUS.FAILED) {
+      return this.getToastComponent(`${label} has failed.`);
     }
-    if (preflight.status !== STATUS.COMPLETE) {
+    if (model.status !== STATUS.COMPLETE) {
       return null;
     }
-    const hasErrors =
-      preflight.error_count !== undefined && preflight.error_count > 0;
+    const hasErrors = model.error_count !== undefined && model.error_count > 0;
     if (hasErrors) {
-      return this.getToastComponent(
-        'Pre-install validation completed with errors.',
-      );
+      return this.getToastComponent(`${label} completed with errors.`);
     }
     const hasWarnings =
-      preflight.warning_count !== undefined && preflight.warning_count > 0;
+      model.warning_count !== undefined && model.warning_count > 0;
     if (hasWarnings) {
       return this.getToastComponent(
-        'Pre-install validation completed with warnings.',
+        `${label} completed with warnings.`,
         'warning',
       );
     }
     return this.getToastComponent(
-      'Pre-install validation completed successfully.',
+      `${label} completed successfully.`,
       'success',
     );
   }
 
   // Using this is often discouraged, but we only want to show toasts if the
-  // preflight is *changing* from `started` to `complete` or `failed` -- we use
-  // this to show the Toast only once we've seen the preflight is `started`.
+  // preflight/job is *changing* from `started` to `complete` or `failed` -- we
+  // use this to show the Toast only once we've seen the status is `started`.
   // https://reactjs.org/docs/react-component.html#static-getderivedstatefromprops
   static getDerivedStateFromProps(props: Props, state: State) {
-    const { preflight } = props;
-    // Only show toasts if the preflight status was `started` at some point.
-    if (preflight.status === STATUS.STARTED && !state.isOpen) {
+    const { model } = props;
+    // Only show toasts if the status was `started` at some point.
+    if (model.status === STATUS.STARTED && !state.isOpen) {
       return { isOpen: true };
     }
     return null;

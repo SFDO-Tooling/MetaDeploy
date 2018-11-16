@@ -5,6 +5,7 @@ import Icon from '@salesforce/design-system-react/components/icon';
 
 import { CONSTANTS } from 'plans/reducer';
 
+import type { Job as JobType } from 'jobs/reducer';
 import type {
   Preflight as PreflightType,
   PreflightError as PreflightErrorType,
@@ -34,7 +35,7 @@ const WarningIcon = (): React.Node => (
   />
 );
 
-// List of preflight "error" and "warning" messages
+// List of job "error" and "warning" messages
 export const ErrorsList = ({
   errorList,
 }: {
@@ -71,30 +72,28 @@ export const ErrorsList = ({
   </ul>
 );
 
-const PreflightResults = ({
-  preflight,
+const JobResults = ({
+  job,
+  label,
+  failMessage,
 }: {
-  preflight: PreflightType,
+  job: PreflightType | JobType,
+  label: string,
+  failMessage?: string,
 }): React.Node => {
   if (
-    preflight.status !== CONSTANTS.STATUS.COMPLETE &&
-    preflight.status !== CONSTANTS.STATUS.FAILED
+    job.status !== CONSTANTS.STATUS.COMPLETE &&
+    job.status !== CONSTANTS.STATUS.FAILED
   ) {
     return null;
   }
 
-  const hasErrors =
-    preflight.error_count !== undefined && preflight.error_count > 0;
-  const hasWarnings =
-    preflight.warning_count !== undefined && preflight.warning_count > 0;
-  if (
-    hasErrors ||
-    hasWarnings ||
-    preflight.status === CONSTANTS.STATUS.FAILED
-  ) {
+  const hasErrors = job.error_count !== undefined && job.error_count > 0;
+  const hasWarnings = job.warning_count !== undefined && job.warning_count > 0;
+  if (hasErrors || hasWarnings || job.status === CONSTANTS.STATUS.FAILED) {
     // Show errors/warnings
-    const errorCount = preflight.error_count || 0;
-    const warningCount = preflight.warning_count || 0;
+    const errorCount = job.error_count || 0;
+    const warningCount = job.warning_count || 0;
     let msg = 'errors';
     const errorMsg = `${errorCount} error${errorCount === 1 ? '' : 's'}`;
     const warningMsg = `${warningCount} warning${
@@ -107,43 +106,36 @@ const PreflightResults = ({
     } else if (warningCount > 0) {
       msg = warningMsg;
     }
-    const planErrors = preflight.results && preflight.results.plan;
-    const failed =
-      errorCount > 0 || preflight.status === CONSTANTS.STATUS.FAILED;
+    const jobErrors = job.results && job.results.plan;
+    const failed = errorCount > 0 || job.status === CONSTANTS.STATUS.FAILED;
     return (
       <>
         <p className={failed ? 'slds-text-color_error' : ''}>
           {failed ? <ErrorIcon /> : <WarningIcon />}
-          {failed || preflight.is_valid
-            ? `Pre-install validation found ${msg}.`
-            : 'Pre-install validation has expired; please run it again.'}
+          {!failed && job.is_valid === false
+            ? `${label} has expired; please run it again.`
+            : `${label} found ${msg}.`}
         </p>
-        {failed ? (
-          <p>
-            After resolving all errors, run the pre-install validation again.
-          </p>
-        ) : null}
-        {planErrors ? <ErrorsList errorList={planErrors} /> : null}
+        {failed && failMessage ? <p>{failMessage}</p> : null}
+        {jobErrors ? <ErrorsList errorList={jobErrors} /> : null}
       </>
     );
   }
 
-  // Valid preflight without errors/warnings
-  if (preflight.is_valid) {
+  // Invalid job
+  if (job.is_valid === false) {
     return (
-      <p className="slds-text-color_success">
-        Pre-install validation completed successfully.
+      <p>
+        <WarningIcon />
+        {label} has expired; please run it again.
       </p>
     );
   }
 
-  // Invalid preflight
+  // Successful job
   return (
-    <p>
-      <WarningIcon />
-      Pre-install validation has expired; please run it again.
-    </p>
+    <p className="slds-text-color_success">{label} completed successfully.</p>
   );
 };
 
-export default PreflightResults;
+export default JobResults;

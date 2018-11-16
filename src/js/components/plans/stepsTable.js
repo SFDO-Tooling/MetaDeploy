@@ -14,7 +14,7 @@ import classNames from 'classnames';
 
 import { CONSTANTS } from 'plans/reducer';
 
-import { ErrorsList } from 'components/plans/preflightResults';
+import { ErrorsList } from 'components/plans/jobResults';
 
 import type { Job as JobType } from 'jobs/reducer';
 import type {

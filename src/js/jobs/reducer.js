@@ -16,6 +16,8 @@ export type Job = {|
   +org_name: string | null,
   +org_type: string | null,
   +organization_url: string | null,
+  +error_count: number,
+  +warning_count: number,
 |};
 export type JobsState = {
   [string]: Job,

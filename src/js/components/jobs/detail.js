@@ -17,12 +17,14 @@ import {
 } from 'components/products/detail';
 import { shouldFetchVersion, gatekeeper } from 'products/utils';
 
-import Header from 'components/plans/header';
 import BodyContainer from 'components/bodyContainer';
+import CtaButton from 'components/jobs/ctaButton';
+import Header from 'components/plans/header';
+import JobResults from 'components/plans/jobResults';
 import ProductNotFound from 'components/products/product404';
 import ProgressBar from 'components/jobs/progressBar';
 import StepsTable from 'components/plans/stepsTable';
-import { ActionBtn, LabelWithSpinner } from 'components/plans/ctaButton';
+import Toasts from 'components/plans/toasts';
 
 import type { AppState } from 'app/reducer';
 import type { InitialProps } from 'components/utils';
@@ -112,6 +114,7 @@ class JobDetail extends React.Component<Props> {
         <>
           <Header product={product} version={version} plan={plan} />
           <BodyContainer>
+            <Toasts model={job} label="Installation" />
             <div
               className="slds-p-around_medium
                 slds-size_1-of-1
@@ -119,11 +122,9 @@ class JobDetail extends React.Component<Props> {
             >
               <div className="slds-text-longform">
                 <h3 className="slds-text-heading_small">{plan.title}</h3>
+                <JobResults job={job} label="Installation" />
               </div>
-              <ActionBtn
-                label={<LabelWithSpinner label="Installation In Progress..." />}
-                disabled
-              />
+              <CtaButton job={job} />
             </div>
             <div
               className="slds-p-around_medium
