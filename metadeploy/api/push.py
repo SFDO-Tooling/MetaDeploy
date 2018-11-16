@@ -66,11 +66,11 @@ async def notify_post_task(job):
     if not job.completed_steps:
         return
 
-    task_name = job.completed_steps[-1]
+    step_id = job.completed_steps[-1]
     user = job.user
 
     payload = {
-        'task_name': task_name,
+        'step_id': step_id,
         'job': JobSerializer(instance=job).data,
     }
     message = {

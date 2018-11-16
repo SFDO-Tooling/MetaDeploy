@@ -40,11 +40,75 @@ describe('reducer', () => {
     expect(actual).toEqual(expected);
   });
 
-  test('handles JOB_STEP_COMPLETED action', () => {
+  describe('JOB_STEP_COMPLETED action', () => {
+    test('adds new job', () => {
+      const initial = {};
+      const expected = { 'job-1': { id: 'job-1' } };
+      const actual = reducer(initial, {
+        type: 'JOB_STEP_COMPLETED',
+        payload: { job: { id: 'job-1' } },
+      });
+
+      expect(actual).toEqual(expected);
+    });
+
+    test('updates existing job', () => {
+      const initial = {
+        'job-1': { id: 'job-1', steps: ['step-1'], completed_steps: [] },
+      };
+      const expected = {
+        'job-1': { ...initial['job-1'], completed_steps: ['step-1'] },
+      };
+      const actual = reducer(initial, {
+        type: 'JOB_STEP_COMPLETED',
+        payload: { step_id: 'step-1', job: { id: 'job-1' } },
+      });
+
+      expect(actual).toEqual(expected);
+    });
+
+    test('ignores already-completed step', () => {
+      const initial = {
+        'job-1': {
+          id: 'job-1',
+          steps: ['step-1', 'step-2'],
+          completed_steps: ['step-1'],
+        },
+      };
+      const expected = {
+        'job-1': { ...initial['job-1'], completed_steps: ['step-1'] },
+      };
+      const actual = reducer(initial, {
+        type: 'JOB_STEP_COMPLETED',
+        payload: { step_id: 'step-1', job: { id: 'job-1' } },
+      });
+
+      expect(actual).toEqual(expected);
+    });
+
+    test('ignores unknown step', () => {
+      const initial = {
+        'job-1': {
+          id: 'job-1',
+          steps: ['step-1'],
+          completed_steps: [],
+        },
+      };
+      const expected = { ...initial };
+      const actual = reducer(initial, {
+        type: 'JOB_STEP_COMPLETED',
+        payload: { step_id: 'foo', job: { id: 'job-1' } },
+      });
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  test('handles JOB_COMPLETED action', () => {
     const initial = {};
     const expected = { 'job-1': { id: 'job-1' } };
     const actual = reducer(initial, {
-      type: 'JOB_STEP_COMPLETED',
+      type: 'JOB_COMPLETED',
       payload: { id: 'job-1' },
     });
 

@@ -1,7 +1,7 @@
 import Sockette from 'sockette';
 
 import * as sockets from 'utils/websockets';
-import { completeJobStep } from 'jobs/actions';
+import { completeJobStep, completeJob } from 'jobs/actions';
 import {
   completePreflight,
   failPreflight,
@@ -79,9 +79,12 @@ describe('getAction', () => {
 
   describe('TASK_COMPLETED', () => {
     test('handles msg', () => {
-      const job = { steps: [] };
-      const msg = { type: 'TASK_COMPLETED', payload: job };
-      const expected = completeJobStep(job);
+      const payload = {
+        step_id: 'step-1',
+        job: { id: 'job-1', steps: ['step-1'], completed_steps: [] },
+      };
+      const msg = { type: 'TASK_COMPLETED', payload };
+      const expected = completeJobStep(payload);
       const actual = sockets.getAction(msg);
 
       expect(actual).toEqual(expected);
@@ -89,6 +92,25 @@ describe('getAction', () => {
 
     test('handles msg (no payload)', () => {
       const msg = { type: 'TASK_COMPLETED' };
+      const expected = null;
+      const actual = sockets.getAction(msg);
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('JOB_COMPLETED', () => {
+    test('handles msg', () => {
+      const payload = { id: 'job-1', steps: ['step-1'] };
+      const msg = { type: 'JOB_COMPLETED', payload };
+      const expected = completeJob(payload);
+      const actual = sockets.getAction(msg);
+
+      expect(actual).toEqual(expected);
+    });
+
+    test('handles msg (no payload)', () => {
+      const msg = { type: 'JOB_COMPLETED' };
       const expected = null;
       const actual = sockets.getAction(msg);
 

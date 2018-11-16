@@ -160,7 +160,7 @@ describe('<StepsTable />', () => {
             plan: 'plan-1',
             status: 'started',
             steps: ['step-1', 'step-2', 'step-4'],
-            completed_steps: ['step-1'],
+            completed_steps: ['step-1', 'foo'],
           },
         });
 

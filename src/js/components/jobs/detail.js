@@ -135,7 +135,7 @@ class JobDetail extends React.Component<Props> {
               job.org_type ? (
                 <Card
                   bodyClassName="slds-card__body_inner"
-                  heading=""
+                  heading="Salesforce Org Information"
                   icon={<Icon category="utility" name="user" />}
                 >
                   <ul>

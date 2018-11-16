@@ -80,20 +80,35 @@ describe('reducer', () => {
     expect(actual).toEqual(expected);
   });
 
-  test('handles PREFLIGHT_FAILED action', () => {
-    const initial = {
-      'plan-1': null,
-      'plan-2': { status: 'complete', is_valid: true },
-    };
-    const expected = {
-      'plan-1': null,
-      'plan-2': { plan: 'plan-2', status: 'complete', is_valid: false },
-    };
-    const actual = reducer(initial, {
-      type: 'PREFLIGHT_FAILED',
-      payload: { plan: 'plan-2', status: 'complete', is_valid: false },
+  describe('PREFLIGHT_INVALIDATED', () => {
+    test('adds new preflight', () => {
+      const initial = {};
+      const expected = {
+        'plan-2': { plan: 'plan-2', is_valid: false },
+      };
+      const actual = reducer(initial, {
+        type: 'PREFLIGHT_INVALIDATED',
+        payload: { plan: 'plan-2', is_valid: false },
+      });
+
+      expect(actual).toEqual(expected);
     });
 
-    expect(actual).toEqual(expected);
+    test('updates existing preflight', () => {
+      const initial = {
+        'plan-1': null,
+        'plan-2': { plan: 'plan-2', is_valid: true },
+      };
+      const expected = {
+        'plan-1': null,
+        'plan-2': { plan: 'plan-2', is_valid: false },
+      };
+      const actual = reducer(initial, {
+        type: 'PREFLIGHT_INVALIDATED',
+        payload: { plan: 'plan-2', is_valid: false },
+      });
+
+      expect(actual).toEqual(expected);
+    });
   });
 });

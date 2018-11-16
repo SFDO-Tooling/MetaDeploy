@@ -36,7 +36,7 @@ type DataCellProps = {
   job?: JobType,
 };
 
-const { RESULT_STATUS } = CONSTANTS;
+const { STATUS, RESULT_STATUS } = CONSTANTS;
 
 class NameDataCell extends React.Component<
   DataCellProps,
@@ -192,23 +192,8 @@ const InstallDataCell = (props: DataCellProps): React.Node => {
   }
   const { id } = item;
   if (job) {
-    const activeStep = job.steps[job.completed_steps.length];
     let icon, title;
-    if (id === activeStep) {
-      title = 'installing';
-      icon = (
-        <>
-          <span
-            className="slds-is-relative
-              slds-m-left_medium
-              slds-m-right_large"
-          >
-            <Spinner size="small" />
-          </span>
-          Installing...
-        </>
-      );
-    } else if (!job.steps.includes(id)) {
+    if (!job.steps.includes(id)) {
       title = 'skipped';
       icon = (
         <Icon
@@ -235,8 +220,47 @@ const InstallDataCell = (props: DataCellProps): React.Node => {
           containerClassName="slds-icon-standard-approval"
         />
       );
+    } else if (job.status === STATUS.STARTED) {
+      let lastCompleted, lastCompletedIdx;
+      let activeStep = job.steps[0];
+      for (let idx = job.completed_steps.length - 1; idx > -1; idx = idx - 1) {
+        lastCompleted = job.completed_steps[idx];
+        lastCompletedIdx = job.steps.indexOf(lastCompleted);
+        if (lastCompletedIdx > -1) {
+          activeStep = job.steps[lastCompletedIdx + 1];
+          break;
+        }
+      }
+      if (activeStep && id === activeStep) {
+        title = 'installing';
+        icon = (
+          <>
+            <span
+              className="slds-is-relative
+                slds-m-left_medium
+                slds-m-right_large"
+            >
+              <Spinner size="small" />
+            </span>
+            Installing...
+          </>
+        );
+      } else {
+        title = 'waiting to install';
+        icon = (
+          <Checkbox
+            id={`step-${id}`}
+            className="slds-p-around_x-small"
+            assistiveText={{
+              label: title,
+            }}
+            checked
+            disabled
+          />
+        );
+      }
     } else {
-      title = 'waiting to install';
+      title = 'not installed';
       icon = (
         <Checkbox
           id={`step-${id}`}

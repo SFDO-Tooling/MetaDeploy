@@ -2,7 +2,7 @@
 
 import Sockette from 'sockette';
 
-import { completeJobStep } from 'jobs/actions';
+import { completeJobStep, completeJob } from 'jobs/actions';
 import {
   completePreflight,
   failPreflight,
@@ -13,7 +13,7 @@ import { log } from 'utils/logging';
 
 import type { Dispatch } from 'redux-thunk';
 import type { Job } from 'jobs/reducer';
-import type { JobStepCompleted } from 'jobs/actions';
+import type { JobStepCompleted, JobCompleted } from 'jobs/actions';
 import type { Preflight } from 'plans/reducer';
 import type {
   PreflightCompleted,
@@ -22,13 +22,18 @@ import type {
 } from 'plans/actions';
 import type { TokenInvalidAction } from 'accounts/actions';
 
-const isPreflight = (obj?: Preflight | Job): %checks => obj && obj.results;
-const isJob = (obj?: Preflight | Job): %checks => obj && obj.steps;
+type ErrorPayload = {| +message: string |};
+export type JobStepCompletedPayload = {| +step_id: string, +job: Job |};
+type Payload = ErrorPayload | Preflight | Job | JobStepCompletedPayload;
+
+const isPreflight = (obj?: Payload): %checks => obj && obj.results;
+const isJob = (obj?: Payload): %checks => obj && obj.steps;
+const isJobStep = (obj?: Payload): %checks => obj && obj.step_id && obj.job;
 
 export const getAction = (
   msg: {
     type?: string,
-    payload?: Preflight | Job,
+    payload?: Payload,
   } = {},
 ):
   | TokenInvalidAction
@@ -36,6 +41,7 @@ export const getAction = (
   | PreflightFailed
   | PreflightInvalid
   | JobStepCompleted
+  | JobCompleted
   | null => {
   switch (msg.type) {
     case 'USER_TOKEN_INVALID':
@@ -47,7 +53,9 @@ export const getAction = (
     case 'PREFLIGHT_INVALIDATED':
       return isPreflight(msg.payload) ? invalidatePreflight(msg.payload) : null;
     case 'TASK_COMPLETED':
-      return isJob(msg.payload) ? completeJobStep(msg.payload) : null;
+      return isJobStep(msg.payload) ? completeJobStep(msg.payload) : null;
+    case 'JOB_COMPLETED':
+      return isJob(msg.payload) ? completeJob(msg.payload) : null;
   }
   return null;
 };

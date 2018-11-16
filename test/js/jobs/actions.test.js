@@ -118,3 +118,12 @@ describe('completeJobStep', () => {
     expect(actions.completeJobStep(payload)).toEqual(expected);
   });
 });
+
+describe('completeJob', () => {
+  test('returns JobCompleted', () => {
+    const payload = { foo: 'bar' };
+    const expected = { type: 'JOB_COMPLETED', payload };
+
+    expect(actions.completeJob(payload)).toEqual(expected);
+  });
+});
