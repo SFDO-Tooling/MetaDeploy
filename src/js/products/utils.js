@@ -14,6 +14,7 @@ import type {
   Product as ProductType,
   Version as VersionType,
 } from 'products/reducer';
+import type { User as UserType } from 'accounts/reducer';
 
 export const shouldFetchVersion = ({
   product,
@@ -44,6 +45,7 @@ export const gatekeeper = ({
   plan,
   job,
   jobId,
+  user,
 }: {
   product: ProductType | null,
   version?: VersionType | null,
@@ -51,6 +53,7 @@ export const gatekeeper = ({
   plan?: PlanType | null,
   job?: JobType | null,
   jobId?: ?string,
+  user?: UserType,
 }): React.Node | false => {
   if (product === null) {
     return <ProductNotFound />;
@@ -74,7 +77,14 @@ export const gatekeeper = ({
   }
   if (version && plan && jobId && !job) {
     if (job === null) {
-      return <JobNotFound product={product} version={version} plan={plan} />;
+      return (
+        <JobNotFound
+          product={product}
+          version={version}
+          plan={plan}
+          user={user}
+        />
+      );
     }
     // Fetching job from API
     return <Spinner />;

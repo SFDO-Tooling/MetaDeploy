@@ -81,6 +81,7 @@ const defaultState = {
       org_type: null,
     },
   },
+  user: null,
 };
 
 describe('<JobDetail />', () => {
@@ -151,7 +152,18 @@ describe('<JobDetail />', () => {
         jobId: 'nope',
       });
 
-      expect(getByText('this plan')).toBeVisible();
+      expect(getByText('starting a new installation')).toBeVisible();
+      expect(getByText('Log In')).toBeVisible();
+    });
+
+    test('renders "Log In With a Different Org" dropdown', () => {
+      const { getByText } = setup({
+        initialState: { ...defaultState, jobs: { nope: null }, user: {} },
+        jobId: 'nope',
+      });
+
+      expect(getByText('starting a new installation')).toBeVisible();
+      expect(getByText('Log In With a Different Org')).toBeVisible();
     });
   });
 

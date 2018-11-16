@@ -15,6 +15,7 @@ import {
   selectVersion,
   selectVersionLabel,
 } from 'components/products/detail';
+import { selectUserState } from 'components/header';
 import { shouldFetchVersion, gatekeeper } from 'products/utils';
 
 import BodyContainer from 'components/bodyContainer';
@@ -34,10 +35,12 @@ import type {
   Product as ProductType,
   Version as VersionType,
 } from 'products/reducer';
+import type { User as UserType } from 'accounts/reducer';
 
 export type SelectedSteps = Set<string>;
 type Props = {
   ...InitialProps,
+  user: UserType,
   product: ProductType | null,
   version: VersionType | null,
   versionLabel: ?string,
@@ -89,7 +92,15 @@ class JobDetail extends React.Component<Props> {
   }
 
   render(): React.Node {
-    const { product, version, versionLabel, plan, job, jobId } = this.props;
+    const {
+      user,
+      product,
+      version,
+      versionLabel,
+      plan,
+      job,
+      jobId,
+    } = this.props;
     const blocked = gatekeeper({
       product,
       version,
@@ -97,6 +108,7 @@ class JobDetail extends React.Component<Props> {
       plan,
       job,
       jobId,
+      user,
     });
     if (blocked !== false) {
       return blocked;
@@ -200,6 +212,7 @@ const selectJob = createSelector(
 );
 
 const select = (appState: AppState, props: InitialProps) => ({
+  user: selectUserState(appState),
   product: selectProduct(appState, props),
   version: selectVersion(appState, props),
   versionLabel: selectVersionLabel(appState, props),

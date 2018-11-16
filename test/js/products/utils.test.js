@@ -149,7 +149,7 @@ describe('gatekeeper', () => {
         job: null,
       });
 
-      expect(getByText('this plan')).toBeVisible();
+      expect(getByText('starting a new installation')).toBeVisible();
     });
 
     describe('unknown job', () => {
