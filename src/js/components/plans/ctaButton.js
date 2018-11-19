@@ -40,6 +40,7 @@ const LoginBtn = ({ label }: { label: string }): React.Node => (
     buttonVariant="brand"
     triggerClassName="slds-size_full"
     label={label}
+    nubbinPosition="top"
   />
 );
 

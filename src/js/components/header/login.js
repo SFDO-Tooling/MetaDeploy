@@ -15,6 +15,7 @@ type Props = {
   buttonVariant: string,
   triggerClassName?: string,
   disabled: boolean,
+  nubbinPosition: string,
 };
 
 class Login extends React.Component<Props, { modalOpen: boolean }> {
@@ -24,6 +25,7 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
     buttonClassName: 'slds-button_outline-brand',
     buttonVariant: 'base',
     disabled: false,
+    nubbinPosition: 'top right',
   };
 
   constructor(props: Props) {
@@ -81,7 +83,7 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
           buttonVariant={this.props.buttonVariant}
           disabled={this.props.disabled}
           menuPosition="relative"
-          nubbinPosition="top right"
+          nubbinPosition={this.props.nubbinPosition}
           iconCategory="utility"
           iconName="down"
           iconPosition="right"

@@ -7,7 +7,6 @@ process.env.BROWSERSLIST_CONFIG = './.browserslistrc';
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
-const TerserPlugin = require('terser-webpack-plugin');
 const path = require('path');
 
 module.exports = {
@@ -24,14 +23,6 @@ module.exports = {
     publicPath: '/static/',
   },
   optimization: {
-    minimizer: [
-      new TerserPlugin({
-        cache: true,
-        parallel: true,
-        sourceMap: true,
-      }),
-      new OptimizeCSSAssetsPlugin(),
-    ],
     runtimeChunk: 'single',
     splitChunks: {
       cacheGroups: {
@@ -105,6 +96,7 @@ module.exports = {
     ],
   },
   plugins: [
+    new OptimizeCSSAssetsPlugin(),
     new HtmlWebpackPlugin({
       inject: false,
       template: path.join(__dirname, 'src', 'index.html'),
