@@ -1,3 +1,4 @@
+OK = 'ok'
 WARN = 'warn'
 ERROR = 'error'
 SKIP = 'skip'

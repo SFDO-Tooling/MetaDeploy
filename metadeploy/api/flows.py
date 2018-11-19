@@ -2,7 +2,7 @@ import logging
 import bleach
 from cumulusci.core import flows
 
-from .constants import WARN, ERROR, SKIP, OPTIONAL
+from .constants import OK, WARN, ERROR, SKIP, OPTIONAL
 
 
 logger = logging.getLogger(__name__)
@@ -32,9 +32,19 @@ class JobFlow(BasicFlow):
     def _post_task(self, task):
         step_id = self._get_step_id(task.name)
         if step_id:
-            self.result.completed_steps.append(step_id)
+            self.result.results[step_id] = [{'status': OK}]
             self.result.save()
         return super()._post_task(task)
+
+    def _post_task_exception(self, task, exception):
+        step_id = self._get_step_id(task.name)
+        if step_id:
+            self.result.results[step_id] = [{
+                'status': ERROR,
+                'msg': str(exception),
+            }]
+            self.result.save()
+        return super()._post_task_exception(task, exception)
 
 
 class PreflightFlow(BasicFlow):
@@ -68,7 +78,7 @@ class PreflightFlow(BasicFlow):
         self.result.results.update(error_result)
 
     def _emit_k_v_for_status_dict(self, status):
-        if status['status_code'] == 'ok':
+        if status['status_code'] == OK:
             return None
 
         if status['status_code'] == ERROR:

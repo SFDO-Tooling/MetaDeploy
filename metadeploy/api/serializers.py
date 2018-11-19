@@ -126,7 +126,28 @@ class ProductSerializer(serializers.ModelSerializer):
         )
 
 
-class JobSerializer(serializers.ModelSerializer):
+class ErrorWarningCountMixin:
+    @staticmethod
+    def _count_status_in_results(results, status_name):
+        count = 0
+        for val in results.values():
+            for status in val:
+                if status['status'] == status_name:
+                    count += 1
+        return count
+
+    def get_error_count(self, obj):
+        if obj.status == self.Meta.model.Status.started:
+            return 0
+        return self._count_status_in_results(obj.results, ERROR)
+
+    def get_warning_count(self, obj):
+        if obj.status == self.Meta.model.Status.started:
+            return 0
+        return self._count_status_in_results(obj.results, WARN)
+
+
+class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault(),
@@ -143,6 +164,8 @@ class JobSerializer(serializers.ModelSerializer):
         many=True,
         pk_field=serializers.CharField(),
     )
+    error_count = serializers.SerializerMethodField()
+    warning_count = serializers.SerializerMethodField()
 
     # Emitted fields:
     creator = serializers.SerializerMethodField()
@@ -156,18 +179,20 @@ class JobSerializer(serializers.ModelSerializer):
             'plan',
             'steps',
             'organization_url',
-            'completed_steps',
+            'results',
             'created_at',
             'enqueued_at',
             'job_id',
             'status',
             'org_name',
             'org_type',
+            'error_count',
+            'warning_count',
         )
         extra_kwargs = {
             'created_at': {'read_only': True},
             'enqueued_at': {'read_only': True},
-            'completed_steps': {'read_only': True},
+            'results': {'read_only': True},
             'job_id': {'read_only': True},
             'status': {'read_only': True},
             'org_type': {'read_only': True},
@@ -245,33 +270,15 @@ class JobSerializer(serializers.ModelSerializer):
         return data
 
 
-class PreflightResultSerializer(serializers.ModelSerializer):
+class PreflightResultSerializer(
+        ErrorWarningCountMixin, serializers.ModelSerializer):
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault(),
     )
     plan = IdOnlyField(read_only=True)
+    is_ready = serializers.SerializerMethodField()
     error_count = serializers.SerializerMethodField()
     warning_count = serializers.SerializerMethodField()
-    is_ready = serializers.SerializerMethodField()
-
-    @staticmethod
-    def _count_status_in_results(results, status_name):
-        count = 0
-        for val in results.values():
-            for status in val:
-                if status['status'] == status_name:
-                    count += 1
-        return count
-
-    def get_error_count(self, obj):
-        if obj.status == PreflightResult.Status.started:
-            return 0
-        return self._count_status_in_results(obj.results, ERROR)
-
-    def get_warning_count(self, obj):
-        if obj.status == PreflightResult.Status.started:
-            return 0
-        return self._count_status_in_results(obj.results, WARN)
 
     def get_is_ready(self, obj):
         return (

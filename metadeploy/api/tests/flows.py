@@ -48,7 +48,38 @@ class TestJobFlow:
         for task in tasks:
             flow._post_task(task)
 
-        assert job.completed_steps == [step.id for step in steps]
+        assert job.results == {
+            str(step.id): [{'status': 'ok'}]
+            for step
+            in steps
+        }
+
+    @pytest.mark.django_db
+    def test_post_task_exception(
+            self, mocker, user_factory, plan_factory, step_factory,
+            job_factory):
+        init = mocker.patch('cumulusci.core.flows.BaseFlow.__init__')
+        init.return_value = None
+        user = user_factory()
+        plan = plan_factory()
+        steps = [
+            step_factory(plan=plan, task_name=f'task_{i}')
+            for i
+            in range(3)
+        ]
+
+        job = job_factory(user=user, plan=plan, steps=steps)
+
+        flow = JobFlow(result=job)
+
+        task = MagicMock()
+        task.name = f'task_0'
+
+        flow._post_task_exception(task, ValueError('Some error'))
+
+        assert job.results == {
+            str(steps[0].id): [{'status': 'error', 'msg': 'Some error'}]
+        }
 
 
 class TestPreflightFlow:

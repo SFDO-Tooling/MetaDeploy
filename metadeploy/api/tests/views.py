@@ -39,13 +39,15 @@ class TestJobViewset:
             'plan': str(job.plan.id),
             'steps': [],
             'organization_url': '',
-            'completed_steps': [],
+            'results': {},
             'created_at': format_timestamp(job.created_at),
             'enqueued_at': None,
             'job_id': None,
             'status': 'started',
             'org_name': 'Secret Org',
             'org_type': '',
+            'error_count': 0,
+            'warning_count': 0,
         }
 
     def test_job__your_own(self, client, job_factory):
@@ -62,13 +64,15 @@ class TestJobViewset:
             'plan': str(job.plan.id),
             'steps': [],
             'organization_url': '',
-            'completed_steps': [],
+            'results': {},
             'created_at': format_timestamp(job.created_at),
             'enqueued_at': None,
             'job_id': None,
             'status': 'started',
             'org_name': 'Secret Org',
             'org_type': '',
+            'error_count': 0,
+            'warning_count': 0,
         }
 
     def test_job__is_public(self, client, job_factory):
@@ -82,13 +86,15 @@ class TestJobViewset:
             'plan': str(job.plan.id),
             'organization_url': None,
             'steps': [],
-            'completed_steps': [],
+            'results': {},
             'created_at': format_timestamp(job.created_at),
             'enqueued_at': None,
             'job_id': None,
             'status': 'started',
             'org_name': None,
             'org_type': '',
+            'error_count': 0,
+            'warning_count': 0,
         }
 
     def test_create_job(self, client, plan_factory, preflight_result_factory):
