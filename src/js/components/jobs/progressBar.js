@@ -14,7 +14,7 @@ const ProgressBar = ({ job }: { job: JobType }): React.Node => {
   );
   const id = `${job.id}-progress`;
   return (
-    <div>
+    <>
       <div
         id={id}
         className="slds-grid
@@ -47,7 +47,7 @@ const ProgressBar = ({ job }: { job: JobType }): React.Node => {
           <span className="slds-assistive-text">Progress: {progress}%</span>
         </span>
       </div>
-    </div>
+    </>
   );
 };
 

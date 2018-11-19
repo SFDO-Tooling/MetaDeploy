@@ -1,9 +1,7 @@
 // @flow
 
 import * as React from 'react';
-import Card from '@salesforce/design-system-react/components/card';
 import DocumentTitle from 'react-document-title';
-import Icon from '@salesforce/design-system-react/components/icon';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
@@ -26,6 +24,7 @@ import ProductNotFound from 'components/products/product404';
 import ProgressBar from 'components/jobs/progressBar';
 import StepsTable from 'components/plans/stepsTable';
 import Toasts from 'components/plans/toasts';
+import UserInfo from 'components/jobs/userInfo';
 
 import type { AppState } from 'app/reducer';
 import type { InitialProps } from 'components/utils';
@@ -143,33 +142,7 @@ class JobDetail extends React.Component<Props> {
                 slds-size_1-of-1
                 slds-medium-size_1-of-2"
             >
-              {(job.creator && job.creator.username) ||
-              job.org_name ||
-              job.org_type ? (
-                <Card
-                  bodyClassName="slds-card__body_inner"
-                  heading="Salesforce Org Information"
-                  icon={<Icon category="utility" name="user" />}
-                >
-                  <ul>
-                    {job.creator && job.creator.username ? (
-                      <li>
-                        <strong>User:</strong> {job.creator.username}
-                      </li>
-                    ) : null}
-                    {job.org_name ? (
-                      <li>
-                        <strong>Org:</strong> {job.org_name}
-                      </li>
-                    ) : null}
-                    {job.org_type ? (
-                      <li>
-                        <strong>Type:</strong> {job.org_type}
-                      </li>
-                    ) : null}
-                  </ul>
-                </Card>
-              ) : null}
+              <UserInfo job={job} />
             </div>
             <div
               className="slds-p-around_medium
