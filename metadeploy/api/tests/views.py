@@ -91,6 +91,27 @@ class TestJobViewset:
             'org_type': '',
         }
 
+    def test_job__is_public_anon(self, anon_client, job_factory):
+        job = job_factory(is_public=True, org_name='Secret Org')
+        url = reverse('job-detail', kwargs={'pk': job.id})
+        response = anon_client.get(url)
+
+        assert response.status_code == 200
+        assert response.json() == {
+            'id': str(job.id),
+            'creator': None,
+            'plan': str(job.plan.id),
+            'organization_url': None,
+            'steps': [],
+            'completed_steps': [],
+            'created_at': format_timestamp(job.created_at),
+            'enqueued_at': None,
+            'job_id': None,
+            'status': 'started',
+            'org_name': None,
+            'org_type': '',
+        }
+
     def test_create_job(self, client, plan_factory, preflight_result_factory):
         plan = plan_factory()
         preflight_result_factory(
