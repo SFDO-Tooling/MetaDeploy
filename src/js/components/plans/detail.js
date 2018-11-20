@@ -2,6 +2,9 @@
 
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
+import { Link } from 'react-router-dom';
+
+import routes from 'utils/routes';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
@@ -196,10 +199,19 @@ class PlanDetail extends React.Component<Props, State> {
                 slds-medium-size_1-of-2"
             >
               <div className="slds-text-longform">
-                <h3 className="slds-text-heading_small">{plan.title}</h3>
+                <h2 className="slds-text-heading_large">{plan.title}</h2>
                 {plan.preflight_message ? (
                   <p>{plan.preflight_message}</p>
                 ) : null}
+                <p className="slds-text-heading_small slds-p-top_large">
+                  This plan is part of <strong>{product.title}</strong>,{' '}
+                  {version.label}
+                </p>
+                <p className="slds-p-bottom_medium">
+                  <Link to={routes.version_detail(product.slug, version.label)}>
+                    View available plans
+                  </Link>
+                </p>
                 {preflight && user ? (
                   <JobResults
                     job={preflight}
