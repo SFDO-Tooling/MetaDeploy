@@ -9,7 +9,7 @@ import { createSelector } from 'reselect';
 
 import routes from 'utils/routes';
 import { fetchVersion } from 'products/actions';
-import { shouldFetchVersion, gatekeeper } from 'products/utils';
+import { shouldFetchVersion, getLoadingOrNotFound } from 'products/utils';
 
 import BodyContainer from 'components/bodyContainer';
 import ProductIcon from 'components/products/icon';
@@ -31,9 +31,9 @@ type VersionDetailProps = {
 };
 
 const ProductDetail = ({ product }: ProductDetailProps) => {
-  const blocked = gatekeeper({ product });
-  if (blocked !== false) {
-    return blocked;
+  const loadingOrNotFound = getLoadingOrNotFound({ product });
+  if (loadingOrNotFound !== false) {
+    return loadingOrNotFound;
   }
   // This redundant check is required to satisfy Flow:
   // https://flow.org/en/docs/lang/refinements/#toc-refinement-invalidations
@@ -75,24 +75,24 @@ class VersionDetail extends React.Component<VersionDetailProps> {
 
   componentDidUpdate(prevProps) {
     const { product, version, versionLabel } = this.props;
-    if (
+    const versionChanged =
       product !== prevProps.product ||
       version !== prevProps.version ||
-      versionLabel !== prevProps.versionLabel
-    ) {
+      versionLabel !== prevProps.versionLabel;
+    if (versionChanged) {
       this.fetchVersionIfMissing();
     }
   }
 
   render(): React.Node {
     const { product, version, versionLabel } = this.props;
-    const blocked = gatekeeper({
+    const loadingOrNotFound = getLoadingOrNotFound({
       product,
       version,
       versionLabel,
     });
-    if (blocked !== false) {
-      return blocked;
+    if (loadingOrNotFound !== false) {
+      return loadingOrNotFound;
     }
     // this redundant check is required to satisfy Flow:
     // https://flow.org/en/docs/lang/refinements/#toc-refinement-invalidations

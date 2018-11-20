@@ -69,9 +69,8 @@ class ProductsList extends React.Component<Props, State> {
     switch (this.props.productsByCategory.size) {
       case 0: {
         // No products; show empty message
-        contents = (
-          <EmptyIllustration message="We couldn’t find any products." />
-        );
+        const msg = 'We couldn’t find any products. Try again later?';
+        contents = <EmptyIllustration message={msg} />;
         break;
       }
       case 1: {

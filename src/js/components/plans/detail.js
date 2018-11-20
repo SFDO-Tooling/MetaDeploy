@@ -14,7 +14,7 @@ import {
   selectVersionLabel,
 } from 'components/products/detail';
 import { selectUserState } from 'components/header';
-import { shouldFetchVersion, gatekeeper } from 'products/utils';
+import { shouldFetchVersion, getLoadingOrNotFound } from 'products/utils';
 import { startJob } from 'jobs/actions';
 
 import BodyContainer from 'components/bodyContainer';
@@ -99,18 +99,18 @@ class PlanDetail extends React.Component<Props, State> {
       plan,
       preflight,
     } = this.props;
-    if (
+    const versionChanged =
       product !== prevProps.product ||
       version !== prevProps.version ||
-      versionLabel !== prevProps.versionLabel
-    ) {
-      this.fetchVersionIfMissing();
-    }
-    if (
+      versionLabel !== prevProps.versionLabel;
+    const preflightChanged =
       user !== prevProps.user ||
       plan !== prevProps.plan ||
-      preflight !== prevProps.preflight
-    ) {
+      preflight !== prevProps.preflight;
+    if (versionChanged) {
+      this.fetchVersionIfMissing();
+    }
+    if (preflightChanged) {
       this.fetchPreflightIfMissing();
     }
   }
@@ -123,12 +123,12 @@ class PlanDetail extends React.Component<Props, State> {
 
   getSelectedSteps(): SelectedSteps {
     const { plan, preflight } = this.props;
+    const selectedSteps = new Set();
     /* istanbul ignore if */
     if (!plan) {
-      return new Set();
+      return selectedSteps;
     }
     const { changedSteps } = this.state;
-    const selectedSteps = new Set();
     for (const step of plan.steps) {
       const { id } = step;
       const result = preflight && preflight.results && preflight.results[id];
@@ -166,14 +166,14 @@ class PlanDetail extends React.Component<Props, State> {
       doStartPreflight,
       doStartJob,
     } = this.props;
-    const blocked = gatekeeper({
+    const loadingOrNotFound = getLoadingOrNotFound({
       product,
       version,
       versionLabel,
       plan,
     });
-    if (blocked !== false) {
-      return blocked;
+    if (loadingOrNotFound !== false) {
+      return loadingOrNotFound;
     }
     // this redundant check is required to satisfy Flow:
     // https://flow.org/en/docs/lang/refinements/#toc-refinement-invalidations

@@ -275,10 +275,6 @@ STATICFILES_DIRS = [
 STATIC_URL = '/static/'
 STATIC_ROOT = str(PROJECT_ROOT / 'staticfiles')
 
-# if MODE == 'dev':
-#     static_dir_root = 'static/dist'
-# else:
-#     static_dir_root = 'static/dist/min'
 
 # Per the docs:
 # > Absolute path to a directory of files which will be served at the root of

@@ -84,11 +84,7 @@ const reducer = (
         },
       };
     }
-    case 'PREFLIGHT_COMPLETED': {
-      const preflight = action.payload;
-      const { plan } = preflight;
-      return { ...preflights, [plan]: preflight };
-    }
+    case 'PREFLIGHT_COMPLETED':
     case 'PREFLIGHT_FAILED': {
       const preflight = action.payload;
       const { plan } = preflight;

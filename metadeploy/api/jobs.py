@@ -18,7 +18,6 @@ import contextlib
 from datetime import timedelta
 from itertools import chain
 from glob import glob
-from tempfile import TemporaryDirectory
 import logging
 from urllib.parse import urlparse
 import zipfile
@@ -32,6 +31,7 @@ from cumulusci.core.config import (
     ServiceConfig,
     YamlGlobalConfig,
 )
+from cumulusci.utils import temporary_dir
 
 from django_rq import job
 
@@ -88,16 +88,6 @@ def report_errors_to(user):
 
 
 @contextlib.contextmanager
-def cd(path):
-    prev_cwd = os.getcwd()
-    os.chdir(path)
-    try:
-        yield
-    finally:
-        os.chdir(prev_cwd)
-
-
-@contextlib.contextmanager
 def prepend_python_path(path):
     prev_path = sys.path.copy()
     sys.path.insert(0, path)
@@ -135,6 +125,8 @@ def run_flows(
         plan (Plan): The Plan instance for the flow you're running.
         skip_tasks (List[str]): The strings in the list should be valid
             task_name values for steps in this flow.
+        organization_url (str): The URL of the organization, required by
+            the OrgConfig.
         flow_class (Type[BasicFlow]): Either the class PreflightFlow or
             the class JobFlow. This is the flow that actually gets run
             inside this function.
@@ -154,8 +146,7 @@ def run_flows(
     with contextlib.ExitStack() as stack:
         stack.enter_context(finalize_result(result))
         stack.enter_context(report_errors_to(user))
-        tmpdirname = stack.enter_context(TemporaryDirectory())
-        stack.enter_context(cd(tmpdirname))
+        tmpdirname = stack.enter_context(temporary_dir())
 
         # Get cwd into Python path, so that the tasks below can import
         # from the checked-out repo:

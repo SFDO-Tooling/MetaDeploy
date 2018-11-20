@@ -231,7 +231,7 @@ class Command(BaseCommand):
 
         plan2 = self.create_plan(
             version1,
-            title='Failing Preflight',
+            title='Reports and Dashboards',
             tier='secondary',
             preflight_flow_name='slow_steps_preflight_bad',
             flow_name='slow_steps_flow',
@@ -240,7 +240,7 @@ class Command(BaseCommand):
 
         plan3 = self.create_plan(
             version1,
-            title='Messy Preflight',
+            title='Account Record Types',
             tier='additional',
             preflight_flow_name='messy_preflight',
         )

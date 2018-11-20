@@ -29,7 +29,7 @@ type DataCellProps = {
   [string]: mixed,
   user?: UserType,
   preflight?: ?PreflightType,
-  item?: {| ...StepType, +id: string |},
+  item?: StepType,
   className?: string,
   selectedSteps?: SelectedStepsType,
   handleStepsChange?: (string, boolean) => void,

@@ -2,7 +2,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { render } from 'react-testing-library';
 
-import { shouldFetchVersion, gatekeeper } from 'products/utils';
+import { shouldFetchVersion, getLoadingOrNotFound } from 'products/utils';
 
 const defaultProduct = {
   id: 'p1',
@@ -68,10 +68,10 @@ describe('shouldFetchVersion', () => {
   });
 });
 
-describe('gatekeeper', () => {
+describe('getLoadingOrNotFound', () => {
   const setup = opts => {
     const { getByText } = render(
-      <MemoryRouter>{gatekeeper(opts)}</MemoryRouter>,
+      <MemoryRouter>{getLoadingOrNotFound(opts)}</MemoryRouter>,
     );
     return { getByText };
   };
