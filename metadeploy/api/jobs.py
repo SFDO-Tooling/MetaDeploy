@@ -18,7 +18,6 @@ import contextlib
 from datetime import timedelta
 from itertools import chain
 from glob import glob
-from tempfile import TemporaryDirectory
 import logging
 from urllib.parse import urlparse
 import zipfile
@@ -32,6 +31,7 @@ from cumulusci.core.config import (
     ServiceConfig,
     YamlGlobalConfig,
 )
+from cumulusci.utils import temporary_dir
 
 from django_rq import job
 
@@ -85,16 +85,6 @@ def report_errors_to(user):
         sync_report_error(user)
         logger.error(e)
         raise
-
-
-@contextlib.contextmanager
-def cd(path):
-    prev_cwd = os.getcwd()
-    os.chdir(path)
-    try:
-        yield
-    finally:
-        os.chdir(prev_cwd)
 
 
 @contextlib.contextmanager
@@ -156,8 +146,7 @@ def run_flows(
     with contextlib.ExitStack() as stack:
         stack.enter_context(finalize_result(result))
         stack.enter_context(report_errors_to(user))
-        tmpdirname = stack.enter_context(TemporaryDirectory())
-        stack.enter_context(cd(tmpdirname))
+        tmpdirname = stack.enter_context(temporary_dir())
 
         # Get cwd into Python path, so that the tasks below can import
         # from the checked-out repo:
