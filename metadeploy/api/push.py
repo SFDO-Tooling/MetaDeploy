@@ -1,4 +1,12 @@
+from collections import namedtuple
 from channels.layers import get_channel_layer
+
+
+Request = namedtuple('Request', 'user')
+
+
+def user_context(user):
+    return {'request': Request(user)}
 
 
 async def push_message_to_user(user, json_message):
@@ -66,15 +74,27 @@ async def notify_post_task(job):
     if not job.completed_steps:
         return
 
-    task_name = job.completed_steps[-1]
+    step_id = job.completed_steps[-1]
     user = job.user
 
     payload = {
-        'task_name': task_name,
-        'job': JobSerializer(instance=job).data,
+        'step_id': step_id,
+        'job': JobSerializer(instance=job, context=user_context(user)).data,
     }
     message = {
         'type': 'TASK_COMPLETED',
+        'payload': payload,
+    }
+    await push_message_to_user(user, message)
+
+
+async def notify_post_job(job):
+    from .serializers import JobSerializer
+
+    user = job.user
+    payload = JobSerializer(instance=job, context=user_context(user)).data
+    message = {
+        'type': 'JOB_COMPLETED',
         'payload': payload,
     }
     await push_message_to_user(user, message)

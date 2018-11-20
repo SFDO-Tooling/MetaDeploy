@@ -11,6 +11,6 @@ describe('<AuthError />', () => {
         <AuthError />
       </MemoryRouter>,
     );
-    expect(getByText('Oh No!')).toBeVisible();
+    expect(getByText('¯\\_(ツ)_/¯')).toBeVisible();
   });
 });

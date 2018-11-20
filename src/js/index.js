@@ -35,6 +35,7 @@ import ErrorBoundary from 'components/error';
 import Footer from 'components/footer';
 import FourOhFour from 'components/404';
 import Header from 'components/header';
+import JobDetail from 'components/jobs/detail';
 import PlanDetail from 'components/plans/detail';
 import ProductsList from 'components/products/list';
 import { ProductDetail, VersionDetail } from 'components/products/detail';
@@ -80,6 +81,11 @@ const App = () => (
                 exact
                 path={routePatterns.plan_detail()}
                 component={PlanDetail}
+              />
+              <Route
+                exact
+                path={routePatterns.job_detail()}
+                component={JobDetail}
               />
               <Route path={routePatterns.auth_error()} component={AuthError} />
               <Route component={FourOhFour} />

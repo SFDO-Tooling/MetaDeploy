@@ -22,7 +22,7 @@ describe('<ProductItem />', () => {
     const initialState = {
       products: [
         {
-          id: 1,
+          id: 'p1',
           title: 'Product 1',
           description: 'This is a test product.',
           category: 'salesforce',
@@ -31,12 +31,12 @@ describe('<ProductItem />', () => {
             url: 'http://foo.bar',
           },
           most_recent_version: {
-            id: 1,
-            product: 1,
+            id: 'v1',
+            product: 'p1',
             label: '1.0.0',
             description: 'This is a test product version.',
             primary_plan: {
-              id: 1,
+              id: 'plan-1',
               title: 'My Plan',
             },
             additional_plans: [],

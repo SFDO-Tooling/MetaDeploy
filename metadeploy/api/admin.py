@@ -21,6 +21,18 @@ admin.site.register(ProductCategory)
 admin.site.register(Version)
 admin.site.register(Plan)
 admin.site.register(PlanSlug)
-admin.site.register(Step)
 admin.site.register(Job)
 admin.site.register(PreflightResult)
+
+
+@admin.register(Step)
+class StepAdmin(admin.ModelAdmin):
+    list_display = (
+        'name',
+        'plan',
+        'order_key',
+        'is_required',
+        'is_recommended',
+        'kind',
+        'task_name',
+    )

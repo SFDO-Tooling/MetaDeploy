@@ -12,10 +12,12 @@ export const renderWithRedux = (
   ui,
   initialState = {},
   customStore = mockStore,
+  rerender = false,
 ) => {
   const store = customStore(initialState);
+  const renderFn = rerender ? rerender : render;
   return {
-    ...render(<Provider store={store}>{ui}</Provider>),
+    ...renderFn(<Provider store={store}>{ui}</Provider>),
     // adding `store` to the returned utilities to allow us
     // to reference it in our tests (just try to avoid using
     // this to test implementation details).

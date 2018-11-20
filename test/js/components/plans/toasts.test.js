@@ -3,23 +3,26 @@ import { render, fireEvent } from 'react-testing-library';
 
 import Toasts from 'components/plans/toasts';
 
-const defaultPreflight = {
+const defaultModel = {
   status: 'started',
 };
+
+const defaultLabel = 'Pre-install validation';
 
 describe('<Toasts />', () => {
   const setup = options => {
     const defaults = {
-      preflight: defaultPreflight,
+      model: defaultModel,
+      label: defaultLabel,
     };
     const opts = { ...defaults, ...options };
     const { getByText, container, rerender } = render(
-      <Toasts preflight={opts.preflight} />,
+      <Toasts model={opts.model} label={opts.label} />,
     );
     return { getByText, container, rerender };
   };
 
-  describe('started preflight', () => {
+  describe('started model', () => {
     test('renders nothing', () => {
       const { container } = setup();
 
@@ -29,9 +32,9 @@ describe('<Toasts />', () => {
     });
   });
 
-  describe('already-completed preflight', () => {
+  describe('already-completed model', () => {
     test('renders nothing', () => {
-      const { container } = setup({ preflight: { status: 'complete' } });
+      const { container } = setup({ model: { status: 'complete' } });
 
       expect(
         container.querySelector('.slds-notify-container').children,
@@ -39,21 +42,21 @@ describe('<Toasts />', () => {
     });
   });
 
-  describe('preflight fails', () => {
+  describe('model fails', () => {
     test('renders toast with message', () => {
       const { getByText, rerender } = setup();
-      const preflight = { status: 'failed' };
-      rerender(<Toasts preflight={preflight} />);
+      const model = { status: 'failed' };
+      rerender(<Toasts model={model} label={defaultLabel} />);
 
       expect(getByText('Pre-install validation has failed.')).toBeVisible();
     });
   });
 
-  describe('preflight completes with errors', () => {
+  describe('model completes with errors', () => {
     test('renders toast with message', () => {
       const { getByText, rerender } = setup();
-      const preflight = { status: 'complete', error_count: 1 };
-      rerender(<Toasts preflight={preflight} />);
+      const model = { status: 'complete', error_count: 1 };
+      rerender(<Toasts model={model} label={defaultLabel} />);
 
       expect(
         getByText('Pre-install validation completed with errors.'),
@@ -61,15 +64,15 @@ describe('<Toasts />', () => {
     });
   });
 
-  describe('preflight completes with warnings', () => {
+  describe('model completes with warnings', () => {
     test('renders toast with message', () => {
       const { getByText, rerender } = setup();
-      const preflight = {
+      const model = {
         status: 'complete',
         error_count: 0,
         warning_count: 1,
       };
-      rerender(<Toasts preflight={preflight} />);
+      rerender(<Toasts model={model} label={defaultLabel} />);
 
       expect(
         getByText('Pre-install validation completed with warnings.'),
@@ -77,11 +80,11 @@ describe('<Toasts />', () => {
     });
   });
 
-  describe('preflight completes successfully', () => {
+  describe('model completes successfully', () => {
     test('renders toast with message', () => {
       const { getByText, rerender } = setup();
-      const preflight = { status: 'complete', error_count: 0 };
-      rerender(<Toasts preflight={preflight} />);
+      const model = { status: 'complete', error_count: 0 };
+      rerender(<Toasts model={model} label={defaultLabel} />);
 
       expect(
         getByText('Pre-install validation completed successfully.'),
@@ -92,8 +95,8 @@ describe('<Toasts />', () => {
   describe('close-toast click', () => {
     test('removes toast', () => {
       const { getByText, container, rerender } = setup();
-      const preflight = { status: 'complete', error_count: 0 };
-      rerender(<Toasts preflight={preflight} />);
+      const model = { status: 'complete', error_count: 0 };
+      rerender(<Toasts model={model} label={defaultLabel} />);
       fireEvent.click(getByText('Close'));
 
       expect(

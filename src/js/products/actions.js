@@ -6,7 +6,7 @@ import type { ThunkAction } from 'redux-thunk';
 
 import type { Products, Version } from 'products/reducer';
 
-type VersionFilters = {| product: number, label: string |};
+type VersionFilters = {| product: string, label: string |};
 type FetchProductsStarted = { type: 'FETCH_PRODUCTS_STARTED' };
 type FetchProductsSucceeded = {
   type: 'FETCH_PRODUCTS_SUCCEEDED',
