@@ -38,6 +38,7 @@ class TestJobViewset:
             },
             'plan': str(job.plan.id),
             'steps': [],
+            'organization_url': '',
             'completed_steps': [],
             'created_at': format_timestamp(job.created_at),
             'enqueued_at': None,
@@ -60,6 +61,7 @@ class TestJobViewset:
             },
             'plan': str(job.plan.id),
             'steps': [],
+            'organization_url': '',
             'completed_steps': [],
             'created_at': format_timestamp(job.created_at),
             'enqueued_at': None,
@@ -78,6 +80,28 @@ class TestJobViewset:
             'id': str(job.id),
             'creator': None,
             'plan': str(job.plan.id),
+            'organization_url': None,
+            'steps': [],
+            'completed_steps': [],
+            'created_at': format_timestamp(job.created_at),
+            'enqueued_at': None,
+            'job_id': None,
+            'status': 'started',
+            'org_name': None,
+            'org_type': '',
+        }
+
+    def test_job__is_public_anon(self, anon_client, job_factory):
+        job = job_factory(is_public=True, org_name='Secret Org')
+        url = reverse('job-detail', kwargs={'pk': job.id})
+        response = anon_client.get(url)
+
+        assert response.status_code == 200
+        assert response.json() == {
+            'id': str(job.id),
+            'creator': None,
+            'plan': str(job.plan.id),
+            'organization_url': None,
             'steps': [],
             'completed_steps': [],
             'created_at': format_timestamp(job.created_at),
@@ -102,6 +126,8 @@ class TestJobViewset:
         response = client.post(reverse('job-list'), data=data)
 
         assert response.status_code == 201
+        assert response.json()["org_type"] == "Developer Edition"
+        assert response.json()["org_name"] == "Sample Org"
 
 
 @pytest.mark.django_db

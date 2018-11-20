@@ -10,10 +10,17 @@ Websocket notifications you can subscribe to:
         PREFLIGHT_INVALIDATED
     job-:id
         TASK_COMPLETED
+        JOB_COMPLETED
 """
-
-
 from channels.layers import get_channel_layer
+from collections import namedtuple
+
+
+Request = namedtuple('Request', 'user')
+
+
+def user_context(user):
+    return {'request': Request(user)}
 
 
 async def push_message_about_instance(instance, json_message):
@@ -83,14 +90,31 @@ async def notify_post_task(job):
     if not job.completed_steps:
         return
 
-    task_name = job.completed_steps[-1]
+    step_id = job.completed_steps[-1]
+    # XXX THIS IS WRONG: We don't know which users are seeing the job at
+    # this point, so claiming it's always the job owner is wrong.
+    user = job.user
 
     payload = {
-        'task_name': task_name,
-        'job': JobSerializer(instance=job).data,
+        'step_id': step_id,
+        'job': JobSerializer(instance=job, context=user_context(user)).data,
     }
     message = {
         'type': 'TASK_COMPLETED',
+        'payload': payload,
+    }
+    await push_message_about_instance(job, message)
+
+
+async def notify_post_job(job):
+    from .serializers import JobSerializer
+
+    # XXX THIS IS WRONG: We don't know which users are seeing the job at
+    # this point, so claiming it's always the job owner is wrong.
+    user = job.user
+    payload = JobSerializer(instance=job, context=user_context(user)).data
+    message = {
+        'type': 'JOB_COMPLETED',
         'payload': payload,
     }
     await push_message_about_instance(job, message)

@@ -50,16 +50,17 @@ describe('<StepsTable />', () => {
   const setup = options => {
     const defaults = { plan: defaultPlan, user: null };
     const opts = { ...defaults, ...options };
-    const { getByText, queryByText, container } = render(
+    const { getByText, getAllByText, queryByText, container } = render(
       <StepsTable
         plan={opts.plan}
         user={opts.user}
         preflight={opts.preflight}
         selectedSteps={new Set(['step-1', 'step-2', 'step-3'])}
+        job={opts.job}
         handleStepsChange={handleStepsChange}
       />,
     );
-    return { getByText, queryByText, container };
+    return { getByText, getAllByText, queryByText, container };
   };
 
   test('renders steps', () => {
@@ -134,9 +135,42 @@ describe('<StepsTable />', () => {
 
       expect(queryByText('Required')).toBeNull();
     });
+
+    test('becomes optional if not included in job', () => {
+      const { getAllByText } = setup({
+        job: {
+          id: 'job-1',
+          plan: 'plan-1',
+          status: 'started',
+          steps: ['step-2'],
+          completed_steps: [],
+        },
+      });
+
+      expect(getAllByText('Required')).toHaveLength(1);
+    });
   });
 
   describe('<InstallDataCell>', () => {
+    describe('with job', () => {
+      test('returns completed, skipped, installing, checkbox', () => {
+        const { getByText } = setup({
+          job: {
+            id: 'job-1',
+            plan: 'plan-1',
+            status: 'started',
+            steps: ['step-1', 'step-2', 'step-4'],
+            completed_steps: ['step-1', 'foo'],
+          },
+        });
+
+        expect(getByText('Installing...')).toBeVisible();
+        expect(getByText('skipped')).toBeVisible();
+        expect(getByText('completed')).toBeVisible();
+        expect(getByText('waiting to install')).toBeVisible();
+      });
+    });
+
     test('disabled if no user', () => {
       const { container } = setup();
 

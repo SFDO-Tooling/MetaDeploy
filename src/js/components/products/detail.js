@@ -9,20 +9,19 @@ import { createSelector } from 'reselect';
 
 import routes from 'utils/routes';
 import { fetchVersion } from 'products/actions';
-import { shouldFetchVersion, gatekeeper } from 'products/utils';
+import { shouldFetchVersion, getLoadingOrNotFound } from 'products/utils';
 
 import BodyContainer from 'components/bodyContainer';
 import ProductIcon from 'components/products/icon';
 import ProductNotFound from 'components/products/product404';
 
-import type { Match } from 'react-router-dom';
 import type { AppState } from 'app/reducer';
+import type { InitialProps } from 'components/utils';
 import type {
   Product as ProductType,
   Version as VersionType,
 } from 'products/reducer';
 
-type InitialProps = { match: Match };
 type ProductDetailProps = { product: ProductType | null };
 type VersionDetailProps = {
   product: ProductType | null,
@@ -32,9 +31,9 @@ type VersionDetailProps = {
 };
 
 const ProductDetail = ({ product }: ProductDetailProps) => {
-  const blocked = gatekeeper({ product });
-  if (blocked !== false) {
-    return blocked;
+  const loadingOrNotFound = getLoadingOrNotFound({ product });
+  if (loadingOrNotFound !== false) {
+    return loadingOrNotFound;
   }
   // This redundant check is required to satisfy Flow:
   // https://flow.org/en/docs/lang/refinements/#toc-refinement-invalidations
@@ -58,7 +57,7 @@ const BodySection = ({ children }: { children: React.Node }) => (
 );
 
 class VersionDetail extends React.Component<VersionDetailProps> {
-  componentDidMount() {
+  fetchVersionIfMissing() {
     const { product, version, versionLabel, doFetchVersion } = this.props;
     if (
       product &&
@@ -70,15 +69,30 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     }
   }
 
+  componentDidMount() {
+    this.fetchVersionIfMissing();
+  }
+
+  componentDidUpdate(prevProps) {
+    const { product, version, versionLabel } = this.props;
+    const versionChanged =
+      product !== prevProps.product ||
+      version !== prevProps.version ||
+      versionLabel !== prevProps.versionLabel;
+    if (versionChanged) {
+      this.fetchVersionIfMissing();
+    }
+  }
+
   render(): React.Node {
     const { product, version, versionLabel } = this.props;
-    const blocked = gatekeeper({
+    const loadingOrNotFound = getLoadingOrNotFound({
       product,
       version,
       versionLabel,
     });
-    if (blocked !== false) {
-      return blocked;
+    if (loadingOrNotFound !== false) {
+      return loadingOrNotFound;
     }
     // this redundant check is required to satisfy Flow:
     // https://flow.org/en/docs/lang/refinements/#toc-refinement-invalidations

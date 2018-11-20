@@ -2,7 +2,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { render } from 'react-testing-library';
 
-import { shouldFetchVersion, gatekeeper } from 'products/utils';
+import { shouldFetchVersion, getLoadingOrNotFound } from 'products/utils';
 
 const defaultProduct = {
   id: 'p1',
@@ -68,10 +68,10 @@ describe('shouldFetchVersion', () => {
   });
 });
 
-describe('gatekeeper', () => {
+describe('getLoadingOrNotFound', () => {
   const setup = opts => {
     const { getByText } = render(
-      <MemoryRouter>{gatekeeper(opts)}</MemoryRouter>,
+      <MemoryRouter>{getLoadingOrNotFound(opts)}</MemoryRouter>,
     );
     return { getByText };
   };
@@ -135,6 +135,33 @@ describe('gatekeeper', () => {
         });
 
         expect(getByText('most recent version')).toBeVisible();
+      });
+    });
+  });
+
+  describe('jobId but no job', () => {
+    test('renders <JobNotFound />', () => {
+      const { getByText } = setup({
+        product: defaultProduct,
+        version: defaultProduct.most_recent_version,
+        plan: defaultProduct.most_recent_version.primary_plan,
+        jobId: 'job-1',
+        job: null,
+      });
+
+      expect(getByText('starting a new installation')).toBeVisible();
+    });
+
+    describe('unknown job', () => {
+      test('renders <Spinner />', () => {
+        const { getByText } = setup({
+          product: defaultProduct,
+          version: defaultProduct.most_recent_version,
+          plan: defaultProduct.most_recent_version.primary_plan,
+          jobId: 'job-1',
+        });
+
+        expect(getByText('Loading...')).toBeVisible();
       });
     });
   });

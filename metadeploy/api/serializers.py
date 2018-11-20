@@ -22,14 +22,6 @@ class IdOnlyField(serializers.CharField):
         return str(value.id)
 
 
-class OrgTypeDefault:
-    def set_context(self, serializer_field):
-        self.org_type = serializer_field.context['request'].user.org_type
-
-    def __call__(self):
-        return self.org_type
-
-
 class FullUserSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
 
@@ -142,13 +134,8 @@ class JobSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault(),
     )
-    org_name = serializers.SerializerMethodField(
-        read_only=True,
-    )
-    org_type = serializers.CharField(
-        default=OrgTypeDefault(),
-        read_only=True,
-    )
+    org_name = serializers.SerializerMethodField()
+    organization_url = serializers.SerializerMethodField()
 
     plan = serializers.PrimaryKeyRelatedField(
         queryset=Plan.objects.all(),
@@ -171,6 +158,7 @@ class JobSerializer(serializers.ModelSerializer):
             'creator',
             'plan',
             'steps',
+            'organization_url',
             'completed_steps',
             'created_at',
             'enqueued_at',
@@ -185,9 +173,15 @@ class JobSerializer(serializers.ModelSerializer):
             'completed_steps': {'read_only': True},
             'job_id': {'read_only': True},
             'status': {'read_only': True},
+            'org_type': {'read_only': True},
         }
 
     def requesting_user_has_rights(self):
+        """
+        Does the user making the request have rights to see this object?
+
+        The user is derived from the serializer context.
+        """
         try:
             user = self.context['request'].user
             return user.is_staff or user == self.instance.user
@@ -202,6 +196,11 @@ class JobSerializer(serializers.ModelSerializer):
     def get_org_name(self, obj):
         if self.requesting_user_has_rights():
             return obj.org_name
+        return None
+
+    def get_organization_url(self, obj):
+        if self.requesting_user_has_rights():
+            return obj.organization_url
         return None
 
     @staticmethod
@@ -243,6 +242,9 @@ class JobSerializer(serializers.ModelSerializer):
         )
         if not has_valid_steps:
             raise serializers.ValidationError("Invalid steps for plan.")
+        data["org_name"] = data["user"].org_name
+        data["org_type"] = data["user"].org_type
+        data["organization_url"] = data["user"].instance_url
         return data
 
 

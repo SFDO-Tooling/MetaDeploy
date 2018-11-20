@@ -6,12 +6,15 @@ import Spinner from '@salesforce/design-system-react/components/spinner';
 import PlanNotFound from 'components/plans/plan404';
 import ProductNotFound from 'components/products/product404';
 import VersionNotFound from 'components/products/version404';
+import JobNotFound from 'components/jobs/job404';
 
+import type { Job as JobType } from 'jobs/reducer';
 import type { Plan as PlanType } from 'plans/reducer';
 import type {
   Product as ProductType,
   Version as VersionType,
 } from 'products/reducer';
+import type { User as UserType } from 'accounts/reducer';
 
 export const shouldFetchVersion = ({
   product,
@@ -35,16 +38,22 @@ export const shouldFetchVersion = ({
   return false;
 };
 
-export const gatekeeper = ({
+export const getLoadingOrNotFound = ({
   product,
   version,
   versionLabel,
   plan,
+  job,
+  jobId,
+  user,
 }: {
   product: ProductType | null,
   version?: VersionType | null,
   versionLabel?: ?string,
   plan?: PlanType | null,
+  job?: JobType | null,
+  jobId?: ?string,
+  user?: UserType,
 }): React.Node | false => {
   if (product === null) {
     return <ProductNotFound />;
@@ -65,6 +74,20 @@ export const gatekeeper = ({
       return <VersionNotFound product={product} />;
     }
     return <PlanNotFound product={product} version={version} />;
+  }
+  if (version && plan && jobId && !job) {
+    if (job === null) {
+      return (
+        <JobNotFound
+          product={product}
+          version={version}
+          plan={plan}
+          user={user}
+        />
+      );
+    }
+    // Fetching job from API
+    return <Spinner />;
   }
   return false;
 };

@@ -13,6 +13,10 @@ jest.mock('products/actions');
 
 fetchVersion.mockReturnValue({ type: 'TEST' });
 
+afterEach(() => {
+  fetchVersion.mockClear();
+});
+
 const defaultState = {
   products: [
     {
@@ -85,15 +89,16 @@ describe('<VersionDetail />', () => {
       versionLabel: '1.0.0',
     };
     const opts = Object.assign({}, defaults, options);
-    const { productSlug, versionLabel } = opts;
-    const { getByText, queryByText, getByAltText } = renderWithRedux(
+    const { productSlug, versionLabel, rerenderFn } = opts;
+    const { getByText, queryByText, getByAltText, rerender } = renderWithRedux(
       <MemoryRouter>
         <VersionDetail match={{ params: { productSlug, versionLabel } }} />
       </MemoryRouter>,
       opts.initialState,
       opts.customStore,
+      rerenderFn,
     );
-    return { getByText, queryByText, getByAltText };
+    return { getByText, queryByText, getByAltText, rerender };
   };
 
   describe('no product', () => {
@@ -113,6 +118,38 @@ describe('<VersionDetail />', () => {
       expect(fetchVersion).toHaveBeenCalledWith({
         product: 'p1',
         label: '2.0.0',
+      });
+    });
+  });
+
+  describe('componentDidUpdate', () => {
+    describe('version is unchanged', () => {
+      test('does not fetch version', () => {
+        const { rerender } = setup();
+
+        expect(fetchVersion).not.toHaveBeenCalled();
+
+        setup({ rerenderFn: rerender });
+
+        expect(fetchVersion).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('version is removed', () => {
+      test('fetches version', () => {
+        const { rerender } = setup({ versionLabel: '2.0.0' });
+
+        expect(fetchVersion).toHaveBeenCalledWith({
+          product: 'p1',
+          label: '2.0.0',
+        });
+
+        setup({ versionLabel: '3.0.0', rerenderFn: rerender });
+
+        expect(fetchVersion).toHaveBeenCalledWith({
+          product: 'p1',
+          label: '3.0.0',
+        });
       });
     });
   });

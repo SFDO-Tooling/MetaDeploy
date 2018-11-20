@@ -18,7 +18,6 @@ import contextlib
 from datetime import timedelta
 from itertools import chain
 from glob import glob
-from tempfile import TemporaryDirectory
 import logging
 from urllib.parse import urlparse
 import zipfile
@@ -32,6 +31,7 @@ from cumulusci.core.config import (
     ServiceConfig,
     YamlGlobalConfig,
 )
+from cumulusci.utils import temporary_dir
 
 from django_rq import job
 
@@ -45,7 +45,7 @@ from .models import (
 )
 from . import cci_configs
 from .flows import (
-    BasicFlow,
+    JobFlow,
     PreflightFlow,
 )
 from .push import report_error
@@ -64,12 +64,8 @@ def extract_user_and_repo(gh_url):
 
 @contextlib.contextmanager
 def finalize_result(result):
-    if isinstance(result, PreflightResult):
-        error_status = PreflightResult.Status.failed
-        success_status = PreflightResult.Status.complete
-    else:
-        error_status = Job.Status.failed
-        success_status = Job.Status.complete
+    error_status = result.Status.failed
+    success_status = result.Status.complete
 
     try:
         yield
@@ -89,16 +85,6 @@ def report_errors_to(user):
         sync_report_error(user)
         logger.error(e)
         raise
-
-
-@contextlib.contextmanager
-def cd(path):
-    prev_cwd = os.getcwd()
-    os.chdir(path)
-    try:
-        yield
-    finally:
-        os.chdir(prev_cwd)
 
 
 @contextlib.contextmanager
@@ -126,33 +112,41 @@ def zip_file_is_safe(zip_file):
     )
 
 
-def run_flows(user, plan, skip_tasks, flow_class=None, result=None):
-    # TODO:
-    #
-    # Can we do anything meaningful with a return value from a @job?
+def run_flows(
+        *, user, plan, skip_tasks, organization_url,
+        flow_class, flow_name, result_class, result_id):
+    """
+    This operates with side effects; it changes things in a Salesforce
+    org, and then records the results of those operations on to a
+    `result`.
 
-    # This is a little stupid, but it lets us mock out BasicFlow in the
-    # tests better than if we put this straight in the kwargs:
-    if flow_class is None:
-        flow_class = BasicFlow
-
-    is_preflight = isinstance(result, PreflightResult)
-
+    Args:
+        user (User): The User requesting this flow be run.
+        plan (Plan): The Plan instance for the flow you're running.
+        skip_tasks (List[str]): The strings in the list should be valid
+            task_name values for steps in this flow.
+        organization_url (str): The URL of the organization, required by
+            the OrgConfig.
+        flow_class (Type[BasicFlow]): Either the class PreflightFlow or
+            the class JobFlow. This is the flow that actually gets run
+            inside this function.
+        flow_name (str): The plan.preflight_flow_name or plan.flow_name,
+            as appropriate.
+        result_class (Union[Type[Job], Type[PreflightResult]]): The
+            instance onto which to record the results of running steps
+            in the flow. Either a PreflightResult or a Job, as
+            appropriate.
+        result_id (int): the PK of the result instance to get.
+    """
+    result = result_class.objects.get(pk=result_id)
     token, token_secret = user.token
-    instance_url = user.instance_url
     repo_url = plan.version.product.repo_url
     commit_ish = plan.version.commit_ish
-
-    if is_preflight:
-        flow_name = plan.preflight_flow_name
-    else:
-        flow_name = plan.flow_name
 
     with contextlib.ExitStack() as stack:
         stack.enter_context(finalize_result(result))
         stack.enter_context(report_errors_to(user))
-        tmpdirname = stack.enter_context(TemporaryDirectory())
-        stack.enter_context(cd(tmpdirname))
+        tmpdirname = stack.enter_context(temporary_dir())
 
         # Get cwd into Python path, so that the tasks below can import
         # from the checked-out repo:
@@ -190,7 +184,7 @@ def run_flows(user, plan, skip_tasks, flow_class=None, result=None):
         current_org = 'current_org'
         org_config = OrgConfig({
             'access_token': token,
-            'instance_url': instance_url,
+            'instance_url': organization_url,
             'refresh_token': token_secret,
         }, current_org)
         proj_config = cci_configs.MetadeployProjectConfig(
@@ -237,9 +231,8 @@ def run_flows(user, plan, skip_tasks, flow_class=None, result=None):
             options={},
             skip=skip_tasks,
             name=flow_name,
+            result=result,
         )
-        if is_preflight:
-            kwargs['preflight_result'] = result
 
         flowinstance = flow_class(*args, **kwargs)
         flowinstance()
@@ -251,7 +244,16 @@ run_flows_job = job(run_flows)
 def enqueuer():
     logger.debug('Enqueuer live', extra={'tag': 'jobs.enqueuer'})
     for j in Job.objects.filter(enqueued_at=None):
-        rq_job = run_flows_job.delay(j.user, j.plan, j.skip_tasks(), result=j)
+        rq_job = run_flows_job.delay(
+            user=j.user,
+            plan=j.plan,
+            skip_tasks=j.skip_tasks(),
+            organization_url=j.organization_url,
+            flow_class=JobFlow,
+            flow_name=j.plan.flow_name,
+            result_class=Job,
+            result_id=j.id,
+        )
         j.job_id = rq_job.id
         j.enqueued_at = rq_job.enqueued_at
         j.save()
@@ -277,11 +279,14 @@ def preflight(user, plan):
         organization_url=user.instance_url,
     )
     run_flows(
-        user,
-        plan,
-        [],
+        user=user,
+        plan=plan,
+        skip_tasks=[],
+        organization_url=preflight_result.organization_url,
         flow_class=PreflightFlow,
-        result=preflight_result,
+        flow_name=plan.preflight_flow_name,
+        result_class=PreflightResult,
+        result_id=preflight_result.id,
     )
 
 

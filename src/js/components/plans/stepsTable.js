@@ -8,13 +8,15 @@ import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import Icon from '@salesforce/design-system-react/components/icon';
+import Spinner from '@salesforce/design-system-react/components/spinner';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
 
 import { CONSTANTS } from 'plans/reducer';
 
-import { ErrorsList } from 'components/plans/preflightResults';
+import { ErrorsList } from 'components/plans/jobResults';
 
+import type { Job as JobType } from 'jobs/reducer';
 import type {
   Plan as PlanType,
   Step as StepType,
@@ -27,13 +29,14 @@ type DataCellProps = {
   [string]: mixed,
   user?: UserType,
   preflight?: ?PreflightType,
-  item?: {| ...StepType, +id: string |},
+  item?: StepType,
   className?: string,
   selectedSteps?: SelectedStepsType,
   handleStepsChange?: (string, boolean) => void,
+  job?: JobType,
 };
 
-const { RESULT_STATUS } = CONSTANTS;
+const { STATUS, RESULT_STATUS } = CONSTANTS;
 
 class NameDataCell extends React.Component<
   DataCellProps,
@@ -147,7 +150,7 @@ const KindDataCell = (props: DataCellProps): React.Node => {
 KindDataCell.displayName = DataTableCell.displayName;
 
 const RequiredDataCell = (props: DataCellProps): React.Node => {
-  const { preflight, item } = props;
+  const { preflight, item, job } = props;
   /* istanbul ignore if */
   if (!item) {
     return null;
@@ -159,7 +162,8 @@ const RequiredDataCell = (props: DataCellProps): React.Node => {
     skipped = result.find(res => res.status === RESULT_STATUS.SKIP);
     optional = result.find(res => res.status === RESULT_STATUS.OPTIONAL);
   }
-  const required = item.is_required && !optional;
+  const required =
+    item.is_required && !optional && (!job || job.steps.includes(id));
   const classes = classNames(
     'slds-align-middle',
     'slds-badge',
@@ -181,14 +185,102 @@ const RequiredDataCell = (props: DataCellProps): React.Node => {
 RequiredDataCell.displayName = DataTableCell.displayName;
 
 const InstallDataCell = (props: DataCellProps): React.Node => {
-  const { preflight, item, selectedSteps, handleStepsChange } = props;
+  const { preflight, item, selectedSteps, handleStepsChange, job } = props;
   /* istanbul ignore if */
   if (!item) {
     return null;
   }
+  const { id } = item;
+  if (job) {
+    let icon, title;
+    if (!job.steps.includes(id)) {
+      title = 'skipped';
+      icon = (
+        <Icon
+          category="utility"
+          name="dash"
+          assistiveText={{
+            label: title,
+          }}
+          size="x-small"
+          colorVariant="light"
+          className="slds-m-horizontal_x-small"
+        />
+      );
+    } else if (job.completed_steps.includes(id)) {
+      title = 'completed';
+      icon = (
+        <Icon
+          category="action"
+          name="approval"
+          assistiveText={{
+            label: title,
+          }}
+          size="x-small"
+          containerClassName="slds-icon-standard-approval"
+        />
+      );
+    } else if (job.status === STATUS.STARTED) {
+      let lastCompleted, lastCompletedIdx;
+      let activeStep = job.steps[0];
+      for (let idx = job.completed_steps.length - 1; idx > -1; idx = idx - 1) {
+        lastCompleted = job.completed_steps[idx];
+        lastCompletedIdx = job.steps.indexOf(lastCompleted);
+        if (lastCompletedIdx > -1) {
+          activeStep = job.steps[lastCompletedIdx + 1];
+          break;
+        }
+      }
+      if (activeStep && id === activeStep) {
+        title = 'installing';
+        icon = (
+          <>
+            <span
+              className="slds-is-relative
+                slds-m-left_medium
+                slds-m-right_large"
+            >
+              <Spinner size="small" />
+            </span>
+            Installing...
+          </>
+        );
+      } else {
+        title = 'waiting to install';
+        icon = (
+          <Checkbox
+            id={`step-${id}`}
+            className="slds-p-around_x-small"
+            assistiveText={{
+              label: title,
+            }}
+            checked
+            disabled
+          />
+        );
+      }
+    } else {
+      title = 'not installed';
+      icon = (
+        <Checkbox
+          id={`step-${id}`}
+          className="slds-p-around_x-small"
+          assistiveText={{
+            label: title,
+          }}
+          checked
+          disabled
+        />
+      );
+    }
+    return (
+      <DataTableCell title={title} {...props}>
+        {icon}
+      </DataTableCell>
+    );
+  }
   const hasValidToken = props.user && props.user.valid_token_for !== null;
   const hasReadyPreflight = preflight && preflight.is_ready;
-  const { id } = item;
   const result = preflight && preflight.results && preflight.results[id];
   let skipped, optional;
   if (result) {
@@ -199,6 +291,14 @@ const InstallDataCell = (props: DataCellProps): React.Node => {
   const recommended = !required && item.is_recommended;
   const disabled =
     Boolean(skipped) || required || !hasValidToken || !hasReadyPreflight;
+  let title = 'optional';
+  if (skipped) {
+    title = skipped.message || 'skipped';
+  } else if (required) {
+    title = 'required';
+  } else if (recommended) {
+    title = 'recommended';
+  }
   let label = '';
   if (skipped && skipped.message) {
     label = skipped.message;
@@ -206,13 +306,16 @@ const InstallDataCell = (props: DataCellProps): React.Node => {
     label = 'recommended';
   }
   return (
-    <DataTableCell {...props}>
+    <DataTableCell title={title} {...props}>
       <Checkbox
         id={`step-${id}`}
         checked={selectedSteps && selectedSteps.has(id)}
         disabled={disabled}
         className="slds-p-vertical_x-small"
         labels={{ label }}
+        assistiveText={{
+          label: title,
+        }}
         onChange={(
           event: SyntheticInputEvent<HTMLInputElement>,
           { checked }: { checked: boolean },
@@ -260,13 +363,15 @@ const StepsTable = ({
   plan,
   preflight,
   selectedSteps,
+  job,
   handleStepsChange,
 }: {
-  user: UserType,
+  user?: UserType,
   plan: PlanType,
-  preflight: ?PreflightType,
-  selectedSteps: SelectedStepsType,
-  handleStepsChange: (string, boolean) => void,
+  preflight?: ?PreflightType,
+  selectedSteps?: SelectedStepsType,
+  job?: JobType,
+  handleStepsChange?: (string, boolean) => void,
 }) => (
   <article className="slds-card slds-scrollable_x">
     <DataTable items={plan.steps} id="plan-steps-table">
@@ -277,7 +382,7 @@ const StepsTable = ({
         <KindDataCell />
       </DataTableColumn>
       <DataTableColumn key="is_required" property="is_required">
-        <RequiredDataCell preflight={preflight} />
+        <RequiredDataCell preflight={preflight} job={job} />
       </DataTableColumn>
       <DataTableColumn
         key="is_recommended"
@@ -289,6 +394,7 @@ const StepsTable = ({
           preflight={preflight}
           selectedSteps={selectedSteps}
           handleStepsChange={handleStepsChange}
+          job={job}
         />
       </DataTableColumn>
     </DataTable>

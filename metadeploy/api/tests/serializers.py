@@ -239,3 +239,10 @@ class TestJob:
         serializer = JobSerializer(data=data, context=dict(request=request))
 
         assert serializer.is_valid()
+
+    def test_no_context(self, job_factory):
+        job = job_factory()
+        serializer = JobSerializer(instance=job)
+
+        assert serializer.data['org_name'] is None
+        assert serializer.data['organization_url'] is None
