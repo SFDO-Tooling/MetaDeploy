@@ -38,7 +38,7 @@ export const shouldFetchVersion = ({
   return false;
 };
 
-export const gatekeeper = ({
+export const getLoadingOrNotFound = ({
   product,
   version,
   versionLabel,

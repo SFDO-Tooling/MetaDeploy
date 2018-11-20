@@ -34,7 +34,8 @@ const reducer = (
       const { id, job } = action.payload;
       return { ...jobs, [id]: job };
     }
-    case 'JOB_STARTED': {
+    case 'JOB_STARTED':
+    case 'JOB_COMPLETED': {
       const job = action.payload;
       return { ...jobs, [job.id]: job };
     }
@@ -55,10 +56,6 @@ const reducer = (
           completed_steps: [...completed_steps, step_id],
         },
       };
-    }
-    case 'JOB_COMPLETED': {
-      const job = action.payload;
-      return { ...jobs, [job.id]: job };
     }
   }
   return jobs;

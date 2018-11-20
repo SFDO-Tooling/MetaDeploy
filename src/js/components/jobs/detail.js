@@ -14,7 +14,7 @@ import {
   selectVersionLabel,
 } from 'components/products/detail';
 import { selectUserState } from 'components/header';
-import { shouldFetchVersion, gatekeeper } from 'products/utils';
+import { shouldFetchVersion, getLoadingOrNotFound } from 'products/utils';
 
 import BodyContainer from 'components/bodyContainer';
 import CtaButton from 'components/jobs/ctaButton';
@@ -36,7 +36,6 @@ import type {
 } from 'products/reducer';
 import type { User as UserType } from 'accounts/reducer';
 
-export type SelectedSteps = Set<string>;
 type Props = {
   ...InitialProps,
   user: UserType,
@@ -78,14 +77,15 @@ class JobDetail extends React.Component<Props> {
 
   componentDidUpdate(prevProps) {
     const { product, version, versionLabel, job, jobId } = this.props;
-    if (
+    const versionChanged =
       product !== prevProps.product ||
       version !== prevProps.version ||
-      versionLabel !== prevProps.versionLabel
-    ) {
+      versionLabel !== prevProps.versionLabel;
+    const jobChanged = job !== prevProps.job || jobId !== prevProps.jobId;
+    if (versionChanged) {
       this.fetchVersionIfMissing();
     }
-    if (job !== prevProps.job || jobId !== prevProps.jobId) {
+    if (jobChanged) {
       this.fetchJobIfMissing();
     }
   }
@@ -100,7 +100,7 @@ class JobDetail extends React.Component<Props> {
       job,
       jobId,
     } = this.props;
-    const blocked = gatekeeper({
+    const loadingOrNotFound = getLoadingOrNotFound({
       product,
       version,
       versionLabel,
@@ -109,8 +109,8 @@ class JobDetail extends React.Component<Props> {
       jobId,
       user,
     });
-    if (blocked !== false) {
-      return blocked;
+    if (loadingOrNotFound !== false) {
+      return loadingOrNotFound;
     }
     // this redundant check is required to satisfy Flow:
     // https://flow.org/en/docs/lang/refinements/#toc-refinement-invalidations

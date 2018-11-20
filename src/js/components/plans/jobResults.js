@@ -112,7 +112,12 @@ const JobResults = ({
       <>
         <p className={failed ? 'slds-text-color_error' : ''}>
           {failed ? <ErrorIcon /> : <WarningIcon />}
-          {!failed && job.is_valid === false
+          {/*
+              Show "expired" message if job is not valid and has no errors.
+              We check `is_valid === false` instead of simply `!is_valid`
+              because jobs do not have `is_valid` property.
+           */}
+          {job.is_valid === false && !failed
             ? `${label} has expired; please run it again.`
             : `${label} found ${msg}.`}
         </p>
@@ -122,7 +127,8 @@ const JobResults = ({
     );
   }
 
-  // Invalid job
+  // We check `is_valid === false` instead of simply `!is_valid` because jobs do
+  // not have `is_valid` property.
   if (job.is_valid === false) {
     return (
       <p>
