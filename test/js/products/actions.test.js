@@ -10,7 +10,7 @@ describe('fetchProducts', () => {
     test('GETs products from api', () => {
       const store = storeWithApi({});
       const product = {
-        id: 1,
+        id: 'p1',
         title: 'Product 1',
         description: 'This is a test product.',
       };
@@ -68,8 +68,8 @@ describe('fetchVersion', () => {
   describe('success', () => {
     test('GETs version from api', () => {
       const store = storeWithApi({});
-      const filters = { product: 1, label: '2' };
-      const version = { id: 2, label: '2' };
+      const filters = { product: 'p1', label: 'v1' };
+      const version = { id: 'v1', label: 'v1' };
       fetchMock.getOnce(addUrlParams(baseUrl, filters), [version]);
       const started = {
         type: 'FETCH_VERSION_STARTED',
@@ -88,7 +88,7 @@ describe('fetchVersion', () => {
 
     test('stores null if no version returned from api', () => {
       const store = storeWithApi({});
-      const filters = { product: 1, label: '2' };
+      const filters = { product: 'p1', label: 'v1' };
       fetchMock.getOnce(addUrlParams(baseUrl, filters), []);
       const started = {
         type: 'FETCH_VERSION_STARTED',
@@ -109,7 +109,7 @@ describe('fetchVersion', () => {
   describe('error', () => {
     test('throws Error', () => {
       const store = storeWithApi({});
-      const filters = { product: 1, label: '2' };
+      const filters = { product: 'p1', label: 'v1' };
       fetchMock.getOnce(addUrlParams(baseUrl, filters), 'string');
 
       expect.assertions(1);
@@ -120,7 +120,7 @@ describe('fetchVersion', () => {
 
     test('dispatches FETCH_VERSION_FAILED action', () => {
       const store = storeWithApi({});
-      const filters = { product: 1, label: '2' };
+      const filters = { product: 'p1', label: 'v1' };
       fetchMock.getOnce(addUrlParams(baseUrl, filters), 500);
       const started = {
         type: 'FETCH_VERSION_STARTED',

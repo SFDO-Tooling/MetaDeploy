@@ -5,7 +5,7 @@ from django.utils import timezone
 
 import pytest
 
-from ..models import PreflightResult
+from ..models import PreflightResult, Job
 from ..jobs import (
     run_flows,
     enqueuer,
@@ -13,23 +13,37 @@ from ..jobs import (
     preflight,
     expire_preflights,
 )
+from ..flows import JobFlow
 
 
 @pytest.mark.django_db
-def test_report_error(mocker, user_factory, plan_factory, step_factory):
+def test_report_error(
+        mocker, job_factory, user_factory, plan_factory, step_factory):
     report_error = mocker.patch('metadeploy.api.jobs.sync_report_error')
     user = user_factory()
     plan = plan_factory()
+    job = job_factory(user=user)
     steps = [step_factory(plan=plan)]
 
-    with pytest.raises(Exception):
-        run_flows(user, plan, steps)
+    run_flows(
+        user=user,
+        plan=plan,
+        skip_tasks=steps,
+        organization_url=job.organization_url,
+        flow_class=JobFlow,
+        flow_name=plan.flow_name,
+        result_class=Job,
+        result_id=job.id,
+    )
 
     assert report_error.called
+    job.refresh_from_db()
+    assert job.status == Job.Status.failed
 
 
 @pytest.mark.django_db
-def test_run_flows(mocker, user_factory, plan_factory, step_factory):
+def test_run_flows(
+        mocker, job_factory, user_factory, plan_factory, step_factory):
     # TODO: I don't like this test at all. But there's a lot of IO that
     # this code causes, so I'm mocking it out.
     mocker.patch('shutil.move')
@@ -43,18 +57,28 @@ def test_run_flows(mocker, user_factory, plan_factory, step_factory):
     mocker.patch('metadeploy.api.jobs.YamlGlobalConfig')
     mocker.patch('metadeploy.api.jobs.cci_configs')
     mocker.patch('metadeploy.api.jobs.BaseProjectKeychain')
-    basic_flow = mocker.patch('metadeploy.api.jobs.BasicFlow')
+    job_flow = mocker.patch('metadeploy.api.jobs.JobFlow')
 
     user = user_factory()
     plan = plan_factory()
     steps = [step_factory(plan=plan)]
+    job = job_factory(user=user)
 
-    run_flows(user, plan, steps)
+    run_flows(
+        user=user,
+        plan=plan,
+        skip_tasks=steps,
+        organization_url=job.organization_url,
+        flow_class=job_flow,
+        flow_name=plan.flow_name,
+        result_class=Job,
+        result_id=job.id,
+    )
 
     # TODO assert? What we really need to assert is a change in the SF
     # org, but that'd be an integration test.
 
-    assert basic_flow.called
+    assert job_flow.called
 
 
 @pytest.mark.django_db
@@ -74,7 +98,8 @@ def test_enqueuer(mocker, job_factory):
 
 
 @pytest.mark.django_db
-def test_malicious_zip_file(mocker, user_factory, plan_factory, step_factory):
+def test_malicious_zip_file(
+        mocker, job_factory, user_factory, plan_factory, step_factory):
     # TODO: I don't like this test at all. But there's a lot of IO that
     # this code causes, so I'm mocking it out.
     mocker.patch('shutil.move')
@@ -93,20 +118,28 @@ def test_malicious_zip_file(mocker, user_factory, plan_factory, step_factory):
     mocker.patch('metadeploy.api.jobs.YamlGlobalConfig')
     mocker.patch('metadeploy.api.jobs.cci_configs')
     mocker.patch('metadeploy.api.jobs.BaseProjectKeychain')
-    basic_flow = mocker.patch('metadeploy.api.jobs.BasicFlow')
-
-    from ..jobs import run_flows
+    job_flow = mocker.patch('metadeploy.api.jobs.JobFlow')
 
     user = user_factory()
     plan = plan_factory()
     steps = [step_factory(plan=plan)]
+    job = job_factory(user=user)
 
-    run_flows(user, plan, steps)
+    run_flows(
+        user=user,
+        plan=plan,
+        skip_tasks=steps,
+        organization_url=job.organization_url,
+        flow_class=job_flow,
+        flow_name=plan.flow_name,
+        result_class=Job,
+        result_id=job.id,
+    )
 
     # TODO assert? What we really need to assert is a change in the SF
     # org, but that'd be an integration test.
 
-    assert not basic_flow.called
+    assert not job_flow.called
 
 
 @pytest.mark.django_db

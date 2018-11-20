@@ -19,15 +19,17 @@ const PlanNotFound = ({
   product: ProductType,
   version: VersionType,
 }) => (
-  <FourOhFour>
-    <p>
-      We can’t find the plan you’re looking for. Try{' '}
-      <Link to={routes.version_detail(product.slug, version.label)}>
-        another plan
-      </Link>{' '}
-      from that product version?
-    </p>
-  </FourOhFour>
+  <FourOhFour
+    message={
+      <>
+        We can’t find the plan you’re looking for. Try{' '}
+        <Link to={routes.version_detail(product.slug, version.label)}>
+          another plan
+        </Link>{' '}
+        from that product version?
+      </>
+    }
+  />
 );
 
 export default PlanNotFound;

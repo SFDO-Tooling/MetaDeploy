@@ -4,22 +4,26 @@ import * as React from 'react';
 import Button from '@salesforce/design-system-react/components/button';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 
+import routes from 'utils/routes';
 import { CONSTANTS } from 'plans/reducer';
 
 import Login from 'components/header/login';
 
+import type { RouterHistory } from 'react-router-dom';
 import type {
   Plan as PlanType,
   Preflight as PreflightType,
 } from 'plans/reducer';
+import type { SelectedSteps as SelectedStepsType } from 'components/plans/detail';
 import type { User as UserType } from 'accounts/reducer';
+import typeof { startJob as StartJobType } from 'jobs/actions';
 import typeof { startPreflight as StartPreflightType } from 'plans/actions';
 
 const { STATUS } = CONSTANTS;
 const btnClasses = 'slds-size_full slds-p-vertical_xx-small';
 
 // For use as a "loading" button label
-const LabelWithSpinner = ({ label }: { label: string }): React.Node => (
+export const LabelWithSpinner = ({ label }: { label: string }): React.Node => (
   <>
     <span className="slds-is-relative slds-m-right_large">
       <Spinner variant="inverse" size="small" />
@@ -36,11 +40,12 @@ const LoginBtn = ({ label }: { label: string }): React.Node => (
     buttonVariant="brand"
     triggerClassName="slds-size_full"
     label={label}
+    nubbinPosition="top"
   />
 );
 
 // Primary CTA button
-const ActionBtn = ({
+export const ActionBtn = ({
   label,
   disabled,
   onClick,
@@ -59,10 +64,15 @@ const ActionBtn = ({
 );
 
 class CtaButton extends React.Component<{
+  history: RouterHistory,
   user: UserType,
+  productSlug: string,
+  versionLabel: string,
   plan: PlanType,
   preflight: ?PreflightType,
+  selectedSteps: SelectedStepsType,
   doStartPreflight: StartPreflightType,
+  doStartJob: StartJobType,
 }> {
   // Returns an action btn if logged in with a valid token;
   // otherwise returns a login dropdown
@@ -77,7 +87,17 @@ class CtaButton extends React.Component<{
   }
 
   render(): React.Node {
-    const { user, plan, preflight, doStartPreflight } = this.props;
+    const {
+      history,
+      user,
+      productSlug,
+      versionLabel,
+      plan,
+      preflight,
+      selectedSteps,
+      doStartPreflight,
+      doStartJob,
+    } = this.props;
     if (!user) {
       // Require login first...
       return <LoginBtn label="Log In to Start Pre-Install Validation" />;
@@ -117,7 +137,22 @@ class CtaButton extends React.Component<{
       case STATUS.COMPLETE: {
         if (preflight.is_ready) {
           // Preflight is done, valid, and has no errors -- allow installation
-          return this.getLoginOrActionBtn('Install');
+          return this.getLoginOrActionBtn('Install', () => {
+            doStartJob({ plan: plan.id, steps: [...selectedSteps] }).then(
+              action => {
+                const { type, payload } = action;
+                if (type === 'JOB_STARTED' && payload && payload.id) {
+                  const url = routes.job_detail(
+                    productSlug,
+                    versionLabel,
+                    plan.slug,
+                    payload.id,
+                  );
+                  history.push(url);
+                }
+              },
+            );
+          });
         }
         // Prior preflight exists, but is no longer valid or has errors
         return this.getLoginOrActionBtn(

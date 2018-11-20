@@ -32,9 +32,10 @@ Copy the ``.env`` file somewhere that will be sourced when you need it::
 
     cp env.example $VIRTUAL_ENV/bin/postactivate
 
-Edit this file to change ``DJANGO_SECRET_KEY`` to any arbitrary string value,
-and to edit the following environment variables (if you're an OddBird, you can
-find these values in the shared Keybase team folder -- ``metadeploy/env``)::
+Edit this file to change ``DJANGO_SECRET_KEY`` and ``DJANGO_HASHID_SALT`` to any
+two different arbitrary string values, and to edit the following environment
+variables (if you're an OddBird, you can find these values in the shared Keybase
+team folder -- ``metadeploy/env``)::
 
     export BUCKETEER_AWS_ACCESS_KEY_ID=...
     export BUCKETEER_AWS_SECRET_ACCESS_KEY=...

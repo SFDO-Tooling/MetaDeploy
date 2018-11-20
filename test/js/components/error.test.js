@@ -29,6 +29,6 @@ describe('<ErrorBoundary />', () => {
     );
 
     expect(queryByText('child')).toBeNull();
-    expect(getByText('Oh No!')).toBeVisible();
+    expect(getByText('¯\\_(ツ)_/¯')).toBeVisible();
   });
 });

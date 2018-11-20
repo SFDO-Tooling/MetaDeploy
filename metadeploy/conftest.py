@@ -186,8 +186,6 @@ def client(user_factory):
     return client
 
 
-# TODO: We will need these eventually, but not yet:
-#
-# @pytest.fixture
-# def anon_client():
-#     return APIClient()
+@pytest.fixture
+def anon_client():
+    return APIClient()

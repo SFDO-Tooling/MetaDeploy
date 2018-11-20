@@ -8,6 +8,7 @@ import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
 import ProductItem from 'components/products/listItem';
+import { EmptyIllustration } from 'components/404';
 
 import type { AppState } from 'app/reducer';
 import type {
@@ -68,12 +69,8 @@ class ProductsList extends React.Component<Props, State> {
     switch (this.props.productsByCategory.size) {
       case 0: {
         // No products; show empty message
-        contents = (
-          <div className="slds-text-longform">
-            <h1 className="slds-text-heading_large">¯\_(ツ)_/¯</h1>
-            <p>We couldn’t find any products.</p>
-          </div>
-        );
+        const msg = 'We couldn’t find any products. Try again later?';
+        contents = <EmptyIllustration message={msg} />;
         break;
       }
       case 1: {

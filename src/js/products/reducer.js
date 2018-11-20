@@ -4,8 +4,8 @@ import type { Plan, Plans } from 'plans/reducer';
 import type { ProductsAction } from 'products/actions';
 
 export type Version = {
-  +id: number,
-  +product: number,
+  +id: string,
+  +product: string,
   +label: string,
   +description: string,
   +created_at: string,
@@ -14,7 +14,7 @@ export type Version = {
   +additional_plans: Plans,
 };
 export type Product = {
-  +id: number,
+  +id: string,
   +slug: string,
   +title: string,
   +description: string,

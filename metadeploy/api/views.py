@@ -1,6 +1,7 @@
+from django.db.models import Q
+
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import (
-    permissions,
     viewsets,
     status,
 )
@@ -26,8 +27,6 @@ from .jobs import preflight_job
 
 class JobViewSet(viewsets.ModelViewSet):
     serializer_class = JobSerializer
-    queryset = Job.objects.all()
-    permission_classes = (permissions.IsAuthenticated,)
     filter_backends = (
         DjangoFilterBackend,
     )
@@ -35,6 +34,15 @@ class JobViewSet(viewsets.ModelViewSet):
         'plan',
         'user',
     )
+
+    def get_queryset(self):
+        if self.request.user.is_staff:
+            return Job.objects.all()
+        if self.request.user.is_anonymous:
+            filters = (Q(is_public=True))
+        else:
+            filters = (Q(is_public=True) | Q(user=self.request.user))
+        return Job.objects.filter(filters)
 
 
 class ProductViewSet(viewsets.ModelViewSet):

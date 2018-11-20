@@ -12,6 +12,8 @@ beforeAll(() => {
     product_list: () => '/api/products/',
     version_list: () => '/api/versions/',
     plan_preflight: id => `/api/plans/${id}/preflight/`,
+    job_list: () => '/api/jobs/',
+    job_detail: id => `/api/jobs/${id}/`,
   };
   window.console.error = jest.fn();
   window.console.warn = jest.fn();
