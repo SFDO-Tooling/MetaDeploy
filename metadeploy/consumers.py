@@ -8,10 +8,9 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
         if self.scope["user"].is_anonymous:
             await self.close()
-            return
-
-        self.groups = set()
-        await self.accept()
+        else:
+            self.groups = set()
+            await self.accept()
 
     async def disconnect(self, close_code):
         for group_name in self.groups:
@@ -54,9 +53,8 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         return model in known_models
 
     @database_sync_to_async
-    async def has_good_permissions(self, content):
+    def has_good_permissions(self, content):
         if content["model"] == "job":
-            # Test job permissions:
-            job = Job.objects.get(pk=content["id"])
-            return job.visible_to(self.scope["user"])
+            job = Job.objects.filter(pk=content["id"]).first()
+            return job and job.visible_to(self.scope["user"])
         return True

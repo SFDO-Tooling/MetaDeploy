@@ -41,3 +41,28 @@ async def test_push_notification_consumer__anonymous():
     communicator.scope["user"] = AnonymousUser()
     connected, subprotocol = await communicator.connect()
     assert not connected
+
+
+@pytest.mark.django_db
+@pytest.mark.asyncio
+async def test_push_notification_consumer__subscribe_job(
+        user_factory, job_factory):
+    user = user_factory()
+    job = job_factory(user=user)
+
+    communicator = WebsocketCommunicator(
+        PushNotificationConsumer,
+        "/ws/notifications/",
+    )
+    communicator.scope["user"] = user
+    connected, subprotocol = await communicator.connect()
+    assert connected
+
+    await communicator.send_json_to({
+        "model": "job",
+        "id": str(job.id),
+    })
+
+    # assert subscribed?
+
+    await communicator.disconnect()

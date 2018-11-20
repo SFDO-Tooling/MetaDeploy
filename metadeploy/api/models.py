@@ -1,5 +1,6 @@
 import itertools
 from datetime import timedelta
+import logging
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -31,6 +32,7 @@ from .constants import ERROR, OPTIONAL
 from .constants import ORGANIZATION_DETAILS
 
 
+logger = logging.getLogger(__name__)
 VERSION_STRING = r'^[a-zA-Z0-9._+-]+$'
 
 
@@ -438,7 +440,7 @@ class Job(HashIdMixin, models.Model):
     is_public = models.BooleanField(default=False)
 
     def visible_to(self, user):
-        return self.is_public or user.is_staff or user == self.useer
+        return self.is_public or user.is_staff or user == self.user
 
     def skip_tasks(self):
         return [
@@ -449,12 +451,15 @@ class Job(HashIdMixin, models.Model):
 
     def save(self, *args, **kwargs):
         ret = super().save(*args, **kwargs)
-        steps_has_changed = self.tracker.has_changed("completed_steps")
-        if steps_has_changed:
-            async_to_sync(notify_post_task)(self)
-        status_has_changed = self.tracker.has_changed("status")
-        if status_has_changed:
-            async_to_sync(notify_post_job)(self)
+        try:
+            steps_has_changed = self.tracker.has_changed("completed_steps")
+            if steps_has_changed:
+                async_to_sync(notify_post_task)(self)
+            status_has_changed = self.tracker.has_changed("status")
+            if status_has_changed:
+                async_to_sync(notify_post_job)(self)
+        except RuntimeError as error:
+            logger.warn(f"RuntimeError: {error}")
         return ret
 
 
