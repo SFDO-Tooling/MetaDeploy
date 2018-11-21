@@ -399,22 +399,9 @@ class Step(HashIdMixin, models.Model):
         return f'Step {self.name} of {self.plan.title} ({self.order_key})'
 
 
-class JobQuerySet(models.QuerySet):
-    def all_completed_step_ids(self, *, user, plan):
-        step_names = itertools.chain(*self.filter(
-            user=user,
-            plan=plan,
-        ).order_by("-created_at").values_list("results", flat=True))
-        return Step.objects.filter(
-            name__in=step_names,
-        ).values_list("id", flat=True)
-
-
 class Job(HashIdMixin, models.Model):
     Status = Choices("started", "complete", "failed")
     tracker = FieldTracker(fields=("results", "status"))
-
-    objects = JobQuerySet.as_manager()
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

@@ -238,14 +238,9 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         Every set in this method is a set of numeric Step PKs, from the
         local database.
         """
-        job_completed_steps = set(Job.objects.all_completed_step_ids(
-            user=user,
-            plan=plan,
-        ))
         required_steps = (
             set(plan.required_step_ids)
             - set(preflight.optional_step_ids)
-            - job_completed_steps
         )
         return not set(required_steps) - set(s.id for s in steps)
 
