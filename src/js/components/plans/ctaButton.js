@@ -8,6 +8,7 @@ import routes from 'utils/routes';
 import { CONSTANTS } from 'plans/reducer';
 
 import Login from 'components/header/login';
+import PreflightWarningModal from 'components/plans/preflightWarningModal';
 
 import type { RouterHistory } from 'react-router-dom';
 import type {
@@ -18,6 +19,18 @@ import type { SelectedSteps as SelectedStepsType } from 'components/plans/detail
 import type { User as UserType } from 'accounts/reducer';
 import typeof { startJob as StartJobType } from 'jobs/actions';
 import typeof { startPreflight as StartPreflightType } from 'plans/actions';
+
+type Props = {
+  history: RouterHistory,
+  user: UserType,
+  productSlug: string,
+  versionLabel: string,
+  plan: PlanType,
+  preflight: ?PreflightType,
+  selectedSteps: SelectedStepsType,
+  doStartPreflight: StartPreflightType,
+  doStartJob: StartJobType,
+};
 
 const { STATUS } = CONSTANTS;
 const btnClasses = 'slds-size_full slds-p-vertical_xx-small';
@@ -63,17 +76,39 @@ export const ActionBtn = ({
   />
 );
 
-class CtaButton extends React.Component<{
-  history: RouterHistory,
-  user: UserType,
-  productSlug: string,
-  versionLabel: string,
-  plan: PlanType,
-  preflight: ?PreflightType,
-  selectedSteps: SelectedStepsType,
-  doStartPreflight: StartPreflightType,
-  doStartJob: StartJobType,
-}> {
+class CtaButton extends React.Component<Props, { modalOpen: boolean }> {
+  constructor(props: Props) {
+    super(props);
+    this.state = { modalOpen: false };
+  }
+
+  toggleModal = (isOpen: boolean) => {
+    this.setState({ modalOpen: isOpen });
+  };
+
+  startJob = () => {
+    const {
+      history,
+      productSlug,
+      versionLabel,
+      plan,
+      selectedSteps,
+      doStartJob,
+    } = this.props;
+    doStartJob({ plan: plan.id, steps: [...selectedSteps] }).then(action => {
+      const { type, payload } = action;
+      if (type === 'JOB_STARTED' && payload && payload.id) {
+        const url = routes.job_detail(
+          productSlug,
+          versionLabel,
+          plan.slug,
+          payload.id,
+        );
+        history.push(url);
+      }
+    });
+  };
+
   // Returns an action btn if logged in with a valid token;
   // otherwise returns a login dropdown
   getLoginOrActionBtn(label: string, onClick?: () => void): React.Node {
@@ -86,18 +121,13 @@ class CtaButton extends React.Component<{
     return <LoginBtn label={`Log In to ${label}`} />;
   }
 
+  getStepNames(): Map<string, string> {
+    const { plan } = this.props;
+    return new Map(plan.steps.map(step => [step.id, step.name]));
+  }
+
   render(): React.Node {
-    const {
-      history,
-      user,
-      productSlug,
-      versionLabel,
-      plan,
-      preflight,
-      selectedSteps,
-      doStartPreflight,
-      doStartJob,
-    } = this.props;
+    const { user, plan, preflight, doStartPreflight } = this.props;
     if (!user) {
       // Require login first...
       return <LoginBtn label="Log In to Start Pre-Install Validation" />;
@@ -137,22 +167,28 @@ class CtaButton extends React.Component<{
       case STATUS.COMPLETE: {
         if (preflight.is_ready) {
           // Preflight is done, valid, and has no errors -- allow installation
-          return this.getLoginOrActionBtn('Install', () => {
-            doStartJob({ plan: plan.id, steps: [...selectedSteps] }).then(
-              action => {
-                const { type, payload } = action;
-                if (type === 'JOB_STARTED' && payload && payload.id) {
-                  const url = routes.job_detail(
-                    productSlug,
-                    versionLabel,
-                    plan.slug,
-                    payload.id,
-                  );
-                  history.push(url);
-                }
-              },
+          const hasWarnings =
+            preflight.warning_count !== undefined &&
+            preflight.warning_count > 0;
+          if (hasWarnings) {
+            // Warnings must be confirmed before proceeding
+            const btn = this.getLoginOrActionBtn('Install', () => {
+              this.toggleModal(true);
+            });
+            return (
+              <>
+                {btn}
+                <PreflightWarningModal
+                  isOpen={this.state.modalOpen}
+                  toggleModal={this.toggleModal}
+                  startJob={this.startJob}
+                  results={preflight.results}
+                  stepNames={this.getStepNames()}
+                />
+              </>
             );
-          });
+          }
+          return this.getLoginOrActionBtn('Install', this.startJob);
         }
         // Prior preflight exists, but is no longer valid or has errors
         return this.getLoginOrActionBtn(

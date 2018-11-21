@@ -38,7 +38,7 @@ describe('<CtaButton />', () => {
       preflight: defaultPreflight,
     };
     const opts = { ...defaults, ...options };
-    const { getByText, container } = render(
+    const { getByText, getByLabelText, container } = render(
       <CtaButton
         history={opts.history}
         user={opts.user}
@@ -51,7 +51,7 @@ describe('<CtaButton />', () => {
         doStartJob={opts.doStartJob}
       />,
     );
-    return { getByText, container };
+    return { getByText, getByLabelText, container };
   };
 
   describe('no user', () => {
@@ -191,6 +191,29 @@ describe('<CtaButton />', () => {
       fireEvent.click(getByText('Re-Run Pre-Install Validation'));
 
       expect(doStartPreflight).toHaveBeenCalledWith('plan-1');
+    });
+  });
+
+  describe('start-install (with warnings) click', () => {
+    test('opens modal', () => {
+      const { getByText, getByLabelText } = setup({
+        preflight: {
+          plan: 'plan-1',
+          status: 'complete',
+          results: {
+            'step-1': [{ status: 'warn', message: 'This is a warning.' }],
+          },
+          is_valid: true,
+          error_count: 0,
+          warning_count: 1,
+          is_ready: true,
+        },
+      });
+      fireEvent.click(getByText('Install'));
+
+      expect(getByText('Please Confirm')).toBeVisible();
+      expect(getByText('This is a warning.')).toBeVisible();
+      expect(getByLabelText('I understand.')).toBeVisible();
     });
   });
 
