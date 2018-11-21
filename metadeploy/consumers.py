@@ -9,24 +9,21 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         if self.scope["user"].is_anonymous:
             await self.close()
         else:
-            self.groups = set()
             await self.accept()
 
-    async def disconnect(self, close_code):
-        for group_name in self.groups:
-            await self.channel_layer.group_discard(
-                group_name,
-                self.channel_name,
-            )
-        self.groups = set()
-
     async def notify(self, event):
+        """
+        Handler for calls like::
+
+            channel_layer.group_send(group_name, {
+                'type': 'notify',  # This routes it to this handler.
+                'content': json_message,
+            })
+        """
         await self.send_json(event['content'])
 
     async def receive_json(self, content, **kwargs):
         # Just used to subscribe to notification channels.
-        # TODO confirm that this user has rights to see events on this
-        # model instance
         all_good = (
             self.is_valid(content)
             and self.is_known_model(content["model"])
@@ -35,7 +32,7 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         if not all_good:
             return
         group_name = f"{content['model']}-{content['id']}"
-        self.groups.add(group_name)
+        self.groups.append(group_name)
         await self.channel_layer.group_add(
             group_name,
             self.channel_name,
