@@ -45,7 +45,7 @@ const ProductDetail = ({ product }: ProductDetailProps) => {
   return <Redirect to={routes.version_detail(product.slug, version.label)} />;
 };
 
-const BodySection = ({ children }: { children: React.Node }) => (
+const BodySection = ({ children }: { children: ?React.Node }) => (
   <div
     className="slds-text-longform
       slds-p-around_medium

@@ -21,7 +21,7 @@ const Header = ({
   product: ProductType,
   version: VersionType,
   plan: PlanType,
-}) => (
+}): React.Node => (
   <PageHeader
     className="page-header
       slds-p-around_x-large"

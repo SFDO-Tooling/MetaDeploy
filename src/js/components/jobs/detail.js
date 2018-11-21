@@ -2,9 +2,6 @@
 
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
-import { Link } from 'react-router-dom';
-
-import routes from 'utils/routes';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
@@ -22,6 +19,7 @@ import { shouldFetchVersion, getLoadingOrNotFound } from 'products/utils';
 import BodyContainer from 'components/bodyContainer';
 import CtaButton from 'components/jobs/ctaButton';
 import Header from 'components/plans/header';
+import Intro from 'components/plans/intro';
 import JobResults from 'components/plans/jobResults';
 import ProductNotFound from 'components/products/product404';
 import ProgressBar from 'components/jobs/progressBar';
@@ -129,47 +127,16 @@ class JobDetail extends React.Component<Props> {
           <Header product={product} version={version} plan={plan} />
           <BodyContainer>
             <Toasts model={job} label="Installation" />
-            <div
-              className="slds-p-around_medium
-                slds-size_1-of-1
-                slds-medium-size_1-of-2"
-            >
-              <div className="slds-text-longform">
-                <h2 className="slds-text-heading_large">{plan.title}</h2>
-                <p className="slds-text-heading_small slds-p-top_large">
-                  This plan is part of <strong>{product.title}</strong>,{' '}
-                  {version.label}
-                </p>
-                <p className="slds-p-bottom_medium">
-                  <Link to={routes.version_detail(product.slug, version.label)}>
-                    View available plans
-                  </Link>
-                </p>
-                <JobResults job={job} label="Installation" />
-              </div>
-              <CtaButton job={job} />
-            </div>
-            <div
-              className="slds-p-around_medium
-                slds-size_1-of-1
-                slds-medium-size_1-of-2"
-            >
-              <UserInfo job={job} />
-            </div>
-            <div
-              className="slds-p-around_medium
-                  slds-size_1-of-1"
-            >
-              <ProgressBar job={job} />
-            </div>
-            {plan.steps.length ? (
-              <div
-                className="slds-p-around_medium
-                  slds-size_1-of-1"
-              >
-                <StepsTable plan={plan} job={job} />
-              </div>
-            ) : null}
+            <Intro
+              product={product}
+              version={version}
+              plan={plan}
+              results={<JobResults job={job} label="Installation" />}
+              cta={<CtaButton job={job} />}
+            />
+            <UserInfo job={job} />
+            <ProgressBar job={job} />
+            {plan.steps.length ? <StepsTable plan={plan} job={job} /> : null}
           </BodyContainer>
         </>
       </DocumentTitle>

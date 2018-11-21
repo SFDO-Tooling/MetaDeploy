@@ -2,9 +2,6 @@
 
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
-import { Link } from 'react-router-dom';
-
-import routes from 'utils/routes';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
@@ -23,6 +20,7 @@ import { startJob } from 'jobs/actions';
 import BodyContainer from 'components/bodyContainer';
 import CtaButton from 'components/plans/ctaButton';
 import Header from 'components/plans/header';
+import Intro from 'components/plans/intro';
 import JobResults from 'components/plans/jobResults';
 import ProductNotFound from 'components/products/product404';
 import StepsTable from 'components/plans/stepsTable';
@@ -193,26 +191,12 @@ class PlanDetail extends React.Component<Props, State> {
             {preflight && user ? (
               <Toasts model={preflight} label="Pre-install validation" />
             ) : null}
-            <div
-              className="slds-p-around_medium
-                slds-size_1-of-1
-                slds-medium-size_1-of-2"
-            >
-              <div className="slds-text-longform">
-                <h2 className="slds-text-heading_large">{plan.title}</h2>
-                {plan.preflight_message ? (
-                  <p>{plan.preflight_message}</p>
-                ) : null}
-                <p className="slds-text-heading_small slds-p-top_large">
-                  This plan is part of <strong>{product.title}</strong>,{' '}
-                  {version.label}
-                </p>
-                <p className="slds-p-bottom_medium">
-                  <Link to={routes.version_detail(product.slug, version.label)}>
-                    View available plans
-                  </Link>
-                </p>
-                {preflight && user ? (
+            <Intro
+              product={product}
+              version={version}
+              plan={plan}
+              results={
+                preflight && user ? (
                   <JobResults
                     job={preflight}
                     label="Pre-install validation"
@@ -221,42 +205,34 @@ class PlanDetail extends React.Component<Props, State> {
                       'run the pre-install validation again.'
                     }
                   />
-                ) : null}
-              </div>
-              {plan.steps.length ? (
-                <CtaButton
-                  history={history}
-                  user={user}
-                  productSlug={product.slug}
-                  versionLabel={version.label}
-                  plan={plan}
-                  preflight={preflight}
-                  selectedSteps={selectedSteps}
-                  doStartPreflight={doStartPreflight}
-                  doStartJob={doStartJob}
-                />
-              ) : null}
-            </div>
-            <div
-              className="slds-p-around_medium
-                slds-size_1-of-1
-                slds-medium-size_1-of-2"
-            >
-              <UserInfo user={user} />
-            </div>
+                ) : null
+              }
+              cta={
+                plan.steps.length ? (
+                  <CtaButton
+                    history={history}
+                    user={user}
+                    productSlug={product.slug}
+                    versionLabel={version.label}
+                    plan={plan}
+                    preflight={preflight}
+                    selectedSteps={selectedSteps}
+                    doStartPreflight={doStartPreflight}
+                    doStartJob={doStartJob}
+                  />
+                ) : null
+              }
+              message={plan.preflight_message}
+            />
+            <UserInfo user={user} />
             {plan.steps.length ? (
-              <div
-                className="slds-p-around_medium
-                  slds-size_1-of-1"
-              >
-                <StepsTable
-                  user={user}
-                  plan={plan}
-                  preflight={preflight}
-                  selectedSteps={selectedSteps}
-                  handleStepsChange={this.handleStepsChange}
-                />
-              </div>
+              <StepsTable
+                user={user}
+                plan={plan}
+                preflight={preflight}
+                selectedSteps={selectedSteps}
+                handleStepsChange={this.handleStepsChange}
+              />
             ) : null}
           </BodyContainer>
         </>
