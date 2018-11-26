@@ -1,6 +1,9 @@
 import itertools
 from datetime import timedelta
 
+import bleach
+from markdown import markdown
+
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import JSONField
@@ -343,6 +346,10 @@ class Plan(HashIdMixin, SlugMixin, models.Model):
     post_install_message = models.CharField(blank=True, max_length=2048)
 
     slug_class = PlanSlug
+
+    @property
+    def post_install_message_markdown(self):
+        return markdown(bleach.clean(self.post_install_message))
 
     @property
     def required_step_ids(self):

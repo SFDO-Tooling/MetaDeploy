@@ -274,6 +274,20 @@ class TestVersionNaturalKey:
 
 
 @pytest.mark.django_db
+def test_plan_post_install_markdown(plan_factory):
+    msg = (
+        "This is a *sample* with some<script src='bad.js'></script> bad tags."
+    )
+    plan = plan_factory(post_install_message=msg)
+    expected = (
+        "<p>This is a <em>sample</em> with some&lt;script src='bad.js'&gt;"
+        "&lt;/script&gt; bad tags.</p>"
+    )
+
+    assert plan.post_install_message_markdown == expected
+
+
+@pytest.mark.django_db
 def test_job_skip_tasks(plan_factory, step_factory, job_factory):
     plan = plan_factory()
     step1 = step_factory(plan=plan, task_name='task1')
