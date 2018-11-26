@@ -211,9 +211,11 @@ describe('<CtaButton />', () => {
       });
       fireEvent.click(getByText('Install'));
 
-      expect(getByText('Please Confirm')).toBeVisible();
+      expect(getByText('Potential Issues')).toBeVisible();
       expect(getByText('This is a warning.')).toBeVisible();
-      expect(getByLabelText('I understand.')).toBeVisible();
+      expect(
+        getByLabelText('I understand these warnings', { exact: false }),
+      ).toBeVisible();
     });
   });
 

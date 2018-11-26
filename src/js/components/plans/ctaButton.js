@@ -121,11 +121,6 @@ class CtaButton extends React.Component<Props, { modalOpen: boolean }> {
     return <LoginBtn label={`Log In to ${label}`} />;
   }
 
-  getStepNames(): Map<string, string> {
-    const { plan } = this.props;
-    return new Map(plan.steps.map(step => [step.id, step.name]));
-  }
-
   render(): React.Node {
     const { user, plan, preflight, doStartPreflight } = this.props;
     if (!user) {
@@ -183,7 +178,7 @@ class CtaButton extends React.Component<Props, { modalOpen: boolean }> {
                   toggleModal={this.toggleModal}
                   startJob={this.startJob}
                   results={preflight.results}
-                  stepNames={this.getStepNames()}
+                  steps={plan.steps}
                 />
               </>
             );
