@@ -347,13 +347,32 @@ class Plan(HashIdMixin, SlugMixin, models.Model):
 
     slug_class = PlanSlug
 
+    markdown_tags = [
+        "h1", "h2", "h3", "h4", "h5", "h6", "b", "i", "strong", "em", "tt",
+        "p", "br", "span", "div", "blockquote", "code", "hr", "ul", "ol", "li",
+        "dd", "dt", "img", "a",
+    ]
+
+    markdown_attrs = {
+        "img": ["src", "alt", "title"],
+        "a": ["href", "alt", "title"],
+    }
+
     @property
     def preflight_message_markdown(self):
-        return markdown(bleach.clean(self.preflight_message))
+        return bleach.clean(
+            markdown(self.preflight_message),
+            tags=self.markdown_tags,
+            attributes=self.markdown_attrs,
+        )
 
     @property
     def post_install_message_markdown(self):
-        return markdown(bleach.clean(self.post_install_message))
+        return bleach.clean(
+            markdown(self.post_install_message),
+            tags=self.markdown_tags,
+            attributes=self.markdown_attrs,
+        )
 
     @property
     def required_step_ids(self):
