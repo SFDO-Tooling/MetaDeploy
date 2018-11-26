@@ -343,9 +343,13 @@ class Plan(HashIdMixin, SlugMixin, models.Model):
         default=Tier.primary,
         max_length=64,
     )
-    post_install_message = models.CharField(blank=True, max_length=2048)
+    post_install_message = models.TextField(blank=True)
 
     slug_class = PlanSlug
+
+    @property
+    def preflight_message_markdown(self):
+        return markdown(bleach.clean(self.preflight_message))
 
     @property
     def post_install_message_markdown(self):

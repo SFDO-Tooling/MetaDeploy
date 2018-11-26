@@ -68,6 +68,9 @@ class PlanSerializer(serializers.ModelSerializer):
         read_only=True,
         pk_field=serializers.CharField(),
     )
+    preflight_message = serializers.CharField(
+        source='preflight_message_markdown',
+    )
 
     class Meta:
         model = Plan
