@@ -163,6 +163,7 @@ class JobSerializer(serializers.ModelSerializer):
             'status',
             'org_name',
             'org_type',
+            'is_public',
         )
         extra_kwargs = {
             'created_at': {'read_only': True},

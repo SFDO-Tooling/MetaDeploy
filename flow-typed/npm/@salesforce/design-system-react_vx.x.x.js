@@ -139,6 +139,18 @@ declare module '@salesforce/design-system-react/components/illustration' {
   declare export default Component;
 }
 
+declare module '@salesforce/design-system-react/components/radio-group' {
+  import typeof { Component } from 'react';
+
+  declare export default Component;
+}
+
+declare module '@salesforce/design-system-react/components/radio-group/radio' {
+  import typeof { Component } from 'react';
+
+  declare export default Component;
+}
+
 declare module '@salesforce/design-system-react/components/settings' {
   declare export default { [string]: Function };
 }
