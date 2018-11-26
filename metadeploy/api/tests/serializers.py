@@ -246,3 +246,27 @@ class TestJob:
 
         assert serializer.data['org_name'] is None
         assert serializer.data['organization_url'] is None
+
+    def test_patch(
+            self, rf, job_factory, plan_factory, user_factory,
+            preflight_result_factory):
+        plan = plan_factory()
+        user = user_factory()
+        request = rf.get('/')
+        request.user = user
+        preflight_result_factory(
+            plan=plan,
+            user=user,
+            status=PreflightResult.Status.complete,
+            results={},
+        )
+        job = job_factory(user=user, plan=plan)
+        serializer = JobSerializer(
+            job,
+            data={'is_public': False},
+            partial=True,
+            context=dict(request=request),
+        )
+
+        assert serializer.is_valid()
+        assert serializer.is_valid(), serializer.errors

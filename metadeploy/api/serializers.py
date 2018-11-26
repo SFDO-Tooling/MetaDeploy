@@ -226,23 +226,35 @@ class JobSerializer(serializers.ModelSerializer):
         return not set(required_steps) - set(s.id for s in steps)
 
     def validate(self, data):
+        user = data.get("user", getattr(self.instance, "user", None))
+        plan = data.get("plan", getattr(self.instance, "plan", None))
+        # The second argument to get here is not fun. A safe navigation
+        # operator would be great, but alas we have none!
+        steps = data.get(
+            "steps",
+            getattr(
+                getattr(self.instance, "steps", None),
+                "all",
+                lambda: [],
+            )(),
+        )
         most_recent_preflight = PreflightResult.objects.most_recent(
-            user=data["user"],
-            plan=data["plan"],
+            user=user,
+            plan=plan,
         )
         if not self._has_valid_preflight(most_recent_preflight):
             raise serializers.ValidationError("No valid preflight.")
         has_valid_steps = self._has_valid_steps(
-            user=data["user"],
-            plan=data["plan"],
-            steps=data["steps"],
+            user=user,
+            plan=plan,
+            steps=steps,
             preflight=most_recent_preflight,
         )
         if not has_valid_steps:
             raise serializers.ValidationError("Invalid steps for plan.")
-        data["org_name"] = data["user"].org_name
-        data["org_type"] = data["user"].org_type
-        data["organization_url"] = data["user"].instance_url
+        data["org_name"] = user.org_name
+        data["org_type"] = user.org_type
+        data["organization_url"] = user.instance_url
         return data
 
 
