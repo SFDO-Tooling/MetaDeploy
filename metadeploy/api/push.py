@@ -92,7 +92,10 @@ async def notify_post_job(job):
     from .serializers import JobSerializer
 
     user = job.user
-    payload = JobSerializer(instance=job, context=user_context(user)).data
+    payload = {
+        'job': JobSerializer(instance=job, context=user_context(user)).data,
+        'message': job.plan.post_install_message,
+    }
     message = {
         'type': 'JOB_COMPLETED',
         'payload': payload,

@@ -340,6 +340,7 @@ class Plan(HashIdMixin, SlugMixin, models.Model):
         default=Tier.primary,
         max_length=64,
     )
+    post_install_message = models.CharField(blank=True, max_length=2048)
 
     slug_class = PlanSlug
 
