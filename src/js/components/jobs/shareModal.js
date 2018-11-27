@@ -8,13 +8,11 @@ import Radio from '@salesforce/design-system-react/components/radio-group/radio'
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 
 import type { Job as JobType } from 'jobs/reducer';
-import type { User as UserType } from 'accounts/reducer';
 import typeof { updateJob as UpdateJobType } from 'jobs/actions';
 
 type Props = {
   isOpen: boolean,
   job: JobType,
-  user: UserType,
   toggleModal: boolean => void,
   updateJob: UpdateJobType,
 };
@@ -73,13 +71,8 @@ class ShareModal extends React.Component<Props, State> {
   };
 
   render(): React.Node {
-    const { job, user } = this.props;
+    const { job } = this.props;
     const { showSuccessMessage } = this.state;
-    const myJob =
-      user &&
-      user.username &&
-      job.creator &&
-      job.creator.username === user.username;
     return (
       <Modal
         isOpen={this.props.isOpen}
@@ -116,11 +109,12 @@ class ShareModal extends React.Component<Props, State> {
                 slds-text-color_success"
             >
               {showSuccessMessage ? 'Copied to clipboard' : ''}
+              {/* Space added to preserve height even when empty. */}
               &nbsp;
             </div>
           </Input>
 
-          {myJob ? (
+          {job.user_can_edit ? (
             <>
               <RadioGroup
                 labels={{ label: 'Who can access this shared link?' }}

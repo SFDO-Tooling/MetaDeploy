@@ -19,6 +19,7 @@ export type Job = {|
   +error_count: number,
   +warning_count: number,
   +is_public: boolean,
+  +user_can_edit: boolean,
 |};
 export type JobsState = {
   [string]: Job,

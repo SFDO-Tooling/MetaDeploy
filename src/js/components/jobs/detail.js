@@ -155,7 +155,6 @@ class JobDetail extends React.Component<Props, { modalOpen: boolean }> {
           <ShareModal
             isOpen={this.state.modalOpen}
             job={job}
-            user={user}
             toggleModal={this.toggleModal}
             updateJob={doUpdateJob}
           />
