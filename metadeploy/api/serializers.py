@@ -146,6 +146,7 @@ class JobSerializer(serializers.ModelSerializer):
 
     # Emitted fields:
     creator = serializers.SerializerMethodField()
+    user_can_edit = serializers.SerializerMethodField()
 
     class Meta:
         model = Job
@@ -164,6 +165,7 @@ class JobSerializer(serializers.ModelSerializer):
             'org_name',
             'org_type',
             'is_public',
+            'user_can_edit',
         )
         extra_kwargs = {
             'created_at': {'read_only': True},
@@ -183,6 +185,12 @@ class JobSerializer(serializers.ModelSerializer):
         try:
             user = self.context['request'].user
             return user.is_staff or user == self.instance.user
+        except (AttributeError, KeyError):
+            return False
+
+    def get_user_can_edit(self, obj):
+        try:
+            return obj.user == self.context['request'].user
         except (AttributeError, KeyError):
             return False
 
