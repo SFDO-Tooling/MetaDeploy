@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from unittest.mock import MagicMock
 import pytz
 from django.utils import timezone
+import vcr
 
 import pytest
 
@@ -42,21 +43,9 @@ def test_report_error(
 
 
 @pytest.mark.django_db
+@vcr.use_cassette()
 def test_run_flows(
         mocker, job_factory, user_factory, plan_factory, step_factory):
-    # TODO: I don't like this test at all. But there's a lot of IO that
-    # this code causes, so I'm mocking it out.
-    mocker.patch('shutil.move')
-    mocker.patch('shutil.rmtree')
-    glob = mocker.patch('metadeploy.api.jobs.glob')
-    glob.return_value = ['test']
-    mocker.patch('github3.login')
-    mocker.patch('zipfile.ZipFile')
-    mocker.patch('metadeploy.api.jobs.OrgConfig')
-    mocker.patch('metadeploy.api.jobs.ServiceConfig')
-    mocker.patch('metadeploy.api.jobs.BaseGlobalConfig')
-    mocker.patch('metadeploy.api.jobs.cci_configs')
-    mocker.patch('metadeploy.api.jobs.BaseProjectKeychain')
     job_flow = mocker.patch('metadeploy.api.jobs.JobFlow')
 
     user = user_factory()
@@ -74,9 +63,6 @@ def test_run_flows(
         result_class=Job,
         result_id=job.id,
     )
-
-    # TODO assert? What we really need to assert is a change in the SF
-    # org, but that'd be an integration test.
 
     assert job_flow.called
 
@@ -135,9 +121,6 @@ def test_malicious_zip_file(
         result_class=Job,
         result_id=job.id,
     )
-
-    # TODO assert? What we really need to assert is a change in the SF
-    # org, but that'd be an integration test.
 
     assert not job_flow.called
 
