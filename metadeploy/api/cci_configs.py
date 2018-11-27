@@ -1,7 +1,7 @@
-from cumulusci.core.config import YamlProjectConfig
+from cumulusci.core.config import BaseProjectConfig
 
 
-class MetadeployProjectConfig(YamlProjectConfig):
+class MetadeployProjectConfig(BaseProjectConfig):
     def __init__(self, *args, repo_root=None, **kwargs):  # pragma: nocover
         self._repo_root = repo_root
         super().__init__(*args, **kwargs)
