@@ -111,37 +111,46 @@ class ShareModal extends React.Component<Props, State> {
             }}
             onFocus={this.handleFocus}
           >
-            <span
+            <div
               className="slds-form-element__help
                 slds-text-color_success"
             >
               {showSuccessMessage ? 'Copied to clipboard' : ''}
               &nbsp;
-            </span>
+            </div>
           </Input>
 
           {myJob ? (
-            <RadioGroup
-              labels={{ label: 'Who can access this shared link?' }}
-              name="is_public"
-              onChange={this.handleChange}
-            >
-              <Radio
-                id="is_public-false"
-                label={
-                  'Only me and Salesforce staff ' +
-                  'can view this installation job.'
-                }
-                value="false"
-                checked={!job.is_public}
-              />
-              <Radio
-                id="is_public-true"
-                label="Anyone with the link can view this installation job."
-                value="true"
-                checked={job.is_public}
-              />
-            </RadioGroup>
+            <>
+              <RadioGroup
+                labels={{ label: 'Who can access this shared link?' }}
+                name="is_public"
+                onChange={this.handleChange}
+              >
+                <Radio
+                  id="is_public-false"
+                  label={
+                    'Only I and Salesforce staff ' +
+                    'can view this installation job.'
+                  }
+                  value="false"
+                  checked={!job.is_public}
+                />
+                <Radio
+                  id="is_public-true"
+                  label="Anyone with the link can view this installation job."
+                  value="true"
+                  checked={job.is_public}
+                />
+              </RadioGroup>
+              <p
+                className="slds-text-body_small
+                  slds-p-top_small"
+              >
+                Access to view the installation job does not provide access to
+                your Salesforce org.
+              </p>
+            </>
           ) : null}
         </div>
       </Modal>
