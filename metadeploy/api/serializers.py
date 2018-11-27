@@ -238,6 +238,9 @@ class JobSerializer(serializers.ModelSerializer):
         plan = data.get("plan", getattr(self.instance, "plan", None))
         # The second argument to get here is not fun. A safe navigation
         # operator would be great, but alas we have none!
+        # If we get PEP 505 (https://www.python.org/dev/peps/pep-0505/)
+        # we could replace this like:
+        #    (self.instance?.steps?.all or lambda: [])()
         steps = data.get(
             "steps",
             getattr(
