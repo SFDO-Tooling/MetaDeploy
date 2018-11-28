@@ -7,56 +7,40 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import Radio from '@salesforce/design-system-react/components/radio-group/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 
+import { withTransientMessage } from 'components/utils';
+
 import type { Job as JobType } from 'jobs/reducer';
+import type { TransientMessageProps } from 'components/utils';
 import typeof { updateJob as UpdateJobType } from 'jobs/actions';
 
-type Props = {
+type Props = {|
   isOpen: boolean,
   job: JobType,
   toggleModal: boolean => void,
   updateJob: UpdateJobType,
-};
-type State = {
-  showSuccessMessage: boolean,
-};
+|};
+type WrappedProps = Props & TransientMessageProps;
 
-class ShareModal extends React.Component<Props, State> {
+class ShareModal extends React.Component<WrappedProps> {
   input: ?HTMLInputElement;
 
-  timeout: ?TimeoutID;
-
-  constructor(props: Props) {
-    super(props);
-    this.state = { showSuccessMessage: false };
-    this.timeout = null;
-  }
-
-  componentWillUnmount() {
-    this.clearTimeout();
-  }
-
-  clearTimeout() {
-    if (this.timeout !== undefined && this.timeout !== null) {
-      clearTimeout(this.timeout);
-      this.timeout = null;
-    }
-  }
-
   handleClose = () => {
-    this.setState({ showSuccessMessage: false });
-    this.clearTimeout();
-    this.props.toggleModal(false);
+    const { toggleModal, hideTransientMessage } = this.props;
+    /* istanbul ignore else */
+    if (hideTransientMessage) {
+      hideTransientMessage();
+    }
+    toggleModal(false);
   };
 
   handleCopy = () => {
+    const { showTransientMessage } = this.props;
     this.handleFocus();
     document.execCommand('copy');
-    this.setState({ showSuccessMessage: true });
-    this.clearTimeout();
-    this.timeout = setTimeout(() => {
-      this.setState({ showSuccessMessage: false });
-      this.clearTimeout();
-    }, 5 * 1000);
+    /* istanbul ignore else */
+    if (showTransientMessage) {
+      showTransientMessage();
+    }
   };
 
   handleFocus = () => {
@@ -76,8 +60,7 @@ class ShareModal extends React.Component<Props, State> {
   };
 
   render(): React.Node {
-    const { job } = this.props;
-    const { showSuccessMessage } = this.state;
+    const { job, transientMessageVisible } = this.props;
     return (
       <Modal
         isOpen={this.props.isOpen}
@@ -110,7 +93,7 @@ class ShareModal extends React.Component<Props, State> {
               className="slds-form-element__help
                 slds-text-color_success"
             >
-              {showSuccessMessage ? 'Copied to clipboard' : ''}
+              {transientMessageVisible ? 'Copied to clipboard' : ''}
               {/* Space added to preserve height even when empty. */}
               &nbsp;
             </div>
@@ -154,4 +137,6 @@ class ShareModal extends React.Component<Props, State> {
   }
 }
 
-export default ShareModal;
+const WrappedShareModal = withTransientMessage(ShareModal);
+
+export default WrappedShareModal;
