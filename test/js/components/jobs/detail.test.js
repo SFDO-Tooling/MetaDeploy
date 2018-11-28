@@ -1,5 +1,6 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { fireEvent } from 'react-testing-library';
 
 import { fetchJob } from 'jobs/actions';
 import { fetchVersion } from 'products/actions';
@@ -260,5 +261,14 @@ describe('<JobDetail />', () => {
     expect(queryByText('test-user')).toBeNull();
     expect(queryByText('Test Org')).toBeNull();
     expect(getByText('Org Type')).toBeVisible();
+  });
+
+  describe('share button click', () => {
+    test('opens modal', () => {
+      const { getByText } = setup();
+      fireEvent.click(getByText('Share'));
+
+      expect(getByText('Share Link to Installation Job')).toBeVisible();
+    });
   });
 });
