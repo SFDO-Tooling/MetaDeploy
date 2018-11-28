@@ -70,6 +70,11 @@ class ShareModal extends React.Component<Props, State> {
     updateJob({ id: job.id, is_public: event.target.value });
   };
 
+  storeInputRef = (input: HTMLInputElement) => {
+    this.input = input;
+    this.handleFocus();
+  };
+
   render(): React.Node {
     const { job } = this.props;
     const { showSuccessMessage } = this.state;
@@ -98,10 +103,7 @@ class ShareModal extends React.Component<Props, State> {
                 style={{ whiteSpace: 'nowrap' }}
               />
             }
-            inputRef={input => {
-              this.input = input;
-              this.handleFocus();
-            }}
+            inputRef={this.storeInputRef}
             onFocus={this.handleFocus}
           >
             <div

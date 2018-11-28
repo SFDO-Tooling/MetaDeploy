@@ -102,6 +102,10 @@ class JobDetail extends React.Component<Props, { modalOpen: boolean }> {
     this.setState({ modalOpen: isOpen });
   };
 
+  openModal = () => {
+    this.toggleModal(true);
+  };
+
   render(): React.Node {
     const {
       user,
@@ -146,9 +150,7 @@ class JobDetail extends React.Component<Props, { modalOpen: boolean }> {
                 iconCategory="utility"
                 iconName="share"
                 iconPosition="left"
-                onClick={() => {
-                  this.toggleModal(true);
-                }}
+                onClick={this.openModal}
               />
             }
           />
