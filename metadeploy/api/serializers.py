@@ -233,22 +233,17 @@ class JobSerializer(serializers.ModelSerializer):
         )
         return not set(required_steps) - set(s.id for s in steps)
 
+    def _get_from_data_or_instance(self, data, name, default=None):
+        value = data.get(name, getattr(self.instance, name, default))
+        # Handle the case where value is a *RelatedManager:
+        if hasattr(value, "all") and callable(value.all):
+            return value.all()
+        return value
+
     def validate(self, data):
-        user = data.get("user", getattr(self.instance, "user", None))
-        plan = data.get("plan", getattr(self.instance, "plan", None))
-        # The second argument to get here is not fun. A safe navigation
-        # operator would be great, but alas we have none!
-        # If we get PEP 505 (https://www.python.org/dev/peps/pep-0505/)
-        # we could replace this like:
-        #    (self.instance?.steps?.all or lambda: [])()
-        steps = data.get(
-            "steps",
-            getattr(
-                getattr(self.instance, "steps", None),
-                "all",
-                lambda: [],
-            )(),
-        )
+        user = self._get_from_data_or_instance(data, "user")
+        plan = self._get_from_data_or_instance(data, "plan")
+        steps = self._get_from_data_or_instance(data, "steps", default=[])
         most_recent_preflight = PreflightResult.objects.most_recent(
             user=user,
             plan=plan,
