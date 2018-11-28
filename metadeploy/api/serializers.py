@@ -253,15 +253,22 @@ class JobSerializer(serializers.ModelSerializer):
             user=user,
             plan=plan,
         )
-        if not self._has_valid_preflight(most_recent_preflight):
-            raise serializers.ValidationError("No valid preflight.")
-        has_valid_steps = self._has_valid_steps(
-            user=user,
-            plan=plan,
-            steps=steps,
-            preflight=most_recent_preflight,
+        no_valid_preflight = (
+            not self.instance
+            and not self._has_valid_preflight(most_recent_preflight)
         )
-        if not has_valid_steps:
+        if no_valid_preflight:
+            raise serializers.ValidationError("No valid preflight.")
+        invalid_steps = (
+            not self.instance
+            and not self._has_valid_steps(
+                user=user,
+                plan=plan,
+                steps=steps,
+                preflight=most_recent_preflight,
+            )
+        )
+        if invalid_steps:
             raise serializers.ValidationError("Invalid steps for plan.")
         data["org_name"] = user.org_name
         data["org_type"] = user.org_type
