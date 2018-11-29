@@ -454,10 +454,16 @@ class Job(HashIdMixin, models.Model):
         try:
             steps_has_changed = self.tracker.has_changed("completed_steps")
             if steps_has_changed:
-                async_to_sync(notify_post_task)(self)
+                # XXX THIS IS WRONG: We don't know which users are
+                # seeing the job at this point, so claiming it's always
+                # the job owner is wrong.
+                async_to_sync(notify_post_task)(self, self.user)
             status_has_changed = self.tracker.has_changed("status")
             if status_has_changed:
-                async_to_sync(notify_post_job)(self)
+                # XXX THIS IS WRONG: We don't know which users are
+                # seeing the job at this point, so claiming it's always
+                # the job owner is wrong.
+                async_to_sync(notify_post_job)(self, self.user)
         except RuntimeError as error:
             logger.warn(f"RuntimeError: {error}")
         return ret

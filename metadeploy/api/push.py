@@ -84,16 +84,13 @@ async def report_error(user):
     await push_message_about_instance(user, message)
 
 
-async def notify_post_task(job):
+async def notify_post_task(job, user):
     from .serializers import JobSerializer
 
     if not job.completed_steps:
         return
 
     step_id = job.completed_steps[-1]
-    # XXX THIS IS WRONG: We don't know which users are seeing the job at
-    # this point, so claiming it's always the job owner is wrong.
-    user = job.user
 
     payload = {
         'step_id': step_id,
@@ -106,12 +103,9 @@ async def notify_post_task(job):
     await push_message_about_instance(job, message)
 
 
-async def notify_post_job(job):
+async def notify_post_job(job, user):
     from .serializers import JobSerializer
 
-    # XXX THIS IS WRONG: We don't know which users are seeing the job at
-    # this point, so claiming it's always the job owner is wrong.
-    user = job.user
     payload = JobSerializer(instance=job, context=user_context(user)).data
     message = {
         'type': 'JOB_COMPLETED',

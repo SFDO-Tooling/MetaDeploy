@@ -1,7 +1,7 @@
-from pytest_factoryboy import register
-from rest_framework.test import APIClient
 import factory
 import pytest
+from pytest_factoryboy import register
+from rest_framework.test import APIClient
 
 from django.contrib.auth import get_user_model
 

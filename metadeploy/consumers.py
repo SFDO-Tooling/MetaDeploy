@@ -1,4 +1,3 @@
-from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
 from metadeploy.api.models import Job
@@ -24,10 +23,13 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
 
     async def receive_json(self, content, **kwargs):
         # Just used to subscribe to notification channels.
+        is_valid = self.is_valid(content)
+        is_known_model = self.is_known_model(content["model"])
+        has_good_permissions = self.has_good_permissions(content)
         all_good = (
-            self.is_valid(content)
-            and self.is_known_model(content["model"])
-            and await self.has_good_permissions(content)
+            is_valid
+            and is_known_model
+            and has_good_permissions
         )
         if not all_good:
             return
@@ -49,9 +51,16 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         }
         return model in known_models
 
-    @database_sync_to_async
     def has_good_permissions(self, content):
         if content["model"] == "job":
-            job = Job.objects.filter(pk=content["id"]).first()
+            # If we use this version, we must make this an async
+            # function.
+            # from channels.db import database_sync_to_async
+            # job = await database_sync_to_async(self.get_job)(content["id"])
+            # Why does database_sync_to_async not work in the tests?
+            job = self.get_job(content["id"])
             return job and job.visible_to(self.scope["user"])
         return True
+
+    def get_job(self, id):
+        return Job.objects.filter(pk=id).first()
