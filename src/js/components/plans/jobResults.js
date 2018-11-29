@@ -23,7 +23,7 @@ const ErrorIcon = (): React.Node => (
   />
 );
 
-const WarningIcon = (): React.Node => (
+export const WarningIcon = (): React.Node => (
   <Icon
     assistiveText={{ label: 'Warning' }}
     category="utility"

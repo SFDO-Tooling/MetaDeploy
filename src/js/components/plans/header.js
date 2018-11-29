@@ -17,10 +17,12 @@ const Header = ({
   product,
   version,
   plan,
+  navRight,
 }: {
   product: ProductType,
   version: VersionType,
   plan: PlanType,
+  navRight?: React.Node,
 }) => (
   <PageHeader
     className="page-header
@@ -34,6 +36,9 @@ const Header = ({
         {product.title}, {version.label}
       </Link>,
     ]}
+    navRight={
+      navRight !== null && navRight !== undefined ? <>{navRight}</> : ''
+    }
     icon={<ProductIcon item={product} />}
     variant="objectHome"
   />

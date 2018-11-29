@@ -21,14 +21,14 @@ export type Plan = {
 };
 export type Plans = Array<Plan>;
 
-export type PreflightError = {
+export type PreflightError = {|
   +status: 'warn' | 'error' | 'skip' | 'optional',
   +message?: string,
-};
-type PreflightErrors = {
+|};
+export type PreflightErrors = {|
   +plan?: Array<PreflightError>,
   [string]: Array<PreflightError>,
-};
+|};
 export type Preflight = {|
   +id: string | null,
   +plan: string,
