@@ -150,6 +150,10 @@ class JobSerializer(serializers.ModelSerializer):
     # Emitted fields:
     creator = serializers.SerializerMethodField()
     user_can_edit = serializers.SerializerMethodField()
+    message = serializers.CharField(
+        source="plan.post_install_message_markdown",
+        read_only=True,
+    )
 
     class Meta:
         model = Job
@@ -169,6 +173,7 @@ class JobSerializer(serializers.ModelSerializer):
             'org_type',
             'is_public',
             'user_can_edit',
+            'message',
         )
         extra_kwargs = {
             'created_at': {'read_only': True},
