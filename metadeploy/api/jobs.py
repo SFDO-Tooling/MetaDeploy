@@ -29,7 +29,7 @@ from cumulusci.core.keychain import BaseProjectKeychain
 from cumulusci.core.config import (
     OrgConfig,
     ServiceConfig,
-    YamlGlobalConfig,
+    BaseGlobalConfig,
 )
 from cumulusci.utils import temporary_dir
 
@@ -188,7 +188,7 @@ def run_flows(
             'refresh_token': token_secret,
         }, current_org)
         proj_config = cci_configs.MetadeployProjectConfig(
-            YamlGlobalConfig(),
+            BaseGlobalConfig(),
             repo_root=tmpdirname,
         )
         proj_keychain = BaseProjectKeychain(proj_config, None)
