@@ -28,6 +28,8 @@ import StepsTable from 'components/plans/stepsTable';
 import Toasts from 'components/plans/toasts';
 import UserInfo from 'components/jobs/userInfo';
 
+import { CONSTANTS } from 'plans/reducer';
+
 import type { AppState } from 'app/reducer';
 import type { InitialProps } from 'components/utils';
 import type { JobsState, Job as JobType } from 'jobs/reducer';
@@ -170,6 +172,12 @@ class JobDetail extends React.Component<Props, { modalOpen: boolean }> {
               <div className="slds-text-longform">
                 <h3 className="slds-text-heading_small">{plan.title}</h3>
                 <JobResults job={job} label="Installation" />
+                {job.status === CONSTANTS.STATUS.COMPLETE &&
+                !job.error_count &&
+                job.message ? (
+                  // These messages are pre-cleaned by the API
+                  <p dangerouslySetInnerHTML={{ __html: job.message }} />
+                ) : null}
               </div>
               <CtaButton job={job} />
             </div>
