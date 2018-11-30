@@ -37,7 +37,7 @@
     "eslint-plugin-react": "^7.11.1",
     "fetch-mock": "^7.2.5",
     "file-loader": "^2.0.0",
-    "flow-bin": "^0.86.0",
+    "flow-bin": "^0.87.0",
     "flow-types": "^1.0.0",
     "html-webpack-plugin": "^3.2.0",
     "husky": "^1.2.0",
@@ -53,10 +53,10 @@
     "optimize-css-assets-webpack-plugin": "^5.0.1",
     "postcss-loader": "^3.0.0",
     "prettier": "^1.15.2",
-    "react-testing-library": "^5.3.0",
+    "react-testing-library": "^5.3.1",
     "redux-mock-store": "^1.5.3",
     "sass-loader": "^7.1.0",
-    "stylelint": "^9.8.0",
+    "stylelint": "^9.9.0",
     "stylelint-config-recommended-scss": "^3.2.0",
     "stylelint-scss": "^3.4.0",
     "url-loader": "^1.1.2",
@@ -78,7 +78,7 @@
     "react-redux": "^5.1.1",
     "react-router-dom": "^4.3.1",
     "redux": "^4.0.1",
-    "redux-devtools-extension": "^2.13.6",
+    "redux-devtools-extension": "^2.13.7",
     "redux-logger": "^3.0.6",
     "redux-persist-middleware": "^1.0.1",
     "redux-thunk": "^2.3.0",
@@ -118,19 +118,22 @@
     }
   },
   "lint-staged": {
-    "*.js": [
-      "prettier --write",
-      "eslint",
-      "git add"
-    ],
-    "*.scss": [
-      "prettier --write",
-      "stylelint",
-      "git add"
-    ],
-    "*.py": [
-      "flake8",
-      "git add"
-    ]
+    "linters": {
+      "*.js": [
+        "prettier --write",
+        "eslint",
+        "git add"
+      ],
+      "*.scss": [
+        "prettier --write",
+        "stylelint",
+        "git add"
+      ],
+      "*.py": [
+        "flake8",
+        "git add"
+      ]
+    },
+    "ignore": ["flow-typed/**/*"]
   }
 }
