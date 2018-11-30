@@ -76,7 +76,10 @@ class PreflightWarningModal extends React.Component<Props, State> {
     this.setState({ confirmed: false });
   };
 
-  handleChange = (checked: boolean) => {
+  handleChange = (
+    event: SyntheticInputEvent<HTMLInputElement>,
+    { checked }: { checked: boolean },
+  ) => {
     this.setState({ confirmed: checked });
   };
 
@@ -128,12 +131,7 @@ class PreflightWarningModal extends React.Component<Props, State> {
                 'I understand these warnings, ' +
                 'and want to continue with installation.',
             }}
-            onChange={(
-              event: SyntheticInputEvent<HTMLInputElement>,
-              { checked }: { checked: boolean },
-            ) => {
-              this.handleChange(checked);
-            }}
+            onChange={this.handleChange}
           />
         </div>
       </Modal>

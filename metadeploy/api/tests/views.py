@@ -46,6 +46,8 @@ class TestJobViewset:
             'status': 'started',
             'org_name': 'Secret Org',
             'org_type': '',
+            'is_public': False,
+            'user_can_edit': False,
         }
 
     def test_job__your_own(self, client, job_factory):
@@ -69,6 +71,8 @@ class TestJobViewset:
             'status': 'started',
             'org_name': 'Secret Org',
             'org_type': '',
+            'is_public': False,
+            'user_can_edit': True,
         }
 
     def test_job__is_public(self, client, job_factory):
@@ -89,6 +93,8 @@ class TestJobViewset:
             'status': 'started',
             'org_name': None,
             'org_type': '',
+            'is_public': True,
+            'user_can_edit': False,
         }
 
     def test_job__is_public_anon(self, anon_client, job_factory):
@@ -110,6 +116,8 @@ class TestJobViewset:
             'status': 'started',
             'org_name': None,
             'org_type': '',
+            'is_public': True,
+            'user_can_edit': False,
         }
 
     def test_create_job(self, client, plan_factory, preflight_result_factory):

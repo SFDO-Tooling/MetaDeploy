@@ -30,6 +30,7 @@ export type JobStepCompleted = {
   payload: JobStepCompletedPayload,
 };
 export type JobCompleted = { type: 'JOB_COMPLETED', payload: Job };
+export type JobUpdated = { type: 'JOB_UPDATED', payload: Job };
 export type JobsAction =
   | FetchJobStarted
   | FetchJobSucceeded
@@ -38,7 +39,8 @@ export type JobsAction =
   | JobStarted
   | JobRejected
   | JobStepCompleted
-  | JobCompleted;
+  | JobCompleted
+  | JobUpdated;
 
 export const fetchJob = (jobId: string): ThunkAction => (
   dispatch,
@@ -91,3 +93,24 @@ export const completeJob = (payload: Job): JobCompleted => ({
   type: 'JOB_COMPLETED',
   payload,
 });
+
+export const updateJob = (payload: {
+  +id: string,
+  [string]: mixed,
+}): ThunkAction => (dispatch, getState, { apiFetch }) => {
+  const { id } = payload;
+  dispatch({ type: 'JOB_UPDATE_REQUESTED', payload });
+  const url = window.api_urls.job_detail(id);
+  return apiFetch(url, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then(response => dispatch({ type: 'JOB_UPDATED', payload: response }))
+    .catch(err => {
+      dispatch({ type: 'JOB_UPDATE_REJECTED', payload });
+      throw err;
+    });
+};
