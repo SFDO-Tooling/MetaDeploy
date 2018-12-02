@@ -1,6 +1,9 @@
 import itertools
 from datetime import timedelta
 
+import bleach
+from markdown import markdown
+
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import JSONField
@@ -340,8 +343,36 @@ class Plan(HashIdMixin, SlugMixin, models.Model):
         default=Tier.primary,
         max_length=64,
     )
+    post_install_message = models.TextField(blank=True)
 
     slug_class = PlanSlug
+
+    markdown_tags = [
+        "h1", "h2", "h3", "h4", "h5", "h6", "b", "i", "strong", "em", "tt",
+        "p", "br", "span", "div", "blockquote", "code", "hr", "ul", "ol", "li",
+        "dd", "dt", "img", "a",
+    ]
+
+    markdown_attrs = {
+        "img": ["src", "alt", "title"],
+        "a": ["href", "alt", "title"],
+    }
+
+    @property
+    def preflight_message_markdown(self):
+        return bleach.clean(
+            markdown(self.preflight_message),
+            tags=self.markdown_tags,
+            attributes=self.markdown_attrs,
+        )
+
+    @property
+    def post_install_message_markdown(self):
+        return bleach.clean(
+            markdown(self.post_install_message),
+            tags=self.markdown_tags,
+            attributes=self.markdown_attrs,
+        )
 
     @property
     def required_step_ids(self):
