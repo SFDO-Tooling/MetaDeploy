@@ -112,7 +112,7 @@ class TestJob:
         }
         serializer = JobSerializer(data=data, context=dict(request=request))
 
-        assert serializer.is_valid()
+        assert serializer.is_valid(), serializer.errors
 
     def test_create_bad_preflight(
             self, rf, user_factory, plan_factory, step_factory,
@@ -138,7 +138,7 @@ class TestJob:
         }
         serializer = JobSerializer(data=data, context=dict(request=request))
 
-        assert not serializer.is_valid()
+        assert not serializer.is_valid(), serializer.errors
 
     def test_create_bad_no_preflight(self, rf, user_factory, plan_factory):
         plan = plan_factory()
@@ -151,7 +151,7 @@ class TestJob:
         }
         serializer = JobSerializer(data=data, context=dict(request=request))
 
-        assert not serializer.is_valid()
+        assert not serializer.is_valid(), serializer.errors
 
     def test_invalid_steps(
             self, rf, plan_factory, user_factory, step_factory,
@@ -175,7 +175,7 @@ class TestJob:
         }
         serializer = JobSerializer(data=data, context=dict(request=request))
 
-        assert not serializer.is_valid()
+        assert not serializer.is_valid(), serializer.errors
 
     def test_invalid_steps_made_valid_by_preflight(
             self, rf, plan_factory, user_factory, step_factory,
@@ -201,7 +201,7 @@ class TestJob:
         }
         serializer = JobSerializer(data=data, context=dict(request=request))
 
-        assert serializer.is_valid()
+        assert serializer.is_valid(), serializer.errors
 
     def test_no_context(self, job_factory):
         job = job_factory()
@@ -209,3 +209,18 @@ class TestJob:
 
         assert serializer.data['org_name'] is None
         assert serializer.data['organization_url'] is None
+
+    def test_patch(self, rf, job_factory, plan_factory, user_factory):
+        plan = plan_factory()
+        user = user_factory()
+        request = rf.get('/')
+        request.user = user
+        job = job_factory(user=user, plan=plan)
+        serializer = JobSerializer(
+            job,
+            data={'is_public': False},
+            partial=True,
+            context=dict(request=request),
+        )
+
+        assert serializer.is_valid(), serializer.errors

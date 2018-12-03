@@ -198,7 +198,10 @@ class PlanDetail extends React.Component<Props, State> {
               <div className="slds-text-longform">
                 <h3 className="slds-text-heading_small">{plan.title}</h3>
                 {plan.preflight_message ? (
-                  <p>{plan.preflight_message}</p>
+                  // These messages are pre-cleaned by the API
+                  <p
+                    dangerouslySetInnerHTML={{ __html: plan.preflight_message }}
+                  />
                 ) : null}
                 {preflight && user ? (
                   <JobResults

@@ -96,7 +96,7 @@ class ProductFactory(factory.django.DjangoModelFactory):
     slds_icon_category = ''
     slds_icon_name = ''
     _ensure_slug = factory.PostGenerationMethodCall('ensure_slug')
-    repo_url = 'https://github.com/some/repo.git'
+    repo_url = 'https://github.com/SFDO-Tooling/CumulusCI-Test'
 
 
 @register
@@ -116,6 +116,7 @@ class VersionFactory(factory.django.DjangoModelFactory):
     product = factory.SubFactory(ProductFactory)
     label = 'v0.1.0'
     description = 'A sample version.'
+    commit_ish = 'feature/preflight'
 
 
 @register
@@ -126,8 +127,8 @@ class PlanFactory(factory.django.DjangoModelFactory):
     title = 'Sample plan'
     version = factory.SubFactory(VersionFactory)
     _ensure_slug = factory.PostGenerationMethodCall('ensure_slug')
-    preflight_flow_name = 'preflight_flow'
-    flow_name = 'main_flow'
+    preflight_flow_name = 'slow_steps_preflight_good'
+    flow_name = 'slow_steps_flow'
 
 
 @register

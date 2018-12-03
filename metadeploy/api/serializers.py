@@ -68,6 +68,9 @@ class PlanSerializer(serializers.ModelSerializer):
         read_only=True,
         pk_field=serializers.CharField(),
     )
+    preflight_message = serializers.CharField(
+        source='preflight_message_markdown',
+    )
 
     class Meta:
         model = Plan
@@ -169,6 +172,11 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
 
     # Emitted fields:
     creator = serializers.SerializerMethodField()
+    user_can_edit = serializers.SerializerMethodField()
+    message = serializers.CharField(
+        source="plan.post_install_message_markdown",
+        read_only=True,
+    )
 
     class Meta:
         model = Job
@@ -188,6 +196,9 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             'org_type',
             'error_count',
             'warning_count',
+            'is_public',
+            'user_can_edit',
+            'message',
         )
         extra_kwargs = {
             'created_at': {'read_only': True},
@@ -207,6 +218,12 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         try:
             user = self.context['request'].user
             return user.is_staff or user == self.instance.user
+        except (AttributeError, KeyError):
+            return False
+
+    def get_user_can_edit(self, obj):
+        try:
+            return obj.user == self.context['request'].user
         except (AttributeError, KeyError):
             return False
 
@@ -244,24 +261,41 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         )
         return not set(required_steps) - set(s.id for s in steps)
 
+    def _get_from_data_or_instance(self, data, name, default=None):
+        value = data.get(name, getattr(self.instance, name, default))
+        # Handle the case where value is a *RelatedManager:
+        if hasattr(value, "all") and callable(value.all):
+            return value.all()
+        return value
+
     def validate(self, data):
+        user = self._get_from_data_or_instance(data, "user")
+        plan = self._get_from_data_or_instance(data, "plan")
+        steps = self._get_from_data_or_instance(data, "steps", default=[])
         most_recent_preflight = PreflightResult.objects.most_recent(
-            user=data["user"],
-            plan=data["plan"],
+            user=user,
+            plan=plan,
         )
-        if not self._has_valid_preflight(most_recent_preflight):
+        no_valid_preflight = (
+            not self.instance
+            and not self._has_valid_preflight(most_recent_preflight)
+        )
+        if no_valid_preflight:
             raise serializers.ValidationError("No valid preflight.")
-        has_valid_steps = self._has_valid_steps(
-            user=data["user"],
-            plan=data["plan"],
-            steps=data["steps"],
-            preflight=most_recent_preflight,
+        invalid_steps = (
+            not self.instance
+            and not self._has_valid_steps(
+                user=user,
+                plan=plan,
+                steps=steps,
+                preflight=most_recent_preflight,
+            )
         )
-        if not has_valid_steps:
+        if invalid_steps:
             raise serializers.ValidationError("Invalid steps for plan.")
-        data["org_name"] = data["user"].org_name
-        data["org_type"] = data["user"].org_type
-        data["organization_url"] = data["user"].instance_url
+        data["org_name"] = user.org_name
+        data["org_type"] = user.org_type
+        data["organization_url"] = user.instance_url
         return data
 
 
