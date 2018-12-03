@@ -130,6 +130,8 @@
         "git add"
       ],
       "*.py": [
+        "isort",
+        "black",
         "flake8",
         "git add"
       ]
