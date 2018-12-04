@@ -223,6 +223,7 @@ class TestPreflight:
             "error_count": 0,
             "warning_count": 0,
             "is_ready": False,
+            "user": client.user.id,
         }
 
     def test_get__bad(self, client, plan_factory):
