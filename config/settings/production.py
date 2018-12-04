@@ -1,14 +1,9 @@
 from .base import *  # NOQA
-from .base import (
-    PROJECT_ROOT,
-    TEMPLATES,
-)
+from .base import PROJECT_ROOT, TEMPLATES
 
-STATICFILES_DIRS = [
-    str(PROJECT_ROOT / 'dist' / 'prod'),
-]
+STATICFILES_DIRS = [str(PROJECT_ROOT / "dist" / "prod")]
 
-TEMPLATES[0]['DIRS'] = [
-    str(PROJECT_ROOT / 'dist' / 'prod'),
-    str(PROJECT_ROOT / 'templates'),
+TEMPLATES[0]["DIRS"] = [
+    str(PROJECT_ROOT / "dist" / "prod"),
+    str(PROJECT_ROOT / "templates"),
 ]

@@ -98,6 +98,8 @@
     "eslint": "eslint '*.js' 'src/js/*.js' 'src/js/**/*.js' 'test/js/*.js' 'test/js/**/*.js'",
     "stylelint": "stylelint 'src/sass/**/*.scss'",
     "flake8": "flake8 manage.py metadeploy/ config/",
+    "isort": "isort -rc manage.py metadeploy/ config/",
+    "black": "black manage.py metadeploy/ config/",
     "lint": "npm-run-all -p prettier flake8 -p eslint stylelint",
     "test": "jest",
     "test:watch": "jest --watch",

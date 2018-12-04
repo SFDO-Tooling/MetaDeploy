@@ -5,22 +5,20 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('api', '0012_product_blank_image'),
-    ]
+    dependencies = [("api", "0012_product_blank_image")]
 
     operations = [
         migrations.AlterField(
-            model_name='preflightresult',
-            name='status',
+            model_name="preflightresult",
+            name="status",
             field=models.CharField(
                 choices=[
-                    ('started', 'started'),
-                    ('complete', 'complete'),
-                    ('failed', 'failed'),
+                    ("started", "started"),
+                    ("complete", "complete"),
+                    ("failed", "failed"),
                 ],
-                default='started',
+                default="started",
                 max_length=64,
             ),
-        ),
+        )
     ]

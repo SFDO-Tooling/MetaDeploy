@@ -2,11 +2,11 @@ import datetime
 import logging
 from types import SimpleNamespace
 
-from ..logfmt import LogfmtFormatter, JobIDFilter
+from ..logfmt import JobIDFilter, LogfmtFormatter
 
 
 def test_job_id_filter(mocker):
-    get_id = mocker.patch('metadeploy.logfmt.get_current_job')
+    get_id = mocker.patch("metadeploy.logfmt.get_current_job")
     get_id.return_value.id = 123
     log_filter = JobIDFilter()
     record = SimpleNamespace()
@@ -15,78 +15,57 @@ def test_job_id_filter(mocker):
 
 
 def test_job_id_filter__no_job(mocker):
-    get_id = mocker.patch('metadeploy.logfmt.get_current_job')
+    get_id = mocker.patch("metadeploy.logfmt.get_current_job")
     get_id.return_value = None
     log_filter = JobIDFilter()
     record = SimpleNamespace()
     log_filter.filter(record)
-    assert record.job_id == 'no-job-id'
+    assert record.job_id == "no-job-id"
 
 
 def test_formatter__record_id():
     record = logging.LogRecord(
-        'name',
-        logging.INFO,
-        '/path/name',
-        1,
-        'Some message',
-        (),
-        None,
+        "name", logging.INFO, "/path/name", 1, "Some message", (), None
     )
     record.request_id = 123
     result = LogfmtFormatter().format(record)
-    assert 'id=123' in result
+    assert "id=123" in result
 
 
 def test_formatter__job_id():
     record = logging.LogRecord(
-        'name',
-        logging.INFO,
-        '/path/name',
-        1,
-        'Some message',
-        (),
-        None,
+        "name", logging.INFO, "/path/name", 1, "Some message", (), None
     )
     record.job_id = 321
     result = LogfmtFormatter().format(record)
-    assert 'id=321' in result
+    assert "id=321" in result
 
 
 def test_formatter_format():
     record = logging.LogRecord(
-        'name',
-        logging.INFO,
-        '/path/name',
-        1,
-        'Some message',
-        (),
-        None,
+        "name", logging.INFO, "/path/name", 1, "Some message", (), None
     )
     time = datetime.datetime.fromtimestamp(record.created).strftime(
-        '%Y-%m-%d %H:%M:%S.%f',
+        "%Y-%m-%d %H:%M:%S.%f"
     )
 
     result = LogfmtFormatter().format(record)
-    expected = ' '.join([
-        f'id=unknown',
-        f'at=INFO',
-        f'time="{time}"',
-        f'msg="Some message"',
-        f'tag=external',
-        f'module=name',
-    ])
+    expected = " ".join(
+        [
+            f"id=unknown",
+            f"at=INFO",
+            f'time="{time}"',
+            f'msg="Some message"',
+            f"tag=external",
+            f"module=name",
+        ]
+    )
 
     assert result == expected
 
 
 def test_formatter_format_line():
-    extra = {
-        'none': None,
-        'bool': True,
-        'number': 1,
-        'dict': {},
-    }
+    extra = {"none": None, "bool": True, "number": 1, "dict": {}}
     result = LogfmtFormatter().format_line(extra)
     expected = 'none= bool=true number=1 dict="{}"'
 
@@ -95,16 +74,10 @@ def test_formatter_format_line():
 
 def test_formatter_tag():
     record = logging.LogRecord(
-        'name',
-        logging.INFO,
-        '/path/name',
-        1,
-        'Some message',
-        (),
-        None,
+        "name", logging.INFO, "/path/name", 1, "Some message", (), None
     )
 
-    record.tag = 'some-tag'
+    record.tag = "some-tag"
 
     result = LogfmtFormatter()._get_tag(record)
     expected = '"some-tag"'
