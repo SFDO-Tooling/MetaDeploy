@@ -1,6 +1,6 @@
-WARN = 'warn'
-ERROR = 'error'
-SKIP = 'skip'
-OPTIONAL = 'optional'
+WARN = "warn"
+ERROR = "error"
+SKIP = "skip"
+OPTIONAL = "optional"
 
-ORGANIZATION_DETAILS = 'organization_details'
+ORGANIZATION_DETAILS = "organization_details"
