@@ -5,14 +5,10 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('api', '0020_job_organization_url'),
-    ]
+    dependencies = [("api", "0020_job_organization_url")]
 
     operations = [
         migrations.RenameField(
-            model_name='job',
-            old_name='completed_steps',
-            new_name='results',
-        ),
+            model_name="job", old_name="completed_steps", new_name="results"
+        )
     ]

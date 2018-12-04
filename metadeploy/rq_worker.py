@@ -1,4 +1,4 @@
-from django.db import connections, DatabaseError, InterfaceError
+from django.db import DatabaseError, InterfaceError, connections
 from rq.worker import Worker
 
 
@@ -11,7 +11,7 @@ class ConnectionClosingWorker(Worker):
                 pass
             except DatabaseError as e:
                 str_exc = str(e)
-                if 'closed' not in str_exc and 'not connected' not in str_exc:
+                if "closed" not in str_exc and "not connected" not in str_exc:
                     raise
 
     def perform_job(self, *args, **kwargs):

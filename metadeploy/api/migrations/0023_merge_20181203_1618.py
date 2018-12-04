@@ -6,9 +6,8 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0022_change_default_on_results'),
-        ('api', '0021_plan_post_install_message'),
+        ("api", "0022_change_default_on_results"),
+        ("api", "0021_plan_post_install_message"),
     ]
 
-    operations = [
-    ]
+    operations = []

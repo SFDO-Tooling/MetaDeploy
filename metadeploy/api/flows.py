@@ -1,9 +1,9 @@
 import logging
+
 import bleach
 from cumulusci.core import flows
 
-from .constants import OK, WARN, ERROR, SKIP, OPTIONAL
-
+from .constants import ERROR, OK, OPTIONAL, SKIP, WARN
 
 logger = logging.getLogger(__name__)
 
@@ -20,9 +20,7 @@ class BasicFlow(flows.BaseFlow):
 
     def _get_step_id(self, task_name):
         try:
-            return str(self.result.plan.step_set.filter(
-                task_name=task_name,
-            ).first().id)
+            return str(self.result.plan.step_set.filter(task_name=task_name).first().id)
         except AttributeError:
             logger.error(f"Unknown task name {task_name} for {self.result}")
             return None
@@ -32,17 +30,14 @@ class JobFlow(BasicFlow):
     def _post_task(self, task):
         step_id = self._get_step_id(task.name)
         if step_id:
-            self.result.results[step_id] = [{'status': OK}]
+            self.result.results[step_id] = [{"status": OK}]
             self.result.save()
         return super()._post_task(task)
 
     def _post_task_exception(self, task, exception):
         step_id = self._get_step_id(task.name)
         if step_id:
-            self.result.results[step_id] = [{
-                'status': ERROR,
-                'msg': str(exception),
-            }]
+            self.result.results[step_id] = [{"status": ERROR, "msg": str(exception)}]
             self.result.save()
         return super()._post_task_exception(task, exception)
 
@@ -72,53 +67,39 @@ class PreflightFlow(BasicFlow):
         self.result.results.update(results)
 
     def _post_task_exception(self, task, e):
-        error_result = {
-            'plan': [{'status': ERROR, 'message': str(e)}],
-        }
+        error_result = {"plan": [{"status": ERROR, "message": str(e)}]}
         self.result.results.update(error_result)
 
     def _emit_k_v_for_status_dict(self, status):
-        if status['status_code'] == OK:
+        if status["status_code"] == OK:
             return None
 
-        if status['status_code'] == ERROR:
-            step_id = self._get_step_id(status['task_name'])
+        if status["status_code"] == ERROR:
+            step_id = self._get_step_id(status["task_name"])
             return (
                 step_id,
-                [{
-                    'status': ERROR,
-                    'message': bleach.clean(status.get('msg', '')),
-                }],
+                [{"status": ERROR, "message": bleach.clean(status.get("msg", ""))}],
             )
 
-        if status['status_code'] == WARN:
-            step_id = self._get_step_id(status['task_name'])
+        if status["status_code"] == WARN:
+            step_id = self._get_step_id(status["task_name"])
             return (
                 step_id,
-                [{
-                    'status': WARN,
-                    'message': bleach.clean(status.get('msg', '')),
-                }],
+                [{"status": WARN, "message": bleach.clean(status.get("msg", ""))}],
             )
 
-        if status['status_code'] == SKIP:
-            step_id = self._get_step_id(status['task_name'])
+        if status["status_code"] == SKIP:
+            step_id = self._get_step_id(status["task_name"])
             return (
                 step_id,
-                [{
-                    'status': SKIP,
-                    'message': bleach.clean(status.get('msg', '')),
-                }],
+                [{"status": SKIP, "message": bleach.clean(status.get("msg", ""))}],
             )
 
-        if status['status_code'] == OPTIONAL:
-            step_id = self._get_step_id(status['task_name'])
+        if status["status_code"] == OPTIONAL:
+            step_id = self._get_step_id(status["task_name"])
             return (
                 step_id,
-                [{
-                    'status': OPTIONAL,
-                    'message': bleach.clean(status.get('msg', '')),
-                }],
+                [{"status": OPTIONAL, "message": bleach.clean(status.get("msg", ""))}],
             )
 
     # def _pre_flow(self, *args, **kwargs):

@@ -6,17 +6,14 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('api', '0012_product_blank_image'),
-    ]
+    dependencies = [("api", "0012_product_blank_image")]
 
     operations = [
         migrations.AddField(
-            model_name='job',
-            name='completed_steps',
+            model_name="job",
+            name="completed_steps",
             field=django.contrib.postgres.fields.jsonb.JSONField(
-                blank=True,
-                default=list,
+                blank=True, default=list
             ),
-        ),
+        )
     ]

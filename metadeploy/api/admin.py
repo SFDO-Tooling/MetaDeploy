@@ -1,18 +1,17 @@
 from django.contrib import admin
 
 from .models import (
-    User,
-    Product,
-    ProductSlug,
-    ProductCategory,
-    Version,
+    Job,
     Plan,
     PlanSlug,
-    Step,
-    Job,
     PreflightResult,
+    Product,
+    ProductCategory,
+    ProductSlug,
+    Step,
+    User,
+    Version,
 )
-
 
 admin.site.register(User)
 admin.site.register(Product)
@@ -28,11 +27,11 @@ admin.site.register(PreflightResult)
 @admin.register(Step)
 class StepAdmin(admin.ModelAdmin):
     list_display = (
-        'name',
-        'plan',
-        'order_key',
-        'is_required',
-        'is_recommended',
-        'kind',
-        'task_name',
+        "name",
+        "plan",
+        "order_key",
+        "is_required",
+        "is_recommended",
+        "kind",
+        "task_name",
     )

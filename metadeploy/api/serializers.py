@@ -1,18 +1,8 @@
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from .models import (
-    Product,
-    Job,
-    Version,
-    Plan,
-    Step,
-    PreflightResult,
-)
-
-from django.contrib.auth import get_user_model
-
-from .constants import WARN, ERROR
-
+from .constants import ERROR, WARN
+from .models import Job, Plan, PreflightResult, Product, Step, Version
 
 User = get_user_model()
 
@@ -26,70 +16,63 @@ class FullUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            'username',
-            'email',
-            'valid_token_for',
-            'org_name',
-            'org_type',
-            'is_staff',
+            "username",
+            "email",
+            "valid_token_for",
+            "org_name",
+            "org_type",
+            "is_staff",
         )
 
 
 class LimitedUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = (
-            'username',
-            'is_staff',
-        )
+        fields = ("username", "is_staff")
 
 
 class StepSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
-    kind = serializers.CharField(source='get_kind_display')
+    kind = serializers.CharField(source="get_kind_display")
 
     class Meta:
         model = Step
         fields = (
-            'id',
-            'name',
-            'description',
-            'is_required',
-            'is_recommended',
-            'kind',
-            'kind_icon',
+            "id",
+            "name",
+            "description",
+            "is_required",
+            "is_recommended",
+            "kind",
+            "kind_icon",
         )
 
 
 class PlanSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
-    steps = StepSerializer(many=True, source='step_set')
+    steps = StepSerializer(many=True, source="step_set")
     version = serializers.PrimaryKeyRelatedField(
-        read_only=True,
-        pk_field=serializers.CharField(),
+        read_only=True, pk_field=serializers.CharField()
     )
-    preflight_message = serializers.CharField(
-        source='preflight_message_markdown',
-    )
+    preflight_message = serializers.CharField(source="preflight_message_markdown")
 
     class Meta:
         model = Plan
         fields = (
-            'id',
-            'title',
-            'version',
-            'preflight_message',
-            'tier',
-            'slug',
-            'steps',
+            "id",
+            "title",
+            "version",
+            "preflight_message",
+            "tier",
+            "slug",
+            "steps",
         )
 
 
 class VersionSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     product = serializers.PrimaryKeyRelatedField(
-        read_only=True,
-        pk_field=serializers.CharField(),
+        read_only=True, pk_field=serializers.CharField()
     )
     primary_plan = PlanSerializer()
     secondary_plan = PlanSerializer()
@@ -98,34 +81,34 @@ class VersionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Version
         fields = (
-            'id',
-            'product',
-            'label',
-            'description',
-            'created_at',
-            'primary_plan',
-            'secondary_plan',
-            'additional_plans',
+            "id",
+            "product",
+            "label",
+            "description",
+            "created_at",
+            "primary_plan",
+            "secondary_plan",
+            "additional_plans",
         )
 
 
 class ProductSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
-    category = serializers.CharField(source='category.title')
+    category = serializers.CharField(source="category.title")
     most_recent_version = VersionSerializer()
 
     class Meta:
         model = Product
         fields = (
-            'id',
-            'title',
-            'description',
-            'category',
-            'color',
-            'icon',
-            'image',
-            'most_recent_version',
-            'slug',
+            "id",
+            "title",
+            "description",
+            "category",
+            "color",
+            "icon",
+            "image",
+            "most_recent_version",
+            "slug",
         )
 
 
@@ -135,7 +118,7 @@ class ErrorWarningCountMixin:
         count = 0
         for val in results.values():
             for status in val:
-                if status['status'] == status_name:
+                if status["status"] == status_name:
                     count += 1
         return count
 
@@ -152,20 +135,15 @@ class ErrorWarningCountMixin:
 
 class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
-    user = serializers.HiddenField(
-        default=serializers.CurrentUserDefault(),
-    )
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     org_name = serializers.SerializerMethodField()
     organization_url = serializers.SerializerMethodField()
 
     plan = serializers.PrimaryKeyRelatedField(
-        queryset=Plan.objects.all(),
-        pk_field=serializers.CharField(),
+        queryset=Plan.objects.all(), pk_field=serializers.CharField()
     )
     steps = serializers.PrimaryKeyRelatedField(
-        queryset=Step.objects.all(),
-        many=True,
-        pk_field=serializers.CharField(),
+        queryset=Step.objects.all(), many=True, pk_field=serializers.CharField()
     )
     error_count = serializers.SerializerMethodField()
     warning_count = serializers.SerializerMethodField()
@@ -174,39 +152,38 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
     creator = serializers.SerializerMethodField()
     user_can_edit = serializers.SerializerMethodField()
     message = serializers.CharField(
-        source="plan.post_install_message_markdown",
-        read_only=True,
+        source="plan.post_install_message_markdown", read_only=True
     )
 
     class Meta:
         model = Job
         fields = (
-            'id',
-            'user',
-            'creator',
-            'plan',
-            'steps',
-            'organization_url',
-            'results',
-            'created_at',
-            'enqueued_at',
-            'job_id',
-            'status',
-            'org_name',
-            'org_type',
-            'error_count',
-            'warning_count',
-            'is_public',
-            'user_can_edit',
-            'message',
+            "id",
+            "user",
+            "creator",
+            "plan",
+            "steps",
+            "organization_url",
+            "results",
+            "created_at",
+            "enqueued_at",
+            "job_id",
+            "status",
+            "org_name",
+            "org_type",
+            "error_count",
+            "warning_count",
+            "is_public",
+            "user_can_edit",
+            "message",
         )
         extra_kwargs = {
-            'created_at': {'read_only': True},
-            'enqueued_at': {'read_only': True},
-            'results': {'read_only': True},
-            'job_id': {'read_only': True},
-            'status': {'read_only': True},
-            'org_type': {'read_only': True},
+            "created_at": {"read_only": True},
+            "enqueued_at": {"read_only": True},
+            "results": {"read_only": True},
+            "job_id": {"read_only": True},
+            "status": {"read_only": True},
+            "org_type": {"read_only": True},
         }
 
     def requesting_user_has_rights(self):
@@ -216,14 +193,14 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         The user is derived from the serializer context.
         """
         try:
-            user = self.context['request'].user
+            user = self.context["request"].user
             return user.is_staff or user == self.instance.user
         except (AttributeError, KeyError):
             return False
 
     def get_user_can_edit(self, obj):
         try:
-            return obj.user == self.context['request'].user
+            return obj.user == self.context["request"].user
         except (AttributeError, KeyError):
             return False
 
@@ -255,10 +232,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         Every set in this method is a set of numeric Step PKs, from the
         local database.
         """
-        required_steps = (
-            set(plan.required_step_ids)
-            - set(preflight.optional_step_ids)
-        )
+        required_steps = set(plan.required_step_ids) - set(preflight.optional_step_ids)
         return not set(required_steps) - set(s.id for s in steps)
 
     def _get_from_data_or_instance(self, data, name, default=None):
@@ -273,23 +247,15 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         plan = self._get_from_data_or_instance(data, "plan")
         steps = self._get_from_data_or_instance(data, "steps", default=[])
         most_recent_preflight = PreflightResult.objects.most_recent(
-            user=user,
-            plan=plan,
+            user=user, plan=plan
         )
-        no_valid_preflight = (
-            not self.instance
-            and not self._has_valid_preflight(most_recent_preflight)
+        no_valid_preflight = not self.instance and not self._has_valid_preflight(
+            most_recent_preflight
         )
         if no_valid_preflight:
             raise serializers.ValidationError("No valid preflight.")
-        invalid_steps = (
-            not self.instance
-            and not self._has_valid_steps(
-                user=user,
-                plan=plan,
-                steps=steps,
-                preflight=most_recent_preflight,
-            )
+        invalid_steps = not self.instance and not self._has_valid_steps(
+            user=user, plan=plan, steps=steps, preflight=most_recent_preflight
         )
         if invalid_steps:
             raise serializers.ValidationError("Invalid steps for plan.")
@@ -299,11 +265,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         return data
 
 
-class PreflightResultSerializer(
-        ErrorWarningCountMixin, serializers.ModelSerializer):
-    user = serializers.HiddenField(
-        default=serializers.CurrentUserDefault(),
-    )
+class PreflightResultSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
     plan = IdOnlyField(read_only=True)
     is_ready = serializers.SerializerMethodField()
     error_count = serializers.SerializerMethodField()
@@ -319,21 +281,21 @@ class PreflightResultSerializer(
     class Meta:
         model = PreflightResult
         fields = (
-            'organization_url',
-            'user',
-            'plan',
-            'created_at',
-            'is_valid',
-            'status',
-            'results',
-            'error_count',
-            'warning_count',
-            'is_ready',
+            "organization_url",
+            "user",
+            "plan",
+            "created_at",
+            "is_valid",
+            "status",
+            "results",
+            "error_count",
+            "warning_count",
+            "is_ready",
         )
         extra_kwargs = {
-            'organization_url': {'read_only': True},
-            'created_at': {'read_only': True},
-            'is_valid': {'read_only': True},
-            'status': {'read_only': True},
-            'results': {'read_only': True},
+            "organization_url": {"read_only": True},
+            "created_at": {"read_only": True},
+            "is_valid": {"read_only": True},
+            "status": {"read_only": True},
+            "results": {"read_only": True},
         }
