@@ -95,7 +95,7 @@ class VersionSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     category = serializers.CharField(source="category.title")
-    most_recent_version = VersionSerializer()
+    most_recent_version = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -110,6 +110,12 @@ class ProductSerializer(serializers.ModelSerializer):
             "most_recent_version",
             "slug",
         )
+
+    def get_most_recent_version(self, obj):
+        version = obj.most_recent_version(self.context["request"].user)
+        if version:
+            return VersionSerializer(version, context=self.context).data
+        return None
 
 
 class JobSerializer(serializers.ModelSerializer):

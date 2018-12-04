@@ -7,11 +7,11 @@ from asgiref.sync import async_to_sync
 from colorfield.fields import ColorField
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
-from django.contrib.postgres.fields import JSONField
+from django.contrib.postgres.fields import ArrayField, JSONField
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
@@ -39,6 +39,13 @@ class HashIdMixin(models.Model):
     id = HashidAutoField(primary_key=True)
 
 
+class PrivateMixin(models.Model):
+    class Meta:
+        abstract = True
+
+    visible_to = ArrayField(models.CharField(max_length=1024), default=list, blank=True)
+
+
 class UserQuerySet(models.QuerySet):
     def with_expired_tokens(self):
         token_lifetime_ago = timezone.now() - timedelta(
@@ -50,27 +57,30 @@ class UserQuerySet(models.QuerySet):
 class User(AbstractUser):
     objects = UserQuerySet.as_manager()
 
+    def _get_org_property(self, key):
+        try:
+            return self.social_account.extra_data[ORGANIZATION_DETAILS][key]
+        except (AttributeError, KeyError):
+            return None
+
+    @property
+    def org_id(self):
+        return self._get_org_property("Id")
+
     @property
     def org_name(self):
-        if self.social_account:
-            return self.social_account.extra_data.get(ORGANIZATION_DETAILS, {}).get(
-                "Name"
-            )
-        return None
+        return self._get_org_property("Name")
 
     @property
     def org_type(self):
-        if self.social_account:
-            return self.social_account.extra_data.get(ORGANIZATION_DETAILS, {}).get(
-                "OrganizationType"
-            )
-        return None
+        return self._get_org_property("OrganizationType")
 
     @property
     def instance_url(self):
-        if self.social_account:
-            return self.social_account.extra_data.get("instance_url", None)
-        return None
+        try:
+            return self.social_account.extra_data["instance_url"]
+        except (AttributeError, KeyError):
+            return None
 
     @property
     def token(self):
@@ -172,7 +182,7 @@ class ProductQuerySet(models.QuerySet):
         )
 
 
-class Product(HashIdMixin, SlugMixin, models.Model):
+class Product(HashIdMixin, SlugMixin, PrivateMixin, models.Model):
     SLDS_ICON_CHOICES = (
         ("", ""),
         ("action", "action"),
@@ -208,9 +218,8 @@ class Product(HashIdMixin, SlugMixin, models.Model):
     def __str__(self):
         return self.title
 
-    @property
-    def most_recent_version(self):
-        return self.version_set.order_by("-created_at").first()
+    def most_recent_version(self, user):
+        return self.version_set.order_by("-created_at").visible_to(user).first()
 
     @property
     def icon(self):
@@ -225,13 +234,16 @@ class Product(HashIdMixin, SlugMixin, models.Model):
         return None
 
 
-class VersionManager(models.Manager):
+class VersionQuerySet(models.QuerySet):
     def get_by_natural_key(self, *, product, label):
         return self.get(product=product, label=label)
 
+    def visible_to(self, user):
+        return self.filter(Q(visible_to=[]) | Q(visible_to__contains=[user.org_id]))
 
-class Version(HashIdMixin, models.Model):
-    objects = VersionManager()
+
+class Version(HashIdMixin, PrivateMixin, models.Model):
+    objects = VersionQuerySet.as_manager()
 
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
     label = models.CharField(
@@ -304,7 +316,7 @@ class PlanSlug(models.Model):
         return self.slug
 
 
-class Plan(HashIdMixin, SlugMixin, models.Model):
+class Plan(HashIdMixin, SlugMixin, PrivateMixin, models.Model):
     Tier = Choices("primary", "secondary", "additional")
 
     title = models.CharField(max_length=128)

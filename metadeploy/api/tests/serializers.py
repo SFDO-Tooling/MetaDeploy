@@ -1,7 +1,24 @@
 import pytest
 
 from ..models import PreflightResult
-from ..serializers import JobSerializer, PreflightResultSerializer
+from ..serializers import JobSerializer, PreflightResultSerializer, ProductSerializer
+
+
+@pytest.mark.django_db
+class TestProductSerializer:
+    def test_no_most_recent_version(
+        self, rf, user_factory, product_factory, version_factory
+    ):
+        user = user_factory()
+        product = product_factory()
+        version_factory(label="v0.1.0", product=product, visible_to=["other org"])
+
+        request = rf.get("/")
+        request.user = user
+        context = {"request": request}
+
+        serializer = ProductSerializer(product, context=context)
+        assert serializer.data["most_recent_version"] is None
 
 
 @pytest.mark.django_db

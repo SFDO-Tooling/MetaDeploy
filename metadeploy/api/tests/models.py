@@ -148,12 +148,24 @@ class TestProductSlug:
 
 
 @pytest.mark.django_db
-def test_product_most_recent_version(product_factory, version_factory):
+def test_product_most_recent_version(user_factory, product_factory, version_factory):
+    user = user_factory()
     product = product_factory()
     version_factory(label="v0.1.0", product=product)
     v2 = version_factory(label="v0.2.0", product=product)
 
-    assert product.most_recent_version == v2
+    assert product.most_recent_version(user) == v2
+
+
+@pytest.mark.django_db
+def test_product_most_recent_version__none(
+    user_factory, product_factory, version_factory
+):
+    user = user_factory()
+    product = product_factory()
+    version_factory(label="v0.1.0", product=product, visible_to=["other org"])
+
+    assert product.most_recent_version(user) is None
 
 
 @pytest.mark.django_db
