@@ -5,9 +5,17 @@ import pytest
 import pytz
 import vcr
 from django.utils import timezone
+from rq.worker import StopRequested
 
 from ..flows import JobFlow
-from ..jobs import enqueuer, expire_preflights, expire_user_tokens, preflight, run_flows
+from ..jobs import (
+    enqueuer,
+    expire_preflights,
+    expire_user_tokens,
+    mark_canceled,
+    preflight,
+    run_flows,
+)
 from ..models import Job, PreflightResult
 
 
@@ -198,3 +206,21 @@ def test_expire_preflights(user_factory, plan_factory, preflight_result_factory)
     assert not preflight1.is_valid
     assert preflight2.is_valid
     assert preflight3.is_valid
+
+
+@pytest.mark.django_db
+def test_mark_canceled(job_factory):
+    """
+    Why do we raise and then catch a StopRequested you might ask? Well, because it's
+    what RQ will internally raise on a SIGTERM, so we're essentially faking the "I got a
+    SIGTERM" behavior here. We catch it because we don't want it to actually propagate
+    and kill the tests. But we do want the context manager's except block to be
+    triggered, so we can test its behavior.
+    """
+    job = job_factory()
+    try:
+        with mark_canceled(job):
+            raise StopRequested()
+    except StopRequested:
+        pass
+    assert job.status == job.Status.canceled
