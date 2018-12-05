@@ -425,7 +425,7 @@ class JobQuerySet(models.QuerySet):
 
 
 class Job(HashIdMixin, models.Model):
-    Status = Choices("started", "complete", "failed")
+    Status = Choices("started", "complete", "failed", "canceled")
     tracker = FieldTracker(fields=("completed_steps", "status"))
 
     objects = JobQuerySet.as_manager()
@@ -470,7 +470,7 @@ class PreflightResultQuerySet(models.QuerySet):
 
 
 class PreflightResult(models.Model):
-    Status = Choices("started", "complete", "failed")
+    Status = Choices("started", "complete", "failed", "canceled")
 
     tracker = FieldTracker(fields=("status", "is_valid"))
 

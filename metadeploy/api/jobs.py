@@ -31,6 +31,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django_rq import job
+from rq.worker import StopRequested
 
 from . import cci_configs
 from .flows import JobFlow, PreflightFlow
@@ -83,6 +84,16 @@ def prepend_python_path(path):
         sys.path = prev_path
 
 
+@contextlib.contextmanager
+def mark_canceled(result):
+    try:
+        yield
+    except StopRequested:
+        result.status = result.Status.canceled
+        result.save()
+        raise
+
+
 def is_safe_path(path):
     return not os.path.isabs(path) and ".." not in path.split(os.path.sep)
 
@@ -132,6 +143,7 @@ def run_flows(
 
     with contextlib.ExitStack() as stack:
         stack.enter_context(finalize_result(result))
+        stack.enter_context(mark_canceled(result))
         stack.enter_context(report_errors_to(user))
         tmpdirname = stack.enter_context(temporary_dir())
 
