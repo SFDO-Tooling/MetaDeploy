@@ -11,7 +11,7 @@ from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
@@ -44,7 +44,10 @@ class UserQuerySet(models.QuerySet):
         token_lifetime_ago = timezone.now() - timedelta(
             minutes=settings.TOKEN_LIFETIME_MINUTES
         )
-        return self.filter(socialaccount__last_login__lte=token_lifetime_ago)
+        return self.filter(socialaccount__last_login__lte=token_lifetime_ago).exclude(
+            Q(job__status=Job.Status.started)
+            | Q(preflightresult__status=PreflightResult.Status.started)
+        )
 
 
 class User(AbstractUser):
