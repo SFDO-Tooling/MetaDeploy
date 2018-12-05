@@ -86,6 +86,12 @@ def prepend_python_path(path):
 
 @contextlib.contextmanager
 def mark_canceled(result):
+    """
+    When an RQ worker gets a SIGTERM, it will initiate a warm shutdown, trying to wrap
+    up existing tasks and then raising a StopRequested exception. So we want to mark any
+    job that's not done by then as canceled by catching that exception as it propagates
+    back up.
+    """
     try:
         yield
     except StopRequested:

@@ -210,6 +210,13 @@ def test_expire_preflights(user_factory, plan_factory, preflight_result_factory)
 
 @pytest.mark.django_db
 def test_mark_canceled(job_factory):
+    """
+    Why do we raise and then catch a StopRequested you might ask? Well, because it's
+    what RQ will internally raise on a SIGTERM, so we're essentially faking the "I got a
+    SIGTERM" behavior here. We catch it because we don't want it to actually propagate
+    and kill the tests. But we do want the context manager's except block to be
+    triggered, so we can test its behavior.
+    """
     job = job_factory()
     try:
         with mark_canceled(job):
