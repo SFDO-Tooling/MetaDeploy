@@ -83,9 +83,11 @@ jobs:
           command: |
             . venv/bin/activate
             yarn lint
-      - store_artifacts:
-          path: /tmp/flow
-          destination: flow-logs
+            # @@@ We'd like to run `flow` here, but:
+            # https://github.com/flowtype/flow-bin/issues/138
+    #   - store_artifacts:
+    #       path: /tmp/flow
+    #       destination: flow-logs
 
   test-client:
     working_directory: ~/metadeploy
