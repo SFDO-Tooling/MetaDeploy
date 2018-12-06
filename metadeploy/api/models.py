@@ -7,6 +7,7 @@ from asgiref.sync import async_to_sync
 from colorfield.fields import ColorField
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import UserManager as DjangoUserManager
 from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
@@ -48,7 +49,7 @@ class UserQuerySet(models.QuerySet):
 
 
 class User(AbstractUser):
-    objects = UserQuerySet.as_manager()
+    objects = DjangoUserManager.from_queryset(UserQuerySet)()
 
     @property
     def org_name(self):
@@ -431,7 +432,7 @@ class JobQuerySet(models.QuerySet):
 
 
 class Job(HashIdMixin, models.Model):
-    Status = Choices("started", "complete", "failed")
+    Status = Choices("started", "complete", "failed", "canceled")
     tracker = FieldTracker(fields=("completed_steps", "status"))
 
     objects = JobQuerySet.as_manager()
@@ -476,7 +477,7 @@ class PreflightResultQuerySet(models.QuerySet):
 
 
 class PreflightResult(models.Model):
-    Status = Choices("started", "complete", "failed")
+    Status = Choices("started", "complete", "failed", "canceled")
 
     tracker = FieldTracker(fields=("status", "is_valid"))
 
