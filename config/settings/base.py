@@ -119,6 +119,7 @@ INSTALLED_APPS = [
     "metadeploy",
     "metadeploy.multisalesforce",
     "metadeploy.api",
+    "metadeploy.adminapi.apps.AdminapiConfig",
     "django_js_reverse",
 ]
 
