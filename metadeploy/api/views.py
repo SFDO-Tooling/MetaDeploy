@@ -32,31 +32,19 @@ class JobViewSet(viewsets.ModelViewSet):
 
 class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
-
-    def get_queryset(self):
-        return Product.objects.filter(
-            Q(visible_to__isnull=True)
-            | Q(visible_to__organization_ids__contains=[self.request.user.org_id])
-        ).published()
+    queryset = Product.objects.published()
 
 
 class VersionViewSet(viewsets.ModelViewSet):
     serializer_class = VersionSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ("product", "label")
-
-    def get_queryset(self):
-        return Version.objects.all()
+    queryset = Version.objects.all()
 
 
 class PlanViewSet(viewsets.ModelViewSet):
     serializer_class = PlanSerializer
-
-    def get_queryset(self):
-        return Plan.objects.filter(
-            Q(visible_to__isnull=True)
-            | Q(visible_to__organization_ids__contains=[self.request.user.org_id])
-        )
+    queryset = Plan.objects.all()
 
     def preflight_get(self, request):
         plan = self.get_object()

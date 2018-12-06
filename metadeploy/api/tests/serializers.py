@@ -249,3 +249,55 @@ class TestJob:
         )
 
         assert serializer.is_valid(), serializer.errors
+
+    def test_disallowed_plan(
+        self,
+        rf,
+        user_factory,
+        plan_factory,
+        allowed_list_factory,
+        preflight_result_factory,
+    ):
+        user = user_factory()
+        request = rf.get("/")
+        request.user = user
+        allowed_list = allowed_list_factory(organization_ids=[])
+        plan = plan_factory(visible_to=allowed_list)
+        preflight_result_factory(
+            plan=plan, user=user, status=PreflightResult.Status.complete, results={}
+        )
+        preflight_result_factory(
+            plan=plan, user=user, status=PreflightResult.Status.complete, results={}
+        )
+        data = {"plan": str(plan.id), "steps": []}
+
+        serializer = JobSerializer(data=data, context=dict(request=request))
+
+        assert not serializer.is_valid()
+
+    def test_disallowed_product(
+        self,
+        rf,
+        user_factory,
+        product_factory,
+        plan_factory,
+        allowed_list_factory,
+        preflight_result_factory,
+    ):
+        user = user_factory()
+        request = rf.get("/")
+        request.user = user
+        allowed_list = allowed_list_factory(organization_ids=[])
+        product = product_factory(visible_to=allowed_list)
+        plan = plan_factory(version__product=product)
+        preflight_result_factory(
+            plan=plan, user=user, status=PreflightResult.Status.complete, results={}
+        )
+        preflight_result_factory(
+            plan=plan, user=user, status=PreflightResult.Status.complete, results={}
+        )
+        data = {"plan": str(plan.id), "steps": []}
+
+        serializer = JobSerializer(data=data, context=dict(request=request))
+
+        assert not serializer.is_valid()

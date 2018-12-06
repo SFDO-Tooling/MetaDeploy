@@ -41,6 +41,8 @@ class HashIdMixin(models.Model):
 
 
 class AllowedList(models.Model):
+    title = models.CharField(max_length=128, unique=True)
+    description = models.TextField(blank=True)
     organization_ids = ArrayField(
         models.CharField(max_length=1024), default=list, blank=True
     )
@@ -51,6 +53,9 @@ class PrivateMixin(models.Model):
         abstract = True
 
     visible_to = models.ForeignKey(AllowedList, on_delete=models.SET_NULL, null=True)
+
+    def is_visible_to(self, user):
+        return not self.visible_to or user.org_id in self.visible_to.organization_ids
 
 
 class UserQuerySet(models.QuerySet):

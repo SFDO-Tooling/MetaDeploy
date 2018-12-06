@@ -21,6 +21,8 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
+                ("title", models.CharField(max_length=128, unique=True)),
+                ("description", models.TextField(blank=True)),
                 (
                     "organization_ids",
                     django.contrib.postgres.fields.ArrayField(

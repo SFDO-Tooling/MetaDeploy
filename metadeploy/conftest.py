@@ -75,7 +75,8 @@ class AllowedListFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = AllowedList
 
-    visible_to = []
+    title = factory.Sequence("Allowed List {}".format)
+    organization_ids = []
 
 
 @register
@@ -132,6 +133,7 @@ class PlanFactory(factory.django.DjangoModelFactory):
     _ensure_slug = factory.PostGenerationMethodCall("ensure_slug")
     preflight_flow_name = "slow_steps_preflight_good"
     flow_name = "slow_steps_flow"
+    visible_to = None
 
 
 @register

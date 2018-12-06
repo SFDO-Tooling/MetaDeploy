@@ -55,6 +55,7 @@ class PlanSerializer(serializers.ModelSerializer):
         read_only=True, pk_field=serializers.CharField()
     )
     preflight_message = serializers.CharField(source="preflight_message_markdown")
+    is_allowed = serializers.SerializerMethodField()
 
     class Meta:
         model = Plan
@@ -66,7 +67,11 @@ class PlanSerializer(serializers.ModelSerializer):
             "tier",
             "slug",
             "steps",
+            "is_allowed",
         )
+
+    def get_is_allowed(self, obj):
+        return obj.is_visible_to(self.context["request"].user)
 
 
 class VersionSerializer(serializers.ModelSerializer):
@@ -96,6 +101,7 @@ class ProductSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     category = serializers.CharField(source="category.title")
     most_recent_version = serializers.SerializerMethodField()
+    is_allowed = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -109,6 +115,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "image",
             "most_recent_version",
             "slug",
+            "is_allowed",
         )
 
     def get_most_recent_version(self, obj):
@@ -116,6 +123,9 @@ class ProductSerializer(serializers.ModelSerializer):
         if version:
             return VersionSerializer(version, context=self.context).data
         return None
+
+    def get_is_allowed(self, obj):
+        return obj.is_visible_to(self.context["request"].user)
 
 
 class JobSerializer(serializers.ModelSerializer):
@@ -228,6 +238,17 @@ class JobSerializer(serializers.ModelSerializer):
         # Handle the case where value is a *RelatedManager:
         if hasattr(value, "all") and callable(value.all):
             return value.all()
+        return value
+
+    def validate_plan(self, value):
+        if not value.is_visible_to(self.context["request"].user):
+            raise serializers.ValidationError(
+                "You are not allowed to install this plan."
+            )
+        if not value.version.product.is_visible_to(self.context["request"].user):
+            raise serializers.ValidationError(
+                "You are not allowed to install this product."
+            )
         return value
 
     def validate(self, data):

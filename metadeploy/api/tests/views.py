@@ -155,6 +155,7 @@ class TestBasicGetViews:
                 "additional_plans": [],
             },
             "slug": product.slug,
+            "is_allowed": True,
         }
 
     def test_version(self, client, version_factory):
@@ -186,6 +187,24 @@ class TestBasicGetViews:
             "tier": "primary",
             "slug": "sample-plan",
             "steps": [],
+            "is_allowed": True,
+        }
+
+    def test_plan__not_visible(self, client, allowed_list_factory, plan_factory):
+        allowed_list = allowed_list_factory(organization_ids=[])
+        plan = plan_factory(visible_to=allowed_list)
+        response = client.get(reverse("plan-detail", kwargs={"pk": plan.id}))
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "id": str(plan.id),
+            "title": "Sample plan",
+            "version": str(plan.version.id),
+            "preflight_message": "",
+            "tier": "primary",
+            "slug": "sample-plan",
+            "steps": [],
+            "is_allowed": False,
         }
 
 
