@@ -40,11 +40,17 @@ class HashIdMixin(models.Model):
     id = HashidAutoField(primary_key=True)
 
 
+class AllowedList(models.Model):
+    organization_ids = ArrayField(
+        models.CharField(max_length=1024), default=list, blank=True
+    )
+
+
 class PrivateMixin(models.Model):
     class Meta:
         abstract = True
 
-    visible_to = ArrayField(models.CharField(max_length=1024), default=list, blank=True)
+    visible_to = models.ForeignKey(AllowedList, on_delete=models.SET_NULL, null=True)
 
 
 class UserQuerySet(models.QuerySet):

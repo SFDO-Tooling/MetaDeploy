@@ -35,7 +35,8 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Product.objects.filter(
-            Q(visible_to=[]) | Q(visible_to__contains=[self.request.user.org_id])
+            Q(visible_to__isnull=True)
+            | Q(visible_to__organization_ids__contains=[self.request.user.org_id])
         ).published()
 
 
@@ -53,7 +54,8 @@ class PlanViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Plan.objects.filter(
-            Q(visible_to=[]) | Q(visible_to__contains=[self.request.user.org_id])
+            Q(visible_to__isnull=True)
+            | Q(visible_to__organization_ids__contains=[self.request.user.org_id])
         )
 
     def preflight_get(self, request):

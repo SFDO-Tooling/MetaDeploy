@@ -6,6 +6,7 @@ from pytest_factoryboy import register
 from rest_framework.test import APIClient
 
 from metadeploy.api.models import (
+    AllowedList,
     Job,
     Plan,
     PlanSlug,
@@ -67,6 +68,14 @@ class UserFactory(factory.django.DjangoModelFactory):
     username = factory.Sequence("user_{}@example.com".format)
     password = factory.PostGenerationMethodCall("set_password", "foobar")
     socialaccount_set = factory.RelatedFactory(SocialAccountFactory, "user")
+
+
+@register
+class AllowedListFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = AllowedList
+
+    visible_to = []
 
 
 @register
