@@ -6,8 +6,8 @@ from allauth.socialaccount.models import SocialToken
 from asgiref.sync import async_to_sync
 from colorfield.fields import ColorField
 from django.conf import settings
+from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
-from django.contrib.auth.models import UserManager as DjangoUserManager
 from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
@@ -48,8 +48,12 @@ class UserQuerySet(models.QuerySet):
         return self.filter(socialaccount__last_login__lte=token_lifetime_ago)
 
 
+class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
+    pass
+
+
 class User(AbstractUser):
-    objects = DjangoUserManager.from_queryset(UserQuerySet)()
+    objects = UserManager()
 
     @property
     def org_name(self):
