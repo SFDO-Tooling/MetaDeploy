@@ -24,8 +24,6 @@ export const InstallDataColumnLabel = (): React.Node => (
       triggerClassName="slds-p-left_x-small"
       position="overflowBoundaryElement"
     >
-      {/* @@@ This should not be necessary...
-          https://github.com/salesforce/design-system-react/issues/1578 */}
       <a>
         <Icon
           category="utility"
