@@ -96,7 +96,7 @@
     "serve": "run-p django:serve webpack:serve rq:serve",
     "prettier": "prettier --write '*.js' '.*.js' 'src/js/*.js' 'src/js/**/*.js' 'test/js/*.js' 'test/js/**/*.js' 'src/sass/**/*.scss'",
     "eslint": "eslint '*.js' 'src/js/*.js' 'src/js/**/*.js' 'test/js/*.js' 'test/js/**/*.js'",
-    "flow": "flow",
+    "flow": "flow check",
     "stylelint": "stylelint 'src/sass/**/*.scss'",
     "flake8": "flake8 manage.py metadeploy/ config/",
     "isort": "isort -rc manage.py metadeploy/ config/",
