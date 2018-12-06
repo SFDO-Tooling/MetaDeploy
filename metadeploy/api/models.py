@@ -6,6 +6,7 @@ from allauth.socialaccount.models import SocialToken
 from asgiref.sync import async_to_sync
 from colorfield.fields import ColorField
 from django.conf import settings
+from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import ArrayField, JSONField
 from django.core.exceptions import ValidationError
@@ -54,8 +55,12 @@ class UserQuerySet(models.QuerySet):
         return self.filter(socialaccount__last_login__lte=token_lifetime_ago)
 
 
+class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
+    pass
+
+
 class User(AbstractUser):
-    objects = UserQuerySet.as_manager()
+    objects = UserManager()
 
     def _get_org_property(self, key):
         try:
@@ -437,7 +442,7 @@ class JobQuerySet(models.QuerySet):
 
 
 class Job(HashIdMixin, models.Model):
-    Status = Choices("started", "complete", "failed")
+    Status = Choices("started", "complete", "failed", "canceled")
     tracker = FieldTracker(fields=("completed_steps", "status"))
 
     objects = JobQuerySet.as_manager()
@@ -482,7 +487,7 @@ class PreflightResultQuerySet(models.QuerySet):
 
 
 class PreflightResult(models.Model):
-    Status = Choices("started", "complete", "failed")
+    Status = Choices("started", "complete", "failed", "canceled")
 
     tracker = FieldTracker(fields=("status", "is_valid"))
 
