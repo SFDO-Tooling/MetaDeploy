@@ -190,7 +190,7 @@ class Product(HashIdMixin, SlugMixin, models.Model):
     )
 
     class Meta:
-        ordering = ("order_key",)
+        ordering = ("category__order_key", "order_key")
 
     objects = ProductQuerySet.as_manager()
 
