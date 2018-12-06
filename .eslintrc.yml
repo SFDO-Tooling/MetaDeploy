@@ -22,8 +22,8 @@ settings:
             - static
             - node_modules
   react:
-    version: '15.6.2'
-    flowVersion: '0.79.1'
+    version: '16.6.3'
+    flowVersion: '0.87.0'
 plugins:
   - react
   - prettier
