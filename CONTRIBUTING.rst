@@ -159,6 +159,7 @@ Development Tasks
   files
 - ``yarn prettier``: formats ``.scss`` and ``.js`` files
 - ``yarn eslint``: lints ``.js`` files
+- ``yarn flow``: runs JS type-checking
 - ``yarn stylelint``: lints ``.scss`` files
 - ``yarn flake8``: lints ``.py`` files
 - ``yarn build``: builds development (unminified) static assets into ``dist/``
