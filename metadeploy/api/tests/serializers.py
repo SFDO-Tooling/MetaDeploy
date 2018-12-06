@@ -11,7 +11,6 @@ class TestProductSerializer:
     ):
         user = user_factory()
         product = product_factory()
-        version_factory(label="v0.1.0", product=product, visible_to=["other org"])
 
         request = rf.get("/")
         request.user = user

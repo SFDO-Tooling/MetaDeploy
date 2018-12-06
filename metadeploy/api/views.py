@@ -45,7 +45,7 @@ class VersionViewSet(viewsets.ModelViewSet):
     filterset_fields = ("product", "label")
 
     def get_queryset(self):
-        return Version.objects.visible_to(self.request.user)
+        return Version.objects.all()
 
 
 class PlanViewSet(viewsets.ModelViewSet):

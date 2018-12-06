@@ -12,7 +12,7 @@ from django.contrib.postgres.fields import ArrayField, JSONField
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
-from django.db.models import Count, Q
+from django.db.models import Count
 from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
@@ -224,7 +224,7 @@ class Product(HashIdMixin, SlugMixin, PrivateMixin, models.Model):
         return self.title
 
     def most_recent_version(self, user):
-        return self.version_set.order_by("-created_at").visible_to(user).first()
+        return self.version_set.order_by("-created_at").first()
 
     @property
     def icon(self):
@@ -243,11 +243,8 @@ class VersionQuerySet(models.QuerySet):
     def get_by_natural_key(self, *, product, label):
         return self.get(product=product, label=label)
 
-    def visible_to(self, user):
-        return self.filter(Q(visible_to=[]) | Q(visible_to__contains=[user.org_id]))
 
-
-class Version(HashIdMixin, PrivateMixin, models.Model):
+class Version(HashIdMixin, models.Model):
     objects = VersionQuerySet.as_manager()
 
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
