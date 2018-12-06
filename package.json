@@ -101,7 +101,7 @@
     "flake8": "flake8 manage.py metadeploy/ config/",
     "isort": "isort -rc manage.py metadeploy/ config/",
     "black": "black manage.py metadeploy/ config/",
-    "lint": "npm-run-all -p prettier flake8 -p eslint stylelint flow",
+    "lint": "npm-run-all -p prettier flake8 -p eslint stylelint -s flow",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "JEST_JUNIT_OUTPUT='./coverage/junit.xml' jest --ci --runInBand --reporters=default --reporters=jest-junit",
