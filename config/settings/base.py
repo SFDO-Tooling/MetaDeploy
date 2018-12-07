@@ -264,7 +264,7 @@ ACCOUNT_UNIQUE_EMAIL = False
 SOCIALACCOUNT_ADAPTER = "metadeploy.multisalesforce.adapter.CustomSocialAccountAdapter"
 
 JS_REVERSE_JS_VAR_NAME = "api_urls"
-JS_REVERSE_EXCLUDE_NAMESPACES = ["admin"]
+JS_REVERSE_EXCLUDE_NAMESPACES = ["admin", "admin_rest"]
 
 
 # Redis configuration:
