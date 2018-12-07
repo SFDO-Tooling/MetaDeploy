@@ -241,3 +241,10 @@ class TestPreflight:
         response = client.get(reverse("plan-preflight", kwargs={"pk": plan.id}))
 
         assert response.status_code == 404
+
+    def test_post__unallowed(self, client, plan_factory, allowed_list_factory):
+        allowed_list = allowed_list_factory(organization_ids=[])
+        plan = plan_factory(visible_to=allowed_list)
+        response = client.post(reverse("plan-preflight", kwargs={"pk": plan.id}))
+
+        assert response.status_code == 403

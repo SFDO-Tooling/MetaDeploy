@@ -58,6 +58,11 @@ class PlanViewSet(viewsets.ModelViewSet):
 
     def preflight_post(self, request):
         plan = self.get_object()
+        is_visible_to = plan.is_visible_to(
+            request.user
+        ) and plan.version.product.is_visible_to(request.user)
+        if not is_visible_to:
+            return Response("", status=status.HTTP_403_FORBIDDEN)
         preflight_job.delay(request.user, plan)
         return Response("", status=status.HTTP_202_ACCEPTED)
 
