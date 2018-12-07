@@ -63,8 +63,16 @@ class ProductViewSet(AdminAPIViewSet):
     model_name = "Product"
 
 
+class ProductSlugViewSet(AdminAPIViewSet):
+    model_name = "ProductSlug"
+
+
 class PlanViewSet(AdminAPIViewSet):
     model_name = "Plan"
+
+
+class PlanSlugViewSet(AdminAPIViewSet):
+    model_name = "PlanSlug"
 
 
 class VersionViewSet(AdminAPIViewSet):
