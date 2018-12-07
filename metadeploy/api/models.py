@@ -47,6 +47,9 @@ class AllowedList(models.Model):
         models.CharField(max_length=1024), default=list, blank=True
     )
 
+    def __str__(self):  # pragma: nocover
+        return self.title
+
 
 class PrivateMixin(models.Model):
     class Meta:
