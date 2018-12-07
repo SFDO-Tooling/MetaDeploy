@@ -11,9 +11,7 @@ from .api import (
 
 
 def _get_api_basename(viewset):
-    model_name = getattr(viewset, "model_name", None)
-
-    return model_name.lower()
+    return viewset.model_name.lower()
 
 
 app_name = "admin_api"
