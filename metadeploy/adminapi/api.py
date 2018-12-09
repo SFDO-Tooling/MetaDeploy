@@ -34,6 +34,7 @@ class AdminAPISerializer(serializers.HyperlinkedModelSerializer):
         return field_class, field_kwargs
 
 
+# https://drf-schema-adapter.readthedocs.io/en/latest/drf_auto_endpoint/ inspiration?
 class AdminAPIViewSet(viewsets.ModelViewSet):
     model_app_label = "api"
     model_name = None
@@ -41,7 +42,19 @@ class AdminAPIViewSet(viewsets.ModelViewSet):
     route_ns = "admin_rest"
 
     # Admin Views require IsAdmin/IsStaff. Don't change this
+    # TODO: Permission, lock to SFDC IPs? require HTTPS
+    # TODO: Permission, force subclasses to append, not overwrite
     permission_classes = [permissions.IsAdminUser]
+
+    # TODO: Metadata, create an OPTIONS/metadata response. JSON HYPER SCHEMA.
+    # TODO: Pagination, sane limit/offset default, disablable for certain entities
+    # TODO: Filter, idk figure something out,
+    #   don't reinvent odata $filter and build an injection attack.
+    # TODO: Versioning, require it in accept header
+    # TODO: RFC7807 Error Documents, cuz!
+    # TODO: Request IDs, confirm they work?
+    # TODO: Etags, NO.
+    # TODO: Natural Keys, router support needed.
 
     @property
     def model(self):

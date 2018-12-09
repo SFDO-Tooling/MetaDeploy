@@ -9,6 +9,8 @@ from .api import (
     VersionViewSet,
 )
 
+# TODO: Schema, create a schema endpoint
+
 
 def _get_api_basename(viewset):
     return viewset.model_name.lower()
