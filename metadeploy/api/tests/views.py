@@ -155,6 +155,7 @@ class TestBasicGetViews:
                 "additional_plans": [],
             },
             "slug": product.slug,
+            "order_key": 0,
         }
 
     def test_version(self, client, version_factory):
