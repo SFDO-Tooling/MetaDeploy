@@ -2,4 +2,4 @@
 # production that isn't in development.
 
 -r base.txt
-newrelic==4.6.0.106
+newrelic==4.8.0.110
