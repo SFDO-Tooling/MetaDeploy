@@ -17,7 +17,7 @@ def _get_api_basename(viewset):
 
 
 app_name = "admin_api"
-router = routers.DefaultRouter()
+router = routers.DefaultRouter(trailing_slash=False)
 router.get_default_basename = _get_api_basename
 router.register(r"plans", PlanViewSet)
 router.register(r"planslug", PlanSlugViewSet)

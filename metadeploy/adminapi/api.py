@@ -1,5 +1,8 @@
 from django.apps import apps
-from rest_framework import permissions, serializers, viewsets
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
+from rest_framework import pagination, permissions, serializers, viewsets
+from rest_framework.response import Response
 
 
 class AdminAPISerializer(serializers.HyperlinkedModelSerializer):
@@ -34,27 +37,60 @@ class AdminAPISerializer(serializers.HyperlinkedModelSerializer):
         return field_class, field_kwargs
 
 
+class AdminAPIPagination(pagination.LimitOffsetPagination):
+    default_limit = 10
+    max_limit = 100
+
+    def get_paginated_response(self, data):
+        # the paginator is responsible for creating the Response() on ModelViewSet's
+        # list() so we use this to dictate the list() response shape...
+
+        return Response(
+            {
+                "data": data,
+                "meta": {"total_count": self.count},
+                "links": {
+                    "next": self.get_next_link(),
+                    "previous": self.get_previous_link(),
+                },
+            }
+        )
+
+
 # https://drf-schema-adapter.readthedocs.io/en/latest/drf_auto_endpoint/ inspiration?
+@method_decorator(never_cache, name="list")
+@method_decorator(never_cache, name="retrieve")
 class AdminAPIViewSet(viewsets.ModelViewSet):
     model_app_label = "api"
     model_name = None
     serlializer_base = AdminAPISerializer
+    serializer_class = None
     route_ns = "admin_rest"
 
+    # # Security
     # Admin Views require IsAdmin/IsStaff. Don't change this
     # TODO: Permission, lock to SFDC IPs? require HTTPS
     # TODO: Permission, force subclasses to append, not overwrite
     permission_classes = [permissions.IsAdminUser]
 
+    # # Pagination
+    pagination_class = AdminAPIPagination
+
     # TODO: Metadata, create an OPTIONS/metadata response. JSON HYPER SCHEMA.
-    # TODO: Pagination, sane limit/offset default, disablable for certain entities
     # TODO: Filter, idk figure something out,
     #   don't reinvent odata $filter and build an injection attack.
     # TODO: Versioning, require it in accept header
     # TODO: RFC7807 Error Documents, cuz!
-    # TODO: Request IDs, confirm they work?
-    # TODO: Etags, NO.
     # TODO: Natural Keys, router support needed.
+
+    # # Caching
+    # AdminAPI does not support a caching scheme, so we apply a Cache-Control=Never
+    # for HTTP GETs (list/retrieve).
+
+    # # Response Shape
+    # AdminAPI is inspired by, but noncompliant with JSON:API at this time.
+    # The paginator provides a list response shape.
+    # TODO: JSON:API-style serializer (type, id, attributes, links)
 
     @property
     def model(self):
@@ -67,6 +103,9 @@ class AdminAPIViewSet(viewsets.ModelViewSet):
         return model.objects.all()
 
     def get_serializer_class(self):
+        if self.serializer_class:
+            return self.serializer_class
+
         class AdminSerializer(self.serlializer_base):
             class Meta(self.serlializer_base.Meta):
                 model = self.model
