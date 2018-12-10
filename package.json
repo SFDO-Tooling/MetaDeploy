@@ -12,14 +12,14 @@
     "yarn": "1.12.3"
   },
   "devDependencies": {
-    "@babel/core": "^7.1.6",
-    "@babel/plugin-proposal-class-properties": "^7.1.0",
-    "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
+    "@babel/core": "^7.2.0",
+    "@babel/plugin-proposal-class-properties": "^7.2.1",
+    "@babel/plugin-proposal-object-rest-spread": "^7.2.0",
     "@babel/polyfill": "^7.0.0",
-    "@babel/preset-env": "^7.1.6",
+    "@babel/preset-env": "^7.2.0",
     "@babel/preset-flow": "^7.0.0",
     "@babel/preset-react": "^7.0.0",
-    "autoprefixer": "^9.3.1",
+    "autoprefixer": "^9.4.2",
     "babel-core": "^7.0.0-0",
     "babel-eslint": "^10.0.1",
     "babel-jest": "^23.6.0",
@@ -37,12 +37,12 @@
     "eslint-plugin-react": "^7.11.1",
     "fetch-mock": "^7.2.5",
     "file-loader": "^2.0.0",
-    "flow-bin": "^0.86.0",
+    "flow-bin": "^0.87.0",
     "flow-types": "^1.0.0",
     "html-webpack-plugin": "^3.2.0",
     "husky": "^1.2.0",
     "jest": "^23.6.0",
-    "jest-dom": "^2.1.1",
+    "jest-dom": "^3.0.0",
     "jest-junit": "^5.2.0",
     "lint-staged": "^8.1.0",
     "mini-css-extract-plugin": "^0.4.5",
@@ -52,22 +52,22 @@
     "nyc": "^13.1.0",
     "optimize-css-assets-webpack-plugin": "^5.0.1",
     "postcss-loader": "^3.0.0",
-    "prettier": "^1.15.2",
-    "react-testing-library": "^5.3.0",
+    "prettier": "^1.15.3",
+    "react-testing-library": "^5.3.1",
     "redux-mock-store": "^1.5.3",
     "sass-loader": "^7.1.0",
-    "stylelint": "^9.8.0",
+    "stylelint": "^9.9.0",
     "stylelint-config-recommended-scss": "^3.2.0",
-    "stylelint-scss": "^3.4.0",
+    "stylelint-scss": "^3.4.1",
     "url-loader": "^1.1.2",
-    "webpack": "^4.26.1",
+    "webpack": "^4.27.1",
     "webpack-cli": "^3.1.2",
     "webpack-dev-server": "^3.1.10",
     "webpack-merge": "^4.1.4"
   },
   "dependencies": {
     "@salesforce-ux/design-system": "^2.7.5",
-    "@salesforce/design-system-react": "^0.9.0",
+    "@salesforce/design-system-react": "^0.9.1",
     "classnames": "^2.2.6",
     "js-cookie": "^2.2.0",
     "money-clip": "^3.0.0",
@@ -75,10 +75,10 @@
     "react": "^16.6.3",
     "react-document-title": "^2.0.3",
     "react-dom": "^16.6.3",
-    "react-redux": "^5.1.1",
+    "react-redux": "^6.0.0",
     "react-router-dom": "^4.3.1",
     "redux": "^4.0.1",
-    "redux-devtools-extension": "^2.13.6",
+    "redux-devtools-extension": "^2.13.7",
     "redux-logger": "^3.0.6",
     "redux-persist-middleware": "^1.0.1",
     "redux-thunk": "^2.3.0",
@@ -96,8 +96,11 @@
     "serve": "run-p django:serve webpack:serve rq:serve",
     "prettier": "prettier --write '*.js' '.*.js' 'src/js/*.js' 'src/js/**/*.js' 'test/js/*.js' 'test/js/**/*.js' 'src/sass/**/*.scss'",
     "eslint": "eslint '*.js' 'src/js/*.js' 'src/js/**/*.js' 'test/js/*.js' 'test/js/**/*.js'",
+    "flow": "flow",
     "stylelint": "stylelint 'src/sass/**/*.scss'",
     "flake8": "flake8 manage.py metadeploy/ config/",
+    "isort": "isort -rc manage.py metadeploy/ config/",
+    "black": "black manage.py metadeploy/ config/",
     "lint": "npm-run-all -p prettier flake8 -p eslint stylelint",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -118,19 +121,26 @@
     }
   },
   "lint-staged": {
-    "*.js": [
-      "prettier --write",
-      "eslint",
-      "git add"
-    ],
-    "*.scss": [
-      "prettier --write",
-      "stylelint",
-      "git add"
-    ],
-    "*.py": [
-      "flake8",
-      "git add"
+    "linters": {
+      "*.js": [
+        "prettier --write",
+        "eslint --plugin flowtype-errors --rule 'flowtype-errors/show-errors: 2' --rule 'flowtype-errors/show-warnings: 1'",
+        "git add"
+      ],
+      "*.scss": [
+        "prettier --write",
+        "stylelint",
+        "git add"
+      ],
+      "*.py": [
+        "isort",
+        "black",
+        "flake8",
+        "git add"
+      ]
+    },
+    "ignore": [
+      "flow-typed/**/*"
     ]
   }
 }

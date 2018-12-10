@@ -5,19 +5,17 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('api', '0017_job_status'),
-    ]
+    dependencies = [("api", "0017_job_status")]
 
     operations = [
         migrations.AddField(
-            model_name='job',
-            name='org_name',
+            model_name="job",
+            name="org_name",
             field=models.CharField(blank=True, max_length=256),
         ),
         migrations.AddField(
-            model_name='job',
-            name='org_type',
+            model_name="job",
+            name="org_type",
             field=models.CharField(blank=True, max_length=256),
         ),
     ]

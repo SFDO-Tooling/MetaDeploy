@@ -6,9 +6,8 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0013_job_completed_steps'),
-        ('api', '0014_preflightresult_blank_description'),
+        ("api", "0013_job_completed_steps"),
+        ("api", "0014_preflightresult_blank_description"),
     ]
 
-    operations = [
-    ]
+    operations = []

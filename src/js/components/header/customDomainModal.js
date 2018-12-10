@@ -60,12 +60,12 @@ class CustomDomainModal extends React.Component<Props, { url: string }> {
         footer={footer}
       >
         <form className="slds-p-around_large" onSubmit={this.handleSubmit}>
-          <p
+          <div
             className="slds-form-element__help
               slds-p-bottom_small"
           >
             To go to your company’s login page, enter the custom domain name.
-          </p>
+          </div>
           <Input
             id="login-custom-domain"
             label="Custom Domain"
@@ -73,7 +73,7 @@ class CustomDomainModal extends React.Component<Props, { url: string }> {
             onChange={this.handleChange}
             aria-describedby="login-custom-domain-help"
           >
-            <p
+            <div
               id="login-custom-domain-help"
               className="slds-form-element__help
                 slds-truncate
@@ -83,7 +83,7 @@ class CustomDomainModal extends React.Component<Props, { url: string }> {
               https://
               {this.state.url.trim() ? this.state.url.trim() : <em>domain</em>}
               .my.salesforce.com
-            </p>
+            </div>
           </Input>
         </form>
       </Modal>

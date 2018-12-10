@@ -19,36 +19,25 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
                 'content': json_message,
             })
         """
-        await self.send_json(event['content'])
+        await self.send_json(event["content"])
 
     async def receive_json(self, content, **kwargs):
         # Just used to subscribe to notification channels.
         is_valid = self.is_valid(content)
         is_known_model = self.is_known_model(content["model"])
         has_good_permissions = self.has_good_permissions(content)
-        all_good = (
-            is_valid
-            and is_known_model
-            and has_good_permissions
-        )
+        all_good = is_valid and is_known_model and has_good_permissions
         if not all_good:
             return
         group_name = f"{content['model']}-{content['id']}"
         self.groups.append(group_name)
-        await self.channel_layer.group_add(
-            group_name,
-            self.channel_name,
-        )
+        await self.channel_layer.group_add(group_name, self.channel_name)
 
     def is_valid(self, content):
         return content.keys() == {"model", "id"}
 
     def is_known_model(self, model):
-        known_models = {
-            "user",
-            "preflightrequest",
-            "job",
-        }
+        known_models = {"user", "preflightrequest", "job"}
         return model in known_models
 
     def has_good_permissions(self, content):

@@ -10,4 +10,4 @@ def test_get_auth_params():
         pass
 
     result = ChildClass().get_auth_params(None, None)
-    assert 'prompt' in result and result['prompt'] == 'login'
+    assert "prompt" in result and result["prompt"] == "login"

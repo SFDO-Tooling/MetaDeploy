@@ -20,5 +20,5 @@ class Migration(migrations.Migration):
                 default="started",
                 max_length=64,
             ),
-        ),
+        )
     ]

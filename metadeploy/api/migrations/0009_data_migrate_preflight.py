@@ -4,7 +4,7 @@ from django.db import migrations
 
 
 def forwards(apps, schema_editor):
-    PreflightResult = apps.get_model('api', 'PreflightResult')
+    PreflightResult = apps.get_model("api", "PreflightResult")
     PreflightResult.objects.all().delete()
 
 
@@ -14,10 +14,6 @@ def backwards(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('api', '0008_preflight_plan_and_status'),
-    ]
+    dependencies = [("api", "0008_preflight_plan_and_status")]
 
-    operations = [
-        migrations.RunPython(forwards, backwards),
-    ]
+    operations = [migrations.RunPython(forwards, backwards)]

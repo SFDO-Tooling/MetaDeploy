@@ -5,7 +5,6 @@ from django.utils.html import escape
 
 from ..serializers import FullUserSerializer
 
-
 register = template.Library()
 
 

@@ -18,6 +18,9 @@ export type Job = {|
   +organization_url: string | null,
   +error_count: number,
   +warning_count: number,
+  +is_public: boolean,
+  +user_can_edit: boolean,
+  +message: string,
 |};
 export type JobsState = {
   [string]: Job,
@@ -35,7 +38,8 @@ const reducer = (
       return { ...jobs, [id]: job };
     }
     case 'JOB_STARTED':
-    case 'JOB_COMPLETED': {
+    case 'JOB_COMPLETED':
+    case 'JOB_UPDATED': {
       const job = action.payload;
       return { ...jobs, [job.id]: job };
     }

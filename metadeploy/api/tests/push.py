@@ -1,4 +1,5 @@
 from unittest.mock import MagicMock
+
 import pytest
 
 from ..push import report_error
@@ -13,8 +14,7 @@ class AsyncMock(MagicMock):
 @pytest.mark.asyncio
 async def test_report_error(mocker, user_factory):
     push_message = mocker.patch(
-        'metadeploy.api.push.push_message_about_instance',
-        new=AsyncMock(),
+        "metadeploy.api.push.push_message_about_instance", new=AsyncMock()
     )
     user = user_factory()
     await report_error(user)
