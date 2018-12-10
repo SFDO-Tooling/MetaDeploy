@@ -116,6 +116,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "most_recent_version",
             "slug",
             "is_allowed",
+            "order_key",
         )
 
     def get_most_recent_version(self, obj):
