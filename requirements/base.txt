@@ -4,7 +4,7 @@ dj-database-url==0.5.0
 whitenoise==4.1.2
 channels==2.1.6
 channels_redis==2.3.2
-service_identity==17.0.0
+service_identity==18.1.0
 django-allauth==0.38.0
 werkzeug==0.14.1
 pyopenssl==18.0.0
