@@ -137,9 +137,11 @@ class SlugMixin:
 
 class ProductCategory(models.Model):
     title = models.CharField(max_length=256)
+    order_key = models.PositiveIntegerField(default=0)
 
     class Meta:
         verbose_name_plural = "product categories"
+        ordering = ("order_key",)
 
     def __str__(self):
         return self.title
@@ -187,6 +189,9 @@ class Product(HashIdMixin, SlugMixin, models.Model):
         ("utility", "utility"),
     )
 
+    class Meta:
+        ordering = ("category__order_key", "order_key")
+
     objects = ProductQuerySet.as_manager()
 
     title = models.CharField(max_length=256)
@@ -204,6 +209,7 @@ class Product(HashIdMixin, SlugMixin, models.Model):
     slds_icon_name = models.CharField(max_length=64, blank=True)
     repo_url = models.URLField(blank=True)
     is_listed = models.BooleanField(default=True)
+    order_key = models.PositiveIntegerField(default=0)
 
     slug_class = ProductSlug
 

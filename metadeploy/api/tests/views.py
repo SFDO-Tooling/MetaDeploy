@@ -157,6 +157,7 @@ class TestBasicGetViews:
             },
             "slug": product.slug,
             "is_listed": True,
+            "order_key": 0,
         }
 
     def test_version(self, client, version_factory):

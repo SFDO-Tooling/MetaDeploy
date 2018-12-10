@@ -112,6 +112,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "most_recent_version",
             "slug",
             "is_listed",
+            "order_key",
         )
 
 

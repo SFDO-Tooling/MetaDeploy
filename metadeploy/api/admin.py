@@ -14,9 +14,7 @@ from .models import (
 )
 
 admin.site.register(User)
-admin.site.register(Product)
 admin.site.register(ProductSlug)
-admin.site.register(ProductCategory)
 admin.site.register(Version)
 admin.site.register(Plan)
 admin.site.register(PlanSlug)
@@ -35,3 +33,13 @@ class StepAdmin(admin.ModelAdmin):
         "kind",
         "task_name",
     )
+
+
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ("title", "category", "order_key")
+
+
+@admin.register(ProductCategory)
+class ProductCategoryAdmin(admin.ModelAdmin):
+    list_display = ("title", "order_key")
