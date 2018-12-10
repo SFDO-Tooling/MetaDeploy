@@ -109,6 +109,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "image",
             "most_recent_version",
             "slug",
+            "order_key",
         )
 
 
