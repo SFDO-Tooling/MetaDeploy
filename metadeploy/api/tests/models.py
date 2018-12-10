@@ -157,6 +157,15 @@ def test_product_most_recent_version(product_factory, version_factory):
 
 
 @pytest.mark.django_db
+def test_product_most_recent_version__delisted(product_factory, version_factory):
+    product = product_factory()
+    v1 = version_factory(label="v0.1.0", product=product)
+    version_factory(label="v0.2.0", product=product, is_listed=False)
+
+    assert product.most_recent_version == v1
+
+
+@pytest.mark.django_db
 class TestPlanSlug:
     def test_present(self, plan_factory, plan_slug_factory):
         plan = plan_factory(title="a plan")

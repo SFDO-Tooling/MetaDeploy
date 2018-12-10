@@ -222,7 +222,7 @@ class Product(HashIdMixin, SlugMixin, models.Model):
 
     @property
     def most_recent_version(self):
-        return self.version_set.order_by("-created_at").first()
+        return self.version_set.exclude(is_listed=False).order_by("-created_at").first()
 
     @property
     def icon(self):
