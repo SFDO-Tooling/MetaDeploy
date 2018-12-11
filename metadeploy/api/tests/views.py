@@ -153,8 +153,10 @@ class TestBasicGetViews:
                 "primary_plan": None,
                 "secondary_plan": None,
                 "additional_plans": [],
+                "is_listed": True,
             },
             "slug": product.slug,
+            "is_listed": True,
             "order_key": 0,
         }
 
@@ -172,6 +174,7 @@ class TestBasicGetViews:
             "primary_plan": None,
             "secondary_plan": None,
             "additional_plans": [],
+            "is_listed": True,
         }
 
     def test_plan(self, client, plan_factory):
@@ -187,6 +190,7 @@ class TestBasicGetViews:
             "tier": "primary",
             "slug": "sample-plan",
             "steps": [],
+            "is_listed": True,
         }
 
 

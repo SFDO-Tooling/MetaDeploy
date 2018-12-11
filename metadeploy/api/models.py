@@ -211,6 +211,7 @@ class Product(HashIdMixin, SlugMixin, models.Model):
     )
     slds_icon_name = models.CharField(max_length=64, blank=True)
     repo_url = models.URLField(blank=True)
+    is_listed = models.BooleanField(default=True)
     order_key = models.PositiveIntegerField(default=0)
 
     slug_class = ProductSlug
@@ -224,7 +225,7 @@ class Product(HashIdMixin, SlugMixin, models.Model):
 
     @property
     def most_recent_version(self):
-        return self.version_set.order_by("-created_at").first()
+        return self.version_set.exclude(is_listed=False).order_by("-created_at").first()
 
     @property
     def icon(self):
@@ -259,6 +260,7 @@ class Version(HashIdMixin, models.Model):
         default="master",
         help_text="This is usually a tag, sometimes a branch.",
     )
+    is_listed = models.BooleanField(default=True)
 
     class Meta:
         unique_together = (("product", "label"),)
@@ -328,6 +330,7 @@ class Plan(HashIdMixin, SlugMixin, models.Model):
     flow_name = models.CharField(max_length=64)
     tier = models.CharField(choices=Tier, default=Tier.primary, max_length=64)
     post_install_message = models.TextField(blank=True)
+    is_listed = models.BooleanField(default=True)
 
     slug_class = PlanSlug
 

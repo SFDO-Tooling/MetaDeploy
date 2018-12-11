@@ -12,6 +12,7 @@ export type Version = {
   +primary_plan: Plan,
   +secondary_plan: Plan | null,
   +additional_plans: Plans,
+  +is_listed: boolean,
 };
 export type Product = {
   +id: string,
@@ -27,8 +28,9 @@ export type Product = {
     +url?: string,
   } | null,
   +image: string | null,
-  +most_recent_version: Version,
+  +most_recent_version: Version | null,
   +versions?: { [string]: Version | null },
+  +is_listed: boolean,
 };
 export type Products = Array<Product>;
 
