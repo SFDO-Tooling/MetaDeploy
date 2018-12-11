@@ -12,7 +12,7 @@ from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
@@ -45,7 +45,10 @@ class UserQuerySet(models.QuerySet):
         token_lifetime_ago = timezone.now() - timedelta(
             minutes=settings.TOKEN_LIFETIME_MINUTES
         )
-        return self.filter(socialaccount__last_login__lte=token_lifetime_ago)
+        return self.filter(socialaccount__last_login__lte=token_lifetime_ago).exclude(
+            Q(job__status=Job.Status.started)
+            | Q(preflightresult__status=PreflightResult.Status.started)
+        )
 
 
 class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
@@ -208,6 +211,7 @@ class Product(HashIdMixin, SlugMixin, models.Model):
     )
     slds_icon_name = models.CharField(max_length=64, blank=True)
     repo_url = models.URLField(blank=True)
+    is_listed = models.BooleanField(default=True)
     order_key = models.PositiveIntegerField(default=0)
 
     slug_class = ProductSlug
@@ -221,7 +225,7 @@ class Product(HashIdMixin, SlugMixin, models.Model):
 
     @property
     def most_recent_version(self):
-        return self.version_set.order_by("-created_at").first()
+        return self.version_set.exclude(is_listed=False).order_by("-created_at").first()
 
     @property
     def icon(self):
@@ -256,6 +260,7 @@ class Version(HashIdMixin, models.Model):
         default="master",
         help_text="This is usually a tag, sometimes a branch.",
     )
+    is_listed = models.BooleanField(default=True)
 
     class Meta:
         unique_together = (("product", "label"),)
@@ -325,6 +330,7 @@ class Plan(HashIdMixin, SlugMixin, models.Model):
     flow_name = models.CharField(max_length=64)
     tier = models.CharField(choices=Tier, default=Tier.primary, max_length=64)
     post_install_message = models.TextField(blank=True)
+    is_listed = models.BooleanField(default=True)
 
     slug_class = PlanSlug
 
