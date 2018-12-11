@@ -1,11 +1,15 @@
+from datetime import timedelta
+
 import pytest
+from allauth.socialaccount.models import SocialAccount
 from django.core.exceptions import (
     MultipleObjectsReturned,
     ObjectDoesNotExist,
     ValidationError,
 )
+from django.utils import timezone
 
-from ..models import Version
+from ..models import Job, User, Version
 
 
 @pytest.mark.django_db
@@ -52,6 +56,33 @@ class TestUser:
 
         user.socialaccount_set.first().socialtoken_set.all().delete()
         assert user.valid_token_for is None
+
+
+@pytest.mark.django_db
+class TestUserExpiredTokens:
+    def test_with_completed_job(self, user_factory, job_factory):
+        now = timezone.now()
+        then = now - timedelta(minutes=20)
+        user = user_factory()
+        SocialAccount.objects.filter(id=user.socialaccount_set.first().id).update(
+            last_login=then
+        )
+        job_factory(user=user, status=Job.Status.complete)
+        job_factory(user=user, status=Job.Status.failed)
+        job_factory(user=user, status=Job.Status.canceled)
+
+        assert user in User.objects.with_expired_tokens()
+
+    def test_with_in_progress_job(self, user_factory, job_factory):
+        now = timezone.now()
+        then = now - timedelta(minutes=20)
+        user = user_factory()
+        SocialAccount.objects.filter(id=user.socialaccount_set.first().id).update(
+            last_login=then
+        )
+        job_factory(user=user, status=Job.Status.started)
+
+        assert user not in User.objects.with_expired_tokens()
 
 
 @pytest.mark.django_db
