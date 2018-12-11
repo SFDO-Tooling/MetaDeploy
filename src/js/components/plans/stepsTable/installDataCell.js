@@ -39,13 +39,13 @@ export const InstallDataColumnLabel = (): React.Node => (
 );
 
 const JobCell = (props: DataCellProps): React.Node => {
-  const { item, job } = props;
+  const { item, job, activeJobStep } = props;
   /* istanbul ignore if */
   if (!item || !job) {
     return null;
   }
   const { id } = item;
-  const complete =
+  const isComplete =
     job.results[id] &&
     job.results[id].find(res => res.status === RESULT_STATUS.OK) !== undefined;
   let icon, title;
@@ -63,7 +63,7 @@ const JobCell = (props: DataCellProps): React.Node => {
         className="slds-m-horizontal_x-small"
       />
     );
-  } else if (complete) {
+  } else if (isComplete) {
     title = 'completed';
     icon = (
       <Icon
@@ -77,19 +77,7 @@ const JobCell = (props: DataCellProps): React.Node => {
       />
     );
   } else if (job.status === STATUS.STARTED) {
-    let activeStep;
-    // @@@ This is inefficient; could be calculated once.
-    for (const step of job.steps) {
-      if (
-        !job.results[step] ||
-        job.results[step].find(res => res.status === RESULT_STATUS.OK) ===
-          undefined
-      ) {
-        activeStep = step;
-        break;
-      }
-    }
-    if (activeStep && id === activeStep) {
+    if (activeJobStep && id === activeJobStep) {
       title = 'installing';
       icon = (
         <>
