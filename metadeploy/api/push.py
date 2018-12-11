@@ -65,7 +65,6 @@ async def notify_post_task(job):
     user = job.user
     payload = JobSerializer(instance=job, context=user_context(user)).data
     message = {"type": "TASK_COMPLETED", "payload": payload}
-    message = {"type": "TASK_COMPLETED", "payload": payload}
     await push_message_to_user(user, message)
 
 

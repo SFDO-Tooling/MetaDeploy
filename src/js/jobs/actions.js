@@ -3,7 +3,6 @@
 import type { ThunkAction } from 'redux-thunk';
 
 import type { Job } from 'jobs/reducer';
-import type { JobStepCompletedPayload } from 'utils/websockets';
 
 type JobData = { plan: string, steps: Array<string> };
 
@@ -27,7 +26,7 @@ type JobStarted = {
 type JobRejected = { type: 'JOB_REJECTED', payload: JobData };
 export type JobStepCompleted = {
   type: 'JOB_STEP_COMPLETED',
-  payload: JobStepCompletedPayload,
+  payload: Job,
 };
 export type JobCompleted = { type: 'JOB_COMPLETED', payload: Job };
 export type JobUpdated = { type: 'JOB_UPDATED', payload: Job };
@@ -82,9 +81,7 @@ export const startJob = (data: JobData): ThunkAction => (
     });
 };
 
-export const completeJobStep = (
-  payload: JobStepCompletedPayload,
-): JobStepCompleted => ({
+export const completeJobStep = (payload: Job): JobStepCompleted => ({
   type: 'JOB_STEP_COMPLETED',
   payload,
 });

@@ -2,9 +2,13 @@
 
 import type { JobsAction } from 'jobs/actions';
 import type { LogoutAction } from 'accounts/actions';
+import type { StepResult } from 'plans/reducer';
 
 export type Job = {|
   +id: string,
+  +model_type: 'job',
+  +edited_at: string,
+  +job_id: string,
   +creator: {
     +username: string,
     +is_staff: boolean,
@@ -12,7 +16,9 @@ export type Job = {|
   +plan: string,
   +status: 'started' | 'complete' | 'failed',
   +steps: Array<string>,
-  +completed_steps: Array<string>,
+  +results: {|
+    [string]: Array<StepResult>,
+  |},
   +org_name: string | null,
   +org_type: string | null,
   +organization_url: string | null,
@@ -39,27 +45,14 @@ const reducer = (
     }
     case 'JOB_STARTED':
     case 'JOB_COMPLETED':
-    case 'JOB_UPDATED': {
-      const job = action.payload;
-      return { ...jobs, [job.id]: job };
-    }
+    case 'JOB_UPDATED':
     case 'JOB_STEP_COMPLETED': {
-      const { step_id, job } = action.payload;
+      const job = action.payload;
       const existingJob = jobs[job.id];
-      if (!existingJob) {
+      if (!existingJob || job.edited_at > existingJob.edited_at) {
         return { ...jobs, [job.id]: job };
       }
-      const { steps, completed_steps } = existingJob;
-      if (completed_steps.includes(step_id) || !steps.includes(step_id)) {
-        return jobs;
-      }
-      return {
-        ...jobs,
-        [job.id]: {
-          ...existingJob,
-          completed_steps: [...completed_steps, step_id],
-        },
-      };
+      return jobs;
     }
   }
   return jobs;

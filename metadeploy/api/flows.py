@@ -37,7 +37,9 @@ class JobFlow(BasicFlow):
     def _post_task_exception(self, task, exception):
         step_id = self._get_step_id(task.name)
         if step_id:
-            self.result.results[step_id] = [{"status": ERROR, "msg": str(exception)}]
+            self.result.results[step_id] = [
+                {"status": ERROR, "message": str(exception)}
+            ]
             self.result.save()
         return super()._post_task_exception(task, exception)
 

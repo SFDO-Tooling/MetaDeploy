@@ -45,6 +45,9 @@ const JobCell = (props: DataCellProps): React.Node => {
     return null;
   }
   const { id } = item;
+  const complete =
+    job.results[id] &&
+    job.results[id].find(res => res.status === RESULT_STATUS.OK) !== undefined;
   let icon, title;
   if (!job.steps.includes(id)) {
     title = 'skipped';
@@ -60,7 +63,7 @@ const JobCell = (props: DataCellProps): React.Node => {
         className="slds-m-horizontal_x-small"
       />
     );
-  } else if (job.completed_steps.includes(id)) {
+  } else if (complete) {
     title = 'completed';
     icon = (
       <Icon
@@ -74,13 +77,15 @@ const JobCell = (props: DataCellProps): React.Node => {
       />
     );
   } else if (job.status === STATUS.STARTED) {
-    let lastCompleted, lastCompletedIdx;
-    let activeStep = job.steps[0];
-    for (let idx = job.completed_steps.length - 1; idx > -1; idx = idx - 1) {
-      lastCompleted = job.completed_steps[idx];
-      lastCompletedIdx = job.steps.indexOf(lastCompleted);
-      if (lastCompletedIdx > -1) {
-        activeStep = job.steps[lastCompletedIdx + 1];
+    let activeStep;
+    // @@@ This is inefficient; could be calculated once.
+    for (const step of job.steps) {
+      if (
+        !job.results[step] ||
+        job.results[step].find(res => res.status === RESULT_STATUS.OK) ===
+          undefined
+      ) {
+        activeStep = step;
         break;
       }
     }

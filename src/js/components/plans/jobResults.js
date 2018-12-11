@@ -8,7 +8,7 @@ import { CONSTANTS } from 'plans/reducer';
 import type { Job as JobType } from 'jobs/reducer';
 import type {
   Preflight as PreflightType,
-  PreflightError as PreflightErrorType,
+  StepResult as StepResultType,
 } from 'plans/reducer';
 
 const ErrorIcon = (): React.Node => (
@@ -39,7 +39,7 @@ export const WarningIcon = (): React.Node => (
 export const ErrorsList = ({
   errorList,
 }: {
-  errorList: Array<PreflightErrorType>,
+  errorList: Array<StepResultType>,
 }): React.Node => (
   <ul className="plan-error-list">
     {errorList.map((err, idx) => {

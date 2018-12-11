@@ -66,7 +66,7 @@ class TestJobFlow:
         flow._post_task_exception(task, ValueError("Some error"))
 
         assert job.results == {
-            str(steps[0].id): [{"status": "error", "msg": "Some error"}]
+            str(steps[0].id): [{"status": "error", "message": "Some error"}]
         }
 
 

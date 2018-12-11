@@ -212,7 +212,7 @@ class Command(BaseCommand):
             version1,
             title="Reports and Dashboards",
             tier="secondary",
-            preflight_flow_name="slow_steps_preflight_bad",
+            preflight_flow_name="slow_steps_preflight_good",
             flow_name="slow_steps_flow_bad",
         )
         self.add_steps(plan2)

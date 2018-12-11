@@ -22,16 +22,18 @@ export type Plan = {
 };
 export type Plans = Array<Plan>;
 
-export type PreflightError = {|
-  +status: 'warn' | 'error' | 'skip' | 'optional',
+export type StepResult = {|
+  +status: 'ok' | 'warn' | 'error' | 'skip' | 'optional',
   +message?: string,
 |};
 export type PreflightErrors = {|
-  +plan?: Array<PreflightError>,
-  [string]: Array<PreflightError>,
+  +plan?: Array<StepResult>,
+  [string]: Array<StepResult>,
 |};
 export type Preflight = {|
   +id: string | null,
+  +model_type: 'preflight',
+  +edited_at: string | null,
   +plan: string,
   +status: 'started' | 'complete' | 'failed',
   +results: PreflightErrors,
@@ -51,6 +53,7 @@ export const CONSTANTS = {
     FAILED: 'failed',
   },
   RESULT_STATUS: {
+    OK: 'ok',
     WARN: 'warn',
     ERROR: 'error',
     SKIP: 'skip',
@@ -75,6 +78,8 @@ const reducer = (
         ...preflights,
         [plan]: {
           id: null,
+          model_type: 'preflight',
+          edited_at: null,
           plan,
           status: CONSTANTS.STATUS.STARTED,
           results: {},
@@ -86,25 +91,20 @@ const reducer = (
       };
     }
     case 'PREFLIGHT_COMPLETED':
-    case 'PREFLIGHT_FAILED': {
-      const preflight = action.payload;
-      const { plan } = preflight;
-      return { ...preflights, [plan]: preflight };
-    }
+    case 'PREFLIGHT_FAILED':
     case 'PREFLIGHT_INVALIDATED': {
       const preflight = action.payload;
       const { plan } = preflight;
       const existingPreflight = preflights[plan];
-      if (!existingPreflight) {
+      if (
+        !existingPreflight ||
+        !existingPreflight.edited_at ||
+        !preflight.edited_at ||
+        preflight.edited_at > existingPreflight.edited_at
+      ) {
         return { ...preflights, [plan]: preflight };
       }
-      return {
-        ...preflights,
-        [plan]: {
-          ...existingPreflight,
-          is_valid: false,
-        },
-      };
+      return preflights;
     }
   }
   return preflights;

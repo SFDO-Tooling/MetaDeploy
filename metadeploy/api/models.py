@@ -442,6 +442,7 @@ class Job(HashIdMixin, models.Model):
     # This should be a list of step names:
     results = JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    edited_at = models.DateTimeField(auto_now=True)
     enqueued_at = models.DateTimeField(null=True)
     job_id = models.UUIDField(null=True)
     status = models.CharField(choices=Status, max_length=64, default=Status.started)
@@ -460,8 +461,10 @@ class Job(HashIdMixin, models.Model):
         results_has_changed = self.tracker.has_changed("results")
         if results_has_changed:
             async_to_sync(notify_post_task)(self)
-        status_has_changed = self.tracker.has_changed("status")
-        if status_has_changed:
+        has_completed = (
+            self.tracker.has_changed("status") and self.status == Job.Status.complete
+        )
+        if has_completed:
             async_to_sync(notify_post_job)(self)
         return ret
 
@@ -485,6 +488,7 @@ class PreflightResult(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True)
+    edited_at = models.DateTimeField(auto_now=True)
     is_valid = models.BooleanField(default=True)
     status = models.CharField(choices=Status, max_length=64, default=Status.started)
     # Maybe we don't use foreign keys here because we want the result to

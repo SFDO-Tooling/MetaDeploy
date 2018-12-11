@@ -22,16 +22,15 @@ import type {
 } from 'plans/actions';
 import type { TokenInvalidAction } from 'accounts/actions';
 
-type ErrorPayload = {| +message: string |};
-export type JobStepCompletedPayload = {| +step_id: string, +job: Job |};
-type Payload = ErrorPayload | Preflight | Job | JobStepCompletedPayload;
+type Payload = Preflight | Job;
 
-const isPreflight = (obj?: Payload): %checks => obj && obj.results;
-const isJob = (obj?: Payload): %checks => obj && obj.steps;
-const isJobStep = (obj?: Payload): %checks => obj && obj.step_id && obj.job;
+const isPreflight = (obj?: Payload): boolean %checks =>
+  obj !== undefined && obj.model_type === 'preflight';
+const isJob = (obj?: Payload): boolean %checks =>
+  obj !== undefined && obj.model_type === 'job';
 
 export const getAction = (
-  msg: {
+  event: {
     type?: string,
     payload?: Payload,
   } = {},
@@ -43,19 +42,23 @@ export const getAction = (
   | JobStepCompleted
   | JobCompleted
   | null => {
-  switch (msg.type) {
+  switch (event.type) {
     case 'USER_TOKEN_INVALID':
       return invalidateToken();
     case 'PREFLIGHT_COMPLETED':
-      return isPreflight(msg.payload) ? completePreflight(msg.payload) : null;
+      return isPreflight(event.payload)
+        ? completePreflight(event.payload)
+        : null;
     case 'PREFLIGHT_FAILED':
-      return isPreflight(msg.payload) ? failPreflight(msg.payload) : null;
+      return isPreflight(event.payload) ? failPreflight(event.payload) : null;
     case 'PREFLIGHT_INVALIDATED':
-      return isPreflight(msg.payload) ? invalidatePreflight(msg.payload) : null;
+      return isPreflight(event.payload)
+        ? invalidatePreflight(event.payload)
+        : null;
     case 'TASK_COMPLETED':
-      return isJobStep(msg.payload) ? completeJobStep(msg.payload) : null;
+      return isJob(event.payload) ? completeJobStep(event.payload) : null;
     case 'JOB_COMPLETED':
-      return isJob(msg.payload) ? completeJob(msg.payload) : null;
+      return isJob(event.payload) ? completeJob(event.payload) : null;
   }
   return null;
 };
@@ -89,14 +92,14 @@ export const createSocket = ({
       opts.onopen(e);
     },
     onmessage: e => {
-      let msg = e.data;
+      let data = e.data;
       try {
-        msg = JSON.parse(e.data);
+        data = JSON.parse(e.data);
       } catch (err) {
         // swallow error
       }
-      log('[WebSocket] received:', msg);
-      const action = getAction(msg);
+      log('[WebSocket] received:', data);
+      const action = getAction(data);
       if (action) {
         dispatch(action);
       }
