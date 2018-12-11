@@ -462,7 +462,7 @@ class Job(HashIdMixin, models.Model):
         if results_has_changed:
             async_to_sync(notify_post_task)(self)
         has_completed = (
-            self.tracker.has_changed("status") and self.status == Job.Status.complete
+            self.tracker.has_changed("status") and self.status != Job.Status.started
         )
         if has_completed:
             async_to_sync(notify_post_job)(self)
