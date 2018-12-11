@@ -139,7 +139,6 @@ class ErrorWarningCountMixin:
 
 class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
-    model_type = serializers.SerializerMethodField()
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     org_name = serializers.SerializerMethodField()
     organization_url = serializers.SerializerMethodField()
@@ -164,7 +163,6 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         model = Job
         fields = (
             "id",
-            "model_type",
             "user",
             "creator",
             "plan",
@@ -185,7 +183,6 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             "message",
         )
         extra_kwargs = {
-            "model_type": {"read_only": True},
             "created_at": {"read_only": True},
             "edited_at": {"read_only": True},
             "enqueued_at": {"read_only": True},
@@ -227,9 +224,6 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         if self.requesting_user_has_rights():
             return obj.organization_url
         return None
-
-    def get_model_type(self, obj):
-        return "job"
 
     @staticmethod
     def _has_valid_preflight(most_recent_preflight):
@@ -279,7 +273,6 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
 
 class PreflightResultSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
     plan = IdOnlyField(read_only=True)
-    model_type = serializers.SerializerMethodField()
     is_ready = serializers.SerializerMethodField()
     error_count = serializers.SerializerMethodField()
     warning_count = serializers.SerializerMethodField()
@@ -291,14 +284,10 @@ class PreflightResultSerializer(ErrorWarningCountMixin, serializers.ModelSeriali
             and self._count_status_in_results(obj.results, ERROR) == 0
         )
 
-    def get_model_type(self, obj):
-        return "preflight"
-
     class Meta:
         model = PreflightResult
         fields = (
             "id",
-            "model_type",
             "organization_url",
             "user",
             "plan",
@@ -312,7 +301,6 @@ class PreflightResultSerializer(ErrorWarningCountMixin, serializers.ModelSeriali
             "is_ready",
         )
         extra_kwargs = {
-            "model_type": {"read_only": True},
             "organization_url": {"read_only": True},
             "created_at": {"read_only": True},
             "edited_at": {"read_only": True},

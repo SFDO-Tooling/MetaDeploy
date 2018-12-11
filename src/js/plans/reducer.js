@@ -32,7 +32,6 @@ export type PreflightErrors = {|
 |};
 export type Preflight = {|
   +id: string | null,
-  +model_type: 'preflight',
   +edited_at: string | null,
   +plan: string,
   +status: 'started' | 'complete' | 'failed',
@@ -78,7 +77,6 @@ const reducer = (
         ...preflights,
         [plan]: {
           id: null,
-          model_type: 'preflight',
           edited_at: null,
           plan,
           status: CONSTANTS.STATUS.STARTED,

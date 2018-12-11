@@ -6,7 +6,6 @@ import type { StepResult } from 'plans/reducer';
 
 export type Job = {|
   +id: string,
-  +model_type: 'job',
   +edited_at: string,
   +job_id: string,
   +creator: {

@@ -22,43 +22,47 @@ import type {
 } from 'plans/actions';
 import type { TokenInvalidAction } from 'accounts/actions';
 
-type Payload = Preflight | Job;
-
-const isPreflight = (obj?: Payload): boolean %checks =>
-  obj !== undefined && obj.model_type === 'preflight';
-const isJob = (obj?: Payload): boolean %checks =>
-  obj !== undefined && obj.model_type === 'job';
-
-export const getAction = (
-  event: {
-    type?: string,
-    payload?: Payload,
-  } = {},
-):
+type ErrorEvent = {|
+  type: 'BACKEND_ERROR',
+  payload: {| message: string |},
+|};
+type UserEvent = {|
+  type: 'USER_TOKEN_INVALID',
+|};
+type PreflightEvent = {|
+  type: 'PREFLIGHT_COMPLETED' | 'PREFLIGHT_FAILED' | 'PREFLIGHT_INVALIDATED',
+  payload: Preflight,
+|};
+type JobEvent = {|
+  type: 'TASK_COMPLETED' | 'JOB_COMPLETED',
+  payload: Job,
+|};
+type EventType = ErrorEvent | UserEvent | PreflightEvent | JobEvent;
+type Action =
   | TokenInvalidAction
   | PreflightCompleted
   | PreflightFailed
   | PreflightInvalid
   | JobStepCompleted
-  | JobCompleted
-  | null => {
+  | JobCompleted;
+
+export const getAction = (event: EventType): Action | null => {
+  if (!event || event.type === undefined) {
+    return null;
+  }
   switch (event.type) {
     case 'USER_TOKEN_INVALID':
       return invalidateToken();
     case 'PREFLIGHT_COMPLETED':
-      return isPreflight(event.payload)
-        ? completePreflight(event.payload)
-        : null;
+      return completePreflight(event.payload);
     case 'PREFLIGHT_FAILED':
-      return isPreflight(event.payload) ? failPreflight(event.payload) : null;
+      return failPreflight(event.payload);
     case 'PREFLIGHT_INVALIDATED':
-      return isPreflight(event.payload)
-        ? invalidatePreflight(event.payload)
-        : null;
+      return invalidatePreflight(event.payload);
     case 'TASK_COMPLETED':
-      return isJob(event.payload) ? completeJobStep(event.payload) : null;
+      return completeJobStep(event.payload);
     case 'JOB_COMPLETED':
-      return isJob(event.payload) ? completeJob(event.payload) : null;
+      return completeJob(event.payload);
   }
   return null;
 };
