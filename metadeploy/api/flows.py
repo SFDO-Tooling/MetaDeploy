@@ -38,7 +38,7 @@ class JobFlow(BasicFlow):
         step_id = self._get_step_id(task.name)
         if step_id:
             self.result.results[step_id] = [
-                {"status": ERROR, "message": str(exception)}
+                {"status": ERROR, "message": bleach.clean(str(exception))}
             ]
             self.result.save()
         return super()._post_task_exception(task, exception)
@@ -69,7 +69,7 @@ class PreflightFlow(BasicFlow):
         self.result.results.update(results)
 
     def _post_task_exception(self, task, e):
-        error_result = {"plan": [{"status": ERROR, "message": str(e)}]}
+        error_result = {"plan": [{"status": ERROR, "message": bleach.clean(str(e))}]}
         self.result.results.update(error_result)
 
     def _emit_k_v_for_status_dict(self, status):

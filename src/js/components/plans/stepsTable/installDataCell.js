@@ -9,6 +9,8 @@ import Tooltip from '@salesforce/design-system-react/components/tooltip';
 
 import { CONSTANTS } from 'plans/reducer';
 
+import { ErrorIcon } from 'components/plans/jobResults';
+
 import type { DataCellProps } from 'components/plans/stepsTable/index';
 
 const { STATUS, RESULT_STATUS } = CONSTANTS;
@@ -45,13 +47,17 @@ const JobCell = (props: DataCellProps): React.Node => {
     return null;
   }
   const { id } = item;
-  const isComplete =
-    job.results[id] &&
-    job.results[id].find(res => res.status === RESULT_STATUS.OK) !== undefined;
-  let icon, title;
+  const result = job.results[id];
+  let complete, error, contents, title;
+  if (result) {
+    complete =
+      result.find(res => res.status === RESULT_STATUS.OK) !== undefined;
+    error =
+      result.find(res => res.status === RESULT_STATUS.ERROR) !== undefined;
+  }
   if (!job.steps.includes(id)) {
     title = 'skipped';
-    icon = (
+    contents = (
       <Icon
         category="utility"
         name="dash"
@@ -63,23 +69,23 @@ const JobCell = (props: DataCellProps): React.Node => {
         className="slds-m-horizontal_x-small"
       />
     );
-  } else if (isComplete) {
+  } else if (complete) {
     title = 'completed';
-    icon = (
+    contents = (
       <Icon
         category="action"
         name="approval"
         assistiveText={{
           label: title,
         }}
-        size="x-small"
-        containerClassName="slds-icon-standard-approval"
+        size="xx-small"
+        containerClassName="slds-icon-standard-approval slds-m-left_xxx-small"
       />
     );
   } else if (job.status === STATUS.STARTED) {
     if (activeJobStep && id === activeJobStep) {
       title = 'installing';
-      icon = (
+      contents = (
         <>
           <span
             className="slds-is-relative
@@ -93,7 +99,7 @@ const JobCell = (props: DataCellProps): React.Node => {
       );
     } else {
       title = 'waiting to install';
-      icon = (
+      contents = (
         <Checkbox
           id={`step-${id}`}
           className="slds-p-around_x-small"
@@ -105,9 +111,20 @@ const JobCell = (props: DataCellProps): React.Node => {
         />
       );
     }
+  } else if (error) {
+    title = 'error';
+    contents = (
+      <>
+        <ErrorIcon
+          size="small"
+          containerClassName="slds-m-left_xx-small slds-m-right_x-small"
+        />
+        {title}
+      </>
+    );
   } else {
     title = 'not installed';
-    icon = (
+    contents = (
       <Checkbox
         id={`step-${id}`}
         className="slds-p-around_x-small"
@@ -121,7 +138,7 @@ const JobCell = (props: DataCellProps): React.Node => {
   }
   return (
     <DataTableCell title={title} {...props}>
-      {icon}
+      {contents}
     </DataTableCell>
   );
 };

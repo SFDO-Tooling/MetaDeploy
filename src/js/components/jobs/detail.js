@@ -6,6 +6,7 @@ import DocumentTitle from 'react-document-title';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
+import routes from 'utils/routes';
 import { fetchJob, updateJob } from 'jobs/actions';
 import { fetchVersion } from 'products/actions';
 import { selectPlan } from 'components/plans/detail';
@@ -137,6 +138,11 @@ class JobDetail extends React.Component<Props, { modalOpen: boolean }> {
     if (!product || !version || !plan || !job) {
       return <ProductNotFound />;
     }
+    const linkToPlan = routes.plan_detail(
+      product.slug,
+      version.label,
+      plan.slug,
+    );
     return (
       <DocumentTitle
         title={`Installation | ${plan.title} | ${product.title} | MetaDeploy`}
@@ -178,8 +184,26 @@ class JobDetail extends React.Component<Props, { modalOpen: boolean }> {
                   // These messages are pre-cleaned by the API
                   <p dangerouslySetInnerHTML={{ __html: job.message }} />
                 ) : null}
+                {job.status === CONSTANTS.STATUS.FAILED ? (
+                  <p>
+                    <Button
+                      label="Share the link to this installation job"
+                      variant="link"
+                      onClick={this.openModal}
+                    />{' '}
+                    or get help on the{' '}
+                    <a
+                      href="https://powerofus.force.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Power of Us Hub
+                    </a>
+                    .
+                  </p>
+                ) : null}
               </div>
-              <CtaButton job={job} />
+              <CtaButton job={job} linkToPlan={linkToPlan} />
             </div>
             <div
               className="slds-p-around_medium

@@ -205,7 +205,7 @@ class PlanDetail extends React.Component<Props, State> {
                 ) : null}
                 {preflight && user ? (
                   <JobResults
-                    job={preflight}
+                    preflight={preflight}
                     label="Pre-install validation"
                     failMessage={
                       'After resolving all errors, ' +

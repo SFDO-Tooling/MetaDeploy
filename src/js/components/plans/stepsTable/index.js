@@ -67,7 +67,7 @@ const StepsTable = ({
     <article className="slds-card slds-scrollable_x">
       <DataTable items={plan.steps} id="plan-steps-table">
         <DataTableColumn key="name" label="Steps" property="name" primaryColumn>
-          <NameDataCell preflight={preflight} />
+          <NameDataCell preflight={preflight} job={job} />
         </DataTableColumn>
         <DataTableColumn key="kind" label="Type" property="kind">
           <KindDataCell />
