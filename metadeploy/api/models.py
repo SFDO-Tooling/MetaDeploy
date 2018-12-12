@@ -468,6 +468,11 @@ class Job(HashIdMixin, models.Model):
             async_to_sync(notify_post_job)(self)
         return ret
 
+    def invalidate_related_preflight(self):
+        PreflightResult.objects.filter(
+            organization_url=self.organization_url, user=self.user, plan=self.plan
+        ).update(is_valid=False)
+
 
 class PreflightResultQuerySet(models.QuerySet):
     def most_recent(self, *, user, plan, is_valid_and_complete=True):

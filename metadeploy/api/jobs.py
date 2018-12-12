@@ -242,6 +242,7 @@ run_flows_job = job(run_flows)
 def enqueuer():
     logger.debug("Enqueuer live", extra={"tag": "jobs.enqueuer"})
     for j in Job.objects.filter(enqueued_at=None):
+        j.invalidate_related_preflight()
         rq_job = run_flows_job.delay(
             user=j.user,
             plan=j.plan,
