@@ -29,14 +29,6 @@ describe('getAction', () => {
 
       expect(actual).toEqual(expected);
     });
-
-    test('handles msg (no payload)', () => {
-      const msg = { type: 'PREFLIGHT_COMPLETED' };
-      const expected = null;
-      const actual = sockets.getAction(msg);
-
-      expect(actual).toEqual(expected);
-    });
   });
 
   describe('PREFLIGHT_FAILED', () => {
@@ -44,14 +36,6 @@ describe('getAction', () => {
       const preflight = { status: 'complete', results: {} };
       const msg = { type: 'PREFLIGHT_FAILED', payload: preflight };
       const expected = failPreflight(preflight);
-      const actual = sockets.getAction(msg);
-
-      expect(actual).toEqual(expected);
-    });
-
-    test('handles msg (no payload)', () => {
-      const msg = { type: 'PREFLIGHT_FAILED' };
-      const expected = null;
       const actual = sockets.getAction(msg);
 
       expect(actual).toEqual(expected);
@@ -67,32 +51,13 @@ describe('getAction', () => {
 
       expect(actual).toEqual(expected);
     });
-
-    test('handles msg (no payload)', () => {
-      const msg = { type: 'PREFLIGHT_INVALIDATED' };
-      const expected = null;
-      const actual = sockets.getAction(msg);
-
-      expect(actual).toEqual(expected);
-    });
   });
 
   describe('TASK_COMPLETED', () => {
     test('handles msg', () => {
-      const payload = {
-        step_id: 'step-1',
-        job: { id: 'job-1', steps: ['step-1'], completed_steps: [] },
-      };
+      const payload = { id: 'job-1', steps: ['step-1'], results: {} };
       const msg = { type: 'TASK_COMPLETED', payload };
       const expected = completeJobStep(payload);
-      const actual = sockets.getAction(msg);
-
-      expect(actual).toEqual(expected);
-    });
-
-    test('handles msg (no payload)', () => {
-      const msg = { type: 'TASK_COMPLETED' };
-      const expected = null;
       const actual = sockets.getAction(msg);
 
       expect(actual).toEqual(expected);
@@ -108,18 +73,18 @@ describe('getAction', () => {
 
       expect(actual).toEqual(expected);
     });
-
-    test('handles msg (no payload)', () => {
-      const msg = { type: 'JOB_COMPLETED' };
-      const expected = null;
-      const actual = sockets.getAction(msg);
-
-      expect(actual).toEqual(expected);
-    });
   });
 
   test('handles unknown msg', () => {
     const msg = { foo: 'bar' };
+    const expected = null;
+    const actual = sockets.getAction(msg);
+
+    expect(actual).toEqual(expected);
+  });
+
+  test('handles msg with unknown type', () => {
+    const msg = { type: 'foobar' };
     const expected = null;
     const actual = sockets.getAction(msg);
 

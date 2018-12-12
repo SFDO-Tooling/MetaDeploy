@@ -14,7 +14,7 @@ describe('fetchJob', () => {
         plan: 'plan-1',
         status: 'complete',
         steps: [],
-        completed_steps: [],
+        results: {},
         org_name: null,
         org_type: null,
       };

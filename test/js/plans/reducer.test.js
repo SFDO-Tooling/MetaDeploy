@@ -35,6 +35,7 @@ describe('reducer', () => {
       'plan-1': null,
       'plan-2': {
         id: null,
+        edited_at: null,
         plan: 'plan-2',
         status: 'started',
         results: {},
@@ -97,18 +98,33 @@ describe('reducer', () => {
     test('updates existing preflight', () => {
       const initial = {
         'plan-1': null,
-        'plan-2': { plan: 'plan-2', is_valid: true },
+        'plan-2': { plan: 'plan-2', is_valid: true, edited_at: '1' },
       };
+      const incoming = { plan: 'plan-2', is_valid: false, edited_at: '2' };
       const expected = {
         'plan-1': null,
-        'plan-2': { plan: 'plan-2', is_valid: false },
+        'plan-2': incoming,
       };
       const actual = reducer(initial, {
         type: 'PREFLIGHT_INVALIDATED',
-        payload: { plan: 'plan-2', is_valid: false },
+        payload: incoming,
       });
 
       expect(actual).toEqual(expected);
+    });
+
+    test('ignores older preflight', () => {
+      const initial = {
+        'plan-1': null,
+        'plan-2': { plan: 'plan-2', is_valid: true, edited_at: '2' },
+      };
+      const incoming = { plan: 'plan-2', is_valid: false, edited_at: '1' };
+      const actual = reducer(initial, {
+        type: 'PREFLIGHT_INVALIDATED',
+        payload: incoming,
+      });
+
+      expect(actual).toEqual(initial);
     });
   });
 });

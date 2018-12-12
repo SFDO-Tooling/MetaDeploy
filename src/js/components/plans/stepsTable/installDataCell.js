@@ -79,7 +79,8 @@ const JobCell = (props: DataCellProps): React.Node => {
           label: title,
         }}
         size="xx-small"
-        containerClassName="slds-icon-standard-approval slds-m-left_xxx-small"
+        containerClassName="slds-icon-standard-approval
+          slds-m-left_xxx-small"
       />
     );
   } else if (job.status === STATUS.STARTED) {
@@ -117,7 +118,8 @@ const JobCell = (props: DataCellProps): React.Node => {
       <>
         <ErrorIcon
           size="small"
-          containerClassName="slds-m-left_xx-small slds-m-right_x-small"
+          containerClassName="slds-m-left_xx-small
+            slds-m-right_x-small"
         />
         {title}
       </>
