@@ -25,7 +25,7 @@ describe('fetchJob', () => {
       };
       const succeeded = {
         type: 'FETCH_JOB_SUCCEEDED',
-        payload: { id: 'job-1', job },
+        payload: job,
       };
 
       expect.assertions(1);
@@ -110,30 +110,16 @@ describe('startJob', () => {
   });
 });
 
-describe('completeJobStep', () => {
-  test('returns JobStepCompleted', () => {
+[
+  { type: 'JOB_STEP_COMPLETED', action: 'completeJobStep' },
+  { type: 'JOB_COMPLETED', action: 'completeJob' },
+  { type: 'JOB_FAILED', action: 'failJob' },
+].forEach(({ type, action }) => {
+  test(`${action} returns action object: ${type}`, () => {
     const payload = { foo: 'bar' };
-    const expected = { type: 'JOB_STEP_COMPLETED', payload };
+    const expected = { type, payload };
 
-    expect(actions.completeJobStep(payload)).toEqual(expected);
-  });
-});
-
-describe('completeJob', () => {
-  test('returns JobCompleted', () => {
-    const payload = { foo: 'bar' };
-    const expected = { type: 'JOB_COMPLETED', payload };
-
-    expect(actions.completeJob(payload)).toEqual(expected);
-  });
-});
-
-describe('failJob', () => {
-  test('returns JobFailed', () => {
-    const payload = { foo: 'bar' };
-    const expected = { type: 'JOB_FAILED', payload };
-
-    expect(actions.failJob(payload)).toEqual(expected);
+    expect(actions[action](payload)).toEqual(expected);
   });
 });
 

@@ -18,41 +18,28 @@ describe('reducer', () => {
     expect(actual).toEqual(expected);
   });
 
-  test('handles FETCH_JOB_SUCCEEDED action', () => {
-    const initial = { 'job-2': null };
-    const expected = { 'job-2': null, 'job-1': { id: 'job-1' } };
-    const actual = reducer(initial, {
-      type: 'FETCH_JOB_SUCCEEDED',
-      payload: { id: 'job-1', job: { id: 'job-1' } },
-    });
-
-    expect(actual).toEqual(expected);
-  });
-
-  test('handles JOB_STARTED action', () => {
-    const initial = {};
-    const expected = { 'job-1': { id: 'job-1' } };
-    const actual = reducer(initial, {
-      type: 'JOB_STARTED',
-      payload: { id: 'job-1' },
-    });
-
-    expect(actual).toEqual(expected);
-  });
-
-  describe('JOB_STEP_COMPLETED action', () => {
-    test('adds new job', () => {
+  [
+    { type: 'FETCH_JOB_SUCCEEDED' },
+    { type: 'JOB_STARTED' },
+    { type: 'JOB_COMPLETED' },
+    { type: 'JOB_FAILED' },
+    { type: 'JOB_UPDATED' },
+    { type: 'JOB_STEP_COMPLETED' },
+  ].forEach(({ type }) => {
+    test(`handles ${type} action`, () => {
       const initial = {};
       const expected = { 'job-1': { id: 'job-1' } };
       const actual = reducer(initial, {
-        type: 'JOB_STEP_COMPLETED',
+        type,
         payload: { id: 'job-1' },
       });
 
       expect(actual).toEqual(expected);
     });
+  });
 
-    test('updates existing job', () => {
+  describe('with existing job', () => {
+    test('updates with newer job', () => {
       const initial = {
         'job-1': {
           id: 'job-1',
@@ -98,38 +85,5 @@ describe('reducer', () => {
 
       expect(actual).toEqual(initial);
     });
-  });
-
-  test('handles JOB_COMPLETED action', () => {
-    const initial = {};
-    const expected = { 'job-1': { id: 'job-1' } };
-    const actual = reducer(initial, {
-      type: 'JOB_COMPLETED',
-      payload: { id: 'job-1' },
-    });
-
-    expect(actual).toEqual(expected);
-  });
-
-  test('handles JOB_FAILED action', () => {
-    const initial = {};
-    const expected = { 'job-1': { id: 'job-1' } };
-    const actual = reducer(initial, {
-      type: 'JOB_FAILED',
-      payload: { id: 'job-1' },
-    });
-
-    expect(actual).toEqual(expected);
-  });
-
-  test('handles JOB_UPDATED action', () => {
-    const initial = {};
-    const expected = { 'job-1': { id: 'job-1' } };
-    const actual = reducer(initial, {
-      type: 'JOB_UPDATED',
-      payload: { id: 'job-1' },
-    });
-
-    expect(actual).toEqual(expected);
   });
 });

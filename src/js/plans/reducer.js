@@ -67,10 +67,6 @@ const reducer = (
   switch (action.type) {
     case 'USER_LOGGED_OUT':
       return {};
-    case 'FETCH_PREFLIGHT_SUCCEEDED': {
-      const { plan, preflight } = action.payload;
-      return { ...preflights, [plan]: preflight };
-    }
     case 'PREFLIGHT_STARTED': {
       const plan = action.payload;
       return {
@@ -88,6 +84,7 @@ const reducer = (
         },
       };
     }
+    case 'FETCH_PREFLIGHT_SUCCEEDED':
     case 'PREFLIGHT_COMPLETED':
     case 'PREFLIGHT_FAILED':
     case 'PREFLIGHT_INVALIDATED': {
