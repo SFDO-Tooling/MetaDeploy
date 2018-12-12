@@ -2,7 +2,7 @@
 
 import Sockette from 'sockette';
 
-import { completeJobStep, completeJob } from 'jobs/actions';
+import { completeJobStep, completeJob, failJob } from 'jobs/actions';
 import {
   completePreflight,
   failPreflight,
@@ -13,7 +13,7 @@ import { log } from 'utils/logging';
 
 import type { Dispatch } from 'redux-thunk';
 import type { Job } from 'jobs/reducer';
-import type { JobStepCompleted, JobCompleted } from 'jobs/actions';
+import type { JobStepCompleted, JobCompleted, JobFailed } from 'jobs/actions';
 import type { Preflight } from 'plans/reducer';
 import type {
   PreflightCompleted,
@@ -34,7 +34,7 @@ type PreflightEvent = {|
   payload: Preflight,
 |};
 type JobEvent = {|
-  type: 'TASK_COMPLETED' | 'JOB_COMPLETED',
+  type: 'TASK_COMPLETED' | 'JOB_COMPLETED' | 'JOB_FAILED',
   payload: Job,
 |};
 type EventType = ErrorEvent | UserEvent | PreflightEvent | JobEvent;
@@ -44,7 +44,8 @@ type Action =
   | PreflightFailed
   | PreflightInvalid
   | JobStepCompleted
-  | JobCompleted;
+  | JobCompleted
+  | JobFailed;
 
 export const getAction = (event: EventType): Action | null => {
   if (!event || event.type === undefined) {
@@ -63,6 +64,8 @@ export const getAction = (event: EventType): Action | null => {
       return completeJobStep(event.payload);
     case 'JOB_COMPLETED':
       return completeJob(event.payload);
+    case 'JOB_FAILED':
+      return failJob(event.payload);
   }
   return null;
 };

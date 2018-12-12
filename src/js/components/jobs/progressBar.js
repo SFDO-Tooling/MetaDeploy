@@ -10,17 +10,14 @@ import type { Job as JobType } from 'jobs/reducer';
 // Progress Bar has not been implemented yet in design-system-react
 // https://github.com/salesforce/design-system-react/issues/1365
 const ProgressBar = ({ job }: { job: JobType }): React.Node => {
-  const completedSteps = [];
-  for (const step of job.steps) {
-    if (
+  // Get array of completed steps
+  const completedSteps = job.steps.filter(
+    step =>
       job.results[step] &&
       job.results[step].find(
         res => res.status === CONSTANTS.RESULT_STATUS.OK,
-      ) !== undefined
-    ) {
-      completedSteps.push(step);
-    }
-  }
+      ) !== undefined,
+  );
   const progress = Math.min(
     Math.round((completedSteps.length / job.steps.length) * 100),
     100,

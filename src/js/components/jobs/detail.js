@@ -21,6 +21,7 @@ import { shouldFetchVersion, getLoadingOrNotFound } from 'products/utils';
 import BodyContainer from 'components/bodyContainer';
 import CtaButton from 'components/jobs/ctaButton';
 import Header from 'components/plans/header';
+import JobMessage from 'components/jobs/jobMessage';
 import JobResults from 'components/plans/jobResults';
 import ProductNotFound from 'components/products/product404';
 import ProgressBar from 'components/jobs/progressBar';
@@ -28,8 +29,6 @@ import ShareModal from 'components/jobs/shareModal';
 import StepsTable from 'components/plans/stepsTable';
 import Toasts from 'components/plans/toasts';
 import UserInfo from 'components/jobs/userInfo';
-
-import { CONSTANTS } from 'plans/reducer';
 
 import type { AppState } from 'app/reducer';
 import type { InitialProps } from 'components/utils';
@@ -178,30 +177,7 @@ class JobDetail extends React.Component<Props, { modalOpen: boolean }> {
               <div className="slds-text-longform">
                 <h3 className="slds-text-heading_small">{plan.title}</h3>
                 <JobResults job={job} label="Installation" />
-                {job.status === CONSTANTS.STATUS.COMPLETE &&
-                !job.error_count &&
-                job.message ? (
-                  // These messages are pre-cleaned by the API
-                  <p dangerouslySetInnerHTML={{ __html: job.message }} />
-                ) : null}
-                {job.status === CONSTANTS.STATUS.FAILED ? (
-                  <p>
-                    <Button
-                      label="Share the link to this installation job"
-                      variant="link"
-                      onClick={this.openModal}
-                    />{' '}
-                    or get help on the{' '}
-                    <a
-                      href="https://powerofus.force.com/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Power of Us Hub
-                    </a>
-                    .
-                  </p>
-                ) : null}
+                <JobMessage job={job} openModal={this.openModal} />
               </div>
               <CtaButton job={job} linkToPlan={linkToPlan} />
             </div>

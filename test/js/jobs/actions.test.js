@@ -128,6 +128,15 @@ describe('completeJob', () => {
   });
 });
 
+describe('failJob', () => {
+  test('returns JobFailed', () => {
+    const payload = { foo: 'bar' };
+    const expected = { type: 'JOB_FAILED', payload };
+
+    expect(actions.failJob(payload)).toEqual(expected);
+  });
+});
+
 describe('updateJob', () => {
   describe('success', () => {
     test('dispatches JOB_UPDATED action', () => {

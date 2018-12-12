@@ -1,7 +1,7 @@
 import Sockette from 'sockette';
 
 import * as sockets from 'utils/websockets';
-import { completeJobStep, completeJob } from 'jobs/actions';
+import { completeJobStep, completeJob, failJob } from 'jobs/actions';
 import {
   completePreflight,
   failPreflight,
@@ -69,6 +69,17 @@ describe('getAction', () => {
       const payload = { id: 'job-1', steps: ['step-1'] };
       const msg = { type: 'JOB_COMPLETED', payload };
       const expected = completeJob(payload);
+      const actual = sockets.getAction(msg);
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('JOB_FAILED', () => {
+    test('handles msg', () => {
+      const payload = { id: 'job-1', steps: ['step-1'] };
+      const msg = { type: 'JOB_FAILED', payload };
+      const expected = failJob(payload);
       const actual = sockets.getAction(msg);
 
       expect(actual).toEqual(expected);

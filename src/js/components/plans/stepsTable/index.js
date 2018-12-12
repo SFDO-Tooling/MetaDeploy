@@ -49,15 +49,11 @@ const StepsTable = ({
   job?: JobType,
   handleStepsChange?: (string, boolean) => void,
 }) => {
+  // Get the currently-running step
   let activeJobStep;
   if (job && job.status === CONSTANTS.STATUS.STARTED) {
     for (const step of job.steps) {
-      if (
-        !job.results[step] ||
-        job.results[step].find(
-          res => res.status === CONSTANTS.RESULT_STATUS.OK,
-        ) === undefined
-      ) {
+      if (!job.results[step]) {
         activeJobStep = step;
         break;
       }

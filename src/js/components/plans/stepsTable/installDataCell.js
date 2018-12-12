@@ -83,6 +83,18 @@ const JobCell = (props: DataCellProps): React.Node => {
           slds-m-left_xxx-small"
       />
     );
+  } else if (error) {
+    title = 'error';
+    contents = (
+      <>
+        <ErrorIcon
+          size="small"
+          containerClassName="slds-m-left_xx-small
+            slds-m-right_x-small"
+        />
+        {title}
+      </>
+    );
   } else if (job.status === STATUS.STARTED) {
     if (activeJobStep && id === activeJobStep) {
       title = 'installing';
@@ -112,18 +124,6 @@ const JobCell = (props: DataCellProps): React.Node => {
         />
       );
     }
-  } else if (error) {
-    title = 'error';
-    contents = (
-      <>
-        <ErrorIcon
-          size="small"
-          containerClassName="slds-m-left_xx-small
-            slds-m-right_x-small"
-        />
-        {title}
-      </>
-    );
   } else {
     title = 'not installed';
     contents = (

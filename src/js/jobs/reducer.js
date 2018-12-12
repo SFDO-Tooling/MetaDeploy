@@ -44,6 +44,7 @@ const reducer = (
     }
     case 'JOB_STARTED':
     case 'JOB_COMPLETED':
+    case 'JOB_FAILED':
     case 'JOB_UPDATED':
     case 'JOB_STEP_COMPLETED': {
       const job = action.payload;

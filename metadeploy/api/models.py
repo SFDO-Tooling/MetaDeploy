@@ -458,13 +458,13 @@ class Job(HashIdMixin, models.Model):
 
     def save(self, *args, **kwargs):
         ret = super().save(*args, **kwargs)
-        results_has_changed = self.tracker.has_changed("results")
+        results_has_changed = self.tracker.has_changed("results") and self.results != {}
         if results_has_changed:
             async_to_sync(notify_post_task)(self)
-        has_completed = (
+        has_stopped_running = (
             self.tracker.has_changed("status") and self.status != Job.Status.started
         )
-        if has_completed:
+        if has_stopped_running:
             async_to_sync(notify_post_job)(self)
         return ret
 

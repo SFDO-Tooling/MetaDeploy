@@ -29,6 +29,7 @@ export type JobStepCompleted = {
   payload: Job,
 };
 export type JobCompleted = { type: 'JOB_COMPLETED', payload: Job };
+export type JobFailed = { type: 'JOB_FAILED', payload: Job };
 export type JobUpdated = { type: 'JOB_UPDATED', payload: Job };
 export type JobsAction =
   | FetchJobStarted
@@ -39,6 +40,7 @@ export type JobsAction =
   | JobRejected
   | JobStepCompleted
   | JobCompleted
+  | JobFailed
   | JobUpdated;
 
 export const fetchJob = (jobId: string): ThunkAction => (
@@ -88,6 +90,11 @@ export const completeJobStep = (payload: Job): JobStepCompleted => ({
 
 export const completeJob = (payload: Job): JobCompleted => ({
   type: 'JOB_COMPLETED',
+  payload,
+});
+
+export const failJob = (payload: Job): JobFailed => ({
+  type: 'JOB_FAILED',
   payload,
 });
 
