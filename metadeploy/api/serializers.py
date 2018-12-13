@@ -69,6 +69,7 @@ class PlanSerializer(serializers.ModelSerializer):
             "tier",
             "slug",
             "steps",
+            "is_listed",
         )
 
 
@@ -92,6 +93,7 @@ class VersionSerializer(serializers.ModelSerializer):
             "primary_plan",
             "secondary_plan",
             "additional_plans",
+            "is_listed",
         )
 
 
@@ -112,6 +114,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "image",
             "most_recent_version",
             "slug",
+            "is_listed",
             "order_key",
         )
 

@@ -18,6 +18,7 @@ export type Plan = {
   +title: string,
   +preflight_message: string,
   +steps: Array<Step>,
+  +is_listed: boolean,
 };
 export type Plans = Array<Plan>;
 
