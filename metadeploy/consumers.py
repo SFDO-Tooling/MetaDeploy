@@ -1,6 +1,14 @@
+from collections import namedtuple
+
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
 from metadeploy.api.models import Job
+
+Request = namedtuple("Request", "user")
+
+
+def user_context(user):
+    return {"request": Request(user)}
 
 
 class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
@@ -19,7 +27,20 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
                 'content': json_message,
             })
         """
-        await self.send_json(event["content"])
+        if "content" in event:
+            await self.send_json(event["content"])
+            return
+        if "serializer" in event and "instance" in event and "inner_type" in event:
+            instance = event["instance"]
+            serializer = event["serializer"]
+            payload = {
+                "payload": serializer(
+                    instance=instance, context=user_context(self.scope["user"])
+                ).data,
+                "type": event["inner_type"],
+            }
+            await self.send_json(payload)
+            return
 
     async def receive_json(self, content, **kwargs):
         # Just used to subscribe to notification channels.

@@ -11,16 +11,10 @@ Websocket notifications you can subscribe to:
     job-:id
         TASK_COMPLETED
         JOB_COMPLETED
+        JOB_FAILED
+        JOB_CANCELED
 """
-from collections import namedtuple
-
 from channels.layers import get_channel_layer
-
-Request = namedtuple("Request", "user")
-
-
-def user_context(user):
-    return {"request": Request(user)}
 
 
 async def push_message_about_instance(instance, json_message):
@@ -30,6 +24,22 @@ async def push_message_about_instance(instance, json_message):
     channel_layer = get_channel_layer()
     await channel_layer.group_send(
         group_name, {"type": "notify", "content": json_message}
+    )
+
+
+async def push_serializable(instance, serializer, type_):
+    model_name = instance._meta.model_name
+    id = str(instance.id)
+    group_name = f"{model_name}-{id}"
+    channel_layer = get_channel_layer()
+    await channel_layer.group_send(
+        group_name,
+        {
+            "type": "notify",
+            "instance": instance,
+            "serializer": serializer,
+            "inner_type": type_,
+        },
     )
 
 
@@ -75,19 +85,17 @@ async def report_error(user):
 async def notify_post_task(job, user):
     from .serializers import JobSerializer
 
-    payload = JobSerializer(instance=job, context=user_context(user)).data
-    message = {"type": "TASK_COMPLETED", "payload": payload}
-    await push_message_about_instance(job, message)
+    await push_serializable(job, JobSerializer, "TASK_COMPLETED")
 
 
 async def notify_post_job(job, user):
     from .serializers import JobSerializer
     from .models import Job
 
-    payload = JobSerializer(instance=job, context=user_context(user)).data
-    message = {"payload": payload}
     if job.status == Job.Status.complete:
-        message["type"] = "JOB_COMPLETED"
+        type_ = "JOB_COMPLETED"
     elif job.status == Job.Status.failed:
-        message["type"] = "JOB_FAILED"
-    await push_message_about_instance(job, message)
+        type_ = "JOB_FAILED"
+    elif job.status == Job.Status.canceled:
+        type_ = "JOB_CANCELED"
+    await push_serializable(job, JobSerializer, type_)
