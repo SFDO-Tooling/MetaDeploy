@@ -82,13 +82,13 @@ async def report_error(user):
     await push_message_about_instance(user, message)
 
 
-async def notify_post_task(job, user):
+async def notify_post_task(job):
     from .serializers import JobSerializer
 
     await push_serializable(job, JobSerializer, "TASK_COMPLETED")
 
 
-async def notify_post_job(job, user):
+async def notify_post_job(job):
     from .serializers import JobSerializer
     from .models import Job
 

@@ -468,18 +468,12 @@ class Job(HashIdMixin, models.Model):
                 self.tracker.has_changed("results") and self.results != {}
             )
             if results_has_changed:
-                # XXX THIS IS WRONG: We don't know which users are
-                # seeing the job at this point, so claiming it's always
-                # the job owner is wrong.
-                async_to_sync(notify_post_task)(self, self.user)
+                async_to_sync(notify_post_task)(self)
             has_stopped_running = (
                 self.tracker.has_changed("status") and self.status != Job.Status.started
             )
             if has_stopped_running:
-                # XXX THIS IS WRONG: We don't know which users are
-                # seeing the job at this point, so claiming it's always
-                # the job owner is wrong.
-                async_to_sync(notify_post_job)(self, self.user)
+                async_to_sync(notify_post_job)(self)
         except RuntimeError as error:
             logger.warn(f"RuntimeError: {error}")
         return ret
