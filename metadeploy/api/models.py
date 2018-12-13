@@ -431,29 +431,18 @@ class Step(HashIdMixin, models.Model):
         return f"Step {self.name} of {self.plan.title} ({self.order_key})"
 
 
-class JobQuerySet(models.QuerySet):
-    def all_completed_step_ids(self, *, user, plan):
-        step_names = itertools.chain(
-            *self.filter(user=user, plan=plan)
-            .order_by("-created_at")
-            .values_list("completed_steps", flat=True)
-        )
-        return Step.objects.filter(name__in=step_names).values_list("id", flat=True)
-
-
 class Job(HashIdMixin, models.Model):
     Status = Choices("started", "complete", "failed", "canceled")
-    tracker = FieldTracker(fields=("completed_steps", "status"))
-
-    objects = JobQuerySet.as_manager()
+    tracker = FieldTracker(fields=("results", "status"))
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
     steps = models.ManyToManyField(Step)
     organization_url = models.URLField(blank=True)
     # This should be a list of step names:
-    completed_steps = JSONField(default=list, blank=True)
+    results = JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    edited_at = models.DateTimeField(auto_now=True)
     enqueued_at = models.DateTimeField(null=True)
     job_id = models.UUIDField(null=True)
     status = models.CharField(choices=Status, max_length=64, default=Status.started)
@@ -469,13 +458,30 @@ class Job(HashIdMixin, models.Model):
 
     def save(self, *args, **kwargs):
         ret = super().save(*args, **kwargs)
-        steps_has_changed = self.tracker.has_changed("completed_steps")
-        if steps_has_changed:
+        results_has_changed = self.tracker.has_changed("results") and self.results != {}
+        if results_has_changed:
             async_to_sync(notify_post_task)(self)
-        status_has_changed = self.tracker.has_changed("status")
-        if status_has_changed:
+        has_stopped_running = (
+            self.tracker.has_changed("status") and self.status != Job.Status.started
+        )
+        if has_stopped_running:
             async_to_sync(notify_post_job)(self)
         return ret
+
+    def invalidate_related_preflight(self):
+        # We expect this to be a list of 1 or 0, but we want to account
+        # for the possibility of a larger set. We don't use .update
+        # because we want to trigger the logic in the preflight's save
+        # method.
+        preflights = PreflightResult.objects.filter(
+            organization_url=self.organization_url,
+            user=self.user,
+            plan=self.plan,
+            is_valid=True,
+        )
+        for preflight in preflights:
+            preflight.is_valid = False
+            preflight.save()
 
 
 class PreflightResultQuerySet(models.QuerySet):
@@ -497,6 +503,7 @@ class PreflightResult(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True)
+    edited_at = models.DateTimeField(auto_now=True)
     is_valid = models.BooleanField(default=True)
     status = models.CharField(choices=Status, max_length=64, default=Status.started)
     # Maybe we don't use foreign keys here because we want the result to

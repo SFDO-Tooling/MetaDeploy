@@ -11,6 +11,8 @@ import KindDataCell from 'components/plans/stepsTable/kindDataCell';
 import NameDataCell from 'components/plans/stepsTable/nameDataCell';
 import RequiredDataCell from 'components/plans/stepsTable/requiredDataCell';
 
+import { CONSTANTS } from 'plans/reducer';
+
 import type { Job as JobType } from 'jobs/reducer';
 import type {
   Plan as PlanType,
@@ -29,6 +31,7 @@ export type DataCellProps = {
   selectedSteps?: SelectedStepsType,
   handleStepsChange?: (string, boolean) => void,
   job?: JobType,
+  activeJobStep?: string,
 };
 
 const StepsTable = ({
@@ -45,33 +48,46 @@ const StepsTable = ({
   selectedSteps?: SelectedStepsType,
   job?: JobType,
   handleStepsChange?: (string, boolean) => void,
-}) => (
-  <article className="slds-card slds-scrollable_x">
-    <DataTable items={plan.steps} id="plan-steps-table">
-      <DataTableColumn key="name" label="Steps" property="name" primaryColumn>
-        <NameDataCell preflight={preflight} />
-      </DataTableColumn>
-      <DataTableColumn key="kind" label="Type" property="kind">
-        <KindDataCell />
-      </DataTableColumn>
-      <DataTableColumn key="is_required" property="is_required">
-        <RequiredDataCell preflight={preflight} job={job} />
-      </DataTableColumn>
-      <DataTableColumn
-        key="is_recommended"
-        label={<InstallDataColumnLabel />}
-        property="is_recommended"
-      >
-        <InstallDataCell
-          user={user}
-          preflight={preflight}
-          selectedSteps={selectedSteps}
-          handleStepsChange={handleStepsChange}
-          job={job}
-        />
-      </DataTableColumn>
-    </DataTable>
-  </article>
-);
+}) => {
+  // Get the currently-running step
+  let activeJobStep;
+  if (job && job.status === CONSTANTS.STATUS.STARTED) {
+    for (const step of job.steps) {
+      if (!job.results[step]) {
+        activeJobStep = step;
+        break;
+      }
+    }
+  }
+  return (
+    <article className="slds-card slds-scrollable_x">
+      <DataTable items={plan.steps} id="plan-steps-table">
+        <DataTableColumn key="name" label="Steps" property="name" primaryColumn>
+          <NameDataCell preflight={preflight} job={job} />
+        </DataTableColumn>
+        <DataTableColumn key="kind" label="Type" property="kind">
+          <KindDataCell />
+        </DataTableColumn>
+        <DataTableColumn key="is_required" property="is_required">
+          <RequiredDataCell preflight={preflight} job={job} />
+        </DataTableColumn>
+        <DataTableColumn
+          key="is_recommended"
+          label={<InstallDataColumnLabel />}
+          property="is_recommended"
+        >
+          <InstallDataCell
+            user={user}
+            preflight={preflight}
+            selectedSteps={selectedSteps}
+            handleStepsChange={handleStepsChange}
+            job={job}
+            activeJobStep={activeJobStep}
+          />
+        </DataTableColumn>
+      </DataTable>
+    </article>
+  );
+};
 
 export default StepsTable;
