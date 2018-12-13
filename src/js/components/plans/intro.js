@@ -35,16 +35,14 @@ const Intro = ({
   >
     <div className="slds-text-longform">
       <h2 className="slds-text-heading_large">{plan.title}</h2>
-      <div className="slds-p-vertical_medium">
-        <p className="slds-text-heading_small">
-          This plan is part of <strong>{product.title}</strong>, {version.label}
-        </p>
-        <p>
+      <p className="slds-text-heading_small">
+        This plan is part of{' '}
+        <strong>
           <Link to={routes.version_detail(product.slug, version.label)}>
-            View available plans
+            {product.title}, {version.label}
           </Link>
-        </p>
-      </div>
+        </strong>
+      </p>
       {preMessage}
       {results}
       {postMessage}

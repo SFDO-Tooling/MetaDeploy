@@ -19,7 +19,7 @@ import { startJob } from 'jobs/actions';
 
 import BodyContainer from 'components/bodyContainer';
 import CtaButton from 'components/plans/ctaButton';
-import Header from 'components/plans/header';
+import Header from 'components/products/header';
 import Intro from 'components/plans/intro';
 import JobResults from 'components/plans/jobResults';
 import ProductNotFound from 'components/products/product404';
@@ -186,7 +186,7 @@ class PlanDetail extends React.Component<Props, State> {
     return (
       <DocumentTitle title={`${plan.title} | ${product.title} | MetaDeploy`}>
         <>
-          <Header product={product} version={version} plan={plan} />
+          <Header product={product} version={version} />
           <BodyContainer>
             {preflight && user ? (
               <Toasts model={preflight} label="Pre-install validation" />
