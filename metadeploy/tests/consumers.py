@@ -2,6 +2,7 @@ import pytest
 from channels.testing import WebsocketCommunicator
 from django.contrib.auth.models import AnonymousUser
 
+from ..api.models import Job
 from ..api.push import notify_post_job, user_context, user_token_expired
 from ..api.serializers import JobSerializer
 from ..consumers import PushNotificationConsumer
@@ -39,7 +40,7 @@ async def test_push_notification_consumer__anonymous():
 @pytest.mark.asyncio
 async def test_push_notification_consumer__subscribe_job(user_factory, job_factory):
     user = user_factory()
-    job = job_factory(user=user)
+    job = job_factory(user=user, status=Job.Status.complete)
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
     communicator.scope["user"] = user

@@ -12,6 +12,27 @@ class IdOnlyField(serializers.CharField):
         return str(value.id)
 
 
+class ErrorWarningCountMixin:
+    @staticmethod
+    def _count_status_in_results(results, status_name):
+        count = 0
+        for val in results.values():
+            for status in val:
+                if status["status"] == status_name:
+                    count += 1
+        return count
+
+    def get_error_count(self, obj):
+        if obj.status == self.Meta.model.Status.started:
+            return 0
+        return self._count_status_in_results(obj.results, ERROR)
+
+    def get_warning_count(self, obj):
+        if obj.status == self.Meta.model.Status.started:
+            return 0
+        return self._count_status_in_results(obj.results, WARN)
+
+
 class FullUserSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
 
@@ -117,27 +138,6 @@ class ProductSerializer(serializers.ModelSerializer):
             "is_listed",
             "order_key",
         )
-
-
-class ErrorWarningCountMixin:
-    @staticmethod
-    def _count_status_in_results(results, status_name):
-        count = 0
-        for val in results.values():
-            for status in val:
-                if status["status"] == status_name:
-                    count += 1
-        return count
-
-    def get_error_count(self, obj):
-        if obj.status == self.Meta.model.Status.started:
-            return 0
-        return self._count_status_in_results(obj.results, ERROR)
-
-    def get_warning_count(self, obj):
-        if obj.status == self.Meta.model.Status.started:
-            return 0
-        return self._count_status_in_results(obj.results, WARN)
 
 
 class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
@@ -275,7 +275,9 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
 
 
 class PreflightResultSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
     plan = IdOnlyField(read_only=True)
+    user = IdOnlyField(read_only=True)
     is_ready = serializers.SerializerMethodField()
     error_count = serializers.SerializerMethodField()
     warning_count = serializers.SerializerMethodField()

@@ -223,7 +223,7 @@ class TestPreflight:
 
         assert response.status_code == 200
         assert response.json() == {
-            "id": preflight.id,
+            "id": str(preflight.id),
             "organization_url": client.user.instance_url,
             "plan": str(plan.id),
             "created_at": format_timestamp(preflight.created_at),
@@ -233,7 +233,7 @@ class TestPreflight:
             "error_count": 0,
             "warning_count": 0,
             "is_ready": False,
-            "user": client.user.id,
+            "user": str(client.user.id),
             "edited_at": format_timestamp(preflight.edited_at),
         }
 
