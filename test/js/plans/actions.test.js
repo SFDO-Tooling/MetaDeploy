@@ -23,7 +23,7 @@ describe('fetchPreflight', () => {
       };
       const succeeded = {
         type: 'FETCH_PREFLIGHT_SUCCEEDED',
-        payload: { plan: 'plan-1', preflight },
+        payload: preflight,
       };
 
       expect.assertions(1);
@@ -98,29 +98,15 @@ describe('startPreflight', () => {
   });
 });
 
-describe('completePreflight', () => {
-  test('returns PreflightCompleted', () => {
+[
+  { type: 'PREFLIGHT_COMPLETED', action: 'completePreflight' },
+  { type: 'PREFLIGHT_FAILED', action: 'failPreflight' },
+  { type: 'PREFLIGHT_INVALIDATED', action: 'invalidatePreflight' },
+].forEach(({ type, action }) => {
+  test(`${action} returns action object: ${type}`, () => {
     const payload = { foo: 'bar' };
-    const expected = { type: 'PREFLIGHT_COMPLETED', payload };
+    const expected = { type, payload };
 
-    expect(actions.completePreflight(payload)).toEqual(expected);
-  });
-});
-
-describe('failPreflight', () => {
-  test('returns PreflightFailed', () => {
-    const payload = { foo: 'bar' };
-    const expected = { type: 'PREFLIGHT_FAILED', payload };
-
-    expect(actions.failPreflight(payload)).toEqual(expected);
-  });
-});
-
-describe('invalidatePreflight', () => {
-  test('returns PreflightInvalid', () => {
-    const payload = { foo: 'bar' };
-    const expected = { type: 'PREFLIGHT_INVALIDATED', payload };
-
-    expect(actions.invalidatePreflight(payload)).toEqual(expected);
+    expect(actions[action](payload)).toEqual(expected);
   });
 });

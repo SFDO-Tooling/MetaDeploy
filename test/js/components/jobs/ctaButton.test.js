@@ -1,4 +1,5 @@
 import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { render } from 'react-testing-library';
 
 import CtaButton from 'components/jobs/ctaButton';
@@ -15,7 +16,11 @@ describe('<CtaButton />', () => {
       job: defaultJob,
     };
     const opts = { ...defaults, ...options };
-    const { getByText, container } = render(<CtaButton job={opts.job} />);
+    const { getByText, container } = render(
+      <MemoryRouter>
+        <CtaButton job={opts.job} linkToPlan="/my/plan/" />
+      </MemoryRouter>,
+    );
     return { getByText, container };
   };
 
@@ -42,6 +47,14 @@ describe('<CtaButton />', () => {
 
         expect(container.children).toHaveLength(0);
       });
+    });
+  });
+
+  describe('failed job', () => {
+    test('renders return to preflight btn', () => {
+      const { getByText } = setup({ job: { status: 'failed' } });
+
+      expect(getByText('Return to Pre-Install Validation')).toBeVisible();
     });
   });
 

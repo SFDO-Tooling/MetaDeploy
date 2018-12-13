@@ -10,7 +10,7 @@ type FetchPreflightStarted = {
 };
 type FetchPreflightSucceeded = {
   type: 'FETCH_PREFLIGHT_SUCCEEDED',
-  payload: { plan: string, preflight: Preflight },
+  payload: Preflight,
 };
 type FetchPreflightFailed = {
   type: 'FETCH_PREFLIGHT_FAILED',
@@ -55,7 +55,7 @@ export const fetchPreflight = (planId: string): ThunkAction => (
     .then(response =>
       dispatch({
         type: 'FETCH_PREFLIGHT_SUCCEEDED',
-        payload: { plan: planId, preflight: response },
+        payload: response,
       }),
     )
     .catch(err => {

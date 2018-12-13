@@ -68,6 +68,7 @@ class PlanSerializer(serializers.ModelSerializer):
             "slug",
             "steps",
             "is_allowed",
+            "is_listed",
         )
 
     def get_is_allowed(self, obj):
@@ -94,13 +95,14 @@ class VersionSerializer(serializers.ModelSerializer):
             "primary_plan",
             "secondary_plan",
             "additional_plans",
+            "is_listed",
         )
 
 
 class ProductSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     category = serializers.CharField(source="category.title")
-    most_recent_version = serializers.SerializerMethodField()
+    most_recent_version = VersionSerializer()
     is_allowed = serializers.SerializerMethodField()
 
     class Meta:
@@ -116,20 +118,36 @@ class ProductSerializer(serializers.ModelSerializer):
             "most_recent_version",
             "slug",
             "is_allowed",
+            "is_listed",
             "order_key",
         )
-
-    def get_most_recent_version(self, obj):
-        version = obj.most_recent_version(self.context["request"].user)
-        if version:
-            return VersionSerializer(version, context=self.context).data
-        return None
 
     def get_is_allowed(self, obj):
         return obj.is_visible_to(self.context["request"].user)
 
 
-class JobSerializer(serializers.ModelSerializer):
+class ErrorWarningCountMixin:
+    @staticmethod
+    def _count_status_in_results(results, status_name):
+        count = 0
+        for val in results.values():
+            for status in val:
+                if status["status"] == status_name:
+                    count += 1
+        return count
+
+    def get_error_count(self, obj):
+        if obj.status == self.Meta.model.Status.started:
+            return 0
+        return self._count_status_in_results(obj.results, ERROR)
+
+    def get_warning_count(self, obj):
+        if obj.status == self.Meta.model.Status.started:
+            return 0
+        return self._count_status_in_results(obj.results, WARN)
+
+
+class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     org_name = serializers.SerializerMethodField()
@@ -141,6 +159,8 @@ class JobSerializer(serializers.ModelSerializer):
     steps = serializers.PrimaryKeyRelatedField(
         queryset=Step.objects.all(), many=True, pk_field=serializers.CharField()
     )
+    error_count = serializers.SerializerMethodField()
+    warning_count = serializers.SerializerMethodField()
 
     # Emitted fields:
     creator = serializers.SerializerMethodField()
@@ -158,21 +178,25 @@ class JobSerializer(serializers.ModelSerializer):
             "plan",
             "steps",
             "organization_url",
-            "completed_steps",
+            "results",
             "created_at",
+            "edited_at",
             "enqueued_at",
             "job_id",
             "status",
             "org_name",
             "org_type",
+            "error_count",
+            "warning_count",
             "is_public",
             "user_can_edit",
             "message",
         )
         extra_kwargs = {
             "created_at": {"read_only": True},
+            "edited_at": {"read_only": True},
             "enqueued_at": {"read_only": True},
-            "completed_steps": {"read_only": True},
+            "results": {"read_only": True},
             "job_id": {"read_only": True},
             "status": {"read_only": True},
             "org_type": {"read_only": True},
@@ -224,14 +248,7 @@ class JobSerializer(serializers.ModelSerializer):
         Every set in this method is a set of numeric Step PKs, from the
         local database.
         """
-        job_completed_steps = set(
-            Job.objects.all_completed_step_ids(user=user, plan=plan)
-        )
-        required_steps = (
-            set(plan.required_step_ids)
-            - set(preflight.optional_step_ids)
-            - job_completed_steps
-        )
+        required_steps = set(plan.required_step_ids) - set(preflight.optional_step_ids)
         return not set(required_steps) - set(s.id for s in steps)
 
     def _get_from_data_or_instance(self, data, name, default=None):
@@ -275,31 +292,11 @@ class JobSerializer(serializers.ModelSerializer):
         return data
 
 
-class PreflightResultSerializer(serializers.ModelSerializer):
-    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+class PreflightResultSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
     plan = IdOnlyField(read_only=True)
+    is_ready = serializers.SerializerMethodField()
     error_count = serializers.SerializerMethodField()
     warning_count = serializers.SerializerMethodField()
-    is_ready = serializers.SerializerMethodField()
-
-    @staticmethod
-    def _count_status_in_results(results, status_name):
-        count = 0
-        for val in results.values():
-            for status in val:
-                if status["status"] == status_name:
-                    count += 1
-        return count
-
-    def get_error_count(self, obj):
-        if obj.status == PreflightResult.Status.started:
-            return 0
-        return self._count_status_in_results(obj.results, ERROR)
-
-    def get_warning_count(self, obj):
-        if obj.status == PreflightResult.Status.started:
-            return 0
-        return self._count_status_in_results(obj.results, WARN)
 
     def get_is_ready(self, obj):
         return (
@@ -311,10 +308,12 @@ class PreflightResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = PreflightResult
         fields = (
+            "id",
             "organization_url",
             "user",
             "plan",
             "created_at",
+            "edited_at",
             "is_valid",
             "status",
             "results",
@@ -325,6 +324,7 @@ class PreflightResultSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "organization_url": {"read_only": True},
             "created_at": {"read_only": True},
+            "edited_at": {"read_only": True},
             "is_valid": {"read_only": True},
             "status": {"read_only": True},
             "results": {"read_only": True},
