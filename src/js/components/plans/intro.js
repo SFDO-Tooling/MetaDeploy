@@ -17,14 +17,16 @@ const Intro = ({
   plan,
   results,
   cta,
-  message,
+  preMessage,
+  postMessage,
 }: {
   product: ProductType,
   version: VersionType,
   plan: PlanType,
   results: React.Node,
   cta: React.Node,
-  message?: string,
+  preMessage?: string,
+  postMessage?: string,
 }): React.Node => (
   <div
     className="slds-p-around_medium
@@ -33,7 +35,6 @@ const Intro = ({
   >
     <div className="slds-text-longform">
       <h2 className="slds-text-heading_large">{plan.title}</h2>
-      {message ? <p>{message}</p> : null}
       <div className="slds-p-vertical_medium">
         <p className="slds-text-heading_small">
           This plan is part of <strong>{product.title}</strong>, {version.label}
@@ -44,7 +45,13 @@ const Intro = ({
           </Link>
         </p>
       </div>
+      {preMessage ? (
+        <p dangerouslySetInnerHTML={{ __html: preMessage }} />
+      ) : null}
       {results}
+      {postMessage ? (
+        <p dangerouslySetInnerHTML={{ __html: postMessage }} />
+      ) : null}
     </div>
     {cta}
   </div>

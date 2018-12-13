@@ -5,14 +5,10 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('api', '0013_preflightresult_status_failed'),
-    ]
+    dependencies = [("api", "0013_preflightresult_status_failed")]
 
     operations = [
         migrations.AlterField(
-            model_name='step',
-            name='description',
-            field=models.TextField(blank=True),
-        ),
+            model_name="step", name="description", field=models.TextField(blank=True)
+        )
     ]

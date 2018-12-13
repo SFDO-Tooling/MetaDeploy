@@ -6,6 +6,7 @@ process.env.NODE_ENV = 'production';
 
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const common = require('./webpack.common.js');
 const merge = require('webpack-merge');
 const path = require('path');
@@ -20,6 +21,7 @@ module.exports = merge(common, {
   devtool: 'source-map',
   plugins: [
     new CleanWebpackPlugin(['dist/prod/*.*']),
+    new OptimizeCSSAssetsPlugin(),
     new MiniCssExtractPlugin({
       filename: '[name].[chunkhash].min.css',
     }),

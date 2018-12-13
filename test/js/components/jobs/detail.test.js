@@ -1,5 +1,6 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { fireEvent } from 'react-testing-library';
 
 import { fetchJob } from 'jobs/actions';
 import { fetchVersion } from 'products/actions';
@@ -79,6 +80,8 @@ const defaultState = {
       completed_steps: ['step-1'],
       org_name: 'Test Org',
       org_type: null,
+      message: 'Congrats!',
+      error_count: 0,
     },
   },
   user: null,
@@ -205,6 +208,7 @@ describe('<JobDetail />', () => {
     expect(getByText('Product 1, 1.0.0')).toBeVisible();
     expect(getByText('My Plan')).toBeVisible();
     expect(getByText('Installation Progress')).toBeVisible();
+    expect(getByText('Congrats!')).toBeVisible();
     expect(getByText('test-user')).toBeVisible();
     expect(getByText('Test Org')).toBeVisible();
     expect(queryByText('Type:')).toBeNull();
@@ -232,6 +236,7 @@ describe('<JobDetail />', () => {
             creator: null,
             org_name: null,
             org_type: null,
+            error_count: 1,
           },
         },
       },
@@ -260,5 +265,14 @@ describe('<JobDetail />', () => {
     expect(queryByText('test-user')).toBeNull();
     expect(queryByText('Test Org')).toBeNull();
     expect(getByText('Org Type')).toBeVisible();
+  });
+
+  describe('share button click', () => {
+    test('opens modal', () => {
+      const { getByText } = setup();
+      fireEvent.click(getByText('Share'));
+
+      expect(getByText('Share Link to Installation Job')).toBeVisible();
+    });
   });
 });

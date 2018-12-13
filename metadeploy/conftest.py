@@ -1,26 +1,20 @@
-from pytest_factoryboy import register
-from rest_framework.test import APIClient
 import factory
 import pytest
-
+from allauth.socialaccount.models import SocialAccount, SocialApp, SocialToken
 from django.contrib.auth import get_user_model
-
-from allauth.socialaccount.models import (
-    SocialApp,
-    SocialAccount,
-    SocialToken,
-)
+from pytest_factoryboy import register
+from rest_framework.test import APIClient
 
 from metadeploy.api.models import (
-    Product,
-    ProductSlug,
-    ProductCategory,
     Job,
-    Version,
     Plan,
     PlanSlug,
-    Step,
     PreflightResult,
+    Product,
+    ProductCategory,
+    ProductSlug,
+    Step,
+    Version,
 )
 
 User = get_user_model()
@@ -30,11 +24,11 @@ User = get_user_model()
 class SocialAppFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = SocialApp
-        django_get_or_create = ('provider',)
+        django_get_or_create = ("provider",)
 
-    name = 'Salesforce Production'
-    provider = 'salesforce-production'
-    key = 'https://login.salesforce.com/'
+    name = "Salesforce Production"
+    provider = "salesforce-production"
+    key = "https://login.salesforce.com/"
 
 
 @register
@@ -42,8 +36,8 @@ class SocialTokenFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = SocialToken
 
-    token = '0123456789abcdef'
-    token_secret = 'secret.0123456789abcdef'
+    token = "0123456789abcdef"
+    token_secret = "secret.0123456789abcdef"
     app = factory.SubFactory(SocialAppFactory)
 
 
@@ -52,14 +46,14 @@ class SocialAccountFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = SocialAccount
 
-    provider = 'salesforce-production'
-    uid = factory.Sequence('https://example.com/{}'.format)
-    socialtoken_set = factory.RelatedFactory(SocialTokenFactory, 'account')
+    provider = "salesforce-production"
+    uid = factory.Sequence("https://example.com/{}".format)
+    socialtoken_set = factory.RelatedFactory(SocialTokenFactory, "account")
     extra_data = {
-        'instance_url': 'https://example.com',
-        'organization_details': {
-            'Name': 'Sample Org',
-            'OrganizationType': 'Developer Edition',
+        "instance_url": "https://example.com",
+        "organization_details": {
+            "Name": "Sample Org",
+            "OrganizationType": "Developer Edition",
         },
     }
 
@@ -71,8 +65,8 @@ class UserFactory(factory.django.DjangoModelFactory):
 
     email = factory.Sequence("user_{}@example.com".format)
     username = factory.Sequence("user_{}@example.com".format)
-    password = factory.PostGenerationMethodCall('set_password', 'foobar')
-    socialaccount_set = factory.RelatedFactory(SocialAccountFactory, 'user')
+    password = factory.PostGenerationMethodCall("set_password", "foobar")
+    socialaccount_set = factory.RelatedFactory(SocialAccountFactory, "user")
 
 
 @register
@@ -80,7 +74,7 @@ class ProductCategoryFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = ProductCategory
 
-    title = 'salesforce'
+    title = "salesforce"
 
 
 @register
@@ -88,15 +82,15 @@ class ProductFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Product
 
-    title = factory.Sequence('Sample Product {}'.format)
-    description = 'This is a sample product.'
+    title = factory.Sequence("Sample Product {}".format)
+    description = "This is a sample product."
     category = factory.SubFactory(ProductCategoryFactory)
-    color = '#FFFFFF'
-    icon_url = ''
-    slds_icon_category = ''
-    slds_icon_name = ''
-    _ensure_slug = factory.PostGenerationMethodCall('ensure_slug')
-    repo_url = 'https://github.com/some/repo.git'
+    color = "#FFFFFF"
+    icon_url = ""
+    slds_icon_category = ""
+    slds_icon_name = ""
+    _ensure_slug = factory.PostGenerationMethodCall("ensure_slug")
+    repo_url = "https://github.com/SFDO-Tooling/CumulusCI-Test"
 
 
 @register
@@ -104,7 +98,7 @@ class ProductSlugFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = ProductSlug
 
-    slug = factory.Sequence('this-is-a-slug-{}'.format)
+    slug = factory.Sequence("this-is-a-slug-{}".format)
     parent = factory.SubFactory(ProductFactory)
 
 
@@ -114,8 +108,9 @@ class VersionFactory(factory.django.DjangoModelFactory):
         model = Version
 
     product = factory.SubFactory(ProductFactory)
-    label = 'v0.1.0'
-    description = 'A sample version.'
+    label = "v0.1.0"
+    description = "A sample version."
+    commit_ish = "feature/preflight"
 
 
 @register
@@ -123,11 +118,11 @@ class PlanFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Plan
 
-    title = 'Sample plan'
+    title = "Sample plan"
     version = factory.SubFactory(VersionFactory)
-    _ensure_slug = factory.PostGenerationMethodCall('ensure_slug')
-    preflight_flow_name = 'preflight_flow'
-    flow_name = 'main_flow'
+    _ensure_slug = factory.PostGenerationMethodCall("ensure_slug")
+    preflight_flow_name = "slow_steps_preflight_good"
+    flow_name = "slow_steps_flow"
 
 
 @register
@@ -135,9 +130,9 @@ class StepFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Step
 
-    name = 'Sample step'
+    name = "Sample step"
     plan = factory.SubFactory(PlanFactory)
-    task_name = 'main_task'
+    task_name = "main_task"
 
 
 @register
@@ -145,7 +140,7 @@ class PlanSlugFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = PlanSlug
 
-    slug = factory.Sequence('this-is-a-slug-{}'.format)
+    slug = factory.Sequence("this-is-a-slug-{}".format)
     parent = factory.SubFactory(PlanFactory)
 
 

@@ -22,12 +22,11 @@ settings:
             - static
             - node_modules
   react:
-    version: '15.6.2'
-    flowVersion: '0.79.1'
+    version: '16.6.3'
+    flowVersion: '0.88.0'
 plugins:
   - react
   - prettier
-  - flowtype-errors
   - flowtype
 extends:
   - eslint:recommended
@@ -38,10 +37,6 @@ extends:
   - prettier/flowtype
   - prettier/react
 rules:
-  # Flow
-  flowtype-errors/show-errors: 2
-  flowtype-errors/show-warnings: 1
-
   # Prettier
   prettier/prettier:
     - 2

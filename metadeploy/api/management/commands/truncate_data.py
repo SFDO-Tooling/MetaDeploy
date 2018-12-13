@@ -1,22 +1,21 @@
 from django.core.management.base import BaseCommand
-
 from scheduler.models import RepeatableJob
 
 from ...models import (
+    Job,
+    Plan,
+    PlanSlug,
+    PreflightResult,
+    Product,
     ProductCategory,
     ProductSlug,
-    Product,
-    Job,
-    Version,
-    PlanSlug,
-    Plan,
     Step,
-    PreflightResult,
+    Version,
 )
 
 
 class Command(BaseCommand):
-    help = 'Delete all API data, without touching users or social apps'
+    help = "Delete all API data, without touching users or social apps"
 
     def handle(self, *args, **options):
         ordered_models = [

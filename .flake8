@@ -9,3 +9,4 @@ exclude =
     node,
     node_modules,
     requirements
+max-line-length=88

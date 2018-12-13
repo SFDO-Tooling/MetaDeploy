@@ -127,3 +127,55 @@ describe('completeJob', () => {
     expect(actions.completeJob(payload)).toEqual(expected);
   });
 });
+
+describe('updateJob', () => {
+  describe('success', () => {
+    test('dispatches JOB_UPDATED action', () => {
+      const store = storeWithApi({});
+      const data = { id: 'job-1', is_public: 'true' };
+      const response = {
+        id: 'job-1',
+        is_public: true,
+      };
+      fetchMock.patchOnce(window.api_urls.job_detail('job-1'), {
+        status: 200,
+        body: response,
+      });
+      const started = {
+        type: 'JOB_UPDATE_REQUESTED',
+        payload: data,
+      };
+      const succeeded = {
+        type: 'JOB_UPDATED',
+        payload: response,
+      };
+
+      expect.assertions(1);
+      return store.dispatch(actions.updateJob(data)).then(() => {
+        expect(store.getActions()).toEqual([started, succeeded]);
+      });
+    });
+  });
+
+  describe('error', () => {
+    test('dispatches JOB_UPDATE_REJECTED action', () => {
+      const store = storeWithApi({});
+      const data = { id: 'job-1', is_public: 'true' };
+      fetchMock.patchOnce(window.api_urls.job_detail('job-1'), 500);
+      const started = {
+        type: 'JOB_UPDATE_REQUESTED',
+        payload: data,
+      };
+      const failed = {
+        type: 'JOB_UPDATE_REJECTED',
+        payload: data,
+      };
+
+      expect.assertions(2);
+      return store.dispatch(actions.updateJob(data)).catch(() => {
+        expect(store.getActions()).toEqual([started, failed]);
+        expect(window.console.error).toHaveBeenCalled();
+      });
+    });
+  });
+});

@@ -5,14 +5,6 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('api', '0001_initial'),
-    ]
+    dependencies = [("api", "0001_initial")]
 
-    operations = [
-        migrations.AlterModelManagers(
-            name='user',
-            managers=[
-            ],
-        ),
-    ]
+    operations = [migrations.AlterModelManagers(name="user", managers=[])]

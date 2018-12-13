@@ -222,7 +222,7 @@ class PlanDetail extends React.Component<Props, State> {
                   />
                 ) : null
               }
-              message={plan.preflight_message}
+              preMessage={plan.preflight_message}
             />
             <UserInfo user={user} />
             {plan.steps.length ? (

@@ -1,11 +1,12 @@
 // @flow
 
 import * as React from 'react';
+import Button from '@salesforce/design-system-react/components/button';
 import DocumentTitle from 'react-document-title';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
-import { fetchJob } from 'jobs/actions';
+import { fetchJob, updateJob } from 'jobs/actions';
 import { fetchVersion } from 'products/actions';
 import { selectPlan } from 'components/plans/detail';
 import {
@@ -23,9 +24,12 @@ import Intro from 'components/plans/intro';
 import JobResults from 'components/plans/jobResults';
 import ProductNotFound from 'components/products/product404';
 import ProgressBar from 'components/jobs/progressBar';
+import ShareModal from 'components/jobs/shareModal';
 import StepsTable from 'components/plans/stepsTable';
 import Toasts from 'components/plans/toasts';
 import UserInfo from 'components/jobs/userInfo';
+
+import { CONSTANTS } from 'plans/reducer';
 
 import type { AppState } from 'app/reducer';
 import type { InitialProps } from 'components/utils';
@@ -48,9 +52,15 @@ type Props = {
   jobId: ?string,
   doFetchVersion: typeof fetchVersion,
   doFetchJob: typeof fetchJob,
+  doUpdateJob: typeof updateJob,
 };
 
-class JobDetail extends React.Component<Props> {
+class JobDetail extends React.Component<Props, { modalOpen: boolean }> {
+  constructor(props: Props) {
+    super(props);
+    this.state = { modalOpen: false };
+  }
+
   fetchVersionIfMissing() {
     const { product, version, versionLabel, doFetchVersion } = this.props;
     if (
@@ -91,6 +101,14 @@ class JobDetail extends React.Component<Props> {
     }
   }
 
+  toggleModal = (isOpen: boolean) => {
+    this.setState({ modalOpen: isOpen });
+  };
+
+  openModal = () => {
+    this.toggleModal(true);
+  };
+
   render(): React.Node {
     const {
       user,
@@ -100,6 +118,7 @@ class JobDetail extends React.Component<Props> {
       plan,
       job,
       jobId,
+      doUpdateJob,
     } = this.props;
     const loadingOrNotFound = getLoadingOrNotFound({
       product,
@@ -124,7 +143,26 @@ class JobDetail extends React.Component<Props> {
         title={`Installation | ${plan.title} | ${product.title} | MetaDeploy`}
       >
         <>
-          <Header product={product} version={version} plan={plan} />
+          <Header
+            product={product}
+            version={version}
+            plan={plan}
+            navRight={
+              <Button
+                label="Share"
+                iconCategory="utility"
+                iconName="share"
+                iconPosition="left"
+                onClick={this.openModal}
+              />
+            }
+          />
+          <ShareModal
+            isOpen={this.state.modalOpen}
+            job={job}
+            toggleModal={this.toggleModal}
+            updateJob={doUpdateJob}
+          />
           <BodyContainer>
             <Toasts model={job} label="Installation" />
             <Intro
@@ -133,6 +171,13 @@ class JobDetail extends React.Component<Props> {
               plan={plan}
               results={<JobResults job={job} label="Installation" />}
               cta={<CtaButton job={job} />}
+              postMessage={
+                job.status === CONSTANTS.STATUS.COMPLETE &&
+                !job.error_count &&
+                job.message
+                  ? job.message
+                  : ''
+              }
             />
             <UserInfo job={job} />
             <ProgressBar job={job} />
@@ -176,6 +221,7 @@ const select = (appState: AppState, props: InitialProps) => ({
 const actions = {
   doFetchVersion: fetchVersion,
   doFetchJob: fetchJob,
+  doUpdateJob: updateJob,
 };
 
 const WrappedJobDetail: React.ComponentType<InitialProps> = connect(
