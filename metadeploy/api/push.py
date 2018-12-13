@@ -75,21 +75,19 @@ async def report_error(user):
 async def notify_post_task(job, user):
     from .serializers import JobSerializer
 
-    if not job.completed_steps:
-        return
-
-    step_id = job.completed_steps[-1]
-
-    message = {
-        "step_id": step_id,
-        "job": JobSerializer(instance=job, context=user_context(user)).data,
-    }
+    payload = JobSerializer(instance=job, context=user_context(user)).data
+    message = {"type": "TASK_COMPLETED", "payload": payload}
     await push_message_about_instance(job, message)
 
 
 async def notify_post_job(job, user):
     from .serializers import JobSerializer
+    from .models import Job
 
     payload = JobSerializer(instance=job, context=user_context(user)).data
-    message = {"type": "JOB_COMPLETED", "payload": payload}
+    message = {"payload": payload}
+    if job.status == Job.Status.complete:
+        message["type"] = "JOB_COMPLETED"
+    elif job.status == Job.Status.failed:
+        message["type"] = "JOB_FAILED"
     await push_message_about_instance(job, message)

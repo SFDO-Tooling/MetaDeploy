@@ -178,43 +178,6 @@ class TestJob:
 
         assert serializer.is_valid(), serializer.errors
 
-    def test_invalid_steps_made_valid_by_previous_job(
-        self,
-        rf,
-        plan_factory,
-        user_factory,
-        step_factory,
-        preflight_result_factory,
-        job_factory,
-    ):
-        plan = plan_factory()
-        user = user_factory()
-        step1 = step_factory(is_required=True, plan=plan)
-        step2 = step_factory(is_required=True, plan=plan)
-        step3 = step_factory(is_required=False, plan=plan)
-
-        request = rf.get("/")
-        request.user = user
-        preflight_result_factory(
-            plan=plan, user=user, status=PreflightResult.Status.complete, results={}
-        )
-        job_factory(
-            plan=plan,
-            user=user,
-            steps=[step1, step2, step3],
-            completed_steps=[step1.name],
-        )
-        job_factory(
-            plan=plan,
-            user=user,
-            steps=[step1, step2, step3],
-            completed_steps=[step2.name],
-        )
-        data = {"plan": str(plan.id), "steps": [str(step3.id)]}
-        serializer = JobSerializer(data=data, context=dict(request=request))
-
-        assert serializer.is_valid(), serializer.errors
-
     def test_no_context(self, job_factory):
         job = job_factory()
         serializer = JobSerializer(instance=job)

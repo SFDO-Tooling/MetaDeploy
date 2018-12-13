@@ -77,7 +77,7 @@ const defaultState = {
       plan: 'plan-1',
       status: 'complete',
       steps: ['step-1', 'step-2', 'step-4'],
-      completed_steps: ['step-1'],
+      results: { 'step-1': [{ status: 'ok' }] },
       org_name: 'Test Org',
       org_type: null,
       message: 'Congrats!',
@@ -202,69 +202,93 @@ describe('<JobDetail />', () => {
     });
   });
 
-  test('renders job detail', () => {
-    const { getByText, queryByText } = setup();
+  describe('job complete', () => {
+    test('renders job detail', () => {
+      const { getByText, queryByText } = setup();
 
-    expect(getByText('Product 1, 1.0.0')).toBeVisible();
-    expect(getByText('My Plan')).toBeVisible();
-    expect(getByText('Installation Progress')).toBeVisible();
-    expect(getByText('Congrats!')).toBeVisible();
-    expect(getByText('test-user')).toBeVisible();
-    expect(getByText('Test Org')).toBeVisible();
-    expect(queryByText('Type:')).toBeNull();
-  });
+      expect(getByText('Product 1, 1.0.0')).toBeVisible();
+      expect(getByText('My Plan')).toBeVisible();
+      expect(getByText('Installation Progress')).toBeVisible();
+      expect(getByText('Congrats!')).toBeVisible();
+      expect(getByText('test-user')).toBeVisible();
+      expect(getByText('Test Org')).toBeVisible();
+      expect(queryByText('Type:')).toBeNull();
+    });
 
-  test('renders job detail (no user, no steps)', () => {
-    const { queryByText } = setup({
-      initialState: {
-        ...defaultState,
-        products: [
-          {
-            ...defaultState.products[0],
-            most_recent_version: {
-              ...defaultState.products[0].most_recent_version,
-              primary_plan: {
-                ...defaultState.products[0].most_recent_version.primary_plan,
-                steps: [],
+    test('renders job detail (no user, no steps)', () => {
+      const { queryByText } = setup({
+        initialState: {
+          ...defaultState,
+          products: [
+            {
+              ...defaultState.products[0],
+              most_recent_version: {
+                ...defaultState.products[0].most_recent_version,
+                primary_plan: {
+                  ...defaultState.products[0].most_recent_version.primary_plan,
+                  steps: [],
+                },
               },
             },
-          },
-        ],
-        jobs: {
-          'job-1': {
-            ...defaultState.jobs['job-1'],
-            creator: null,
-            org_name: null,
-            org_type: null,
-            error_count: 1,
+          ],
+          jobs: {
+            'job-1': {
+              ...defaultState.jobs['job-1'],
+              creator: null,
+              org_name: null,
+              org_type: null,
+              error_count: 1,
+            },
           },
         },
-      },
+      });
+
+      expect(queryByText('test-user')).toBeNull();
+      expect(queryByText('Test Org')).toBeNull();
+      expect(queryByText('Type:')).toBeNull();
     });
 
-    expect(queryByText('test-user')).toBeNull();
-    expect(queryByText('Test Org')).toBeNull();
-    expect(queryByText('Type:')).toBeNull();
+    test('renders job detail (no username, no org_name)', () => {
+      const { getByText, queryByText } = setup({
+        initialState: {
+          ...defaultState,
+          jobs: {
+            'job-1': {
+              ...defaultState.jobs['job-1'],
+              creator: null,
+              org_name: null,
+              org_type: 'Org Type',
+            },
+          },
+        },
+      });
+
+      expect(queryByText('test-user')).toBeNull();
+      expect(queryByText('Test Org')).toBeNull();
+      expect(getByText('Org Type')).toBeVisible();
+    });
   });
 
-  test('renders job detail (no username, no org_name)', () => {
-    const { getByText, queryByText } = setup({
-      initialState: {
-        ...defaultState,
-        jobs: {
-          'job-1': {
-            ...defaultState.jobs['job-1'],
-            creator: null,
-            org_name: null,
-            org_type: 'Org Type',
+  describe('job failed', () => {
+    test('renders job failed msg', () => {
+      const { getByText, queryByText } = setup({
+        initialState: {
+          ...defaultState,
+          jobs: {
+            'job-1': {
+              ...defaultState.jobs['job-1'],
+              status: 'failed',
+            },
           },
         },
-      },
-    });
+      });
 
-    expect(queryByText('test-user')).toBeNull();
-    expect(queryByText('Test Org')).toBeNull();
-    expect(getByText('Org Type')).toBeVisible();
+      expect(
+        getByText('Share the link to this installation job'),
+      ).toBeVisible();
+      expect(getByText('Power of Us Hub')).toBeVisible();
+      expect(queryByText('Congrats!')).toBeNull();
+    });
   });
 
   describe('share button click', () => {

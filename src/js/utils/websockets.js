@@ -2,7 +2,7 @@
 
 import Sockette from 'sockette';
 
-import { completeJobStep, completeJob } from 'jobs/actions';
+import { completeJobStep, completeJob, failJob } from 'jobs/actions';
 import {
   completePreflight,
   failPreflight,
@@ -13,7 +13,7 @@ import { log } from 'utils/logging';
 
 import type { Dispatch } from 'redux-thunk';
 import type { Job } from 'jobs/reducer';
-import type { JobStepCompleted, JobCompleted } from 'jobs/actions';
+import type { JobStepCompleted, JobCompleted, JobFailed } from 'jobs/actions';
 import type { Preflight } from 'plans/reducer';
 import type {
   PreflightCompleted,
@@ -22,40 +22,50 @@ import type {
 } from 'plans/actions';
 import type { TokenInvalidAction } from 'accounts/actions';
 
-type ErrorPayload = {| +message: string |};
-export type JobStepCompletedPayload = {| +step_id: string, +job: Job |};
-type Payload = ErrorPayload | Preflight | Job | JobStepCompletedPayload;
-
-const isPreflight = (obj?: Payload): %checks => obj && obj.results;
-const isJob = (obj?: Payload): %checks => obj && obj.steps;
-const isJobStep = (obj?: Payload): %checks => obj && obj.step_id && obj.job;
-
-export const getAction = (
-  msg: {
-    type?: string,
-    payload?: Payload,
-  } = {},
-):
+type ErrorEvent = {|
+  type: 'BACKEND_ERROR',
+  payload: {| message: string |},
+|};
+type UserEvent = {|
+  type: 'USER_TOKEN_INVALID',
+|};
+type PreflightEvent = {|
+  type: 'PREFLIGHT_COMPLETED' | 'PREFLIGHT_FAILED' | 'PREFLIGHT_INVALIDATED',
+  payload: Preflight,
+|};
+type JobEvent = {|
+  type: 'TASK_COMPLETED' | 'JOB_COMPLETED' | 'JOB_FAILED',
+  payload: Job,
+|};
+type EventType = ErrorEvent | UserEvent | PreflightEvent | JobEvent;
+type Action =
   | TokenInvalidAction
   | PreflightCompleted
   | PreflightFailed
   | PreflightInvalid
   | JobStepCompleted
   | JobCompleted
-  | null => {
-  switch (msg.type) {
+  | JobFailed;
+
+export const getAction = (event: EventType): Action | null => {
+  if (!event || event.type === undefined) {
+    return null;
+  }
+  switch (event.type) {
     case 'USER_TOKEN_INVALID':
       return invalidateToken();
     case 'PREFLIGHT_COMPLETED':
-      return isPreflight(msg.payload) ? completePreflight(msg.payload) : null;
+      return completePreflight(event.payload);
     case 'PREFLIGHT_FAILED':
-      return isPreflight(msg.payload) ? failPreflight(msg.payload) : null;
+      return failPreflight(event.payload);
     case 'PREFLIGHT_INVALIDATED':
-      return isPreflight(msg.payload) ? invalidatePreflight(msg.payload) : null;
+      return invalidatePreflight(event.payload);
     case 'TASK_COMPLETED':
-      return isJobStep(msg.payload) ? completeJobStep(msg.payload) : null;
+      return completeJobStep(event.payload);
     case 'JOB_COMPLETED':
-      return isJob(msg.payload) ? completeJob(msg.payload) : null;
+      return completeJob(event.payload);
+    case 'JOB_FAILED':
+      return failJob(event.payload);
   }
   return null;
 };
@@ -89,14 +99,14 @@ export const createSocket = ({
       opts.onopen(e);
     },
     onmessage: e => {
-      let msg = e.data;
+      let data = e.data;
       try {
-        msg = JSON.parse(e.data);
+        data = JSON.parse(e.data);
       } catch (err) {
         // swallow error
       }
-      log('[WebSocket] received:', msg);
-      const action = getAction(msg);
+      log('[WebSocket] received:', data);
+      const action = getAction(data);
       if (action) {
         dispatch(action);
       }

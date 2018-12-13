@@ -6,7 +6,7 @@ import ProgressBar from 'components/jobs/progressBar';
 const defaultJob = {
   id: 'job-1',
   steps: ['1', '2', '3', '4'],
-  completed_steps: ['1'],
+  results: { '1': [{ status: 'ok' }] },
 };
 
 describe('<ProgressBar />', () => {
@@ -28,7 +28,15 @@ describe('<ProgressBar />', () => {
   describe('complete', () => {
     test('renders complete progress bar', () => {
       const { getByText } = setup({
-        job: { ...defaultJob, completed_steps: ['1', '2', '3', '4'] },
+        job: {
+          ...defaultJob,
+          results: {
+            '1': [{ status: 'ok' }],
+            '2': [{ status: 'ok' }],
+            '3': [{ status: 'ok' }],
+            '4': [{ status: 'ok' }],
+          },
+        },
       });
 
       expect(getByText('100% Complete')).toBeVisible();

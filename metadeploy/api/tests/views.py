@@ -33,16 +33,19 @@ class TestJobViewset:
             "plan": str(job.plan.id),
             "steps": [],
             "organization_url": "",
-            "completed_steps": [],
+            "results": {},
             "created_at": format_timestamp(job.created_at),
             "enqueued_at": None,
             "job_id": None,
             "status": "started",
             "org_name": "Secret Org",
             "org_type": "",
+            "error_count": 0,
+            "warning_count": 0,
             "is_public": False,
             "user_can_edit": False,
             "message": "",
+            "edited_at": format_timestamp(job.edited_at),
         }
 
     def test_job__your_own(self, client, job_factory):
@@ -56,16 +59,19 @@ class TestJobViewset:
             "plan": str(job.plan.id),
             "steps": [],
             "organization_url": "",
-            "completed_steps": [],
+            "results": {},
             "created_at": format_timestamp(job.created_at),
             "enqueued_at": None,
             "job_id": None,
             "status": "started",
             "org_name": "Secret Org",
             "org_type": "",
+            "error_count": 0,
+            "warning_count": 0,
             "is_public": False,
             "user_can_edit": True,
             "message": "",
+            "edited_at": format_timestamp(job.edited_at),
         }
 
     def test_job__is_public(self, client, job_factory):
@@ -79,16 +85,19 @@ class TestJobViewset:
             "plan": str(job.plan.id),
             "organization_url": None,
             "steps": [],
-            "completed_steps": [],
+            "results": {},
             "created_at": format_timestamp(job.created_at),
             "enqueued_at": None,
             "job_id": None,
             "status": "started",
             "org_name": None,
             "org_type": "",
+            "error_count": 0,
+            "warning_count": 0,
             "is_public": True,
             "user_can_edit": False,
             "message": "",
+            "edited_at": format_timestamp(job.edited_at),
         }
 
     def test_job__is_public_anon(self, anon_client, job_factory):
@@ -103,7 +112,9 @@ class TestJobViewset:
             "plan": str(job.plan.id),
             "organization_url": None,
             "steps": [],
-            "completed_steps": [],
+            "results": {},
+            "error_count": 0,
+            "warning_count": 0,
             "created_at": format_timestamp(job.created_at),
             "enqueued_at": None,
             "job_id": None,
@@ -113,6 +124,7 @@ class TestJobViewset:
             "is_public": True,
             "user_can_edit": False,
             "message": "",
+            "edited_at": format_timestamp(job.edited_at),
         }
 
     def test_create_job(self, client, plan_factory, preflight_result_factory):
@@ -211,6 +223,7 @@ class TestPreflight:
 
         assert response.status_code == 200
         assert response.json() == {
+            "id": preflight.id,
             "organization_url": client.user.instance_url,
             "plan": str(plan.id),
             "created_at": format_timestamp(preflight.created_at),
@@ -220,6 +233,8 @@ class TestPreflight:
             "error_count": 0,
             "warning_count": 0,
             "is_ready": False,
+            "user": client.user.id,
+            "edited_at": format_timestamp(preflight.edited_at),
         }
 
     def test_get__bad(self, client, plan_factory):

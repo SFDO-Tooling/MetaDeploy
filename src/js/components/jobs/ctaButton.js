@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import Icon from '@salesforce/design-system-react/components/icon';
+import { Link } from 'react-router-dom';
 
 import { CONSTANTS } from 'plans/reducer';
 
@@ -11,7 +12,13 @@ import type { Job as JobType } from 'jobs/reducer';
 
 const { STATUS } = CONSTANTS;
 
-const CtaButton = ({ job }: { job: JobType }): React.Node => {
+const CtaButton = ({
+  job,
+  linkToPlan,
+}: {
+  job: JobType,
+  linkToPlan: string,
+}): React.Node => {
   switch (job.status) {
     case STATUS.STARTED:
       return (
@@ -25,6 +32,8 @@ const CtaButton = ({ job }: { job: JobType }): React.Node => {
         return (
           <a
             href={job.organization_url}
+            target="_blank"
+            rel="noreferrer noopener"
             className="slds-button
               slds-button_brand
               slds-size_full
@@ -42,6 +51,19 @@ const CtaButton = ({ job }: { job: JobType }): React.Node => {
         );
       }
       return null;
+    }
+    case STATUS.FAILED: {
+      return (
+        <Link
+          to={linkToPlan}
+          className="slds-button
+            slds-button_brand
+            slds-size_full
+            slds-p-vertical_xx-small"
+        >
+          Return to Pre-Install Validation
+        </Link>
+      );
     }
   }
   return null;

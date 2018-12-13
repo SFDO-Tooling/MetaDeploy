@@ -18,23 +18,13 @@ describe('reducer', () => {
     expect(actual).toEqual(expected);
   });
 
-  test('handles FETCH_PREFLIGHT_SUCCEEDED action', () => {
-    const initial = { 'plan-1': null, 'plan-2': { status: 'started' } };
-    const expected = { 'plan-1': null, 'plan-2': { status: 'complete' } };
-    const actual = reducer(initial, {
-      type: 'FETCH_PREFLIGHT_SUCCEEDED',
-      payload: { plan: 'plan-2', preflight: { status: 'complete' } },
-    });
-
-    expect(actual).toEqual(expected);
-  });
-
   test('handles PREFLIGHT_STARTED action', () => {
     const initial = { 'plan-1': null };
     const expected = {
       'plan-1': null,
       'plan-2': {
         id: null,
+        edited_at: null,
         plan: 'plan-2',
         status: 'started',
         results: {},
@@ -52,63 +42,58 @@ describe('reducer', () => {
     expect(actual).toEqual(expected);
   });
 
-  test('handles PREFLIGHT_COMPLETED action', () => {
-    const initial = { 'plan-1': null, 'plan-2': { status: 'started' } };
-    const expected = {
-      'plan-1': null,
-      'plan-2': { plan: 'plan-2', status: 'complete' },
-    };
-    const actual = reducer(initial, {
-      type: 'PREFLIGHT_COMPLETED',
-      payload: { plan: 'plan-2', status: 'complete' },
-    });
-
-    expect(actual).toEqual(expected);
-  });
-
-  test('handles PREFLIGHT_FAILED action', () => {
-    const initial = { 'plan-1': null, 'plan-2': { status: 'started' } };
-    const expected = {
-      'plan-1': null,
-      'plan-2': { plan: 'plan-2', status: 'failed' },
-    };
-    const actual = reducer(initial, {
-      type: 'PREFLIGHT_FAILED',
-      payload: { plan: 'plan-2', status: 'failed' },
-    });
-
-    expect(actual).toEqual(expected);
-  });
-
-  describe('PREFLIGHT_INVALIDATED', () => {
-    test('adds new preflight', () => {
-      const initial = {};
+  [
+    { type: 'FETCH_PREFLIGHT_SUCCEEDED' },
+    { type: 'PREFLIGHT_COMPLETED' },
+    { type: 'PREFLIGHT_FAILED' },
+    { type: 'PREFLIGHT_INVALIDATED' },
+  ].forEach(({ type }) => {
+    test(`handles ${type} action`, () => {
+      const initial = { 'plan-1': null, 'plan-2': { status: 'started' } };
       const expected = {
-        'plan-2': { plan: 'plan-2', is_valid: false },
+        'plan-1': null,
+        'plan-2': { plan: 'plan-2', status: 'complete' },
       };
       const actual = reducer(initial, {
-        type: 'PREFLIGHT_INVALIDATED',
-        payload: { plan: 'plan-2', is_valid: false },
+        type,
+        payload: { plan: 'plan-2', status: 'complete' },
       });
 
       expect(actual).toEqual(expected);
     });
+  });
 
-    test('updates existing preflight', () => {
+  describe('with existing preflight', () => {
+    test('updates with newer preflight', () => {
       const initial = {
         'plan-1': null,
-        'plan-2': { plan: 'plan-2', is_valid: true },
+        'plan-2': { plan: 'plan-2', is_valid: true, edited_at: '1' },
       };
+      const incoming = { plan: 'plan-2', is_valid: false, edited_at: '2' };
       const expected = {
         'plan-1': null,
-        'plan-2': { plan: 'plan-2', is_valid: false },
+        'plan-2': incoming,
       };
       const actual = reducer(initial, {
         type: 'PREFLIGHT_INVALIDATED',
-        payload: { plan: 'plan-2', is_valid: false },
+        payload: incoming,
       });
 
       expect(actual).toEqual(expected);
+    });
+
+    test('ignores older preflight', () => {
+      const initial = {
+        'plan-1': null,
+        'plan-2': { plan: 'plan-2', is_valid: true, edited_at: '2' },
+      };
+      const incoming = { plan: 'plan-2', is_valid: false, edited_at: '1' };
+      const actual = reducer(initial, {
+        type: 'PREFLIGHT_INVALIDATED',
+        payload: incoming,
+      });
+
+      expect(actual).toEqual(initial);
     });
   });
 });
