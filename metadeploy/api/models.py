@@ -469,9 +469,19 @@ class Job(HashIdMixin, models.Model):
         return ret
 
     def invalidate_related_preflight(self):
-        PreflightResult.objects.filter(
-            organization_url=self.organization_url, user=self.user, plan=self.plan
-        ).update(is_valid=False)
+        # We expect this to be a list of 1 or 0, but we want to account
+        # for the possibility of a larger set. We don't use .update
+        # because we want to trigger the logic in the preflight's save
+        # method.
+        preflights = PreflightResult.objects.filter(
+            organization_url=self.organization_url,
+            user=self.user,
+            plan=self.plan,
+            is_valid=True,
+        )
+        for preflight in preflights:
+            preflight.is_valid = False
+            preflight.save()
 
 
 class PreflightResultQuerySet(models.QuerySet):
