@@ -28,14 +28,15 @@ class NameDataCell extends React.Component<
   };
 
   render(): React.Node {
-    const { preflight, item, className, ...otherProps } = this.props;
+    const { preflight, job, item, className, ...otherProps } = this.props;
     /* istanbul ignore if */
     if (!item) {
       return null;
     }
+    const currentJob = preflight || job;
     const { name, description } = item;
     const { id } = item;
-    const result = preflight && preflight.results && preflight.results[id];
+    const result = currentJob && currentJob.results && currentJob.results[id];
     let hasError = false;
     let hasWarning = false;
     let optional;

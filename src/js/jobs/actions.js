@@ -3,7 +3,6 @@
 import type { ThunkAction } from 'redux-thunk';
 
 import type { Job } from 'jobs/reducer';
-import type { JobStepCompletedPayload } from 'utils/websockets';
 
 type JobData = { plan: string, steps: Array<string> };
 
@@ -13,7 +12,7 @@ type FetchJobStarted = {
 };
 type FetchJobSucceeded = {
   type: 'FETCH_JOB_SUCCEEDED',
-  payload: { id: string, job: Job },
+  payload: Job,
 };
 type FetchJobFailed = {
   type: 'FETCH_JOB_FAILED',
@@ -27,9 +26,10 @@ type JobStarted = {
 type JobRejected = { type: 'JOB_REJECTED', payload: JobData };
 export type JobStepCompleted = {
   type: 'JOB_STEP_COMPLETED',
-  payload: JobStepCompletedPayload,
+  payload: Job,
 };
 export type JobCompleted = { type: 'JOB_COMPLETED', payload: Job };
+export type JobFailed = { type: 'JOB_FAILED', payload: Job };
 export type JobUpdated = { type: 'JOB_UPDATED', payload: Job };
 export type JobsAction =
   | FetchJobStarted
@@ -40,6 +40,7 @@ export type JobsAction =
   | JobRejected
   | JobStepCompleted
   | JobCompleted
+  | JobFailed
   | JobUpdated;
 
 export const fetchJob = (jobId: string): ThunkAction => (
@@ -52,7 +53,7 @@ export const fetchJob = (jobId: string): ThunkAction => (
     .then(response =>
       dispatch({
         type: 'FETCH_JOB_SUCCEEDED',
-        payload: { id: jobId, job: response },
+        payload: response,
       }),
     )
     .catch(err => {
@@ -82,15 +83,18 @@ export const startJob = (data: JobData): ThunkAction => (
     });
 };
 
-export const completeJobStep = (
-  payload: JobStepCompletedPayload,
-): JobStepCompleted => ({
+export const completeJobStep = (payload: Job): JobStepCompleted => ({
   type: 'JOB_STEP_COMPLETED',
   payload,
 });
 
 export const completeJob = (payload: Job): JobCompleted => ({
   type: 'JOB_COMPLETED',
+  payload,
+});
+
+export const failJob = (payload: Job): JobFailed => ({
+  type: 'JOB_FAILED',
   payload,
 });
 

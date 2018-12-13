@@ -14,6 +14,7 @@ import { shouldFetchVersion, getLoadingOrNotFound } from 'products/utils';
 import BodyContainer from 'components/bodyContainer';
 import ProductIcon from 'components/products/icon';
 import ProductNotFound from 'components/products/product404';
+import VersionNotFound from 'components/products/version404';
 
 import type { AppState } from 'app/reducer';
 import type { InitialProps } from 'components/utils';
@@ -40,6 +41,9 @@ const ProductDetail = ({ product }: ProductDetailProps) => {
   /* istanbul ignore if */
   if (!product) {
     return <ProductNotFound />;
+  }
+  if (!product.most_recent_version) {
+    return <VersionNotFound product={product} />;
   }
   const version = product.most_recent_version;
   return <Redirect to={routes.version_detail(product.slug, version.label)} />;
@@ -100,6 +104,9 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     if (!product || !version) {
       return <ProductNotFound />;
     }
+    const listedAdditionalPlans = version.additional_plans.filter(
+      plan => plan.is_listed,
+    );
     return (
       <DocumentTitle title={`${product.title} | MetaDeploy`}>
         <>
@@ -116,21 +123,23 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                 Select a Plan to Install
               </h3>
               <p>{version.description}</p>
-              <p>
-                <Link
-                  to={routes.plan_detail(
-                    product.slug,
-                    version.label,
-                    version.primary_plan.slug,
-                  )}
-                  className="slds-button
-                    slds-button_brand
-                    slds-size_full"
-                >
-                  {version.primary_plan.title}
-                </Link>
-              </p>
-              {version.secondary_plan ? (
+              {version.primary_plan.is_listed ? (
+                <p>
+                  <Link
+                    to={routes.plan_detail(
+                      product.slug,
+                      version.label,
+                      version.primary_plan.slug,
+                    )}
+                    className="slds-button
+                      slds-button_brand
+                      slds-size_full"
+                  >
+                    {version.primary_plan.title}
+                  </Link>
+                </p>
+              ) : null}
+              {version.secondary_plan && version.secondary_plan.is_listed ? (
                 <p>
                   <Link
                     to={routes.plan_detail(
@@ -146,10 +155,10 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                   </Link>
                 </p>
               ) : null}
-              {version.additional_plans.length ? (
+              {listedAdditionalPlans.length ? (
                 <div className="slds-p-top_x-large">
                   <h3 className="slds-text-heading_small">Additional Plans</h3>
-                  {version.additional_plans.map(plan => (
+                  {listedAdditionalPlans.map(plan => (
                     <p key={plan.id}>
                       <Link
                         to={routes.plan_detail(
@@ -205,7 +214,10 @@ export const selectVersion: (
     if (!product || !versionLabel) {
       return null;
     }
-    if (product.most_recent_version.label === versionLabel) {
+    if (
+      product.most_recent_version &&
+      product.most_recent_version.label === versionLabel
+    ) {
       return product.most_recent_version;
     }
     if (product.versions && product.versions[versionLabel]) {
