@@ -1,7 +1,7 @@
 import pytest
 from django.urls import reverse
 
-from ..models import PreflightResult
+from ..models import Job, PreflightResult
 
 
 def format_timestamp(value):
@@ -126,6 +126,13 @@ class TestJobViewset:
         assert response.status_code == 201
         assert response.json()["org_type"] == "Developer Edition"
         assert response.json()["org_name"] == "Sample Org"
+
+    def test_destroy_job(self, client, job_factory):
+        job = job_factory(user=client.user)
+        response = client.delete(reverse("job-detail", kwargs={"pk": job.id}))
+
+        assert response.status_code == 204
+        assert Job.objects.filter(id=job.id).exists()
 
 
 @pytest.mark.django_db

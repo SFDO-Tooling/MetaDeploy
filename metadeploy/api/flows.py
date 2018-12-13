@@ -2,10 +2,15 @@ import logging
 
 import bleach
 from cumulusci.core import flows
+from django.core.cache import cache
 
 from .constants import ERROR, OPTIONAL, SKIP, WARN
 
 logger = logging.getLogger(__name__)
+
+
+class StopFlowException(Exception):
+    pass
 
 
 class BasicFlow(flows.BaseFlow):
@@ -24,6 +29,16 @@ class BasicFlow(flows.BaseFlow):
         except AttributeError:
             logger.error(f"Unknown task name {task_name} for {self.result}")
             return None
+
+    def _pre_task(self, task):
+        """
+        Before each task, we should check if we've been told to abandon this job.
+        """
+        if self._flow_canceled():
+            raise StopFlowException("Job canceled.")
+
+    def _flow_canceled(self):
+        return bool(cache.delete(f"CANCEL-{self.result.id}"))
 
 
 class JobFlow(BasicFlow):

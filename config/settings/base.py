@@ -299,6 +299,13 @@ CHANNEL_LAYERS = {
     }
 }
 
+# Rest Framework settings:
+REST_FRAMEWORK = {
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticatedOrReadOnly",
+    )
+}
+
 
 # SF Connected App and GitHub configuration:
 CONNECTED_APP_CLIENT_SECRET = env("CONNECTED_APP_CLIENT_SECRET")

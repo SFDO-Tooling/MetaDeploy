@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
@@ -18,7 +19,7 @@ from .serializers import (
 class JobViewSet(viewsets.ModelViewSet):
     serializer_class = JobSerializer
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ("plan", "user")
+    filterset_fields = ("plan", "user", "status")
 
     def get_queryset(self):
         if self.request.user.is_staff:
@@ -28,6 +29,9 @@ class JobViewSet(viewsets.ModelViewSet):
         else:
             filters = Q(is_public=True) | Q(user=self.request.user)
         return Job.objects.filter(filters)
+
+    def perform_destroy(self, instance):
+        cache.set(f"CANCEL-{instance.id}", True)
 
 
 class ProductViewSet(viewsets.ModelViewSet):
