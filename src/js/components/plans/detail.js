@@ -198,7 +198,7 @@ class PlanDetail extends React.Component<Props, State> {
               results={
                 preflight && user ? (
                   <JobResults
-                    job={preflight}
+                    preflight={preflight}
                     label="Pre-install validation"
                     failMessage={
                       'After resolving all errors, ' +
@@ -222,7 +222,14 @@ class PlanDetail extends React.Component<Props, State> {
                   />
                 ) : null
               }
-              preMessage={plan.preflight_message}
+              preMessage={
+                plan.preflight_message ? (
+                  // These messages are pre-cleaned by the API
+                  <p
+                    dangerouslySetInnerHTML={{ __html: plan.preflight_message }}
+                  />
+                ) : null
+              }
             />
             <UserInfo user={user} />
             {plan.steps.length ? (

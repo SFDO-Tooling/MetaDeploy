@@ -8,18 +8,24 @@ import { CONSTANTS } from 'plans/reducer';
 import type { Job as JobType } from 'jobs/reducer';
 import type {
   Preflight as PreflightType,
-  PreflightError as PreflightErrorType,
+  StepResult as StepResultType,
 } from 'plans/reducer';
 
-const ErrorIcon = (): React.Node => (
+export const ErrorIcon = ({
+  size,
+  containerClassName,
+}: {
+  size?: string,
+  containerClassName?: string,
+}): React.Node => (
   <Icon
     assistiveText={{ label: 'Error' }}
     category="utility"
     name="error"
     colorVariant="error"
-    size="x-small"
+    size={size || 'x-small'}
     className="slds-m-bottom_xxx-small"
-    containerClassName="slds-m-right_x-small"
+    containerClassName={containerClassName || 'slds-m-right_x-small'}
   />
 );
 
@@ -39,7 +45,7 @@ export const WarningIcon = (): React.Node => (
 export const ErrorsList = ({
   errorList,
 }: {
-  errorList: Array<PreflightErrorType>,
+  errorList: Array<StepResultType>,
 }): React.Node => (
   <ul className="plan-error-list">
     {errorList.map((err, idx) => {
@@ -74,26 +80,36 @@ export const ErrorsList = ({
 
 const JobResults = ({
   job,
+  preflight,
   label,
   failMessage,
 }: {
-  job: PreflightType | JobType,
+  job?: JobType,
+  preflight?: PreflightType,
   label: string,
   failMessage?: string,
 }): React.Node => {
+  const currentJob = job || preflight;
   if (
-    job.status !== CONSTANTS.STATUS.COMPLETE &&
-    job.status !== CONSTANTS.STATUS.FAILED
+    !currentJob ||
+    (currentJob.status !== CONSTANTS.STATUS.COMPLETE &&
+      currentJob.status !== CONSTANTS.STATUS.FAILED)
   ) {
     return null;
   }
 
-  const hasErrors = job.error_count !== undefined && job.error_count > 0;
-  const hasWarnings = job.warning_count !== undefined && job.warning_count > 0;
-  if (hasErrors || hasWarnings || job.status === CONSTANTS.STATUS.FAILED) {
+  const hasErrors =
+    currentJob.error_count !== undefined && currentJob.error_count > 0;
+  const hasWarnings =
+    currentJob.warning_count !== undefined && currentJob.warning_count > 0;
+  if (
+    hasErrors ||
+    hasWarnings ||
+    currentJob.status === CONSTANTS.STATUS.FAILED
+  ) {
     // Show errors/warnings
-    const errorCount = job.error_count || 0;
-    const warningCount = job.warning_count || 0;
+    const errorCount = currentJob.error_count || 0;
+    const warningCount = currentJob.warning_count || 0;
     let msg = 'errors';
     const errorMsg = `${errorCount} error${errorCount === 1 ? '' : 's'}`;
     const warningMsg = `${warningCount} warning${
@@ -106,8 +122,9 @@ const JobResults = ({
     } else if (warningCount > 0) {
       msg = warningMsg;
     }
-    const jobErrors = job.results && job.results.plan;
-    const failed = errorCount > 0 || job.status === CONSTANTS.STATUS.FAILED;
+    const jobErrors = currentJob.results && currentJob.results.plan;
+    const failed =
+      errorCount > 0 || currentJob.status === CONSTANTS.STATUS.FAILED;
     return (
       <>
         <p className={failed ? 'slds-text-color_error' : ''}>
@@ -117,9 +134,9 @@ const JobResults = ({
               We check `is_valid === false` instead of simply `!is_valid`
               because jobs do not have `is_valid` property.
            */}
-          {job.is_valid === false && !failed
+          {currentJob.is_valid === false && !failed
             ? `${label} has expired; please run it again.`
-            : `${label} found ${msg}.`}
+            : `${label} encountered ${msg}.`}
         </p>
         {failed && failMessage ? <p>{failMessage}</p> : null}
         {jobErrors ? <ErrorsList errorList={jobErrors} /> : null}
@@ -129,7 +146,7 @@ const JobResults = ({
 
   // We check `is_valid === false` instead of simply `!is_valid` because jobs do
   // not have `is_valid` property.
-  if (job.is_valid === false) {
+  if (currentJob.is_valid === false) {
     return (
       <p>
         <WarningIcon />

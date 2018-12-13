@@ -25,8 +25,8 @@ const Intro = ({
   plan: PlanType,
   results: React.Node,
   cta: React.Node,
-  preMessage?: string,
-  postMessage?: string,
+  preMessage?: React.Node,
+  postMessage?: React.Node,
 }): React.Node => (
   <div
     className="slds-p-around_medium
@@ -45,13 +45,9 @@ const Intro = ({
           </Link>
         </p>
       </div>
-      {preMessage ? (
-        <p dangerouslySetInnerHTML={{ __html: preMessage }} />
-      ) : null}
+      {preMessage}
       {results}
-      {postMessage ? (
-        <p dangerouslySetInnerHTML={{ __html: postMessage }} />
-      ) : null}
+      {postMessage}
     </div>
     {cta}
   </div>

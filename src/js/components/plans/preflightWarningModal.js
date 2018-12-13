@@ -10,7 +10,7 @@ import { CONSTANTS } from 'plans/reducer';
 import { WarningIcon } from 'components/plans/jobResults';
 
 import type {
-  PreflightError as PreflightErrorType,
+  StepResult as StepResultType,
   PreflightErrors as PreflightErrorsType,
   Step as StepType,
 } from 'plans/reducer';
@@ -32,7 +32,7 @@ const WarningList = ({
   name,
 }: {
   id: string,
-  results: Array<PreflightErrorType>,
+  results: Array<StepResultType>,
   name?: string,
 }): React.Node => {
   const warnings = [];

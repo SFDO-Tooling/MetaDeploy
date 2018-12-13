@@ -143,7 +143,7 @@ describe('<StepsTable />', () => {
           plan: 'plan-1',
           status: 'started',
           steps: ['step-2'],
-          completed_steps: [],
+          results: {},
         },
       });
 
@@ -160,7 +160,7 @@ describe('<StepsTable />', () => {
             plan: 'plan-1',
             status: 'started',
             steps: ['step-1', 'step-2', 'step-4'],
-            completed_steps: ['step-1', 'foo'],
+            results: { 'step-1': [{ status: 'ok' }], foo: [{ status: 'ok' }] },
           },
         });
 
@@ -168,6 +168,28 @@ describe('<StepsTable />', () => {
         expect(getByText('skipped')).toBeVisible();
         expect(getByText('completed')).toBeVisible();
         expect(getByText('waiting to install')).toBeVisible();
+      });
+
+      describe('failed', () => {
+        test('shows errored step', () => {
+          const { getByText, queryByText } = setup({
+            job: {
+              id: 'job-1',
+              plan: 'plan-1',
+              status: 'failed',
+              steps: ['step-1', 'step-2', 'step-4'],
+              results: {
+                'step-1': [{ status: 'ok' }],
+                'step-2': [{ status: 'error', message: 'totally failed' }],
+              },
+            },
+          });
+
+          expect(getByText('error')).toBeVisible();
+          expect(getByText('totally failed')).toBeVisible();
+          expect(queryByText('Installing...')).toBeNull();
+          expect(queryByText('waiting to install')).toBeNull();
+        });
       });
     });
 
