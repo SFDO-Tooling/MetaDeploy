@@ -20,7 +20,7 @@ import { shouldFetchVersion, getLoadingOrNotFound } from 'products/utils';
 
 import BodyContainer from 'components/bodyContainer';
 import CtaButton from 'components/jobs/ctaButton';
-import Header from 'components/products/header';
+import Header from 'components/plans/header';
 import Intro from 'components/plans/intro';
 import JobMessage from 'components/jobs/jobMessage';
 import JobResults from 'components/plans/jobResults';
@@ -151,6 +151,7 @@ class JobDetail extends React.Component<Props, { modalOpen: boolean }> {
           <Header
             product={product}
             version={version}
+            plan={plan}
             navRight={
               <Button
                 label="Share"

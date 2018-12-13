@@ -12,20 +12,15 @@ import type {
 const Header = ({
   product,
   version,
-  navRight,
 }: {
   product: ProductType,
   version: VersionType,
-  navRight?: React.Node,
 }): React.Node => (
   <PageHeader
     className="page-header
       slds-p-around_x-large"
     title={product.title}
     info={version.label}
-    navRight={
-      navRight !== null && navRight !== undefined ? <>{navRight}</> : ''
-    }
     icon={<ProductIcon item={product} />}
   />
 );
