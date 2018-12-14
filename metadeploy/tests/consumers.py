@@ -50,7 +50,7 @@ async def test_push_notification_consumer__subscribe_job(user_factory, job_facto
     await communicator.send_json_to({"model": "job", "id": str(job.id)})
     assert await communicator.receive_nothing()
 
-    await notify_post_job(job, user)
+    await notify_post_job(job)
     response = await communicator.receive_json_from()
     assert response == {
         "type": "JOB_COMPLETED",
@@ -76,7 +76,7 @@ async def test_push_notification_consumer__subscribe_job__bad(
     await communicator.send_json_to({"model": "job", "id": str(job.id)})
     assert await communicator.receive_nothing()
 
-    await notify_post_job(job, user)
+    await notify_post_job(job)
     assert await communicator.receive_nothing()
 
     await communicator.disconnect()
