@@ -171,9 +171,6 @@ class JobDetail extends React.Component<Props, { modalOpen: boolean }> {
           <BodyContainer>
             <Toasts model={job} label="Installation" />
             <Intro
-              product={product}
-              version={version}
-              plan={plan}
               results={<JobResults job={job} label="Installation" />}
               cta={<CtaButton job={job} linkToPlan={linkToPlan} />}
               postMessage={<JobMessage job={job} openModal={this.openModal} />}

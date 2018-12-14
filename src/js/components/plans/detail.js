@@ -192,9 +192,6 @@ class PlanDetail extends React.Component<Props, State> {
               <Toasts model={preflight} label="Pre-install validation" />
             ) : null}
             <Intro
-              product={product}
-              version={version}
-              plan={plan}
               results={
                 preflight && user ? (
                   <JobResults
