@@ -12,7 +12,7 @@ type FetchJobStarted = {
 };
 type FetchJobSucceeded = {
   type: 'FETCH_JOB_SUCCEEDED',
-  payload: Job,
+  payload: { id: string, job: Job },
 };
 type FetchJobFailed = {
   type: 'FETCH_JOB_FAILED',
@@ -53,7 +53,7 @@ export const fetchJob = (jobId: string): ThunkAction => (
     .then(response =>
       dispatch({
         type: 'FETCH_JOB_SUCCEEDED',
-        payload: response,
+        payload: { id: jobId, job: response },
       }),
     )
     .catch(err => {
