@@ -13,8 +13,6 @@ import type {
   Version as VersionType,
 } from 'products/reducer';
 
-// @@@ Ideally this could be replaced by the product-header, but...
-// https://github.com/salesforce/design-system-react/issues/1686
 const Header = ({
   product,
   version,
