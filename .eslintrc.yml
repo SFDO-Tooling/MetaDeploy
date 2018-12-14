@@ -23,7 +23,7 @@ settings:
             - node_modules
   react:
     version: '16.6.3'
-    flowVersion: '0.88.0'
+    flowVersion: '0.89.0'
 plugins:
   - react
   - prettier
