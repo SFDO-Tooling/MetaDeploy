@@ -5,6 +5,7 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from .constants import REDIS_JOB_CANCEL_KEY
 from .jobs import preflight_job
 from .models import Job, Plan, PreflightResult, Product, Version
 from .serializers import (
@@ -31,7 +32,7 @@ class JobViewSet(viewsets.ModelViewSet):
         return Job.objects.filter(filters)
 
     def perform_destroy(self, instance):
-        cache.set(f"CANCEL-{instance.id}", True)
+        cache.set(REDIS_JOB_CANCEL_KEY.format(id=instance.id), True)
 
 
 class ProductViewSet(viewsets.ModelViewSet):

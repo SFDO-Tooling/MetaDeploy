@@ -4,7 +4,7 @@ import bleach
 from cumulusci.core import flows
 from django.core.cache import cache
 
-from .constants import ERROR, OK, OPTIONAL, SKIP, WARN
+from .constants import ERROR, OK, OPTIONAL, REDIS_JOB_CANCEL_KEY, SKIP, WARN
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ class BasicFlow(flows.BaseFlow):
             raise StopFlowException("Job canceled.")
 
     def _flow_canceled(self):
-        return bool(cache.delete(f"CANCEL-{self.result.id}"))
+        return cache.get(REDIS_JOB_CANCEL_KEY.format(id=self.result.id))
 
 
 class JobFlow(BasicFlow):

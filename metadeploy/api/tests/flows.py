@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, sentinel
 import pytest
 from django.core.cache import cache
 
+from ..constants import REDIS_JOB_CANCEL_KEY
 from ..flows import BasicFlow, JobFlow, PreflightFlow, StopFlowException
 from ..models import Step
 
@@ -30,7 +31,7 @@ class TestJobFlow:
         init.return_value = None
         job = job_factory()
         flow = JobFlow(result=job)
-        cache.set(f"CANCEL-{job.id}", True)
+        cache.set(REDIS_JOB_CANCEL_KEY.format(id=job.id), True)
         with pytest.raises(StopFlowException):
             flow._pre_task(None)
 
