@@ -21,6 +21,7 @@ import { shouldFetchVersion, getLoadingOrNotFound } from 'products/utils';
 import BodyContainer from 'components/bodyContainer';
 import CtaButton from 'components/jobs/ctaButton';
 import Header from 'components/plans/header';
+import Intro from 'components/plans/intro';
 import JobMessage from 'components/jobs/jobMessage';
 import JobResults from 'components/plans/jobResults';
 import ProductNotFound from 'components/products/product404';
@@ -169,39 +170,14 @@ class JobDetail extends React.Component<Props, { modalOpen: boolean }> {
           />
           <BodyContainer>
             <Toasts model={job} label="Installation" />
-            <div
-              className="slds-p-around_medium
-                slds-size_1-of-1
-                slds-medium-size_1-of-2"
-            >
-              <div className="slds-text-longform">
-                <h3 className="slds-text-heading_small">{plan.title}</h3>
-                <JobResults job={job} label="Installation" />
-                <JobMessage job={job} openModal={this.openModal} />
-              </div>
-              <CtaButton job={job} linkToPlan={linkToPlan} />
-            </div>
-            <div
-              className="slds-p-around_medium
-                slds-size_1-of-1
-                slds-medium-size_1-of-2"
-            >
-              <UserInfo job={job} />
-            </div>
-            <div
-              className="slds-p-around_medium
-                  slds-size_1-of-1"
-            >
-              <ProgressBar job={job} />
-            </div>
-            {plan.steps.length ? (
-              <div
-                className="slds-p-around_medium
-                  slds-size_1-of-1"
-              >
-                <StepsTable plan={plan} job={job} />
-              </div>
-            ) : null}
+            <Intro
+              results={<JobResults job={job} label="Installation" />}
+              cta={<CtaButton job={job} linkToPlan={linkToPlan} />}
+              postMessage={<JobMessage job={job} openModal={this.openModal} />}
+            />
+            <UserInfo job={job} />
+            <ProgressBar job={job} />
+            {plan.steps.length ? <StepsTable plan={plan} job={job} /> : null}
           </BodyContainer>
         </>
       </DocumentTitle>
