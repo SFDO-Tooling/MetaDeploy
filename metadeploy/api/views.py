@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from .constants import REDIS_JOB_CANCEL_KEY
 from .jobs import preflight_job
 from .models import Job, Plan, PreflightResult, Product, Version
+from .permissions import OnlyOwnerCanDelete
 from .serializers import (
     JobSerializer,
     PlanSerializer,
@@ -21,6 +22,7 @@ class JobViewSet(viewsets.ModelViewSet):
     serializer_class = JobSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ("plan", "user", "status")
+    permission_classes = (OnlyOwnerCanDelete,)
 
     def get_queryset(self):
         if self.request.user.is_staff:

@@ -449,6 +449,7 @@ class Job(HashIdMixin, models.Model):
     org_name = models.CharField(blank=True, max_length=256)
     org_type = models.CharField(blank=True, max_length=256)
     is_public = models.BooleanField(default=False)
+    canceled_at = models.DateTimeField(null=True)
 
     def skip_tasks(self):
         return [
@@ -506,6 +507,7 @@ class PreflightResult(models.Model):
     edited_at = models.DateTimeField(auto_now=True)
     is_valid = models.BooleanField(default=True)
     status = models.CharField(choices=Status, max_length=64, default=Status.started)
+    canceled_at = models.DateTimeField(null=True)
     # Maybe we don't use foreign keys here because we want the result to
     # remain static even if steps are subsequently changed:
     results = JSONField(default=dict, blank=True)

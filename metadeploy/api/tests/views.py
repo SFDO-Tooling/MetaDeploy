@@ -146,6 +146,13 @@ class TestJobViewset:
         assert response.status_code == 204
         assert Job.objects.filter(id=job.id).exists()
 
+    def test_destroy_job__bad_user(self, client, job_factory):
+        job = job_factory(is_public=True)
+        response = client.delete(reverse("job-detail", kwargs={"pk": job.id}))
+
+        assert response.status_code == 403
+        assert Job.objects.filter(id=job.id).exists()
+
 
 @pytest.mark.django_db
 class TestBasicGetViews:

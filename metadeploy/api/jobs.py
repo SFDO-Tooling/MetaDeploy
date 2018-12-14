@@ -96,6 +96,7 @@ def mark_canceled(result):
         yield
     except StopRequested:
         result.status = result.Status.canceled
+        result.canceled_at = timezone.now()
         result.save()
         raise
 
