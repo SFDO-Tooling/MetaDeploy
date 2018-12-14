@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
-import PageHeader from '@salesforce/design-system-react/components/page-header';
 import { Redirect, Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
@@ -12,7 +11,7 @@ import { fetchVersion } from 'products/actions';
 import { shouldFetchVersion, getLoadingOrNotFound } from 'products/utils';
 
 import BodyContainer from 'components/bodyContainer';
-import ProductIcon from 'components/products/icon';
+import Header from 'components/products/header';
 import ProductNotFound from 'components/products/product404';
 import VersionNotFound from 'components/products/version404';
 
@@ -49,7 +48,7 @@ const ProductDetail = ({ product }: ProductDetailProps) => {
   return <Redirect to={routes.version_detail(product.slug, version.label)} />;
 };
 
-const BodySection = ({ children }: { children: React.Node }) => (
+const BodySection = ({ children }: { children: ?React.Node }) => (
   <div
     className="slds-text-longform
       slds-p-around_medium
@@ -110,13 +109,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     return (
       <DocumentTitle title={`${product.title} | MetaDeploy`}>
         <>
-          <PageHeader
-            className="page-header
-              slds-p-around_x-large"
-            title={product.title}
-            info={version.label}
-            icon={<ProductIcon item={product} />}
-          />
+          <Header product={product} version={version} />
           <BodyContainer>
             <BodySection>
               <h3 className="slds-text-heading_small">

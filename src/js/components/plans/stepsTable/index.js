@@ -60,33 +60,43 @@ const StepsTable = ({
     }
   }
   return (
-    <article className="slds-card slds-scrollable_x">
-      <DataTable items={plan.steps} id="plan-steps-table">
-        <DataTableColumn key="name" label="Steps" property="name" primaryColumn>
-          <NameDataCell preflight={preflight} job={job} />
-        </DataTableColumn>
-        <DataTableColumn key="kind" label="Type" property="kind">
-          <KindDataCell />
-        </DataTableColumn>
-        <DataTableColumn key="is_required" property="is_required">
-          <RequiredDataCell preflight={preflight} job={job} />
-        </DataTableColumn>
-        <DataTableColumn
-          key="is_recommended"
-          label={<InstallDataColumnLabel />}
-          property="is_recommended"
-        >
-          <InstallDataCell
-            user={user}
-            preflight={preflight}
-            selectedSteps={selectedSteps}
-            handleStepsChange={handleStepsChange}
-            job={job}
-            activeJobStep={activeJobStep}
-          />
-        </DataTableColumn>
-      </DataTable>
-    </article>
+    <div
+      className="slds-p-around_medium
+      slds-size_1-of-1"
+    >
+      <article className="slds-card slds-scrollable_x">
+        <DataTable items={plan.steps} id="plan-steps-table">
+          <DataTableColumn
+            key="name"
+            label="Steps"
+            property="name"
+            primaryColumn
+          >
+            <NameDataCell preflight={preflight} job={job} />
+          </DataTableColumn>
+          <DataTableColumn key="kind" label="Type" property="kind">
+            <KindDataCell />
+          </DataTableColumn>
+          <DataTableColumn key="is_required" property="is_required">
+            <RequiredDataCell preflight={preflight} job={job} />
+          </DataTableColumn>
+          <DataTableColumn
+            key="is_recommended"
+            label={<InstallDataColumnLabel />}
+            property="is_recommended"
+          >
+            <InstallDataCell
+              user={user}
+              preflight={preflight}
+              selectedSteps={selectedSteps}
+              handleStepsChange={handleStepsChange}
+              job={job}
+              activeJobStep={activeJobStep}
+            />
+          </DataTableColumn>
+        </DataTable>
+      </article>
+    </div>
   );
 };
 

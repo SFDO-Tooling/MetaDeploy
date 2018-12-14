@@ -35,33 +35,41 @@ const Footer = (): React.Node => (
 const UserInfo = ({ user }: { user: UserType }): React.Node => {
   const hasValidToken = user && user.valid_token_for !== null;
   return (
-    <Card
-      bodyClassName="slds-card__body_inner"
-      heading={hasValidToken ? 'Connected to Salesforce' : ''}
-      icon={
-        hasValidToken ? <Icon category="utility" name="connected_apps" /> : null
-      }
-      empty={hasValidToken ? null : <LoggedOut />}
-      footer={hasValidToken ? <Footer /> : null}
+    <div
+      className="slds-p-around_medium
+        slds-size_1-of-1
+        slds-medium-size_1-of-2"
     >
-      <ul>
-        {user && user.username ? (
-          <li>
-            <strong>User:</strong> {user.username}
-          </li>
-        ) : null}
-        {user && user.org_name ? (
-          <li>
-            <strong>Org:</strong> {user.org_name}
-          </li>
-        ) : null}
-        {user && user.org_type ? (
-          <li>
-            <strong>Type:</strong> {user.org_type}
-          </li>
-        ) : null}
-      </ul>
-    </Card>
+      <Card
+        bodyClassName="slds-card__body_inner"
+        heading={hasValidToken ? 'Connected to Salesforce' : ''}
+        icon={
+          hasValidToken ? (
+            <Icon category="utility" name="connected_apps" />
+          ) : null
+        }
+        empty={hasValidToken ? null : <LoggedOut />}
+        footer={hasValidToken ? <Footer /> : null}
+      >
+        <ul>
+          {user && user.username ? (
+            <li>
+              <strong>User:</strong> {user.username}
+            </li>
+          ) : null}
+          {user && user.org_name ? (
+            <li>
+              <strong>Org:</strong> {user.org_name}
+            </li>
+          ) : null}
+          {user && user.org_type ? (
+            <li>
+              <strong>Type:</strong> {user.org_type}
+            </li>
+          ) : null}
+        </ul>
+      </Card>
+    </div>
   );
 };
 

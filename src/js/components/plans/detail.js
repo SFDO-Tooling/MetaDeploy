@@ -20,6 +20,7 @@ import { startJob } from 'jobs/actions';
 import BodyContainer from 'components/bodyContainer';
 import CtaButton from 'components/plans/ctaButton';
 import Header from 'components/plans/header';
+import Intro from 'components/plans/intro';
 import JobResults from 'components/plans/jobResults';
 import ProductNotFound from 'components/products/product404';
 import StepsTable from 'components/plans/stepsTable';
@@ -190,20 +191,9 @@ class PlanDetail extends React.Component<Props, State> {
             {preflight && user ? (
               <Toasts model={preflight} label="Pre-install validation" />
             ) : null}
-            <div
-              className="slds-p-around_medium
-                slds-size_1-of-1
-                slds-medium-size_1-of-2"
-            >
-              <div className="slds-text-longform">
-                <h3 className="slds-text-heading_small">{plan.title}</h3>
-                {plan.preflight_message ? (
-                  // These messages are pre-cleaned by the API
-                  <p
-                    dangerouslySetInnerHTML={{ __html: plan.preflight_message }}
-                  />
-                ) : null}
-                {preflight && user ? (
+            <Intro
+              results={
+                preflight && user ? (
                   <JobResults
                     preflight={preflight}
                     label="Pre-install validation"
@@ -212,42 +202,41 @@ class PlanDetail extends React.Component<Props, State> {
                       'run the pre-install validation again.'
                     }
                   />
-                ) : null}
-              </div>
-              {plan.steps.length ? (
-                <CtaButton
-                  history={history}
-                  user={user}
-                  productSlug={product.slug}
-                  versionLabel={version.label}
-                  plan={plan}
-                  preflight={preflight}
-                  selectedSteps={selectedSteps}
-                  doStartPreflight={doStartPreflight}
-                  doStartJob={doStartJob}
-                />
-              ) : null}
-            </div>
-            <div
-              className="slds-p-around_medium
-                slds-size_1-of-1
-                slds-medium-size_1-of-2"
-            >
-              <UserInfo user={user} />
-            </div>
+                ) : null
+              }
+              cta={
+                plan.steps.length ? (
+                  <CtaButton
+                    history={history}
+                    user={user}
+                    productSlug={product.slug}
+                    versionLabel={version.label}
+                    plan={plan}
+                    preflight={preflight}
+                    selectedSteps={selectedSteps}
+                    doStartPreflight={doStartPreflight}
+                    doStartJob={doStartJob}
+                  />
+                ) : null
+              }
+              preMessage={
+                plan.preflight_message ? (
+                  // These messages are pre-cleaned by the API
+                  <p
+                    dangerouslySetInnerHTML={{ __html: plan.preflight_message }}
+                  />
+                ) : null
+              }
+            />
+            <UserInfo user={user} />
             {plan.steps.length ? (
-              <div
-                className="slds-p-around_medium
-                  slds-size_1-of-1"
-              >
-                <StepsTable
-                  user={user}
-                  plan={plan}
-                  preflight={preflight}
-                  selectedSteps={selectedSteps}
-                  handleStepsChange={this.handleStepsChange}
-                />
-              </div>
+              <StepsTable
+                user={user}
+                plan={plan}
+                preflight={preflight}
+                selectedSteps={selectedSteps}
+                handleStepsChange={this.handleStepsChange}
+              />
             ) : null}
           </BodyContainer>
         </>
