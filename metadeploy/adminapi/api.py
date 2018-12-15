@@ -67,10 +67,10 @@ class AdminAPIViewSet(viewsets.ModelViewSet):
     serializer_class = None
     route_ns = "admin_rest"
 
-    # # Security
-    # Admin Views require IsAdmin/IsStaff. Don't change this
     # TODO: Permission, lock to SFDC IPs? require HTTPS
     # TODO: Permission, force subclasses to append, not overwrite
+    # TODO: API Key?
+    # Admin Views require IsAdmin/IsStaff. Don't change this
     permission_classes = [permissions.IsAdminUser]
 
     # # Pagination
