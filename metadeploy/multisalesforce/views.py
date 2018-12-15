@@ -1,3 +1,5 @@
+import logging
+
 import requests
 from allauth.socialaccount.providers.oauth2.views import (
     OAuth2CallbackView,
@@ -14,6 +16,8 @@ from .provider import (
     SalesforceProductionProvider,
     SalesforceTestProvider,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class SalesforcePermissionsError(Exception):
@@ -45,6 +49,10 @@ class SaveInstanceUrlMixin:
         return resp.json()
 
     def complete_login(self, request, app, token, **kwargs):
+        logger.info(
+            "Calling back to Salesforce to complete login.",
+            extra={"tag": "oauth", "context": {}},
+        )
         resp = requests.get(self.userinfo_url, params={"oauth_token": token})
         resp.raise_for_status()
         extra_data = resp.json()
@@ -82,13 +90,31 @@ class SalesforceOAuth2CustomAdapter(SaveInstanceUrlMixin, SalesforceOAuth2BaseAd
         return "https://{}.my.salesforce.com".format(custom_domain)
 
 
-prod_oauth2_login = OAuth2LoginView.adapter_view(SalesforceOAuth2ProductionAdapter)
-prod_oauth2_callback = OAuth2CallbackView.adapter_view(
+class LoggingOAuth2LoginView(OAuth2LoginView):
+    def dispatch(self, *args, **kwargs):
+        logger.info("Dispatching OAuth login", extra={"tag": "oauth", "context": {}})
+        return super().dispatch(*args, **kwargs)
+
+
+class LoggingOAuth2CallbackView(OAuth2CallbackView):
+    def dispatch(self, *args, **kwargs):
+        logger.info("Dispatching OAuth callback", extra={"tag": "oauth", "context": {}})
+        return super().dispatch(*args, **kwargs)
+
+
+prod_oauth2_login = LoggingOAuth2LoginView.adapter_view(
     SalesforceOAuth2ProductionAdapter
 )
-sandbox_oauth2_login = OAuth2LoginView.adapter_view(SalesforceOAuth2SandboxAdapter)
-sandbox_oauth2_callback = OAuth2CallbackView.adapter_view(
+prod_oauth2_callback = LoggingOAuth2CallbackView.adapter_view(
+    SalesforceOAuth2ProductionAdapter
+)
+sandbox_oauth2_login = LoggingOAuth2LoginView.adapter_view(
     SalesforceOAuth2SandboxAdapter
 )
-custom_oauth2_login = OAuth2LoginView.adapter_view(SalesforceOAuth2CustomAdapter)
-custom_oauth2_callback = OAuth2CallbackView.adapter_view(SalesforceOAuth2CustomAdapter)
+sandbox_oauth2_callback = LoggingOAuth2CallbackView.adapter_view(
+    SalesforceOAuth2SandboxAdapter
+)
+custom_oauth2_login = LoggingOAuth2LoginView.adapter_view(SalesforceOAuth2CustomAdapter)
+custom_oauth2_callback = LoggingOAuth2CallbackView.adapter_view(
+    SalesforceOAuth2CustomAdapter
+)
