@@ -171,6 +171,7 @@ class TestBasicGetViews:
             "is_allowed": True,
             "is_listed": True,
             "order_key": 0,
+            "not_allowed_instructions": None,
         }
 
     def test_version(self, client, version_factory):
@@ -205,10 +206,13 @@ class TestBasicGetViews:
             "steps": [],
             "is_allowed": True,
             "is_listed": True,
+            "not_allowed_instructions": None,
         }
 
     def test_plan__not_visible(self, client, allowed_list_factory, plan_factory):
-        allowed_list = allowed_list_factory(organization_ids=[])
+        allowed_list = allowed_list_factory(
+            organization_ids=[], description="Sample instructions."
+        )
         plan = plan_factory(visible_to=allowed_list)
         response = client.get(reverse("plan-detail", kwargs={"pk": plan.id}))
 
@@ -223,6 +227,7 @@ class TestBasicGetViews:
             "steps": None,
             "is_allowed": False,
             "is_listed": True,
+            "not_allowed_instructions": "<p>Sample instructions.</p>",
         }
 
 

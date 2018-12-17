@@ -103,6 +103,7 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
     is_allowed = serializers.SerializerMethodField()
     steps = StepSerializer(source="step_set", many=True)
     preflight_message = serializers.CharField(source="preflight_message_markdown")
+    not_allowed_instructions = serializers.SerializerMethodField()
 
     class Meta:
         model = Plan
@@ -116,6 +117,7 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
             "steps",
             "is_allowed",
             "is_listed",
+            "not_allowed_instructions",
         )
         circumspect_fields = ("steps", "preflight_message")
 
@@ -124,6 +126,9 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
 
     def get_is_allowed(self, obj):
         return obj.is_visible_to(self.context["request"].user)
+
+    def get_not_allowed_instructions(self, obj):
+        return getattr(obj.visible_to, "description_markdown", None)
 
 
 class VersionSerializer(serializers.ModelSerializer):
@@ -156,6 +161,7 @@ class ProductSerializer(CircumspectSerializerMixin, serializers.ModelSerializer)
     most_recent_version = VersionSerializer()
     is_allowed = serializers.SerializerMethodField()
     description = serializers.CharField(source="description_markdown")
+    not_allowed_instructions = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -172,6 +178,7 @@ class ProductSerializer(CircumspectSerializerMixin, serializers.ModelSerializer)
             "is_allowed",
             "is_listed",
             "order_key",
+            "not_allowed_instructions",
         )
         circumspect_fields = ("description",)
 
@@ -180,6 +187,9 @@ class ProductSerializer(CircumspectSerializerMixin, serializers.ModelSerializer)
 
     def get_is_allowed(self, obj):
         return obj.is_visible_to(self.context["request"].user)
+
+    def get_not_allowed_instructions(self, obj):
+        return getattr(obj.visible_to, "description_markdown", None)
 
 
 class ErrorWarningCountMixin:

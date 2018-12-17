@@ -80,6 +80,12 @@ class AllowedList(models.Model):
     def __str__(self):  # pragma: nocover
         return self.title
 
+    @property
+    def description_markdown(self):
+        return bleach.clean(
+            markdown(self.description), tags=MARKDOWN_TAGS, attributes=MARKDOWN_ATTRS
+        )
+
 
 class PrivateMixin(models.Model):
     class Meta:
