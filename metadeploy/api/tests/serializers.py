@@ -1,7 +1,31 @@
 import pytest
 
 from ..models import PreflightResult
-from ..serializers import JobSerializer, PreflightResultSerializer, ProductSerializer
+from ..serializers import (
+    JobSerializer,
+    PlanSerializer,
+    PreflightResultSerializer,
+    ProductSerializer,
+)
+
+
+@pytest.mark.django_db
+class TestPlanSerializer:
+    def test_circumspect_description(
+        self, rf, user_factory, plan_factory, allowed_list_factory, step_factory
+    ):
+        user = user_factory()
+        allowed_list = allowed_list_factory()
+        plan = plan_factory(visible_to=allowed_list, preflight_message="Test")
+        [step_factory(plan=plan) for _ in range(3)]
+
+        request = rf.get("/")
+        request.user = user
+        context = {"request": request}
+
+        serializer = PlanSerializer(plan, context=context)
+        assert serializer.data["preflight_message"] == ""
+        assert serializer.data["steps"] == []
 
 
 @pytest.mark.django_db
@@ -18,6 +42,20 @@ class TestProductSerializer:
 
         serializer = ProductSerializer(product, context=context)
         assert serializer.data["most_recent_version"] is None
+
+    def test_circumspect_description(
+        self, rf, user_factory, product_factory, allowed_list_factory
+    ):
+        user = user_factory()
+        allowed_list = allowed_list_factory()
+        product = product_factory(visible_to=allowed_list, description="Test")
+
+        request = rf.get("/")
+        request.user = user
+        context = {"request": request}
+
+        serializer = ProductSerializer(product, context=context)
+        assert serializer.data["description"] == ""
 
 
 @pytest.mark.django_db

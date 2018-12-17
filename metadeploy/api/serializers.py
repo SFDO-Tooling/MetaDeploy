@@ -50,12 +50,12 @@ class StepSerializer(serializers.ModelSerializer):
 
 class PlanSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
-    steps = StepSerializer(many=True, source="step_set")
     version = serializers.PrimaryKeyRelatedField(
         read_only=True, pk_field=serializers.CharField()
     )
-    preflight_message = serializers.CharField(source="preflight_message_markdown")
     is_allowed = serializers.SerializerMethodField()
+    steps = serializers.SerializerMethodField()
+    preflight_message = serializers.SerializerMethodField()
 
     class Meta:
         model = Plan
@@ -73,6 +73,18 @@ class PlanSerializer(serializers.ModelSerializer):
 
     def get_is_allowed(self, obj):
         return obj.is_visible_to(self.context["request"].user)
+
+    # TODO: I would like to extract this logic into a CircumspectField:
+    def get_steps(self, obj):
+        if obj.is_visible_to(self.context["request"].user):
+            return StepSerializer(obj.step_set, many=True).data
+        return []
+
+    # TODO: I would like to extract this logic into a CircumspectField:
+    def get_preflight_message(self, obj):
+        if obj.is_visible_to(self.context["request"].user):
+            return obj.preflight_message_markdown
+        return ""
 
 
 class VersionSerializer(serializers.ModelSerializer):
@@ -104,6 +116,7 @@ class ProductSerializer(serializers.ModelSerializer):
     category = serializers.CharField(source="category.title")
     most_recent_version = VersionSerializer()
     is_allowed = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -124,6 +137,12 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def get_is_allowed(self, obj):
         return obj.is_visible_to(self.context["request"].user)
+
+    # TODO: I would like to extract this logic into a CircumspectField:
+    def get_description(self, obj):
+        if obj.is_visible_to(self.context["request"].user):
+            return obj.description
+        return ""
 
 
 class ErrorWarningCountMixin:
