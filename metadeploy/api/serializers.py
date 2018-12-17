@@ -141,7 +141,7 @@ class ProductSerializer(serializers.ModelSerializer):
     # TODO: I would like to extract this logic into a CircumspectField:
     def get_description(self, obj):
         if obj.is_visible_to(self.context["request"].user):
-            return obj.description
+            return obj.description_markdown
         return ""
 
 

@@ -151,7 +151,7 @@ class TestBasicGetViews:
         assert response.json() == {
             "id": str(product.id),
             "title": product.title,
-            "description": "This is a sample product.",
+            "description": "<p>This is a sample product.</p>",
             "category": "salesforce",
             "color": "#FFFFFF",
             "icon": None,

@@ -32,6 +32,36 @@ from .push import (
 
 VERSION_STRING = r"^[a-zA-Z0-9._+-]+$"
 
+MARKDOWN_TAGS = [
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "b",
+    "i",
+    "strong",
+    "em",
+    "tt",
+    "p",
+    "br",
+    "span",
+    "div",
+    "blockquote",
+    "code",
+    "hr",
+    "ul",
+    "ol",
+    "li",
+    "dd",
+    "dt",
+    "img",
+    "a",
+]
+
+MARKDOWN_ATTRS = {"img": ["src", "alt", "title"], "a": ["href", "alt", "title"]}
+
 
 class HashIdMixin(models.Model):
     class Meta:
@@ -263,6 +293,12 @@ class Product(HashIdMixin, SlugMixin, PrivateMixin, models.Model):
             }
         return None
 
+    @property
+    def description_markdown(self):
+        return bleach.clean(
+            markdown(self.description), tags=MARKDOWN_TAGS, attributes=MARKDOWN_ATTRS
+        )
+
 
 class VersionQuerySet(models.QuerySet):
     def get_by_natural_key(self, *, product, label):
@@ -358,50 +394,20 @@ class Plan(HashIdMixin, SlugMixin, PrivateMixin, models.Model):
 
     slug_class = PlanSlug
 
-    markdown_tags = [
-        "h1",
-        "h2",
-        "h3",
-        "h4",
-        "h5",
-        "h6",
-        "b",
-        "i",
-        "strong",
-        "em",
-        "tt",
-        "p",
-        "br",
-        "span",
-        "div",
-        "blockquote",
-        "code",
-        "hr",
-        "ul",
-        "ol",
-        "li",
-        "dd",
-        "dt",
-        "img",
-        "a",
-    ]
-
-    markdown_attrs = {"img": ["src", "alt", "title"], "a": ["href", "alt", "title"]}
-
     @property
     def preflight_message_markdown(self):
         return bleach.clean(
             markdown(self.preflight_message),
-            tags=self.markdown_tags,
-            attributes=self.markdown_attrs,
+            tags=MARKDOWN_TAGS,
+            attributes=MARKDOWN_ATTRS,
         )
 
     @property
     def post_install_message_markdown(self):
         return bleach.clean(
             markdown(self.post_install_message),
-            tags=self.markdown_tags,
-            attributes=self.markdown_attrs,
+            tags=MARKDOWN_TAGS,
+            attributes=MARKDOWN_ATTRS,
         )
 
     @property
