@@ -24,8 +24,8 @@ class TestPlanSerializer:
         context = {"request": request}
 
         serializer = PlanSerializer(plan, context=context)
-        assert serializer.data["preflight_message"] == ""
-        assert serializer.data["steps"] == []
+        assert serializer.data["preflight_message"] is None
+        assert serializer.data["steps"] is None
 
 
 @pytest.mark.django_db
@@ -55,7 +55,7 @@ class TestProductSerializer:
         context = {"request": request}
 
         serializer = ProductSerializer(product, context=context)
-        assert serializer.data["description"] == ""
+        assert serializer.data["description"] is None
 
 
 @pytest.mark.django_db

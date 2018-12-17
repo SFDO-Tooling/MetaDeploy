@@ -217,10 +217,10 @@ class TestBasicGetViews:
             "id": str(plan.id),
             "title": "Sample plan",
             "version": str(plan.version.id),
-            "preflight_message": "",
+            "preflight_message": None,
             "tier": "primary",
             "slug": "sample-plan",
-            "steps": [],
+            "steps": None,
             "is_allowed": False,
             "is_listed": True,
         }

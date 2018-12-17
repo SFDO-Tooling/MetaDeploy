@@ -1,5 +1,9 @@
+from collections import OrderedDict
+
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
+from rest_framework.fields import SkipField
+from rest_framework.relations import PKOnlyObject
 
 from .constants import ERROR, WARN
 from .models import Job, Plan, PreflightResult, Product, Step, Version
@@ -10,6 +14,49 @@ User = get_user_model()
 class IdOnlyField(serializers.CharField):
     def to_representation(self, value):
         return str(value.id)
+
+
+class CircumspectSerializerMixin:
+    def circumspect_visible(self, obj, user):  # pragma: nocover
+        raise NotImplementedError("Subclasses must implement circumspect_visible")
+
+    def to_representation(self, instance):
+        """
+        Object instance -> Dict of primitive datatypes.
+
+        Inlined from rest_framework.serializers
+        """
+        ret = OrderedDict()
+        fields = self._readable_fields
+
+        for field in fields:
+            try:
+                attribute = field.get_attribute(instance)
+                should_be_circumspect = (
+                    field.field_name in self.Meta.circumspect_fields
+                    and not self.circumspect_visible(
+                        instance, self.context["request"].user
+                    )
+                )
+                if should_be_circumspect:
+                    attribute = None
+            except SkipField:  # pragma: nocover
+                continue
+
+            # We skip `to_representation` for `None` values so that fields do
+            # not have to explicitly deal with that case.
+            #
+            # For related fields with `use_pk_only_optimization` we need to
+            # resolve the pk value.
+            check_for_none = (
+                attribute.pk if isinstance(attribute, PKOnlyObject) else attribute
+            )
+            if check_for_none is None:
+                ret[field.field_name] = None
+            else:
+                ret[field.field_name] = field.to_representation(attribute)
+
+        return ret
 
 
 class FullUserSerializer(serializers.ModelSerializer):
@@ -48,14 +95,14 @@ class StepSerializer(serializers.ModelSerializer):
         )
 
 
-class PlanSerializer(serializers.ModelSerializer):
+class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     version = serializers.PrimaryKeyRelatedField(
         read_only=True, pk_field=serializers.CharField()
     )
     is_allowed = serializers.SerializerMethodField()
-    steps = serializers.SerializerMethodField()
-    preflight_message = serializers.SerializerMethodField()
+    steps = StepSerializer(source="step_set", many=True)
+    preflight_message = serializers.CharField(source="preflight_message_markdown")
 
     class Meta:
         model = Plan
@@ -70,21 +117,13 @@ class PlanSerializer(serializers.ModelSerializer):
             "is_allowed",
             "is_listed",
         )
+        circumspect_fields = ("steps", "preflight_message")
+
+    def circumspect_visible(self, obj, user):
+        return obj.is_visible_to(user)
 
     def get_is_allowed(self, obj):
         return obj.is_visible_to(self.context["request"].user)
-
-    # TODO: I would like to extract this logic into a CircumspectField:
-    def get_steps(self, obj):
-        if obj.is_visible_to(self.context["request"].user):
-            return StepSerializer(obj.step_set, many=True).data
-        return []
-
-    # TODO: I would like to extract this logic into a CircumspectField:
-    def get_preflight_message(self, obj):
-        if obj.is_visible_to(self.context["request"].user):
-            return obj.preflight_message_markdown
-        return ""
 
 
 class VersionSerializer(serializers.ModelSerializer):
@@ -111,12 +150,12 @@ class VersionSerializer(serializers.ModelSerializer):
         )
 
 
-class ProductSerializer(serializers.ModelSerializer):
+class ProductSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     category = serializers.CharField(source="category.title")
     most_recent_version = VersionSerializer()
     is_allowed = serializers.SerializerMethodField()
-    description = serializers.SerializerMethodField()
+    description = serializers.CharField(source="description_markdown")
 
     class Meta:
         model = Product
@@ -134,15 +173,13 @@ class ProductSerializer(serializers.ModelSerializer):
             "is_listed",
             "order_key",
         )
+        circumspect_fields = ("description",)
+
+    def circumspect_visible(self, obj, user):
+        return obj.is_visible_to(user)
 
     def get_is_allowed(self, obj):
         return obj.is_visible_to(self.context["request"].user)
-
-    # TODO: I would like to extract this logic into a CircumspectField:
-    def get_description(self, obj):
-        if obj.is_visible_to(self.context["request"].user):
-            return obj.description_markdown
-        return ""
 
 
 class ErrorWarningCountMixin:
