@@ -25,7 +25,7 @@ describe('fetchJob', () => {
       };
       const succeeded = {
         type: 'FETCH_JOB_SUCCEEDED',
-        payload: job,
+        payload: { id: 'job-1', job },
       };
 
       expect.assertions(1);

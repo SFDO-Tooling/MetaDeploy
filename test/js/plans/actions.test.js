@@ -23,7 +23,7 @@ describe('fetchPreflight', () => {
       };
       const succeeded = {
         type: 'FETCH_PREFLIGHT_SUCCEEDED',
-        payload: preflight,
+        payload: { plan: 'plan-1', preflight },
       };
 
       expect.assertions(1);

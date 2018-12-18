@@ -42,8 +42,18 @@ describe('reducer', () => {
     expect(actual).toEqual(expected);
   });
 
+  test('handles FETCH_PREFLIGHT_SUCCEEDED action', () => {
+    const initial = {};
+    const expected = { 'plan-1': null };
+    const actual = reducer(initial, {
+      type: 'FETCH_PREFLIGHT_SUCCEEDED',
+      payload: { plan: 'plan-1', preflight: null },
+    });
+
+    expect(actual).toEqual(expected);
+  });
+
   [
-    { type: 'FETCH_PREFLIGHT_SUCCEEDED' },
     { type: 'PREFLIGHT_COMPLETED' },
     { type: 'PREFLIGHT_FAILED' },
     { type: 'PREFLIGHT_INVALIDATED' },
