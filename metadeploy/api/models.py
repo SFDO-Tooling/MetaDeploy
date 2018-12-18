@@ -60,6 +60,9 @@ class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
 class User(HashIdMixin, AbstractUser):
     objects = UserManager()
 
+    def subscribable_by(self, user):
+        return self == user
+
     @property
     def org_name(self):
         if self.social_account:
@@ -452,6 +455,9 @@ class Job(HashIdMixin, models.Model):
     org_type = models.CharField(blank=True, max_length=256)
     is_public = models.BooleanField(default=False)
 
+    def subscribable_by(self, user):
+        return self.visible_to(user)
+
     def visible_to(self, user):
         return self.is_public or user.is_staff or user == self.user
 
@@ -525,6 +531,9 @@ class PreflightResult(models.Model):
     #   ...
     # }
 
+    def subscribable_by(self, user):
+        return self.user == user
+
     def has_any_errors(self):
         return any(
             (
@@ -577,8 +586,11 @@ class PreflightResult(models.Model):
     def save(self, *args, **kwargs):
         ret = super().save(*args, **kwargs)
 
-        self.push_if_completed()
-        self.push_if_failed()
-        self.push_if_invalidated()
+        try:
+            self.push_if_completed()
+            self.push_if_failed()
+            self.push_if_invalidated()
+        except RuntimeError as error:
+            logger.warn(f"RuntimeError: {error}")
 
         return ret

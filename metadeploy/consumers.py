@@ -1,10 +1,13 @@
 from collections import namedtuple
 
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
-
-from metadeploy.api.models import Job
+from django.apps import apps
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 
 Request = namedtuple("Request", "user")
+
+
+KNOWN_MODELS = {"user", "preflightresult", "job"}
 
 
 def user_context(user):
@@ -45,32 +48,37 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
     async def receive_json(self, content, **kwargs):
         # Just used to subscribe to notification channels.
         is_valid = self.is_valid(content)
-        is_known_model = self.is_known_model(content["model"])
+        is_known_model = self.is_known_model(content.get("model", None))
         has_good_permissions = self.has_good_permissions(content)
         all_good = is_valid and is_known_model and has_good_permissions
         if not all_good:
+            await self.send_json({"error": "Invalid subscription."})
             return
         group_name = f"{content['model']}-{content['id']}"
         self.groups.append(group_name)
         await self.channel_layer.group_add(group_name, self.channel_name)
+        await self.send_json(
+            {"ok": f"Subscribed to {content['model']}.id = {content['id']}"}
+        )
 
     def is_valid(self, content):
         return content.keys() == {"model", "id"}
 
     def is_known_model(self, model):
-        known_models = {"user", "preflightrequest", "job"}
-        return model in known_models
+        return model in KNOWN_MODELS
 
     def has_good_permissions(self, content):
-        if content["model"] == "job":
-            # If we use this version, we must make this an async
-            # function.
-            # from channels.db import database_sync_to_async
-            # job = await database_sync_to_async(self.get_job)(content["id"])
-            # Why does database_sync_to_async not work in the tests?
-            job = self.get_job(content["id"])
-            return job and job.visible_to(self.scope["user"])
-        return True
-
-    def get_job(self, id):
-        return Job.objects.filter(pk=id).first()
+        possible_exceptions = (
+            AttributeError,
+            KeyError,
+            LookupError,
+            MultipleObjectsReturned,
+            ObjectDoesNotExist,
+            ValueError,
+        )
+        try:
+            model = apps.get_model("api", content["model"])
+            obj = model.objects.get(pk=content["id"])
+            return obj.subscribable_by(self.scope["user"])
+        except possible_exceptions:
+            return False
