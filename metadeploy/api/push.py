@@ -36,7 +36,7 @@ async def push_serializable(instance, serializer, type_):
         group_name,
         {
             "type": "notify",
-            "instance": instance,
+            "instance": {"model": model_name, "id": id},
             "serializer": serializer,
             "inner_type": type_,
         },

@@ -34,7 +34,7 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
             await self.send_json(event["content"])
             return
         if "serializer" in event and "instance" in event and "inner_type" in event:
-            instance = event["instance"]
+            instance = self.get_instance(**event["instance"])
             serializer = event["serializer"]
             payload = {
                 "payload": serializer(
@@ -44,6 +44,10 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
             }
             await self.send_json(payload)
             return
+
+    def get_instance(self, *, model, id):
+        Model = apps.get_model("api", model)
+        return Model.objects.get(pk=id)
 
     async def receive_json(self, content, **kwargs):
         # Just used to subscribe to notification channels.
@@ -77,8 +81,7 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
             ValueError,
         )
         try:
-            model = apps.get_model("api", content["model"])
-            obj = model.objects.get(pk=content["id"])
+            obj = self.get_instance(**content)
             return obj.subscribable_by(self.scope["user"])
         except possible_exceptions:
             return False
