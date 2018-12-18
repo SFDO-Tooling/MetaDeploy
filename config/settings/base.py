@@ -359,6 +359,11 @@ LOGGING = {
         "django.server": {"handlers": ["console"], "level": "INFO", "propagate": False},
         "rq.worker": {"handlers": ["rq_console"], "level": "DEBUG"},
         "metadeploy.multisalesforce": {"handlers": ["console"], "level": "DEBUG"},
+        "log_request_id.middleware": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
     },
 }
 
