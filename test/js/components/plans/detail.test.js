@@ -65,6 +65,7 @@ const defaultState = {
               is_recommended: false,
             },
           ],
+          is_allowed: true,
         },
         secondary_plan: {
           id: 'plan-2',
@@ -72,6 +73,7 @@ const defaultState = {
           title: 'My Other Plan',
           preflight_message: '',
           steps: [{ id: 'step-5', name: 'My Other Step' }],
+          is_allowed: true,
         },
         additional_plans: [
           {
@@ -80,9 +82,20 @@ const defaultState = {
             title: 'My Third Plan',
             preflight_message: 'Third preflight text...',
             steps: [],
+            is_allowed: true,
+          },
+          {
+            id: 'plan-4',
+            slug: 'fourth-plan',
+            title: 'My Restricted Plan',
+            preflight_message: null,
+            steps: null,
+            is_allowed: false,
+            not_allowed_instructions: 'plan restricted',
           },
         ],
       },
+      is_allowed: true,
     },
   ],
   preflights: {
@@ -227,6 +240,38 @@ describe('<PlanDetail />', () => {
       });
 
       expect(getByText('another plan')).toBeVisible();
+    });
+  });
+
+  describe('parent product is restricted', () => {
+    test('renders <PlanNotAllowed />', () => {
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          products: [
+            {
+              ...defaultState.products[0],
+              is_allowed: false,
+              not_allowed_instructions: 'foobar',
+              description: null,
+            },
+          ],
+        },
+      });
+
+      expect(getByText('another plan')).toBeVisible();
+      expect(getByText('foobar')).toBeVisible();
+    });
+  });
+
+  describe('plan is restricted', () => {
+    test('renders <PlanNotAllowed />', () => {
+      const { getByText } = setup({
+        planSlug: 'fourth-plan',
+      });
+
+      expect(getByText('another plan')).toBeVisible();
+      expect(getByText('plan restricted')).toBeVisible();
     });
   });
 

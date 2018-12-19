@@ -2,9 +2,11 @@
 
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
+import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
+import routes from 'utils/routes';
 import { CONSTANTS } from 'plans/reducer';
 import { fetchPreflight, startPreflight } from 'plans/actions';
 import { fetchVersion } from 'products/actions';
@@ -22,6 +24,7 @@ import CtaButton from 'components/plans/ctaButton';
 import Header from 'components/plans/header';
 import Intro from 'components/plans/intro';
 import JobResults from 'components/plans/jobResults';
+import PlanNotAllowed from 'components/products/notAllowed';
 import ProductNotFound from 'components/products/product404';
 import StepsTable from 'components/plans/stepsTable';
 import Toasts from 'components/plans/toasts';
@@ -126,7 +129,7 @@ class PlanDetail extends React.Component<Props, State> {
     const { plan, preflight } = this.props;
     const selectedSteps = new Set();
     /* istanbul ignore if */
-    if (!plan) {
+    if (!plan || !plan.steps) {
       return selectedSteps;
     }
     const { changedSteps } = this.state;
@@ -187,58 +190,79 @@ class PlanDetail extends React.Component<Props, State> {
       <DocumentTitle title={`${plan.title} | ${product.title} | MetaDeploy`}>
         <>
           <Header product={product} version={version} plan={plan} />
-          <BodyContainer>
-            {preflight && user ? (
-              <Toasts model={preflight} label="Pre-install validation" />
-            ) : null}
-            <Intro
-              results={
-                preflight && user ? (
-                  <JobResults
-                    preflight={preflight}
-                    label="Pre-install validation"
-                    failMessage={
-                      'After resolving all errors, ' +
-                      'run the pre-install validation again.'
-                    }
-                  />
-                ) : null
+          {product.is_allowed && plan.is_allowed ? (
+            <BodyContainer>
+              {preflight && user ? (
+                <Toasts model={preflight} label="Pre-install validation" />
+              ) : null}
+              <Intro
+                results={
+                  preflight && user ? (
+                    <JobResults
+                      preflight={preflight}
+                      label="Pre-install validation"
+                      failMessage={
+                        'After resolving all errors, ' +
+                        'run the pre-install validation again.'
+                      }
+                    />
+                  ) : null
+                }
+                cta={
+                  plan.steps && plan.steps.length ? (
+                    <CtaButton
+                      history={history}
+                      user={user}
+                      productSlug={product.slug}
+                      versionLabel={version.label}
+                      plan={plan}
+                      preflight={preflight}
+                      selectedSteps={selectedSteps}
+                      doStartPreflight={doStartPreflight}
+                      doStartJob={doStartJob}
+                    />
+                  ) : null
+                }
+                preMessage={
+                  plan.preflight_message ? (
+                    // These messages are pre-cleaned by the API
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: plan.preflight_message,
+                      }}
+                    />
+                  ) : null
+                }
+              />
+              <UserInfo user={user} />
+              {plan.steps && plan.steps.length ? (
+                <StepsTable
+                  user={user}
+                  plan={plan}
+                  preflight={preflight}
+                  selectedSteps={selectedSteps}
+                  handleStepsChange={this.handleStepsChange}
+                />
+              ) : null}
+            </BodyContainer>
+          ) : (
+            <PlanNotAllowed
+              isLoggedIn={user !== null}
+              message={
+                product.not_allowed_instructions ||
+                plan.not_allowed_instructions
               }
-              cta={
-                plan.steps.length ? (
-                  <CtaButton
-                    history={history}
-                    user={user}
-                    productSlug={product.slug}
-                    versionLabel={version.label}
-                    plan={plan}
-                    preflight={preflight}
-                    selectedSteps={selectedSteps}
-                    doStartPreflight={doStartPreflight}
-                    doStartJob={doStartJob}
-                  />
-                ) : null
-              }
-              preMessage={
-                plan.preflight_message ? (
-                  // These messages are pre-cleaned by the API
-                  <p
-                    dangerouslySetInnerHTML={{ __html: plan.preflight_message }}
-                  />
-                ) : null
+              link={
+                <>
+                  Try{' '}
+                  <Link to={routes.version_detail(product.slug, version.label)}>
+                    another plan
+                  </Link>{' '}
+                  from that product version
+                </>
               }
             />
-            <UserInfo user={user} />
-            {plan.steps.length ? (
-              <StepsTable
-                user={user}
-                plan={plan}
-                preflight={preflight}
-                selectedSteps={selectedSteps}
-                handleStepsChange={this.handleStepsChange}
-              />
-            ) : null}
-          </BodyContainer>
+          )}
         </>
       </DocumentTitle>
     );

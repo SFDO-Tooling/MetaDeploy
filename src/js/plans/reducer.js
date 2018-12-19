@@ -16,9 +16,11 @@ export type Plan = {
   +id: string,
   +slug: string,
   +title: string,
-  +preflight_message: string,
-  +steps: Array<Step>,
+  +preflight_message: string | null,
+  +steps: Array<Step> | null,
   +is_listed: boolean,
+  +is_allowed: boolean,
+  +not_allowed_instructions: string | null,
 };
 export type Plans = Array<Plan>;
 

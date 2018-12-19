@@ -1,6 +1,7 @@
 // @flow
 
 import { cache } from 'utils/caching';
+import { fetchProducts } from 'products/actions';
 
 import type { ThunkAction } from 'redux-thunk';
 import type { User } from 'accounts/reducer';
@@ -20,7 +21,7 @@ export const login = (payload: User): LoginAction => {
   };
 };
 
-export const doLocalLogout = (): LogoutAction => {
+export const doLocalLogout = (): ThunkAction => dispatch => {
   cache.clear();
   if (window.socket) {
     window.socket.close(1000, 'user logged out');
@@ -29,9 +30,8 @@ export const doLocalLogout = (): LogoutAction => {
   if (window.Raven && window.Raven.isSetup()) {
     window.Raven.setUserContext();
   }
-  return {
-    type: 'USER_LOGGED_OUT',
-  };
+  dispatch({ type: 'USER_LOGGED_OUT' });
+  return dispatch(fetchProducts());
 };
 
 export const logout = (): ThunkAction => (dispatch, getState, { apiFetch }) =>
