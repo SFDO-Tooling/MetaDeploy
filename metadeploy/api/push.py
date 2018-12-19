@@ -31,13 +31,14 @@ async def push_serializable(instance, serializer, type_):
     model_name = instance._meta.model_name
     id = str(instance.id)
     group_name = f"{model_name}-{id}"
+    serializer_name = f"{serializer.__module__}.{serializer.__name__}"
     channel_layer = get_channel_layer()
     await channel_layer.group_send(
         group_name,
         {
             "type": "notify",
             "instance": {"model": model_name, "id": id},
-            "serializer": serializer,
+            "serializer": serializer_name,
             "inner_type": type_,
         },
     )
