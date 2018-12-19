@@ -27,16 +27,17 @@ def test_report_error(mocker, job_factory, user_factory, plan_factory, step_fact
     job = job_factory(user=user)
     steps = [step_factory(plan=plan)]
 
-    run_flows(
-        user=user,
-        plan=plan,
-        skip_tasks=steps,
-        organization_url=job.organization_url,
-        flow_class=JobFlow,
-        flow_name=plan.flow_name,
-        result_class=Job,
-        result_id=job.id,
-    )
+    with pytest.raises(Exception):
+        run_flows(
+            user=user,
+            plan=plan,
+            skip_tasks=steps,
+            organization_url=job.organization_url,
+            flow_class=JobFlow,
+            flow_name=plan.flow_name,
+            result_class=Job,
+            result_id=job.id,
+        )
 
     assert report_error.called
     job.refresh_from_db()
@@ -172,7 +173,8 @@ def test_preflight_failure(mocker, user_factory, plan_factory):
 
     user = user_factory()
     plan = plan_factory()
-    preflight(user, plan)
+    with pytest.raises(Exception):
+        preflight(user, plan)
 
     preflight_result = PreflightResult.objects.last()
     assert preflight_result.status == PreflightResult.Status.failed

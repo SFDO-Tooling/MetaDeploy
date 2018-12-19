@@ -57,9 +57,11 @@ def finalize_result(result):
     try:
         yield
         result.status = success_status
-    except Exception:
+    except Exception as e:
         result.status = error_status
+        result.exception = str(e)
         logger.error(f"{result._meta.model_name} {result.id} failed.")
+        raise
     finally:
         result.save()
 
