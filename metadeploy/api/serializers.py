@@ -122,12 +122,14 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
         circumspect_fields = ("steps", "preflight_message")
 
     def circumspect_visible(self, obj, user):
-        return obj.is_visible_to(user)
+        return obj.is_visible_to(user) and obj.version.product.is_visible_to(user)
 
     def get_is_allowed(self, obj):
         return obj.is_visible_to(self.context["request"].user)
 
     def get_not_allowed_instructions(self, obj):
+        if not obj.version.product.is_visible_to(self.context["request"].user):
+            return getattr(obj.version.product.visible_to, "description_markdown", None)
         return getattr(obj.visible_to, "description_markdown", None)
 
 

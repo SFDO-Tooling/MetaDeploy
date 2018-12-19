@@ -94,7 +94,9 @@ class PrivateMixin(models.Model):
     visible_to = models.ForeignKey(AllowedList, on_delete=models.SET_NULL, null=True)
 
     def is_visible_to(self, user):
-        return not self.visible_to or user.org_id in self.visible_to.organization_ids
+        return not self.visible_to or (
+            user and user.org_id in self.visible_to.organization_ids
+        )
 
 
 class UserQuerySet(models.QuerySet):

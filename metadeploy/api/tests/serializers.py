@@ -16,7 +16,7 @@ class TestPlanSerializer:
     ):
         user = user_factory()
         allowed_list = allowed_list_factory()
-        plan = plan_factory(visible_to=allowed_list, preflight_message="Test")
+        plan = plan_factory(visible_to=allowed_list, preflight_message="test")
         [step_factory(plan=plan) for _ in range(3)]
 
         request = rf.get("/")
@@ -26,6 +26,30 @@ class TestPlanSerializer:
         serializer = PlanSerializer(plan, context=context)
         assert serializer.data["preflight_message"] is None
         assert serializer.data["steps"] is None
+
+    def test_circumspect_product_description(
+        self,
+        rf,
+        user_factory,
+        plan_factory,
+        allowed_list_factory,
+        step_factory,
+        product_factory,
+    ):
+        user = user_factory()
+        allowed_list = allowed_list_factory(description="Test.")
+        product = product_factory(visible_to=allowed_list)
+        plan = plan_factory(preflight_message="test", version__product=product)
+        [step_factory(plan=plan) for _ in range(3)]
+
+        request = rf.get("/")
+        request.user = user
+        context = {"request": request}
+
+        serializer = PlanSerializer(plan, context=context)
+        assert serializer.data["preflight_message"] is None
+        assert serializer.data["steps"] is None
+        assert serializer.data["not_allowed_instructions"] == "<p>Test.</p>"
 
 
 @pytest.mark.django_db
