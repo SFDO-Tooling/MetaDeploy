@@ -95,7 +95,7 @@ class PrivateMixin(models.Model):
 
     def is_visible_to(self, user):
         return not self.visible_to or (
-            user and user.org_id in self.visible_to.organization_ids
+            user.is_authenticated and user.org_id in self.visible_to.organization_ids
         )
 
 
