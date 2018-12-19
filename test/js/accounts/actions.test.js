@@ -6,6 +6,14 @@ import * as actions from 'accounts/actions';
 import { cache } from 'utils/caching';
 
 describe('login', () => {
+  beforeEach(() => {
+    window.socket = { subscribe: jest.fn() };
+  });
+
+  afterEach(() => {
+    Reflect.deleteProperty(window, 'socket');
+  });
+
   test('returns LoginAction', () => {
     const user = {
       username: 'Test User',
@@ -17,6 +25,21 @@ describe('login', () => {
     };
 
     expect(actions.login(user)).toEqual(expected);
+  });
+
+  test('subscribes to user ws events', () => {
+    const user = {
+      id: 'user-id',
+      username: 'Test User',
+      email: 'test@foo.bar',
+    };
+    actions.login(user);
+    const expected = {
+      model: 'user',
+      id: 'user-id',
+    };
+
+    expect(window.socket.subscribe).toHaveBeenCalledWith(expected);
   });
 
   describe('with Raven', () => {
@@ -44,6 +67,14 @@ describe('login', () => {
 });
 
 describe('doLocalLogout', () => {
+  beforeEach(() => {
+    window.socket = { reconnect: jest.fn() };
+  });
+
+  afterEach(() => {
+    Reflect.deleteProperty(window, 'socket');
+  });
+
   test('returns LogoutAction', () => {
     const expected = {
       type: 'USER_LOGGED_OUT',
@@ -59,13 +90,10 @@ describe('doLocalLogout', () => {
     expect(cache.clear).toHaveBeenCalled();
   });
 
-  test('closes socket', () => {
-    const close = jest.fn();
-    window.socket = { close };
+  test('reconnects socket', () => {
     actions.doLocalLogout();
 
-    expect(close).toHaveBeenCalled();
-    expect(window).not.toHaveProperty('socket');
+    expect(window.socket.reconnect).toHaveBeenCalled();
   });
 
   describe('with Raven', () => {
@@ -89,6 +117,14 @@ describe('doLocalLogout', () => {
 });
 
 describe('logout', () => {
+  beforeEach(() => {
+    window.socket = { reconnect: jest.fn() };
+  });
+
+  afterEach(() => {
+    Reflect.deleteProperty(window, 'socket');
+  });
+
   test('POSTs logout then dispatches LogoutAction', () => {
     fetchMock.postOnce(window.api_urls.account_logout(), {
       status: 204,

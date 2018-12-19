@@ -6,7 +6,15 @@ import * as actions from 'jobs/actions';
 
 describe('fetchJob', () => {
   describe('success', () => {
-    test('GETs job from api', () => {
+    beforeEach(() => {
+      window.socket = { subscribe: jest.fn() };
+    });
+
+    afterEach(() => {
+      Reflect.deleteProperty(window, 'socket');
+    });
+
+    test('GETs job from api and subscribes to ws events', () => {
       const store = storeWithApi({});
       const job = {
         id: 'job-1',
@@ -27,10 +35,34 @@ describe('fetchJob', () => {
         type: 'FETCH_JOB_SUCCEEDED',
         payload: { id: 'job-1', job },
       };
+      const expected = {
+        model: 'job',
+        id: 'job-1',
+      };
 
-      expect.assertions(1);
+      expect.assertions(2);
       return store.dispatch(actions.fetchJob('job-1')).then(() => {
         expect(store.getActions()).toEqual([started, succeeded]);
+        expect(window.socket.subscribe).toHaveBeenCalledWith(expected);
+      });
+    });
+
+    test('handles missing job', () => {
+      const store = storeWithApi({});
+      fetchMock.getOnce(window.api_urls.job_detail('job-1'), 404);
+      const started = {
+        type: 'FETCH_JOB_STARTED',
+        payload: 'job-1',
+      };
+      const succeeded = {
+        type: 'FETCH_JOB_SUCCEEDED',
+        payload: { id: 'job-1', job: null },
+      };
+
+      expect.assertions(2);
+      return store.dispatch(actions.fetchJob('job-1')).then(() => {
+        expect(store.getActions()).toEqual([started, succeeded]);
+        expect(window.socket.subscribe).not.toHaveBeenCalled();
       });
     });
   });
@@ -59,7 +91,15 @@ describe('fetchJob', () => {
 
 describe('startJob', () => {
   describe('success', () => {
-    test('dispatches JOB_STARTED action', () => {
+    beforeEach(() => {
+      window.socket = { subscribe: jest.fn() };
+    });
+
+    afterEach(() => {
+      Reflect.deleteProperty(window, 'socket');
+    });
+
+    test('dispatches JOB_STARTED action and subscribes to ws events', () => {
       const store = storeWithApi({});
       const data = { plan: 'plan-1', steps: ['step-1'] };
       const response = {
@@ -79,10 +119,15 @@ describe('startJob', () => {
         type: 'JOB_STARTED',
         payload: response,
       };
+      const expected = {
+        model: 'job',
+        id: 'job-1',
+      };
 
-      expect.assertions(1);
+      expect.assertions(2);
       return store.dispatch(actions.startJob(data)).then(() => {
         expect(store.getActions()).toEqual([started, succeeded]);
+        expect(window.socket.subscribe).toHaveBeenCalledWith(expected);
       });
     });
   });

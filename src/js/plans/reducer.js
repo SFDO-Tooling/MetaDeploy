@@ -31,8 +31,8 @@ export type PreflightErrors = {|
   [string]: Array<StepResult>,
 |};
 export type Preflight = {|
-  +id: string | null,
-  +edited_at: string | null,
+  +id: string,
+  +edited_at: string,
   +plan: string,
   +status: 'started' | 'complete' | 'failed',
   +results: PreflightErrors,
@@ -67,27 +67,11 @@ const reducer = (
   switch (action.type) {
     case 'USER_LOGGED_OUT':
       return {};
-    case 'PREFLIGHT_STARTED': {
-      const plan = action.payload;
-      return {
-        ...preflights,
-        [plan]: {
-          id: null,
-          edited_at: null,
-          plan,
-          status: CONSTANTS.STATUS.STARTED,
-          results: {},
-          is_valid: true,
-          error_count: 0,
-          warning_count: 0,
-          is_ready: false,
-        },
-      };
-    }
     case 'FETCH_PREFLIGHT_SUCCEEDED': {
       const { plan, preflight } = action.payload;
       return { ...preflights, [plan]: preflight };
     }
+    case 'PREFLIGHT_STARTED':
     case 'PREFLIGHT_COMPLETED':
     case 'PREFLIGHT_FAILED':
     case 'PREFLIGHT_INVALIDATED': {
@@ -96,8 +80,6 @@ const reducer = (
       const existingPreflight = preflights[plan];
       if (
         !existingPreflight ||
-        !existingPreflight.edited_at ||
-        !preflight.edited_at ||
         preflight.edited_at > existingPreflight.edited_at
       ) {
         return { ...preflights, [plan]: preflight };

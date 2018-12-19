@@ -46,6 +46,7 @@ type Action =
   | JobStepCompleted
   | JobCompleted
   | JobFailed;
+type Subscription = {| model: string, id: string |};
 
 export const getAction = (event: EventType): Action | null => {
   if (!event || event.type === undefined) {
@@ -78,7 +79,10 @@ export const createSocket = ({
   url: string,
   options?: { [string]: mixed },
   dispatch: Dispatch,
-}): Sockette => {
+} = {}): {
+  subscribe: (payload: Subscription) => void,
+  reconnect: () => void,
+} => {
   const defaults = {
     maxAttempts: 25,
     onopen: () => {},
@@ -90,12 +94,21 @@ export const createSocket = ({
   };
   const opts = { ...defaults, ...options };
 
-  return new Sockette(url, {
+  let open = false;
+  const pending = new Set();
+
+  const socket = new Sockette(url, {
     protocols: opts.protocols,
     timeout: opts.timeout,
     maxAttempts: opts.maxAttempts,
     onopen: e => {
       log('[WebSocket] connected');
+      open = true;
+      for (const obj of pending) {
+        log('[WebSocket] subscribing to:', obj);
+        socket.json(obj);
+      }
+      pending.clear();
       opts.onopen(e);
     },
     onmessage: e => {
@@ -122,6 +135,7 @@ export const createSocket = ({
     },
     onclose: e => {
       log('[WebSocket] closed');
+      open = false;
       opts.onclose(e);
     },
     onerror: e => {
@@ -129,4 +143,22 @@ export const createSocket = ({
       opts.onerror(e);
     },
   });
+
+  const subscribe = (payload: Subscription) => {
+    if (open) {
+      log('[WebSocket] subscribing to:', payload);
+      socket.json(payload);
+    } else {
+      pending.add(payload);
+    }
+  };
+  const reconnect = () => {
+    socket.close(1000, 'user logged out');
+    socket.open();
+  };
+
+  return {
+    subscribe,
+    reconnect,
+  };
 };

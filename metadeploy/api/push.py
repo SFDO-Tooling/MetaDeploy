@@ -4,7 +4,7 @@ Websocket notifications you can subscribe to:
     user-:id
         USER_TOKEN_INVALID
         BACKEND_ERROR
-    preflightrequest-:id
+    preflightresult-:id
         PREFLIGHT_COMPLETED
         PREFLIGHT_FAILED
         PREFLIGHT_INVALIDATED

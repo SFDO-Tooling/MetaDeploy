@@ -14,6 +14,13 @@ export const login = (payload: User): LoginAction => {
   if (window.Raven && window.Raven.isSetup()) {
     window.Raven.setUserContext(payload);
   }
+  /* istanbul ignore else */
+  if (payload) {
+    window.socket.subscribe({
+      model: 'user',
+      id: payload.id,
+    });
+  }
   return {
     type: 'USER_LOGGED_IN',
     payload,
@@ -22,10 +29,7 @@ export const login = (payload: User): LoginAction => {
 
 export const doLocalLogout = (): LogoutAction => {
   cache.clear();
-  if (window.socket) {
-    window.socket.close(1000, 'user logged out');
-    Reflect.deleteProperty(window, 'socket');
-  }
+  window.socket.reconnect();
   if (window.Raven && window.Raven.isSetup()) {
     window.Raven.setUserContext();
   }
