@@ -143,7 +143,7 @@ def test_expire_user_tokens(user_factory):
 
 
 @pytest.mark.django_db
-def test_preflight(mocker, user_factory, plan_factory):
+def test_preflight(mocker, user_factory, plan_factory, preflight_result_factory):
     mocker.patch("shutil.move")
     mocker.patch("shutil.rmtree")
     glob = mocker.patch("metadeploy.api.jobs.glob")
@@ -159,20 +159,28 @@ def test_preflight(mocker, user_factory, plan_factory):
 
     user = user_factory()
     plan = plan_factory()
-    preflight(user, plan)
+    preflight_result = preflight_result_factory(
+        user=user, plan=plan, organization_url=user.instance_url
+    )
+    preflight(preflight_result.pk)
 
     assert preflight_flow.called
 
 
 @pytest.mark.django_db
-def test_preflight_failure(mocker, user_factory, plan_factory):
+def test_preflight_failure(
+    mocker, user_factory, plan_factory, preflight_result_factory
+):
     glob = mocker.patch("metadeploy.api.jobs.glob")
     glob.side_effect = Exception
     mocker.patch("github3.login")
 
     user = user_factory()
     plan = plan_factory()
-    preflight(user, plan)
+    preflight_result = preflight_result_factory(
+        user=user, plan=plan, organization_url=user.instance_url
+    )
+    preflight(preflight_result.pk)
 
     preflight_result = PreflightResult.objects.last()
     assert preflight_result.status == PreflightResult.Status.failed

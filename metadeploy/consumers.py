@@ -17,10 +17,7 @@ def user_context(user):
 
 class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
-        if self.scope["user"].is_anonymous:
-            await self.close()
-        else:
-            await self.accept()
+        await self.accept()
 
     async def notify(self, event):
         """

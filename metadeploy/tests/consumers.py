@@ -1,6 +1,5 @@
 import pytest
 from channels.testing import WebsocketCommunicator
-from django.contrib.auth.models import AnonymousUser
 
 from ..api.models import Job, PreflightResult
 from ..api.push import notify_post_job, preflight_completed, user_token_expired
@@ -27,14 +26,6 @@ async def test_push_notification_consumer__user_token_invalid(user_factory):
     assert response == {"type": "USER_TOKEN_INVALID"}
 
     await communicator.disconnect()
-
-
-@pytest.mark.asyncio
-async def test_push_notification_consumer__anonymous():
-    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
-    communicator.scope["user"] = AnonymousUser()
-    connected, _ = await communicator.connect()
-    assert not connected
 
 
 @pytest.mark.django_db

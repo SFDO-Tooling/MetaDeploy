@@ -212,7 +212,7 @@ class TestPreflight:
         plan = plan_factory()
         response = client.post(reverse("plan-preflight", kwargs={"pk": plan.id}))
 
-        assert response.status_code == 202
+        assert response.status_code == 201
 
     def test_get__good(self, client, plan_factory, preflight_result_factory):
         plan = plan_factory()
