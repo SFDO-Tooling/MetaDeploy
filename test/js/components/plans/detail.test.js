@@ -243,27 +243,6 @@ describe('<PlanDetail />', () => {
     });
   });
 
-  describe('parent product is restricted', () => {
-    test('renders <PlanNotAllowed />', () => {
-      const { getByText } = setup({
-        initialState: {
-          ...defaultState,
-          products: [
-            {
-              ...defaultState.products[0],
-              is_allowed: false,
-              not_allowed_instructions: 'foobar',
-              description: null,
-            },
-          ],
-        },
-      });
-
-      expect(getByText('another plan')).toBeVisible();
-      expect(getByText('foobar')).toBeVisible();
-    });
-  });
-
   describe('plan is restricted', () => {
     test('renders <PlanNotAllowed />', () => {
       const { getByText } = setup({

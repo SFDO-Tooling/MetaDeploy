@@ -248,10 +248,7 @@ class PlanDetail extends React.Component<Props, State> {
           ) : (
             <PlanNotAllowed
               isLoggedIn={user !== null}
-              message={
-                product.not_allowed_instructions ||
-                plan.not_allowed_instructions
-              }
+              message={plan.not_allowed_instructions}
               link={
                 <>
                   Try{' '}
