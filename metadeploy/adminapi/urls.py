@@ -8,6 +8,7 @@ from .api import (
     ProductViewSet,
     VersionViewSet,
 )
+from .explore import ExplorerViewSet
 
 # TODO: Schema, create a schema endpoint
 
@@ -25,4 +26,5 @@ router.register(r"productcategory", ProductCategoryViewSet)
 router.register(r"products", ProductViewSet)
 router.register(r"productslug", ProductSlugViewSet)
 router.register(r"versions", VersionViewSet)
+router.register(r"other", ExplorerViewSet)
 urlpatterns = router.urls
