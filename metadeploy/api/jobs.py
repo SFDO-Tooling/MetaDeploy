@@ -24,8 +24,7 @@ from urllib.parse import urlparse
 
 import github3
 from asgiref.sync import async_to_sync
-from cumulusci.core.config import BaseGlobalConfig, OrgConfig, ServiceConfig
-from cumulusci.core.keychain import BaseProjectKeychain
+from cumulusci.core.config import OrgConfig, ServiceConfig
 from cumulusci.utils import temporary_dir
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -197,12 +196,10 @@ def run_flows(
             },
             current_org,
         )
-        proj_config = cci_configs.MetadeployProjectConfig(
-            BaseGlobalConfig(), repo_root=tmpdirname
-        )
-        proj_keychain = BaseProjectKeychain(proj_config, None)
-        proj_keychain.set_org(org_config)
-        proj_config.set_keychain(proj_keychain)
+
+        ctx = cci_configs.MetaDeployCCI(repo_root=tmpdirname)
+
+        ctx.keychain.set_org(org_config)
 
         # Set up the connected_app:
         connected_app = ServiceConfig(
@@ -212,7 +209,7 @@ def run_flows(
                 "client_id": settings.CONNECTED_APP_CLIENT_ID,
             }
         )
-        proj_config.keychain.set_service("connected_app", connected_app, True)
+        ctx.keychain.set_service("connected_app", connected_app, True)
 
         # Set up github:
         github_app = ServiceConfig(
@@ -226,12 +223,12 @@ def run_flows(
                 "username": "not-a-username",
             }
         )
-        proj_config.keychain.set_service("github", github_app, True)
+        ctx.keychain.set_service("github", github_app, True)
 
         # Make and run the flow:
-        flow_config = proj_config.get_flow(flow_name)
+        flow_config = ctx.project_config.get_flow(flow_name)
 
-        args = (proj_config, flow_config, proj_keychain.get_org(current_org))
+        args = (ctx.project_config, flow_config, ctx.keychain.get_org(current_org))
         kwargs = dict(options={}, skip=skip_tasks, name=flow_name, result=result)
 
         flowinstance = flow_class(*args, **kwargs)

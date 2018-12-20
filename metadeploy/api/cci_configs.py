@@ -1,4 +1,5 @@
 from cumulusci.core.config import BaseProjectConfig
+from cumulusci.core.runtime import BaseCumulusCI
 
 
 class MetadeployProjectConfig(BaseProjectConfig):
@@ -33,3 +34,7 @@ class MetadeployProjectConfig(BaseProjectConfig):
     @property
     def repo_commit(self):  # pragma: nocover
         return
+
+
+class MetaDeployCCI(BaseCumulusCI):
+    project_config_class = MetadeployProjectConfig
