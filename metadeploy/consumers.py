@@ -5,6 +5,8 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.apps import apps
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 
+from .api.constants import CHANNELS_GROUP_NAME
+
 Request = namedtuple("Request", "user")
 
 
@@ -60,7 +62,9 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         if not all_good:
             await self.send_json({"error": "Invalid subscription."})
             return
-        group_name = f"{content['model']}-{content['id']}"
+        group_name = CHANNELS_GROUP_NAME.format(
+            model=content["model"], id=content["id"]
+        )
         self.groups.append(group_name)
         await self.channel_layer.group_add(group_name, self.channel_name)
         await self.send_json(
