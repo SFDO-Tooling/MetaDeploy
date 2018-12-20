@@ -103,9 +103,7 @@ def test_malicious_zip_file(
     zip_file.return_value = zip_file_instance
     mocker.patch("metadeploy.api.jobs.OrgConfig")
     mocker.patch("metadeploy.api.jobs.ServiceConfig")
-    mocker.patch("metadeploy.api.jobs.BaseGlobalConfig")
-    mocker.patch("metadeploy.api.jobs.cci_configs")
-    mocker.patch("metadeploy.api.jobs.BaseProjectKeychain")
+    mocker.patch("metadeploy.api.jobs.MetaDeployCCI")
     job_flow = mocker.patch("metadeploy.api.jobs.JobFlow")
 
     user = user_factory()
@@ -153,9 +151,7 @@ def test_preflight(mocker, user_factory, plan_factory):
     mocker.patch("zipfile.ZipFile")
     mocker.patch("metadeploy.api.jobs.OrgConfig")
     mocker.patch("metadeploy.api.jobs.ServiceConfig")
-    mocker.patch("metadeploy.api.jobs.BaseGlobalConfig")
-    mocker.patch("metadeploy.api.jobs.cci_configs")
-    mocker.patch("metadeploy.api.jobs.BaseProjectKeychain")
+    mocker.patch("metadeploy.api.jobs.MetaDeployCCI")
     preflight_flow = mocker.patch("metadeploy.api.jobs.PreflightFlow")
 
     user = user_factory()

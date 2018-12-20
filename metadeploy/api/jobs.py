@@ -20,7 +20,6 @@ import zipfile
 from datetime import timedelta
 from glob import glob
 from itertools import chain
-from urllib.parse import urlparse
 
 import github3
 from asgiref.sync import async_to_sync
@@ -32,7 +31,7 @@ from django.utils import timezone
 from django_rq import job
 from rq.worker import StopRequested
 
-from . import cci_configs
+from .cci_configs import MetaDeployCCI, extract_user_and_repo
 from .flows import JobFlow, PreflightFlow
 from .models import Job, PreflightResult
 from .push import report_error
@@ -40,12 +39,6 @@ from .push import report_error
 logger = logging.getLogger(__name__)
 User = get_user_model()
 sync_report_error = async_to_sync(report_error)
-
-
-def extract_user_and_repo(gh_url):
-    path = urlparse(gh_url).path
-    _, user, repo, *_ = path.split("/")
-    return user, repo
 
 
 @contextlib.contextmanager
@@ -197,7 +190,7 @@ def run_flows(
             current_org,
         )
 
-        ctx = cci_configs.MetaDeployCCI(repo_root=tmpdirname)
+        ctx = MetaDeployCCI(repo_root=tmpdirname, plan=plan, result=result)
 
         ctx.keychain.set_org(org_config)
 
