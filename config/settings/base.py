@@ -123,7 +123,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    "log_request_id.middleware.RequestIDMiddleware",
+    "metadeploy.logging_middleware.LoggingMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -331,8 +331,8 @@ LOGGING = {
         "verbose": {
             "()": "metadeploy.logfmt.LogfmtFormatter",
             "format": (
-                "%(levelname)s %(asctime)s %(module)s %(process)d "
-                "%(thread)d %(message)s"
+                "%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d "
+                "%(message)s"
             ),
         }
     },
@@ -345,7 +345,7 @@ LOGGING = {
         },
         "rq_console": {
             "level": "DEBUG",
-            "class": "rq.utils.ColorizingStreamHandler",
+            "class": "logging.StreamHandler",
             "filters": ["job_id"],
             "formatter": "verbose",
         },
@@ -359,6 +359,11 @@ LOGGING = {
         "django.server": {"handlers": ["console"], "level": "INFO", "propagate": False},
         "rq.worker": {"handlers": ["rq_console"], "level": "DEBUG"},
         "metadeploy.multisalesforce": {"handlers": ["console"], "level": "DEBUG"},
+        "metadeploy.logging_middleware": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
     },
 }
 
