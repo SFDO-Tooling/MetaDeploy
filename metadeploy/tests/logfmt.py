@@ -25,7 +25,7 @@ def test_job_id_filter__no_job(mocker):
 
 def test_formatter__record_id():
     record = logging.LogRecord(
-        "name", logging.INFO, "/path/name", 1, "Some message", (), None
+        "name", logging.INFO, "module", 1, "Some message", (), None
     )
     record.request_id = 123
     result = LogfmtFormatter().format(record)
@@ -34,7 +34,7 @@ def test_formatter__record_id():
 
 def test_formatter__job_id():
     record = logging.LogRecord(
-        "name", logging.INFO, "/path/name", 1, "Some message", (), None
+        "name", logging.INFO, "module", 1, "Some message", (), None
     )
     record.job_id = 321
     result = LogfmtFormatter().format(record)
@@ -43,7 +43,7 @@ def test_formatter__job_id():
 
 def test_formatter_format():
     record = logging.LogRecord(
-        "name", logging.INFO, "/path/name", 1, "Some message", (), None
+        "name", logging.INFO, "module", 1, "Some message", (), None
     )
     time = datetime.datetime.fromtimestamp(record.created).strftime(
         "%Y-%m-%d %H:%M:%S.%f"
@@ -55,9 +55,9 @@ def test_formatter_format():
             f"id=unknown",
             f"at=INFO",
             f'time="{time}"',
-            f'msg="Some message"',
             f"tag=external",
-            f"module=name",
+            f"module=module",
+            f'msg="Some message"',
         ]
     )
 
@@ -74,12 +74,36 @@ def test_formatter_format_line():
 
 def test_formatter_tag():
     record = logging.LogRecord(
-        "name", logging.INFO, "/path/name", 1, "Some message", (), None
+        "name", logging.INFO, "module", 1, "Some message", (), None
     )
 
     record.tag = "some-tag"
 
     result = LogfmtFormatter()._get_tag(record)
     expected = '"some-tag"'
+
+    assert result == expected
+
+
+def test_parsed_msg():
+    record = logging.LogRecord(
+        "name", logging.INFO, "logging_middleware", 1, "foo=bar baz=qux", (), None
+    )
+    time = datetime.datetime.fromtimestamp(record.created).strftime(
+        "%Y-%m-%d %H:%M:%S.%f"
+    )
+
+    result = LogfmtFormatter().format(record)
+    expected = " ".join(
+        [
+            f"id=unknown",
+            f"at=INFO",
+            f'time="{time}"',
+            f"tag=external",
+            f"module=logging_middleware",
+            f"foo=bar",
+            f"baz=qux",
+        ]
+    )
 
     assert result == expected

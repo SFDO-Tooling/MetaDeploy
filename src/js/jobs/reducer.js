@@ -38,7 +38,10 @@ const reducer = (
   switch (action.type) {
     case 'USER_LOGGED_OUT':
       return {};
-    case 'FETCH_JOB_SUCCEEDED':
+    case 'FETCH_JOB_SUCCEEDED': {
+      const { id, job } = action.payload;
+      return { ...jobs, [id]: job };
+    }
     case 'JOB_STARTED':
     case 'JOB_COMPLETED':
     case 'JOB_FAILED':

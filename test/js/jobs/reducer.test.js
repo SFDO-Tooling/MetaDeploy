@@ -18,8 +18,18 @@ describe('reducer', () => {
     expect(actual).toEqual(expected);
   });
 
+  test('handles FETCH_JOB_SUCCEEDED action', () => {
+    const initial = {};
+    const expected = { 'job-1': null };
+    const actual = reducer(initial, {
+      type: 'FETCH_JOB_SUCCEEDED',
+      payload: { id: 'job-1', job: null },
+    });
+
+    expect(actual).toEqual(expected);
+  });
+
   [
-    { type: 'FETCH_JOB_SUCCEEDED' },
     { type: 'JOB_STARTED' },
     { type: 'JOB_COMPLETED' },
     { type: 'JOB_FAILED' },
