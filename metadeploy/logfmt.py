@@ -1,8 +1,10 @@
 import datetime
+import io
 import logging
 import numbers
 
 from django.utils.log import ServerFormatter
+from logfmt import parse
 from rq import get_current_job
 
 NO_JOB_ID = "no-job-id"
@@ -31,6 +33,10 @@ class LogfmtFormatter(ServerFormatter):
             },
         )
     """
+
+    def _parse_msg(self, msg):
+        msg = list(parse(io.StringIO(msg)))
+        return msg[0]
 
     def _escape_quotes(self, string):
         return '"{}"'.format(string.replace('"', "\\" + '"'))
@@ -72,22 +78,26 @@ class LogfmtFormatter(ServerFormatter):
         return "external"
 
     def format(self, record):
+        parsed_msg = record.module == "logging_middleware"
         id_ = self._get_id(record)
         time = self._get_time(record)
-        msg = self._escape_quotes(record.getMessage())
         tag = self._get_tag(record)
+        if parsed_msg:
+            msg = self._parse_msg(record.getMessage())
+        else:
+            msg = self._escape_quotes(record.getMessage())
         rest = self.format_line(getattr(record, "context", {}))
-        return " ".join(
-            filter(
-                None,
-                [
-                    f"id={id_}",
-                    f"at={record.levelname}",
-                    f"time={time}",
-                    f"msg={msg}",
-                    f"tag={tag}",
-                    f"module={record.module}",
-                    f"{rest}",
-                ],
-            )
-        )
+        fields = [
+            f"id={id_}",
+            f"at={record.levelname}",
+            f"time={time}",
+            f"tag={tag}",
+            f"module={record.module}",
+        ]
+        if parsed_msg:
+            for k, v in msg.items():
+                fields.append(f"{k}={v}")
+        else:
+            fields.append(f"msg={msg}")
+        fields.append(f"{rest}")
+        return " ".join(filter(None, fields))

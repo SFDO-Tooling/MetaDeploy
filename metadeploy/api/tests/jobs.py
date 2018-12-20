@@ -27,16 +27,17 @@ def test_report_error(mocker, job_factory, user_factory, plan_factory, step_fact
     job = job_factory(user=user)
     steps = [step_factory(plan=plan)]
 
-    run_flows(
-        user=user,
-        plan=plan,
-        skip_tasks=steps,
-        organization_url=job.organization_url,
-        flow_class=JobFlow,
-        flow_name=plan.flow_name,
-        result_class=Job,
-        result_id=job.id,
-    )
+    with pytest.raises(Exception):
+        run_flows(
+            user=user,
+            plan=plan,
+            skip_tasks=steps,
+            organization_url=job.organization_url,
+            flow_class=JobFlow,
+            flow_name=plan.flow_name,
+            result_class=Job,
+            result_id=job.id,
+        )
 
     assert report_error.called
     job.refresh_from_db()
@@ -102,9 +103,7 @@ def test_malicious_zip_file(
     zip_file.return_value = zip_file_instance
     mocker.patch("metadeploy.api.jobs.OrgConfig")
     mocker.patch("metadeploy.api.jobs.ServiceConfig")
-    mocker.patch("metadeploy.api.jobs.BaseGlobalConfig")
-    mocker.patch("metadeploy.api.jobs.cci_configs")
-    mocker.patch("metadeploy.api.jobs.BaseProjectKeychain")
+    mocker.patch("metadeploy.api.jobs.MetaDeployCCI")
     job_flow = mocker.patch("metadeploy.api.jobs.JobFlow")
 
     user = user_factory()
@@ -152,9 +151,7 @@ def test_preflight(mocker, user_factory, plan_factory, preflight_result_factory)
     mocker.patch("zipfile.ZipFile")
     mocker.patch("metadeploy.api.jobs.OrgConfig")
     mocker.patch("metadeploy.api.jobs.ServiceConfig")
-    mocker.patch("metadeploy.api.jobs.BaseGlobalConfig")
-    mocker.patch("metadeploy.api.jobs.cci_configs")
-    mocker.patch("metadeploy.api.jobs.BaseProjectKeychain")
+    mocker.patch("metadeploy.api.jobs.MetaDeployCCI")
     preflight_flow = mocker.patch("metadeploy.api.jobs.PreflightFlow")
 
     user = user_factory()
@@ -180,7 +177,8 @@ def test_preflight_failure(
     preflight_result = preflight_result_factory(
         user=user, plan=plan, organization_url=user.instance_url
     )
-    preflight(preflight_result.pk)
+    with pytest.raises(Exception):
+        preflight(preflight_result.pk)
 
     preflight_result = PreflightResult.objects.last()
     assert preflight_result.status == PreflightResult.Status.failed
