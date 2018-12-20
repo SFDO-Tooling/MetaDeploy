@@ -190,7 +190,7 @@ def run_flows(
             current_org,
         )
 
-        ctx = MetaDeployCCI(repo_root=tmpdirname, plan=plan, result=result)
+        ctx = MetaDeployCCI(repo_root=tmpdirname, plan=plan)
 
         ctx.keychain.set_org(org_config)
 
