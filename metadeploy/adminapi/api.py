@@ -48,7 +48,7 @@ class AdminAPIPagination(pagination.LimitOffsetPagination):
         return Response(
             {
                 "data": data,
-                "meta": {"total_count": self.count},
+                "meta": {"page": {"total": self.count}},
                 "links": {
                     "next": self.get_next_link(),
                     "previous": self.get_previous_link(),
@@ -88,8 +88,13 @@ class AdminAPIViewSet(viewsets.ModelViewSet):
     # for HTTP GETs (list/retrieve).
 
     # # Response Shape
-    # AdminAPI is inspired by, but noncompliant with JSON:API at this time.
-    # The paginator provides a list response shape.
+    # AdminAPI is inspired by, but noncompliant with JSON:API at this time. Fight me.
+    # The paginator provides the top level list response shape, but we should probably
+    # build response shape into the viewset. That just requires a lot more overrides...
+    # TODO: research the best way to always set a response shape.
+    # - response finalizer
+    # - override the mixin methods, super, and edit response?
+    # - override the mixin methods and produce own response
     # TODO: JSON:API-style serializer (type, id, attributes, links)
 
     @property
