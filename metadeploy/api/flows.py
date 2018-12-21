@@ -1,7 +1,11 @@
 import logging
+from io import StringIO
 
 import bleach
 from cumulusci.core import flows
+from django.conf import settings
+
+from metadeploy.logfmt import LogfmtFormatter
 
 from .constants import ERROR, OK, OPTIONAL, SKIP, WARN
 
@@ -27,6 +31,21 @@ class BasicFlow(flows.BaseFlow):
 
 
 class JobFlow(BasicFlow):
+    def _pre_flow(self, *args, **kwargs):
+        self.string_buffer = StringIO()
+        self.handler = logging.StreamHandler(stream=self.string_buffer)
+        self.handler.setLevel(logging.DEBUG)
+        formatter = LogfmtFormatter(settings.LOGGING["formatters"]["verbose"]["format"])
+        self.handler.setFormatter(formatter)
+        self.logger.addHandler(self.handler)
+
+    def _post_flow(self):
+        # TODO: I would hope self.string_buffer would have a vaule, but it appears not
+        # to ever get one. Once I fix that, I can wire it up to set a value on each
+        # _post_task to a new logging field on the job.
+        print("=======> ", self.string_buffer.getvalue())
+        self.logger.removeHandler(self.handler)
+
     def _post_task(self, task):
         step_id = self._get_step_id(task.name)
         if step_id:
