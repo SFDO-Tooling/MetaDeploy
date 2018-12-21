@@ -1,7 +1,6 @@
 import itertools
 from datetime import timedelta
 
-import bleach
 from allauth.socialaccount.models import SocialToken
 from asgiref.sync import async_to_sync
 from colorfield.fields import ColorField
@@ -17,8 +16,8 @@ from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from hashid_field import HashidAutoField
-from markdown import markdown
 from model_utils import Choices, FieldTracker
+from sfdo_template_helpers.fields import MarkdownField
 
 from .constants import ERROR, OPTIONAL, ORGANIZATION_DETAILS
 from .push import (
@@ -32,36 +31,6 @@ from .push import (
 
 VERSION_STRING = r"^[a-zA-Z0-9._+-]+$"
 
-MARKDOWN_TAGS = [
-    "h1",
-    "h2",
-    "h3",
-    "h4",
-    "h5",
-    "h6",
-    "b",
-    "i",
-    "strong",
-    "em",
-    "tt",
-    "p",
-    "br",
-    "span",
-    "div",
-    "blockquote",
-    "code",
-    "hr",
-    "ul",
-    "ol",
-    "li",
-    "dd",
-    "dt",
-    "img",
-    "a",
-]
-
-MARKDOWN_ATTRS = {"img": ["src", "alt", "title"], "a": ["href", "alt", "title"]}
-
 
 class HashIdMixin(models.Model):
     class Meta:
@@ -72,19 +41,13 @@ class HashIdMixin(models.Model):
 
 class AllowedList(models.Model):
     title = models.CharField(max_length=128, unique=True)
-    description = models.TextField(blank=True)
+    description = MarkdownField(blank=True, property_suffix="_markdown")
     organization_ids = ArrayField(
         models.CharField(max_length=1024), default=list, blank=True
     )
 
     def __str__(self):
         return self.title
-
-    @property
-    def description_markdown(self):
-        return bleach.clean(
-            markdown(self.description), tags=MARKDOWN_TAGS, attributes=MARKDOWN_ATTRS
-        )
 
 
 class AllowedListAccessMixin(models.Model):
@@ -260,7 +223,7 @@ class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, models.Model):
     objects = ProductQuerySet.as_manager()
 
     title = models.CharField(max_length=256)
-    description = models.TextField()
+    description = MarkdownField(property_suffix="_markdown")
     category = models.ForeignKey(ProductCategory, on_delete=models.PROTECT)
     color = ColorField(blank=True)
     image = models.ImageField(blank=True)
@@ -300,12 +263,6 @@ class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, models.Model):
                 "name": self.slds_icon_name,
             }
         return None
-
-    @property
-    def description_markdown(self):
-        return bleach.clean(
-            markdown(self.description), tags=MARKDOWN_TAGS, attributes=MARKDOWN_ATTRS
-        )
 
 
 class VersionQuerySet(models.QuerySet):
@@ -393,30 +350,14 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, models.Model):
 
     title = models.CharField(max_length=128)
     version = models.ForeignKey(Version, on_delete=models.PROTECT)
-    preflight_message = models.TextField(blank=True)
+    preflight_message = MarkdownField(blank=True, property_suffix="_markdown")
     preflight_flow_name = models.CharField(max_length=256, blank=True)
     flow_name = models.CharField(max_length=64)
     tier = models.CharField(choices=Tier, default=Tier.primary, max_length=64)
-    post_install_message = models.TextField(blank=True)
+    post_install_message = MarkdownField(blank=True, property_suffix="_markdown")
     is_listed = models.BooleanField(default=True)
 
     slug_class = PlanSlug
-
-    @property
-    def preflight_message_markdown(self):
-        return bleach.clean(
-            markdown(self.preflight_message),
-            tags=MARKDOWN_TAGS,
-            attributes=MARKDOWN_ATTRS,
-        )
-
-    @property
-    def post_install_message_markdown(self):
-        return bleach.clean(
-            markdown(self.post_install_message),
-            tags=MARKDOWN_TAGS,
-            attributes=MARKDOWN_ATTRS,
-        )
 
     @property
     def required_step_ids(self):
