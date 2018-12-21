@@ -26,5 +26,5 @@ github3.py==1.2.0
 bleach==3.0.2
 django-hashid-field==2.1.5
 redis>=2.10,<3.0  # pyup: >=2.10,<3.0
-markdown==3.0.1
 logfmt==0.4
+-e git+https://github.com/SFDO-Tooling/sfdo-template-helpers.git@v0.1.0#egg=sfdo_template_helpers
