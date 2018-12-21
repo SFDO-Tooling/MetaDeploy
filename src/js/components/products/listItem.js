@@ -31,7 +31,11 @@ const ProductItem = ({ item }: { item: ProductType }) => {
         <div className="slds-text-title">
           Version {item.most_recent_version.label}
         </div>
-        <p className="slds-truncate">{item.description}</p>
+        <div
+          className="slds-truncate"
+          // This description is pre-cleaned by the API
+          dangerouslySetInnerHTML={{ __html: item.description }}
+        />
       </Card>
     </Link>
   );

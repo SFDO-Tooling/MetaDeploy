@@ -26,10 +26,7 @@ const getResponse = resp =>
       },
     );
 
-const getApiFetch = (onAuthFailure: () => void) => (
-  url: string,
-  opts: { [string]: mixed } = {},
-) => {
+const getApiFetch = () => (url: string, opts: { [string]: mixed } = {}) => {
   const options = Object.assign({}, { headers: {} }, opts);
   const method = options.method || 'GET';
   if (!csrfSafeMethod(method)) {
@@ -42,11 +39,7 @@ const getApiFetch = (onAuthFailure: () => void) => (
         if (response.ok) {
           return getResponse(response);
         }
-        if (response.status === 401) {
-          onAuthFailure();
-          return getResponse(response);
-        }
-        if (response.status === 403 || response.status === 404) {
+        if (response.status >= 400 && response.status < 500) {
           return null;
         }
         const error = (new Error(response.statusText): { [string]: mixed });

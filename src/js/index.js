@@ -26,7 +26,7 @@ import { routePatterns } from 'utils/routes';
 
 import reducer from 'app/reducer';
 
-import { login, doLocalLogout } from 'accounts/actions';
+import { login } from 'accounts/actions';
 
 import { fetchProducts } from 'products/actions';
 
@@ -110,9 +110,7 @@ cache
         composeWithDevTools(
           applyMiddleware(
             thunk.withExtraArgument({
-              apiFetch: getApiFetch(() => {
-                appStore.dispatch(doLocalLogout());
-              }),
+              apiFetch: getApiFetch(),
             }),
             persistMiddleware,
             logger,

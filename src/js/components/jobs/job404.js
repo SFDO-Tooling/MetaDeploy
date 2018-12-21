@@ -13,18 +13,17 @@ import type {
   Product as ProductType,
   Version as VersionType,
 } from 'products/reducer';
-import type { User as UserType } from 'accounts/reducer';
 
 const JobNotFound = ({
   product,
   version,
   plan,
-  user,
+  isLoggedIn,
 }: {
   product: ProductType,
   version: VersionType,
   plan: PlanType,
-  user?: UserType,
+  isLoggedIn?: boolean,
 }) => (
   <>
     <FourOhFour
@@ -41,7 +40,7 @@ const JobNotFound = ({
     <div className="slds-align_absolute-center">
       <Login
         id="job-404-login"
-        label={user ? 'Log In With a Different Org' : 'Log In'}
+        label={isLoggedIn ? 'Log In With a Different Org' : 'Log In'}
         buttonClassName="slds-p-horizontal_xxx-small"
         buttonVariant="base"
         nubbinPosition="top"

@@ -14,7 +14,6 @@ import type {
   Product as ProductType,
   Version as VersionType,
 } from 'products/reducer';
-import type { User as UserType } from 'accounts/reducer';
 
 export const shouldFetchVersion = ({
   product,
@@ -45,7 +44,7 @@ export const getLoadingOrNotFound = ({
   plan,
   job,
   jobId,
-  user,
+  isLoggedIn,
 }: {
   product: ProductType | null,
   version?: VersionType | null,
@@ -53,7 +52,7 @@ export const getLoadingOrNotFound = ({
   plan?: PlanType | null,
   job?: JobType | null,
   jobId?: ?string,
-  user?: UserType,
+  isLoggedIn?: boolean,
 }): React.Node | false => {
   if (product === null) {
     return <ProductNotFound />;
@@ -82,7 +81,7 @@ export const getLoadingOrNotFound = ({
           product={product}
           version={version}
           plan={plan}
-          user={user}
+          isLoggedIn={isLoggedIn}
         />
       );
     }

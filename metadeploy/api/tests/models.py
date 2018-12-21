@@ -13,6 +13,13 @@ from ..models import Job, User, Version
 
 
 @pytest.mark.django_db
+class TestAllowedList:
+    def test_str(self, allowed_list_factory):
+        allowed_list = allowed_list_factory(title="A title")
+        assert str(allowed_list) == "A title"
+
+
+@pytest.mark.django_db
 class TestUser:
     def test_org_name(self, user_factory):
         user = user_factory()
@@ -237,17 +244,16 @@ class TestPlanSlug:
 
 
 @pytest.mark.django_db
-def test_plan_natural_key(plan_factory):
-    plan = plan_factory(title="My Plan")
-    assert plan.natural_key() == (plan.version, "My Plan")
+class TestPlan:
+    def test_natural_key(self, plan_factory):
+        plan = plan_factory(title="My Plan")
+        assert plan.natural_key() == (plan.version, "My Plan")
 
-
-@pytest.mark.django_db
-def test_plan_str(product_factory, version_factory, plan_factory):
-    product = product_factory(title="My Product")
-    version = version_factory(label="v0.1.0", product=product)
-    plan = plan_factory(title="My Plan", version=version)
-    assert str(plan) == "My Product, Version v0.1.0, Plan My Plan"
+    def test_str(self, product_factory, version_factory, plan_factory):
+        product = product_factory(title="My Product")
+        version = version_factory(label="v0.1.0", product=product)
+        plan = plan_factory(title="My Plan", version=version)
+        assert str(plan) == "My Product, Version v0.1.0, Plan My Plan"
 
 
 @pytest.mark.django_db
