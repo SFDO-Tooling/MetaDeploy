@@ -43,29 +43,54 @@ describe('login', () => {
   });
 });
 
-describe('doLocalLogout', () => {
-  test('returns LogoutAction', () => {
-    const expected = {
+describe('logout', () => {
+  let store;
+
+  beforeEach(() => {
+    store = storeWithApi({});
+    fetchMock.getOnce(window.api_urls.product_list(), []);
+    fetchMock.postOnce(window.api_urls.account_logout(), {
+      status: 204,
+      body: {},
+    });
+  });
+
+  test('dispatches LogoutAction and fetches product', () => {
+    const loggedOut = {
       type: 'USER_LOGGED_OUT',
     };
+    const started = {
+      type: 'FETCH_PRODUCTS_STARTED',
+    };
+    const succeeded = {
+      type: 'FETCH_PRODUCTS_SUCCEEDED',
+      payload: [],
+    };
 
-    expect(actions.doLocalLogout()).toEqual(expected);
+    expect.assertions(1);
+    return store.dispatch(actions.logout()).then(() => {
+      expect(store.getActions()).toEqual([loggedOut, started, succeeded]);
+    });
   });
 
   test('clears cache', () => {
     cache.clear = jest.fn();
-    actions.doLocalLogout();
 
-    expect(cache.clear).toHaveBeenCalled();
+    expect.assertions(1);
+    return store.dispatch(actions.logout()).then(() => {
+      expect(cache.clear).toHaveBeenCalled();
+    });
   });
 
   test('closes socket', () => {
     const close = jest.fn();
     window.socket = { close };
-    actions.doLocalLogout();
 
-    expect(close).toHaveBeenCalled();
-    expect(window).not.toHaveProperty('socket');
+    expect.assertions(2);
+    return store.dispatch(actions.logout()).then(() => {
+      expect(close).toHaveBeenCalled();
+      expect(window).not.toHaveProperty('socket');
+    });
   });
 
   describe('with Raven', () => {
@@ -81,26 +106,10 @@ describe('doLocalLogout', () => {
     });
 
     test('resets user context', () => {
-      actions.doLocalLogout();
-
-      expect(window.Raven.setUserContext).toHaveBeenCalledWith();
-    });
-  });
-});
-
-describe('logout', () => {
-  test('POSTs logout then dispatches LogoutAction', () => {
-    fetchMock.postOnce(window.api_urls.account_logout(), {
-      status: 204,
-      body: {},
-    });
-    const store = storeWithApi({});
-    const expected = {
-      type: 'USER_LOGGED_OUT',
-    };
-
-    return store.dispatch(actions.logout()).then(() => {
-      expect(store.getActions()).toEqual([expected]);
+      expect.assertions(1);
+      return store.dispatch(actions.logout()).then(() => {
+        expect(window.Raven.setUserContext).toHaveBeenCalledWith();
+      });
     });
   });
 });

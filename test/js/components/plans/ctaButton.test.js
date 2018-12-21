@@ -171,6 +171,27 @@ describe('<CtaButton />', () => {
     });
   });
 
+  describe('no plan steps', () => {
+    test('renders with empty steps', () => {
+      const { getByText } = setup({
+        plan: { ...defaultPlan, steps: null },
+        preflight: {
+          plan: 'plan-1',
+          status: 'complete',
+          results: {
+            'step-1': [{ status: 'warn', message: 'This is a warning.' }],
+          },
+          is_valid: true,
+          error_count: 0,
+          warning_count: 1,
+          is_ready: true,
+        },
+      });
+
+      expect(getByText('Install')).toBeVisible();
+    });
+  });
+
   describe('start-preflight click', () => {
     test('calls doStartPreflight with plan id', () => {
       const doStartPreflight = jest.fn();

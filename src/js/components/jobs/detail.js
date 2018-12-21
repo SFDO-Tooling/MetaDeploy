@@ -127,7 +127,7 @@ class JobDetail extends React.Component<Props, { modalOpen: boolean }> {
       plan,
       job,
       jobId,
-      user,
+      isLoggedIn: user !== null,
     });
     if (loadingOrNotFound !== false) {
       return loadingOrNotFound;
@@ -177,7 +177,9 @@ class JobDetail extends React.Component<Props, { modalOpen: boolean }> {
             />
             <UserInfo job={job} />
             <ProgressBar job={job} />
-            {plan.steps.length ? <StepsTable plan={plan} job={job} /> : null}
+            {plan.steps && plan.steps.length ? (
+              <StepsTable plan={plan} job={job} />
+            ) : null}
           </BodyContainer>
         </>
       </DocumentTitle>

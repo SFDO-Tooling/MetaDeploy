@@ -3,7 +3,15 @@ from django.utils import timezone
 from django.utils.text import slugify
 from scheduler.models import RepeatableJob
 
-from ...models import Plan, PlanSlug, Product, ProductCategory, Step, Version
+from ...models import (
+    AllowedList,
+    Plan,
+    PlanSlug,
+    Product,
+    ProductCategory,
+    Step,
+    Version,
+)
 
 
 class Command(BaseCommand):
@@ -252,6 +260,15 @@ class Command(BaseCommand):
         version2 = self.create_version(product2)
         self.create_plan(version2)
 
+        allowed_list = AllowedList.objects.create(
+            title="restricted",
+            description=(
+                "This item is restricted. "
+                "No [OddBirds](http://www.oddbird.net/birds) allowed!"
+            ),
+            organization_ids=[],
+        )
+
         product3 = self.create_product(
             title=f"Custom Icon Salesforce Product",
             description=f"This product should have a custom icon.",
@@ -260,7 +277,8 @@ class Command(BaseCommand):
             order_key=2,
         )
         version3 = self.create_version(product3)
-        self.create_plan(version3)
+        self.create_plan(version3, title="Restricted Plan", visible_to=allowed_list)
+        self.create_plan(version3, title="Unrestricted Plan", tier="secondary")
 
         product4 = self.create_product(
             title=f"Custom SLDS Icon Salesforce Product",
@@ -269,6 +287,7 @@ class Command(BaseCommand):
             slds_icon_category="utility",
             slds_icon_name="world",
             order_key=3,
+            visible_to=allowed_list,
         )
         version4 = self.create_version(product4)
         self.create_plan(version4)

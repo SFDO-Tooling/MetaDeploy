@@ -7,7 +7,7 @@ from colorfield.fields import ColorField
 from django.conf import settings
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
-from django.contrib.postgres.fields import JSONField
+from django.contrib.postgres.fields import ArrayField, JSONField
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
@@ -39,6 +39,29 @@ class HashIdMixin(models.Model):
     id = HashidAutoField(primary_key=True)
 
 
+class AllowedList(models.Model):
+    title = models.CharField(max_length=128, unique=True)
+    description = MarkdownField(blank=True, property_suffix="_markdown")
+    organization_ids = ArrayField(
+        models.CharField(max_length=1024), default=list, blank=True
+    )
+
+    def __str__(self):
+        return self.title
+
+
+class AllowedListAccessMixin(models.Model):
+    class Meta:
+        abstract = True
+
+    visible_to = models.ForeignKey(AllowedList, on_delete=models.SET_NULL, null=True)
+
+    def is_visible_to(self, user):
+        return not self.visible_to or (
+            user.is_authenticated and user.org_id in self.visible_to.organization_ids
+        )
+
+
 class UserQuerySet(models.QuerySet):
     def with_expired_tokens(self):
         token_lifetime_ago = timezone.now() - timedelta(
@@ -57,27 +80,30 @@ class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
 class User(AbstractUser):
     objects = UserManager()
 
+    def _get_org_property(self, key):
+        try:
+            return self.social_account.extra_data[ORGANIZATION_DETAILS][key]
+        except (AttributeError, KeyError):
+            return None
+
+    @property
+    def org_id(self):
+        return self._get_org_property("Id")
+
     @property
     def org_name(self):
-        if self.social_account:
-            return self.social_account.extra_data.get(ORGANIZATION_DETAILS, {}).get(
-                "Name"
-            )
-        return None
+        return self._get_org_property("Name")
 
     @property
     def org_type(self):
-        if self.social_account:
-            return self.social_account.extra_data.get(ORGANIZATION_DETAILS, {}).get(
-                "OrganizationType"
-            )
-        return None
+        return self._get_org_property("OrganizationType")
 
     @property
     def instance_url(self):
-        if self.social_account:
-            return self.social_account.extra_data.get("instance_url", None)
-        return None
+        try:
+            return self.social_account.extra_data["instance_url"]
+        except (AttributeError, KeyError):
+            return None
 
     @property
     def token(self):
@@ -181,7 +207,7 @@ class ProductQuerySet(models.QuerySet):
         )
 
 
-class Product(HashIdMixin, SlugMixin, models.Model):
+class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, models.Model):
     SLDS_ICON_CHOICES = (
         ("", ""),
         ("action", "action"),
@@ -197,7 +223,7 @@ class Product(HashIdMixin, SlugMixin, models.Model):
     objects = ProductQuerySet.as_manager()
 
     title = models.CharField(max_length=256)
-    description = models.TextField()
+    description = MarkdownField(property_suffix="_markdown")
     category = models.ForeignKey(ProductCategory, on_delete=models.PROTECT)
     color = ColorField(blank=True)
     image = models.ImageField(blank=True)
@@ -239,13 +265,13 @@ class Product(HashIdMixin, SlugMixin, models.Model):
         return None
 
 
-class VersionManager(models.Manager):
+class VersionQuerySet(models.QuerySet):
     def get_by_natural_key(self, *, product, label):
         return self.get(product=product, label=label)
 
 
 class Version(HashIdMixin, models.Model):
-    objects = VersionManager()
+    objects = VersionQuerySet.as_manager()
 
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
     label = models.CharField(
@@ -319,7 +345,7 @@ class PlanSlug(models.Model):
         return self.slug
 
 
-class Plan(HashIdMixin, SlugMixin, models.Model):
+class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, models.Model):
     Tier = Choices("primary", "secondary", "additional")
 
     title = models.CharField(max_length=128)
