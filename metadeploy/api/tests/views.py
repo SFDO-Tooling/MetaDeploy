@@ -165,7 +165,7 @@ class TestBasicGetViews:
         assert response.json() == {
             "id": str(product.id),
             "title": product.title,
-            "description": "This is a sample product.",
+            "description": "<p>This is a sample product.</p>",
             "category": "salesforce",
             "color": "#FFFFFF",
             "icon": None,
@@ -182,8 +182,10 @@ class TestBasicGetViews:
                 "is_listed": True,
             },
             "slug": product.slug,
+            "is_allowed": True,
             "is_listed": True,
             "order_key": 0,
+            "not_allowed_instructions": None,
         }
 
     def test_version(self, client, version_factory):
@@ -216,7 +218,30 @@ class TestBasicGetViews:
             "tier": "primary",
             "slug": "sample-plan",
             "steps": [],
+            "is_allowed": True,
             "is_listed": True,
+            "not_allowed_instructions": None,
+        }
+
+    def test_plan__not_visible(self, client, allowed_list_factory, plan_factory):
+        allowed_list = allowed_list_factory(
+            organization_ids=[], description="Sample instructions."
+        )
+        plan = plan_factory(visible_to=allowed_list)
+        response = client.get(reverse("plan-detail", kwargs={"pk": plan.id}))
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "id": str(plan.id),
+            "title": "Sample plan",
+            "version": str(plan.version.id),
+            "preflight_message": None,
+            "tier": "primary",
+            "slug": "sample-plan",
+            "steps": None,
+            "is_allowed": False,
+            "is_listed": True,
+            "not_allowed_instructions": "<p>Sample instructions.</p>",
         }
 
 
@@ -226,7 +251,7 @@ class TestPreflight:
         plan = plan_factory()
         response = client.post(reverse("plan-preflight", kwargs={"pk": plan.id}))
 
-        assert response.status_code == 202
+        assert response.status_code == 201
 
     def test_get__good(self, client, plan_factory, preflight_result_factory):
         plan = plan_factory()
@@ -237,7 +262,7 @@ class TestPreflight:
 
         assert response.status_code == 200
         assert response.json() == {
-            "id": preflight.id,
+            "id": str(preflight.id),
             "organization_url": client.user.instance_url,
             "plan": str(plan.id),
             "created_at": format_timestamp(preflight.created_at),
@@ -247,7 +272,7 @@ class TestPreflight:
             "error_count": 0,
             "warning_count": 0,
             "is_ready": False,
-            "user": client.user.id,
+            "user": str(client.user.id),
             "edited_at": format_timestamp(preflight.edited_at),
         }
 
@@ -256,3 +281,10 @@ class TestPreflight:
         response = client.get(reverse("plan-preflight", kwargs={"pk": plan.id}))
 
         assert response.status_code == 404
+
+    def test_post__unallowed(self, client, plan_factory, allowed_list_factory):
+        allowed_list = allowed_list_factory(organization_ids=[])
+        plan = plan_factory(visible_to=allowed_list)
+        response = client.post(reverse("plan-preflight", kwargs={"pk": plan.id}))
+
+        assert response.status_code == 403

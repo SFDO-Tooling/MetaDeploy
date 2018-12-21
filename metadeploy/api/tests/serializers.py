@@ -1,7 +1,85 @@
 import pytest
 
 from ..models import PreflightResult
-from ..serializers import JobSerializer, PreflightResultSerializer
+from ..serializers import (
+    JobSerializer,
+    PlanSerializer,
+    PreflightResultSerializer,
+    ProductSerializer,
+)
+
+
+@pytest.mark.django_db
+class TestPlanSerializer:
+    def test_circumspect_description(
+        self, rf, user_factory, plan_factory, allowed_list_factory, step_factory
+    ):
+        user = user_factory()
+        allowed_list = allowed_list_factory()
+        plan = plan_factory(visible_to=allowed_list, preflight_message="test")
+        [step_factory(plan=plan) for _ in range(3)]
+
+        request = rf.get("/")
+        request.user = user
+        context = {"request": request}
+
+        serializer = PlanSerializer(plan, context=context)
+        assert serializer.data["preflight_message"] is None
+        assert serializer.data["steps"] is None
+
+    def test_circumspect_product_description(
+        self,
+        rf,
+        user_factory,
+        plan_factory,
+        allowed_list_factory,
+        step_factory,
+        product_factory,
+    ):
+        user = user_factory()
+        allowed_list = allowed_list_factory(description="Test.")
+        product = product_factory(visible_to=allowed_list)
+        plan = plan_factory(preflight_message="test", version__product=product)
+        [step_factory(plan=plan) for _ in range(3)]
+
+        request = rf.get("/")
+        request.user = user
+        context = {"request": request}
+
+        serializer = PlanSerializer(plan, context=context)
+        assert serializer.data["preflight_message"] is None
+        assert serializer.data["steps"] is None
+        assert serializer.data["not_allowed_instructions"] == "<p>Test.</p>"
+
+
+@pytest.mark.django_db
+class TestProductSerializer:
+    def test_no_most_recent_version(
+        self, rf, user_factory, product_factory, version_factory
+    ):
+        user = user_factory()
+        product = product_factory()
+
+        request = rf.get("/")
+        request.user = user
+        context = {"request": request}
+
+        serializer = ProductSerializer(product, context=context)
+        assert serializer.data["most_recent_version"] is None
+
+    def test_circumspect_description(
+        self, rf, user_factory, product_factory, allowed_list_factory
+    ):
+        user = user_factory()
+        allowed_list = allowed_list_factory()
+        product = product_factory(visible_to=allowed_list, description="Test")
+
+        request = rf.get("/")
+        request.user = user
+        context = {"request": request}
+
+        serializer = ProductSerializer(product, context=context)
+        assert serializer.data["description"] is None
 
 
 @pytest.mark.django_db
@@ -244,3 +322,55 @@ class TestJob:
             "Pending job exists. Please try again later, or cancel that job."
             in non_field_errors
         )
+
+    def test_disallowed_plan(
+        self,
+        rf,
+        user_factory,
+        plan_factory,
+        allowed_list_factory,
+        preflight_result_factory,
+    ):
+        user = user_factory()
+        request = rf.get("/")
+        request.user = user
+        allowed_list = allowed_list_factory(organization_ids=[])
+        plan = plan_factory(visible_to=allowed_list)
+        preflight_result_factory(
+            plan=plan, user=user, status=PreflightResult.Status.complete, results={}
+        )
+        preflight_result_factory(
+            plan=plan, user=user, status=PreflightResult.Status.complete, results={}
+        )
+        data = {"plan": str(plan.id), "steps": []}
+
+        serializer = JobSerializer(data=data, context=dict(request=request))
+
+        assert not serializer.is_valid()
+
+    def test_disallowed_product(
+        self,
+        rf,
+        user_factory,
+        product_factory,
+        plan_factory,
+        allowed_list_factory,
+        preflight_result_factory,
+    ):
+        user = user_factory()
+        request = rf.get("/")
+        request.user = user
+        allowed_list = allowed_list_factory(organization_ids=[])
+        product = product_factory(visible_to=allowed_list)
+        plan = plan_factory(version__product=product)
+        preflight_result_factory(
+            plan=plan, user=user, status=PreflightResult.Status.complete, results={}
+        )
+        preflight_result_factory(
+            plan=plan, user=user, status=PreflightResult.Status.complete, results={}
+        )
+        data = {"plan": str(plan.id), "steps": []}
+
+        serializer = JobSerializer(data=data, context=dict(request=request))
+
+        assert not serializer.is_valid()

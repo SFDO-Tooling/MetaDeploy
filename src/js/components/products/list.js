@@ -121,7 +121,11 @@ const selectProductsByCategory = createSelector(
   (products: ProductsType): ProductsMapType => {
     const productsByCategory = new Map();
     for (const product of products) {
-      if (product.is_listed && product.most_recent_version) {
+      if (
+        product.is_allowed &&
+        product.is_listed &&
+        product.most_recent_version
+      ) {
         const category = product.category;
         const existing = productsByCategory.get(category) || [];
         existing.push(product);

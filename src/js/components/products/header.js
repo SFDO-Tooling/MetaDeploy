@@ -4,23 +4,20 @@ import * as React from 'react';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import ProductIcon from 'components/products/icon';
 
-import type {
-  Product as ProductType,
-  Version as VersionType,
-} from 'products/reducer';
+import type { Product as ProductType } from 'products/reducer';
 
 const Header = ({
   product,
-  version,
+  versionLabel,
 }: {
   product: ProductType,
-  version: VersionType,
+  versionLabel: string,
 }): React.Node => (
   <PageHeader
     className="page-header
       slds-p-around_x-large"
     title={product.title}
-    info={version.label}
+    info={versionLabel}
     icon={<ProductIcon item={product} />}
   />
 );

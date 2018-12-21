@@ -18,7 +18,7 @@ export type Product = {
   +id: string,
   +slug: string,
   +title: string,
-  +description: string,
+  +description: string | null,
   +category: string,
   +color: string,
   +icon: {
@@ -31,6 +31,8 @@ export type Product = {
   +most_recent_version: Version | null,
   +versions?: { [string]: Version | null },
   +is_listed: boolean,
+  +is_allowed: boolean,
+  +not_allowed_instructions: string | null,
 };
 export type Products = Array<Product>;
 
@@ -38,6 +40,8 @@ const reducer = (products: Products = [], action: ProductsAction): Products => {
   switch (action.type) {
     case 'FETCH_PRODUCTS_SUCCEEDED':
       return action.payload;
+    case 'FETCH_PRODUCTS_FAILED':
+      return [];
     case 'FETCH_VERSION_SUCCEEDED': {
       const { product, label, version } = action.payload;
       return products.map(p => {
