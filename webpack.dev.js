@@ -28,6 +28,8 @@ module.exports = merge(common, {
     },
     hot: false,
     writeToDisk: true,
+    // @@@ https://github.com/webpack/webpack-dev-server/issues/1604
+    disableHostCheck: true,
   },
   plugins: [
     new CleanWebpackPlugin(['dist/*.*']),
