@@ -45,7 +45,7 @@ class JobFlow(BasicFlow):
         step_id = self._get_step_id(task.name)
         if step_id:
             self.result.results[step_id] = [{"status": OK}]
-            self.log = self.string_buffer.getvalue()
+            self.result.log = self.string_buffer.getvalue()
             self.result.save()
         return super()._post_task(task)
 
@@ -55,7 +55,7 @@ class JobFlow(BasicFlow):
             self.result.results[step_id] = [
                 {"status": ERROR, "message": bleach.clean(str(exception))}
             ]
-            self.log = self.string_buffer.getvalue()
+            self.result.log = self.string_buffer.getvalue()
             self.result.save()
         return super()._post_task_exception(task, exception)
 
