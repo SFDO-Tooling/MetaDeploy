@@ -85,6 +85,7 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
             MultipleObjectsReturned,
             ObjectDoesNotExist,
             ValueError,
+            TypeError,
         )
         try:
             obj = self.get_instance(**content)

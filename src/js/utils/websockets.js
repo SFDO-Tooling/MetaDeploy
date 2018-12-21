@@ -22,6 +22,10 @@ import type {
 } from 'plans/actions';
 import type { TokenInvalidAction } from 'accounts/actions';
 
+type SubscriptionEvent = {|
+  ok?: string,
+  error?: string,
+|};
 type ErrorEvent = {|
   type: 'BACKEND_ERROR',
   payload: {| message: string |},
@@ -37,7 +41,13 @@ type JobEvent = {|
   type: 'TASK_COMPLETED' | 'JOB_COMPLETED' | 'JOB_FAILED',
   payload: Job,
 |};
-type EventType = ErrorEvent | UserEvent | PreflightEvent | JobEvent;
+type EventType =
+  | SubscriptionEvent
+  | ErrorEvent
+  | UserEvent
+  | PreflightEvent
+  | JobEvent;
+
 type Action =
   | TokenInvalidAction
   | PreflightCompleted
@@ -49,7 +59,7 @@ type Action =
 type Subscription = {| model: string, id: string |};
 
 export const getAction = (event: EventType): Action | null => {
-  if (!event || event.type === undefined) {
+  if (!event || !event.type) {
     return null;
   }
   switch (event.type) {
