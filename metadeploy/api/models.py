@@ -457,9 +457,6 @@ class Job(HashIdMixin, models.Model):
     exception = models.TextField(null=True)
 
     def subscribable_by(self, user):
-        return self.visible_to(user)
-
-    def visible_to(self, user):
         return self.is_public or user.is_staff or user == self.user
 
     def skip_tasks(self):

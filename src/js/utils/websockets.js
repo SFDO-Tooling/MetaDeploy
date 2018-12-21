@@ -114,9 +114,9 @@ export const createSocket = ({
     onopen: e => {
       log('[WebSocket] connected');
       open = true;
-      for (const obj of pending) {
-        log('[WebSocket] subscribing to:', obj);
-        socket.json(obj);
+      for (const payload of pending) {
+        log('[WebSocket] subscribing to:', payload);
+        socket.json(payload);
       }
       pending.clear();
       opts.onopen(e);
