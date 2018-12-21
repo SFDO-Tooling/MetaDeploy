@@ -31,13 +31,20 @@ class BasicFlow(flows.BaseFlow):
 
 
 class JobFlow(BasicFlow):
-    def _pre_flow(self, *args, **kwargs):
+    def _init_logger(self):
+        logger = logging.getLogger("cumulusci")
+
         self.string_buffer = StringIO()
         self.handler = logging.StreamHandler(stream=self.string_buffer)
-        self.handler.setLevel(logging.DEBUG)
-        formatter = LogfmtFormatter(settings.LOGGING["formatters"]["verbose"]["format"])
-        self.handler.setFormatter(formatter)
-        self.logger.addHandler(self.handler)
+        self.handler.setFormatter(logging.Formatter())
+        
+        logger.addHandler(handler)
+        logger.setLevel(logging.DEBUG)
+        # logger.propagate = False # not sure why we do this in metaci, trying it left out.
+        self.logger = logger
+        return self.logger
+
+    
 
     def _post_flow(self):
         # TODO: I would hope self.string_buffer would have a vaule, but it appears not
