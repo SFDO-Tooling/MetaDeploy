@@ -3,9 +3,6 @@ from io import StringIO
 
 import bleach
 from cumulusci.core import flows
-from django.conf import settings
-
-from metadeploy.logfmt import LogfmtFormatter
 
 from .constants import ERROR, OK, OPTIONAL, SKIP, WARN
 
@@ -33,30 +30,22 @@ class BasicFlow(flows.BaseFlow):
 class JobFlow(BasicFlow):
     def _init_logger(self):
         logger = logging.getLogger("cumulusci")
-
         self.string_buffer = StringIO()
         self.handler = logging.StreamHandler(stream=self.string_buffer)
         self.handler.setFormatter(logging.Formatter())
-        
-        logger.addHandler(handler)
+        logger.addHandler(self.handler)
         logger.setLevel(logging.DEBUG)
-        # logger.propagate = False # not sure why we do this in metaci, trying it left out.
         self.logger = logger
         return self.logger
 
-    
-
     def _post_flow(self):
-        # TODO: I would hope self.string_buffer would have a vaule, but it appears not
-        # to ever get one. Once I fix that, I can wire it up to set a value on each
-        # _post_task to a new logging field on the job.
-        print("=======> ", self.string_buffer.getvalue())
         self.logger.removeHandler(self.handler)
 
     def _post_task(self, task):
         step_id = self._get_step_id(task.name)
         if step_id:
             self.result.results[step_id] = [{"status": OK}]
+            self.log = self.string_buffer.getvalue()
             self.result.save()
         return super()._post_task(task)
 
@@ -66,6 +55,7 @@ class JobFlow(BasicFlow):
             self.result.results[step_id] = [
                 {"status": ERROR, "message": bleach.clean(str(exception))}
             ]
+            self.log = self.string_buffer.getvalue()
             self.result.save()
         return super()._post_task_exception(task, exception)
 

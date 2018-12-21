@@ -41,8 +41,10 @@ class TestJobFlow:
         for i, task in enumerate(tasks):
             task.name = f"task_{i}"
 
+        flow._init_logger()
         for task in tasks:
             flow._post_task(task)
+        flow._post_flow()
 
         assert job.results == {str(step.id): [{"status": "ok"}] for step in steps}
 
@@ -63,6 +65,7 @@ class TestJobFlow:
         task = MagicMock()
         task.name = f"task_0"
 
+        flow._init_logger()
         flow._post_task_exception(task, ValueError("Some error"))
 
         assert job.results == {

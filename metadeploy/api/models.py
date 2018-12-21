@@ -450,6 +450,7 @@ class Job(HashIdMixin, models.Model):
     org_type = models.CharField(blank=True, max_length=256)
     is_public = models.BooleanField(default=False)
     exception = models.TextField(null=True)
+    log = models.TextField(blank=True)
 
     def skip_tasks(self):
         return [
