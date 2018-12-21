@@ -2,7 +2,6 @@ import itertools
 import logging
 from datetime import timedelta
 
-import bleach
 from allauth.socialaccount.models import SocialToken
 from asgiref.sync import async_to_sync
 from colorfield.fields import ColorField
@@ -18,8 +17,8 @@ from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from hashid_field import HashidAutoField
-from markdown import markdown
 from model_utils import Choices, FieldTracker
+from sfdo_template_helpers.fields import MarkdownField
 
 from .constants import ERROR, OPTIONAL, ORGANIZATION_DETAILS
 from .push import (
@@ -330,60 +329,14 @@ class Plan(HashIdMixin, SlugMixin, models.Model):
 
     title = models.CharField(max_length=128)
     version = models.ForeignKey(Version, on_delete=models.PROTECT)
-    preflight_message = models.TextField(blank=True)
+    preflight_message = MarkdownField(blank=True, property_suffix="_markdown")
     preflight_flow_name = models.CharField(max_length=256, blank=True)
     flow_name = models.CharField(max_length=64)
     tier = models.CharField(choices=Tier, default=Tier.primary, max_length=64)
-    post_install_message = models.TextField(blank=True)
+    post_install_message = MarkdownField(blank=True, property_suffix="_markdown")
     is_listed = models.BooleanField(default=True)
 
     slug_class = PlanSlug
-
-    markdown_tags = [
-        "h1",
-        "h2",
-        "h3",
-        "h4",
-        "h5",
-        "h6",
-        "b",
-        "i",
-        "strong",
-        "em",
-        "tt",
-        "p",
-        "br",
-        "span",
-        "div",
-        "blockquote",
-        "code",
-        "hr",
-        "ul",
-        "ol",
-        "li",
-        "dd",
-        "dt",
-        "img",
-        "a",
-    ]
-
-    markdown_attrs = {"img": ["src", "alt", "title"], "a": ["href", "alt", "title"]}
-
-    @property
-    def preflight_message_markdown(self):
-        return bleach.clean(
-            markdown(self.preflight_message),
-            tags=self.markdown_tags,
-            attributes=self.markdown_attrs,
-        )
-
-    @property
-    def post_install_message_markdown(self):
-        return bleach.clean(
-            markdown(self.post_install_message),
-            tags=self.markdown_tags,
-            attributes=self.markdown_attrs,
-        )
 
     @property
     def required_step_ids(self):
