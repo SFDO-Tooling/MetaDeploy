@@ -13,6 +13,13 @@ from ..models import Job, User, Version
 
 
 @pytest.mark.django_db
+class TestAllowedList:
+    def test_str(self, allowed_list_factory):
+        allowed_list = allowed_list_factory(title="A title")
+        assert str(allowed_list) == "A title"
+
+
+@pytest.mark.django_db
 class TestUser:
     def test_org_name(self, user_factory):
         user = user_factory()

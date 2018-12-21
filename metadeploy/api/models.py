@@ -77,7 +77,7 @@ class AllowedList(models.Model):
         models.CharField(max_length=1024), default=list, blank=True
     )
 
-    def __str__(self):  # pragma: nocover
+    def __str__(self):
         return self.title
 
     @property
@@ -87,7 +87,7 @@ class AllowedList(models.Model):
         )
 
 
-class PrivateMixin(models.Model):
+class AllowedListAccessMixin(models.Model):
     class Meta:
         abstract = True
 
@@ -244,7 +244,7 @@ class ProductQuerySet(models.QuerySet):
         )
 
 
-class Product(HashIdMixin, SlugMixin, PrivateMixin, models.Model):
+class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, models.Model):
     SLDS_ICON_CHOICES = (
         ("", ""),
         ("action", "action"),
@@ -388,7 +388,7 @@ class PlanSlug(models.Model):
         return self.slug
 
 
-class Plan(HashIdMixin, SlugMixin, PrivateMixin, models.Model):
+class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, models.Model):
     Tier = Choices("primary", "secondary", "additional")
 
     title = models.CharField(max_length=128)
