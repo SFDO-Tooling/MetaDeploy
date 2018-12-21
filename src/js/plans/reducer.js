@@ -33,6 +33,7 @@ export type PreflightErrors = {|
 export type Preflight = {|
   +id: string,
   +edited_at: string,
+  +user: string,
   +plan: string,
   +status: 'started' | 'complete' | 'failed',
   +results: PreflightErrors,
