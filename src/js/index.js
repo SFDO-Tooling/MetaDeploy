@@ -118,6 +118,14 @@ cache
         ),
       );
 
+      // Connect to WebSocket server
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const host = window.location.host;
+      window.socket = createSocket({
+        url: `${protocol}//${host}${window.api_urls.ws_notifications()}`,
+        dispatch: appStore.dispatch,
+      });
+
       // Get logged-in/out status
       const userString = el.getAttribute('data-user');
       if (userString) {
@@ -130,14 +138,6 @@ cache
         if (user) {
           // Login
           appStore.dispatch(login(user));
-          // Connect to WebSocket server
-          const protocol =
-            window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-          const host = window.location.host;
-          window.socket = createSocket({
-            url: `${protocol}//${host}${window.api_urls.ws_notifications()}`,
-            dispatch: appStore.dispatch,
-          });
         }
       }
       el.removeAttribute('data-user');

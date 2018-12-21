@@ -63,8 +63,12 @@ class PlanViewSet(viewsets.ModelViewSet):
         ) and plan.version.product.is_visible_to(request.user)
         if not is_visible_to:
             return Response("", status=status.HTTP_403_FORBIDDEN)
-        preflight_job.delay(request.user, plan)
-        return Response("", status=status.HTTP_202_ACCEPTED)
+        preflight_result = PreflightResult.objects.create(
+            user=request.user, plan=plan, organization_url=request.user.instance_url
+        )
+        preflight_job.delay(preflight_result.pk)
+        serializer = PreflightResultSerializer(instance=preflight_result)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=["post", "get"])
     def preflight(self, request, pk=None):

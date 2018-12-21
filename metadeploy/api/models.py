@@ -1,4 +1,5 @@
 import itertools
+import logging
 from datetime import timedelta
 
 from allauth.socialaccount.models import SocialToken
@@ -29,6 +30,7 @@ from .push import (
     user_token_expired,
 )
 
+logger = logging.getLogger(__name__)
 VERSION_STRING = r"^[a-zA-Z0-9._+-]+$"
 
 
@@ -77,8 +79,11 @@ class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
     pass
 
 
-class User(AbstractUser):
+class User(HashIdMixin, AbstractUser):
     objects = UserManager()
+
+    def subscribable_by(self, user):
+        return self == user
 
     def _get_org_property(self, key):
         try:
@@ -430,6 +435,9 @@ class Job(HashIdMixin, models.Model):
     is_public = models.BooleanField(default=False)
     exception = models.TextField(null=True)
 
+    def subscribable_by(self, user):
+        return self.is_public or user.is_staff or user == self.user
+
     def skip_tasks(self):
         return [
             step.task_name
@@ -438,14 +446,19 @@ class Job(HashIdMixin, models.Model):
 
     def save(self, *args, **kwargs):
         ret = super().save(*args, **kwargs)
-        results_has_changed = self.tracker.has_changed("results") and self.results != {}
-        if results_has_changed:
-            async_to_sync(notify_post_task)(self)
-        has_stopped_running = (
-            self.tracker.has_changed("status") and self.status != Job.Status.started
-        )
-        if has_stopped_running:
-            async_to_sync(notify_post_job)(self)
+        try:
+            results_has_changed = (
+                self.tracker.has_changed("results") and self.results != {}
+            )
+            if results_has_changed:
+                async_to_sync(notify_post_task)(self)
+            has_stopped_running = (
+                self.tracker.has_changed("status") and self.status != Job.Status.started
+            )
+            if has_stopped_running:
+                async_to_sync(notify_post_job)(self)
+        except RuntimeError as error:
+            logger.warn(f"RuntimeError: {error}")
         return ret
 
     def invalidate_related_preflight(self):
@@ -495,6 +508,9 @@ class PreflightResult(models.Model):
     #   <definitive name>: [... errors],
     #   ...
     # }
+
+    def subscribable_by(self, user):
+        return self.user == user
 
     def has_any_errors(self):
         return any(
@@ -548,8 +564,11 @@ class PreflightResult(models.Model):
     def save(self, *args, **kwargs):
         ret = super().save(*args, **kwargs)
 
-        self.push_if_completed()
-        self.push_if_failed()
-        self.push_if_invalidated()
+        try:
+            self.push_if_completed()
+            self.push_if_failed()
+            self.push_if_invalidated()
+        except RuntimeError as error:
+            logger.warn(f"RuntimeError: {error}")
 
         return ret
