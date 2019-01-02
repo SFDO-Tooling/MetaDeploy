@@ -19,7 +19,7 @@ def obscure_mpinstaller_deployment_test_failure(text):
     Returns 'Apex Test Failure' as the error text if the text contains a test failure
     message.
     """
-    if text.find("Apex Test Failure: ") != -1:
+    if "Apex Test Failure: " in text:
         return "Apex Test Failure"
     return text
 
