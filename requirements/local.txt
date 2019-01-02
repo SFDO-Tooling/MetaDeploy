@@ -2,5 +2,5 @@
 
 -r test.txt
 
-Sphinx==1.8.2
-django-extensions==2.1.2
+Sphinx==1.8.3
+django-extensions==2.1.4
