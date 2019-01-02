@@ -261,17 +261,17 @@ def expire_user_tokens():
 expire_user_tokens_job = job(expire_user_tokens)
 
 
-def preflight(user, plan):
-    preflight_result = PreflightResult.objects.create(
-        user=user, plan=plan, organization_url=user.instance_url
-    )
+def preflight(preflight_result_id):
+    # Because the FieldTracker interferes with transparently serializing models across
+    # the Redis boundary, we have to pass a primative value to this function,
+    preflight_result = PreflightResult.objects.get(pk=preflight_result_id)
     run_flows(
-        user=user,
-        plan=plan,
+        user=preflight_result.user,
+        plan=preflight_result.plan,
         skip_tasks=[],
         organization_url=preflight_result.organization_url,
         flow_class=PreflightFlow,
-        flow_name=plan.preflight_flow_name,
+        flow_name=preflight_result.plan.preflight_flow_name,
         result_class=PreflightResult,
         result_id=preflight_result.id,
     )

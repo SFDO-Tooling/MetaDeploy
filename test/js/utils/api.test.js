@@ -12,24 +12,6 @@ describe('apiFetch', () => {
     return expect(apiFetch('/test/url/')).resolves.toEqual(expected);
   });
 
-  test('401: calls onAuthFailure', () => {
-    const onAuthFailure = jest.fn();
-    const apiFetchWithFailure = getApiFetch(onAuthFailure);
-
-    fetchMock.getOnce('/test/url/', { status: 401, body: 'Unauthorized' });
-
-    return apiFetchWithFailure('/test/url/').then(resp => {
-      expect(resp).toEqual('Unauthorized');
-      expect(onAuthFailure).toHaveBeenCalled();
-    });
-  });
-
-  test('403: returns null', () => {
-    fetchMock.getOnce('/test/url/', 403);
-
-    return expect(apiFetch('/test/url/')).resolves.toBeNull();
-  });
-
   test('404: returns null', () => {
     fetchMock.getOnce('/test/url/', 404);
 

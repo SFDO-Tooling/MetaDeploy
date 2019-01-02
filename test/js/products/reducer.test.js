@@ -30,6 +30,21 @@ describe('reducer', () => {
     expect(actual).toEqual(expected);
   });
 
+  test('handles FETCH_PRODUCTS_FAILED action', () => {
+    const product = {
+      id: 'p1',
+      title: 'Product 1',
+      description: 'This is a test product.',
+      category: 'salesforce',
+    };
+    const expected = [];
+    const actual = reducer([product], {
+      type: 'FETCH_PRODUCTS_FAILED',
+    });
+
+    expect(actual).toEqual(expected);
+  });
+
   test('handles FETCH_VERSION_SUCCEEDED action', () => {
     const product1 = {
       id: 'p1',

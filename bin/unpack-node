@@ -13,7 +13,7 @@ else
     exit 1
 fi
 
-nodefile="../requirements/node-v10.13.0-${platform}-x64.tar.xz"
+nodefile="../requirements/node-v10.15.0-${platform}-x64.tar.xz"
 yarnfile="../requirements/yarn-v1.12.3.tar.gz"
 
 rm -rf ../node/*

@@ -9,7 +9,16 @@ import {
 } from 'plans/actions';
 import { invalidateToken } from 'accounts/actions';
 
-jest.mock('sockette');
+const mockJson = jest.fn();
+const mockClose = jest.fn();
+const mockOpen = jest.fn();
+jest.mock('sockette', () =>
+  jest.fn().mockImplementation(() => ({
+    json: mockJson,
+    close: mockClose,
+    open: mockOpen,
+  })),
+);
 
 describe('getAction', () => {
   test('handles USER_TOKEN_INVALID msg', () => {
@@ -106,21 +115,24 @@ describe('getAction', () => {
 describe('createSocket', () => {
   beforeEach(() => {
     Sockette.mockClear();
+    mockJson.mockClear();
+    mockClose.mockClear();
+    mockOpen.mockClear();
   });
 
-  test('returns Sockette created with url', () => {
-    const socket = sockets.createSocket({ url: '/my/url' });
+  test('creates socket with url', () => {
+    sockets.createSocket({ url: '/my/url' });
 
-    expect(socket).toBeInstanceOf(Sockette);
     expect(Sockette).toHaveBeenCalledTimes(1);
     expect(Sockette.mock.calls[0][0]).toEqual('/my/url');
   });
 
   describe('events', () => {
     const dispatch = jest.fn();
+    let socket;
 
     beforeEach(() => {
-      sockets.createSocket({ dispatch });
+      socket = sockets.createSocket({ dispatch });
     });
 
     describe('onopen', () => {
@@ -130,6 +142,14 @@ describe('createSocket', () => {
         expect(window.console.info).toHaveBeenCalledWith(
           '[WebSocket] connected',
         );
+      });
+
+      test('subscribes to pending objects', () => {
+        const payload = { model: 'foo', id: 'bar' };
+        socket.subscribe(payload);
+        Sockette.mock.calls[0][1].onopen({});
+
+        expect(mockJson).toHaveBeenCalledWith(payload);
       });
     });
 
@@ -190,6 +210,39 @@ describe('createSocket', () => {
           {},
         );
       });
+    });
+  });
+
+  describe('subscribe', () => {
+    let socket;
+
+    beforeEach(() => {
+      socket = sockets.createSocket();
+    });
+
+    describe('ws open', () => {
+      test('subscribes to object', () => {
+        const payload = { model: 'foo', id: 'bar' };
+        Sockette.mock.calls[0][1].onopen();
+        socket.subscribe(payload);
+
+        expect(mockJson).toHaveBeenCalledWith(payload);
+      });
+    });
+  });
+
+  describe('reconnect', () => {
+    let socket;
+
+    beforeEach(() => {
+      socket = sockets.createSocket();
+    });
+
+    test('closes and reopens ws connection', () => {
+      socket.reconnect();
+
+      expect(mockClose).toHaveBeenCalledWith(1000, 'user logged out');
+      expect(mockOpen).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -36,12 +36,14 @@ const defaultState = {
           slug: 'my-plan',
           title: 'My Plan',
           is_listed: true,
+          is_allowed: true,
         },
         secondary_plan: {
           id: 'plan-2',
           slug: 'my-secondary-plan',
           title: 'My Secondary Plan',
           is_listed: true,
+          is_allowed: true,
         },
         additional_plans: [
           {
@@ -49,13 +51,16 @@ const defaultState = {
             slug: 'my-additional-plan',
             title: 'My Additional Plan',
             is_listed: true,
+            is_allowed: true,
           },
         ],
         is_listed: true,
       },
       is_listed: true,
+      is_allowed: true,
     },
   ],
+  user: {},
 };
 
 describe('<ProductDetail />', () => {
@@ -227,12 +232,14 @@ describe('<VersionDetail />', () => {
             slug: 'my-plan',
             title: 'My Plan',
             is_listed: true,
+            is_allowed: true,
           },
           secondary_plan: null,
           additional_plans: [],
           is_listed: true,
         },
         is_listed: true,
+        is_allowed: true,
       };
       const { getByText, queryByText } = setup({
         initialState: { products: [product] },
@@ -257,6 +264,7 @@ describe('<VersionDetail />', () => {
         slug: 'my-plan-4',
         title: 'My Plan 4',
         is_listed: true,
+        is_allowed: true,
       },
       secondary_plan: null,
       additional_plans: [],
@@ -287,6 +295,45 @@ describe('<VersionDetail />', () => {
       });
 
       expect(getByText('most recent version')).toBeVisible();
+    });
+  });
+
+  describe('product is restricted', () => {
+    test('renders <ProductNotAllowed />', () => {
+      const { getByText } = setup({
+        initialState: {
+          products: [
+            {
+              ...defaultState.products[0],
+              is_allowed: false,
+              not_allowed_instructions: 'foobar',
+              description: null,
+            },
+          ],
+        },
+      });
+
+      expect(getByText('list of all products')).toBeVisible();
+      expect(getByText('foobar')).toBeVisible();
+    });
+
+    test('renders <ProductNotAllowed /> without custom message', () => {
+      const { getByText } = setup({
+        initialState: {
+          products: [
+            {
+              ...defaultState.products[0],
+              is_allowed: false,
+              not_allowed_instructions: null,
+              description: null,
+            },
+          ],
+          user: null,
+        },
+      });
+
+      expect(getByText('list of all products')).toBeVisible();
+      expect(getByText('log in')).toBeVisible();
     });
   });
 });

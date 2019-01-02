@@ -178,7 +178,7 @@ class CtaButton extends React.Component<Props, { modalOpen: boolean }> {
                   toggleModal={this.toggleModal}
                   startJob={this.startJob}
                   results={preflight.results}
-                  steps={plan.steps}
+                  steps={plan.steps || []}
                 />
               </>
             );

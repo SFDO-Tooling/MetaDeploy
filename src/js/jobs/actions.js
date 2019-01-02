@@ -50,12 +50,18 @@ export const fetchJob = (jobId: string): ThunkAction => (
 ) => {
   dispatch({ type: 'FETCH_JOB_STARTED', payload: jobId });
   return apiFetch(window.api_urls.job_detail(jobId))
-    .then(response =>
-      dispatch({
+    .then(response => {
+      if (response) {
+        window.socket.subscribe({
+          model: 'job',
+          id: response.id,
+        });
+      }
+      return dispatch({
         type: 'FETCH_JOB_SUCCEEDED',
         payload: { id: jobId, job: response },
-      }),
-    )
+      });
+    })
     .catch(err => {
       dispatch({ type: 'FETCH_JOB_FAILED', payload: jobId });
       throw err;
@@ -76,7 +82,13 @@ export const startJob = (data: JobData): ThunkAction => (
       'Content-Type': 'application/json',
     },
   })
-    .then(response => dispatch({ type: 'JOB_STARTED', payload: response }))
+    .then(response => {
+      window.socket.subscribe({
+        model: 'job',
+        id: response.id,
+      });
+      return dispatch({ type: 'JOB_STARTED', payload: response });
+    })
     .catch(err => {
       dispatch({ type: 'JOB_REJECTED', payload: data });
       throw err;
