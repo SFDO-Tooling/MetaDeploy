@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.utils.text import slugify
@@ -158,10 +157,7 @@ class Command(BaseCommand):
             order_key=9,
         )
 
-    def enable_repeatable_jobs(self):
-        return "redis" in settings.CHANNEL_LAYERS["default"]["BACKEND"]
-
-    def create_enqueuer_job(self):  # pragma: nocover
+    def create_enqueuer_job(self):
         RepeatableJob.objects.get_or_create(
             callable="metadeploy.api.jobs.enqueuer_job",
             defaults=dict(
@@ -173,7 +169,7 @@ class Command(BaseCommand):
             ),
         )
 
-    def create_token_expiry_job(self):  # pragma: nocover
+    def create_token_expiry_job(self):
         RepeatableJob.objects.get_or_create(
             callable="metadeploy.api.jobs.expire_user_tokens_job",
             defaults=dict(
@@ -185,7 +181,7 @@ class Command(BaseCommand):
             ),
         )
 
-    def create_preflight_expiry_job(self):  # pragma: nocover
+    def create_preflight_expiry_job(self):
         RepeatableJob.objects.get_or_create(
             callable="metadeploy.api.jobs.expire_preflights_job",
             defaults=dict(
@@ -198,10 +194,9 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        if self.enable_repeatable_jobs():  # pragma: nocover
-            self.create_enqueuer_job()
-            self.create_token_expiry_job()
-            self.create_preflight_expiry_job()
+        self.create_enqueuer_job()
+        self.create_token_expiry_job()
+        self.create_preflight_expiry_job()
         sf_category = ProductCategory.objects.create(title="salesforce", order_key=0)
         co_category = ProductCategory.objects.create(title="community", order_key=1)
         product1 = self.create_product(
