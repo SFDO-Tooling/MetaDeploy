@@ -435,6 +435,7 @@ class Job(HashIdMixin, models.Model):
     is_public = models.BooleanField(default=False)
     canceled_at = models.DateTimeField(null=True)
     exception = models.TextField(null=True)
+    log = models.TextField(blank=True)
 
     def subscribable_by(self, user):
         return self.is_public or user.is_staff or user == self.user
