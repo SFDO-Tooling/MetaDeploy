@@ -21,7 +21,7 @@ from .serializers import (
 class JobViewSet(viewsets.ModelViewSet):
     serializer_class = JobSerializer
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ("plan", "user", "status")
+    filterset_fields = ("plan", "user", "status", "organization_url")
     permission_classes = (OnlyOwnerCanDelete,)
 
     def get_queryset(self):
