@@ -22,12 +22,6 @@ def env(name):
         )
 
 
-INSTANCE_URL = env("TEST_INSTANCE_URL")
-ORGANIZATION_ID = env("TEST_ORGANIZATION_ID")
-TOKEN = env("TEST_TOKEN")
-TOKEN_SECRET = env("TEST_TOKEN_SECRET")
-
-
 @pytest.mark.integration
 @pytest.mark.django_db
 def test_can_reach_salesforce(
@@ -40,6 +34,12 @@ def test_can_reach_salesforce(
     version_factory,
     product_factory,
 ):
+    # Ensure 12-factor-esque values are found:
+    INSTANCE_URL = env("TEST_INSTANCE_URL")
+    ORGANIZATION_ID = env("TEST_ORGANIZATION_ID")
+    TOKEN = env("TEST_TOKEN")
+    TOKEN_SECRET = env("TEST_TOKEN_SECRET")
+
     user = user_factory(socialaccount_set=[])
     social_account = social_account_factory(
         user=user,
