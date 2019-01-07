@@ -126,6 +126,18 @@ cache
         dispatch: appStore.dispatch,
       });
 
+      // Get JS globals
+      let GLOBALS = {};
+      try {
+        const globalsEl = document.getElementById('js-globals');
+        if (globalsEl) {
+          GLOBALS = JSON.parse(globalsEl.textContent);
+        }
+      } catch (err) {
+        logError(err);
+      }
+      window.GLOBALS = GLOBALS;
+
       // Get logged-in/out status
       const userString = el.getAttribute('data-user');
       if (userString) {

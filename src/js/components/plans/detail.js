@@ -205,6 +205,13 @@ class PlanDetail extends React.Component<Props, State> {
                         'After resolving all errors, ' +
                         'run the pre-install validation again.'
                       }
+                      successMessage={
+                        'Pre-install validation will expire if install is ' +
+                        'not run within ' +
+                        `${window.GLOBALS.PREFLIGHT_LIFETIME_MINUTES || 10} ` +
+                        'minutes, and you will need to run pre-install ' +
+                        'validation again.'
+                      }
                     />
                   ) : null
                 }
