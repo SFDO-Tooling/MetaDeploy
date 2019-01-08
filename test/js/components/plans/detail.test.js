@@ -111,7 +111,7 @@ const defaultState = {
       is_ready: true,
     },
   },
-  user: { valid_token_for: 'foo' },
+  user: { valid_token_for: 'foo', org_type: 'an org' },
   jobs: {},
 };
 
@@ -143,6 +143,19 @@ describe('<PlanDetail />', () => {
     );
     return { getByText, queryByText, getByAltText, container, rerender };
   };
+
+  describe('insufficient permissions for user', () => {
+    test('renders login button', () => {
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          user: { valid_token_for: 'foo' },
+        },
+      });
+
+      expect(getByText('log in with a different org')).toBeVisible();
+    });
+  });
 
   describe('no product', () => {
     test('renders <ProductNotFound />', () => {

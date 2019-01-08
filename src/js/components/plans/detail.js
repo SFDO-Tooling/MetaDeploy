@@ -6,6 +6,8 @@ import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
+import Icon from '@salesforce/design-system-react/components/icon';
+
 import routes from 'utils/routes';
 import { CONSTANTS } from 'plans/reducer';
 import { fetchPreflight, startPreflight } from 'plans/actions';
@@ -29,6 +31,7 @@ import ProductNotFound from 'components/products/product404';
 import StepsTable from 'components/plans/stepsTable';
 import Toasts from 'components/plans/toasts';
 import UserInfo from 'components/plans/userInfo';
+import Login from 'components/header/login';
 
 import type { AppState } from 'app/reducer';
 import type { InitialProps } from 'components/utils';
@@ -186,6 +189,30 @@ class PlanDetail extends React.Component<Props, State> {
       return <ProductNotFound />;
     }
     const selectedSteps = this.getSelectedSteps();
+    let cta = null;
+    if (user && !user.org_type) {
+      cta = (
+        <Login
+          id="user-info-login"
+          label="log in with a different org"
+          buttonVariant="base"
+        />
+      );
+    } else if (plan.steps && plan.steps.length) {
+      cta = (
+        <CtaButton
+          history={history}
+          user={user}
+          productSlug={product.slug}
+          versionLabel={version.label}
+          plan={plan}
+          preflight={preflight}
+          selectedSteps={selectedSteps}
+          doStartPreflight={doStartPreflight}
+          doStartJob={doStartJob}
+        />
+      );
+    }
     return (
       <DocumentTitle title={`${plan.title} | ${product.title} | MetaDeploy`}>
         <>
@@ -208,20 +235,29 @@ class PlanDetail extends React.Component<Props, State> {
                     />
                   ) : null
                 }
-                cta={
-                  plan.steps && plan.steps.length ? (
-                    <CtaButton
-                      history={history}
-                      user={user}
-                      productSlug={product.slug}
-                      versionLabel={version.label}
-                      plan={plan}
-                      preflight={preflight}
-                      selectedSteps={selectedSteps}
-                      doStartPreflight={doStartPreflight}
-                      doStartJob={doStartJob}
-                    />
-                  ) : null
+                cta={cta}
+                postMessage={
+                  user && user.org_type ? null : (
+                    <div>
+                      <div className="slds-text-color_error">
+                        <Icon
+                          category="utility"
+                          name="error"
+                          size="xx-small"
+                          containerClassName="slds-icon-utility-error
+                            slds-m-left_xxx-small"
+                        />
+                        <span>
+                          Oops! It looks like you don&apos;t have permissions to
+                          run an installation on this org.
+                        </span>
+                      </div>
+                      <div>
+                        Please contact an Admin within your org or use the
+                        button below to log in with a different org.
+                      </div>
+                    </div>
+                  )
                 }
                 preMessage={
                   plan.preflight_message ? (
