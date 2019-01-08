@@ -311,7 +311,7 @@ class TestJob:
             "plan": str(plan.id),
             "steps": [str(step1.id), str(step2.id), str(step3.id)],
         }
-        job_factory(organization_url=user.instance_url)
+        job = job_factory(organization_url=user.instance_url)
         serializer = JobSerializer(data=data, context=dict(request=request))
 
         assert not serializer.is_valid()
@@ -319,7 +319,7 @@ class TestJob:
             str(error) for error in serializer.errors["non_field_errors"]
         ]
         assert (
-            "Pending job exists. Please try again later, or cancel that job."
+            f"Pending job {job.id} exists. Please try again later, or cancel that job."
             in non_field_errors
         )
 

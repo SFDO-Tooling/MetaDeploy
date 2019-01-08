@@ -332,7 +332,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
     def _pending_job_exists(self, *, user):
         return Job.objects.filter(
             status=Job.Status.started, organization_url=user.instance_url
-        ).exists()
+        ).first()
 
     def validate_plan(self, value):
         if not value.is_visible_to(self.context["request"].user):
@@ -365,10 +365,11 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         if invalid_steps:
             raise serializers.ValidationError("Invalid steps for plan.")
 
-        pending_job_exists = not self.instance and self._pending_job_exists(user=user)
-        if pending_job_exists:
+        pending_job = not self.instance and self._pending_job_exists(user=user)
+        if pending_job:
             raise serializers.ValidationError(
-                "Pending job exists. Please try again later, or cancel that job."
+                f"Pending job {pending_job.id} exists. Please try again later, or "
+                f"cancel that job."
             )
 
         data["org_name"] = user.org_name
