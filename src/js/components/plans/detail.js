@@ -6,8 +6,6 @@ import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
-import Icon from '@salesforce/design-system-react/components/icon';
-
 import routes from 'utils/routes';
 import { CONSTANTS } from 'plans/reducer';
 import { fetchPreflight, startPreflight } from 'plans/actions';
@@ -25,6 +23,7 @@ import BodyContainer from 'components/bodyContainer';
 import CtaButton from 'components/plans/ctaButton';
 import Header from 'components/plans/header';
 import Intro from 'components/plans/intro';
+import { ErrorIcon } from 'components/plans/jobResults';
 import JobResults from 'components/plans/jobResults';
 import PlanNotAllowed from 'components/products/notAllowed';
 import ProductNotFound from 'components/products/product404';
@@ -193,9 +192,12 @@ class PlanDetail extends React.Component<Props, State> {
     if (user && !user.org_type) {
       cta = (
         <Login
-          id="user-info-login"
-          label="log in with a different org"
-          buttonVariant="base"
+          id="org-not-allowed-login"
+          buttonClassName="slds-size_full slds-p-vertical_xx-small"
+          buttonVariant="brand"
+          triggerClassName="slds-size_full"
+          label="Log in with a different org"
+          nubbinPosition="top"
         />
       );
     } else if (plan.steps && plan.steps.length) {
@@ -239,15 +241,9 @@ class PlanDetail extends React.Component<Props, State> {
                 postMessage={
                   user && user.org_type ? null : (
                     <div>
-                      <div className="slds-text-color_error">
-                        <Icon
-                          category="utility"
-                          name="error"
-                          size="xx-small"
-                          containerClassName="slds-icon-utility-error
-                            slds-m-left_xxx-small"
-                        />
-                        <span>
+                      <div>
+                        <ErrorIcon />
+                        <span className="slds-text-color_error">
                           Oops! It looks like you don&apos;t have permissions to
                           run an installation on this org.
                         </span>
