@@ -16,21 +16,26 @@ export type Plan = {
   +id: string,
   +slug: string,
   +title: string,
-  +preflight_message: string,
-  +steps: Array<Step>,
+  +preflight_message: string | null,
+  +steps: Array<Step> | null,
+  +is_listed: boolean,
+  +is_allowed: boolean,
+  +not_allowed_instructions: string | null,
 };
 export type Plans = Array<Plan>;
 
-export type PreflightError = {|
-  +status: 'warn' | 'error' | 'skip' | 'optional',
+export type StepResult = {|
+  +status: 'ok' | 'warn' | 'error' | 'skip' | 'optional',
   +message?: string,
 |};
 export type PreflightErrors = {|
-  +plan?: Array<PreflightError>,
-  [string]: Array<PreflightError>,
+  +plan?: Array<StepResult>,
+  [string]: Array<StepResult>,
 |};
 export type Preflight = {|
-  +id: string | null,
+  +id: string,
+  +edited_at: string,
+  +user: string,
   +plan: string,
   +status: 'started' | 'complete' | 'failed',
   +results: PreflightErrors,
@@ -50,6 +55,7 @@ export const CONSTANTS = {
     FAILED: 'failed',
   },
   RESULT_STATUS: {
+    OK: 'ok',
     WARN: 'warn',
     ERROR: 'error',
     SKIP: 'skip',
@@ -68,42 +74,20 @@ const reducer = (
       const { plan, preflight } = action.payload;
       return { ...preflights, [plan]: preflight };
     }
-    case 'PREFLIGHT_STARTED': {
-      const plan = action.payload;
-      return {
-        ...preflights,
-        [plan]: {
-          id: null,
-          plan,
-          status: CONSTANTS.STATUS.STARTED,
-          results: {},
-          is_valid: true,
-          error_count: 0,
-          warning_count: 0,
-          is_ready: false,
-        },
-      };
-    }
+    case 'PREFLIGHT_STARTED':
     case 'PREFLIGHT_COMPLETED':
-    case 'PREFLIGHT_FAILED': {
-      const preflight = action.payload;
-      const { plan } = preflight;
-      return { ...preflights, [plan]: preflight };
-    }
+    case 'PREFLIGHT_FAILED':
     case 'PREFLIGHT_INVALIDATED': {
       const preflight = action.payload;
       const { plan } = preflight;
       const existingPreflight = preflights[plan];
-      if (!existingPreflight) {
+      if (
+        !existingPreflight ||
+        preflight.edited_at > existingPreflight.edited_at
+      ) {
         return { ...preflights, [plan]: preflight };
       }
-      return {
-        ...preflights,
-        [plan]: {
-          ...existingPreflight,
-          is_valid: false,
-        },
-      };
+      return preflights;
     }
   }
   return preflights;

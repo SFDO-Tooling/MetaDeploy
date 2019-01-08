@@ -1,7 +1,7 @@
 import Sockette from 'sockette';
 
 import * as sockets from 'utils/websockets';
-import { completeJobStep, completeJob } from 'jobs/actions';
+import { completeJobStep, completeJob, failJob } from 'jobs/actions';
 import {
   completePreflight,
   failPreflight,
@@ -9,7 +9,16 @@ import {
 } from 'plans/actions';
 import { invalidateToken } from 'accounts/actions';
 
-jest.mock('sockette');
+const mockJson = jest.fn();
+const mockClose = jest.fn();
+const mockOpen = jest.fn();
+jest.mock('sockette', () =>
+  jest.fn().mockImplementation(() => ({
+    json: mockJson,
+    close: mockClose,
+    open: mockOpen,
+  })),
+);
 
 describe('getAction', () => {
   test('handles USER_TOKEN_INVALID msg', () => {
@@ -29,14 +38,6 @@ describe('getAction', () => {
 
       expect(actual).toEqual(expected);
     });
-
-    test('handles msg (no payload)', () => {
-      const msg = { type: 'PREFLIGHT_COMPLETED' };
-      const expected = null;
-      const actual = sockets.getAction(msg);
-
-      expect(actual).toEqual(expected);
-    });
   });
 
   describe('PREFLIGHT_FAILED', () => {
@@ -44,14 +45,6 @@ describe('getAction', () => {
       const preflight = { status: 'complete', results: {} };
       const msg = { type: 'PREFLIGHT_FAILED', payload: preflight };
       const expected = failPreflight(preflight);
-      const actual = sockets.getAction(msg);
-
-      expect(actual).toEqual(expected);
-    });
-
-    test('handles msg (no payload)', () => {
-      const msg = { type: 'PREFLIGHT_FAILED' };
-      const expected = null;
       const actual = sockets.getAction(msg);
 
       expect(actual).toEqual(expected);
@@ -67,32 +60,13 @@ describe('getAction', () => {
 
       expect(actual).toEqual(expected);
     });
-
-    test('handles msg (no payload)', () => {
-      const msg = { type: 'PREFLIGHT_INVALIDATED' };
-      const expected = null;
-      const actual = sockets.getAction(msg);
-
-      expect(actual).toEqual(expected);
-    });
   });
 
   describe('TASK_COMPLETED', () => {
     test('handles msg', () => {
-      const payload = {
-        step_id: 'step-1',
-        job: { id: 'job-1', steps: ['step-1'], completed_steps: [] },
-      };
+      const payload = { id: 'job-1', steps: ['step-1'], results: {} };
       const msg = { type: 'TASK_COMPLETED', payload };
       const expected = completeJobStep(payload);
-      const actual = sockets.getAction(msg);
-
-      expect(actual).toEqual(expected);
-    });
-
-    test('handles msg (no payload)', () => {
-      const msg = { type: 'TASK_COMPLETED' };
-      const expected = null;
       const actual = sockets.getAction(msg);
 
       expect(actual).toEqual(expected);
@@ -108,10 +82,13 @@ describe('getAction', () => {
 
       expect(actual).toEqual(expected);
     });
+  });
 
-    test('handles msg (no payload)', () => {
-      const msg = { type: 'JOB_COMPLETED' };
-      const expected = null;
+  describe('JOB_FAILED', () => {
+    test('handles msg', () => {
+      const payload = { id: 'job-1', steps: ['step-1'] };
+      const msg = { type: 'JOB_FAILED', payload };
+      const expected = failJob(payload);
       const actual = sockets.getAction(msg);
 
       expect(actual).toEqual(expected);
@@ -125,26 +102,37 @@ describe('getAction', () => {
 
     expect(actual).toEqual(expected);
   });
+
+  test('handles msg with unknown type', () => {
+    const msg = { type: 'foobar' };
+    const expected = null;
+    const actual = sockets.getAction(msg);
+
+    expect(actual).toEqual(expected);
+  });
 });
 
 describe('createSocket', () => {
   beforeEach(() => {
     Sockette.mockClear();
+    mockJson.mockClear();
+    mockClose.mockClear();
+    mockOpen.mockClear();
   });
 
-  test('returns Sockette created with url', () => {
-    const socket = sockets.createSocket({ url: '/my/url' });
+  test('creates socket with url', () => {
+    sockets.createSocket({ url: '/my/url' });
 
-    expect(socket).toBeInstanceOf(Sockette);
     expect(Sockette).toHaveBeenCalledTimes(1);
     expect(Sockette.mock.calls[0][0]).toEqual('/my/url');
   });
 
   describe('events', () => {
     const dispatch = jest.fn();
+    let socket;
 
     beforeEach(() => {
-      sockets.createSocket({ dispatch });
+      socket = sockets.createSocket({ dispatch });
     });
 
     describe('onopen', () => {
@@ -154,6 +142,14 @@ describe('createSocket', () => {
         expect(window.console.info).toHaveBeenCalledWith(
           '[WebSocket] connected',
         );
+      });
+
+      test('subscribes to pending objects', () => {
+        const payload = { model: 'foo', id: 'bar' };
+        socket.subscribe(payload);
+        Sockette.mock.calls[0][1].onopen({});
+
+        expect(mockJson).toHaveBeenCalledWith(payload);
       });
     });
 
@@ -214,6 +210,39 @@ describe('createSocket', () => {
           {},
         );
       });
+    });
+  });
+
+  describe('subscribe', () => {
+    let socket;
+
+    beforeEach(() => {
+      socket = sockets.createSocket();
+    });
+
+    describe('ws open', () => {
+      test('subscribes to object', () => {
+        const payload = { model: 'foo', id: 'bar' };
+        Sockette.mock.calls[0][1].onopen();
+        socket.subscribe(payload);
+
+        expect(mockJson).toHaveBeenCalledWith(payload);
+      });
+    });
+  });
+
+  describe('reconnect', () => {
+    let socket;
+
+    beforeEach(() => {
+      socket = sockets.createSocket();
+    });
+
+    test('closes and reopens ws connection', () => {
+      socket.reconnect();
+
+      expect(mockClose).toHaveBeenCalledWith(1000, 'user logged out');
+      expect(mockOpen).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -33,16 +33,19 @@ class TestJobViewset:
             "plan": str(job.plan.id),
             "steps": [],
             "organization_url": "",
-            "completed_steps": [],
+            "results": {},
             "created_at": format_timestamp(job.created_at),
             "enqueued_at": None,
             "job_id": None,
             "status": "started",
             "org_name": "Secret Org",
             "org_type": "",
+            "error_count": 0,
+            "warning_count": 0,
             "is_public": False,
             "user_can_edit": False,
             "message": "",
+            "edited_at": format_timestamp(job.edited_at),
         }
 
     def test_job__your_own(self, client, job_factory):
@@ -56,16 +59,19 @@ class TestJobViewset:
             "plan": str(job.plan.id),
             "steps": [],
             "organization_url": "",
-            "completed_steps": [],
+            "results": {},
             "created_at": format_timestamp(job.created_at),
             "enqueued_at": None,
             "job_id": None,
             "status": "started",
             "org_name": "Secret Org",
             "org_type": "",
+            "error_count": 0,
+            "warning_count": 0,
             "is_public": False,
             "user_can_edit": True,
             "message": "",
+            "edited_at": format_timestamp(job.edited_at),
         }
 
     def test_job__is_public(self, client, job_factory):
@@ -79,16 +85,19 @@ class TestJobViewset:
             "plan": str(job.plan.id),
             "organization_url": None,
             "steps": [],
-            "completed_steps": [],
+            "results": {},
             "created_at": format_timestamp(job.created_at),
             "enqueued_at": None,
             "job_id": None,
             "status": "started",
             "org_name": None,
             "org_type": "",
+            "error_count": 0,
+            "warning_count": 0,
             "is_public": True,
             "user_can_edit": False,
             "message": "",
+            "edited_at": format_timestamp(job.edited_at),
         }
 
     def test_job__is_public_anon(self, anon_client, job_factory):
@@ -103,7 +112,9 @@ class TestJobViewset:
             "plan": str(job.plan.id),
             "organization_url": None,
             "steps": [],
-            "completed_steps": [],
+            "results": {},
+            "error_count": 0,
+            "warning_count": 0,
             "created_at": format_timestamp(job.created_at),
             "enqueued_at": None,
             "job_id": None,
@@ -113,6 +124,7 @@ class TestJobViewset:
             "is_public": True,
             "user_can_edit": False,
             "message": "",
+            "edited_at": format_timestamp(job.edited_at),
         }
 
     def test_create_job(self, client, plan_factory, preflight_result_factory):
@@ -139,7 +151,7 @@ class TestBasicGetViews:
         assert response.json() == {
             "id": str(product.id),
             "title": product.title,
-            "description": "This is a sample product.",
+            "description": "<p>This is a sample product.</p>",
             "category": "salesforce",
             "color": "#FFFFFF",
             "icon": None,
@@ -153,8 +165,13 @@ class TestBasicGetViews:
                 "primary_plan": None,
                 "secondary_plan": None,
                 "additional_plans": [],
+                "is_listed": True,
             },
             "slug": product.slug,
+            "is_allowed": True,
+            "is_listed": True,
+            "order_key": 0,
+            "not_allowed_instructions": None,
         }
 
     def test_version(self, client, version_factory):
@@ -171,6 +188,7 @@ class TestBasicGetViews:
             "primary_plan": None,
             "secondary_plan": None,
             "additional_plans": [],
+            "is_listed": True,
         }
 
     def test_plan(self, client, plan_factory):
@@ -186,6 +204,30 @@ class TestBasicGetViews:
             "tier": "primary",
             "slug": "sample-plan",
             "steps": [],
+            "is_allowed": True,
+            "is_listed": True,
+            "not_allowed_instructions": None,
+        }
+
+    def test_plan__not_visible(self, client, allowed_list_factory, plan_factory):
+        allowed_list = allowed_list_factory(
+            organization_ids=[], description="Sample instructions."
+        )
+        plan = plan_factory(visible_to=allowed_list)
+        response = client.get(reverse("plan-detail", kwargs={"pk": plan.id}))
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "id": str(plan.id),
+            "title": "Sample plan",
+            "version": str(plan.version.id),
+            "preflight_message": None,
+            "tier": "primary",
+            "slug": "sample-plan",
+            "steps": None,
+            "is_allowed": False,
+            "is_listed": True,
+            "not_allowed_instructions": "<p>Sample instructions.</p>",
         }
 
 
@@ -195,7 +237,7 @@ class TestPreflight:
         plan = plan_factory()
         response = client.post(reverse("plan-preflight", kwargs={"pk": plan.id}))
 
-        assert response.status_code == 202
+        assert response.status_code == 201
 
     def test_get__good(self, client, plan_factory, preflight_result_factory):
         plan = plan_factory()
@@ -206,6 +248,7 @@ class TestPreflight:
 
         assert response.status_code == 200
         assert response.json() == {
+            "id": str(preflight.id),
             "organization_url": client.user.instance_url,
             "plan": str(plan.id),
             "created_at": format_timestamp(preflight.created_at),
@@ -215,6 +258,8 @@ class TestPreflight:
             "error_count": 0,
             "warning_count": 0,
             "is_ready": False,
+            "user": str(client.user.id),
+            "edited_at": format_timestamp(preflight.edited_at),
         }
 
     def test_get__bad(self, client, plan_factory):
@@ -222,3 +267,10 @@ class TestPreflight:
         response = client.get(reverse("plan-preflight", kwargs={"pk": plan.id}))
 
         assert response.status_code == 404
+
+    def test_post__unallowed(self, client, plan_factory, allowed_list_factory):
+        allowed_list = allowed_list_factory(organization_ids=[])
+        plan = plan_factory(visible_to=allowed_list)
+        response = client.post(reverse("plan-preflight", kwargs={"pk": plan.id}))
+
+        assert response.status_code == 403

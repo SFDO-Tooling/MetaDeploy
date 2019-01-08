@@ -35,22 +35,32 @@ const defaultState = {
           id: 'plan-1',
           slug: 'my-plan',
           title: 'My Plan',
+          is_listed: true,
+          is_allowed: true,
         },
         secondary_plan: {
           id: 'plan-2',
           slug: 'my-secondary-plan',
           title: 'My Secondary Plan',
+          is_listed: true,
+          is_allowed: true,
         },
         additional_plans: [
           {
             id: 'plan-3',
             slug: 'my-additional-plan',
             title: 'My Additional Plan',
+            is_listed: true,
+            is_allowed: true,
           },
         ],
+        is_listed: true,
       },
+      is_listed: true,
+      is_allowed: true,
     },
   ],
+  user: {},
 };
 
 describe('<ProductDetail />', () => {
@@ -70,6 +80,16 @@ describe('<ProductDetail />', () => {
 
     expect(routes.version_detail).toHaveBeenCalledTimes(1);
     expect(routes.version_detail).toHaveBeenCalledWith('product-1', '1.0.0');
+  });
+
+  describe('no most_recent_version', () => {
+    test('renders <VersionNotFound />', () => {
+      const { getByText } = setup({
+        products: [{ ...defaultState.products[0], most_recent_version: null }],
+      });
+
+      expect(getByText('list of all products')).toBeVisible();
+    });
   });
 
   describe('no product', () => {
@@ -169,6 +189,32 @@ describe('<VersionDetail />', () => {
       );
     });
 
+    test('handles missing primary plan', () => {
+      const product = defaultState.products[0];
+      const { getByText, queryByText } = setup({
+        initialState: {
+          products: [
+            {
+              ...product,
+              most_recent_version: {
+                ...product.most_recent_version,
+                primary_plan: {
+                  ...product.most_recent_version.primary_plan,
+                  is_listed: false,
+                },
+              },
+            },
+          ],
+        },
+      });
+
+      expect(getByText('Product 1')).toBeVisible();
+      expect(getByText('This is a test product version.')).toBeVisible();
+      expect(queryByText('My Plan')).toBeNull();
+      expect(getByText('My Secondary Plan')).toBeVisible();
+      expect(getByText('My Additional Plan')).toBeVisible();
+    });
+
     test('handles missing secondary/additional plans', () => {
       const product = {
         id: 'p1',
@@ -185,10 +231,15 @@ describe('<VersionDetail />', () => {
             id: 'plan-1',
             slug: 'my-plan',
             title: 'My Plan',
+            is_listed: true,
+            is_allowed: true,
           },
           secondary_plan: null,
           additional_plans: [],
+          is_listed: true,
         },
+        is_listed: true,
+        is_allowed: true,
       };
       const { getByText, queryByText } = setup({
         initialState: { products: [product] },
@@ -212,9 +263,12 @@ describe('<VersionDetail />', () => {
         id: 'plan-4',
         slug: 'my-plan-4',
         title: 'My Plan 4',
+        is_listed: true,
+        is_allowed: true,
       },
       secondary_plan: null,
       additional_plans: [],
+      is_listed: true,
     };
     const product = Object.assign({}, defaultState.products[0]);
     product.versions = { [version.label]: version };
@@ -241,6 +295,45 @@ describe('<VersionDetail />', () => {
       });
 
       expect(getByText('most recent version')).toBeVisible();
+    });
+  });
+
+  describe('product is restricted', () => {
+    test('renders <ProductNotAllowed />', () => {
+      const { getByText } = setup({
+        initialState: {
+          products: [
+            {
+              ...defaultState.products[0],
+              is_allowed: false,
+              not_allowed_instructions: 'foobar',
+              description: null,
+            },
+          ],
+        },
+      });
+
+      expect(getByText('list of all products')).toBeVisible();
+      expect(getByText('foobar')).toBeVisible();
+    });
+
+    test('renders <ProductNotAllowed /> without custom message', () => {
+      const { getByText } = setup({
+        initialState: {
+          products: [
+            {
+              ...defaultState.products[0],
+              is_allowed: false,
+              not_allowed_instructions: null,
+              description: null,
+            },
+          ],
+          user: null,
+        },
+      });
+
+      expect(getByText('list of all products')).toBeVisible();
+      expect(getByText('log in')).toBeVisible();
     });
   });
 });

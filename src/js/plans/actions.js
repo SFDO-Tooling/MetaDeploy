@@ -19,7 +19,7 @@ type FetchPreflightFailed = {
 type PreflightRequested = { type: 'PREFLIGHT_REQUESTED', payload: string };
 type PreflightStarted = {
   type: 'PREFLIGHT_STARTED',
-  payload: string,
+  payload: Preflight,
 };
 type PreflightRejected = { type: 'PREFLIGHT_REJECTED', payload: string };
 export type PreflightCompleted = {
@@ -52,12 +52,18 @@ export const fetchPreflight = (planId: string): ThunkAction => (
 ) => {
   dispatch({ type: 'FETCH_PREFLIGHT_STARTED', payload: planId });
   return apiFetch(window.api_urls.plan_preflight(planId))
-    .then(response =>
-      dispatch({
+    .then(response => {
+      if (response) {
+        window.socket.subscribe({
+          model: 'preflightresult',
+          id: response.id,
+        });
+      }
+      return dispatch({
         type: 'FETCH_PREFLIGHT_SUCCEEDED',
         payload: { plan: planId, preflight: response },
-      }),
-    )
+      });
+    })
     .catch(err => {
       dispatch({ type: 'FETCH_PREFLIGHT_FAILED', payload: planId });
       throw err;
@@ -72,7 +78,13 @@ export const startPreflight = (planId: string): ThunkAction => (
   dispatch({ type: 'PREFLIGHT_REQUESTED', payload: planId });
   const url = window.api_urls.plan_preflight(planId);
   return apiFetch(url, { method: 'POST' })
-    .then(() => dispatch({ type: 'PREFLIGHT_STARTED', payload: planId }))
+    .then(response => {
+      window.socket.subscribe({
+        model: 'preflightresult',
+        id: response.id,
+      });
+      return dispatch({ type: 'PREFLIGHT_STARTED', payload: response });
+    })
     .catch(err => {
       dispatch({ type: 'PREFLIGHT_REJECTED', payload: planId });
       throw err;

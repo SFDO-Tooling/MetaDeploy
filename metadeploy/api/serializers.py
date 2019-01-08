@@ -1,5 +1,9 @@
+from collections import OrderedDict
+
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
+from rest_framework.fields import SkipField
+from rest_framework.relations import PKOnlyObject
 
 from .constants import ERROR, WARN
 from .models import Job, Plan, PreflightResult, Product, Step, Version
@@ -12,10 +16,77 @@ class IdOnlyField(serializers.CharField):
         return str(value.id)
 
 
+class ErrorWarningCountMixin:
+    @staticmethod
+    def _count_status_in_results(results, status_name):
+        count = 0
+        for val in results.values():
+            for status in val:
+                if status["status"] == status_name:
+                    count += 1
+        return count
+
+    def get_error_count(self, obj):
+        if obj.status == self.Meta.model.Status.started:
+            return 0
+        return self._count_status_in_results(obj.results, ERROR)
+
+    def get_warning_count(self, obj):
+        if obj.status == self.Meta.model.Status.started:
+            return 0
+        return self._count_status_in_results(obj.results, WARN)
+
+
+class CircumspectSerializerMixin:
+    def circumspect_visible(self, obj, user):  # pragma: nocover
+        raise NotImplementedError("Subclasses must implement circumspect_visible")
+
+    def to_representation(self, instance):
+        """
+        Object instance -> Dict of primitive datatypes.
+
+        Inlined from rest_framework.serializers
+        """
+        ret = OrderedDict()
+        fields = self._readable_fields
+
+        for field in fields:
+            try:
+                attribute = field.get_attribute(instance)
+                should_be_circumspect = (
+                    field.field_name in self.Meta.circumspect_fields
+                    and not self.circumspect_visible(
+                        instance, self.context["request"].user
+                    )
+                )
+                if should_be_circumspect:
+                    attribute = None
+            except SkipField:  # pragma: nocover
+                continue
+
+            # We skip `to_representation` for `None` values so that fields do
+            # not have to explicitly deal with that case.
+            #
+            # For related fields with `use_pk_only_optimization` we need to
+            # resolve the pk value.
+            check_for_none = (
+                attribute.pk if isinstance(attribute, PKOnlyObject) else attribute
+            )
+            if check_for_none is None:
+                ret[field.field_name] = None
+            else:
+                ret[field.field_name] = field.to_representation(attribute)
+
+        return ret
+
+
 class FullUserSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
+
     class Meta:
         model = User
         fields = (
+            "id",
             "username",
             "email",
             "valid_token_for",
@@ -48,13 +119,15 @@ class StepSerializer(serializers.ModelSerializer):
         )
 
 
-class PlanSerializer(serializers.ModelSerializer):
+class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
-    steps = StepSerializer(many=True, source="step_set")
     version = serializers.PrimaryKeyRelatedField(
         read_only=True, pk_field=serializers.CharField()
     )
+    is_allowed = serializers.SerializerMethodField()
+    steps = StepSerializer(source="step_set", many=True)
     preflight_message = serializers.CharField(source="preflight_message_markdown")
+    not_allowed_instructions = serializers.SerializerMethodField()
 
     class Meta:
         model = Plan
@@ -66,7 +139,22 @@ class PlanSerializer(serializers.ModelSerializer):
             "tier",
             "slug",
             "steps",
+            "is_allowed",
+            "is_listed",
+            "not_allowed_instructions",
         )
+        circumspect_fields = ("steps", "preflight_message")
+
+    def circumspect_visible(self, obj, user):
+        return obj.is_visible_to(user) and obj.version.product.is_visible_to(user)
+
+    def get_is_allowed(self, obj):
+        return obj.is_visible_to(self.context["request"].user)
+
+    def get_not_allowed_instructions(self, obj):
+        if not obj.version.product.is_visible_to(self.context["request"].user):
+            return getattr(obj.version.product.visible_to, "description_markdown", None)
+        return getattr(obj.visible_to, "description_markdown", None)
 
 
 class VersionSerializer(serializers.ModelSerializer):
@@ -89,13 +177,17 @@ class VersionSerializer(serializers.ModelSerializer):
             "primary_plan",
             "secondary_plan",
             "additional_plans",
+            "is_listed",
         )
 
 
-class ProductSerializer(serializers.ModelSerializer):
+class ProductSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     category = serializers.CharField(source="category.title")
     most_recent_version = VersionSerializer()
+    is_allowed = serializers.SerializerMethodField()
+    description = serializers.CharField(source="description_markdown")
+    not_allowed_instructions = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -109,10 +201,24 @@ class ProductSerializer(serializers.ModelSerializer):
             "image",
             "most_recent_version",
             "slug",
+            "is_allowed",
+            "is_listed",
+            "order_key",
+            "not_allowed_instructions",
         )
+        circumspect_fields = ("description",)
+
+    def circumspect_visible(self, obj, user):
+        return obj.is_visible_to(user)
+
+    def get_is_allowed(self, obj):
+        return obj.is_visible_to(self.context["request"].user)
+
+    def get_not_allowed_instructions(self, obj):
+        return getattr(obj.visible_to, "description_markdown", None)
 
 
-class JobSerializer(serializers.ModelSerializer):
+class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     org_name = serializers.SerializerMethodField()
@@ -124,6 +230,8 @@ class JobSerializer(serializers.ModelSerializer):
     steps = serializers.PrimaryKeyRelatedField(
         queryset=Step.objects.all(), many=True, pk_field=serializers.CharField()
     )
+    error_count = serializers.SerializerMethodField()
+    warning_count = serializers.SerializerMethodField()
 
     # Emitted fields:
     creator = serializers.SerializerMethodField()
@@ -141,21 +249,25 @@ class JobSerializer(serializers.ModelSerializer):
             "plan",
             "steps",
             "organization_url",
-            "completed_steps",
+            "results",
             "created_at",
+            "edited_at",
             "enqueued_at",
             "job_id",
             "status",
             "org_name",
             "org_type",
+            "error_count",
+            "warning_count",
             "is_public",
             "user_can_edit",
             "message",
         )
         extra_kwargs = {
             "created_at": {"read_only": True},
+            "edited_at": {"read_only": True},
             "enqueued_at": {"read_only": True},
-            "completed_steps": {"read_only": True},
+            "results": {"read_only": True},
             "job_id": {"read_only": True},
             "status": {"read_only": True},
             "org_type": {"read_only": True},
@@ -207,14 +319,7 @@ class JobSerializer(serializers.ModelSerializer):
         Every set in this method is a set of numeric Step PKs, from the
         local database.
         """
-        job_completed_steps = set(
-            Job.objects.all_completed_step_ids(user=user, plan=plan)
-        )
-        required_steps = (
-            set(plan.required_step_ids)
-            - set(preflight.optional_step_ids)
-            - job_completed_steps
-        )
+        required_steps = set(plan.required_step_ids) - set(preflight.optional_step_ids)
         return not set(required_steps) - set(s.id for s in steps)
 
     def _get_from_data_or_instance(self, data, name, default=None):
@@ -222,6 +327,17 @@ class JobSerializer(serializers.ModelSerializer):
         # Handle the case where value is a *RelatedManager:
         if hasattr(value, "all") and callable(value.all):
             return value.all()
+        return value
+
+    def validate_plan(self, value):
+        if not value.is_visible_to(self.context["request"].user):
+            raise serializers.ValidationError(
+                "You are not allowed to install this plan."
+            )
+        if not value.version.product.is_visible_to(self.context["request"].user):
+            raise serializers.ValidationError(
+                "You are not allowed to install this product."
+            )
         return value
 
     def validate(self, data):
@@ -247,31 +363,13 @@ class JobSerializer(serializers.ModelSerializer):
         return data
 
 
-class PreflightResultSerializer(serializers.ModelSerializer):
-    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+class PreflightResultSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
     plan = IdOnlyField(read_only=True)
+    user = IdOnlyField(read_only=True)
+    is_ready = serializers.SerializerMethodField()
     error_count = serializers.SerializerMethodField()
     warning_count = serializers.SerializerMethodField()
-    is_ready = serializers.SerializerMethodField()
-
-    @staticmethod
-    def _count_status_in_results(results, status_name):
-        count = 0
-        for val in results.values():
-            for status in val:
-                if status["status"] == status_name:
-                    count += 1
-        return count
-
-    def get_error_count(self, obj):
-        if obj.status == PreflightResult.Status.started:
-            return 0
-        return self._count_status_in_results(obj.results, ERROR)
-
-    def get_warning_count(self, obj):
-        if obj.status == PreflightResult.Status.started:
-            return 0
-        return self._count_status_in_results(obj.results, WARN)
 
     def get_is_ready(self, obj):
         return (
@@ -283,10 +381,12 @@ class PreflightResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = PreflightResult
         fields = (
+            "id",
             "organization_url",
             "user",
             "plan",
             "created_at",
+            "edited_at",
             "is_valid",
             "status",
             "results",
@@ -297,6 +397,7 @@ class PreflightResultSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "organization_url": {"read_only": True},
             "created_at": {"read_only": True},
+            "edited_at": {"read_only": True},
             "is_valid": {"read_only": True},
             "status": {"read_only": True},
             "results": {"read_only": True},

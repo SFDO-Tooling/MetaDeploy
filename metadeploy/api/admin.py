@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from .models import (
+    AllowedList,
     Job,
     Plan,
     PlanSlug,
@@ -13,15 +14,14 @@ from .models import (
     Version,
 )
 
-admin.site.register(User)
-admin.site.register(Product)
-admin.site.register(ProductSlug)
-admin.site.register(ProductCategory)
-admin.site.register(Version)
+admin.site.register(AllowedList)
+admin.site.register(Job)
 admin.site.register(Plan)
 admin.site.register(PlanSlug)
-admin.site.register(Job)
 admin.site.register(PreflightResult)
+admin.site.register(ProductSlug)
+admin.site.register(User)
+admin.site.register(Version)
 
 
 @admin.register(Step)
@@ -35,3 +35,13 @@ class StepAdmin(admin.ModelAdmin):
         "kind",
         "task_name",
     )
+
+
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ("title", "category", "order_key")
+
+
+@admin.register(ProductCategory)
+class ProductCategoryAdmin(admin.ModelAdmin):
+    list_display = ("title", "order_key")

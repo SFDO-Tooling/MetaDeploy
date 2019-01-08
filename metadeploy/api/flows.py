@@ -1,9 +1,11 @@
 import logging
+from io import StringIO
 
 import bleach
 from cumulusci.core import flows
 
-from .constants import ERROR, OPTIONAL, SKIP, WARN
+from .belvedere_utils import obscure_salesforce_log
+from .constants import ERROR, OK, OPTIONAL, SKIP, WARN
 
 logger = logging.getLogger(__name__)
 
@@ -27,12 +29,36 @@ class BasicFlow(flows.BaseFlow):
 
 
 class JobFlow(BasicFlow):
+    def _init_logger(self):
+        logger = logging.getLogger("cumulusci")
+        self.string_buffer = StringIO()
+        self.handler = logging.StreamHandler(stream=self.string_buffer)
+        self.handler.setFormatter(logging.Formatter())
+        logger.addHandler(self.handler)
+        logger.setLevel(logging.DEBUG)
+        self.logger = logger
+        return self.logger
+
+    def _post_flow(self):
+        self.logger.removeHandler(self.handler)
+
     def _post_task(self, task):
         step_id = self._get_step_id(task.name)
         if step_id:
-            self.result.completed_steps.append(step_id)
+            self.result.results[step_id] = [{"status": OK}]
+            self.result.log = obscure_salesforce_log(self.string_buffer.getvalue())
             self.result.save()
         return super()._post_task(task)
+
+    def _post_task_exception(self, task, exception):
+        step_id = self._get_step_id(task.name)
+        if step_id:
+            self.result.results[step_id] = [
+                {"status": ERROR, "message": bleach.clean(str(exception))}
+            ]
+            self.result.log = obscure_salesforce_log(self.string_buffer.getvalue())
+            self.result.save()
+        return super()._post_task_exception(task, exception)
 
 
 class PreflightFlow(BasicFlow):
@@ -60,11 +86,11 @@ class PreflightFlow(BasicFlow):
         self.result.results.update(results)
 
     def _post_task_exception(self, task, e):
-        error_result = {"plan": [{"status": ERROR, "message": str(e)}]}
+        error_result = {"plan": [{"status": ERROR, "message": bleach.clean(str(e))}]}
         self.result.results.update(error_result)
 
     def _emit_k_v_for_status_dict(self, status):
-        if status["status_code"] == "ok":
+        if status["status_code"] == OK:
             return None
 
         if status["status_code"] == ERROR:

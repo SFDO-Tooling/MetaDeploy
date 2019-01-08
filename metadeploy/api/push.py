@@ -1,25 +1,54 @@
-from collections import namedtuple
+"""
+Websocket notifications you can subscribe to:
 
+    user.:id
+        USER_TOKEN_INVALID
+        BACKEND_ERROR
+    preflightresult.:id
+        PREFLIGHT_COMPLETED
+        PREFLIGHT_FAILED
+        PREFLIGHT_INVALIDATED
+    job.:id
+        TASK_COMPLETED
+        JOB_COMPLETED
+        JOB_FAILED
+        JOB_CANCELED
+"""
 from channels.layers import get_channel_layer
 
-Request = namedtuple("Request", "user")
+from .constants import CHANNELS_GROUP_NAME
 
 
-def user_context(user):
-    return {"request": Request(user)}
-
-
-async def push_message_to_user(user, json_message):
-    user_id = user.id
+async def push_message_about_instance(instance, json_message):
+    model_name = instance._meta.model_name
+    id = str(instance.id)
+    group_name = CHANNELS_GROUP_NAME.format(model=model_name, id=id)
     channel_layer = get_channel_layer()
     await channel_layer.group_send(
-        f"user-{user_id}", {"type": "notify", "content": json_message}
+        group_name, {"type": "notify", "content": json_message}
+    )
+
+
+async def push_serializable(instance, serializer, type_):
+    model_name = instance._meta.model_name
+    id = str(instance.id)
+    group_name = CHANNELS_GROUP_NAME.format(model=model_name, id=id)
+    serializer_name = f"{serializer.__module__}.{serializer.__name__}"
+    channel_layer = get_channel_layer()
+    await channel_layer.group_send(
+        group_name,
+        {
+            "type": "notify",
+            "instance": {"model": model_name, "id": id},
+            "serializer": serializer_name,
+            "inner_type": type_,
+        },
     )
 
 
 async def user_token_expired(user):
     message = {"type": "USER_TOKEN_INVALID"}
-    await push_message_to_user(user, message)
+    await push_message_about_instance(user, message)
 
 
 async def preflight_completed(preflight):
@@ -27,7 +56,7 @@ async def preflight_completed(preflight):
 
     payload = PreflightResultSerializer(instance=preflight).data
     message = {"type": "PREFLIGHT_COMPLETED", "payload": payload}
-    await push_message_to_user(preflight.user, message)
+    await push_message_about_instance(preflight, message)
 
 
 async def preflight_failed(preflight):
@@ -35,7 +64,7 @@ async def preflight_failed(preflight):
 
     payload = PreflightResultSerializer(instance=preflight).data
     message = {"type": "PREFLIGHT_FAILED", "payload": payload}
-    await push_message_to_user(preflight.user, message)
+    await push_message_about_instance(preflight, message)
 
 
 async def preflight_invalidated(preflight):
@@ -43,7 +72,7 @@ async def preflight_invalidated(preflight):
 
     payload = PreflightResultSerializer(instance=preflight).data
     message = {"type": "PREFLIGHT_INVALIDATED", "payload": payload}
-    await push_message_to_user(preflight.user, message)
+    await push_message_about_instance(preflight, message)
 
 
 async def report_error(user):
@@ -53,30 +82,23 @@ async def report_error(user):
         # contains sensitive material:
         "payload": {"message": "There was an error"},
     }
-    await push_message_to_user(user, message)
+    await push_message_about_instance(user, message)
 
 
 async def notify_post_task(job):
     from .serializers import JobSerializer
 
-    if not job.completed_steps:
-        return
-
-    step_id = job.completed_steps[-1]
-    user = job.user
-
-    payload = {
-        "step_id": step_id,
-        "job": JobSerializer(instance=job, context=user_context(user)).data,
-    }
-    message = {"type": "TASK_COMPLETED", "payload": payload}
-    await push_message_to_user(user, message)
+    await push_serializable(job, JobSerializer, "TASK_COMPLETED")
 
 
 async def notify_post_job(job):
     from .serializers import JobSerializer
+    from .models import Job
 
-    user = job.user
-    payload = JobSerializer(instance=job, context=user_context(user)).data
-    message = {"type": "JOB_COMPLETED", "payload": payload}
-    await push_message_to_user(user, message)
+    if job.status == Job.Status.complete:
+        type_ = "JOB_COMPLETED"
+    elif job.status == Job.Status.failed:
+        type_ = "JOB_FAILED"
+    elif job.status == Job.Status.canceled:
+        type_ = "JOB_CANCELED"
+    await push_serializable(job, JobSerializer, type_)

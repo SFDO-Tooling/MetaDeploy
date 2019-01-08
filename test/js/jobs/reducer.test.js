@@ -19,110 +19,81 @@ describe('reducer', () => {
   });
 
   test('handles FETCH_JOB_SUCCEEDED action', () => {
-    const initial = { 'job-2': null };
-    const expected = { 'job-2': null, 'job-1': { id: 'job-1' } };
+    const initial = {};
+    const expected = { 'job-1': null };
     const actual = reducer(initial, {
       type: 'FETCH_JOB_SUCCEEDED',
-      payload: { id: 'job-1', job: { id: 'job-1' } },
+      payload: { id: 'job-1', job: null },
     });
 
     expect(actual).toEqual(expected);
   });
 
-  test('handles JOB_STARTED action', () => {
-    const initial = {};
-    const expected = { 'job-1': { id: 'job-1' } };
-    const actual = reducer(initial, {
-      type: 'JOB_STARTED',
-      payload: { id: 'job-1' },
-    });
-
-    expect(actual).toEqual(expected);
-  });
-
-  describe('JOB_STEP_COMPLETED action', () => {
-    test('adds new job', () => {
+  [
+    { type: 'JOB_STARTED' },
+    { type: 'JOB_COMPLETED' },
+    { type: 'JOB_FAILED' },
+    { type: 'JOB_UPDATED' },
+    { type: 'JOB_STEP_COMPLETED' },
+  ].forEach(({ type }) => {
+    test(`handles ${type} action`, () => {
       const initial = {};
       const expected = { 'job-1': { id: 'job-1' } };
       const actual = reducer(initial, {
-        type: 'JOB_STEP_COMPLETED',
-        payload: { job: { id: 'job-1' } },
+        type,
+        payload: { id: 'job-1' },
       });
 
       expect(actual).toEqual(expected);
     });
+  });
 
-    test('updates existing job', () => {
-      const initial = {
-        'job-1': { id: 'job-1', steps: ['step-1'], completed_steps: [] },
-      };
-      const expected = {
-        'job-1': { ...initial['job-1'], completed_steps: ['step-1'] },
-      };
-      const actual = reducer(initial, {
-        type: 'JOB_STEP_COMPLETED',
-        payload: { step_id: 'step-1', job: { id: 'job-1' } },
-      });
-
-      expect(actual).toEqual(expected);
-    });
-
-    test('ignores already-completed step', () => {
-      const initial = {
-        'job-1': {
-          id: 'job-1',
-          steps: ['step-1', 'step-2'],
-          completed_steps: ['step-1'],
-        },
-      };
-      const expected = {
-        'job-1': { ...initial['job-1'], completed_steps: ['step-1'] },
-      };
-      const actual = reducer(initial, {
-        type: 'JOB_STEP_COMPLETED',
-        payload: { step_id: 'step-1', job: { id: 'job-1' } },
-      });
-
-      expect(actual).toEqual(expected);
-    });
-
-    test('ignores unknown step', () => {
+  describe('with existing job', () => {
+    test('updates with newer job', () => {
       const initial = {
         'job-1': {
           id: 'job-1',
           steps: ['step-1'],
-          completed_steps: [],
+          results: {},
+          edited_at: '1',
         },
       };
-      const expected = { ...initial };
+      const incoming = {
+        ...initial['job-1'],
+        results: { 'step-1': [{ status: 'ok' }] },
+        edited_at: '2',
+      };
+      const expected = {
+        'job-1': incoming,
+      };
       const actual = reducer(initial, {
         type: 'JOB_STEP_COMPLETED',
-        payload: { step_id: 'foo', job: { id: 'job-1' } },
+        payload: incoming,
       });
 
       expect(actual).toEqual(expected);
     });
-  });
 
-  test('handles JOB_COMPLETED action', () => {
-    const initial = {};
-    const expected = { 'job-1': { id: 'job-1' } };
-    const actual = reducer(initial, {
-      type: 'JOB_COMPLETED',
-      payload: { id: 'job-1' },
+    test('ignores older job', () => {
+      const initial = {
+        'job-1': {
+          id: 'job-1',
+          steps: ['step-1', 'step-2'],
+          results: { 'step-1': [{ status: 'ok' }] },
+          edited_at: '2',
+        },
+      };
+      const incoming = {
+        ...initial['job-1'],
+        results: {},
+        edited_at: '1',
+      };
+      const actual = reducer(initial, {
+        type: 'JOB_STEP_COMPLETED',
+        payload: incoming,
+      });
+
+      expect(actual).toEqual(initial);
     });
-
-    expect(actual).toEqual(expected);
-  });
-
-  test('handles JOB_UPDATED action', () => {
-    const initial = {};
-    const expected = { 'job-1': { id: 'job-1' } };
-    const actual = reducer(initial, {
-      type: 'JOB_UPDATED',
-      payload: { id: 'job-1' },
-    });
-
-    expect(actual).toEqual(expected);
   });
 });

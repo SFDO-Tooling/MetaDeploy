@@ -121,10 +121,16 @@ const selectProductsByCategory = createSelector(
   (products: ProductsType): ProductsMapType => {
     const productsByCategory = new Map();
     for (const product of products) {
-      const category = product.category;
-      const existing = productsByCategory.get(category) || [];
-      existing.push(product);
-      productsByCategory.set(category, existing);
+      if (
+        product.is_allowed &&
+        product.is_listed &&
+        product.most_recent_version
+      ) {
+        const category = product.category;
+        const existing = productsByCategory.get(category) || [];
+        existing.push(product);
+        productsByCategory.set(category, existing);
+      }
     }
     return productsByCategory;
   },

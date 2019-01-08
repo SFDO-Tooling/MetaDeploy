@@ -26,7 +26,7 @@ import { routePatterns } from 'utils/routes';
 
 import reducer from 'app/reducer';
 
-import { login, doLocalLogout } from 'accounts/actions';
+import { login } from 'accounts/actions';
 
 import { fetchProducts } from 'products/actions';
 
@@ -110,15 +110,21 @@ cache
         composeWithDevTools(
           applyMiddleware(
             thunk.withExtraArgument({
-              apiFetch: getApiFetch(() => {
-                appStore.dispatch(doLocalLogout());
-              }),
+              apiFetch: getApiFetch(),
             }),
             persistMiddleware,
             logger,
           ),
         ),
       );
+
+      // Connect to WebSocket server
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const host = window.location.host;
+      window.socket = createSocket({
+        url: `${protocol}//${host}${window.api_urls.ws_notifications()}`,
+        dispatch: appStore.dispatch,
+      });
 
       // Get logged-in/out status
       const userString = el.getAttribute('data-user');
@@ -132,14 +138,6 @@ cache
         if (user) {
           // Login
           appStore.dispatch(login(user));
-          // Connect to WebSocket server
-          const protocol =
-            window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-          const host = window.location.host;
-          window.socket = createSocket({
-            url: `${protocol}//${host}${window.api_urls.ws_notifications()}`,
-            dispatch: appStore.dispatch,
-          });
         }
       }
       el.removeAttribute('data-user');

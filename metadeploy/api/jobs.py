@@ -20,12 +20,10 @@ import zipfile
 from datetime import timedelta
 from glob import glob
 from itertools import chain
-from urllib.parse import urlparse
 
 import github3
 from asgiref.sync import async_to_sync
-from cumulusci.core.config import BaseGlobalConfig, OrgConfig, ServiceConfig
-from cumulusci.core.keychain import BaseProjectKeychain
+from cumulusci.core.config import OrgConfig, ServiceConfig
 from cumulusci.utils import temporary_dir
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -33,7 +31,7 @@ from django.utils import timezone
 from django_rq import job
 from rq.worker import StopRequested
 
-from . import cci_configs
+from .cci_configs import MetaDeployCCI, extract_user_and_repo
 from .flows import JobFlow, PreflightFlow
 from .models import Job, PreflightResult
 from .push import report_error
@@ -41,12 +39,6 @@ from .push import report_error
 logger = logging.getLogger(__name__)
 User = get_user_model()
 sync_report_error = async_to_sync(report_error)
-
-
-def extract_user_and_repo(gh_url):
-    path = urlparse(gh_url).path
-    _, user, repo, *_ = path.split("/")
-    return user, repo
 
 
 @contextlib.contextmanager
@@ -57,9 +49,11 @@ def finalize_result(result):
     try:
         yield
         result.status = success_status
-    except Exception:
+    except Exception as e:
         result.status = error_status
+        result.exception = str(e)
         logger.error(f"{result._meta.model_name} {result.id} failed.")
+        raise
     finally:
         result.save()
 
@@ -195,12 +189,10 @@ def run_flows(
             },
             current_org,
         )
-        proj_config = cci_configs.MetadeployProjectConfig(
-            BaseGlobalConfig(), repo_root=tmpdirname
-        )
-        proj_keychain = BaseProjectKeychain(proj_config, None)
-        proj_keychain.set_org(org_config)
-        proj_config.set_keychain(proj_keychain)
+
+        ctx = MetaDeployCCI(repo_root=tmpdirname, plan=plan)
+
+        ctx.keychain.set_org(org_config)
 
         # Set up the connected_app:
         connected_app = ServiceConfig(
@@ -210,7 +202,7 @@ def run_flows(
                 "client_id": settings.CONNECTED_APP_CLIENT_ID,
             }
         )
-        proj_config.keychain.set_service("connected_app", connected_app, True)
+        ctx.keychain.set_service("connected_app", connected_app, True)
 
         # Set up github:
         github_app = ServiceConfig(
@@ -224,12 +216,12 @@ def run_flows(
                 "username": "not-a-username",
             }
         )
-        proj_config.keychain.set_service("github", github_app, True)
+        ctx.keychain.set_service("github", github_app, True)
 
         # Make and run the flow:
-        flow_config = proj_config.get_flow(flow_name)
+        flow_config = ctx.project_config.get_flow(flow_name)
 
-        args = (proj_config, flow_config, proj_keychain.get_org(current_org))
+        args = (ctx.project_config, flow_config, ctx.keychain.get_org(current_org))
         kwargs = dict(options={}, skip=skip_tasks, name=flow_name, result=result)
 
         flowinstance = flow_class(*args, **kwargs)
@@ -242,6 +234,7 @@ run_flows_job = job(run_flows)
 def enqueuer():
     logger.debug("Enqueuer live", extra={"tag": "jobs.enqueuer"})
     for j in Job.objects.filter(enqueued_at=None):
+        j.invalidate_related_preflight()
         rq_job = run_flows_job.delay(
             user=j.user,
             plan=j.plan,
@@ -260,8 +253,6 @@ def enqueuer():
 enqueuer_job = job(enqueuer)
 
 
-# TODO: Make sure this doesn't pull a token out from under a pending or
-# running job, when we get to that bit of implementation:
 def expire_user_tokens():
     for user in User.objects.with_expired_tokens():
         user.expire_token()
@@ -270,17 +261,17 @@ def expire_user_tokens():
 expire_user_tokens_job = job(expire_user_tokens)
 
 
-def preflight(user, plan):
-    preflight_result = PreflightResult.objects.create(
-        user=user, plan=plan, organization_url=user.instance_url
-    )
+def preflight(preflight_result_id):
+    # Because the FieldTracker interferes with transparently serializing models across
+    # the Redis boundary, we have to pass a primative value to this function,
+    preflight_result = PreflightResult.objects.get(pk=preflight_result_id)
     run_flows(
-        user=user,
-        plan=plan,
+        user=preflight_result.user,
+        plan=preflight_result.plan,
         skip_tasks=[],
         organization_url=preflight_result.organization_url,
         flow_class=PreflightFlow,
-        flow_name=plan.preflight_flow_name,
+        flow_name=preflight_result.plan.preflight_flow_name,
         result_class=PreflightResult,
         result_id=preflight_result.id,
     )

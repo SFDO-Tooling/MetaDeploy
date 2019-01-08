@@ -3,7 +3,15 @@ from django.utils import timezone
 from django.utils.text import slugify
 from scheduler.models import RepeatableJob
 
-from ...models import Plan, PlanSlug, Product, ProductCategory, Step, Version
+from ...models import (
+    AllowedList,
+    Plan,
+    PlanSlug,
+    Product,
+    ProductCategory,
+    Step,
+    Version,
+)
 
 
 class Command(BaseCommand):
@@ -189,12 +197,13 @@ class Command(BaseCommand):
         self.create_enqueuer_job()
         self.create_token_expiry_job()
         self.create_preflight_expiry_job()
-        sf_category = ProductCategory.objects.create(title="salesforce")
-        co_category = ProductCategory.objects.create(title="community")
+        sf_category = ProductCategory.objects.create(title="salesforce", order_key=0)
+        co_category = ProductCategory.objects.create(title="community", order_key=1)
         product1 = self.create_product(
             title="Product With Useful Data",
             repo_url="https://github.com/SFDO-Tooling/CumulusCI-Test",
             category=sf_category,
+            order_key=0,
         )
         old_version = self.create_version(product1, "0.2.0")
         self.create_plan(old_version)
@@ -211,8 +220,8 @@ class Command(BaseCommand):
             version1,
             title="Reports and Dashboards",
             tier="secondary",
-            preflight_flow_name="slow_steps_preflight_bad",
-            flow_name="slow_steps_flow",
+            preflight_flow_name="slow_steps_preflight_good",
+            flow_name="slow_steps_flow_bad",
         )
         self.add_steps(plan2)
 
@@ -246,18 +255,30 @@ class Command(BaseCommand):
             description=f"This product should have a red icon.",
             category=sf_category,
             color="#c23934",
+            order_key=1,
         )
         version2 = self.create_version(product2)
         self.create_plan(version2)
+
+        allowed_list = AllowedList.objects.create(
+            title="restricted",
+            description=(
+                "This item is restricted. "
+                "No [OddBirds](http://www.oddbird.net/birds) allowed!"
+            ),
+            organization_ids=[],
+        )
 
         product3 = self.create_product(
             title=f"Custom Icon Salesforce Product",
             description=f"This product should have a custom icon.",
             category=sf_category,
             icon_url=("https://lightningdesignsystem.com/assets/images" "/avatar3.jpg"),
+            order_key=2,
         )
         version3 = self.create_version(product3)
-        self.create_plan(version3)
+        self.create_plan(version3, title="Restricted Plan", visible_to=allowed_list)
+        self.create_plan(version3, title="Unrestricted Plan", tier="secondary")
 
         product4 = self.create_product(
             title=f"Custom SLDS Icon Salesforce Product",
@@ -265,13 +286,15 @@ class Command(BaseCommand):
             category=sf_category,
             slds_icon_category="utility",
             slds_icon_name="world",
+            order_key=3,
+            visible_to=allowed_list,
         )
         version4 = self.create_version(product4)
         self.create_plan(version4)
 
         for i in range(4):
             product = self.create_product(
-                title=f"Sample Community Product {i}", category=co_category
+                title=f"Sample Community Product {i}", category=co_category, order_key=i
             )
             version = self.create_version(product)
             self.create_plan(version)

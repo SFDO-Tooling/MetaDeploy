@@ -10,3 +10,7 @@ env:
   commonjs: true
   jest: true
   node: false
+rules:
+  import/namespace:
+    - 2
+    - allowComputed: true

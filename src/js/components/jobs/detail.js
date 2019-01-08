@@ -6,6 +6,7 @@ import DocumentTitle from 'react-document-title';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
+import routes from 'utils/routes';
 import { fetchJob, updateJob } from 'jobs/actions';
 import { fetchVersion } from 'products/actions';
 import { selectPlan } from 'components/plans/detail';
@@ -20,6 +21,8 @@ import { shouldFetchVersion, getLoadingOrNotFound } from 'products/utils';
 import BodyContainer from 'components/bodyContainer';
 import CtaButton from 'components/jobs/ctaButton';
 import Header from 'components/plans/header';
+import Intro from 'components/plans/intro';
+import JobMessage from 'components/jobs/jobMessage';
 import JobResults from 'components/plans/jobResults';
 import ProductNotFound from 'components/products/product404';
 import ProgressBar from 'components/jobs/progressBar';
@@ -27,8 +30,6 @@ import ShareModal from 'components/jobs/shareModal';
 import StepsTable from 'components/plans/stepsTable';
 import Toasts from 'components/plans/toasts';
 import UserInfo from 'components/jobs/userInfo';
-
-import { CONSTANTS } from 'plans/reducer';
 
 import type { AppState } from 'app/reducer';
 import type { InitialProps } from 'components/utils';
@@ -126,7 +127,7 @@ class JobDetail extends React.Component<Props, { modalOpen: boolean }> {
       plan,
       job,
       jobId,
-      user,
+      isLoggedIn: user !== null,
     });
     if (loadingOrNotFound !== false) {
       return loadingOrNotFound;
@@ -137,6 +138,11 @@ class JobDetail extends React.Component<Props, { modalOpen: boolean }> {
     if (!product || !version || !plan || !job) {
       return <ProductNotFound />;
     }
+    const linkToPlan = routes.plan_detail(
+      product.slug,
+      version.label,
+      plan.slug,
+    );
     return (
       <DocumentTitle
         title={`Installation | ${plan.title} | ${product.title} | MetaDeploy`}
@@ -164,43 +170,15 @@ class JobDetail extends React.Component<Props, { modalOpen: boolean }> {
           />
           <BodyContainer>
             <Toasts model={job} label="Installation" />
-            <div
-              className="slds-p-around_medium
-                slds-size_1-of-1
-                slds-medium-size_1-of-2"
-            >
-              <div className="slds-text-longform">
-                <h3 className="slds-text-heading_small">{plan.title}</h3>
-                <JobResults job={job} label="Installation" />
-                {job.status === CONSTANTS.STATUS.COMPLETE &&
-                !job.error_count &&
-                job.message ? (
-                  // These messages are pre-cleaned by the API
-                  <p dangerouslySetInnerHTML={{ __html: job.message }} />
-                ) : null}
-              </div>
-              <CtaButton job={job} />
-            </div>
-            <div
-              className="slds-p-around_medium
-                slds-size_1-of-1
-                slds-medium-size_1-of-2"
-            >
-              <UserInfo job={job} />
-            </div>
-            <div
-              className="slds-p-around_medium
-                  slds-size_1-of-1"
-            >
-              <ProgressBar job={job} />
-            </div>
-            {plan.steps.length ? (
-              <div
-                className="slds-p-around_medium
-                  slds-size_1-of-1"
-              >
-                <StepsTable plan={plan} job={job} />
-              </div>
+            <Intro
+              results={<JobResults job={job} label="Installation" />}
+              cta={<CtaButton job={job} linkToPlan={linkToPlan} />}
+              postMessage={<JobMessage job={job} openModal={this.openModal} />}
+            />
+            <UserInfo job={job} />
+            <ProgressBar job={job} />
+            {plan.steps && plan.steps.length ? (
+              <StepsTable plan={plan} job={job} />
             ) : null}
           </BodyContainer>
         </>

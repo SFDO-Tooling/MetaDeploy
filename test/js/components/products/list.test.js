@@ -42,9 +42,14 @@ describe('<Products />', () => {
             primary_plan: {
               id: 'plan-1',
               title: 'My Plan',
+              is_listed: true,
+              is_allowed: true,
             },
             additional_plans: [],
+            is_listed: true,
           },
+          is_listed: true,
+          is_allowed: true,
         },
       ],
     };
@@ -75,9 +80,14 @@ describe('<Products />', () => {
             primary_plan: {
               id: 'plan-1',
               title: 'My Plan',
+              is_listed: true,
+              is_allowed: true,
             },
             additional_plans: [],
+            is_listed: true,
           },
+          is_listed: true,
+          is_allowed: true,
         },
         {
           id: 'p2',
@@ -93,9 +103,35 @@ describe('<Products />', () => {
             primary_plan: {
               id: 'plan-2',
               title: 'My Plan',
+              is_listed: true,
+              is_allowed: true,
             },
             additional_plans: [],
+            is_listed: true,
           },
+          is_listed: true,
+          is_allowed: true,
+        },
+        {
+          id: 'p3',
+          title: 'Product 3',
+          description: 'This is an unlisted product.',
+          category: 'community',
+          most_recent_version: {
+            id: 'v3',
+            product: 'p3',
+            label: '1.0.0',
+            description: 'This is a product version.',
+            primary_plan: {
+              id: 'plan-3',
+              title: 'My Plan',
+              is_listed: true,
+              is_allowed: true,
+            },
+            additional_plans: [],
+            is_listed: true,
+          },
+          is_listed: false,
         },
       ],
     };
@@ -105,11 +141,12 @@ describe('<Products />', () => {
     });
 
     test('renders products list', () => {
-      const { getByText } = setup(initialState);
+      const { getByText, queryByText } = setup(initialState);
       const activeTab = getByText('salesforce');
 
       expect(getByText('Product 1')).toBeVisible();
       expect(getByText('Product 2')).toBeInTheDocument();
+      expect(queryByText('Product 3')).toBeNull();
       expect(activeTab).toBeVisible();
       expect(getByText('community')).toBeVisible();
       expect(activeTab).toHaveClass('slds-active');

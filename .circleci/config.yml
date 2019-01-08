@@ -83,6 +83,9 @@ jobs:
           command: |
             . venv/bin/activate
             yarn lint
+      - store_artifacts:
+          path: /tmp/flow
+          destination: flow-logs
 
   test-client:
     working_directory: ~/metadeploy

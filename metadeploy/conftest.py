@@ -6,6 +6,7 @@ from pytest_factoryboy import register
 from rest_framework.test import APIClient
 
 from metadeploy.api.models import (
+    AllowedList,
     Job,
     Plan,
     PlanSlug,
@@ -70,6 +71,15 @@ class UserFactory(factory.django.DjangoModelFactory):
 
 
 @register
+class AllowedListFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = AllowedList
+
+    title = factory.Sequence("Allowed List {}".format)
+    organization_ids = []
+
+
+@register
 class ProductCategoryFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = ProductCategory
@@ -123,6 +133,7 @@ class PlanFactory(factory.django.DjangoModelFactory):
     _ensure_slug = factory.PostGenerationMethodCall("ensure_slug")
     preflight_flow_name = "slow_steps_preflight_good"
     flow_name = "slow_steps_flow"
+    visible_to = None
 
 
 @register

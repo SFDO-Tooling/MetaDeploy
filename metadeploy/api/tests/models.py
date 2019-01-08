@@ -1,11 +1,22 @@
+from datetime import timedelta
+
 import pytest
+from allauth.socialaccount.models import SocialAccount
 from django.core.exceptions import (
     MultipleObjectsReturned,
     ObjectDoesNotExist,
     ValidationError,
 )
+from django.utils import timezone
 
-from ..models import Version
+from ..models import Job, User, Version
+
+
+@pytest.mark.django_db
+class TestAllowedList:
+    def test_str(self, allowed_list_factory):
+        allowed_list = allowed_list_factory(title="A title")
+        assert str(allowed_list) == "A title"
 
 
 @pytest.mark.django_db
@@ -52,6 +63,33 @@ class TestUser:
 
         user.socialaccount_set.first().socialtoken_set.all().delete()
         assert user.valid_token_for is None
+
+
+@pytest.mark.django_db
+class TestUserExpiredTokens:
+    def test_with_completed_job(self, user_factory, job_factory):
+        now = timezone.now()
+        then = now - timedelta(minutes=20)
+        user = user_factory()
+        SocialAccount.objects.filter(id=user.socialaccount_set.first().id).update(
+            last_login=then
+        )
+        job_factory(user=user, status=Job.Status.complete)
+        job_factory(user=user, status=Job.Status.failed)
+        job_factory(user=user, status=Job.Status.canceled)
+
+        assert user in User.objects.with_expired_tokens()
+
+    def test_with_in_progress_job(self, user_factory, job_factory):
+        now = timezone.now()
+        then = now - timedelta(minutes=20)
+        user = user_factory()
+        SocialAccount.objects.filter(id=user.socialaccount_set.first().id).update(
+            last_login=then
+        )
+        job_factory(user=user, status=Job.Status.started)
+
+        assert user not in User.objects.with_expired_tokens()
 
 
 @pytest.mark.django_db
@@ -157,6 +195,15 @@ def test_product_most_recent_version(product_factory, version_factory):
 
 
 @pytest.mark.django_db
+def test_product_most_recent_version__delisted(product_factory, version_factory):
+    product = product_factory()
+    v1 = version_factory(label="v0.1.0", product=product)
+    version_factory(label="v0.2.0", product=product, is_listed=False)
+
+    assert product.most_recent_version == v1
+
+
+@pytest.mark.django_db
 class TestPlanSlug:
     def test_present(self, plan_factory, plan_slug_factory):
         plan = plan_factory(title="a plan")
@@ -197,17 +244,16 @@ class TestPlanSlug:
 
 
 @pytest.mark.django_db
-def test_plan_natural_key(plan_factory):
-    plan = plan_factory(title="My Plan")
-    assert plan.natural_key() == (plan.version, "My Plan")
+class TestPlan:
+    def test_natural_key(self, plan_factory):
+        plan = plan_factory(title="My Plan")
+        assert plan.natural_key() == (plan.version, "My Plan")
 
-
-@pytest.mark.django_db
-def test_plan_str(product_factory, version_factory, plan_factory):
-    product = product_factory(title="My Product")
-    version = version_factory(label="v0.1.0", product=product)
-    plan = plan_factory(title="My Plan", version=version)
-    assert str(plan) == "My Product, Version v0.1.0, Plan My Plan"
+    def test_str(self, product_factory, version_factory, plan_factory):
+        product = product_factory(title="My Product")
+        version = version_factory(label="v0.1.0", product=product)
+        plan = plan_factory(title="My Plan", version=version)
+        assert str(plan) == "My Product, Version v0.1.0, Plan My Plan"
 
 
 @pytest.mark.django_db
@@ -274,11 +320,21 @@ def test_plan_post_install_markdown(plan_factory):
 
 
 @pytest.mark.django_db
-def test_job_skip_tasks(plan_factory, step_factory, job_factory):
-    plan = plan_factory()
-    step1 = step_factory(plan=plan, task_name="task1")
-    step2 = step_factory(plan=plan, task_name="task2")
-    step3 = step_factory(plan=plan, task_name="task3")
-    job = job_factory(plan=plan, steps=[step1, step3])
+class TestJob:
+    def test_skip_tasks(self, plan_factory, step_factory, job_factory):
+        plan = plan_factory()
+        step1 = step_factory(plan=plan, task_name="task1")
+        step2 = step_factory(plan=plan, task_name="task2")
+        step3 = step_factory(plan=plan, task_name="task3")
+        job = job_factory(plan=plan, steps=[step1, step3])
 
-    assert job.skip_tasks() == [step2.task_name]
+        assert job.skip_tasks() == [step2.task_name]
+
+    def test_invalidate_related_preflight(self, job_factory, preflight_result_factory):
+        job = job_factory()
+        preflight = preflight_result_factory(plan=job.plan, user=job.user)
+        assert preflight.is_valid
+        job.invalidate_related_preflight()
+
+        preflight.refresh_from_db()
+        assert not preflight.is_valid
