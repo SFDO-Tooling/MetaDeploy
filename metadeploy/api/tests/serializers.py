@@ -311,7 +311,7 @@ class TestJob:
             "plan": str(plan.id),
             "steps": [str(step1.id), str(step2.id), str(step3.id)],
         }
-        job_factory(plan=plan, user=user)
+        job_factory(organization_url=user.instance_url)
         serializer = JobSerializer(data=data, context=dict(request=request))
 
         assert not serializer.is_valid()
