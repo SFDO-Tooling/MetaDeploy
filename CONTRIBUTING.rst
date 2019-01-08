@@ -153,6 +153,7 @@ Development Tasks
 - ``yarn serve``: starts development server (with watcher) at
   `<http://localhost:8080/>`_ (assets are served from ``dist/`` dir)
 - ``yarn pytest``: run Python tests
+- ``yarn pytest:integration``: run Python integration tests
 - ``yarn test``: run JS tests
 - ``yarn test:watch``: run JS tests with a watcher for development
 - ``yarn lint``: formats and lints ``.scss`` and ``.js`` files; lints ``.py``
@@ -175,3 +176,13 @@ automatically prepended to commit messages):
 - 🛢 (``:oil_drum:``) -> ``python manage.py migrate``
 - 🐈 (``:cat2:``) -> ``yarn``
 - 🙀 (``:scream_cat:``) -> ``rm -rf node_modules/; bin/unpack-node; yarn``
+
+Writing integration tests
+-------------------------
+
+For now, our Salesforce integration tests do not modify state on the
+Salesforce side; they only test that they *could*. As such, we don't
+need to generate scratch orgs to test against. 
+
+Instead, we will use some stable testing credentials for a stable test
+org. If you are part of OddBirds, you can find them in keybase.
