@@ -46,9 +46,15 @@ export const LabelWithSpinner = ({ label }: { label: string }): React.Node => (
 );
 
 // Generic "login" dropdown with custom label text
-const LoginBtn = ({ label }: { label: string }): React.Node => (
+export const LoginBtn = ({
+  id,
+  label,
+}: {
+  id?: string,
+  label: string,
+}): React.Node => (
   <Login
-    id="plan-detail-login"
+    id={id || 'plan-detail-login'}
     buttonClassName={btnClasses}
     buttonVariant="brand"
     triggerClassName="slds-size_full"
