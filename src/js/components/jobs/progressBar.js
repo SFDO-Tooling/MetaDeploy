@@ -18,10 +18,13 @@ const ProgressBar = ({ job }: { job: JobType }): React.Node => {
         res => res.status === CONSTANTS.RESULT_STATUS.OK,
       ) !== undefined,
   );
-  const progress = Math.min(
-    Math.round((completedSteps.length / job.steps.length) * 100),
-    100,
-  );
+  const progress =
+    job.status === 'failed'
+      ? 100
+      : Math.min(
+          Math.round((completedSteps.length / job.steps.length) * 100),
+          100,
+        );
   const id = `${job.id}-progress`;
   return (
     <div
@@ -37,10 +40,18 @@ const ProgressBar = ({ job }: { job: JobType }): React.Node => {
       >
         <span>
           <strong>Installation Progress</strong>
+          {job.status === 'failed' ? (
+            <strong className="slds-text-color_error">
+              {' '}
+              - Installation encountered an error.
+            </strong>
+          ) : null}
         </span>
-        <span aria-hidden="true">
-          <strong>{progress}% Complete</strong>
-        </span>
+        {job.status === 'failed' ? null : (
+          <span aria-hidden="true">
+            <strong>{progress}% Complete</strong>
+          </span>
+        )}
       </div>
       <div
         className="slds-progress-bar
@@ -53,7 +64,9 @@ const ProgressBar = ({ job }: { job: JobType }): React.Node => {
       >
         <span
           className={classNames('slds-progress-bar__value', {
-            'slds-progress-bar__value_success': progress === 100,
+            'slds-progress-bar__value_success':
+              job.status !== 'failed' && progress === 100,
+            'md-progress-bar__value_error': job.status === 'failed',
           })}
           style={{ width: `${progress}%` }}
         >
