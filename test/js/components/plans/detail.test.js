@@ -149,11 +149,11 @@ describe('<PlanDetail />', () => {
       const { getByText } = setup({
         initialState: {
           ...defaultState,
-          user: { valid_token_for: 'foo' },
+          user: { valid_token_for: 'foo', org_type: null },
         },
       });
 
-      expect(getByText('log in with a different org')).toBeVisible();
+      expect(getByText('Log in with a different org')).toBeVisible();
     });
   });
 

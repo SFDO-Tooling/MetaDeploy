@@ -20,17 +20,15 @@ import { shouldFetchVersion, getLoadingOrNotFound } from 'products/utils';
 import { startJob } from 'jobs/actions';
 
 import BodyContainer from 'components/bodyContainer';
-import CtaButton from 'components/plans/ctaButton';
+import CtaButton, { LoginBtn } from 'components/plans/ctaButton';
 import Header from 'components/plans/header';
 import Intro from 'components/plans/intro';
-import { ErrorIcon } from 'components/plans/jobResults';
-import JobResults from 'components/plans/jobResults';
+import JobResults, { ErrorIcon } from 'components/plans/jobResults';
 import PlanNotAllowed from 'components/products/notAllowed';
 import ProductNotFound from 'components/products/product404';
 import StepsTable from 'components/plans/stepsTable';
 import Toasts from 'components/plans/toasts';
 import UserInfo from 'components/plans/userInfo';
-import Login from 'components/header/login';
 
 import type { AppState } from 'app/reducer';
 import type { InitialProps } from 'components/utils';
@@ -160,17 +158,54 @@ class PlanDetail extends React.Component<Props, State> {
     return selectedSteps;
   }
 
-  render(): React.Node {
+  getCTA(selectedSteps: SelectedSteps): React.Node {
     const {
       history,
+      user,
+      product,
+      version,
+      plan,
+      preflight,
+      doStartPreflight,
+      doStartJob,
+    } = this.props;
+    /* istanbul ignore if */
+    if (!product || !version || !plan) {
+      return null;
+    }
+    if (user && !user.org_type) {
+      return (
+        <LoginBtn
+          id="org-not-allowed-login"
+          label="Log in with a different org"
+        />
+      );
+    } else if (plan.steps && plan.steps.length) {
+      return (
+        <CtaButton
+          history={history}
+          user={user}
+          productSlug={product.slug}
+          versionLabel={version.label}
+          plan={plan}
+          preflight={preflight}
+          selectedSteps={selectedSteps}
+          doStartPreflight={doStartPreflight}
+          doStartJob={doStartJob}
+        />
+      );
+    }
+    return null;
+  }
+
+  render(): React.Node {
+    const {
       user,
       product,
       version,
       versionLabel,
       plan,
       preflight,
-      doStartPreflight,
-      doStartJob,
     } = this.props;
     const loadingOrNotFound = getLoadingOrNotFound({
       product,
@@ -188,33 +223,6 @@ class PlanDetail extends React.Component<Props, State> {
       return <ProductNotFound />;
     }
     const selectedSteps = this.getSelectedSteps();
-    let cta = null;
-    if (user && !user.org_type) {
-      cta = (
-        <Login
-          id="org-not-allowed-login"
-          buttonClassName="slds-size_full slds-p-vertical_xx-small"
-          buttonVariant="brand"
-          triggerClassName="slds-size_full"
-          label="Log in with a different org"
-          nubbinPosition="top"
-        />
-      );
-    } else if (plan.steps && plan.steps.length) {
-      cta = (
-        <CtaButton
-          history={history}
-          user={user}
-          productSlug={product.slug}
-          versionLabel={version.label}
-          plan={plan}
-          preflight={preflight}
-          selectedSteps={selectedSteps}
-          doStartPreflight={doStartPreflight}
-          doStartJob={doStartJob}
-        />
-      );
-    }
     return (
       <DocumentTitle title={`${plan.title} | ${product.title} | MetaDeploy`}>
         <>
@@ -225,6 +233,16 @@ class PlanDetail extends React.Component<Props, State> {
                 <Toasts model={preflight} label="Pre-install validation" />
               ) : null}
               <Intro
+                preMessage={
+                  plan.preflight_message ? (
+                    // These messages are pre-cleaned by the API
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: plan.preflight_message,
+                      }}
+                    />
+                  ) : null
+                }
                 results={
                   preflight && user ? (
                     <JobResults
@@ -237,34 +255,24 @@ class PlanDetail extends React.Component<Props, State> {
                     />
                   ) : null
                 }
-                cta={cta}
                 postMessage={
                   user && user.org_type ? null : (
-                    <div>
-                      <div>
+                    <>
+                      <div className="slds-p-bottom_xx-small">
                         <ErrorIcon />
                         <span className="slds-text-color_error">
-                          Oops! It looks like you don&apos;t have permissions to
-                          run an installation on this org.
+                          Oops! It looks like you don’t have permissions to run
+                          an installation on this org.
                         </span>
                       </div>
-                      <div>
+                      <p>
                         Please contact an Admin within your org or use the
                         button below to log in with a different org.
-                      </div>
-                    </div>
+                      </p>
+                    </>
                   )
                 }
-                preMessage={
-                  plan.preflight_message ? (
-                    // These messages are pre-cleaned by the API
-                    <div
-                      dangerouslySetInnerHTML={{
-                        __html: plan.preflight_message,
-                      }}
-                    />
-                  ) : null
-                }
+                cta={this.getCTA(selectedSteps)}
               />
               <UserInfo user={user} />
               {plan.steps && plan.steps.length ? (

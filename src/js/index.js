@@ -137,6 +137,8 @@ cache
         }
         if (user) {
           // Login
+          // @@@
+          user.org_type = null;
           appStore.dispatch(login(user));
         }
       }
