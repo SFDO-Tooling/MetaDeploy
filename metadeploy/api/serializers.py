@@ -417,3 +417,8 @@ class PreflightResultSerializer(ErrorWarningCountMixin, serializers.ModelSeriali
             "status": {"read_only": True},
             "results": {"read_only": True},
         }
+
+
+class OrgSerializer(serializers.Serializer):
+    current_job = JobSerializer()
+    current_preflight = PreflightResultSerializer()

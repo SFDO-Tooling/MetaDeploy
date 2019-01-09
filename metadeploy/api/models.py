@@ -22,6 +22,8 @@ from sfdo_template_helpers.fields import MarkdownField
 
 from .constants import ERROR, OPTIONAL, ORGANIZATION_DETAILS
 from .push import (
+    notify_org_job_changed,
+    notify_org_preflight_changed,
     notify_post_job,
     notify_post_task,
     preflight_completed,
@@ -446,21 +448,36 @@ class Job(HashIdMixin, models.Model):
             for step in set(self.plan.step_set.all()) - set(self.steps.all())
         ]
 
+    def _push_if_condition(self, condition, fn):
+        if condition:
+            async_to_sync(fn)(self)
+
+    def push_to_org_subscribers(self, is_new):
+        self._push_if_condition(
+            is_new or self.tracker.has_changed("status"), notify_org_job_changed
+        )
+
+    def push_if_results_changed(self):
+        results_has_changed = self.tracker.has_changed("results") and self.results != {}
+        self._push_if_condition(results_has_changed, notify_post_task)
+
+    def push_if_has_stopped_running(self):
+        has_stopped_running = (
+            self.tracker.has_changed("status") and self.status != Job.Status.started
+        )
+        self._push_if_condition(has_stopped_running, notify_post_job)
+
     def save(self, *args, **kwargs):
+        is_new = bool(self.id)
         ret = super().save(*args, **kwargs)
+
         try:
-            results_has_changed = (
-                self.tracker.has_changed("results") and self.results != {}
-            )
-            if results_has_changed:
-                async_to_sync(notify_post_task)(self)
-            has_stopped_running = (
-                self.tracker.has_changed("status") and self.status != Job.Status.started
-            )
-            if has_stopped_running:
-                async_to_sync(notify_post_job)(self)
+            self.push_to_org_subscribers(is_new)
+            self.push_if_results_changed()
+            self.push_if_has_stopped_running()
         except RuntimeError as error:
             logger.warn(f"RuntimeError: {error}")
+
         return ret
 
     def invalidate_related_preflight(self):
@@ -546,6 +563,11 @@ class PreflightResult(models.Model):
         if condition:
             async_to_sync(fn)(self)
 
+    def push_to_org_subscribers(self, is_new):
+        self._push_if_condition(
+            is_new or self.tracker.has_changed("status"), notify_org_preflight_changed
+        )
+
     def push_if_completed(self):
         has_completed = (
             self.tracker.has_changed("status")
@@ -565,9 +587,11 @@ class PreflightResult(models.Model):
         self._push_if_condition(is_invalidated, preflight_invalidated)
 
     def save(self, *args, **kwargs):
+        is_new = bool(self.id)
         ret = super().save(*args, **kwargs)
 
         try:
+            self.push_to_org_subscribers(is_new)
             self.push_if_completed()
             self.push_if_failed()
             self.push_if_invalidated()

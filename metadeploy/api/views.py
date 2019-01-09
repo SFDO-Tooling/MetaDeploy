@@ -11,6 +11,7 @@ from .models import Job, Plan, PreflightResult, Product, Version
 from .permissions import OnlyOwnerCanDelete
 from .serializers import (
     JobSerializer,
+    OrgSerializer,
     PlanSerializer,
     PreflightResultSerializer,
     ProductSerializer,
@@ -83,3 +84,23 @@ class PlanViewSet(viewsets.ModelViewSet):
             return self.preflight_get(request)
         if request.method == "POST":
             return self.preflight_post(request)
+
+
+class OrgViewSet(viewsets.ViewSet):
+    def list(self, request):
+        """
+        This will return data on the user's current org. It is not a
+        list endpoint, but does not take a pk, so we have to implement
+        it this way.
+        """
+        current_job = Job.objects.filter(
+            organization_url=request.user.instance_url, status=Job.Status.started
+        ).first()
+        current_preflight = PreflightResult.objects.filter(
+            organization_url=request.user.instance_url,
+            status=PreflightResult.Status.started,
+        ).first()
+        serializer = OrgSerializer(
+            {"current_job": current_job, "current_preflight": current_preflight}
+        )
+        return Response(serializer.data)

@@ -13,10 +13,14 @@ Websocket notifications you can subscribe to:
         JOB_COMPLETED
         JOB_FAILED
         JOB_CANCELED
+    org.:org_url
+        PREFLIGHT_CHANGED
+        JOB_CHANGED
 """
 from channels.layers import get_channel_layer
 
 from .constants import CHANNELS_GROUP_NAME
+from .hash_url import convert_org_url_to_key
 
 
 async def push_message_about_instance(instance, json_message):
@@ -102,3 +106,32 @@ async def notify_post_job(job):
     elif job.status == Job.Status.canceled:
         type_ = "JOB_CANCELED"
     await push_serializable(job, JobSerializer, type_)
+
+
+async def _job_or_preflight_changed(org_url, type_):
+    from .serializers import OrgSerializer
+    from .models import Job, PreflightResult
+
+    current_job = Job.objects.filter(
+        organization_url=org_url, status=Job.Status.started
+    ).first()
+    current_preflight = PreflightResult.objects.filter(
+        organization_url=org_url, status=PreflightResult.Status.started
+    ).first()
+    serializer = OrgSerializer(
+        {"current_job": current_job, "current_preflight": current_preflight}
+    )
+    message = {"type": type_, "payload": serializer.data}
+    group_name = CHANNELS_GROUP_NAME.format(
+        model="org", id=convert_org_url_to_key(org_url)
+    )
+    channel_layer = get_channel_layer()
+    await channel_layer.group_send(group_name, {"type": "notify", "content": message})
+
+
+async def notify_org_job_changed(job):
+    await _job_or_preflight_changed(job.organization_url, "JOB_CHANGED")
+
+
+async def notify_org_preflight_changed(preflight):
+    await _job_or_preflight_changed(preflight.organization_url, "PREFLIGHT_CHANGED")

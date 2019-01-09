@@ -288,3 +288,31 @@ class TestPreflight:
         response = client.post(reverse("plan-preflight", kwargs={"pk": plan.id}))
 
         assert response.status_code == 403
+
+
+@pytest.mark.django_db
+class TestOrgViewset:
+    def test_get_job(self, client, job_factory, plan_factory):
+        plan = plan_factory()
+        job_factory(
+            organization_url=client.user.instance_url, user=client.user, plan=plan
+        )
+        response = client.get(reverse("org-list"))
+
+        assert response.json()["current_job"] is not None
+        assert response.json()["current_preflight"] is None
+
+    def test_get_preflight(self, client, preflight_result_factory, plan_factory):
+        plan = plan_factory()
+        preflight_result_factory(
+            organization_url=client.user.instance_url, user=client.user, plan=plan
+        )
+        response = client.get(reverse("org-list"))
+
+        assert response.json()["current_job"] is None
+        assert response.json()["current_preflight"] is not None
+
+    def test_get_none(self, client):
+        response = client.get(reverse("org-list"))
+
+        assert response.json() == {"current_job": None, "current_preflight": None}
