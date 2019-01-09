@@ -18,8 +18,7 @@ const routes = {
 
 export const routePatterns = {
   home: () => '/',
-  auth_error: () =>
-    '/accounts/salesforce-(custom|production|test)/login/callback',
+  auth_error: () => '/accounts/*',
   product_list: () => '/products',
   product_detail: () => '/products/:productSlug',
   version_detail: () => `/products/:productSlug/:versionLabel`,
