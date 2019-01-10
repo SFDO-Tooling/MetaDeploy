@@ -263,7 +263,7 @@ class PlanDetail extends React.Component<Props, State> {
                   ) : null
                 }
                 postMessage={
-                  user && user.org_type ? null : (
+                  !user || (user && user.org_type) ? null : (
                     <>
                       <div className="slds-p-bottom_xx-small">
                         <ErrorIcon />
