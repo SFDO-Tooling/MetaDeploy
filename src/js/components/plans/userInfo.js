@@ -68,6 +68,11 @@ const UserInfo = ({ user }: { user: UserType }): React.Node => {
             </li>
           ) : null}
         </ul>
+        <p>
+          The credentials to your Salesforce org will only be held for
+          {` ${window.GLOBALS.TOKEN_LIFETIME_MINUTES || 10} `}
+          minutes or until your requested job is complete.
+        </p>
       </Card>
     </div>
   );
