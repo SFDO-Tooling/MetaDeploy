@@ -474,7 +474,7 @@ class Job(HashIdMixin, models.Model):
         self._push_if_condition(has_stopped_running, notify_post_job)
 
     def save(self, *args, **kwargs):
-        is_new = bool(self.id)
+        is_new = self._state.adding
         ret = super().save(*args, **kwargs)
 
         try:
@@ -599,7 +599,7 @@ class PreflightResult(models.Model):
         self._push_if_condition(is_invalidated, preflight_invalidated)
 
     def save(self, *args, **kwargs):
-        is_new = bool(self.id)
+        is_new = self._state.adding
         ret = super().save(*args, **kwargs)
 
         try:
