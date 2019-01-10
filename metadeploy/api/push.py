@@ -15,6 +15,7 @@ Websocket notifications you can subscribe to:
         JOB_CANCELED
 """
 from channels.layers import get_channel_layer
+from django.utils.translation import gettext_lazy as _
 
 from .constants import CHANNELS_GROUP_NAME
 
@@ -80,7 +81,7 @@ async def report_error(user):
         "type": "BACKEND_ERROR",
         # We don't pass the message through to the frontend in case it
         # contains sensitive material:
-        "payload": {"message": "There was an error"},
+        "payload": {"message": _("There was an error")},
     }
     await push_message_about_instance(user, message)
 

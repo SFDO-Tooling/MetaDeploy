@@ -192,8 +192,8 @@ class ProductSlug(models.Model):
     parent = models.ForeignKey("Product", on_delete=models.PROTECT)
     is_active = models.BooleanField(
         default=True,
-        help_text=(
-            "If multiple slugs are active, we will default to the most " "recent."
+        help_text=_(
+            "If multiple slugs are active, we will default to the most recent."
         ),
     )
     created_at = models.DateTimeField(auto_now_add=True)
@@ -234,7 +234,7 @@ class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, models.Model):
     image = models.ImageField(blank=True)
     icon_url = models.URLField(
         blank=True,
-        help_text=("This will take precedence over Color and the SLDS Icons."),
+        help_text=_("This will take precedence over Color and the SLDS Icons."),
     )
     slds_icon_category = models.CharField(
         choices=SLDS_ICON_CHOICES, default="", blank=True, max_length=32
@@ -288,7 +288,7 @@ class Version(HashIdMixin, models.Model):
     commit_ish = models.CharField(
         max_length=256,
         default="master",
-        help_text="This is usually a tag, sometimes a branch.",
+        help_text=_("This is usually a tag, sometimes a branch."),
     )
     is_listed = models.BooleanField(default=True)
 
@@ -327,8 +327,8 @@ class PlanSlug(models.Model):
     parent = models.ForeignKey("Plan", on_delete=models.PROTECT)
     is_active = models.BooleanField(
         default=True,
-        help_text=(
-            "If multiple slugs are active, we will default to the most " "recent."
+        help_text=_(
+            "If multiple slugs are active, we will default to the most recent."
         ),
     )
     created_at = models.DateTimeField(auto_now_add=True)
@@ -340,7 +340,7 @@ class PlanSlug(models.Model):
         )
         if qs.exists():
             raise ValidationError(
-                {"slug": ["This must be unique for the Plan's Version."]}
+                {"slug": [_("This must be unique for the Plan's Version.")]}
             )
 
     class Meta:

@@ -1,6 +1,7 @@
 from collections import OrderedDict
 
 from django.contrib.auth import get_user_model
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.fields import SkipField
 from rest_framework.relations import PKOnlyObject
@@ -332,11 +333,11 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
     def validate_plan(self, value):
         if not value.is_visible_to(self.context["request"].user):
             raise serializers.ValidationError(
-                "You are not allowed to install this plan."
+                _("You are not allowed to install this plan.")
             )
         if not value.version.product.is_visible_to(self.context["request"].user):
             raise serializers.ValidationError(
-                "You are not allowed to install this product."
+                _("You are not allowed to install this product.")
             )
         return value
 
@@ -351,12 +352,12 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             most_recent_preflight
         )
         if no_valid_preflight:
-            raise serializers.ValidationError("No valid preflight.")
+            raise serializers.ValidationError(_("No valid preflight."))
         invalid_steps = not self.instance and not self._has_valid_steps(
             user=user, plan=plan, steps=steps, preflight=most_recent_preflight
         )
         if invalid_steps:
-            raise serializers.ValidationError("Invalid steps for plan.")
+            raise serializers.ValidationError(_("Invalid steps for plan."))
         data["org_name"] = user.org_name
         data["org_type"] = user.org_type
         data["organization_url"] = user.instance_url
