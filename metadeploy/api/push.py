@@ -14,8 +14,7 @@ Websocket notifications you can subscribe to:
         JOB_FAILED
         JOB_CANCELED
     org.:org_url
-        PREFLIGHT_CHANGED
-        JOB_CHANGED
+        ORG_CHANGED
 """
 from channels.layers import get_channel_layer
 
@@ -130,8 +129,8 @@ async def _job_or_preflight_changed(org_url, type_):
 
 
 async def notify_org_job_changed(job):
-    await _job_or_preflight_changed(job.organization_url, "JOB_CHANGED")
+    await _job_or_preflight_changed(job.organization_url, "ORG_CHANGED")
 
 
 async def notify_org_preflight_changed(preflight):
-    await _job_or_preflight_changed(preflight.organization_url, "PREFLIGHT_CHANGED")
+    await _job_or_preflight_changed(preflight.organization_url, "ORG_CHANGED")

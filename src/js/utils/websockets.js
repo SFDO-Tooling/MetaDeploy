@@ -8,19 +8,22 @@ import {
   failPreflight,
   invalidatePreflight,
 } from 'plans/actions';
-import { invalidateToken } from 'accounts/actions';
+import { invalidateToken } from 'user/actions';
 import { log } from 'utils/logging';
+import { updateOrg } from 'org/actions';
 
 import type { Dispatch } from 'redux-thunk';
 import type { Job } from 'jobs/reducer';
 import type { JobStepCompleted, JobCompleted, JobFailed } from 'jobs/actions';
+import type { Org } from 'org/reducer';
+import type { OrgChanged } from 'org/actions';
 import type { Preflight } from 'plans/reducer';
 import type {
   PreflightCompleted,
   PreflightFailed,
   PreflightInvalid,
 } from 'plans/actions';
-import type { TokenInvalidAction } from 'accounts/actions';
+import type { TokenInvalidAction } from 'user/actions';
 
 type SubscriptionEvent = {|
   ok?: string,
@@ -41,12 +44,17 @@ type JobEvent = {|
   type: 'TASK_COMPLETED' | 'JOB_COMPLETED' | 'JOB_FAILED',
   payload: Job,
 |};
+type OrgEvent = {|
+  type: 'ORG_CHANGED',
+  payload: Org,
+|};
 type EventType =
   | SubscriptionEvent
   | ErrorEvent
   | UserEvent
   | PreflightEvent
-  | JobEvent;
+  | JobEvent
+  | OrgEvent;
 
 type Action =
   | TokenInvalidAction
@@ -55,7 +63,8 @@ type Action =
   | PreflightInvalid
   | JobStepCompleted
   | JobCompleted
-  | JobFailed;
+  | JobFailed
+  | OrgChanged;
 type Subscription = {| model: string, id: string |};
 
 export const getAction = (event: EventType): Action | null => {
@@ -77,6 +86,8 @@ export const getAction = (event: EventType): Action | null => {
       return completeJob(event.payload);
     case 'JOB_FAILED':
       return failJob(event.payload);
+    case 'ORG_CHANGED':
+      return updateOrg(event.payload);
   }
   return null;
 };

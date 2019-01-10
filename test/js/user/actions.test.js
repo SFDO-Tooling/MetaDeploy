@@ -2,7 +2,7 @@ import fetchMock from 'fetch-mock';
 
 import { storeWithApi } from './../utils';
 
-import * as actions from 'accounts/actions';
+import * as actions from 'user/actions';
 import { cache } from 'utils/caching';
 
 describe('login', () => {

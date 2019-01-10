@@ -4,18 +4,18 @@ import * as React from 'react';
 import Button from '@salesforce/design-system-react/components/button';
 import DocumentTitle from 'react-document-title';
 import { connect } from 'react-redux';
-import { createSelector } from 'reselect';
 
 import routes from 'utils/routes';
 import { fetchJob, updateJob } from 'jobs/actions';
 import { fetchVersion } from 'products/actions';
-import { selectPlan } from 'components/plans/detail';
+import { selectJob, selectJobId } from 'jobs/selectors';
+import { selectPlan } from 'plans/selectors';
 import {
   selectProduct,
   selectVersion,
   selectVersionLabel,
-} from 'components/products/detail';
-import { selectUserState } from 'components/header';
+} from 'products/selectors';
+import { selectUserState } from 'user/selectors';
 import { shouldFetchVersion, getLoadingOrNotFound } from 'products/utils';
 
 import BodyContainer from 'components/bodyContainer';
@@ -33,13 +33,13 @@ import UserInfo from 'components/jobs/userInfo';
 
 import type { AppState } from 'app/reducer';
 import type { InitialProps } from 'components/utils';
-import type { JobsState, Job as JobType } from 'jobs/reducer';
+import type { Job as JobType } from 'jobs/reducer';
 import type { Plan as PlanType } from 'plans/reducer';
 import type {
   Product as ProductType,
   Version as VersionType,
 } from 'products/reducer';
-import type { User as UserType } from 'accounts/reducer';
+import type { User as UserType } from 'user/reducer';
 
 type Props = {
   ...InitialProps,
@@ -186,25 +186,6 @@ class JobDetail extends React.Component<Props, { modalOpen: boolean }> {
     );
   }
 }
-
-const selectJobsState = (appState: AppState): JobsState => appState.jobs;
-
-const selectJobId = (
-  appState: AppState,
-  { match: { params } }: InitialProps,
-): ?string => params.jobId;
-
-const selectJob = createSelector(
-  [selectJobsState, selectJobId],
-  (jobs: JobsState, jobId: ?string): ?JobType => {
-    if (!jobId) {
-      return undefined;
-    }
-    // A `null` job means we already fetched and no prior job exists
-    // An `undefined` job means we don't know whether a job exists
-    return jobs[jobId];
-  },
-);
 
 const select = (appState: AppState, props: InitialProps) => ({
   user: selectUserState(appState),

@@ -20,7 +20,7 @@ import type {
   Step as StepType,
 } from 'plans/reducer';
 import type { SelectedSteps as SelectedStepsType } from 'components/plans/detail';
-import type { User as UserType } from 'accounts/reducer';
+import type { User as UserType } from 'user/reducer';
 
 export type DataCellProps = {
   [string]: mixed,

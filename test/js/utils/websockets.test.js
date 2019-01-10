@@ -7,7 +7,7 @@ import {
   failPreflight,
   invalidatePreflight,
 } from 'plans/actions';
-import { invalidateToken } from 'accounts/actions';
+import { invalidateToken } from 'user/actions';
 
 const mockJson = jest.fn();
 const mockClose = jest.fn();

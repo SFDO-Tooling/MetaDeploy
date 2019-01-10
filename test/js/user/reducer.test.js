@@ -1,4 +1,4 @@
-import reducer from 'accounts/reducer';
+import reducer from 'user/reducer';
 
 describe('reducer', () => {
   test('returns initial state', () => {

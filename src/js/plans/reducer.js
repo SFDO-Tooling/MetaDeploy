@@ -1,6 +1,6 @@
 // @flow
 
-import type { LogoutAction } from 'accounts/actions';
+import type { LogoutAction } from 'user/actions';
 import type { PlansAction } from 'plans/actions';
 
 export type Step = {|

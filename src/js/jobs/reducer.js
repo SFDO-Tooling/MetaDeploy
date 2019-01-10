@@ -1,7 +1,7 @@
 // @flow
 
 import type { JobsAction } from 'jobs/actions';
-import type { LogoutAction } from 'accounts/actions';
+import type { LogoutAction } from 'user/actions';
 import type { StepResult } from 'plans/reducer';
 
 export type Job = {|

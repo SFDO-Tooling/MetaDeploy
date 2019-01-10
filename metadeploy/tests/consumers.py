@@ -171,7 +171,7 @@ async def test_push_notification_consumer__subscribe_org(
     await notify_org_job_changed(job)
     response = await communicator.receive_json_from()
     assert response == {
-        "type": "JOB_CHANGED",
+        "type": "ORG_CHANGED",
         "payload": OrgSerializer({"current_job": job, "current_preflight": None}).data,
     }
 
