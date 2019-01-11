@@ -197,7 +197,7 @@ class PlanDetail extends React.Component<Props, State> {
                   product.slug,
                   version.label,
                   plan.slug,
-                  org.current_job.id,
+                  org.current_job,
                 )}
               >
                 View the running installation
