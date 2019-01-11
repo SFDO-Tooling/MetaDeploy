@@ -40,6 +40,7 @@ describe('<JobResults />', () => {
         job={opts.job}
         label={opts.label}
         failMessage={opts.failMessage}
+        successMessage={opts.successMessage}
       />,
     );
     return { getByText, queryByText, container };
@@ -144,7 +145,7 @@ describe('<JobResults />', () => {
   });
 
   describe('completed successful preflight', () => {
-    test('displays success message', () => {
+    test('displays standard success message', () => {
       const job = {
         status: 'complete',
         error_count: 0,
@@ -157,6 +158,19 @@ describe('<JobResults />', () => {
       expect(
         getByText('Pre-install validation completed successfully.'),
       ).toBeVisible();
+    });
+
+    test('displays custom success message', () => {
+      const job = {
+        status: 'complete',
+        error_count: 0,
+        warning_count: 0,
+        is_valid: true,
+        results: {},
+      };
+      const { getByText } = setup({ job, successMessage: 'Yay!' });
+
+      expect(getByText('Yay!')).toBeVisible();
     });
   });
 

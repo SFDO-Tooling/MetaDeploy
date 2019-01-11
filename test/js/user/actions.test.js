@@ -6,7 +6,14 @@ import * as actions from 'user/actions';
 import { cache } from 'utils/caching';
 
 describe('login', () => {
+  let store;
+
   beforeEach(() => {
+    store = storeWithApi({});
+    fetchMock.getOnce(window.api_urls.org_list(), {
+      current_job: null,
+      current_preflight: null,
+    });
     window.socket = { subscribe: jest.fn() };
   });
 
@@ -19,27 +26,45 @@ describe('login', () => {
       username: 'Test User',
       email: 'test@foo.bar',
     };
-    const expected = {
+    const loggedIn = {
       type: 'USER_LOGGED_IN',
       payload: user,
     };
+    const fetchingOrg = {
+      type: 'FETCH_ORG_JOBS_STARTED',
+    };
+    const fetchedOrg = {
+      type: 'FETCH_ORG_JOBS_SUCCEEDED',
+      payload: { current_job: null, current_preflight: null },
+    };
 
-    expect(actions.login(user)).toEqual(expected);
+    expect.assertions(1);
+    return store.dispatch(actions.login(user)).then(() => {
+      expect(store.getActions()).toEqual([loggedIn, fetchingOrg, fetchedOrg]);
+    });
   });
 
-  test('subscribes to user ws events', () => {
+  test('subscribes to user/org ws events', () => {
     const user = {
       id: 'user-id',
       username: 'Test User',
       email: 'test@foo.bar',
+      valid_token_for: 'org-url',
     };
-    actions.login(user);
-    const expected = {
+    const userSubscription = {
       model: 'user',
       id: 'user-id',
     };
+    const orgSubscription = {
+      model: 'org',
+      id: 'org-url',
+    };
 
-    expect(window.socket.subscribe).toHaveBeenCalledWith(expected);
+    expect.assertions(2);
+    return store.dispatch(actions.login(user)).then(() => {
+      expect(window.socket.subscribe).toHaveBeenCalledWith(userSubscription);
+      expect(window.socket.subscribe).toHaveBeenCalledWith(orgSubscription);
+    });
   });
 
   describe('with Raven', () => {
@@ -59,9 +84,11 @@ describe('login', () => {
         username: 'Test User',
         email: 'test@foo.bar',
       };
-      actions.login(user);
 
-      expect(window.Raven.setUserContext).toHaveBeenCalledWith(user);
+      expect.assertions(1);
+      return store.dispatch(actions.login(user)).then(() => {
+        expect(window.Raven.setUserContext).toHaveBeenCalledWith(user);
+      });
     });
   });
 });
