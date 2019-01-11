@@ -3,7 +3,7 @@ from channels.testing import WebsocketCommunicator
 
 from ..api.models import Job, PreflightResult
 from ..api.push import (
-    notify_org_job_changed,
+    notify_org_result_changed,
     notify_post_job,
     preflight_completed,
     user_token_expired,
@@ -168,10 +168,10 @@ async def test_push_notification_consumer__subscribe_org(
     response = await communicator.receive_json_from()
     assert "ok" in response
 
-    await notify_org_job_changed(job)
+    await notify_org_result_changed(job)
     response = await communicator.receive_json_from()
     assert response == {
-        "type": "JOB_CHANGED",
+        "type": "ORG_CHANGED",
         "payload": OrgSerializer({"current_job": job, "current_preflight": None}).data,
     }
 

@@ -7,6 +7,7 @@ const defaultJob = {
   id: 'job-1',
   steps: ['1', '2', '3', '4'],
   results: { '1': [{ status: 'ok' }] },
+  status: 'started',
 };
 
 describe('<ProgressBar />', () => {
@@ -15,8 +16,8 @@ describe('<ProgressBar />', () => {
       job: defaultJob,
     };
     const opts = { ...defaults, ...options };
-    const { getByText } = render(<ProgressBar job={opts.job} />);
-    return { getByText };
+    const { getByText, queryByText } = render(<ProgressBar job={opts.job} />);
+    return { getByText, queryByText };
   };
 
   test('renders progress bar', () => {
@@ -36,10 +37,29 @@ describe('<ProgressBar />', () => {
             '3': [{ status: 'ok' }],
             '4': [{ status: 'ok' }],
           },
+          status: 'complete',
         },
       });
 
       expect(getByText('100% Complete')).toBeVisible();
+    });
+  });
+
+  describe('failed', () => {
+    test('renders failed progress bar', () => {
+      const { getByText, queryByText } = setup({
+        job: {
+          ...defaultJob,
+          results: {
+            '1': [{ status: 'ok' }],
+            '2': [{ status: 'error' }],
+          },
+          status: 'failed',
+        },
+      });
+
+      expect(getByText('Failed')).toBeVisible();
+      expect(queryByText('100% Complete')).toBeNull();
     });
   });
 });

@@ -22,8 +22,7 @@ from sfdo_template_helpers.fields import MarkdownField
 
 from .constants import ERROR, OPTIONAL, ORGANIZATION_DETAILS
 from .push import (
-    notify_org_job_changed,
-    notify_org_preflight_changed,
+    notify_org_result_changed,
     notify_post_job,
     notify_post_task,
     preflight_completed,
@@ -460,7 +459,7 @@ class Job(HashIdMixin, models.Model):
 
     def push_to_org_subscribers(self, is_new):
         self._push_if_condition(
-            is_new or self.tracker.has_changed("status"), notify_org_job_changed
+            is_new or self.tracker.has_changed("status"), notify_org_result_changed
         )
 
     def push_if_results_changed(self):
@@ -577,7 +576,7 @@ class PreflightResult(models.Model):
 
     def push_to_org_subscribers(self, is_new):
         self._push_if_condition(
-            is_new or self.tracker.has_changed("status"), notify_org_preflight_changed
+            is_new or self.tracker.has_changed("status"), notify_org_result_changed
         )
 
     def push_if_completed(self):

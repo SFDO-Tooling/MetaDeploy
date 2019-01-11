@@ -4,11 +4,15 @@ import * as React from 'react';
 import DocumentTitle from 'react-document-title';
 import { Redirect, Link } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { createSelector } from 'reselect';
 
 import routes from 'utils/routes';
 import { fetchVersion } from 'products/actions';
-import { selectUserState } from 'components/header';
+import {
+  selectProduct,
+  selectVersion,
+  selectVersionLabel,
+} from 'products/selectors';
+import { selectUserState } from 'user/selectors';
 import { shouldFetchVersion, getLoadingOrNotFound } from 'products/utils';
 
 import BodyContainer from 'components/bodyContainer';
@@ -23,7 +27,7 @@ import type {
   Product as ProductType,
   Version as VersionType,
 } from 'products/reducer';
-import type { User as UserType } from 'accounts/reducer';
+import type { User as UserType } from 'user/reducer';
 
 type ProductDetailProps = { product: ProductType | null };
 type VersionDetailProps = {
@@ -211,41 +215,6 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     );
   }
 }
-
-export const selectProduct = (
-  appState: AppState,
-  { match: { params } }: InitialProps,
-): ProductType | null => {
-  const product = appState.products.find(p => p.slug === params.productSlug);
-  return product || null;
-};
-
-export const selectVersionLabel = (
-  appState: AppState,
-  { match: { params } }: InitialProps,
-): ?string => params.versionLabel;
-
-export const selectVersion: (
-  AppState,
-  InitialProps,
-) => VersionType | null = createSelector(
-  [selectProduct, selectVersionLabel],
-  (product: ProductType | null, versionLabel: ?string): VersionType | null => {
-    if (!product || !versionLabel) {
-      return null;
-    }
-    if (
-      product.most_recent_version &&
-      product.most_recent_version.label === versionLabel
-    ) {
-      return product.most_recent_version;
-    }
-    if (product.versions && product.versions[versionLabel]) {
-      return product.versions[versionLabel];
-    }
-    return null;
-  },
-);
 
 const selectProductDetail = (appState: AppState, props: InitialProps) => ({
   product: selectProduct(appState, props),

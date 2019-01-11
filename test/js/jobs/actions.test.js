@@ -219,3 +219,48 @@ describe('updateJob', () => {
     });
   });
 });
+
+describe('cancelJob', () => {
+  describe('success', () => {
+    test('dispatches JOB_CANCEL_ACCEPTED action', () => {
+      const store = storeWithApi({});
+      const id = 'job-1';
+      fetchMock.deleteOnce(window.api_urls.job_detail(id), 204);
+      const started = {
+        type: 'JOB_CANCEL_REQUESTED',
+        payload: id,
+      };
+      const succeeded = {
+        type: 'JOB_CANCEL_ACCEPTED',
+        payload: id,
+      };
+
+      expect.assertions(1);
+      return store.dispatch(actions.cancelJob(id)).then(() => {
+        expect(store.getActions()).toEqual([started, succeeded]);
+      });
+    });
+  });
+
+  describe('error', () => {
+    test('dispatches JOB_CANCEL_REJECTED action', () => {
+      const store = storeWithApi({});
+      const id = 'job-1';
+      fetchMock.deleteOnce(window.api_urls.job_detail(id), 500);
+      const started = {
+        type: 'JOB_CANCEL_REQUESTED',
+        payload: id,
+      };
+      const failed = {
+        type: 'JOB_CANCEL_REJECTED',
+        payload: id,
+      };
+
+      expect.assertions(2);
+      return store.dispatch(actions.cancelJob(id)).catch(() => {
+        expect(store.getActions()).toEqual([started, failed]);
+        expect(window.console.error).toHaveBeenCalled();
+      });
+    });
+  });
+});

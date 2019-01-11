@@ -420,5 +420,5 @@ class PreflightResultSerializer(ErrorWarningCountMixin, serializers.ModelSeriali
 
 
 class OrgSerializer(serializers.Serializer):
-    current_job = JobSerializer()
-    current_preflight = PreflightResultSerializer()
+    current_job = IdOnlyField()
+    current_preflight = IdOnlyField()

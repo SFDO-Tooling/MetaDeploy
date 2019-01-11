@@ -26,7 +26,7 @@ import { routePatterns } from 'utils/routes';
 
 import reducer from 'app/reducer';
 
-import { login } from 'accounts/actions';
+import { login } from 'user/actions';
 
 import { fetchProducts } from 'products/actions';
 

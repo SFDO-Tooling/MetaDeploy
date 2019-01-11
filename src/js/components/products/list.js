@@ -5,18 +5,19 @@ import DocumentTitle from 'react-document-title';
 import Tabs from '@salesforce/design-system-react/components/tabs';
 import TabsPanel from '@salesforce/design-system-react/components/tabs/panel';
 import { connect } from 'react-redux';
-import { createSelector } from 'reselect';
+
+import {
+  selectProductCategories,
+  selectProductsByCategory,
+} from 'products/selectors';
 
 import ProductItem from 'components/products/listItem';
 import { EmptyIllustration } from 'components/404';
 
 import type { AppState } from 'app/reducer';
-import type {
-  Products as ProductsType,
-  Product as ProductType,
-} from 'products/reducer';
+import type { ProductsMapType } from 'products/selectors';
+import type { Products as ProductsType } from 'products/reducer';
 
-type ProductsMapType = Map<string, Array<ProductType>>;
 type Props = {
   productsByCategory: ProductsMapType,
   productCategories: Array<string>,
@@ -112,36 +113,6 @@ class ProductsList extends React.Component<Props, State> {
     );
   }
 }
-
-const selectProductsState = (appState: AppState): ProductsType =>
-  appState.products;
-
-const selectProductsByCategory = createSelector(
-  selectProductsState,
-  (products: ProductsType): ProductsMapType => {
-    const productsByCategory = new Map();
-    for (const product of products) {
-      if (
-        product.is_allowed &&
-        product.is_listed &&
-        product.most_recent_version
-      ) {
-        const category = product.category;
-        const existing = productsByCategory.get(category) || [];
-        existing.push(product);
-        productsByCategory.set(category, existing);
-      }
-    }
-    return productsByCategory;
-  },
-);
-
-const selectProductCategories = createSelector(
-  selectProductsByCategory,
-  (productsByCategory: ProductsMapType): Array<string> => [
-    ...productsByCategory.keys(),
-  ],
-);
 
 const select = (appState: AppState): Props => ({
   productCategories: selectProductCategories(appState),
