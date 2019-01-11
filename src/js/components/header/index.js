@@ -6,13 +6,14 @@ import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 
 import routes from 'utils/routes';
-import { logout } from 'accounts/actions';
+import { logout } from 'user/actions';
+import { selectUserState } from 'user/selectors';
 
 import Login from 'components/header/login';
 import Logout from 'components/header/logout';
 
 import type { AppState } from 'app/reducer';
-import type { User } from 'accounts/reducer';
+import type { User } from 'user/reducer';
 
 type Props = {
   user: User,
@@ -52,8 +53,6 @@ const Header = ({ user, doLogout }: Props) => (
     variant="objectHome"
   />
 );
-
-export const selectUserState = (appState: AppState): User => appState.user;
 
 const select = (appState: AppState) => ({
   user: selectUserState(appState),

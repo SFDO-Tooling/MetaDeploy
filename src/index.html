@@ -31,15 +31,16 @@
     <!-- JavaScript -->
     <script type="text/javascript" src="<%= htmlWebpackPlugin.files.chunks.runtime.entry %>"></script>
     <script type="text/javascript" src="<%= htmlWebpackPlugin.files.chunks.vendors.entry %>"></script>
-    {% if SENTRY_DSN_PUBLIC %}
+    {% if GLOBALS.SENTRY_DSN_PUBLIC %}
       <!-- Insert Raven JS -->
       <script id="js-raven-setup" type="application/json">
         {
-          "dsn": "{{ SENTRY_DSN_PUBLIC }}"
+          "dsn": "{{ GLOBALS.SENTRY_DSN_PUBLIC }}"
         }
       </script>
       <script type="text/javascript" src="<%= htmlWebpackPlugin.files.chunks.raven.entry %>"></script>
     {% endif %}
+    {{ GLOBALS|json_script:"js-globals" }}
     <script type="text/javascript" charset="utf-8">
       {% js_reverse_inline %}
     </script>

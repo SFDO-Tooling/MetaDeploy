@@ -6,14 +6,14 @@ import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 
 import routes from 'utils/routes';
-import { selectUserState } from 'components/header';
+import { selectUserState } from 'user/selectors';
 
 import Login from 'components/header/login';
 import { EmptyIllustration } from 'components/404';
 
 import type { AppState } from 'app/reducer';
 import type { InitialProps } from 'components/utils';
-import type { User as UserType } from 'accounts/reducer';
+import type { User as UserType } from 'user/reducer';
 
 const AuthError = ({ user }: { user: UserType }) => (
   <DocumentTitle title="Authentication Error | MetaDeploy">

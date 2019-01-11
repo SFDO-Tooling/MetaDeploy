@@ -15,15 +15,25 @@ const { STATUS } = CONSTANTS;
 const CtaButton = ({
   job,
   linkToPlan,
+  canceling,
 }: {
   job: JobType,
   linkToPlan: string,
+  canceling: boolean,
 }): React.Node => {
   switch (job.status) {
     case STATUS.STARTED:
       return (
         <ActionBtn
-          label={<LabelWithSpinner label="Installation In Progress..." />}
+          label={
+            <LabelWithSpinner
+              label={
+                canceling
+                  ? 'Canceling Installation...'
+                  : 'Installation In Progress...'
+              }
+            />
+          }
           disabled
         />
       );
