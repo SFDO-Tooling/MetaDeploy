@@ -37,10 +37,18 @@ const { STATUS } = CONSTANTS;
 const btnClasses = 'slds-size_full slds-p-vertical_xx-small';
 
 // For use as a "loading" button label
-export const LabelWithSpinner = ({ label }: { label: string }): React.Node => (
+export const LabelWithSpinner = ({
+  label,
+  variant,
+  size,
+}: {
+  label: string,
+  variant?: string,
+  size?: string,
+}): React.Node => (
   <>
     <span className="slds-is-relative slds-m-right_large">
-      <Spinner variant="inverse" size="small" />
+      <Spinner variant={variant || 'inverse'} size={size || 'small'} />
     </span>
     {label}
   </>

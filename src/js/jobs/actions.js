@@ -30,7 +30,18 @@ export type JobStepCompleted = {
 };
 export type JobCompleted = { type: 'JOB_COMPLETED', payload: Job };
 export type JobFailed = { type: 'JOB_FAILED', payload: Job };
+type JobUpdateRequested = { type: 'JOB_UPDATE_REQUESTED', payload: Job };
 export type JobUpdated = { type: 'JOB_UPDATED', payload: Job };
+type JobUpdateRejected = { type: 'JOB_UPDATE_REJECTED', payload: Job };
+type JobCancelRequested = {
+  type: 'JOB_CANCEL_REQUESTED',
+  payload: string,
+};
+type JobCanceled = { type: 'JOB_CANCEL_ACCEPTED', payload: string };
+type JobCancelRejected = {
+  type: 'JOB_CANCEL_REJECTED',
+  payload: string,
+};
 export type JobsAction =
   | FetchJobStarted
   | FetchJobSucceeded
@@ -41,7 +52,12 @@ export type JobsAction =
   | JobStepCompleted
   | JobCompleted
   | JobFailed
-  | JobUpdated;
+  | JobUpdateRequested
+  | JobUpdated
+  | JobUpdateRejected
+  | JobCancelRequested
+  | JobCanceled
+  | JobCancelRejected;
 
 export const fetchJob = (jobId: string): ThunkAction => (
   dispatch,
@@ -127,6 +143,23 @@ export const updateJob = (payload: {
     .then(response => dispatch({ type: 'JOB_UPDATED', payload: response }))
     .catch(err => {
       dispatch({ type: 'JOB_UPDATE_REJECTED', payload });
+      throw err;
+    });
+};
+
+export const cancelJob = (id: string): ThunkAction => (
+  dispatch,
+  getState,
+  { apiFetch },
+) => {
+  dispatch({ type: 'JOB_CANCEL_REQUESTED', payload: id });
+  const url = window.api_urls.job_detail(id);
+  return apiFetch(url, {
+    method: 'DELETE',
+  })
+    .then(() => dispatch({ type: 'JOB_CANCEL_ACCEPTED', payload: id }))
+    .catch(err => {
+      dispatch({ type: 'JOB_CANCEL_REJECTED', payload: id });
       throw err;
     });
 };

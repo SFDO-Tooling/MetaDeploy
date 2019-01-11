@@ -6,7 +6,8 @@ import DocumentTitle from 'react-document-title';
 import { connect } from 'react-redux';
 
 import routes from 'utils/routes';
-import { fetchJob, updateJob } from 'jobs/actions';
+import { CONSTANTS } from 'plans/reducer';
+import { fetchJob, updateJob, cancelJob } from 'jobs/actions';
 import { fetchVersion } from 'products/actions';
 import { selectJob, selectJobId } from 'jobs/selectors';
 import { selectPlan } from 'plans/selectors';
@@ -30,6 +31,7 @@ import ShareModal from 'components/jobs/shareModal';
 import StepsTable from 'components/plans/stepsTable';
 import Toasts from 'components/plans/toasts';
 import UserInfo from 'components/jobs/userInfo';
+import { LabelWithSpinner } from 'components/plans/ctaButton';
 
 import type { AppState } from 'app/reducer';
 import type { InitialProps } from 'components/utils';
@@ -53,12 +55,17 @@ type Props = {
   doFetchVersion: typeof fetchVersion,
   doFetchJob: typeof fetchJob,
   doUpdateJob: typeof updateJob,
+  doCancelJob: typeof cancelJob,
+};
+type State = {
+  modalOpen: boolean,
+  canceling: boolean,
 };
 
-class JobDetail extends React.Component<Props, { modalOpen: boolean }> {
+class JobDetail extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { modalOpen: false };
+    this.state = { modalOpen: false, canceling: false };
   }
 
   fetchVersionIfMissing() {
@@ -109,6 +116,51 @@ class JobDetail extends React.Component<Props, { modalOpen: boolean }> {
     this.toggleModal(true);
   };
 
+  cancelJob = () => {
+    const { job, doCancelJob } = this.props;
+    /* istanbul ignore if */
+    if (!job) {
+      return;
+    }
+    doCancelJob(job.id).then(() => {
+      this.setState({ canceling: true });
+    });
+  };
+
+  getCancelBtn(): React.Node {
+    const { job } = this.props;
+    /* istanbul ignore if */
+    if (!job) {
+      return null;
+    }
+    if (job.status === CONSTANTS.STATUS.STARTED && job.user_can_edit) {
+      const { canceling } = this.state;
+      if (canceling) {
+        return (
+          <Button
+            label={
+              <LabelWithSpinner
+                label="Canceling Installation..."
+                variant="base"
+                size="x-small"
+              />
+            }
+            disabled
+          />
+        );
+      }
+      return (
+        <Button
+          label="Cancel Installation"
+          variant="base"
+          className="slds-button_text-destructive"
+          onClick={this.cancelJob}
+        />
+      );
+    }
+    return null;
+  }
+
   render(): React.Node {
     const {
       user,
@@ -143,6 +195,7 @@ class JobDetail extends React.Component<Props, { modalOpen: boolean }> {
       version.label,
       plan.slug,
     );
+    const { canceling } = this.state;
     return (
       <DocumentTitle
         title={`Installation | ${plan.title} | ${product.title} | MetaDeploy`}
@@ -153,13 +206,16 @@ class JobDetail extends React.Component<Props, { modalOpen: boolean }> {
             version={version}
             plan={plan}
             navRight={
-              <Button
-                label="Share"
-                iconCategory="utility"
-                iconName="share"
-                iconPosition="left"
-                onClick={this.openModal}
-              />
+              <>
+                {this.getCancelBtn()}
+                <Button
+                  label="Share Installation"
+                  iconCategory="utility"
+                  iconName="share"
+                  iconPosition="left"
+                  onClick={this.openModal}
+                />
+              </>
             }
           />
           <ShareModal
@@ -172,7 +228,13 @@ class JobDetail extends React.Component<Props, { modalOpen: boolean }> {
             <Toasts model={job} label="Installation" />
             <Intro
               results={<JobResults job={job} label="Installation" />}
-              cta={<CtaButton job={job} linkToPlan={linkToPlan} />}
+              cta={
+                <CtaButton
+                  job={job}
+                  linkToPlan={linkToPlan}
+                  canceling={canceling}
+                />
+              }
               postMessage={<JobMessage job={job} openModal={this.openModal} />}
             />
             <UserInfo job={job} />
@@ -201,6 +263,7 @@ const actions = {
   doFetchVersion: fetchVersion,
   doFetchJob: fetchJob,
   doUpdateJob: updateJob,
+  doCancelJob: cancelJob,
 };
 
 const WrappedJobDetail: React.ComponentType<InitialProps> = connect(

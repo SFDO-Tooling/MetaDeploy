@@ -14,11 +14,16 @@ describe('<CtaButton />', () => {
   const setup = options => {
     const defaults = {
       job: defaultJob,
+      canceling: false,
     };
     const opts = { ...defaults, ...options };
     const { getByText, container } = render(
       <MemoryRouter>
-        <CtaButton job={opts.job} linkToPlan="/my/plan/" />
+        <CtaButton
+          job={opts.job}
+          linkToPlan="/my/plan/"
+          canceling={opts.canceling}
+        />
       </MemoryRouter>,
     );
     return { getByText, container };
@@ -29,6 +34,17 @@ describe('<CtaButton />', () => {
       const { getByText } = setup({ job: { status: 'started' } });
 
       expect(getByText('Installation In Progress...')).toBeVisible();
+    });
+  });
+
+  describe('canceling job', () => {
+    test('renders progress btn', () => {
+      const { getByText } = setup({
+        job: { status: 'started' },
+        canceling: true,
+      });
+
+      expect(getByText('Canceling Installation...')).toBeVisible();
     });
   });
 
