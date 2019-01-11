@@ -107,9 +107,12 @@ async def notify_post_job(job):
     await push_serializable(job, JobSerializer, type_)
 
 
-async def _job_or_preflight_changed(org_url, type_):
+async def notify_org_result_changed(result):
     from .serializers import OrgSerializer
     from .models import Job, PreflightResult
+
+    type_ = "ORG_CHANGED"
+    org_url = result.organization_url
 
     current_job = Job.objects.filter(
         organization_url=org_url, status=Job.Status.started
@@ -126,11 +129,3 @@ async def _job_or_preflight_changed(org_url, type_):
     )
     channel_layer = get_channel_layer()
     await channel_layer.group_send(group_name, {"type": "notify", "content": message})
-
-
-async def notify_org_job_changed(job):
-    await _job_or_preflight_changed(job.organization_url, "ORG_CHANGED")
-
-
-async def notify_org_preflight_changed(preflight):
-    await _job_or_preflight_changed(preflight.organization_url, "ORG_CHANGED")
