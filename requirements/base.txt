@@ -25,7 +25,7 @@ django-model-utils==3.1.2
 django-storages==1.7.1
 boto3==1.9.78
 github3.py==1.2.0
-bleach==3.0.2
+bleach==3.1.0
 django-hashid-field==2.1.5
 redis==2.10.6  # pyup: <3.0
 logfmt==0.4
