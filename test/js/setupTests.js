@@ -14,7 +14,9 @@ beforeAll(() => {
     plan_preflight: id => `/api/plans/${id}/preflight/`,
     job_list: () => '/api/jobs/',
     job_detail: id => `/api/jobs/${id}/`,
+    org_list: () => '/api/org/',
   };
+  window.GLOBALS = {};
   window.console.error = jest.fn();
   window.console.warn = jest.fn();
   window.console.info = jest.fn();

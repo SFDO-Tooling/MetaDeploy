@@ -7,4 +7,5 @@ from ..context_processors import env
 def test_env(rf):
     result = env(rf.get("/"))
 
-    assert "SENTRY_DSN_PUBLIC" in result
+    assert "GLOBALS" in result
+    assert "SENTRY_DSN_PUBLIC" in result["GLOBALS"]

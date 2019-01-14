@@ -9,7 +9,7 @@ import Login from 'components/header/login';
 
 import svgPath from 'images/no-connection.svg';
 
-import type { User as UserType } from 'accounts/reducer';
+import type { User as UserType } from 'user/reducer';
 
 const LoggedOut = (): React.Node => (
   <Illustration
@@ -68,6 +68,11 @@ const UserInfo = ({ user }: { user: UserType }): React.Node => {
             </li>
           ) : null}
         </ul>
+        <p className="slds-p-top_small">
+          The credentials to your Salesforce org will only be held for
+          {` ${window.GLOBALS.TOKEN_LIFETIME_MINUTES || 10} `}
+          minutes or until your requested installation is complete.
+        </p>
       </Card>
     </div>
   );

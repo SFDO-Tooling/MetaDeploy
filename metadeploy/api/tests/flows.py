@@ -1,8 +1,10 @@
 from unittest.mock import MagicMock, sentinel
 
 import pytest
+from django.core.cache import cache
 
-from ..flows import BasicFlow, JobFlow, PreflightFlow
+from ..constants import REDIS_JOB_CANCEL_KEY
+from ..flows import BasicFlow, JobFlow, PreflightFlow, StopFlowException
 from ..models import Step
 
 
@@ -24,16 +26,25 @@ class TestJobFlow:
         assert flow.result == sentinel.job
 
     @pytest.mark.django_db
+    def test_cancel_job(self, mocker, job_factory):
+        init = mocker.patch("cumulusci.core.flows.BaseFlow.__init__")
+        init.return_value = None
+        job = job_factory()
+        flow = JobFlow(result=job)
+        cache.set(REDIS_JOB_CANCEL_KEY.format(id=job.id), True)
+        with pytest.raises(StopFlowException):
+            flow._pre_task(None)
+
+    @pytest.mark.django_db
     def test_post_task(
         self, mocker, user_factory, plan_factory, step_factory, job_factory
     ):
         init = mocker.patch("cumulusci.core.flows.BaseFlow.__init__")
         init.return_value = None
-        user = user_factory()
         plan = plan_factory()
         steps = [step_factory(plan=plan, task_name=f"task_{i}") for i in range(3)]
 
-        job = job_factory(user=user, plan=plan, steps=steps)
+        job = job_factory(plan=plan, steps=steps)
 
         flow = JobFlow(result=job)
 

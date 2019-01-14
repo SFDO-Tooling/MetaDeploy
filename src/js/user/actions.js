@@ -1,17 +1,18 @@
 // @flow
 
 import { cache } from 'utils/caching';
+import { fetchOrgJobs } from 'org/actions';
 import { fetchProducts } from 'products/actions';
 
 import type { ThunkAction } from 'redux-thunk';
-import type { User } from 'accounts/reducer';
+import type { User } from 'user/reducer';
 
 type LoginAction = { type: 'USER_LOGGED_IN', payload: User };
 export type LogoutAction = { type: 'USER_LOGGED_OUT' };
 export type TokenInvalidAction = { type: 'USER_TOKEN_INVALIDATED' };
 export type UserAction = LoginAction | LogoutAction | TokenInvalidAction;
 
-export const login = (payload: User): LoginAction => {
+export const login = (payload: User): ThunkAction => dispatch => {
   if (window.Raven && window.Raven.isSetup()) {
     window.Raven.setUserContext(payload);
   }
@@ -21,11 +22,18 @@ export const login = (payload: User): LoginAction => {
       model: 'user',
       id: payload.id,
     });
+    if (payload.valid_token_for) {
+      window.socket.subscribe({
+        model: 'org',
+        id: payload.valid_token_for,
+      });
+    }
   }
-  return {
+  dispatch({
     type: 'USER_LOGGED_IN',
     payload,
-  };
+  });
+  return dispatch(fetchOrgJobs());
 };
 
 export const logout = (): ThunkAction => (dispatch, getState, { apiFetch }) =>

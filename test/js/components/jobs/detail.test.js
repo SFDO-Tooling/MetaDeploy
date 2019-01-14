@@ -2,7 +2,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { fireEvent } from 'react-testing-library';
 
-import { fetchJob } from 'jobs/actions';
+import { fetchJob, cancelJob } from 'jobs/actions';
 import { fetchVersion } from 'products/actions';
 
 import { renderWithRedux, storeWithApi } from './../../utils';
@@ -18,6 +18,7 @@ fetchJob.mockReturnValue({ type: 'TEST' });
 afterEach(() => {
   fetchVersion.mockClear();
   fetchJob.mockClear();
+  cancelJob.mockClear();
 });
 
 const defaultState = {
@@ -294,9 +295,36 @@ describe('<JobDetail />', () => {
   describe('share button click', () => {
     test('opens modal', () => {
       const { getByText } = setup();
-      fireEvent.click(getByText('Share'));
+      fireEvent.click(getByText('Share Installation'));
 
       expect(getByText('Share Link to Installation Job')).toBeVisible();
+    });
+  });
+
+  describe('cancel btn click', () => {
+    test('calls cancelJob', () => {
+      const canceled = Promise.resolve({});
+      cancelJob.mockReturnValue(() => canceled);
+      const id = 'job-1';
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          jobs: {
+            [id]: {
+              ...defaultState.jobs[id],
+              status: 'started',
+              user_can_edit: true,
+            },
+          },
+        },
+      });
+      fireEvent.click(getByText('Cancel Installation'));
+
+      expect.assertions(2);
+      expect(cancelJob).toHaveBeenCalledWith('job-1');
+      return canceled.then(() => {
+        expect(getByText('Canceling Installation...')).toBeVisible();
+      });
     });
   });
 });

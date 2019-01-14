@@ -7,11 +7,12 @@ from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.utils.translation import gettext as _
 
 from .api.constants import CHANNELS_GROUP_NAME
+from .api.hash_url import convert_org_url_to_key
 
 Request = namedtuple("Request", "user")
 
 
-KNOWN_MODELS = {"user", "preflightresult", "job"}
+KNOWN_MODELS = {"user", "preflightresult", "job", "org"}
 
 
 def user_context(user):
@@ -83,6 +84,8 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         return model in KNOWN_MODELS
 
     def has_good_permissions(self, content):
+        if self.handle_org_special_case(content):
+            return True
         possible_exceptions = (
             AttributeError,
             KeyError,
@@ -97,3 +100,9 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
             return obj.subscribable_by(self.scope["user"])
         except possible_exceptions:
             return False
+
+    def handle_org_special_case(self, content):
+        if content["model"] == "org":
+            content["id"] = convert_org_url_to_key(self.scope["user"].instance_url)
+            return True
+        return False

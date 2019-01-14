@@ -7,7 +7,8 @@ import {
   failPreflight,
   invalidatePreflight,
 } from 'plans/actions';
-import { invalidateToken } from 'accounts/actions';
+import { invalidateToken } from 'user/actions';
+import { updateOrg } from 'org/actions';
 
 const mockJson = jest.fn();
 const mockClose = jest.fn();
@@ -89,6 +90,17 @@ describe('getAction', () => {
       const payload = { id: 'job-1', steps: ['step-1'] };
       const msg = { type: 'JOB_FAILED', payload };
       const expected = failJob(payload);
+      const actual = sockets.getAction(msg);
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('ORG_CHANGED', () => {
+    test('handles msg', () => {
+      const payload = { current_job: 'id', current_preflight: null };
+      const msg = { type: 'ORG_CHANGED', payload };
+      const expected = updateOrg(payload);
       const actual = sockets.getAction(msg);
 
       expect(actual).toEqual(expected);

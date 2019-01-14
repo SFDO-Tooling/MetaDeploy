@@ -83,11 +83,13 @@ const JobResults = ({
   preflight,
   label,
   failMessage,
+  successMessage,
 }: {
   job?: JobType,
   preflight?: PreflightType,
   label: string,
   failMessage?: string,
+  successMessage?: string,
 }): React.Node => {
   const currentJob = job || preflight;
   if (
@@ -157,7 +159,10 @@ const JobResults = ({
 
   // Successful job
   return (
-    <p className="slds-text-color_success">{label} completed successfully.</p>
+    <>
+      <p className="slds-text-color_success">{label} completed successfully.</p>
+      {successMessage ? <p>{successMessage}</p> : null}
+    </>
   );
 };
 

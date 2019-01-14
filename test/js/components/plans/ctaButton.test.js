@@ -36,6 +36,7 @@ describe('<CtaButton />', () => {
       plan: defaultPlan,
       user: { valid_token_for: 'foo' },
       preflight: defaultPreflight,
+      preventAction: false,
     };
     const opts = { ...defaults, ...options };
     const { getByText, getByLabelText, container } = render(
@@ -47,6 +48,7 @@ describe('<CtaButton />', () => {
         plan={opts.plan}
         preflight={opts.preflight}
         selectedSteps={new Set(['step-1'])}
+        preventAction={opts.preventAction}
         doStartPreflight={opts.doStartPreflight}
         doStartJob={opts.doStartJob}
       />,
@@ -59,6 +61,15 @@ describe('<CtaButton />', () => {
       const { getByText } = setup({ user: null });
 
       expect(getByText('Log In to Start Pre-Install Validation')).toBeVisible();
+    });
+  });
+
+  describe('preventAction', () => {
+    test('renders disabled btn', () => {
+      const { getByText } = setup({ preventAction: true });
+
+      expect(getByText('Install')).toBeVisible();
+      expect(getByText('Install')).toBeDisabled();
     });
   });
 
