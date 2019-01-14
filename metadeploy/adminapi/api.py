@@ -6,6 +6,10 @@ from rest_framework.response import Response
 
 
 class AdminAPISerializer(serializers.HyperlinkedModelSerializer):
+    """Custom serializer to make sure we link to /admin/rest/ routes
+    rather than the public /api/
+    """
+
     id = serializers.CharField(read_only=True)
 
     class Meta:
@@ -38,6 +42,8 @@ class AdminAPISerializer(serializers.HyperlinkedModelSerializer):
 
 
 class AdminAPIPagination(pagination.LimitOffsetPagination):
+    """Custom pagination to keep links separate from data"""
+
     default_limit = 10
     max_limit = 100
 
@@ -63,7 +69,7 @@ class AdminAPIPagination(pagination.LimitOffsetPagination):
 class AdminAPIViewSet(viewsets.ModelViewSet):
     model_app_label = "api"
     model_name = None
-    serlializer_base = AdminAPISerializer
+    serializer_base = AdminAPISerializer
     serializer_class = None
     route_ns = "admin_rest"
 
@@ -73,7 +79,7 @@ class AdminAPIViewSet(viewsets.ModelViewSet):
     # Admin Views require IsAdmin/IsStaff. Don't change this
     permission_classes = [permissions.IsAdminUser]
 
-    # # Pagination
+    # Pagination
     pagination_class = AdminAPIPagination
 
     # TODO: Metadata, create an OPTIONS/metadata response. JSON HYPER SCHEMA.
@@ -83,11 +89,11 @@ class AdminAPIViewSet(viewsets.ModelViewSet):
     # TODO: RFC7807 Error Documents, cuz!
     # TODO: Natural Keys, router support needed.
 
-    # # Caching
+    # Caching
     # AdminAPI does not support a caching scheme, so we apply a Cache-Control=Never
     # for HTTP GETs (list/retrieve).
 
-    # # Response Shape
+    # Response Shape
     # AdminAPI is inspired by, but noncompliant with JSON:API at this time. Fight me.
     # The paginator provides the top level list response shape, but we should probably
     # build response shape into the viewset. That just requires a lot more overrides...
@@ -108,14 +114,14 @@ class AdminAPIViewSet(viewsets.ModelViewSet):
         return model.objects.all()
 
     def get_serializer_class(self):
-        if self.serializer_class:
-            return self.serializer_class
+        if self.serializer_class is None:
 
-        class AdminSerializer(self.serlializer_base):
-            class Meta(self.serlializer_base.Meta):
-                model = self.model
+            class AdminSerializer(self.serializer_base):
+                class Meta(self.serializer_base.Meta):
+                    model = self.model
 
-        return AdminSerializer
+            self.serializer_class = AdminSerializer
+        return self.serializer_class
 
     def get_serializer_context(self,):
         ctx = super().get_serializer_context()
@@ -146,3 +152,7 @@ class VersionViewSet(AdminAPIViewSet):
 
 class ProductCategoryViewSet(AdminAPIViewSet):
     model_name = "ProductCategory"
+
+
+class AllowedListViewSet(AdminAPIViewSet):
+    model_name = "AllowedList"

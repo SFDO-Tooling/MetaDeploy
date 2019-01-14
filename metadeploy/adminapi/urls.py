@@ -1,6 +1,7 @@
 from rest_framework import routers
 
 from .api import (
+    AllowedListViewSet,
     PlanSlugViewSet,
     PlanViewSet,
     ProductCategoryViewSet,
@@ -8,9 +9,6 @@ from .api import (
     ProductViewSet,
     VersionViewSet,
 )
-from .explore import ExplorerViewSet
-
-# TODO: Schema, create a schema endpoint
 
 
 def _get_api_basename(viewset):
@@ -20,11 +18,11 @@ def _get_api_basename(viewset):
 app_name = "admin_api"
 router = routers.DefaultRouter(trailing_slash=False)
 router.get_default_basename = _get_api_basename
+router.register(r"allowedlists", AllowedListViewSet)
 router.register(r"plans", PlanViewSet)
 router.register(r"planslug", PlanSlugViewSet)
 router.register(r"productcategory", ProductCategoryViewSet)
 router.register(r"products", ProductViewSet)
 router.register(r"productslug", ProductSlugViewSet)
 router.register(r"versions", VersionViewSet)
-router.register(r"other", ExplorerViewSet)
 urlpatterns = router.urls
