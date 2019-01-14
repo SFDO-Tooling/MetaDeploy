@@ -1,8 +1,20 @@
+from ipaddress import IPv4Address
+
 from django.apps import apps
+from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from rest_framework import pagination, permissions, serializers, viewsets
 from rest_framework.response import Response
+
+
+class IsAllowedIPAddress(permissions.BasePermission):
+    """Permission check for allowed IP networks.
+    """
+
+    def has_permission(self, request, view):
+        ip_addr = IPv4Address(request.META["REMOTE_ADDR"])
+        return any(ip_addr in subnet for subnet in settings.ADMIN_API_ALLOWED_SUBNETS)
 
 
 class AdminAPISerializer(serializers.HyperlinkedModelSerializer):
@@ -73,11 +85,11 @@ class AdminAPIViewSet(viewsets.ModelViewSet):
     serializer_class = None
     route_ns = "admin_rest"
 
-    # TODO: Permission, lock to SFDC IPs? require HTTPS
+    # TODO: Permission, require HTTPS
     # TODO: Permission, force subclasses to append, not overwrite
     # TODO: API Key?
     # Admin Views require IsAdmin/IsStaff. Don't change this
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsAllowedIPAddress, permissions.IsAdminUser]
 
     # Pagination
     pagination_class = AdminAPIPagination

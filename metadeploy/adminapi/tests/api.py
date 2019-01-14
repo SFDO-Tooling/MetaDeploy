@@ -1,4 +1,5 @@
 import pytest
+from rest_framework.test import APIClient
 
 
 @pytest.mark.django_db
@@ -50,3 +51,14 @@ class TestPlanViewSet:
             "version": f"http://testserver/admin/rest/versions/{plan.version.id}",
             "visible_to": None,
         }
+
+    def test_ipaddress_restriction(self, user_factory, plan_factory):
+        client = APIClient(REMOTE_ADDR="8.8.8.8")
+        user = user_factory(is_staff=True)
+        client.force_login(user)
+        client.user = user
+
+        plan = plan_factory()
+        response = client.get(f"http://testserver/admin/rest/plans/{plan.id}")
+
+        assert response.status_code == 403

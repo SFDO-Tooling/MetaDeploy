@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
+from ipaddress import IPv4Network
 from os import environ
 from pathlib import Path
 
@@ -179,6 +180,12 @@ ROOT_URLCONF = "metadeploy.urls"
 
 # Must end in a /, or you will experience surprises:
 ADMIN_AREA_PREFIX = "admin/"
+
+ADMIN_API_ALLOWED_SUBNETS = env(
+    "ADMIN_API_ALLOWED_SUBNETS",
+    default="127.0.0.1/32",
+    type_=lambda x: [IPv4Network(s) for s in x.split(",")],
+)
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
