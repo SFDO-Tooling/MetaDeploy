@@ -37,7 +37,7 @@ type JobCancelRequested = {
   type: 'JOB_CANCEL_REQUESTED',
   payload: string,
 };
-type JobCanceled = { type: 'JOB_CANCEL_ACCEPTED', payload: string };
+export type JobCanceled = { type: 'JOB_CANCEL_ACCEPTED', payload: string };
 type JobCancelRejected = {
   type: 'JOB_CANCEL_REJECTED',
   payload: string,
@@ -146,6 +146,11 @@ export const updateJob = (payload: {
       throw err;
     });
 };
+
+export const simpleCancelJob = (payload: Job): JobCanceled => ({
+  type: 'JOB_CANCEL_ACCEPTED',
+  payload: payload.id,
+});
 
 export const cancelJob = (id: string): ThunkAction => (
   dispatch,

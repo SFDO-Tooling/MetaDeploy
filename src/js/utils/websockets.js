@@ -2,7 +2,12 @@
 
 import Sockette from 'sockette';
 
-import { completeJobStep, completeJob, failJob } from 'jobs/actions';
+import {
+  completeJobStep,
+  completeJob,
+  failJob,
+  simpleCancelJob,
+} from 'jobs/actions';
 import {
   completePreflight,
   failPreflight,
@@ -14,7 +19,12 @@ import { updateOrg } from 'org/actions';
 
 import type { Dispatch } from 'redux-thunk';
 import type { Job } from 'jobs/reducer';
-import type { JobStepCompleted, JobCompleted, JobFailed } from 'jobs/actions';
+import type {
+  JobStepCompleted,
+  JobCompleted,
+  JobFailed,
+  JobCanceled,
+} from 'jobs/actions';
 import type { Org } from 'org/reducer';
 import type { OrgChanged } from 'org/actions';
 import type { Preflight } from 'plans/reducer';
@@ -41,7 +51,7 @@ type PreflightEvent = {|
   payload: Preflight,
 |};
 type JobEvent = {|
-  type: 'TASK_COMPLETED' | 'JOB_COMPLETED' | 'JOB_FAILED',
+  type: 'TASK_COMPLETED' | 'JOB_COMPLETED' | 'JOB_FAILED' | 'JOB_CANCELED',
   payload: Job,
 |};
 type OrgEvent = {|
@@ -64,6 +74,7 @@ type Action =
   | JobStepCompleted
   | JobCompleted
   | JobFailed
+  | JobCanceled
   | OrgChanged;
 type Subscription = {| model: string, id: string |};
 
@@ -84,6 +95,8 @@ export const getAction = (event: EventType): Action | null => {
       return completeJobStep(event.payload);
     case 'JOB_COMPLETED':
       return completeJob(event.payload);
+    case 'JOB_CANCELED':
+      return simpleCancelJob(event.payload);
     case 'JOB_FAILED':
       return failJob(event.payload);
     case 'ORG_CHANGED':

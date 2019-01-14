@@ -48,6 +48,9 @@ class Toasts extends React.Component<Props, State> {
     if (model.status === STATUS.FAILED) {
       return this.getToastComponent(`${label} has failed.`);
     }
+    if (model.status === STATUS.CANCELED) {
+      return this.getToastComponent(`${label} has been canceled.`);
+    }
     if (model.status !== STATUS.COMPLETE) {
       return null;
     }

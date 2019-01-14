@@ -50,7 +50,8 @@ def finalize_result(result):
         yield
         result.status = success_status
     except Exception as e:
-        result.status = error_status
+        if not isinstance(e, StopRequested):
+            result.status = error_status
         result.exception = str(e)
         logger.error(f"{result._meta.model_name} {result.id} failed.")
         raise
@@ -226,6 +227,9 @@ def run_flows(
         kwargs = dict(options={}, skip=skip_tasks, name=flow_name, result=result)
 
         flowinstance = flow_class(*args, **kwargs)
+        # XXX: TEMPORARY FOR TESTING:
+        if result_class == Job:
+            raise StopRequested
         flowinstance()
 
 

@@ -18,7 +18,9 @@ const ProgressBar = ({ job }: { job: JobType }): React.Node => {
         res => res.status === CONSTANTS.RESULT_STATUS.OK,
       ) !== undefined,
   );
-  const isFailed = job.status === CONSTANTS.STATUS.FAILED;
+  const isFailed =
+    job.status === CONSTANTS.STATUS.FAILED ||
+    job.status === CONSTANTS.STATUS.CANCELED;
   const progress = isFailed
     ? 100
     : Math.min(
@@ -43,7 +45,7 @@ const ProgressBar = ({ job }: { job: JobType }): React.Node => {
             Installation Progress
             {isFailed ? (
               <>
-                : <span className="slds-text-color_error">Failed</span>
+                : <span className="slds-text-color_error">{job.status}</span>
               </>
             ) : null}
           </strong>

@@ -53,6 +53,7 @@ export const CONSTANTS = {
     STARTED: 'started',
     COMPLETE: 'complete',
     FAILED: 'failed',
+    CANCELED: 'canceled',
   },
   RESULT_STATUS: {
     OK: 'ok',
