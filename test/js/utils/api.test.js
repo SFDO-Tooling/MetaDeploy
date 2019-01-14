@@ -31,6 +31,13 @@ describe('apiFetch', () => {
     expect.assertions(1);
     return expect(apiFetch('/test/url/')).rejects.toThrow('not cool');
   });
+
+  test('string response: returns response', () => {
+    const expected = 'foobar';
+    fetchMock.getOnce('/test/url/', expected);
+
+    return expect(apiFetch('/test/url/')).resolves.toEqual(expected);
+  });
 });
 
 describe('addUrlParams', () => {
