@@ -137,6 +137,7 @@ export const createSocket = ({
     maxAttempts: opts.maxAttempts,
     onopen: e => {
       log('[WebSocket] connected');
+      dispatch({ type: 'SOCKET_CONNECTED' });
       open = true;
       for (const payload of pending) {
         log('[WebSocket] subscribing to:', payload);
@@ -168,9 +169,10 @@ export const createSocket = ({
       opts.onmaximum(e);
     },
     onclose: e => {
-      log('[WebSocket] closed');
+      log('[WebSocket] closed:', e);
       open = false;
       opts.onclose(e);
+      dispatch({ type: 'SOCKET_DISCONNECTED' });
     },
     onerror: e => {
       log('[WebSocket] error:', e);
