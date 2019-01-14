@@ -24,6 +24,10 @@ def boolish(val):
     return val in BOOLS
 
 
+def ipv4_networks(val):
+    return [IPv4Network(s.strip()) for s in val.split(",")]
+
+
 class NoDefaultValue:
     pass
 
@@ -182,9 +186,7 @@ ROOT_URLCONF = "metadeploy.urls"
 ADMIN_AREA_PREFIX = "admin/"
 
 ADMIN_API_ALLOWED_SUBNETS = env(
-    "ADMIN_API_ALLOWED_SUBNETS",
-    default="127.0.0.1/32",
-    type_=lambda x: [IPv4Network(s) for s in x.split(",")],
+    "ADMIN_API_ALLOWED_SUBNETS", default="127.0.0.1/32", type_=ipv4_networks
 )
 
 # Password validation

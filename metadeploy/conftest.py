@@ -193,8 +193,8 @@ def client(user_factory):
 
 
 @pytest.fixture
-def staff_client(user_factory):
-    user = user_factory(is_staff=True)
+def admin_api_client(user_factory):
+    user = user_factory(is_superuser=True)
     client = APIClient()
     client.force_login(user)
     client.user = user

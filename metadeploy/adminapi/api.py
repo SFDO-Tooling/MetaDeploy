@@ -2,10 +2,13 @@ from ipaddress import IPv4Address
 
 from django.apps import apps
 from django.conf import settings
+from django.core import exceptions
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from rest_framework import pagination, permissions, serializers, viewsets
 from rest_framework.response import Response
+
+from metadeploy.api import models
 
 
 class IsAllowedIPAddress(permissions.BasePermission):
@@ -14,7 +17,19 @@ class IsAllowedIPAddress(permissions.BasePermission):
 
     def has_permission(self, request, view):
         ip_addr = IPv4Address(request.META["REMOTE_ADDR"])
-        return any(ip_addr in subnet for subnet in settings.ADMIN_API_ALLOWED_SUBNETS)
+        if not any(ip_addr in subnet for subnet in settings.ADMIN_API_ALLOWED_SUBNETS):
+            raise exceptions.SuspiciousOperation(f"Disallowed IP address: {ip_addr}")
+        return True
+
+
+class IsAPIUser(permissions.BasePermission):
+    """Permission check for API permission.
+
+    (Currently just checks if user is a superuser.)
+    """
+
+    def has_permission(self, request, view):
+        return request.user.is_superuser
 
 
 class AdminAPISerializer(serializers.HyperlinkedModelSerializer):
@@ -85,11 +100,9 @@ class AdminAPIViewSet(viewsets.ModelViewSet):
     serializer_class = None
     route_ns = "admin_rest"
 
-    # TODO: Permission, require HTTPS
     # TODO: Permission, force subclasses to append, not overwrite
     # TODO: API Key?
-    # Admin Views require IsAdmin/IsStaff. Don't change this
-    permission_classes = [IsAllowedIPAddress, permissions.IsAdminUser]
+    permission_classes = [IsAllowedIPAddress, IsAPIUser]
 
     # Pagination
     pagination_class = AdminAPIPagination
@@ -150,8 +163,35 @@ class ProductSlugViewSet(AdminAPIViewSet):
     model_name = "ProductSlug"
 
 
+class PlanStepSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Step
+        exclude = ("id", "plan", "order_key")
+
+
+class PlanSerializer(AdminAPISerializer):
+    steps = PlanStepSerializer(source="step_set", many=True, required=False)
+
+    class Meta:
+        fields = "__all__"
+
+    def create(self, validated_data):
+        steps = validated_data.pop("step_set") or []
+        plan = self.Meta.model.objects.create(**validated_data)
+        for i, step_data in enumerate(steps):
+            plan.step_set.create(order_key=i, **step_data)
+        return plan
+
+    def update(self, instance, validated_data):
+        if "step_set" in validated_data:
+            raise serializers.ValidationError(detail="Updating steps not supported.")
+        validated_data.pop("step_set", None)
+        return super().update(instance, validated_data)
+
+
 class PlanViewSet(AdminAPIViewSet):
     model_name = "Plan"
+    serializer_base = PlanSerializer
 
 
 class PlanSlugViewSet(AdminAPIViewSet):
