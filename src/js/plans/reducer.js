@@ -37,7 +37,7 @@ export type Preflight = {|
   +edited_at: string,
   +user: string,
   +plan: string,
-  +status: 'started' | 'complete' | 'failed',
+  +status: 'started' | 'complete' | 'failed' | 'canceled',
   +results: PreflightErrors,
   +is_valid: boolean,
   +error_count: number,

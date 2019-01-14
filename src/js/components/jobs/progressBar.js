@@ -45,7 +45,12 @@ const ProgressBar = ({ job }: { job: JobType }): React.Node => {
             Installation Progress
             {isFailed ? (
               <>
-                : <span className="slds-text-color_error">{job.status}</span>
+                :{' '}
+                <span className="slds-text-color_error">
+                  {job.status === CONSTANTS.STATUS.CANCELED
+                    ? 'Canceled'
+                    : 'Failed'}
+                </span>
               </>
             ) : null}
           </strong>

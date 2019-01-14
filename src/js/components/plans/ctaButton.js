@@ -208,6 +208,7 @@ class CtaButton extends React.Component<Props, { modalOpen: boolean }> {
           startPreflight,
         );
       }
+      case STATUS.CANCELED:
       case STATUS.FAILED: {
         // Prior preflight exists, but failed or had plan-level errors
         return this.getLoginOrActionBtn(

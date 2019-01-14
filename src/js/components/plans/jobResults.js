@@ -95,7 +95,8 @@ const JobResults = ({
   if (
     !currentJob ||
     (currentJob.status !== CONSTANTS.STATUS.COMPLETE &&
-      currentJob.status !== CONSTANTS.STATUS.FAILED)
+      currentJob.status !== CONSTANTS.STATUS.FAILED &&
+      currentJob.status !== CONSTANTS.STATUS.CANCELED)
   ) {
     return null;
   }
@@ -143,6 +144,16 @@ const JobResults = ({
         {failed && failMessage ? <p>{failMessage}</p> : null}
         {jobErrors ? <ErrorsList errorList={jobErrors} /> : null}
       </>
+    );
+  }
+
+  // Canceled job
+  if (currentJob.status === CONSTANTS.STATUS.CANCELED) {
+    return (
+      <p className="slds-text-color_error">
+        <ErrorIcon />
+        {label} was canceled.
+      </p>
     );
   }
 

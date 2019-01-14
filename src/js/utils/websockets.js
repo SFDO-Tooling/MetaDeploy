@@ -6,7 +6,7 @@ import {
   completeJobStep,
   completeJob,
   failJob,
-  simpleCancelJob,
+  jobCanceled,
 } from 'jobs/actions';
 import {
   completePreflight,
@@ -96,7 +96,7 @@ export const getAction = (event: EventType): Action | null => {
     case 'JOB_COMPLETED':
       return completeJob(event.payload);
     case 'JOB_CANCELED':
-      return simpleCancelJob(event.payload);
+      return jobCanceled(event.payload);
     case 'JOB_FAILED':
       return failJob(event.payload);
     case 'ORG_CHANGED':
