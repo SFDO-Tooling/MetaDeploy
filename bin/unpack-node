@@ -14,7 +14,7 @@ else
 fi
 
 nodefile="../requirements/node-v10.15.0-${platform}-x64.tar.xz"
-yarnfile="../requirements/yarn-v1.12.3.tar.gz"
+yarnfile="../requirements/yarn-v1.13.0.tar.gz"
 
 rm -rf ../node/*
 tar --strip-components=1 -Jxf ${nodefile}
