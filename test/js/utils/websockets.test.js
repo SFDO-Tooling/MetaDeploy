@@ -1,7 +1,12 @@
 import Sockette from 'sockette';
 
 import * as sockets from 'utils/websockets';
-import { completeJobStep, completeJob, failJob } from 'jobs/actions';
+import {
+  completeJobStep,
+  completeJob,
+  failJob,
+  jobCanceled,
+} from 'jobs/actions';
 import {
   completePreflight,
   failPreflight,
@@ -90,6 +95,17 @@ describe('getAction', () => {
       const payload = { id: 'job-1', steps: ['step-1'] };
       const msg = { type: 'JOB_FAILED', payload };
       const expected = failJob(payload);
+      const actual = sockets.getAction(msg);
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('JOB_CANCELED', () => {
+    test('handles msg', () => {
+      const payload = { id: 'job-1', steps: ['step-1'] };
+      const msg = { type: 'JOB_CANCELED', payload };
+      const expected = jobCanceled(payload);
       const actual = sockets.getAction(msg);
 
       expect(actual).toEqual(expected);
@@ -227,9 +243,10 @@ describe('createSocket', () => {
 
   describe('subscribe', () => {
     let socket;
+    const dispatch = jest.fn();
 
     beforeEach(() => {
-      socket = sockets.createSocket();
+      socket = sockets.createSocket({ dispatch });
     });
 
     describe('ws open', () => {

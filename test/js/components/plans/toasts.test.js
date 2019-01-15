@@ -52,6 +52,18 @@ describe('<Toasts />', () => {
     });
   });
 
+  describe('model cancels', () => {
+    test('renders toast with message', () => {
+      const { getByText, rerender } = setup();
+      const model = { status: 'canceled' };
+      rerender(<Toasts model={model} label={defaultLabel} />);
+
+      expect(
+        getByText('Pre-install validation has been canceled.'),
+      ).toBeVisible();
+    });
+  });
+
   describe('model completes with errors', () => {
     test('renders toast with message', () => {
       const { getByText, rerender } = setup();

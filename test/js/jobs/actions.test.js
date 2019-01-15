@@ -158,6 +158,7 @@ describe('startJob', () => {
 [
   { type: 'JOB_STEP_COMPLETED', action: 'completeJobStep' },
   { type: 'JOB_COMPLETED', action: 'completeJob' },
+  { type: 'JOB_CANCELED', action: 'jobCanceled' },
   { type: 'JOB_FAILED', action: 'failJob' },
 ].forEach(({ type, action }) => {
   test(`${action} returns action object: ${type}`, () => {

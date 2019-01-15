@@ -169,7 +169,7 @@ export const createSocket = ({
       opts.onmaximum(e);
     },
     onclose: e => {
-      log('[WebSocket] closed:', e);
+      log('[WebSocket] closed');
       open = false;
       opts.onclose(e);
       dispatch({ type: 'SOCKET_DISCONNECTED' });

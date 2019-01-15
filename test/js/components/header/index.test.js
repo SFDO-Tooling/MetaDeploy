@@ -1,6 +1,6 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { fireEvent } from 'react-testing-library';
+import { fireEvent, queryByText } from 'react-testing-library';
 
 import { renderWithRedux } from './../../utils';
 
@@ -42,6 +42,22 @@ describe('<Header />', () => {
       fireEvent.click(btn);
 
       expect(getByText('Log Out')).toBeVisible();
+    });
+  });
+
+  describe('offline', () => {
+    test('renders OfflineAlert if websocket disconnected', () => {
+      const initialState = { user: { username: 'Test User' }, socket: false };
+      const { getByText } = setup(initialState);
+
+      expect(getByText('offline')).toBeVisible();
+    });
+
+    test("doesn't render OfflineAlert if websocket connected", () => {
+      const initialState = { user: { username: 'Test User' }, socket: true };
+      const { container } = setup(initialState);
+
+      expect(queryByText(container, 'offline')).toBeNull();
     });
   });
 });

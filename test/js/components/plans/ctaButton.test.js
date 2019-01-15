@@ -151,6 +151,16 @@ describe('<CtaButton />', () => {
     });
   });
 
+  describe('canceled preflight', () => {
+    test('renders re-run-preflight btn', () => {
+      const { getByText } = setup({
+        preflight: { status: 'canceled', is_valid: true, error_count: 0 },
+      });
+
+      expect(getByText('Re-Run Pre-Install Validation')).toBeVisible();
+    });
+  });
+
   describe('failed preflight', () => {
     test('renders re-run-preflight btn', () => {
       const { getByText } = setup({
