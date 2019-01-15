@@ -227,9 +227,6 @@ def run_flows(
         kwargs = dict(options={}, skip=skip_tasks, name=flow_name, result=result)
 
         flowinstance = flow_class(*args, **kwargs)
-        # XXX: TEMPORARY FOR TESTING:
-        if result_class == Job:
-            raise StopRequested
         flowinstance()
 
 

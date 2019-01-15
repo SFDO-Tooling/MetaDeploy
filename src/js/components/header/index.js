@@ -12,6 +12,7 @@ import { selectSocketState } from 'socket/selectors';
 
 import Login from 'components/header/login';
 import Logout from 'components/header/logout';
+import OfflineAlert from 'components/offlineAlert';
 
 import type { AppState } from 'app/reducer';
 import type { User } from 'user/reducer';
@@ -24,44 +25,40 @@ type Props = {
 };
 
 const Header = ({ user, doLogout, socket }: Props) => (
-  <PageHeader
-    className="global-header
-      slds-p-horizontal_x-large
-      slds-p-vertical_medium"
-    title={
-      <Link
-        to={routes.home()}
-        className="slds-page-header__title
-          slds-text-heading_large
-          slds-text-link_reset"
-      >
-        <span data-logo-bit="start">meta</span>
-        <span data-logo-bit="end">deploy</span>
-      </Link>
-    }
-    navRight={
-      <>
+  <>
+    <PageHeader
+      className="global-header
+        slds-p-horizontal_x-large
+        slds-p-vertical_medium"
+      title={
         <Link
-          to={routes.product_list()}
-          className="slds-text-heading_small
-            slds-p-right_large
-            slds-text-link_reset
-            slds-align-middle"
+          to={routes.home()}
+          className="slds-page-header__title
+            slds-text-heading_large
+            slds-text-link_reset"
         >
-          Products
+          <span data-logo-bit="start">meta</span>
+          <span data-logo-bit="end">deploy</span>
         </Link>
-        {user ? <Logout user={user} doLogout={doLogout} /> : <Login />}
-      </>
-    }
-    info={
-      socket && socket.connected ? null : (
+      }
+      navRight={
         <>
-          <span>You&#39;re in offline mode.</span>
+          <Link
+            to={routes.product_list()}
+            className="slds-text-heading_small
+              slds-p-right_large
+              slds-text-link_reset
+              slds-align-middle"
+          >
+            Products
+          </Link>
+          {user ? <Logout user={user} doLogout={doLogout} /> : <Login />}
         </>
-      )
-    }
-    variant="objectHome"
-  />
+      }
+      variant="objectHome"
+    />
+    {socket ? null : <OfflineAlert />}
+  </>
 );
 
 const select = (appState: AppState) => ({

@@ -2,16 +2,14 @@
 
 import type { SocketAction } from 'socket/actions';
 
-export type Socket = {
-  +connected: boolean,
-} | null;
+export type Socket = boolean;
 
-const reducer = (socket: Socket = null, action: SocketAction): Socket => {
+const reducer = (socket: Socket = false, action: SocketAction): Socket => {
   switch (action.type) {
     case 'SOCKET_DISCONNECTED':
-      return { connected: false };
+      return false;
     case 'SOCKET_CONNECTED':
-      return { connected: true };
+      return true;
   }
   return socket;
 };
