@@ -1,5 +1,5 @@
-from typing import List, Type
 from ipaddress import IPv4Address, IPv4Network
+from typing import List, Type
 
 from django.apps import apps
 from django.conf import settings
@@ -8,15 +8,14 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from rest_framework import pagination, permissions, serializers, viewsets
 from rest_framework.response import Response
-from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 
 from metadeploy.api import models
-
 
 
 class IsAllowedIPAddress(permissions.BasePermission):
     """Permission check for allowed IP networks.
     """
+
     ip_ranges: List[IPv4Network]
 
     def has_permission(self, request, view):
@@ -25,10 +24,16 @@ class IsAllowedIPAddress(permissions.BasePermission):
             raise exceptions.SuspiciousOperation(f"Disallowed IP address: {ip_addr}")
         return True
 
-def AllowedIPRange(ip_ranges: List[IPv4Network], cls_prefix: str = "") -> Type[permissions.BasePermission]:
-    """Factory that returns an IsAllowedIpAddress permission based on a given list of ip_ranges.
+
+def AllowedIPRange(
+    ip_ranges: List[IPv4Network], cls_prefix: str = ""
+) -> Type[permissions.BasePermission]:
+    """Factory that returns an IsAllowedIpAddress permission for a list of ip_ranges.
     """
-    return type(f"{cls_prefix}AllowedIPRange", (IsAllowedIPAddress, ), {"ip_ranges": ip_ranges})
+    return type(
+        f"{cls_prefix}AllowedIPRange", (IsAllowedIPAddress,), {"ip_ranges": ip_ranges}
+    )
+
 
 class IsAPIUser(permissions.BasePermission):
     """Permission check for API permission.
@@ -108,8 +113,8 @@ class AdminAPIViewSet(viewsets.ModelViewSet):
     route_ns = "admin_rest"
 
     permission_classes = [
-        AllowedIPRange(settings.ADMIN_API_ALLOWED_SUBNETS, cls_prefix='VPN'),
-        IsAPIUser
+        AllowedIPRange(settings.ADMIN_API_ALLOWED_SUBNETS, cls_prefix="VPN"),
+        IsAPIUser,
     ]
 
     # Pagination
