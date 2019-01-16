@@ -170,7 +170,7 @@ class ProductSlugViewSet(AdminAPIViewSet):
 class PlanStepSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Step
-        exclude = ("id", "plan", "order_key")
+        exclude = ("id", "plan")
 
 
 class PlanSerializer(AdminAPISerializer):
@@ -182,8 +182,8 @@ class PlanSerializer(AdminAPISerializer):
     def create(self, validated_data):
         steps = validated_data.pop("step_set") or []
         plan = self.Meta.model.objects.create(**validated_data)
-        for i, step_data in enumerate(steps):
-            plan.step_set.create(order_key=i, **step_data)
+        for step_data in steps:
+            plan.step_set.create(**step_data)
         return plan
 
     def update(self, instance, validated_data):

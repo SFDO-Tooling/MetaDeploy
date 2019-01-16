@@ -358,7 +358,6 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, models.Model):
     version = models.ForeignKey(Version, on_delete=models.PROTECT)
     preflight_message = MarkdownField(blank=True, property_suffix="_markdown")
     preflight_flow_name = models.CharField(max_length=256, blank=True)
-    flow_name = models.CharField(max_length=64)
     tier = models.CharField(choices=Tier, default=Tier.primary, max_length=64)
     post_install_message = MarkdownField(blank=True, property_suffix="_markdown")
     is_listed = models.BooleanField(default=True)
@@ -389,16 +388,25 @@ class Step(HashIdMixin, models.Model):
     )
 
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
-    name = models.CharField(max_length=1024)
+    name = models.CharField(max_length=1024, help_text="Customer facing label")
     description = models.TextField(blank=True)
     is_required = models.BooleanField(default=True)
     is_recommended = models.BooleanField(default=True)
     kind = models.CharField(choices=Kind, default=Kind.metadata, max_length=64)
-    order_key = models.PositiveIntegerField(default=0)
-    task_name = models.CharField(max_length=64)
+    task_name = models.CharField(max_length=64, help_text="CCI Config task_name")
+    step_num = models.CharField(
+        max_length=64, help_text="dotted step number for CCI task"
+    )
+    task_class = models.CharField(
+        max_length=2048, help_text="dotted module path to BaseTask implementation"
+    )
+    task_config = JSONField(default=dict, blank=True)
 
     class Meta:
-        ordering = ("order_key", "name")
+        ordering = (
+            "step_num",
+            "task_name",
+        )  # TODO: does postgres sort step_num the way I expect
 
     @property
     def kind_icon(self):
@@ -413,7 +421,7 @@ class Step(HashIdMixin, models.Model):
         return None
 
     def __str__(self):
-        return f"Step {self.name} of {self.plan.title} ({self.order_key})"
+        return f"Step {self.name} of {self.plan.title} ({self.step_num})"
 
 
 class Job(HashIdMixin, models.Model):
