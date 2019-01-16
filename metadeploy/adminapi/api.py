@@ -107,8 +107,6 @@ class AdminAPIViewSet(viewsets.ModelViewSet):
     serializer_class = None
     route_ns = "admin_rest"
 
-    # TODO: add 'rest_framework.tokenauth.apps.TokenAuthAppConfig' to INSTALLED_APPS
-    authentication_classes = (TokenAuthentication, SessionAuthentication, )
     permission_classes = [
         AllowedIPRange(settings.ADMIN_API_ALLOWED_SUBNETS, cls_prefix='VPN'),
         IsAPIUser
