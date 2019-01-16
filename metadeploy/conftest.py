@@ -193,5 +193,14 @@ def client(user_factory):
 
 
 @pytest.fixture
+def admin_api_client(user_factory):
+    user = user_factory(is_superuser=True)
+    client = APIClient()
+    client.force_login(user)
+    client.user = user
+    return client
+
+
+@pytest.fixture
 def anon_client():
     return APIClient()
