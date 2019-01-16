@@ -329,6 +329,11 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             return value.all()
         return value
 
+    def _pending_job_exists(self, *, user):
+        return Job.objects.filter(
+            status=Job.Status.started, organization_url=user.instance_url
+        ).first()
+
     def validate_plan(self, value):
         if not value.is_visible_to(self.context["request"].user):
             raise serializers.ValidationError(
@@ -344,6 +349,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         user = self._get_from_data_or_instance(data, "user")
         plan = self._get_from_data_or_instance(data, "plan")
         steps = self._get_from_data_or_instance(data, "steps", default=[])
+
         most_recent_preflight = PreflightResult.objects.most_recent(
             user=user, plan=plan
         )
@@ -352,11 +358,20 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         )
         if no_valid_preflight:
             raise serializers.ValidationError("No valid preflight.")
+
         invalid_steps = not self.instance and not self._has_valid_steps(
             user=user, plan=plan, steps=steps, preflight=most_recent_preflight
         )
         if invalid_steps:
             raise serializers.ValidationError("Invalid steps for plan.")
+
+        pending_job = not self.instance and self._pending_job_exists(user=user)
+        if pending_job:
+            raise serializers.ValidationError(
+                f"Pending job {pending_job.id} exists. Please try again later, or "
+                f"cancel that job."
+            )
+
         data["org_name"] = user.org_name
         data["org_type"] = user.org_type
         data["organization_url"] = user.instance_url
@@ -402,3 +417,8 @@ class PreflightResultSerializer(ErrorWarningCountMixin, serializers.ModelSeriali
             "status": {"read_only": True},
             "results": {"read_only": True},
         }
+
+
+class OrgSerializer(serializers.Serializer):
+    current_job = IdOnlyField()
+    current_preflight = IdOnlyField()

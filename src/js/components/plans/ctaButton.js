@@ -16,7 +16,7 @@ import type {
   Preflight as PreflightType,
 } from 'plans/reducer';
 import type { SelectedSteps as SelectedStepsType } from 'components/plans/detail';
-import type { User as UserType } from 'accounts/reducer';
+import type { User as UserType } from 'user/reducer';
 import typeof { startJob as StartJobType } from 'jobs/actions';
 import typeof { startPreflight as StartPreflightType } from 'plans/actions';
 
@@ -28,6 +28,7 @@ type Props = {
   plan: PlanType,
   preflight: ?PreflightType,
   selectedSteps: SelectedStepsType,
+  preventAction: boolean,
   doStartPreflight: StartPreflightType,
   doStartJob: StartJobType,
 };
@@ -36,19 +37,33 @@ const { STATUS } = CONSTANTS;
 const btnClasses = 'slds-size_full slds-p-vertical_xx-small';
 
 // For use as a "loading" button label
-export const LabelWithSpinner = ({ label }: { label: string }): React.Node => (
+export const LabelWithSpinner = ({
+  label,
+  variant,
+  size,
+}: {
+  label: string,
+  variant?: string,
+  size?: string,
+}): React.Node => (
   <>
     <span className="slds-is-relative slds-m-right_large">
-      <Spinner variant="inverse" size="small" />
+      <Spinner variant={variant || 'inverse'} size={size || 'small'} />
     </span>
     {label}
   </>
 );
 
 // Generic "login" dropdown with custom label text
-const LoginBtn = ({ label }: { label: string }): React.Node => (
+export const LoginBtn = ({
+  id,
+  label,
+}: {
+  id?: string,
+  label: string,
+}): React.Node => (
   <Login
-    id="plan-detail-login"
+    id={id || 'plan-detail-login'}
     buttonClassName={btnClasses}
     buttonVariant="brand"
     triggerClassName="slds-size_full"
@@ -112,10 +127,12 @@ class CtaButton extends React.Component<Props, { modalOpen: boolean }> {
   // Returns an action btn if logged in with a valid token;
   // otherwise returns a login dropdown
   getLoginOrActionBtn(label: string, onClick?: () => void): React.Node {
-    const { user } = this.props;
+    const { user, preventAction } = this.props;
     const hasValidToken = user && user.valid_token_for !== null;
     if (hasValidToken) {
-      return <ActionBtn label={label} onClick={onClick} />;
+      return (
+        <ActionBtn label={label} onClick={onClick} disabled={preventAction} />
+      );
     }
     // Require login first...
     return <LoginBtn label={`Log In to ${label}`} />;

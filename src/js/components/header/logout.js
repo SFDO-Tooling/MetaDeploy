@@ -6,8 +6,8 @@ import Button from '@salesforce/design-system-react/components/button';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import DropdownTrigger from '@salesforce/design-system-react/components/menu-dropdown/button-trigger';
 
-import type { User } from 'accounts/reducer';
-import typeof { logout as LogoutType } from 'accounts/actions';
+import type { User } from 'user/reducer';
+import typeof { logout as LogoutType } from 'user/actions';
 
 const Logout = ({
   user,

@@ -111,8 +111,9 @@ const defaultState = {
       is_ready: true,
     },
   },
-  user: { valid_token_for: 'foo' },
+  user: { valid_token_for: 'foo', org_type: 'an org' },
   jobs: {},
+  org: null,
 };
 
 describe('<PlanDetail />', () => {
@@ -143,6 +144,49 @@ describe('<PlanDetail />', () => {
     );
     return { getByText, queryByText, getByAltText, container, rerender };
   };
+
+  describe('insufficient permissions for user', () => {
+    test('renders login button', () => {
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          user: { valid_token_for: 'foo', org_type: null },
+        },
+      });
+
+      expect(getByText('Log in with a different org')).toBeVisible();
+    });
+  });
+
+  describe('installation is already running on org', () => {
+    test('renders warning and disabled button', () => {
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          org: { current_job: '1', current_preflight: null },
+        },
+      });
+
+      expect(getByText('View the running installation')).toBeVisible();
+      expect(getByText('Install')).toBeDisabled();
+    });
+  });
+
+  describe('preflight is already running on org', () => {
+    test('renders warning and disabled button', () => {
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          org: { current_job: null, current_preflight: '1' },
+        },
+      });
+
+      expect(
+        getByText('A pre-install validation is currently running on this org.'),
+      ).toBeVisible();
+      expect(getByText('Install')).toBeDisabled();
+    });
+  });
 
   describe('no product', () => {
     test('renders <ProductNotFound />', () => {
@@ -212,6 +256,21 @@ describe('<PlanDetail />', () => {
     expect(getByText('My Plan')).toBeVisible();
     expect(getByText('Preflight text...')).toBeVisible();
     expect(getByText('Step 1')).toBeVisible();
+  });
+
+  test('renders preflight expiration warning', () => {
+    const { getByText } = setup({
+      initialState: {
+        ...defaultState,
+        org: { current_job: null, current_preflight: null },
+      },
+    });
+
+    expect(
+      getByText('not run within 10 minutes', {
+        exact: false,
+      }),
+    ).toBeVisible();
   });
 
   test('renders secondary_plan detail (no preflight)', () => {

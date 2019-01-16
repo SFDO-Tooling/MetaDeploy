@@ -4,26 +4,30 @@ import * as React from 'react';
 import DocumentTitle from 'react-document-title';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { createSelector } from 'reselect';
 
 import routes from 'utils/routes';
 import { CONSTANTS } from 'plans/reducer';
 import { fetchPreflight, startPreflight } from 'plans/actions';
 import { fetchVersion } from 'products/actions';
+import { selectOrg } from 'org/selectors';
+import { selectPlan, selectPreflight } from 'plans/selectors';
 import {
   selectProduct,
   selectVersion,
   selectVersionLabel,
-} from 'components/products/detail';
-import { selectUserState } from 'components/header';
+} from 'products/selectors';
+import { selectUserState } from 'user/selectors';
 import { shouldFetchVersion, getLoadingOrNotFound } from 'products/utils';
 import { startJob } from 'jobs/actions';
 
 import BodyContainer from 'components/bodyContainer';
-import CtaButton from 'components/plans/ctaButton';
+import CtaButton, { LoginBtn } from 'components/plans/ctaButton';
 import Header from 'components/plans/header';
 import Intro from 'components/plans/intro';
-import JobResults from 'components/plans/jobResults';
+import JobResults, {
+  ErrorIcon,
+  WarningIcon,
+} from 'components/plans/jobResults';
 import PlanNotAllowed from 'components/products/notAllowed';
 import ProductNotFound from 'components/products/product404';
 import StepsTable from 'components/plans/stepsTable';
@@ -32,16 +36,16 @@ import UserInfo from 'components/plans/userInfo';
 
 import type { AppState } from 'app/reducer';
 import type { InitialProps } from 'components/utils';
+import type { Org as OrgType } from 'org/reducer';
 import type {
   Plan as PlanType,
   Preflight as PreflightType,
-  PreflightsState,
 } from 'plans/reducer';
 import type {
   Product as ProductType,
   Version as VersionType,
 } from 'products/reducer';
-import type { User as UserType } from 'accounts/reducer';
+import type { User as UserType } from 'user/reducer';
 
 export type SelectedSteps = Set<string>;
 type Props = {
@@ -52,6 +56,7 @@ type Props = {
   versionLabel: ?string,
   plan: PlanType | null,
   preflight: ?PreflightType,
+  org: OrgType,
   doFetchVersion: typeof fetchVersion,
   doFetchPreflight: typeof fetchPreflight,
   doStartPreflight: typeof startPreflight,
@@ -107,14 +112,13 @@ class PlanDetail extends React.Component<Props, State> {
       product !== prevProps.product ||
       version !== prevProps.version ||
       versionLabel !== prevProps.versionLabel;
-    const preflightChanged =
-      user !== prevProps.user ||
-      plan !== prevProps.plan ||
-      preflight !== prevProps.preflight;
+    const userChanged = user !== prevProps.user;
+    const planChanged = plan !== prevProps.plan;
+    const preflightChanged = preflight !== prevProps.preflight;
     if (versionChanged) {
       this.fetchVersionIfMissing();
     }
-    if (preflightChanged) {
+    if (userChanged || planChanged || preflightChanged) {
       this.fetchPreflightIfMissing();
     }
   }
@@ -158,17 +162,117 @@ class PlanDetail extends React.Component<Props, State> {
     return selectedSteps;
   }
 
-  render(): React.Node {
+  getPostMessage(): React.Node {
+    const { user, product, version, plan, org } = this.props;
+    /* istanbul ignore if */
+    if (!product || !version || !plan) {
+      return null;
+    }
+    if (user && !user.org_type) {
+      return (
+        <>
+          <div className="slds-p-bottom_xx-small">
+            <ErrorIcon />
+            <span className="slds-text-color_error">
+              Oops! It looks like you don’t have permissions to run an
+              installation on this org.
+            </span>
+          </div>
+          <p>
+            Please contact an Admin within your org or use the button below to
+            log in with a different org.
+          </p>
+        </>
+      );
+    }
+    if (org) {
+      if (org.current_job) {
+        return (
+          <p>
+            <WarningIcon />
+            <span>
+              An installation is currently running on this org.{' '}
+              <Link
+                to={routes.job_detail(
+                  product.slug,
+                  version.label,
+                  plan.slug,
+                  org.current_job,
+                )}
+              >
+                View the running installation
+              </Link>{' '}
+              to cancel it.
+            </span>
+          </p>
+        );
+      }
+      if (org.current_preflight) {
+        return (
+          <p>
+            <WarningIcon />
+            <span>
+              A pre-install validation is currently running on this org.
+            </span>
+          </p>
+        );
+      }
+    }
+    return null;
+  }
+
+  getCTA(selectedSteps: SelectedSteps): React.Node {
     const {
       history,
+      user,
+      product,
+      version,
+      plan,
+      preflight,
+      org,
+      doStartPreflight,
+      doStartJob,
+    } = this.props;
+    /* istanbul ignore if */
+    if (!product || !version || !plan) {
+      return null;
+    }
+    if (user && !user.org_type) {
+      return (
+        <LoginBtn
+          id="org-not-allowed-login"
+          label="Log in with a different org"
+        />
+      );
+    } else if (plan.steps && plan.steps.length) {
+      return (
+        <CtaButton
+          history={history}
+          user={user}
+          productSlug={product.slug}
+          versionLabel={version.label}
+          plan={plan}
+          preflight={preflight}
+          selectedSteps={selectedSteps}
+          preventAction={Boolean(
+            org && (org.current_job || org.current_preflight),
+          )}
+          doStartPreflight={doStartPreflight}
+          doStartJob={doStartJob}
+        />
+      );
+    }
+    return null;
+  }
+
+  render(): React.Node {
+    const {
       user,
       product,
       version,
       versionLabel,
       plan,
       preflight,
-      doStartPreflight,
-      doStartJob,
     } = this.props;
     const loadingOrNotFound = getLoadingOrNotFound({
       product,
@@ -196,33 +300,6 @@ class PlanDetail extends React.Component<Props, State> {
                 <Toasts model={preflight} label="Pre-install validation" />
               ) : null}
               <Intro
-                results={
-                  preflight && user ? (
-                    <JobResults
-                      preflight={preflight}
-                      label="Pre-install validation"
-                      failMessage={
-                        'After resolving all errors, ' +
-                        'run the pre-install validation again.'
-                      }
-                    />
-                  ) : null
-                }
-                cta={
-                  plan.steps && plan.steps.length ? (
-                    <CtaButton
-                      history={history}
-                      user={user}
-                      productSlug={product.slug}
-                      versionLabel={version.label}
-                      plan={plan}
-                      preflight={preflight}
-                      selectedSteps={selectedSteps}
-                      doStartPreflight={doStartPreflight}
-                      doStartJob={doStartJob}
-                    />
-                  ) : null
-                }
                 preMessage={
                   plan.preflight_message ? (
                     // These messages are pre-cleaned by the API
@@ -233,6 +310,27 @@ class PlanDetail extends React.Component<Props, State> {
                     />
                   ) : null
                 }
+                results={
+                  preflight && user ? (
+                    <JobResults
+                      preflight={preflight}
+                      label="Pre-install validation"
+                      failMessage={
+                        'After resolving all errors, ' +
+                        'run the pre-install validation again.'
+                      }
+                      successMessage={
+                        'Pre-install validation will expire if install is ' +
+                        'not run within ' +
+                        `${window.GLOBALS.PREFLIGHT_LIFETIME_MINUTES || 10} ` +
+                        'minutes, and you will need to run pre-install ' +
+                        'validation again.'
+                      }
+                    />
+                  ) : null
+                }
+                postMessage={this.getPostMessage()}
+                cta={this.getCTA(selectedSteps)}
               />
               <UserInfo user={user} />
               {plan.steps && plan.steps.length ? (
@@ -266,50 +364,6 @@ class PlanDetail extends React.Component<Props, State> {
   }
 }
 
-const selectPlanSlug = (
-  appState: AppState,
-  { match: { params } }: InitialProps,
-): ?string => params.planSlug;
-
-export const selectPlan: (
-  AppState,
-  InitialProps,
-) => PlanType | null = createSelector(
-  [selectProduct, selectVersion, selectPlanSlug],
-  (
-    product: ProductType | null,
-    version: VersionType | null,
-    planSlug: ?string,
-  ): PlanType | null => {
-    if (!product || !version || !planSlug) {
-      return null;
-    }
-    if (version.primary_plan.slug === planSlug) {
-      return version.primary_plan;
-    }
-    if (version.secondary_plan && version.secondary_plan.slug === planSlug) {
-      return version.secondary_plan;
-    }
-    const plan = version.additional_plans.find(p => p.slug === planSlug);
-    return plan || null;
-  },
-);
-
-const selectPreflightsState = (appState: AppState): PreflightsState =>
-  appState.preflights;
-
-const selectPreflight = createSelector(
-  [selectPreflightsState, selectPlan],
-  (preflights: PreflightsState, plan: PlanType | null): ?PreflightType => {
-    if (!plan) {
-      return null;
-    }
-    // A `null` preflight means we already fetched and no prior preflight exists
-    // An `undefined` preflight means we don't know whether a preflight exists
-    return preflights[plan.id];
-  },
-);
-
 const select = (appState: AppState, props: InitialProps) => ({
   user: selectUserState(appState),
   product: selectProduct(appState, props),
@@ -317,6 +371,7 @@ const select = (appState: AppState, props: InitialProps) => ({
   versionLabel: selectVersionLabel(appState, props),
   plan: selectPlan(appState, props),
   preflight: selectPreflight(appState, props),
+  org: selectOrg(appState),
 });
 
 const actions = {

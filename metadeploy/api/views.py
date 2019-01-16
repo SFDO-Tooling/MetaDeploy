@@ -1,13 +1,17 @@
+from django.core.cache import cache
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from .constants import REDIS_JOB_CANCEL_KEY
 from .jobs import preflight_job
 from .models import Job, Plan, PreflightResult, Product, Version
+from .permissions import OnlyOwnerCanDelete
 from .serializers import (
     JobSerializer,
+    OrgSerializer,
     PlanSerializer,
     PreflightResultSerializer,
     ProductSerializer,
@@ -18,7 +22,8 @@ from .serializers import (
 class JobViewSet(viewsets.ModelViewSet):
     serializer_class = JobSerializer
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ("plan", "user")
+    filterset_fields = ("plan", "user", "status", "organization_url")
+    permission_classes = (OnlyOwnerCanDelete,)
 
     def get_queryset(self):
         if self.request.user.is_staff:
@@ -28,6 +33,9 @@ class JobViewSet(viewsets.ModelViewSet):
         else:
             filters = Q(is_public=True) | Q(user=self.request.user)
         return Job.objects.filter(filters)
+
+    def perform_destroy(self, instance):
+        cache.set(REDIS_JOB_CANCEL_KEY.format(id=instance.id), True)
 
 
 class ProductViewSet(viewsets.ModelViewSet):
@@ -76,3 +84,23 @@ class PlanViewSet(viewsets.ModelViewSet):
             return self.preflight_get(request)
         if request.method == "POST":
             return self.preflight_post(request)
+
+
+class OrgViewSet(viewsets.ViewSet):
+    def list(self, request):
+        """
+        This will return data on the user's current org. It is not a
+        list endpoint, but does not take a pk, so we have to implement
+        it this way.
+        """
+        current_job = Job.objects.filter(
+            organization_url=request.user.instance_url, status=Job.Status.started
+        ).first()
+        current_preflight = PreflightResult.objects.filter(
+            organization_url=request.user.instance_url,
+            status=PreflightResult.Status.started,
+        ).first()
+        serializer = OrgSerializer(
+            {"current_job": current_job, "current_preflight": current_preflight}
+        )
+        return Response(serializer.data)

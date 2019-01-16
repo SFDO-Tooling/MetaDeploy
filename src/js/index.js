@@ -26,7 +26,7 @@ import { routePatterns } from 'utils/routes';
 
 import reducer from 'app/reducer';
 
-import { login } from 'accounts/actions';
+import { login } from 'user/actions';
 
 import { fetchProducts } from 'products/actions';
 
@@ -125,6 +125,18 @@ cache
         url: `${protocol}//${host}${window.api_urls.ws_notifications()}`,
         dispatch: appStore.dispatch,
       });
+
+      // Get JS globals
+      let GLOBALS = {};
+      try {
+        const globalsEl = document.getElementById('js-globals');
+        if (globalsEl) {
+          GLOBALS = JSON.parse(globalsEl.textContent);
+        }
+      } catch (err) {
+        logError(err);
+      }
+      window.GLOBALS = GLOBALS;
 
       // Get logged-in/out status
       const userString = el.getAttribute('data-user');

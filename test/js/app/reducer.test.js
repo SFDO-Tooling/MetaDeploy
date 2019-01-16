@@ -9,6 +9,7 @@ describe('reducer', () => {
       'products',
       'preflights',
       'jobs',
+      'org',
     ]);
   });
 });
