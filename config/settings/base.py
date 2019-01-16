@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
+from ipaddress import IPv4Network
 from os import environ
 from pathlib import Path
 
@@ -21,6 +22,10 @@ BOOLS = ("True", "true", "T", "t", "1", 1)
 
 def boolish(val):
     return val in BOOLS
+
+
+def ipv4_networks(val):
+    return [IPv4Network(s.strip()) for s in val.split(",")]
 
 
 class NoDefaultValue:
@@ -115,10 +120,12 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "colorfield",
     "rest_framework",
+    "rest_framework.authtoken",
     "django_filters",
     "metadeploy",
     "metadeploy.multisalesforce",
     "metadeploy.api",
+    "metadeploy.adminapi.apps.AdminapiConfig",
     "django_js_reverse",
 ]
 
@@ -178,6 +185,10 @@ ROOT_URLCONF = "metadeploy.urls"
 
 # Must end in a /, or you will experience surprises:
 ADMIN_AREA_PREFIX = "admin/"
+
+ADMIN_API_ALLOWED_SUBNETS = env(
+    "ADMIN_API_ALLOWED_SUBNETS", default="127.0.0.1/32", type_=ipv4_networks
+)
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
@@ -263,7 +274,7 @@ ACCOUNT_UNIQUE_EMAIL = False
 SOCIALACCOUNT_ADAPTER = "metadeploy.multisalesforce.adapter.CustomSocialAccountAdapter"
 
 JS_REVERSE_JS_VAR_NAME = "api_urls"
-JS_REVERSE_EXCLUDE_NAMESPACES = ["admin"]
+JS_REVERSE_EXCLUDE_NAMESPACES = ["admin", "admin_rest"]
 
 
 # Redis configuration:
@@ -303,7 +314,11 @@ CHANNEL_LAYERS = {
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticatedOrReadOnly",
-    )
+    ),
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.TokenAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ),
 }
 
 
