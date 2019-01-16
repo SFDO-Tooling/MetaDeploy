@@ -1,3 +1,4 @@
+from typing import List, Type
 from ipaddress import IPv4Address
 
 from django.apps import apps
@@ -7,20 +8,27 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from rest_framework import pagination, permissions, serializers, viewsets
 from rest_framework.response import Response
+from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 
 from metadeploy.api import models
+
 
 
 class IsAllowedIPAddress(permissions.BasePermission):
     """Permission check for allowed IP networks.
     """
+    ip_ranges: List[IPv4Network]
 
     def has_permission(self, request, view):
         ip_addr = IPv4Address(request.META["REMOTE_ADDR"])
-        if not any(ip_addr in subnet for subnet in settings.ADMIN_API_ALLOWED_SUBNETS):
+        if not any(ip_addr in subnet for subnet in ip_ranges):
             raise exceptions.SuspiciousOperation(f"Disallowed IP address: {ip_addr}")
         return True
 
+def AllowedIPRange(ip_ranges: List[IPv4Network], cls_prefix: str = "") -> Type[permissions.BasePermission]:
+    """Factory that returns an IsAllowedIpAddress permission based on a given list of ip_ranges.
+    """
+    return type(f"{cls_prefix}AllowedIPRange", (IsAllowedIPAddress, ), {"ip_ranges": ip_ranges})
 
 class IsAPIUser(permissions.BasePermission):
     """Permission check for API permission.
@@ -90,7 +98,6 @@ class AdminAPIPagination(pagination.LimitOffsetPagination):
         )
 
 
-# https://drf-schema-adapter.readthedocs.io/en/latest/drf_auto_endpoint/ inspiration?
 @method_decorator(never_cache, name="list")
 @method_decorator(never_cache, name="retrieve")
 class AdminAPIViewSet(viewsets.ModelViewSet):
@@ -100,18 +107,16 @@ class AdminAPIViewSet(viewsets.ModelViewSet):
     serializer_class = None
     route_ns = "admin_rest"
 
-    # TODO: Permission, force subclasses to append, not overwrite
-    # TODO: API Key?
-    permission_classes = [IsAllowedIPAddress, IsAPIUser]
+    # TODO: I believe we need to add SessionAuthentication as the DEFAULT_AUTHETICATION_CLASSES setting for rest framework, see https://www.django-rest-framework.org/api-guide/authentication/, it ensures that we're CSRF checked
+    # TODO: add 'rest_framework.tokenauth.apps.TokenAuthAppConfig' to INSTALLED_APPS
+    authentication_classes = (TokenAuthentication, SessionAuthentication, )
+    permission_classes = [AllowedIPRange(settings.ADMIN_API_ALLOWED_SUBNETS, cls_prefix='VPN'), IsAPIUser]
 
     # Pagination
     pagination_class = AdminAPIPagination
 
-    # TODO: Metadata, create an OPTIONS/metadata response. JSON HYPER SCHEMA.
     # TODO: Filter, idk figure something out,
     #   don't reinvent odata $filter and build an injection attack.
-    # TODO: Versioning, require it in accept header
-    # TODO: RFC7807 Error Documents, cuz!
     # TODO: Natural Keys, router support needed.
 
     # Caching
@@ -119,14 +124,8 @@ class AdminAPIViewSet(viewsets.ModelViewSet):
     # for HTTP GETs (list/retrieve).
 
     # Response Shape
-    # AdminAPI is inspired by, but noncompliant with JSON:API at this time. Fight me.
-    # The paginator provides the top level list response shape, but we should probably
-    # build response shape into the viewset. That just requires a lot more overrides...
-    # TODO: research the best way to always set a response shape.
-    # - response finalizer
-    # - override the mixin methods, super, and edit response?
-    # - override the mixin methods and produce own response
-    # TODO: JSON:API-style serializer (type, id, attributes, links)
+    # AdminAPI is inspired by, but noncompliant with JSON:API at this time.
+    # The paginator provides the top level list response shape.
 
     @property
     def model(self):
