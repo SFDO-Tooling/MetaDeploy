@@ -1,5 +1,5 @@
 from typing import List, Type
-from ipaddress import IPv4Address
+from ipaddress import IPv4Address, IPv4Network
 
 from django.apps import apps
 from django.conf import settings
@@ -21,7 +21,7 @@ class IsAllowedIPAddress(permissions.BasePermission):
 
     def has_permission(self, request, view):
         ip_addr = IPv4Address(request.META["REMOTE_ADDR"])
-        if not any(ip_addr in subnet for subnet in ip_ranges):
+        if not any(ip_addr in subnet for subnet in self.ip_ranges):
             raise exceptions.SuspiciousOperation(f"Disallowed IP address: {ip_addr}")
         return True
 
@@ -107,10 +107,12 @@ class AdminAPIViewSet(viewsets.ModelViewSet):
     serializer_class = None
     route_ns = "admin_rest"
 
-    # TODO: I believe we need to add SessionAuthentication as the DEFAULT_AUTHETICATION_CLASSES setting for rest framework, see https://www.django-rest-framework.org/api-guide/authentication/, it ensures that we're CSRF checked
     # TODO: add 'rest_framework.tokenauth.apps.TokenAuthAppConfig' to INSTALLED_APPS
     authentication_classes = (TokenAuthentication, SessionAuthentication, )
-    permission_classes = [AllowedIPRange(settings.ADMIN_API_ALLOWED_SUBNETS, cls_prefix='VPN'), IsAPIUser]
+    permission_classes = [
+        AllowedIPRange(settings.ADMIN_API_ALLOWED_SUBNETS, cls_prefix='VPN'),
+        IsAPIUser
+    ]
 
     # Pagination
     pagination_class = AdminAPIPagination
