@@ -2,6 +2,7 @@ TAGS
 *.DS_Store
 *~
 .vscode
+.idea/
 .livereload
 node_modules/
 node/
