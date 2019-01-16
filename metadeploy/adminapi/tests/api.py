@@ -15,7 +15,6 @@ class TestPlanViewSet:
         assert response.json() == {
             "data": [
                 {
-                    "flow_name": "slow_steps_flow",
                     "id": f"{plan.id}",
                     "is_listed": True,
                     "post_install_message": "",
@@ -41,7 +40,6 @@ class TestPlanViewSet:
 
         assert response.status_code == 200
         assert response.json() == {
-            "flow_name": "slow_steps_flow",
             "id": str(plan.id),
             "is_listed": True,
             "post_install_message": "",
@@ -71,7 +69,6 @@ class TestPlanViewSet:
             url,
             {
                 "title": "Sample plan",
-                "flow_name": "bogus",
                 "steps": [
                     {"task_name": "task1", "name": "Task 1"},
                     {"task_name": "task2", "name": "Task 2"},
@@ -85,7 +82,6 @@ class TestPlanViewSet:
         json = response.json()
         plan_id = json["id"]
         assert response.json() == {
-            "flow_name": "bogus",
             "id": plan_id,
             "is_listed": True,
             "post_install_message": "",
@@ -123,7 +119,6 @@ class TestPlanViewSet:
             f"http://testserver/admin/rest/plans/{plan.id}",
             {
                 "title": "Sample plan",
-                "flow_name": "bogus",
                 "version": f"http://testserver/admin/rest/versions/{plan.version.id}",
             },
             format="json",
@@ -134,7 +129,6 @@ class TestPlanViewSet:
             f"http://testserver/admin/rest/plans/{plan.id}",
             {
                 "title": "Sample plan",
-                "flow_name": "bogus",
                 "steps": [],
                 "version": f"http://testserver/admin/rest/versions/{plan.version.id}",
             },

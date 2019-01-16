@@ -110,7 +110,7 @@ def run_flows(
     skip_tasks,
     organization_url,
     flow_class,
-    flow_name,
+    # flow_name, # FIXME
     result_class,
     result_id,
 ):
@@ -220,10 +220,10 @@ def run_flows(
         ctx.keychain.set_service("github", github_app, True)
 
         # Make and run the flow:
-        flow_config = ctx.project_config.get_flow(flow_name)
+        flow_config = ctx.project_config.get_flow(None)  # FIXME
 
         args = (ctx.project_config, flow_config, ctx.keychain.get_org(current_org))
-        kwargs = dict(options={}, skip=skip_tasks, name=flow_name, result=result)
+        kwargs = dict(options={}, skip=skip_tasks, name="Nothin", result=result)
 
         flowinstance = flow_class(*args, **kwargs)
         flowinstance()
@@ -242,7 +242,7 @@ def enqueuer():
             skip_tasks=j.skip_tasks(),
             organization_url=j.organization_url,
             flow_class=JobFlow,
-            flow_name=j.plan.flow_name,
+            # flow_name=j.plan.flow_name, FIXME
             result_class=Job,
             result_id=j.id,
         )
@@ -272,7 +272,7 @@ def preflight(preflight_result_id):
         skip_tasks=[],
         organization_url=preflight_result.organization_url,
         flow_class=PreflightFlow,
-        flow_name=preflight_result.plan.preflight_flow_name,
+        # flow_name=preflight_result.plan.preflight_flow_name, FIXME
         result_class=PreflightResult,
         result_id=preflight_result.id,
     )
