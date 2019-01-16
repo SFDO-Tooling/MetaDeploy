@@ -9,10 +9,10 @@ https://docs.djangoproject.com/en/1.11/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
-
 from ipaddress import IPv4Network
 from os import environ
 from pathlib import Path
+from typing import List
 
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
@@ -20,11 +20,11 @@ from django.core.exceptions import ImproperlyConfigured
 BOOLS = ("True", "true", "T", "t", "1", 1)
 
 
-def boolish(val):
+def boolish(val: str) -> bool:
     return val in BOOLS
 
 
-def ipv4_networks(val):
+def ipv4_networks(val: str) -> List[IPv4Network]:
     return [IPv4Network(s.strip()) for s in val.split(",")]
 
 
