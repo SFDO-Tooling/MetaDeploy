@@ -120,6 +120,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "colorfield",
     "rest_framework",
+    "rest_framework.authtoken",
     "django_filters",
     "metadeploy",
     "metadeploy.multisalesforce",
@@ -220,6 +221,13 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = env(
     "SECURE_HSTS_INCLUDE_SUBDOMAINS", default=False, type_=boolish
 )
 SECURE_HSTS_PRELOAD = env("SECURE_HSTS_PRELOAD", default=False, type_=boolish)
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.TokenAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    )
+}
 
 
 # Internationalization
