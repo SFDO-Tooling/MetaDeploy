@@ -1,20 +1,25 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { fireEvent, queryByText } from 'react-testing-library';
+import { fireEvent } from 'react-testing-library';
 
 import { renderWithRedux } from './../../utils';
 
 import Header from 'components/header';
 
 describe('<Header />', () => {
-  const setup = (initialState = { user: null }) => {
-    const { container, getByLabelText, getByText } = renderWithRedux(
+  const setup = (initialState = { user: null, socket: false }) => {
+    const {
+      container,
+      getByLabelText,
+      getByText,
+      queryByText,
+    } = renderWithRedux(
       <MemoryRouter>
         <Header />
       </MemoryRouter>,
       initialState,
     );
-    return { container, getByLabelText, getByText };
+    return { container, getByLabelText, getByText, queryByText };
   };
 
   describe('logged out', () => {
@@ -47,17 +52,16 @@ describe('<Header />', () => {
 
   describe('offline', () => {
     test('renders OfflineAlert if websocket disconnected', () => {
-      const initialState = { user: { username: 'Test User' }, socket: false };
-      const { getByText } = setup(initialState);
+      const { getByText } = setup();
 
-      expect(getByText('offline')).toBeVisible();
+      expect(getByText('reload the page.')).toBeVisible();
     });
 
-    test("doesn't render OfflineAlert if websocket connected", () => {
-      const initialState = { user: { username: 'Test User' }, socket: true };
-      const { container } = setup(initialState);
+    test('does not render OfflineAlert if websocket connected', () => {
+      const initialState = { user: null, socket: true };
+      const { queryByText } = setup(initialState);
 
-      expect(queryByText(container, 'offline')).toBeNull();
+      expect(queryByText('reload the page.')).toBeNull();
     });
   });
 });

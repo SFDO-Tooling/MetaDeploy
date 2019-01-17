@@ -1,17 +1,13 @@
 import Sockette from 'sockette';
 
 import * as sockets from 'utils/websockets';
-import {
-  completeJobStep,
-  completeJob,
-  failJob,
-  jobCanceled,
-} from 'jobs/actions';
+import { completeJobStep, completeJob, failJob, cancelJob } from 'jobs/actions';
 import {
   completePreflight,
   failPreflight,
   invalidatePreflight,
 } from 'plans/actions';
+import { connectSocket, disconnectSocket } from 'socket/actions';
 import { invalidateToken } from 'user/actions';
 import { updateOrg } from 'org/actions';
 
@@ -105,7 +101,7 @@ describe('getAction', () => {
     test('handles msg', () => {
       const payload = { id: 'job-1', steps: ['step-1'] };
       const msg = { type: 'JOB_CANCELED', payload };
-      const expected = jobCanceled(payload);
+      const expected = cancelJob(payload);
       const actual = sockets.getAction(msg);
 
       expect(actual).toEqual(expected);
@@ -157,15 +153,17 @@ describe('createSocket', () => {
 
   describe('events', () => {
     const dispatch = jest.fn();
-    let socket;
+    let socket, socketInstance;
 
     beforeEach(() => {
+      dispatch.mockClear();
       socket = sockets.createSocket({ dispatch });
+      socketInstance = Sockette.mock.calls[0][1];
     });
 
     describe('onopen', () => {
       test('logs', () => {
-        Sockette.mock.calls[0][1].onopen({});
+        socketInstance.onopen({});
 
         expect(window.console.info).toHaveBeenCalledWith(
           '[WebSocket] connected',
@@ -175,15 +173,22 @@ describe('createSocket', () => {
       test('subscribes to pending objects', () => {
         const payload = { model: 'foo', id: 'bar' };
         socket.subscribe(payload);
-        Sockette.mock.calls[0][1].onopen({});
+        socketInstance.onopen({});
 
         expect(mockJson).toHaveBeenCalledWith(payload);
+      });
+
+      test('dispatches connectSocket action', () => {
+        socketInstance.onopen({});
+        const expected = connectSocket();
+
+        expect(dispatch).toHaveBeenCalledWith(expected);
       });
     });
 
     describe('onmessage', () => {
       test('logs', () => {
-        Sockette.mock.calls[0][1].onmessage({});
+        socketInstance.onmessage({});
 
         expect(window.console.info).toHaveBeenCalledWith(
           '[WebSocket] received:',
@@ -192,7 +197,7 @@ describe('createSocket', () => {
       });
 
       test('dispatches action', () => {
-        Sockette.mock.calls[0][1].onmessage({
+        socketInstance.onmessage({
           data: { type: 'USER_TOKEN_INVALID' },
         });
         const expected = invalidateToken();
@@ -203,7 +208,7 @@ describe('createSocket', () => {
 
     describe('onreconnect', () => {
       test('logs', () => {
-        Sockette.mock.calls[0][1].onreconnect({});
+        socketInstance.onreconnect({});
 
         expect(window.console.info).toHaveBeenCalledWith(
           '[WebSocket] reconnecting...',
@@ -213,30 +218,56 @@ describe('createSocket', () => {
 
     describe('onmaximum', () => {
       test('logs', () => {
-        Sockette.mock.calls[0][1].onmaximum({});
+        socketInstance.onmaximum({});
 
         expect(window.console.info).toHaveBeenCalledWith(
-          '[WebSocket] ending reconnect after 25 attempts',
+          '[WebSocket] ending reconnect after Infinity attempts',
         );
       });
     });
 
     describe('onclose', () => {
       test('logs', () => {
-        Sockette.mock.calls[0][1].onclose({});
+        socketInstance.onclose({});
 
         expect(window.console.info).toHaveBeenCalledWith('[WebSocket] closed');
+      });
+
+      test('dispatches disconnectSocket action after 5 seconds', () => {
+        jest.useFakeTimers();
+        socketInstance.onopen({});
+        socketInstance.onclose({});
+
+        expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), 5000);
+
+        jest.runAllTimers();
+        const expected = disconnectSocket();
+
+        expect(dispatch).toHaveBeenCalledWith(expected);
+
+        setTimeout.mockClear();
+        socketInstance.onclose({});
+
+        expect(setTimeout).not.toHaveBeenCalled();
+      });
+
+      test('does not dispatch disconnectSocket action if reconnected', () => {
+        jest.useFakeTimers();
+        socketInstance.onopen({});
+        socketInstance.onclose({});
+        socketInstance.onopen({});
+        jest.runAllTimers();
+        const expected = disconnectSocket();
+
+        expect(dispatch).not.toHaveBeenCalledWith(expected);
       });
     });
 
     describe('onerror', () => {
       test('logs', () => {
-        Sockette.mock.calls[0][1].onerror({});
+        socketInstance.onerror({});
 
-        expect(window.console.info).toHaveBeenCalledWith(
-          '[WebSocket] error:',
-          {},
-        );
+        expect(window.console.info).toHaveBeenCalledWith('[WebSocket] error');
       });
     });
   });

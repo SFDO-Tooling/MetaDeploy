@@ -7,16 +7,16 @@ import { connect } from 'react-redux';
 
 import routes from 'utils/routes';
 import { logout } from 'user/actions';
-import { selectUserState } from 'user/selectors';
 import { selectSocketState } from 'socket/selectors';
+import { selectUserState } from 'user/selectors';
 
 import Login from 'components/header/login';
 import Logout from 'components/header/logout';
 import OfflineAlert from 'components/offlineAlert';
 
 import type { AppState } from 'app/reducer';
-import type { User } from 'user/reducer';
 import type { Socket } from 'socket/reducer';
+import type { User } from 'user/reducer';
 
 type Props = {
   user: User,
@@ -26,6 +26,7 @@ type Props = {
 
 const Header = ({ user, doLogout, socket }: Props) => (
   <>
+    {socket ? null : <OfflineAlert />}
     <PageHeader
       className="global-header
         slds-p-horizontal_x-large
@@ -57,7 +58,6 @@ const Header = ({ user, doLogout, socket }: Props) => (
       }
       variant="objectHome"
     />
-    {socket ? null : <OfflineAlert />}
   </>
 );
 

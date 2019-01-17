@@ -149,7 +149,7 @@ export const updateJob = (payload: {
     });
 };
 
-export const cancelJob = (id: string): ThunkAction => (
+export const requestCancelJob = (id: string): ThunkAction => (
   dispatch,
   getState,
   { apiFetch },
@@ -166,7 +166,7 @@ export const cancelJob = (id: string): ThunkAction => (
     });
 };
 
-export const jobCanceled = (payload: Job): JobCanceled => ({
+export const cancelJob = (payload: Job): JobCanceled => ({
   type: 'JOB_CANCELED',
   payload,
 });

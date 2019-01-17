@@ -6,8 +6,8 @@ import jobs from 'jobs/reducer';
 import org from 'org/reducer';
 import preflights from 'plans/reducer';
 import products from 'products/reducer';
-import user from 'user/reducer';
 import socket from 'socket/reducer';
+import user from 'user/reducer';
 
 import type { CombinedReducer } from 'redux';
 import type { JobsState } from 'jobs/reducer';

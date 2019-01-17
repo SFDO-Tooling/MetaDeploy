@@ -2,17 +2,13 @@
 
 import Sockette from 'sockette';
 
-import {
-  completeJobStep,
-  completeJob,
-  failJob,
-  jobCanceled,
-} from 'jobs/actions';
+import { completeJobStep, completeJob, failJob, cancelJob } from 'jobs/actions';
 import {
   completePreflight,
   failPreflight,
   invalidatePreflight,
 } from 'plans/actions';
+import { connectSocket, disconnectSocket } from 'socket/actions';
 import { invalidateToken } from 'user/actions';
 import { log } from 'utils/logging';
 import { updateOrg } from 'org/actions';
@@ -96,7 +92,7 @@ export const getAction = (event: EventType): Action | null => {
     case 'JOB_COMPLETED':
       return completeJob(event.payload);
     case 'JOB_CANCELED':
-      return jobCanceled(event.payload);
+      return cancelJob(event.payload);
     case 'JOB_FAILED':
       return failJob(event.payload);
     case 'ORG_CHANGED':
@@ -107,7 +103,7 @@ export const getAction = (event: EventType): Action | null => {
 
 export const createSocket = ({
   url,
-  options,
+  options = {},
   dispatch,
 }: {
   url: string,
@@ -118,7 +114,8 @@ export const createSocket = ({
   reconnect: () => void,
 } => {
   const defaults = {
-    maxAttempts: 25,
+    timeout: 1000,
+    maxAttempts: Infinity,
     onopen: () => {},
     onmessage: () => {},
     onreconnect: () => {},
@@ -132,12 +129,11 @@ export const createSocket = ({
   const pending = new Set();
 
   const socket = new Sockette(url, {
-    protocols: opts.protocols,
     timeout: opts.timeout,
     maxAttempts: opts.maxAttempts,
     onopen: e => {
       log('[WebSocket] connected');
-      dispatch({ type: 'SOCKET_CONNECTED' });
+      dispatch(connectSocket());
       open = true;
       for (const payload of pending) {
         log('[WebSocket] subscribing to:', payload);
@@ -170,12 +166,18 @@ export const createSocket = ({
     },
     onclose: e => {
       log('[WebSocket] closed');
-      open = false;
+      if (open) {
+        open = false;
+        setTimeout(() => {
+          if (!open) {
+            dispatch(disconnectSocket());
+          }
+        }, 5000);
+      }
       opts.onclose(e);
-      dispatch({ type: 'SOCKET_DISCONNECTED' });
     },
     onerror: e => {
-      log('[WebSocket] error:', e);
+      log('[WebSocket] error');
       opts.onerror(e);
     },
   });
