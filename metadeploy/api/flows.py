@@ -25,11 +25,11 @@ class BasicFlow(flows.BaseFlow):
         self.result = result
         return super().__init__(*args, **kwargs)
 
-    def _get_step_id(self, task_name):
+    def _get_step_id(self, path):
         try:
-            return str(self.result.plan.step_set.filter(task_name=task_name).first().id)
+            return str(self.result.plan.step_set.filter(path=path).first().id)
         except AttributeError:
-            logger.error(f"Unknown task name {task_name} for {self.result}")
+            logger.error(f"Unknown task name {path} for {self.result}")
             return None
 
     def _pre_task(self, task):
@@ -109,28 +109,28 @@ class PreflightFlow(BasicFlow):
             return None
 
         if status["status_code"] == ERROR:
-            step_id = self._get_step_id(status["task_name"])
+            step_id = self._get_step_id(status["path"])
             return (
                 step_id,
                 [{"status": ERROR, "message": bleach.clean(status.get("msg", ""))}],
             )
 
         if status["status_code"] == WARN:
-            step_id = self._get_step_id(status["task_name"])
+            step_id = self._get_step_id(status["path"])
             return (
                 step_id,
                 [{"status": WARN, "message": bleach.clean(status.get("msg", ""))}],
             )
 
         if status["status_code"] == SKIP:
-            step_id = self._get_step_id(status["task_name"])
+            step_id = self._get_step_id(status["path"])
             return (
                 step_id,
                 [{"status": SKIP, "message": bleach.clean(status.get("msg", ""))}],
             )
 
         if status["status_code"] == OPTIONAL:
-            step_id = self._get_step_id(status["task_name"])
+            step_id = self._get_step_id(status["path"])
             return (
                 step_id,
                 [{"status": OPTIONAL, "message": bleach.clean(status.get("msg", ""))}],

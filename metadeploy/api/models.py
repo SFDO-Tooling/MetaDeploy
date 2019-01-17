@@ -456,8 +456,7 @@ class Job(HashIdMixin, models.Model):
 
     def skip_tasks(self):
         return [
-            step.task_name
-            for step in set(self.plan.step_set.all()) - set(self.steps.all())
+            step.path for step in set(self.plan.step_set.all()) - set(self.steps.all())
         ]
 
     def _push_if_condition(self, condition, fn):

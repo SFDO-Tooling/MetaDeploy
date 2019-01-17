@@ -35,7 +35,7 @@ class MetaDeployCallback(FlowCallback):
 
 class MetaDeployCCI(BaseCumulusCI):
     project_config_class = MetadeployProjectConfig
-    callback_class = FlowCallback
+    callback_class = MetaDeployCallback
 
     def get_flow_from_plan(self, plan, ctx):
         # ctx is either a PreflightResult or a Job, and that will change what we do...

@@ -42,7 +42,7 @@ class TestJobFlow:
         init = mocker.patch("cumulusci.core.flows.BaseFlow.__init__")
         init.return_value = None
         plan = plan_factory()
-        steps = [step_factory(plan=plan, task_name=f"task_{i}") for i in range(3)]
+        steps = [step_factory(plan=plan, path=f"task_{i}") for i in range(3)]
 
         job = job_factory(plan=plan, steps=steps)
 
@@ -67,7 +67,7 @@ class TestJobFlow:
         init.return_value = None
         user = user_factory()
         plan = plan_factory()
-        steps = [step_factory(plan=plan, task_name=f"task_{i}") for i in range(3)]
+        steps = [step_factory(plan=plan, path=f"task_{i}") for i in range(3)]
 
         job = job_factory(user=user, plan=plan, steps=steps)
 
@@ -99,19 +99,19 @@ class TestPreflightFlow:
         init.return_value = None
         user = user_factory()
         plan = plan_factory()
-        step1 = step_factory(plan=plan, task_name="name_1")
-        step_factory(plan=plan, task_name="name_2")
-        step3 = step_factory(plan=plan, task_name="name_3")
-        step4 = step_factory(plan=plan, task_name="name_4")
-        step5 = step_factory(plan=plan, task_name="name_5")
+        step1 = step_factory(plan=plan, path="name_1")
+        step_factory(plan=plan, path="name_2")
+        step3 = step_factory(plan=plan, path="name_3")
+        step4 = step_factory(plan=plan, path="name_4")
+        step5 = step_factory(plan=plan, path="name_5")
         pfr = preflight_result_factory(user=user, plan=plan)
         preflight_flow = PreflightFlow(result=pfr)
         preflight_flow.step_return_values = [
-            {"task_name": "name_1", "status_code": "error", "msg": "error 1"},
-            {"task_name": "name_2", "status_code": "ok"},
-            {"task_name": "name_3", "status_code": "warn", "msg": "warn 1"},
-            {"task_name": "name_4", "status_code": "optional"},
-            {"task_name": "name_5", "status_code": "skip", "msg": "skip 1"},
+            {"path": "name_1", "status_code": "error", "msg": "error 1"},
+            {"path": "name_2", "status_code": "ok"},
+            {"path": "name_3", "status_code": "warn", "msg": "warn 1"},
+            {"path": "name_4", "status_code": "optional"},
+            {"path": "name_5", "status_code": "skip", "msg": "skip 1"},
         ]
 
         preflight_flow._post_flow()
