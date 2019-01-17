@@ -31,15 +31,27 @@ const steps = [
   },
 ];
 
-const InstallProgressIndicator = (): React.Node => {
-  // TODO compute steps situation from the state?
-  const completedSteps = [{ id: 0 }];
-  const selectedStep = { id: 1 };
+const InstallProgressIndicator = (/* props: {
+  activeStep: Number,
+  status: String,
+} */) => {
+  const completed = [
+    {
+      id: 0,
+      label: <i>Log in</i>,
+      assistiveText: "You're logged in.",
+    },
+  ];
+  const current = {
+    id: 1,
+    label: <i>Start preflight</i>,
+    assistiveText: "You've started the preflight check.",
+  };
   return (
     <ProgressIndicator
       steps={steps}
-      completedSteps={completedSteps}
-      selectedStep={selectedStep}
+      completedSteps={completed}
+      selectedStep={current}
     />
   );
 };
