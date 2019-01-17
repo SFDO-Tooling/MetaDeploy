@@ -27,6 +27,10 @@ PREFIX = settings.ADMIN_AREA_PREFIX
 
 urlpatterns = [
     path(urljoin(PREFIX, r"django-rq/"), include("django_rq.urls")),
+    path(
+        urljoin(PREFIX, r"rest/"),
+        include("metadeploy.adminapi.urls", namespace="admin_rest"),
+    ),
     # Put this after all other things using `PREFIX`:
     path(PREFIX, admin.site.urls),
     path("accounts/", include("allauth.urls")),
