@@ -393,7 +393,9 @@ class Step(HashIdMixin, models.Model):
     is_required = models.BooleanField(default=True)
     is_recommended = models.BooleanField(default=True)
     kind = models.CharField(choices=Kind, default=Kind.metadata, max_length=64)
-    task_name = models.CharField(max_length=64, help_text="CCI Config task_name")
+    path = models.CharField(
+        max_length=2048, help_text="dotted path e.g. flow1.flow2.task_name"
+    )
     step_num = models.CharField(
         max_length=64, help_text="dotted step number for CCI task"
     )
@@ -403,10 +405,7 @@ class Step(HashIdMixin, models.Model):
     task_config = JSONField(default=dict, blank=True)
 
     class Meta:
-        ordering = (
-            "step_num",
-            "task_name",
-        )  # TODO: does postgres sort step_num the way I expect
+        ordering = ("step_num",)  # TODO: does postgres sort step_num the way I expect
 
     @property
     def kind_icon(self):

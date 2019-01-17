@@ -143,7 +143,7 @@ class StepFactory(factory.django.DjangoModelFactory):
 
     name = "Sample step"
     plan = factory.SubFactory(PlanFactory)
-    task_name = "main_task"
+    path = "main_task"
     task_class = "cumulusci.core.tests.test_tasks._TaskHasResult"
     step_num = factory.Sequence("1.{}".format)
 

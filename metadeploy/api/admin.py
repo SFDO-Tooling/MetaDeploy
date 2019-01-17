@@ -33,7 +33,7 @@ class StepAdmin(admin.ModelAdmin):
         "is_required",
         "is_recommended",
         "kind",
-        "task_name",
+        "path",
     )
 
 
