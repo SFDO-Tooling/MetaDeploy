@@ -7,7 +7,6 @@ import vcr
 from django.utils import timezone
 from rq.worker import StopRequested
 
-from ..flows import JobFlow
 from ..jobs import (
     enqueuer,
     expire_preflights,
@@ -33,7 +32,6 @@ def test_report_error(mocker, job_factory, user_factory, plan_factory, step_fact
             plan=plan,
             skip_tasks=steps,
             organization_url=job.organization_url,
-            flow_class=JobFlow,
             result_class=Job,
             result_id=job.id,
         )
@@ -58,7 +56,6 @@ def test_run_flows(mocker, job_factory, user_factory, plan_factory, step_factory
         plan=plan,
         skip_tasks=steps,
         organization_url=job.organization_url,
-        flow_class=job_flow,
         result_class=Job,
         result_id=job.id,
     )
@@ -114,7 +111,6 @@ def test_malicious_zip_file(
         plan=plan,
         skip_tasks=steps,
         organization_url=job.organization_url,
-        flow_class=job_flow,
         result_class=Job,
         result_id=job.id,
     )

@@ -9,7 +9,7 @@ from os import environ
 import pytest
 from django.core.exceptions import ImproperlyConfigured
 
-from metadeploy.api.jobs import JobFlow, run_flows
+from metadeploy.api.jobs import run_flows
 from metadeploy.api.models import Job
 
 
@@ -68,7 +68,6 @@ def test_can_reach_salesforce(
         plan=plan,
         skip_tasks=steps,
         organization_url=INSTANCE_URL,
-        flow_class=JobFlow,
         result_class=Job,
         result_id=job.id,
     )

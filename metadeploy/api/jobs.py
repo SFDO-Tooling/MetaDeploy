@@ -32,7 +32,6 @@ from django_rq import job
 from rq.worker import StopRequested
 
 from .cci_configs import MetaDeployCCI, extract_user_and_repo
-from .flows import JobFlow, PreflightFlow
 from .models import Job, PreflightResult
 from .push import report_error
 
@@ -103,17 +102,7 @@ def zip_file_is_safe(zip_file):
     return all(is_safe_path(info.filename) for info in zip_file.infolist())
 
 
-def run_flows(
-    *,
-    user,
-    plan,
-    skip_tasks,
-    organization_url,
-    flow_class,
-    # flow_name, # FIXME
-    result_class,
-    result_id,
-):
+def run_flows(*, user, plan, skip_tasks, organization_url, result_class, result_id):
     """
     This operates with side effects; it changes things in a Salesforce
     org, and then records the results of those operations on to a
@@ -126,11 +115,6 @@ def run_flows(
             task_name values for steps in this flow.
         organization_url (str): The URL of the organization, required by
             the OrgConfig.
-        flow_class (Type[BasicFlow]): Either the class PreflightFlow or
-            the class JobFlow. This is the flow that actually gets run
-            inside this function.
-        flow_name (str): The plan.preflight_flow_name or plan.flow_name,
-            as appropriate.
         result_class (Union[Type[Job], Type[PreflightResult]]): The
             instance onto which to record the results of running steps
             in the flow. Either a PreflightResult or a Job, as
@@ -219,14 +203,9 @@ def run_flows(
         )
         ctx.keychain.set_service("github", github_app, True)
 
-        # Make and run the flow:
-        flow_config = ctx.project_config.get_flow(None)  # FIXME
-
-        args = (ctx.project_config, flow_config, ctx.keychain.get_org(current_org))
-        kwargs = dict(options={}, skip=skip_tasks, name="Nothin", result=result)
-
-        flowinstance = flow_class(*args, **kwargs)
-        flowinstance()
+        # TODO: skip_tasks
+        flow_coordinator = ctx.get_flow_from_plan(plan, result)  # FIXME
+        flow_coordinator.run(ctx.keychain.get_org(current_org))
 
 
 run_flows_job = job(run_flows)
@@ -241,8 +220,6 @@ def enqueuer():
             plan=j.plan,
             skip_tasks=j.skip_tasks(),
             organization_url=j.organization_url,
-            flow_class=JobFlow,
-            # flow_name=j.plan.flow_name, FIXME
             result_class=Job,
             result_id=j.id,
         )
@@ -271,8 +248,6 @@ def preflight(preflight_result_id):
         plan=preflight_result.plan,
         skip_tasks=[],
         organization_url=preflight_result.organization_url,
-        flow_class=PreflightFlow,
-        # flow_name=preflight_result.plan.preflight_flow_name, FIXME
         result_class=PreflightResult,
         result_id=preflight_result.id,
     )
