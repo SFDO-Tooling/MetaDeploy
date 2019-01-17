@@ -64,6 +64,9 @@ class Command(BaseCommand):
 
     def create_step(self, **kwargs):
         task_name = kwargs.pop("task_name", "quick_task")
+        kwargs.setdefault(
+            "task_class", "cumulusci.core.tests.test_flowrunner._SfdcTask"
+        )
         return Step.objects.create(task_name=task_name, **kwargs)
 
     def add_steps(self, plan):
@@ -76,6 +79,7 @@ class Command(BaseCommand):
             ),
             is_recommended=False,
             task_name="quick_task",
+            step_num="0.9",
         )
         self.create_step(
             plan=plan,
