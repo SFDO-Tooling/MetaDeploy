@@ -106,7 +106,7 @@ const JobResults = ({
   const hasWarnings =
     currentJob.warning_count !== undefined && currentJob.warning_count > 0;
   const canceledPreflight =
-    preflight && preflight && currentJob.status === CONSTANTS.STATUS.CANCELED;
+    preflight && currentJob.status === CONSTANTS.STATUS.CANCELED;
   if (
     hasErrors ||
     hasWarnings ||
