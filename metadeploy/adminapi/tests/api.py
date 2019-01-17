@@ -53,6 +53,9 @@ class TestPlanViewSet:
                     "kind": "metadata",
                     "name": "Sample step",
                     "task_name": "main_task",
+                    "step_num": "1.0",
+                    "task_class": "cumulusci.core.tests.test_tasks._TaskHasResult",
+                    "task_config": {},
                 }
             ],
             "tier": "primary",
@@ -70,8 +73,18 @@ class TestPlanViewSet:
             {
                 "title": "Sample plan",
                 "steps": [
-                    {"task_name": "task1", "name": "Task 1"},
-                    {"task_name": "task2", "name": "Task 2"},
+                    {
+                        "task_name": "task1",
+                        "name": "Task 1",
+                        "step_num": "1.0",
+                        "task_class": "cumulusci.core.tests.test_tasks._TaskHasResult",
+                    },
+                    {
+                        "task_name": "task2",
+                        "name": "Task 2",
+                        "step_num": "1.3",
+                        "task_class": "cumulusci.core.tests.test_tasks._TaskHasResult",
+                    },
                 ],
                 "version": f"http://testserver/admin/rest/versions/{version.id}",
             },
@@ -95,6 +108,9 @@ class TestPlanViewSet:
                     "kind": "metadata",
                     "name": "Task 1",
                     "task_name": "task1",
+                    "step_num": "1.0",
+                    "task_class": "cumulusci.core.tests.test_tasks._TaskHasResult",
+                    "task_config": {},
                 },
                 {
                     "description": "",
@@ -103,6 +119,9 @@ class TestPlanViewSet:
                     "kind": "metadata",
                     "name": "Task 2",
                     "task_name": "task2",
+                    "step_num": "1.3",
+                    "task_class": "cumulusci.core.tests.test_tasks._TaskHasResult",
+                    "task_config": {},
                 },
             ],
             "tier": "primary",
