@@ -258,8 +258,8 @@ class TestPlan:
 
 @pytest.mark.django_db
 def test_step_str(step_factory):
-    step = step_factory(name="Test step", order_key=3, plan__title="The Plan")
-    assert str(step) == "Step Test step of The Plan (3)"
+    step = step_factory(name="Test step", step_num="3.1", plan__title="The Plan")
+    assert str(step) == "Step Test step of The Plan (3.1)"
 
 
 @pytest.mark.django_db
