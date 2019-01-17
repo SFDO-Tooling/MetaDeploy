@@ -3,6 +3,7 @@ TAGS
 *~
 .vscode
 .livereload
+.idea/
 node_modules/
 node/
 coverage/
