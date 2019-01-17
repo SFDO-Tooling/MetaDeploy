@@ -78,6 +78,7 @@ const reducer = (
     case 'PREFLIGHT_STARTED':
     case 'PREFLIGHT_COMPLETED':
     case 'PREFLIGHT_FAILED':
+    case 'PREFLIGHT_CANCELED':
     case 'PREFLIGHT_INVALIDATED': {
       const preflight = action.payload;
       const { plan } = preflight;

@@ -6,6 +6,7 @@ import { completeJobStep, completeJob, failJob, cancelJob } from 'jobs/actions';
 import {
   completePreflight,
   failPreflight,
+  cancelPreflight,
   invalidatePreflight,
 } from 'plans/actions';
 import { connectSocket, disconnectSocket } from 'socket/actions';
@@ -27,6 +28,7 @@ import type { Preflight } from 'plans/reducer';
 import type {
   PreflightCompleted,
   PreflightFailed,
+  PreflightCanceled,
   PreflightInvalid,
 } from 'plans/actions';
 import type { TokenInvalidAction } from 'user/actions';
@@ -43,7 +45,11 @@ type UserEvent = {|
   type: 'USER_TOKEN_INVALID',
 |};
 type PreflightEvent = {|
-  type: 'PREFLIGHT_COMPLETED' | 'PREFLIGHT_FAILED' | 'PREFLIGHT_INVALIDATED',
+  type:
+    | 'PREFLIGHT_COMPLETED'
+    | 'PREFLIGHT_FAILED'
+    | 'PREFLIGHT_CANCELED'
+    | 'PREFLIGHT_INVALIDATED',
   payload: Preflight,
 |};
 type JobEvent = {|
@@ -66,6 +72,7 @@ type Action =
   | TokenInvalidAction
   | PreflightCompleted
   | PreflightFailed
+  | PreflightCanceled
   | PreflightInvalid
   | JobStepCompleted
   | JobCompleted
@@ -85,6 +92,8 @@ export const getAction = (event: EventType): Action | null => {
       return completePreflight(event.payload);
     case 'PREFLIGHT_FAILED':
       return failPreflight(event.payload);
+    case 'PREFLIGHT_CANCELED':
+      return cancelPreflight(event.payload);
     case 'PREFLIGHT_INVALIDATED':
       return invalidatePreflight(event.payload);
     case 'TASK_COMPLETED':

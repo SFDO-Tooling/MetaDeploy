@@ -105,10 +105,13 @@ const JobResults = ({
     currentJob.error_count !== undefined && currentJob.error_count > 0;
   const hasWarnings =
     currentJob.warning_count !== undefined && currentJob.warning_count > 0;
+  const canceledPreflight =
+    preflight && preflight && currentJob.status === CONSTANTS.STATUS.CANCELED;
   if (
     hasErrors ||
     hasWarnings ||
-    currentJob.status === CONSTANTS.STATUS.FAILED
+    currentJob.status === CONSTANTS.STATUS.FAILED ||
+    canceledPreflight
   ) {
     // Show errors/warnings
     const errorCount = currentJob.error_count || 0;
@@ -127,7 +130,9 @@ const JobResults = ({
     }
     const jobErrors = currentJob.results && currentJob.results.plan;
     const failed =
-      errorCount > 0 || currentJob.status === CONSTANTS.STATUS.FAILED;
+      errorCount > 0 ||
+      currentJob.status === CONSTANTS.STATUS.FAILED ||
+      canceledPreflight;
     return (
       <>
         <p className={failed ? 'slds-text-color_error' : ''}>

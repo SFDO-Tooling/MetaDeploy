@@ -1,12 +1,8 @@
 import Sockette from 'sockette';
 
+import * as jobActions from 'jobs/actions';
+import * as preflightActions from 'plans/actions';
 import * as sockets from 'utils/websockets';
-import { completeJobStep, completeJob, failJob, cancelJob } from 'jobs/actions';
-import {
-  completePreflight,
-  failPreflight,
-  invalidatePreflight,
-} from 'plans/actions';
 import { connectSocket, disconnectSocket } from 'socket/actions';
 import { invalidateToken } from 'user/actions';
 import { updateOrg } from 'org/actions';
@@ -31,77 +27,32 @@ describe('getAction', () => {
     expect(actual).toEqual(expected);
   });
 
-  describe('PREFLIGHT_COMPLETED', () => {
-    test('handles msg', () => {
-      const preflight = { status: 'complete', results: {} };
-      const msg = { type: 'PREFLIGHT_COMPLETED', payload: preflight };
-      const expected = completePreflight(preflight);
+  [
+    { type: 'PREFLIGHT_COMPLETED', action: 'completePreflight' },
+    { type: 'PREFLIGHT_FAILED', action: 'failPreflight' },
+    { type: 'PREFLIGHT_CANCELED', action: 'cancelPreflight' },
+    { type: 'PREFLIGHT_INVALIDATED', action: 'invalidatePreflight' },
+  ].forEach(({ type, action }) => {
+    test(`handles msg: ${type}`, () => {
+      const payload = { foo: 'bar' };
+      const msg = { type, payload };
+      const expected = preflightActions[action](payload);
       const actual = sockets.getAction(msg);
 
       expect(actual).toEqual(expected);
     });
   });
 
-  describe('PREFLIGHT_FAILED', () => {
-    test('handles msg', () => {
-      const preflight = { status: 'complete', results: {} };
-      const msg = { type: 'PREFLIGHT_FAILED', payload: preflight };
-      const expected = failPreflight(preflight);
-      const actual = sockets.getAction(msg);
-
-      expect(actual).toEqual(expected);
-    });
-  });
-
-  describe('PREFLIGHT_INVALIDATED', () => {
-    test('handles msg', () => {
-      const preflight = { status: 'complete', results: {} };
-      const msg = { type: 'PREFLIGHT_INVALIDATED', payload: preflight };
-      const expected = invalidatePreflight(preflight);
-      const actual = sockets.getAction(msg);
-
-      expect(actual).toEqual(expected);
-    });
-  });
-
-  describe('TASK_COMPLETED', () => {
-    test('handles msg', () => {
-      const payload = { id: 'job-1', steps: ['step-1'], results: {} };
-      const msg = { type: 'TASK_COMPLETED', payload };
-      const expected = completeJobStep(payload);
-      const actual = sockets.getAction(msg);
-
-      expect(actual).toEqual(expected);
-    });
-  });
-
-  describe('JOB_COMPLETED', () => {
-    test('handles msg', () => {
-      const payload = { id: 'job-1', steps: ['step-1'] };
-      const msg = { type: 'JOB_COMPLETED', payload };
-      const expected = completeJob(payload);
-      const actual = sockets.getAction(msg);
-
-      expect(actual).toEqual(expected);
-    });
-  });
-
-  describe('JOB_FAILED', () => {
-    test('handles msg', () => {
-      const payload = { id: 'job-1', steps: ['step-1'] };
-      const msg = { type: 'JOB_FAILED', payload };
-      const expected = failJob(payload);
-      const actual = sockets.getAction(msg);
-
-      expect(actual).toEqual(expected);
-    });
-  });
-
-  describe('JOB_CANCELED', () => {
-    test('handles msg', () => {
-      const payload = { id: 'job-1', steps: ['step-1'] };
-      const msg = { type: 'JOB_CANCELED', payload };
-      const expected = cancelJob(payload);
+  [
+    { type: 'TASK_COMPLETED', action: 'completeJobStep' },
+    { type: 'JOB_COMPLETED', action: 'completeJob' },
+    { type: 'JOB_FAILED', action: 'failJob' },
+    { type: 'JOB_CANCELED', action: 'cancelJob' },
+  ].forEach(({ type, action }) => {
+    test(`handles msg: ${type}`, () => {
+      const payload = { foo: 'bar' };
+      const msg = { type, payload };
+      const expected = jobActions[action](payload);
       const actual = sockets.getAction(msg);
 
       expect(actual).toEqual(expected);

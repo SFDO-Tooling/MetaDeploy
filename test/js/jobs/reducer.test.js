@@ -33,6 +33,7 @@ describe('reducer', () => {
     { type: 'JOB_STARTED' },
     { type: 'JOB_COMPLETED' },
     { type: 'JOB_FAILED' },
+    { type: 'JOB_CANCELED' },
     { type: 'JOB_UPDATED' },
     { type: 'JOB_STEP_COMPLETED' },
   ].forEach(({ type }) => {

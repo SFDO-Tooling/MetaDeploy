@@ -225,7 +225,7 @@ class JobDetail extends React.Component<Props, State> {
             updateJob={doUpdateJob}
           />
           <BodyContainer>
-            <Toasts model={job} label="Installation" />
+            <Toasts job={job} label="Installation" />
             <Intro
               results={<JobResults job={job} label="Installation" />}
               cta={

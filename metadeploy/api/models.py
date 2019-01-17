@@ -25,6 +25,7 @@ from .push import (
     notify_org_result_changed,
     notify_post_job,
     notify_post_task,
+    preflight_canceled,
     preflight_completed,
     preflight_failed,
     preflight_invalidated,
@@ -593,6 +594,13 @@ class PreflightResult(models.Model):
         )
         self._push_if_condition(has_failed, preflight_failed)
 
+    def push_if_canceled(self):
+        has_canceled = (
+            self.tracker.has_changed("status")
+            and self.status == PreflightResult.Status.canceled
+        )
+        self._push_if_condition(has_canceled, preflight_canceled)
+
     def push_if_invalidated(self):
         is_invalidated = self.tracker.has_changed("is_valid") and not self.is_valid
         self._push_if_condition(is_invalidated, preflight_invalidated)
@@ -605,6 +613,7 @@ class PreflightResult(models.Model):
             self.push_to_org_subscribers(is_new)
             self.push_if_completed()
             self.push_if_failed()
+            self.push_if_canceled()
             self.push_if_invalidated()
         except RuntimeError as error:
             logger.warn(f"RuntimeError: {error}")
