@@ -145,7 +145,7 @@ class StepFactory(factory.django.DjangoModelFactory):
     plan = factory.SubFactory(PlanFactory)
     task_name = "main_task"
     task_class = "cumulusci.core.tests.test_tasks._TaskHasResult"
-    step_num = factory.sequence("1.{}")
+    step_num = factory.Sequence("1.{}".format)
 
 
 @register
