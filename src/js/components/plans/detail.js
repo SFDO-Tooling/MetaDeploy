@@ -297,7 +297,7 @@ class PlanDetail extends React.Component<Props, State> {
           {product.is_allowed && plan.is_allowed ? (
             <BodyContainer>
               {preflight && user ? (
-                <Toasts model={preflight} label="Pre-install validation" />
+                <Toasts preflight={preflight} label="Pre-install validation" />
               ) : null}
               <Intro
                 preMessage={

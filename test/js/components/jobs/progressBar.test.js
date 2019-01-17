@@ -62,4 +62,22 @@ describe('<ProgressBar />', () => {
       expect(queryByText('100% Complete')).toBeNull();
     });
   });
+
+  describe('canceled', () => {
+    test('renders canceled progress bar', () => {
+      const { getByText, queryByText } = setup({
+        job: {
+          ...defaultJob,
+          results: {
+            '1': [{ status: 'ok' }],
+            '2': [{ status: 'error' }],
+          },
+          status: 'canceled',
+        },
+      });
+
+      expect(getByText('Canceled')).toBeVisible();
+      expect(queryByText('100% Complete')).toBeNull();
+    });
+  });
 });

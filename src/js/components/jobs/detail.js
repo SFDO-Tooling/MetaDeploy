@@ -7,7 +7,7 @@ import { connect } from 'react-redux';
 
 import routes from 'utils/routes';
 import { CONSTANTS } from 'plans/reducer';
-import { fetchJob, updateJob, cancelJob } from 'jobs/actions';
+import { fetchJob, updateJob, requestCancelJob } from 'jobs/actions';
 import { fetchVersion } from 'products/actions';
 import { selectJob, selectJobId } from 'jobs/selectors';
 import { selectPlan } from 'plans/selectors';
@@ -55,7 +55,7 @@ type Props = {
   doFetchVersion: typeof fetchVersion,
   doFetchJob: typeof fetchJob,
   doUpdateJob: typeof updateJob,
-  doCancelJob: typeof cancelJob,
+  doRequestCancelJob: typeof requestCancelJob,
 };
 type State = {
   modalOpen: boolean,
@@ -116,13 +116,13 @@ class JobDetail extends React.Component<Props, State> {
     this.toggleModal(true);
   };
 
-  cancelJob = () => {
-    const { job, doCancelJob } = this.props;
+  requestCancelJob = () => {
+    const { job, doRequestCancelJob } = this.props;
     /* istanbul ignore if */
     if (!job) {
       return;
     }
-    doCancelJob(job.id).then(() => {
+    doRequestCancelJob(job.id).then(() => {
       this.setState({ canceling: true });
     });
   };
@@ -154,7 +154,7 @@ class JobDetail extends React.Component<Props, State> {
           label="Cancel Installation"
           variant="base"
           className="slds-button_text-destructive"
-          onClick={this.cancelJob}
+          onClick={this.requestCancelJob}
         />
       );
     }
@@ -225,7 +225,7 @@ class JobDetail extends React.Component<Props, State> {
             updateJob={doUpdateJob}
           />
           <BodyContainer>
-            <Toasts model={job} label="Installation" />
+            <Toasts job={job} label="Installation" />
             <Intro
               results={<JobResults job={job} label="Installation" />}
               cta={
@@ -263,7 +263,7 @@ const actions = {
   doFetchVersion: fetchVersion,
   doFetchJob: fetchJob,
   doUpdateJob: updateJob,
-  doCancelJob: cancelJob,
+  doRequestCancelJob: requestCancelJob,
 };
 
 const WrappedJobDetail: React.ComponentType<InitialProps> = connect(

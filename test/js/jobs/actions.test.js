@@ -158,6 +158,7 @@ describe('startJob', () => {
 [
   { type: 'JOB_STEP_COMPLETED', action: 'completeJobStep' },
   { type: 'JOB_COMPLETED', action: 'completeJob' },
+  { type: 'JOB_CANCELED', action: 'cancelJob' },
   { type: 'JOB_FAILED', action: 'failJob' },
 ].forEach(({ type, action }) => {
   test(`${action} returns action object: ${type}`, () => {
@@ -220,7 +221,7 @@ describe('updateJob', () => {
   });
 });
 
-describe('cancelJob', () => {
+describe('requestCancelJob', () => {
   describe('success', () => {
     test('dispatches JOB_CANCEL_ACCEPTED action', () => {
       const store = storeWithApi({});
@@ -236,7 +237,7 @@ describe('cancelJob', () => {
       };
 
       expect.assertions(1);
-      return store.dispatch(actions.cancelJob(id)).then(() => {
+      return store.dispatch(actions.requestCancelJob(id)).then(() => {
         expect(store.getActions()).toEqual([started, succeeded]);
       });
     });
@@ -257,7 +258,7 @@ describe('cancelJob', () => {
       };
 
       expect.assertions(2);
-      return store.dispatch(actions.cancelJob(id)).catch(() => {
+      return store.dispatch(actions.requestCancelJob(id)).catch(() => {
         expect(store.getActions()).toEqual([started, failed]);
         expect(window.console.error).toHaveBeenCalled();
       });

@@ -154,6 +154,7 @@ describe('startPreflight', () => {
 [
   { type: 'PREFLIGHT_COMPLETED', action: 'completePreflight' },
   { type: 'PREFLIGHT_FAILED', action: 'failPreflight' },
+  { type: 'PREFLIGHT_CANCELED', action: 'cancelPreflight' },
   { type: 'PREFLIGHT_INVALIDATED', action: 'invalidatePreflight' },
 ].forEach(({ type, action }) => {
   test(`${action} returns action object: ${type}`, () => {
