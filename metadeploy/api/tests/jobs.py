@@ -230,3 +230,16 @@ def test_mark_canceled(job_factory):
     except StopRequested:
         pass
     assert job.status == job.Status.canceled
+
+
+@pytest.mark.django_db
+def test_mark_canceled_preflight(user_factory, plan_factory, preflight_result_factory):
+    user = user_factory()
+    plan = plan_factory()
+    preflight = preflight_result_factory(user=user, plan=plan)
+    try:
+        with mark_canceled(preflight):
+            raise StopRequested()
+    except StopRequested:
+        pass
+    assert preflight.status == preflight.Status.canceled

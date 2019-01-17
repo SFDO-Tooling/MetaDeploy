@@ -144,6 +144,19 @@ describe('<JobResults />', () => {
     });
   });
 
+  describe('canceled preflight', () => {
+    test('displays error message', () => {
+      const job = {
+        status: 'canceled',
+        error_count: 0,
+        warning_count: 0,
+      };
+      const { getByText } = setup({ job });
+
+      expect(getByText('Pre-install validation was canceled.')).toBeVisible();
+    });
+  });
+
   describe('completed successful preflight', () => {
     test('displays standard success message', () => {
       const job = {

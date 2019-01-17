@@ -95,7 +95,8 @@ const JobResults = ({
   if (
     !currentJob ||
     (currentJob.status !== CONSTANTS.STATUS.COMPLETE &&
-      currentJob.status !== CONSTANTS.STATUS.FAILED)
+      currentJob.status !== CONSTANTS.STATUS.FAILED &&
+      currentJob.status !== CONSTANTS.STATUS.CANCELED)
   ) {
     return null;
   }
@@ -104,10 +105,13 @@ const JobResults = ({
     currentJob.error_count !== undefined && currentJob.error_count > 0;
   const hasWarnings =
     currentJob.warning_count !== undefined && currentJob.warning_count > 0;
+  const canceledPreflight =
+    preflight && currentJob.status === CONSTANTS.STATUS.CANCELED;
   if (
     hasErrors ||
     hasWarnings ||
-    currentJob.status === CONSTANTS.STATUS.FAILED
+    currentJob.status === CONSTANTS.STATUS.FAILED ||
+    canceledPreflight
   ) {
     // Show errors/warnings
     const errorCount = currentJob.error_count || 0;
@@ -126,7 +130,9 @@ const JobResults = ({
     }
     const jobErrors = currentJob.results && currentJob.results.plan;
     const failed =
-      errorCount > 0 || currentJob.status === CONSTANTS.STATUS.FAILED;
+      errorCount > 0 ||
+      currentJob.status === CONSTANTS.STATUS.FAILED ||
+      canceledPreflight;
     return (
       <>
         <p className={failed ? 'slds-text-color_error' : ''}>
@@ -143,6 +149,16 @@ const JobResults = ({
         {failed && failMessage ? <p>{failMessage}</p> : null}
         {jobErrors ? <ErrorsList errorList={jobErrors} /> : null}
       </>
+    );
+  }
+
+  // Canceled job
+  if (currentJob.status === CONSTANTS.STATUS.CANCELED) {
+    return (
+      <p className="slds-text-color_error">
+        <ErrorIcon />
+        {label} was canceled.
+      </p>
     );
   }
 

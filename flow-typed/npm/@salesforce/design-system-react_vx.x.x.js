@@ -151,6 +151,18 @@ declare module '@salesforce/design-system-react/components/radio-group/radio' {
   declare export default Component;
 }
 
+declare module '@salesforce/design-system-react/components/alert' {
+  import typeof { Component } from 'react';
+
+  declare export default Component;
+}
+
+declare module '@salesforce/design-system-react/components/alert/container' {
+  import typeof { Component } from 'react';
+
+  declare export default Component;
+}
+
 declare module '@salesforce/design-system-react/components/settings' {
   declare export default { [string]: Function };
 }

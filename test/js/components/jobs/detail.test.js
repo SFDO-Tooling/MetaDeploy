@@ -2,7 +2,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { fireEvent } from 'react-testing-library';
 
-import { fetchJob, cancelJob } from 'jobs/actions';
+import { fetchJob, requestCancelJob } from 'jobs/actions';
 import { fetchVersion } from 'products/actions';
 
 import { renderWithRedux, storeWithApi } from './../../utils';
@@ -18,7 +18,7 @@ fetchJob.mockReturnValue({ type: 'TEST' });
 afterEach(() => {
   fetchVersion.mockClear();
   fetchJob.mockClear();
-  cancelJob.mockClear();
+  requestCancelJob.mockClear();
 });
 
 const defaultState = {
@@ -302,9 +302,9 @@ describe('<JobDetail />', () => {
   });
 
   describe('cancel btn click', () => {
-    test('calls cancelJob', () => {
+    test('calls requestCancelJob', () => {
       const canceled = Promise.resolve({});
-      cancelJob.mockReturnValue(() => canceled);
+      requestCancelJob.mockReturnValue(() => canceled);
       const id = 'job-1';
       const { getByText } = setup({
         initialState: {
@@ -321,7 +321,7 @@ describe('<JobDetail />', () => {
       fireEvent.click(getByText('Cancel Installation'));
 
       expect.assertions(2);
-      expect(cancelJob).toHaveBeenCalledWith('job-1');
+      expect(requestCancelJob).toHaveBeenCalledWith('job-1');
       return canceled.then(() => {
         expect(getByText('Canceling Installation...')).toBeVisible();
       });
