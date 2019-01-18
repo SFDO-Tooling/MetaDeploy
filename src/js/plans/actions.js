@@ -58,7 +58,7 @@ export const fetchPreflight = (planId: string): ThunkAction => (
   dispatch({ type: 'FETCH_PREFLIGHT_STARTED', payload: planId });
   return apiFetch(window.api_urls.plan_preflight(planId))
     .then(response => {
-      if (response) {
+      if (response && window.socket) {
         window.socket.subscribe({
           model: 'preflightresult',
           id: response.id,
@@ -84,10 +84,13 @@ export const startPreflight = (planId: string): ThunkAction => (
   const url = window.api_urls.plan_preflight(planId);
   return apiFetch(url, { method: 'POST' })
     .then(response => {
-      window.socket.subscribe({
-        model: 'preflightresult',
-        id: response.id,
-      });
+      /* istanbul ignore else */
+      if (window.socket) {
+        window.socket.subscribe({
+          model: 'preflightresult',
+          id: response.id,
+        });
+      }
       return dispatch({ type: 'PREFLIGHT_STARTED', payload: response });
     })
     .catch(err => {
