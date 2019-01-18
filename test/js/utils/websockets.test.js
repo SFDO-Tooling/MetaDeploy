@@ -10,6 +10,7 @@ import { updateOrg } from 'org/actions';
 const mockJson = jest.fn();
 const mockClose = jest.fn();
 const mockOpen = jest.fn();
+const dispatch = jest.fn();
 jest.mock('sockette', () =>
   jest.fn().mockImplementation(() => ({
     json: mockJson,
@@ -17,6 +18,16 @@ jest.mock('sockette', () =>
     open: mockOpen,
   })),
 );
+
+const opts = { url: '/my/url', dispatch };
+
+afterEach(() => {
+  Sockette.mockClear();
+  mockJson.mockClear();
+  mockClose.mockClear();
+  mockOpen.mockClear();
+  dispatch.mockClear();
+});
 
 describe('getAction', () => {
   test('handles USER_TOKEN_INVALID msg', () => {
@@ -88,33 +99,24 @@ describe('getAction', () => {
 });
 
 describe('createSocket', () => {
-  beforeEach(() => {
-    Sockette.mockClear();
-    mockJson.mockClear();
-    mockClose.mockClear();
-    mockOpen.mockClear();
-  });
-
   test('creates socket with url', () => {
-    sockets.createSocket({ url: '/my/url' });
+    sockets.createSocket(opts);
 
     expect(Sockette).toHaveBeenCalledTimes(1);
     expect(Sockette.mock.calls[0][0]).toEqual('/my/url');
   });
 
   describe('events', () => {
-    const dispatch = jest.fn();
     let socket, socketInstance;
 
     beforeEach(() => {
-      dispatch.mockClear();
-      socket = sockets.createSocket({ dispatch });
+      socket = sockets.createSocket(opts);
       socketInstance = Sockette.mock.calls[0][1];
     });
 
     describe('onopen', () => {
       test('logs', () => {
-        socketInstance.onopen({});
+        socketInstance.onopen();
 
         expect(window.console.info).toHaveBeenCalledWith(
           '[WebSocket] connected',
@@ -124,13 +126,13 @@ describe('createSocket', () => {
       test('subscribes to pending objects', () => {
         const payload = { model: 'foo', id: 'bar' };
         socket.subscribe(payload);
-        socketInstance.onopen({});
+        socketInstance.onopen();
 
         expect(mockJson).toHaveBeenCalledWith(payload);
       });
 
       test('dispatches connectSocket action', () => {
-        socketInstance.onopen({});
+        socketInstance.onopen();
         const expected = connectSocket();
 
         expect(dispatch).toHaveBeenCalledWith(expected);
@@ -159,7 +161,7 @@ describe('createSocket', () => {
 
     describe('onreconnect', () => {
       test('logs', () => {
-        socketInstance.onreconnect({});
+        socketInstance.onreconnect();
 
         expect(window.console.info).toHaveBeenCalledWith(
           '[WebSocket] reconnecting...',
@@ -169,7 +171,7 @@ describe('createSocket', () => {
 
     describe('onmaximum', () => {
       test('logs', () => {
-        socketInstance.onmaximum({});
+        socketInstance.onmaximum();
 
         expect(window.console.info).toHaveBeenCalledWith(
           '[WebSocket] ending reconnect after Infinity attempts',
@@ -179,15 +181,15 @@ describe('createSocket', () => {
 
     describe('onclose', () => {
       test('logs', () => {
-        socketInstance.onclose({});
+        socketInstance.onclose();
 
         expect(window.console.info).toHaveBeenCalledWith('[WebSocket] closed');
       });
 
       test('dispatches disconnectSocket action after 5 seconds', () => {
         jest.useFakeTimers();
-        socketInstance.onopen({});
-        socketInstance.onclose({});
+        socketInstance.onopen();
+        socketInstance.onclose();
 
         expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), 5000);
 
@@ -197,16 +199,16 @@ describe('createSocket', () => {
         expect(dispatch).toHaveBeenCalledWith(expected);
 
         setTimeout.mockClear();
-        socketInstance.onclose({});
+        socketInstance.onclose();
 
         expect(setTimeout).not.toHaveBeenCalled();
       });
 
       test('does not dispatch disconnectSocket action if reconnected', () => {
         jest.useFakeTimers();
-        socketInstance.onopen({});
-        socketInstance.onclose({});
-        socketInstance.onopen({});
+        socketInstance.onopen();
+        socketInstance.onclose();
+        socketInstance.onopen();
         jest.runAllTimers();
         const expected = disconnectSocket();
 
@@ -216,7 +218,7 @@ describe('createSocket', () => {
 
     describe('onerror', () => {
       test('logs', () => {
-        socketInstance.onerror({});
+        socketInstance.onerror();
 
         expect(window.console.info).toHaveBeenCalledWith('[WebSocket] error');
       });
@@ -225,10 +227,9 @@ describe('createSocket', () => {
 
   describe('subscribe', () => {
     let socket;
-    const dispatch = jest.fn();
 
     beforeEach(() => {
-      socket = sockets.createSocket({ dispatch });
+      socket = sockets.createSocket(opts);
     });
 
     describe('ws open', () => {
@@ -246,13 +247,25 @@ describe('createSocket', () => {
     let socket;
 
     beforeEach(() => {
-      socket = sockets.createSocket();
+      socket = sockets.createSocket(opts);
+      jest.useFakeTimers();
     });
 
     test('closes and reopens ws connection', () => {
+      Sockette.mock.calls[0][1].onopen();
+      mockOpen.mockClear();
       socket.reconnect();
 
       expect(mockClose).toHaveBeenCalledWith(1000, 'user logged out');
+      expect(mockOpen).not.toHaveBeenCalled();
+
+      jest.advanceTimersByTime(750);
+
+      expect(mockOpen).not.toHaveBeenCalled();
+
+      Sockette.mock.calls[0][1].onclose();
+      jest.advanceTimersByTime(500);
+
       expect(mockOpen).toHaveBeenCalledTimes(1);
     });
   });

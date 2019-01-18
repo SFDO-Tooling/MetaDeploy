@@ -17,7 +17,7 @@ export const login = (payload: User): ThunkAction => dispatch => {
     window.Raven.setUserContext(payload);
   }
   /* istanbul ignore else */
-  if (payload) {
+  if (payload && window.socket) {
     window.socket.subscribe({
       model: 'user',
       id: payload.id,
@@ -41,7 +41,10 @@ export const logout = (): ThunkAction => (dispatch, getState, { apiFetch }) =>
     method: 'POST',
   }).then(() => {
     cache.clear();
-    window.socket.reconnect();
+    /* istanbul ignore else */
+    if (window.socket) {
+      window.socket.reconnect();
+    }
     if (window.Raven && window.Raven.isSetup()) {
       window.Raven.setUserContext();
     }
