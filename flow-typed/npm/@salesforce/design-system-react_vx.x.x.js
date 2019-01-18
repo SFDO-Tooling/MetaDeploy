@@ -163,6 +163,12 @@ declare module '@salesforce/design-system-react/components/alert/container' {
   declare export default Component;
 }
 
+declare module '@salesforce/design-system-react/components/progress-indicator' {
+  import typeof { Component } from 'react';
+
+  declare export default Component;
+}
+
 declare module '@salesforce/design-system-react/components/settings' {
   declare export default { [string]: Function };
 }

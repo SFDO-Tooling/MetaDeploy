@@ -297,8 +297,10 @@ class PlanDetail extends React.Component<Props, State> {
             product={product}
             version={version}
             plan={plan}
-            userLoggedIn={user !== null}
+            showProgressIndicator={true}
+            userLoggedIn={Boolean(user && user.valid_token_for)}
             preflightStatus={preflight && preflight.status}
+            preflightIsReady={Boolean(preflight && preflight.is_ready)}
           />
           {product.is_allowed && plan.is_allowed ? (
             <BodyContainer>
