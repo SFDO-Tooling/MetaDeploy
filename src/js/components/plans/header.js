@@ -19,33 +19,50 @@ const Header = ({
   version,
   plan,
   navRight,
+  userLoggedIn,
+  preflightStatus,
 }: {
   product: ProductType,
   version: VersionType,
   plan: PlanType,
   navRight?: React.Node,
-}) => (
-  <>
-    <PageHeader
-      className="page-header
+  userLoggedIn: boolean,
+  preflightStatus: ?string,
+}) => {
+  let activeStep;
+  if (!userLoggedIn) {
+    activeStep = 0;
+  } else if (preflightStatus === null) {
+    activeStep = 1;
+  } else {
+    activeStep = 2;
+  }
+  return (
+    <>
+      <PageHeader
+        className="page-header
       slds-p-around_x-large"
-      title={plan.title}
-      trail={[
-        <Link
-          to={routes.version_detail(product.slug, version.label)}
-          key={product.slug}
-        >
-          {product.title}, {version.label}
-        </Link>,
-      ]}
-      navRight={
-        navRight !== null && navRight !== undefined ? <>{navRight}</> : ''
-      }
-      icon={<ProductIcon item={product} />}
-      variant="objectHome"
-    />
-    <InstallProgressIndicator />
-  </>
-);
+        title={plan.title}
+        trail={[
+          <Link
+            to={routes.version_detail(product.slug, version.label)}
+            key={product.slug}
+          >
+            {product.title}, {version.label}
+          </Link>,
+        ]}
+        navRight={
+          navRight !== null && navRight !== undefined ? <>{navRight}</> : ''
+        }
+        icon={<ProductIcon item={product} />}
+        variant="objectHome"
+      />
+      <InstallProgressIndicator
+        activeStep={activeStep}
+        status={preflightStatus}
+      />
+    </>
+  );
+};
 
 export default Header;

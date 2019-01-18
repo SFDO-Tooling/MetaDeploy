@@ -293,7 +293,13 @@ class PlanDetail extends React.Component<Props, State> {
     return (
       <DocumentTitle title={`${plan.title} | ${product.title} | MetaDeploy`}>
         <>
-          <Header product={product} version={version} plan={plan} />
+          <Header
+            product={product}
+            version={version}
+            plan={plan}
+            userLoggedIn={user !== null}
+            preflightStatus={preflight && preflight.status}
+          />
           {product.is_allowed && plan.is_allowed ? (
             <BodyContainer>
               {preflight && user ? (

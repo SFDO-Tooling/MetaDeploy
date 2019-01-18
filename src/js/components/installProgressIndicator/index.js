@@ -19,39 +19,27 @@ const steps = [
     label: <i>Preflight finished</i>,
     assistiveText: 'The preflight check has completed.',
   },
-  {
-    id: 3,
-    label: <i>Start job</i>,
-    assistiveText: "You've started the job.",
-  },
-  {
-    id: 4,
-    label: <i>Job finished</i>,
-    assistiveText: 'The job has completed.',
-  },
 ];
 
-const InstallProgressIndicator = (/* props: {
-  activeStep: Number,
-  status: String,
-} */) => {
-  const completed = [
-    {
-      id: 0,
-      label: <i>Log in</i>,
-      assistiveText: "You're logged in.",
-    },
-  ];
-  const current = {
-    id: 1,
-    label: <i>Start preflight</i>,
-    assistiveText: "You've started the preflight check.",
-  };
+const InstallProgressIndicator = ({
+  activeStep,
+  status,
+}: {
+  activeStep: number,
+  status: ?string,
+}) => {
+  const completedSteps = steps.slice(0, activeStep);
+  const errorSteps =
+    status === 'completed' || status === 'started'
+      ? []
+      : steps.slice(activeStep, activeStep + 1);
+  const selectedStep = steps[activeStep];
   return (
     <ProgressIndicator
       steps={steps}
-      completedSteps={completed}
-      selectedStep={current}
+      completedSteps={completedSteps}
+      selectedStep={selectedStep}
+      errorSteps={errorSteps}
     />
   );
 };
