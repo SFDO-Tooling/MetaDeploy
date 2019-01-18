@@ -118,10 +118,14 @@ export const createSocket = ({
   url: string,
   options?: { [string]: mixed },
   dispatch: Dispatch,
-} = {}): {
+}): {
   subscribe: (payload: Subscription) => void,
   reconnect: () => void,
-} => {
+} | null => {
+  /* istanbul ignore if */
+  if (!(url && dispatch)) {
+    return null;
+  }
   const defaults = {
     timeout: 1000,
     maxAttempts: Infinity,
@@ -199,9 +203,26 @@ export const createSocket = ({
       pending.add(payload);
     }
   };
+
+  let reconnecting;
+  const clearReconnect = () => {
+    /* istanbul ignore else */
+    if (reconnecting) {
+      clearInterval(reconnecting);
+      reconnecting = undefined;
+    }
+  };
+
   const reconnect = () => {
     socket.close(1000, 'user logged out');
-    socket.open();
+    // Without polling, the `onopen` callback after reconnect could fire before
+    // the `onclose` callback...
+    reconnecting = setInterval(() => {
+      if (!open) {
+        socket.open();
+        clearReconnect();
+      }
+    }, 500);
   };
 
   return {

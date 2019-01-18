@@ -69,7 +69,7 @@ export const fetchJob = (jobId: string): ThunkAction => (
   dispatch({ type: 'FETCH_JOB_STARTED', payload: jobId });
   return apiFetch(window.api_urls.job_detail(jobId))
     .then(response => {
-      if (response) {
+      if (response && window.socket) {
         window.socket.subscribe({
           model: 'job',
           id: response.id,
@@ -101,10 +101,13 @@ export const startJob = (data: JobData): ThunkAction => (
     },
   })
     .then(response => {
-      window.socket.subscribe({
-        model: 'job',
-        id: response.id,
-      });
+      /* istanbul ignore else */
+      if (window.socket) {
+        window.socket.subscribe({
+          model: 'job',
+          id: response.id,
+        });
+      }
       return dispatch({ type: 'JOB_STARTED', payload: response });
     })
     .catch(err => {
