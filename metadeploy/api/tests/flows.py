@@ -12,7 +12,7 @@ def test_get_step_id(mocker):
     init = mocker.patch("cumulusci.core.flows.BaseFlow.__init__")
     init.return_value = None
     basic_flow = BasicFlow()
-    basic_flow._step_set = Step.objects.none()
+    basic_flow._steps = Step.objects.none()
     result = basic_flow._get_step_id("anything")
 
     assert result is None

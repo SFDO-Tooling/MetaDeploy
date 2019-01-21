@@ -27,7 +27,7 @@ class BasicFlow(flows.BaseFlow):
 
     def _get_step_id(self, path):
         try:
-            return str(self.result.plan.step_set.filter(path=path).first().id)
+            return str(self.result.plan.steps.filter(path=path).first().id)
         except AttributeError:
             logger.error(f"Unknown task name {path} for {self.result}")
             return None

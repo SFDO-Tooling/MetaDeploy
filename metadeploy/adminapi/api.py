@@ -174,22 +174,22 @@ class PlanStepSerializer(serializers.ModelSerializer):
 
 
 class PlanSerializer(AdminAPISerializer):
-    steps = PlanStepSerializer(source="step_set", many=True, required=False)
+    steps = PlanStepSerializer(source="steps", many=True, required=False)
 
     class Meta:
         fields = "__all__"
 
     def create(self, validated_data):
-        steps = validated_data.pop("step_set") or []
+        steps = validated_data.pop("steps") or []
         plan = self.Meta.model.objects.create(**validated_data)
         for step_data in steps:
-            plan.step_set.create(**step_data)
+            plan.steps.create(**step_data)
         return plan
 
     def update(self, instance, validated_data):
-        if "step_set" in validated_data:
+        if "steps" in validated_data:
             raise serializers.ValidationError(detail="Updating steps not supported.")
-        validated_data.pop("step_set", None)
+        validated_data.pop("steps", None)
         return super().update(instance, validated_data)
 
 

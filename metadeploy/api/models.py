@@ -366,7 +366,7 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, models.Model):
 
     @property
     def required_step_ids(self):
-        return self.step_set.filter(is_required=True).values_list("id", flat=True)
+        return self.steps.filter(is_required=True).values_list("id", flat=True)
 
     @property
     def slug_queryset(self):
@@ -387,7 +387,7 @@ class Step(HashIdMixin, models.Model):
         ("data", _("Data")),
     )
 
-    plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
+    plan = models.ForeignKey(Plan, on_delete=models.PROTECT, related_name="steps")
     name = models.CharField(max_length=1024, help_text="Customer facing label")
     description = models.TextField(blank=True)
     is_required = models.BooleanField(default=True)
@@ -456,7 +456,7 @@ class Job(HashIdMixin, models.Model):
 
     def skip_tasks(self):
         return [
-            step.path for step in set(self.plan.step_set.all()) - set(self.steps.all())
+            step.path for step in set(self.plan.steps.all()) - set(self.steps.all())
         ]
 
     def _push_if_condition(self, condition, fn):
