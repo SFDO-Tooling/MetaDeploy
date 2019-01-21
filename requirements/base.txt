@@ -9,7 +9,7 @@ django-allauth==0.38.0
 werkzeug==0.14.1
 pyopenssl==18.0.0
 django-js-reverse==0.8.2
-djangorestframework==3.9.0
+djangorestframework==3.9.1
 django-colorfield==0.1.15
 django-filter==2.0.0
 django-redis==4.10.0
