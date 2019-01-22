@@ -418,7 +418,7 @@ class Step(HashIdMixin, models.Model):
 
     class Meta:
         ordering = (
-            DottedArray(F("step_num"), extra="."),
+            DottedArray(F("step_num")),
         )  # TODO: does postgres sort step_num the way I expect
 
     @property
