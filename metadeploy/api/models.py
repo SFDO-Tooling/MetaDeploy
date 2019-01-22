@@ -14,7 +14,7 @@ from django.contrib.postgres.fields import ArrayField, JSONField
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
-from django.db.models import Count, Q
+from django.db.models import Count, F, Func, Q
 from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
@@ -382,6 +382,17 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, models.Model):
         return "{}, Plan {}".format(self.version, self.title)
 
 
+class StringToArray(Func):
+    pass
+    # to make the migrations not yell
+    # TODO SQUASH
+
+
+class DottedArray(Func):
+    function = "string_to_array"
+    template = "%(function)s(%(expressions)s, '.')"
+
+
 class Step(HashIdMixin, models.Model):
     Kind = Choices(
         ("metadata", _("Metadata")),
@@ -408,7 +419,9 @@ class Step(HashIdMixin, models.Model):
     task_config = JSONField(default=dict, blank=True)
 
     class Meta:
-        ordering = ("step_num",)  # TODO: does postgres sort step_num the way I expect
+        ordering = (
+            DottedArray(F("step_num"), extra="."),
+        )  # TODO: does postgres sort step_num the way I expect
 
     @property
     def kind_icon(self):
