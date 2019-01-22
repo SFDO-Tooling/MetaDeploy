@@ -82,10 +82,13 @@ describe('<CtaButton />', () => {
   });
 
   describe('no preflight', () => {
-    test('renders start-preflight btn', () => {
-      const { getByText } = setup({ preflight: null });
+    test('triggers preflight button', () => {
+      const doStartPreflight = jest.fn();
+      const { getByText } = setup({ preflight: null, doStartPreflight });
 
-      expect(getByText('Start Pre-Install Validation')).toBeVisible();
+      expect(getByText('Pre-Install Validation In Progress...')).toBeVisible();
+
+      expect(doStartPreflight).toHaveBeenCalledWith('plan-1');
     });
 
     describe('no valid token', () => {
@@ -186,7 +189,9 @@ describe('<CtaButton />', () => {
 
   describe('unknown preflight status', () => {
     test('renders nothing', () => {
-      const { container } = setup({ preflight: { status: 'foo' } });
+      const { container } = setup({
+        preflight: { status: 'foo', is_valid: false },
+      });
 
       expect(container.children).toHaveLength(0);
     });

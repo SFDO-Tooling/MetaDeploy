@@ -97,6 +97,13 @@ class CtaButton extends React.Component<Props, { modalOpen: boolean }> {
     this.state = { modalOpen: false };
   }
 
+  componentDidMount() {
+    const { plan, doStartPreflight, user, preflight } = this.props;
+    if (user && user.valid_token_for && !(preflight && preflight.is_valid)) {
+      doStartPreflight(plan.id);
+    }
+  }
+
   toggleModal = (isOpen: boolean) => {
     this.setState({ modalOpen: isOpen });
   };

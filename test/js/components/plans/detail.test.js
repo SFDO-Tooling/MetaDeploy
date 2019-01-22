@@ -259,11 +259,14 @@ describe('<PlanDetail />', () => {
   });
 
   test('renders preflight expiration warning', () => {
+    const doStartPreflight = jest.fn();
+    const initialState = {
+      org: { current_job: null, current_preflight: null },
+      doStartPreflight,
+      ...defaultState,
+    };
     const { getByText } = setup({
-      initialState: {
-        ...defaultState,
-        org: { current_job: null, current_preflight: null },
-      },
+      initialState,
     });
 
     expect(
@@ -315,7 +318,8 @@ describe('<PlanDetail />', () => {
 
   describe('handleStepsChange', () => {
     test('updates checkbox', () => {
-      const { container } = setup();
+      const doStartPreflight = jest.fn();
+      const { container } = setup({ doStartPreflight });
       const checkbox1 = container.querySelector('#step-step-1');
       const checkbox2 = container.querySelector('#step-step-2');
       const checkbox3 = container.querySelector('#step-step-3');
