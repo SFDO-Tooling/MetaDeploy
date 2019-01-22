@@ -41,7 +41,7 @@ class MetaDeployCCI(BaseCumulusCI):
     ):
 
         steps = [
-            step.to_spec(skip=True) if step.skip in skip else step.to_spec(skip=False)
+            step.to_spec(skip=True) if step.path in skip else step.to_spec(skip=False)
             for step in plan.steps
         ]
 
