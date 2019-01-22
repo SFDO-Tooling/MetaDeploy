@@ -44,7 +44,7 @@ def test_report_error(mocker, job_factory, user_factory, plan_factory, step_fact
 @pytest.mark.django_db
 @vcr.use_cassette()
 def test_run_flows(mocker, job_factory, user_factory, plan_factory, step_factory):
-    job_flow = mocker.patch("metadeploy.api.jobs.JobFlowCallback")
+    job_flow = mocker.patch("metadeploy.api.flows.JobFlowCallback")
 
     user = user_factory()
     plan = plan_factory()
@@ -99,7 +99,7 @@ def test_malicious_zip_file(
     mocker.patch("metadeploy.api.jobs.OrgConfig")
     mocker.patch("metadeploy.api.jobs.ServiceConfig")
     mocker.patch("metadeploy.api.jobs.MetaDeployCCI")
-    job_flow = mocker.patch("metadeploy.api.jobs.JobFlowCallback")
+    job_flow = mocker.patch("metadeploy.api.flows.JobFlowCallback")
 
     user = user_factory()
     plan = plan_factory()
@@ -145,7 +145,7 @@ def test_preflight(mocker, user_factory, plan_factory, preflight_result_factory)
     mocker.patch("metadeploy.api.jobs.OrgConfig")
     mocker.patch("metadeploy.api.jobs.ServiceConfig")
     mocker.patch("metadeploy.api.jobs.MetaDeployCCI")
-    preflight_flow = mocker.patch("metadeploy.api.jobs.PreflightFlowCallback")
+    preflight_flow = mocker.patch("metadeploy.api.flows.PreflightFlowCallback")
 
     user = user_factory()
     plan = plan_factory()
