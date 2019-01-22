@@ -382,13 +382,11 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, models.Model):
         return "{}, Plan {}".format(self.version, self.title)
 
 
-class StringToArray(Func):
-    pass
-    # to make the migrations not yell
-    # TODO SQUASH
-
-
 class DottedArray(Func):
+    """ Turns a dotted string into an array of strings.
+
+    Useful for version numbers. Particularly if you further cast to int. """
+
     function = "string_to_array"
     template = "%(function)s(%(expressions)s, '.')"
 
