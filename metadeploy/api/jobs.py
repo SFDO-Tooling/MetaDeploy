@@ -203,8 +203,7 @@ def run_flows(*, user, plan, skip_tasks, organization_url, result_class, result_
         )
         ctx.keychain.set_service("github", github_app, True)
 
-        # TODO: skip_tasks
-        flow_coordinator = ctx.get_flow_from_plan(plan, result)  # FIXME
+        flow_coordinator = ctx.get_flow_from_plan(plan, result, skip=skip_tasks)
         flow_coordinator.run(ctx.keychain.get_org(current_org))
 
 

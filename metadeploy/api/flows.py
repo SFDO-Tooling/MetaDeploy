@@ -2,7 +2,7 @@ import logging
 from io import StringIO
 
 import bleach
-from cumulusci.core import flows
+from cumulusci.core.flowrunner import FlowCallback
 from django.core.cache import cache
 
 from .belvedere_utils import obscure_salesforce_log
@@ -15,24 +15,22 @@ class StopFlowException(Exception):
     pass
 
 
-class BasicFlow(flows.BaseFlow):
-    # TODO:
-    # We'll want to subclass BaseFlow and add logic in the progress
-    # callbacks to record and possibly push progress:
-    # pre_flow, post_flow, pre_task, post_task, pre_subflow,
-    # post_subflow
-    def __init__(self, *args, result=None, **kwargs):
-        self.result = result
-        return super().__init__(*args, **kwargs)
+class MetaDeployCallback(FlowCallback):
+    def __init__(self, ctx):
+        self.context = ctx  # will be either a preflight or a job...
+        # TODO: collate results, probably requires a change in how
+        # FlowCoordinator calls its Callbacks....
 
+
+class BasicFlow(MetaDeployCallback):
     def _get_step_id(self, path):
         try:
-            return str(self.result.plan.steps.filter(path=path).first().id)
+            return str(self.context.plan.steps.filter(path=path).first().id)
         except AttributeError:
-            logger.error(f"Unknown task name {path} for {self.result}")
+            logger.error(f"Unknown task name {path} for {self.context}")
             return None
 
-    def _pre_task(self, task):
+    def pre_task(self, step):
         """
         Before each task, we should check if we've been told to abandon this job.
         """
@@ -40,11 +38,12 @@ class BasicFlow(flows.BaseFlow):
             raise StopFlowException("Job canceled.")
 
     def _flow_canceled(self):
-        return cache.get(REDIS_JOB_CANCEL_KEY.format(id=self.result.id))
+        return cache.get(REDIS_JOB_CANCEL_KEY.format(id=self.context.id))
 
 
 class JobFlow(BasicFlow):
     def _init_logger(self):
+        # TODO FIXME!!!
         logger = logging.getLogger("cumulusci")
         self.string_buffer = StringIO()
         self.handler = logging.StreamHandler(stream=self.string_buffer)
@@ -54,30 +53,31 @@ class JobFlow(BasicFlow):
         self.logger = logger
         return self.logger
 
-    def _post_flow(self):
+    def post_flow(self):
         self.logger.removeHandler(self.handler)
 
-    def _post_task(self, task):
-        step_id = self._get_step_id(task.name)
+    def post_task(self, step, result):
+        step_id = self._get_step_id(step.path)
         if step_id:
-            self.result.results[step_id] = [{"status": OK}]
-            self.result.log = obscure_salesforce_log(self.string_buffer.getvalue())
-            self.result.save()
-        return super()._post_task(task)
+            self.context.results[step_id] = [{"status": OK}]
+            self.context.log = obscure_salesforce_log(self.string_buffer.getvalue())
+            self.context.save()
+        return super().post_task(step, result)
 
     def _post_task_exception(self, task, exception):
+        # TODO FIXME!!!
         step_id = self._get_step_id(task.name)
         if step_id:
-            self.result.results[step_id] = [
+            self.context.results[step_id] = [
                 {"status": ERROR, "message": bleach.clean(str(exception))}
             ]
-            self.result.log = obscure_salesforce_log(self.string_buffer.getvalue())
-            self.result.save()
-        return super()._post_task_exception(task, exception)
+            self.context.log = obscure_salesforce_log(self.string_buffer.getvalue())
+            self.context.save()
+        # return super()._post_task_exception(task, exception)
 
 
 class PreflightFlow(BasicFlow):
-    def _post_flow(self):
+    def post_flow(self):
         """
         Turn the step_return_values into a merged error dict.
 
@@ -88,6 +88,10 @@ class PreflightFlow(BasicFlow):
         Finally, this is attached to the result object, which the caller
         must then save.
         """
+        raise NotImplementedError(
+            "Christian needs to fix this so that we have the"
+            "return values for everything here...."
+        )
         results = {}
         for status in self.step_return_values:
             kv = self._emit_k_v_for_status_dict(status)
@@ -98,11 +102,15 @@ class PreflightFlow(BasicFlow):
                 results[k].extend(v)
             except KeyError:
                 results[k] = v
-        self.result.results.update(results)
+        self.context.results.update(results)
 
     def _post_task_exception(self, task, e):
+        raise NotImplementedError(
+            "Christian needs to fix this so that we have"
+            "the return values for everything here...."
+        )
         error_result = {"plan": [{"status": ERROR, "message": bleach.clean(str(e))}]}
-        self.result.results.update(error_result)
+        self.context.results.update(error_result)
 
     def _emit_k_v_for_status_dict(self, status):
         if status["status_code"] == OK:
@@ -135,18 +143,3 @@ class PreflightFlow(BasicFlow):
                 step_id,
                 [{"status": OPTIONAL, "message": bleach.clean(status.get("msg", ""))}],
             )
-
-    # def _pre_flow(self, *args, **kwargs):
-    #     pass
-
-    # def _pre_task(self, *args, **kwargs):
-    #     pass
-
-    # def _post_task(self, *args, **kwargs):
-    #     pass
-
-    # def _pre_subflow(self, *args, **kwargs):
-    #     pass
-
-    # def _post_subflow(self, *args, **kwargs):
-    #     pass

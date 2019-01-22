@@ -1,10 +1,12 @@
 import itertools
 import logging
 from datetime import timedelta
+from typing import Union
 
 from allauth.socialaccount.models import SocialToken
 from asgiref.sync import async_to_sync
 from colorfield.fields import ColorField
+from cumulusci.core.flowrunner import StepSpec
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
@@ -33,6 +35,7 @@ from .push import (
 
 logger = logging.getLogger(__name__)
 VERSION_STRING = r"^[a-zA-Z0-9._+-]+$"
+WorkableModel = Union["Job", "PreflightReference"]
 
 
 class HashIdMixin(models.Model):
@@ -418,6 +421,15 @@ class Step(HashIdMixin, models.Model):
         if self.kind == self.Kind.data:
             return "paste"
         return None
+
+    def to_spec(self, skip: bool = False):
+        return StepSpec(
+            step_num=self.step_num,
+            task_name=self.path,  # skip from_flow path construction in StepSpec ctr
+            task_config=self.task_config,
+            task_class=self.task_class,
+            skip=skip,
+        )
 
     def __str__(self):
         return f"Step {self.name} of {self.plan.title} ({self.step_num})"
