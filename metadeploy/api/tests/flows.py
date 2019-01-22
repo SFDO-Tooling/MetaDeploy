@@ -9,9 +9,7 @@ from ..models import Step
 
 
 def test_get_step_id(mocker):
-    init = mocker.patch("cumulusci.core.flows.BaseFlow.__init__")
-    init.return_value = None
-    basic_flow = BasicFlow()
+    basic_flow = BasicFlow(sentinel.result)
     basic_flow._steps = Step.objects.none()
     result = basic_flow._get_step_id("anything")
 
@@ -20,33 +18,27 @@ def test_get_step_id(mocker):
 
 class TestJobFlow:
     def test_init(self, mocker):
-        init = mocker.patch("cumulusci.core.flows.BaseFlow.__init__")
-        init.return_value = None
-        flow = JobFlow(result=sentinel.job)
-        assert flow.result == sentinel.job
+        flow = JobFlow(sentinel.job)
+        assert flow.context == sentinel.job
 
     @pytest.mark.django_db
     def test_cancel_job(self, mocker, job_factory):
-        init = mocker.patch("cumulusci.core.flows.BaseFlow.__init__")
-        init.return_value = None
         job = job_factory()
-        flow = JobFlow(result=job)
+        flow = JobFlow(job)
         cache.set(REDIS_JOB_CANCEL_KEY.format(id=job.id), True)
         with pytest.raises(StopFlowException):
-            flow._pre_task(None)
+            flow.pre_task(None)
 
     @pytest.mark.django_db
     def test_post_task(
         self, mocker, user_factory, plan_factory, step_factory, job_factory
     ):
-        init = mocker.patch("cumulusci.core.flows.BaseFlow.__init__")
-        init.return_value = None
         plan = plan_factory()
         steps = [step_factory(plan=plan, path=f"task_{i}") for i in range(3)]
 
         job = job_factory(plan=plan, steps=steps)
 
-        flow = JobFlow(result=job)
+        flow = JobFlow(job)
 
         tasks = [MagicMock() for _ in range(3)]
         for i, task in enumerate(tasks):
@@ -54,8 +46,8 @@ class TestJobFlow:
 
         flow._init_logger()
         for task in tasks:
-            flow._post_task(task)
-        flow._post_flow()
+            flow.post_task(task, sentinel.task_result)
+        flow.post_flow()
 
         assert job.results == {str(step.id): [{"status": "ok"}] for step in steps}
 
@@ -63,15 +55,13 @@ class TestJobFlow:
     def test_post_task_exception(
         self, mocker, user_factory, plan_factory, step_factory, job_factory
     ):
-        init = mocker.patch("cumulusci.core.flows.BaseFlow.__init__")
-        init.return_value = None
         user = user_factory()
         plan = plan_factory()
         steps = [step_factory(plan=plan, path=f"task_{i}") for i in range(3)]
 
         job = job_factory(user=user, plan=plan, steps=steps)
 
-        flow = JobFlow(result=job)
+        flow = JobFlow(job)
 
         task = MagicMock()
         task.name = f"task_0"
@@ -86,17 +76,13 @@ class TestJobFlow:
 
 class TestPreflightFlow:
     def test_init(self, mocker):
-        init = mocker.patch("cumulusci.core.flows.BaseFlow.__init__")
-        init.return_value = None
-        preflight_flow = PreflightFlow(result=sentinel.preflight)
-        assert preflight_flow.result == sentinel.preflight
+        preflight_flow = PreflightFlow(sentinel.preflight)
+        assert preflight_flow.context == sentinel.preflight
 
     @pytest.mark.django_db
     def test_post_flow(
         self, mocker, user_factory, plan_factory, step_factory, preflight_result_factory
     ):
-        init = mocker.patch("cumulusci.core.flows.BaseFlow.__init__")
-        init.return_value = None
         user = user_factory()
         plan = plan_factory()
         step1 = step_factory(plan=plan, path="name_1")
@@ -105,7 +91,7 @@ class TestPreflightFlow:
         step4 = step_factory(plan=plan, path="name_4")
         step5 = step_factory(plan=plan, path="name_5")
         pfr = preflight_result_factory(user=user, plan=plan)
-        preflight_flow = PreflightFlow(result=pfr)
+        preflight_flow = PreflightFlow(pfr)
         preflight_flow.step_return_values = [
             {"path": "name_1", "status_code": "error", "msg": "error 1"},
             {"path": "name_2", "status_code": "ok"},
@@ -114,7 +100,7 @@ class TestPreflightFlow:
             {"path": "name_5", "status_code": "skip", "msg": "skip 1"},
         ]
 
-        preflight_flow._post_flow()
+        preflight_flow.post_flow()
 
         assert pfr.results == {
             step1.id: [{"status": "error", "message": "error 1"}],
@@ -127,12 +113,10 @@ class TestPreflightFlow:
     def test_post_task_exception(
         self, mocker, user_factory, plan_factory, preflight_result_factory
     ):
-        init = mocker.patch("cumulusci.core.flows.BaseFlow.__init__")
-        init.return_value = None
         user = user_factory()
         plan = plan_factory()
         pfr = preflight_result_factory(user=user, plan=plan)
-        preflight_flow = PreflightFlow(result=pfr)
+        preflight_flow = PreflightFlow(pfr)
 
         exc = ValueError("A value error.")
         preflight_flow._post_task_exception(None, exc)

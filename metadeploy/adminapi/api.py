@@ -174,7 +174,7 @@ class PlanStepSerializer(serializers.ModelSerializer):
 
 
 class PlanSerializer(AdminAPISerializer):
-    steps = PlanStepSerializer(source="steps", many=True, required=False)
+    steps = PlanStepSerializer(many=True, required=False)
 
     class Meta:
         fields = "__all__"
