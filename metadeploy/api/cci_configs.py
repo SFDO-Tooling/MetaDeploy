@@ -40,10 +40,7 @@ class MetaDeployCCI(BaseCumulusCI):
         self, plan: Plan, ctx: WorkableModel, skip: List[str] = None
     ):
 
-        steps = [
-            step.to_spec(skip=True) if step.path in skip else step.to_spec(skip=False)
-            for step in plan.steps
-        ]
+        steps = [step.to_spec(skip=step.path in skip) for step in plan.steps]
 
         # TODO: either use the dynamic stuff i put into baseruntime, or scrap it.
         # ctx is either a PreflightResult or a Job, and that will change what we do...
