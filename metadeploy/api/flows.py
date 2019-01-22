@@ -15,14 +15,12 @@ class StopFlowException(Exception):
     pass
 
 
-class MetaDeployCallback(FlowCallback):
+class BasicFlowCallback(FlowCallback):
     def __init__(self, ctx):
         self.context = ctx  # will be either a preflight or a job...
         # TODO: collate results, probably requires a change in how
         # FlowCoordinator calls its Callbacks....
 
-
-class BasicFlow(MetaDeployCallback):
     def _get_step_id(self, path):
         try:
             return str(self.context.plan.steps.filter(path=path).first().id)
@@ -41,7 +39,7 @@ class BasicFlow(MetaDeployCallback):
         return cache.get(REDIS_JOB_CANCEL_KEY.format(id=self.context.id))
 
 
-class JobFlow(BasicFlow):
+class JobFlowCallback(BasicFlowCallback):
     def _init_logger(self):
         # TODO FIXME!!!
         logger = logging.getLogger("cumulusci")
@@ -76,7 +74,7 @@ class JobFlow(BasicFlow):
         # return super()._post_task_exception(task, exception)
 
 
-class PreflightFlow(BasicFlow):
+class PreflightFlowCallback(BasicFlowCallback):
     def post_flow(self):
         """
         Turn the step_return_values into a merged error dict.

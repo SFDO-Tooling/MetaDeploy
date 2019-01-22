@@ -5,7 +5,7 @@ from cumulusci.core.config import BaseProjectConfig
 from cumulusci.core.flowrunner import FlowCoordinator
 from cumulusci.core.runtime import BaseCumulusCI
 
-from metadeploy.api.flows import JobFlow, PreflightFlow
+from metadeploy.api.flows import JobFlowCallback, PreflightFlowCallback
 from metadeploy.api.models import Job, Plan, PreflightResult, WorkableModel
 
 
@@ -39,19 +39,17 @@ class MetaDeployCCI(BaseCumulusCI):
     def get_flow_from_plan(
         self, plan: Plan, ctx: WorkableModel, skip: List[str] = None
     ):
-
         steps = [step.to_spec(skip=step.path in skip) for step in plan.steps]
 
-        # TODO: either use the dynamic stuff i put into baseruntime, or scrap it.
-        # ctx is either a PreflightResult or a Job, and that will change what we do...
         if isinstance(ctx, PreflightResult):
-            callbacks = PreflightFlow(ctx)
+            callbacks = PreflightFlowCallback(ctx)
         elif isinstance(ctx, Job):
-            callbacks = JobFlow(ctx)
+            callbacks = JobFlowCallback(ctx)
         else:
             raise AttributeError(
-                "Cannot get a flow from non preflight or job ctxs."
-            )  # FIXME: bad error...
+                f"ctx must be either a PreflightResult "
+                f"or Job, but was passed {type(ctx)}."
+            )
 
         return FlowCoordinator.from_steps(
             self.project_config, steps, name="default", callbacks=callbacks
