@@ -62,6 +62,7 @@ export const CONSTANTS = {
     SKIP: 'skip',
     OPTIONAL: 'optional',
   },
+  AUTO_START_PREFLIGHT: 'start_preflight',
 };
 
 const reducer = (

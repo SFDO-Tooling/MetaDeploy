@@ -4,6 +4,8 @@ import cookies from 'js-cookie';
 
 import { logError } from 'utils/logging';
 
+export type UrlParams = { [string]: string | number | boolean };
+
 // these HTTP methods do not require CSRF protection
 const csrfSafeMethod = method => /^(GET|HEAD|OPTIONS|TRACE)$/.test(method);
 
@@ -58,15 +60,17 @@ const getApiFetch = () => (url: string, opts: { [string]: mixed } = {}) => {
 };
 
 // Based on https://fetch.spec.whatwg.org/#fetch-api
-export const addUrlParams = (
-  baseUrl: string,
-  params: { [string]: string | number } = {},
-) => {
+export const addUrlParams = (baseUrl: string, params: UrlParams = {}) => {
   const url = new URL(baseUrl, window.location.origin);
   Object.keys(params).forEach(key =>
     url.searchParams.append(key, params[key].toString()),
   );
-  return url.toString();
+  return url.pathname + url.search + url.hash;
+};
+
+export const getUrlParam = (key: string): ?string => {
+  const url = new URLSearchParams(window.location.search);
+  return url.get(key);
 };
 
 export default getApiFetch;
