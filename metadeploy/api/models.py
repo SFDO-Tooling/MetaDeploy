@@ -58,7 +58,9 @@ class AllowedListAccessMixin(models.Model):
     class Meta:
         abstract = True
 
-    visible_to = models.ForeignKey(AllowedList, on_delete=models.SET_NULL, null=True)
+    visible_to = models.ForeignKey(
+        AllowedList, on_delete=models.SET_NULL, null=True, blank=True
+    )
 
     def is_visible_to(self, user):
         return not self.visible_to or (
