@@ -217,6 +217,7 @@ class JobDetail extends React.Component<Props, State> {
                 />
               </>
             }
+            showProgressIndicator={false}
           />
           <ShareModal
             isOpen={this.state.modalOpen}
