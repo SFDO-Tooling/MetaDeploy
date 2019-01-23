@@ -22,6 +22,7 @@ const Header = ({
   showProgressIndicator,
   userLoggedIn,
   preflightStatus,
+  preflightIsValid,
   preflightIsReady,
 }: {
   product: ProductType,
@@ -31,6 +32,7 @@ const Header = ({
   showProgressIndicator: boolean,
   userLoggedIn?: boolean,
   preflightStatus?: ?string,
+  preflightIsValid?: boolean,
   preflightIsReady?: boolean,
 }) => (
   <>
@@ -56,6 +58,7 @@ const Header = ({
       <ProgressIndicator
         userLoggedIn={userLoggedIn}
         preflightStatus={preflightStatus}
+        preflightIsValid={preflightIsValid}
         preflightIsReady={preflightIsReady}
       />
     ) : null}

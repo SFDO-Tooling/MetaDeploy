@@ -8,6 +8,7 @@ describe('<ProgressIndicator />', () => {
     const defaults = {
       userLoggedIn: true,
       preflightStatus: null,
+      preflightIsValid: true,
       preflightIsReady: false,
     };
     const opts = { ...defaults, ...options };
@@ -15,6 +16,7 @@ describe('<ProgressIndicator />', () => {
       <ProgressIndicator
         userLoggedIn={opts.userLoggedIn}
         preflightStatus={opts.preflightStatus}
+        preflightIsValid={opts.preflightIsValid}
         preflightIsReady={opts.preflightIsReady}
       />,
     );
@@ -63,6 +65,21 @@ describe('<ProgressIndicator />', () => {
     });
   });
 
+  describe('preflight invalid', () => {
+    test('shows first step complete', () => {
+      const { getByText } = setup({
+        preflightStatus: 'complete',
+        preflightIsValid: false,
+      });
+
+      expect(getByText('Step 1: Log in - Completed')).toBeVisible();
+      expect(getByText('Step 2: Run pre-install validation')).toBeVisible();
+      expect(
+        getByText('Step 3: Pre-install validation complete'),
+      ).toBeVisible();
+    });
+  });
+
   describe('preflight complete and is_ready', () => {
     test('shows all steps complete', () => {
       const { getByText } = setup({
@@ -84,7 +101,6 @@ describe('<ProgressIndicator />', () => {
     test('shows error step', () => {
       const { getByText } = setup({
         preflightStatus: 'complete',
-        preflightIsReady: false,
       });
 
       expect(getByText('Step 1: Log in - Completed')).toBeVisible();

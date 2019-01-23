@@ -23,21 +23,24 @@ const steps = [
 const ProgressIndicator = ({
   userLoggedIn,
   preflightStatus,
+  preflightIsValid,
   preflightIsReady,
 }: {
   userLoggedIn?: boolean,
   preflightStatus?: ?string,
+  preflightIsValid?: boolean,
   preflightIsReady?: boolean,
 }) => {
   let activeStep = 0;
   if (userLoggedIn) {
-    activeStep = preflightStatus ? 2 : 1;
+    activeStep = preflightStatus && preflightIsValid ? 2 : 1;
   }
   const completedSteps = preflightIsReady
     ? steps.slice()
     : steps.slice(0, activeStep);
   const errorSteps =
     userLoggedIn &&
+    preflightIsValid &&
     preflightStatus &&
     preflightStatus !== CONSTANTS.STATUS.STARTED &&
     !preflightIsReady
