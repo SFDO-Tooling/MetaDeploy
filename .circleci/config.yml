@@ -1,10 +1,9 @@
 version: 2
 jobs:
-
   build:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.6.6
+      - image: circleci/python:3.7
     steps:
       - checkout
       - restore_cache:
@@ -46,22 +45,22 @@ jobs:
       - save_cache:
           key: v1-metadeploy-node-{{ checksum "bin/unpack-node" }}
           paths:
-            - "~/metadeploy/node"
+            - '~/metadeploy/node'
       - save_cache:
           key: v1-metadeploy-py-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
           paths:
-            - "~/.cache/pip"
+            - '~/.cache/pip'
             - ./venv
       - save_cache:
           key: v1-metadeploy-npm-{{ checksum "yarn.lock" }}
           paths:
-            - "~/.cache/yarn"
-            - "~/metadeploy/node_modules"
+            - '~/.cache/yarn'
+            - '~/metadeploy/node_modules'
 
   lint:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.6.6
+      - image: circleci/python:3.7
     steps:
       - checkout
       - restore_cache:
@@ -87,7 +86,7 @@ jobs:
   test-client:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.6.6
+      - image: circleci/python:3.7
     steps:
       - checkout
       - restore_cache:
@@ -118,7 +117,7 @@ jobs:
   test-python:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.6.6
+      - image: circleci/python:3.7
       - image: circleci/redis:latest
       - image: circleci/postgres:latest
         environment:
@@ -163,7 +162,7 @@ jobs:
   report-test-coverage:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.6.6
+      - image: circleci/python:3.7
     steps:
       - checkout
       - attach_workspace:

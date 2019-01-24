@@ -12,9 +12,9 @@ Cloning the project
 Making a virtual env
 --------------------
 
-MetaDeploy development requires Python v3.6. If ``which python3.6`` returns a
+MetaDeploy development requires Python v3.7. If ``which python3.7`` returns a
 non-empty path, it's already installed and you can continue to the next step. If
-it returns nothing, then install Python v3.6 using
+it returns nothing, then install Python v3.7 using
 ``brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/f2a764ef944b1080be64bd88dca9a1d80130c558/Formula/python.rb``,
 or from `Python.org`_.
 
@@ -25,7 +25,7 @@ temporarily for a particular "environment" or directory. We use
 `virtualenvwrapper`_. Assuming you're in the repo root, do the following to
 create a virtualenv (once you have `virtualenvwrapper`_ installed locally)::
 
-    mkvirtualenv metadeploy --python=$(which python3.6)
+    mkvirtualenv metadeploy --python=$(which python3.7)
     setvirtualenvproject
 
 Copy the ``.env`` file somewhere that will be sourced when you need it::
@@ -182,7 +182,7 @@ Writing integration tests
 
 For now, our Salesforce integration tests do not modify state on the
 Salesforce side; they only test that they *could*. As such, we don't
-need to generate scratch orgs to test against. 
+need to generate scratch orgs to test against.
 
 Instead, we will use some stable testing credentials for a stable test
 org. If you are part of OddBirds, you can find them in keybase.
