@@ -8,6 +8,8 @@ import { logError } from 'utils/logging';
 
 import CustomDomainModal from 'components/header/customDomainModal';
 
+import type { UrlParams } from 'utils/api';
+
 type Props = {
   id: string,
   label: string | React.Node,
@@ -16,6 +18,7 @@ type Props = {
   triggerClassName?: string,
   disabled: boolean,
   nubbinPosition: string,
+  redirectParams: UrlParams,
 };
 type MenuOption =
   | {|
@@ -34,6 +37,7 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
     buttonVariant: 'base',
     disabled: false,
     nubbinPosition: 'top right',
+    redirectParams: {},
   };
 
   constructor(props: Props) {
@@ -60,8 +64,11 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
       return;
     }
     if (opt.href) {
+      const { redirectParams } = this.props;
       window.location.assign(
-        addUrlParams(opt.href, { next: window.location.pathname }),
+        addUrlParams(opt.href, {
+          next: addUrlParams(window.location.href, redirectParams),
+        }),
       );
     }
   };
@@ -95,19 +102,30 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
 
   render(): React.Node {
     const menuOpts = Login.getMenuOpts();
+    const {
+      id,
+      label,
+      triggerClassName,
+      buttonClassName,
+      buttonVariant,
+      disabled,
+      nubbinPosition,
+      redirectParams,
+    } = this.props;
+    const { modalOpen } = this.state;
     return (
       <>
         <Dropdown
-          id={this.props.id}
-          label={this.props.label}
+          id={id}
+          label={label}
           className="slds-dropdown_actions
             slds-dropdown_medium"
-          triggerClassName={this.props.triggerClassName}
-          buttonClassName={this.props.buttonClassName}
-          buttonVariant={this.props.buttonVariant}
-          disabled={this.props.disabled}
+          triggerClassName={triggerClassName}
+          buttonClassName={buttonClassName}
+          buttonVariant={buttonVariant}
+          disabled={disabled}
           menuPosition="relative"
-          nubbinPosition={this.props.nubbinPosition}
+          nubbinPosition={nubbinPosition}
           iconCategory="utility"
           iconName="down"
           iconPosition="right"
@@ -115,8 +133,9 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
           onSelect={this.handleSelect}
         />
         <CustomDomainModal
-          isOpen={this.state.modalOpen}
+          isOpen={modalOpen}
           toggleModal={this.toggleModal}
+          redirectParams={redirectParams}
         />
       </>
     );
