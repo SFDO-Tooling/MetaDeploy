@@ -7,9 +7,9 @@ PREFLIGHT_LIFETIME_MINUTES = env("PREFLIGHT_LIFETIME_MINUTES", type_=int, defaul
 
 INSTALLED_APPS = INSTALLED_APPS + ["django_extensions"]  # NOQA
 
-DEFAULT_FILE_STORAGE = "metadeploy.redis_storage.RedisStorage"
+# DEFAULT_FILE_STORAGE = "metadeploy.redis_storage.RedisStorage"
 
-REDIS_STORAGE_CONFIG = {"USE_REDIS_CACHE": "default"}
+# REDIS_STORAGE_CONFIG = {"USE_REDIS_CACHE": "default"}
 
 LOGGING["loggers"]["werkzeug"] = {
     "handlers": ["console"],
