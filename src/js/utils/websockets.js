@@ -2,25 +2,33 @@
 
 import Sockette from 'sockette';
 
-import { completeJobStep, completeJob, failJob } from 'jobs/actions';
+import { completeJobStep, completeJob, failJob, cancelJob } from 'jobs/actions';
 import {
   completePreflight,
   failPreflight,
+  cancelPreflight,
   invalidatePreflight,
 } from 'plans/actions';
+import { connectSocket, disconnectSocket } from 'socket/actions';
 import { invalidateToken } from 'user/actions';
 import { log } from 'utils/logging';
 import { updateOrg } from 'org/actions';
 
 import type { Dispatch } from 'redux-thunk';
 import type { Job } from 'jobs/reducer';
-import type { JobStepCompleted, JobCompleted, JobFailed } from 'jobs/actions';
+import type {
+  JobStepCompleted,
+  JobCompleted,
+  JobFailed,
+  JobCanceled,
+} from 'jobs/actions';
 import type { Org } from 'org/reducer';
 import type { OrgChanged } from 'org/actions';
 import type { Preflight } from 'plans/reducer';
 import type {
   PreflightCompleted,
   PreflightFailed,
+  PreflightCanceled,
   PreflightInvalid,
 } from 'plans/actions';
 import type { TokenInvalidAction } from 'user/actions';
@@ -37,11 +45,15 @@ type UserEvent = {|
   type: 'USER_TOKEN_INVALID',
 |};
 type PreflightEvent = {|
-  type: 'PREFLIGHT_COMPLETED' | 'PREFLIGHT_FAILED' | 'PREFLIGHT_INVALIDATED',
+  type:
+    | 'PREFLIGHT_COMPLETED'
+    | 'PREFLIGHT_FAILED'
+    | 'PREFLIGHT_CANCELED'
+    | 'PREFLIGHT_INVALIDATED',
   payload: Preflight,
 |};
 type JobEvent = {|
-  type: 'TASK_COMPLETED' | 'JOB_COMPLETED' | 'JOB_FAILED',
+  type: 'TASK_COMPLETED' | 'JOB_COMPLETED' | 'JOB_FAILED' | 'JOB_CANCELED',
   payload: Job,
 |};
 type OrgEvent = {|
@@ -60,10 +72,12 @@ type Action =
   | TokenInvalidAction
   | PreflightCompleted
   | PreflightFailed
+  | PreflightCanceled
   | PreflightInvalid
   | JobStepCompleted
   | JobCompleted
   | JobFailed
+  | JobCanceled
   | OrgChanged;
 type Subscription = {| model: string, id: string |};
 
@@ -78,12 +92,16 @@ export const getAction = (event: EventType): Action | null => {
       return completePreflight(event.payload);
     case 'PREFLIGHT_FAILED':
       return failPreflight(event.payload);
+    case 'PREFLIGHT_CANCELED':
+      return cancelPreflight(event.payload);
     case 'PREFLIGHT_INVALIDATED':
       return invalidatePreflight(event.payload);
     case 'TASK_COMPLETED':
       return completeJobStep(event.payload);
     case 'JOB_COMPLETED':
       return completeJob(event.payload);
+    case 'JOB_CANCELED':
+      return cancelJob(event.payload);
     case 'JOB_FAILED':
       return failJob(event.payload);
     case 'ORG_CHANGED':
@@ -94,18 +112,23 @@ export const getAction = (event: EventType): Action | null => {
 
 export const createSocket = ({
   url,
-  options,
+  options = {},
   dispatch,
 }: {
   url: string,
   options?: { [string]: mixed },
   dispatch: Dispatch,
-} = {}): {
+}): {
   subscribe: (payload: Subscription) => void,
   reconnect: () => void,
-} => {
+} | null => {
+  /* istanbul ignore if */
+  if (!(url && dispatch)) {
+    return null;
+  }
   const defaults = {
-    maxAttempts: 25,
+    timeout: 1000,
+    maxAttempts: Infinity,
     onopen: () => {},
     onmessage: () => {},
     onreconnect: () => {},
@@ -119,11 +142,11 @@ export const createSocket = ({
   const pending = new Set();
 
   const socket = new Sockette(url, {
-    protocols: opts.protocols,
     timeout: opts.timeout,
     maxAttempts: opts.maxAttempts,
     onopen: e => {
       log('[WebSocket] connected');
+      dispatch(connectSocket());
       open = true;
       for (const payload of pending) {
         log('[WebSocket] subscribing to:', payload);
@@ -156,11 +179,18 @@ export const createSocket = ({
     },
     onclose: e => {
       log('[WebSocket] closed');
-      open = false;
+      if (open) {
+        open = false;
+        setTimeout(() => {
+          if (!open) {
+            dispatch(disconnectSocket());
+          }
+        }, 5000);
+      }
       opts.onclose(e);
     },
     onerror: e => {
-      log('[WebSocket] error:', e);
+      log('[WebSocket] error');
       opts.onerror(e);
     },
   });
@@ -173,9 +203,26 @@ export const createSocket = ({
       pending.add(payload);
     }
   };
+
+  let reconnecting;
+  const clearReconnect = () => {
+    /* istanbul ignore else */
+    if (reconnecting) {
+      clearInterval(reconnecting);
+      reconnecting = undefined;
+    }
+  };
+
   const reconnect = () => {
     socket.close(1000, 'user logged out');
-    socket.open();
+    // Without polling, the `onopen` callback after reconnect could fire before
+    // the `onclose` callback...
+    reconnecting = setInterval(() => {
+      if (!open) {
+        socket.open();
+        clearReconnect();
+      }
+    }, 500);
   };
 
   return {

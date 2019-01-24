@@ -37,7 +37,7 @@ export type Preflight = {|
   +edited_at: string,
   +user: string,
   +plan: string,
-  +status: 'started' | 'complete' | 'failed',
+  +status: 'started' | 'complete' | 'failed' | 'canceled',
   +results: PreflightErrors,
   +is_valid: boolean,
   +error_count: number,
@@ -53,6 +53,7 @@ export const CONSTANTS = {
     STARTED: 'started',
     COMPLETE: 'complete',
     FAILED: 'failed',
+    CANCELED: 'canceled',
   },
   RESULT_STATUS: {
     OK: 'ok',
@@ -77,6 +78,7 @@ const reducer = (
     case 'PREFLIGHT_STARTED':
     case 'PREFLIGHT_COMPLETED':
     case 'PREFLIGHT_FAILED':
+    case 'PREFLIGHT_CANCELED':
     case 'PREFLIGHT_INVALIDATED': {
       const preflight = action.payload;
       const { plan } = preflight;

@@ -293,11 +293,20 @@ class PlanDetail extends React.Component<Props, State> {
     return (
       <DocumentTitle title={`${plan.title} | ${product.title} | MetaDeploy`}>
         <>
-          <Header product={product} version={version} plan={plan} />
+          <Header
+            product={product}
+            version={version}
+            plan={plan}
+            showProgressIndicator={true}
+            userLoggedIn={Boolean(user && user.valid_token_for)}
+            preflightStatus={preflight && preflight.status}
+            preflightIsValid={Boolean(preflight && preflight.is_valid)}
+            preflightIsReady={Boolean(preflight && preflight.is_ready)}
+          />
           {product.is_allowed && plan.is_allowed ? (
             <BodyContainer>
               {preflight && user ? (
-                <Toasts model={preflight} label="Pre-install validation" />
+                <Toasts preflight={preflight} label="Pre-install validation" />
               ) : null}
               <Intro
                 preMessage={

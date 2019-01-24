@@ -62,6 +62,7 @@ const CtaButton = ({
       }
       return null;
     }
+    case STATUS.CANCELED:
     case STATUS.FAILED: {
       return (
         <Link

@@ -3,26 +3,26 @@ import { render, fireEvent } from 'react-testing-library';
 
 import Toasts from 'components/plans/toasts';
 
-const defaultModel = {
+const defaultJob = {
   status: 'started',
 };
 
-const defaultLabel = 'Pre-install validation';
+const defaultLabel = 'Installation';
 
 describe('<Toasts />', () => {
   const setup = options => {
     const defaults = {
-      model: defaultModel,
+      job: defaultJob,
       label: defaultLabel,
     };
     const opts = { ...defaults, ...options };
     const { getByText, container, rerender } = render(
-      <Toasts model={opts.model} label={opts.label} />,
+      <Toasts job={opts.job} label={opts.label} />,
     );
     return { getByText, container, rerender };
   };
 
-  describe('started model', () => {
+  describe('started job', () => {
     test('renders nothing', () => {
       const { container } = setup();
 
@@ -32,9 +32,9 @@ describe('<Toasts />', () => {
     });
   });
 
-  describe('already-completed model', () => {
+  describe('already-completed job', () => {
     test('renders nothing', () => {
-      const { container } = setup({ model: { status: 'complete' } });
+      const { container } = setup({ job: { status: 'complete' } });
 
       expect(
         container.querySelector('.slds-notify-container').children,
@@ -42,61 +42,75 @@ describe('<Toasts />', () => {
     });
   });
 
-  describe('model fails', () => {
+  describe('job fails', () => {
     test('renders toast with message', () => {
       const { getByText, rerender } = setup();
-      const model = { status: 'failed' };
-      rerender(<Toasts model={model} label={defaultLabel} />);
+      const job = { status: 'failed' };
+      rerender(<Toasts job={job} label={defaultLabel} />);
+
+      expect(getByText('Installation has failed.')).toBeVisible();
+    });
+  });
+
+  describe('job cancels', () => {
+    test('renders toast with message', () => {
+      const { getByText, rerender } = setup();
+      const job = { status: 'canceled' };
+      rerender(<Toasts job={job} label={defaultLabel} />);
+
+      expect(getByText('Installation has been canceled.')).toBeVisible();
+    });
+  });
+
+  describe('preflight cancels', () => {
+    test('renders toast with message', () => {
+      const { getByText, rerender } = setup();
+      const preflight = { status: 'canceled' };
+      rerender(<Toasts preflight={preflight} label="Pre-install validation" />);
 
       expect(getByText('Pre-install validation has failed.')).toBeVisible();
     });
   });
 
-  describe('model completes with errors', () => {
+  describe('job completes with errors', () => {
     test('renders toast with message', () => {
       const { getByText, rerender } = setup();
-      const model = { status: 'complete', error_count: 1 };
-      rerender(<Toasts model={model} label={defaultLabel} />);
+      const job = { status: 'complete', error_count: 1 };
+      rerender(<Toasts job={job} label={defaultLabel} />);
 
-      expect(
-        getByText('Pre-install validation completed with errors.'),
-      ).toBeVisible();
+      expect(getByText('Installation completed with errors.')).toBeVisible();
     });
   });
 
-  describe('model completes with warnings', () => {
+  describe('job completes with warnings', () => {
     test('renders toast with message', () => {
       const { getByText, rerender } = setup();
-      const model = {
+      const job = {
         status: 'complete',
         error_count: 0,
         warning_count: 1,
       };
-      rerender(<Toasts model={model} label={defaultLabel} />);
+      rerender(<Toasts job={job} label={defaultLabel} />);
 
-      expect(
-        getByText('Pre-install validation completed with warnings.'),
-      ).toBeVisible();
+      expect(getByText('Installation completed with warnings.')).toBeVisible();
     });
   });
 
-  describe('model completes successfully', () => {
+  describe('job completes successfully', () => {
     test('renders toast with message', () => {
       const { getByText, rerender } = setup();
-      const model = { status: 'complete', error_count: 0 };
-      rerender(<Toasts model={model} label={defaultLabel} />);
+      const job = { status: 'complete', error_count: 0 };
+      rerender(<Toasts job={job} label={defaultLabel} />);
 
-      expect(
-        getByText('Pre-install validation completed successfully.'),
-      ).toBeVisible();
+      expect(getByText('Installation completed successfully.')).toBeVisible();
     });
   });
 
   describe('close-toast click', () => {
     test('removes toast', () => {
       const { getByText, container, rerender } = setup();
-      const model = { status: 'complete', error_count: 0 };
-      rerender(<Toasts model={model} label={defaultLabel} />);
+      const job = { status: 'complete', error_count: 0 };
+      rerender(<Toasts job={job} label={defaultLabel} />);
       fireEvent.click(getByText('Close'));
 
       expect(

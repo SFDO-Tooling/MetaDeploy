@@ -74,6 +74,14 @@ describe('<CtaButton />', () => {
     });
   });
 
+  describe('canceled job', () => {
+    test('renders return to preflight btn', () => {
+      const { getByText } = setup({ job: { status: 'canceled' } });
+
+      expect(getByText('Return to Pre-Install Validation')).toBeVisible();
+    });
+  });
+
   describe('unknown job status', () => {
     test('renders nothing', () => {
       const { container } = setup({ job: { status: 'foo' } });

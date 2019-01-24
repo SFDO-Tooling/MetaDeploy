@@ -33,6 +33,7 @@ describe('reducer', () => {
     { type: 'PREFLIGHT_STARTED' },
     { type: 'PREFLIGHT_COMPLETED' },
     { type: 'PREFLIGHT_FAILED' },
+    { type: 'PREFLIGHT_CANCELED' },
     { type: 'PREFLIGHT_INVALIDATED' },
   ].forEach(({ type }) => {
     test(`handles ${type} action`, () => {

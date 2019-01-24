@@ -7,14 +7,19 @@ import { renderWithRedux } from './../../utils';
 import Header from 'components/header';
 
 describe('<Header />', () => {
-  const setup = (initialState = { user: null }) => {
-    const { container, getByLabelText, getByText } = renderWithRedux(
+  const setup = (initialState = { user: null, socket: false }) => {
+    const {
+      container,
+      getByLabelText,
+      getByText,
+      queryByText,
+    } = renderWithRedux(
       <MemoryRouter>
         <Header />
       </MemoryRouter>,
       initialState,
     );
-    return { container, getByLabelText, getByText };
+    return { container, getByLabelText, getByText, queryByText };
   };
 
   describe('logged out', () => {
@@ -42,6 +47,21 @@ describe('<Header />', () => {
       fireEvent.click(btn);
 
       expect(getByText('Log Out')).toBeVisible();
+    });
+  });
+
+  describe('offline', () => {
+    test('renders OfflineAlert if websocket disconnected', () => {
+      const { getByText } = setup();
+
+      expect(getByText('reload the page.')).toBeVisible();
+    });
+
+    test('does not render OfflineAlert if websocket connected', () => {
+      const initialState = { user: null, socket: true };
+      const { queryByText } = setup(initialState);
+
+      expect(queryByText('reload the page.')).toBeNull();
     });
   });
 });

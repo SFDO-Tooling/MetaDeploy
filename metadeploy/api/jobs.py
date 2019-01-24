@@ -49,7 +49,8 @@ def finalize_result(result):
         yield
         result.status = success_status
     except Exception as e:
-        result.status = error_status
+        if not isinstance(e, StopRequested):
+            result.status = error_status
         result.exception = str(e)
         logger.error(f"{result._meta.model_name} {result.id} failed.")
         raise
@@ -240,7 +241,7 @@ expire_user_tokens_job = job(expire_user_tokens)
 
 def preflight(preflight_result_id):
     # Because the FieldTracker interferes with transparently serializing models across
-    # the Redis boundary, we have to pass a primative value to this function,
+    # the Redis boundary, we have to pass a primitive value to this function,
     preflight_result = PreflightResult.objects.get(pk=preflight_result_id)
     run_flows(
         user=preflight_result.user,
