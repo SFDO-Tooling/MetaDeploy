@@ -39,7 +39,7 @@ class MetaDeployCCI(BaseCumulusCI):
     def get_flow_from_plan(
         self, plan: Plan, ctx: WorkableModel, skip: List[str] = None
     ):
-        steps = [step.to_spec(skip=step.path in skip) for step in plan.steps]
+        steps = [step.to_spec(skip=step.path in skip) for step in plan.steps.all()]
 
         if isinstance(ctx, PreflightResult):
             callbacks = PreflightFlowCallback(ctx)

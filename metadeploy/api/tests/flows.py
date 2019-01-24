@@ -49,10 +49,10 @@ class TestJobFlow:
         for i, task in enumerate(tasks):
             task.name = f"task_{i}"
 
-        flow._init_logger()
+        flow.pre_flow(sentinel.flow_coordinator)
         for task in tasks:
             flow.post_task(task, sentinel.task_result)
-        flow.post_flow()
+        flow.post_flow(sentinel.flow_coordinator)
 
         assert job.results == {str(step.id): [{"status": "ok"}] for step in steps}
 
@@ -71,7 +71,7 @@ class TestJobFlow:
         task = MagicMock()
         task.name = f"task_0"
 
-        flow._init_logger()
+        flow.pre_flow(sentinel.flow_coordinator)
         flow._post_task_exception(task, ValueError("Some error"))
 
         assert job.results == {
@@ -105,7 +105,7 @@ class TestPreflightFlow:
             {"path": "name_5", "status_code": "skip", "msg": "skip 1"},
         ]
 
-        preflight_flow.post_flow()
+        preflight_flow.post_flow(sentinel.flow_coordinator)
 
         assert pfr.results == {
             step1.id: [{"status": "error", "message": "error 1"}],
