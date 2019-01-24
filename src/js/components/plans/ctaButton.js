@@ -6,7 +6,7 @@ import Spinner from '@salesforce/design-system-react/components/spinner';
 
 import routes from 'utils/routes';
 import { CONSTANTS } from 'plans/reducer';
-import { getUrlParam } from 'utils/api';
+import { getUrlParam, removeUrlParam } from 'utils/api';
 
 import Login from 'components/header/login';
 import PreflightWarningModal from 'components/plans/preflightWarningModal';
@@ -118,7 +118,7 @@ class CtaButton extends React.Component<
         this.autoStartPreflight();
       }
       // Remove query-string from URL
-      history.replace({ search: '' });
+      history.replace({ search: removeUrlParam(AUTO_START_PREFLIGHT) });
     }
   }
 
@@ -188,7 +188,7 @@ class CtaButton extends React.Component<
   // otherwise returns a login dropdown
   getLoginOrActionBtn(
     label: string,
-    onClick?: () => void = () => {},
+    onClick: () => void,
     startPreflightAfterLogin?: boolean = false,
   ): React.Node {
     const { user, preventAction } = this.props;
