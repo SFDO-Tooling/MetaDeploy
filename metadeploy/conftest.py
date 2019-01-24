@@ -1,4 +1,5 @@
 import factory
+import factory.fuzzy
 import pytest
 from allauth.socialaccount.models import SocialAccount, SocialApp, SocialToken
 from django.contrib.auth import get_user_model
@@ -7,6 +8,7 @@ from rest_framework.test import APIClient
 
 from metadeploy.api.models import (
     AllowedList,
+    AllowedListOrg,
     Job,
     Plan,
     PlanSlug,
@@ -76,7 +78,15 @@ class AllowedListFactory(factory.django.DjangoModelFactory):
         model = AllowedList
 
     title = factory.Sequence("Allowed List {}".format)
-    organization_ids = []
+
+
+@register
+class AllowedListOrgFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = AllowedListOrg
+
+    org_id = factory.fuzzy.FuzzyText(length=15, prefix="00D")
+    description = factory.Sequence("Allowed List Org {}".format)
 
 
 @register

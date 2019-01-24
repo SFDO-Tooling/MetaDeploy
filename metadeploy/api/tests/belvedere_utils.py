@@ -1,7 +1,27 @@
+import pytest
+
 from ..belvedere_utils import (
+    convert_to_18,
     obscure_mpinstaller_deployment_test_failure,
     obscure_salesforce_log,
 )
+
+
+def test_convert_to_18_too_short():
+    text = "00D1F0000009"
+    with pytest.raises(ValueError):
+        convert_to_18(text)
+
+
+def test_convert_to_18():
+    text = "00D1F0000009Gpn"
+    expected = "00D1F0000009GpnUAE"
+    assert convert_to_18(text) == expected
+
+
+def test_convert_to_18_already_18():
+    text = "00D1F0000009GpnUAE"
+    assert convert_to_18(text) == text
 
 
 def test_obscure_salesforce_log():
