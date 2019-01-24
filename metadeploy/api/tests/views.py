@@ -254,9 +254,10 @@ class TestBasicGetViews:
         allowed_list = allowed_list_factory(description="Sample instructions.")
         allowed_list_org = allowed_list_org_factory(allowed_list=allowed_list)
         plan = plan_factory(visible_to=allowed_list)
-        user = user_factory(social_account_set=None)
-        social_account = user.social_account_set.all()[0]
+        user = user_factory()
+        social_account = user.socialaccount_set.all()[0]
         social_account.extra_data[ORGANIZATION_DETAILS]["Id"] = allowed_list_org.org_id
+        social_account.save()
         client.force_login(user)
         response = client.get(reverse("plan-detail", kwargs={"pk": plan.id}))
 
