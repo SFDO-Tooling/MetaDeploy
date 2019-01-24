@@ -2,6 +2,7 @@ TAGS
 *.DS_Store
 *~
 .vscode
+.idea/
 .livereload
 .idea/
 node_modules/
@@ -18,6 +19,7 @@ npm-debug.log
 yarn-error.log
 staticfiles/
 dump.rdb
+/env
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

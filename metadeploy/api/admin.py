@@ -29,11 +29,11 @@ class StepAdmin(admin.ModelAdmin):
     list_display = (
         "name",
         "plan",
-        "order_key",
+        "step_num",
         "is_required",
         "is_recommended",
         "kind",
-        "task_name",
+        "path",
     )
 
 

@@ -15,7 +15,6 @@ class TestPlanViewSet:
         assert response.json() == {
             "data": [
                 {
-                    "flow_name": "slow_steps_flow",
                     "id": f"{plan.id}",
                     "is_listed": True,
                     "post_install_message": "",
@@ -41,7 +40,6 @@ class TestPlanViewSet:
 
         assert response.status_code == 200
         assert response.json() == {
-            "flow_name": "slow_steps_flow",
             "id": str(plan.id),
             "is_listed": True,
             "post_install_message": "",
@@ -54,7 +52,10 @@ class TestPlanViewSet:
                     "is_required": True,
                     "kind": "metadata",
                     "name": "Sample step",
-                    "task_name": "main_task",
+                    "path": "main_task",
+                    "step_num": "1.0",
+                    "task_class": "cumulusci.core.tests.test_tasks._TaskHasResult",
+                    "task_config": {},
                 }
             ],
             "tier": "primary",
@@ -71,10 +72,19 @@ class TestPlanViewSet:
             url,
             {
                 "title": "Sample plan",
-                "flow_name": "bogus",
                 "steps": [
-                    {"task_name": "task1", "name": "Task 1"},
-                    {"task_name": "task2", "name": "Task 2"},
+                    {
+                        "path": "task1",
+                        "name": "Task 1",
+                        "step_num": "1.0",
+                        "task_class": "cumulusci.core.tests.test_tasks._TaskHasResult",
+                    },
+                    {
+                        "path": "task2",
+                        "name": "Task 2",
+                        "step_num": "1.3",
+                        "task_class": "cumulusci.core.tests.test_tasks._TaskHasResult",
+                    },
                 ],
                 "version": f"http://testserver/admin/rest/versions/{version.id}",
             },
@@ -85,7 +95,6 @@ class TestPlanViewSet:
         json = response.json()
         plan_id = json["id"]
         assert response.json() == {
-            "flow_name": "bogus",
             "id": plan_id,
             "is_listed": True,
             "post_install_message": "",
@@ -98,7 +107,10 @@ class TestPlanViewSet:
                     "is_required": True,
                     "kind": "metadata",
                     "name": "Task 1",
-                    "task_name": "task1",
+                    "path": "task1",
+                    "step_num": "1.0",
+                    "task_class": "cumulusci.core.tests.test_tasks._TaskHasResult",
+                    "task_config": {},
                 },
                 {
                     "description": "",
@@ -106,7 +118,10 @@ class TestPlanViewSet:
                     "is_required": True,
                     "kind": "metadata",
                     "name": "Task 2",
-                    "task_name": "task2",
+                    "path": "task2",
+                    "step_num": "1.3",
+                    "task_class": "cumulusci.core.tests.test_tasks._TaskHasResult",
+                    "task_config": {},
                 },
             ],
             "tier": "primary",
@@ -123,7 +138,6 @@ class TestPlanViewSet:
             f"http://testserver/admin/rest/plans/{plan.id}",
             {
                 "title": "Sample plan",
-                "flow_name": "bogus",
                 "version": f"http://testserver/admin/rest/versions/{plan.version.id}",
             },
             format="json",
@@ -134,7 +148,6 @@ class TestPlanViewSet:
             f"http://testserver/admin/rest/plans/{plan.id}",
             {
                 "title": "Sample plan",
-                "flow_name": "bogus",
                 "steps": [],
                 "version": f"http://testserver/admin/rest/versions/{plan.version.id}",
             },

@@ -4,80 +4,76 @@ import pytest
 from django.core.cache import cache
 
 from ..constants import REDIS_JOB_CANCEL_KEY
-from ..flows import BasicFlow, JobFlow, PreflightFlow, StopFlowException
+from ..flows import (
+    BasicFlowCallback,
+    JobFlowCallback,
+    PreflightFlowCallback,
+    StopFlowException,
+)
 from ..models import Step
 
 
 def test_get_step_id(mocker):
-    init = mocker.patch("cumulusci.core.flows.BaseFlow.__init__")
-    init.return_value = None
-    basic_flow = BasicFlow()
-    basic_flow._step_set = Step.objects.none()
-    result = basic_flow._get_step_id("anything")
+    callbacks = BasicFlowCallback(sentinel.result)
+    callbacks._steps = Step.objects.none()
+    result = callbacks._get_step_id("anything")
 
     assert result is None
 
 
 class TestJobFlow:
     def test_init(self, mocker):
-        init = mocker.patch("cumulusci.core.flows.BaseFlow.__init__")
-        init.return_value = None
-        flow = JobFlow(result=sentinel.job)
-        assert flow.result == sentinel.job
+        callbacks = JobFlowCallback(sentinel.job)
+        assert callbacks.context == sentinel.job
 
     @pytest.mark.django_db
     def test_cancel_job(self, mocker, job_factory):
-        init = mocker.patch("cumulusci.core.flows.BaseFlow.__init__")
-        init.return_value = None
         job = job_factory()
-        flow = JobFlow(result=job)
+        callbacks = JobFlowCallback(job)
         cache.set(REDIS_JOB_CANCEL_KEY.format(id=job.id), True)
         with pytest.raises(StopFlowException):
-            flow._pre_task(None)
+            callbacks.pre_task(None)
 
     @pytest.mark.django_db
     def test_post_task(
         self, mocker, user_factory, plan_factory, step_factory, job_factory
     ):
-        init = mocker.patch("cumulusci.core.flows.BaseFlow.__init__")
-        init.return_value = None
         plan = plan_factory()
-        steps = [step_factory(plan=plan, task_name=f"task_{i}") for i in range(3)]
+        steps = [step_factory(plan=plan, path=f"task_{i}") for i in range(3)]
 
         job = job_factory(plan=plan, steps=steps)
 
-        flow = JobFlow(result=job)
+        callbacks = JobFlowCallback(job)
 
-        tasks = [MagicMock() for _ in range(3)]
-        for i, task in enumerate(tasks):
-            task.name = f"task_{i}"
+        stepspecs = [MagicMock() for _ in range(3)]
+        for i, stepspec in enumerate(stepspecs):
+            stepspec.path = f"task_{i}"
+        result = MagicMock(exception=None)
 
-        flow._init_logger()
-        for task in tasks:
-            flow._post_task(task)
-        flow._post_flow()
+        callbacks.pre_flow(sentinel.flow_coordinator)
+        for stepspec in stepspecs:
+            callbacks.post_task(stepspec, result)
+        callbacks.post_flow(sentinel.flow_coordinator)
 
         assert job.results == {str(step.id): [{"status": "ok"}] for step in steps}
 
     @pytest.mark.django_db
-    def test_post_task_exception(
+    def test_post_task__exception(
         self, mocker, user_factory, plan_factory, step_factory, job_factory
     ):
-        init = mocker.patch("cumulusci.core.flows.BaseFlow.__init__")
-        init.return_value = None
         user = user_factory()
         plan = plan_factory()
-        steps = [step_factory(plan=plan, task_name=f"task_{i}") for i in range(3)]
+        steps = [step_factory(plan=plan, path=f"task_{i}") for i in range(3)]
 
         job = job_factory(user=user, plan=plan, steps=steps)
 
-        flow = JobFlow(result=job)
+        callbacks = JobFlowCallback(job)
 
-        task = MagicMock()
-        task.name = f"task_0"
+        step = MagicMock(path="task_0")
+        step.result = MagicMock(exception=ValueError("Some error"))
 
-        flow._init_logger()
-        flow._post_task_exception(task, ValueError("Some error"))
+        callbacks.pre_flow(sentinel.flow_coordinator)
+        callbacks.post_task(step, step.result)
 
         assert job.results == {
             str(steps[0].id): [{"status": "error", "message": "Some error"}]
@@ -86,35 +82,42 @@ class TestJobFlow:
 
 class TestPreflightFlow:
     def test_init(self, mocker):
-        init = mocker.patch("cumulusci.core.flows.BaseFlow.__init__")
-        init.return_value = None
-        preflight_flow = PreflightFlow(result=sentinel.preflight)
-        assert preflight_flow.result == sentinel.preflight
+        callbacks = PreflightFlowCallback(sentinel.preflight)
+        assert callbacks.context == sentinel.preflight
 
     @pytest.mark.django_db
     def test_post_flow(
         self, mocker, user_factory, plan_factory, step_factory, preflight_result_factory
     ):
-        init = mocker.patch("cumulusci.core.flows.BaseFlow.__init__")
-        init.return_value = None
         user = user_factory()
         plan = plan_factory()
-        step1 = step_factory(plan=plan, task_name="name_1")
-        step_factory(plan=plan, task_name="name_2")
-        step3 = step_factory(plan=plan, task_name="name_3")
-        step4 = step_factory(plan=plan, task_name="name_4")
-        step5 = step_factory(plan=plan, task_name="name_5")
+        step1 = step_factory(plan=plan, path="name_1")
+        step_factory(plan=plan, path="name_2")
+        step3 = step_factory(plan=plan, path="name_3")
+        step4 = step_factory(plan=plan, path="name_4")
+        step5 = step_factory(plan=plan, path="name_5")
         pfr = preflight_result_factory(user=user, plan=plan)
-        preflight_flow = PreflightFlow(result=pfr)
-        preflight_flow.step_return_values = [
-            {"task_name": "name_1", "status_code": "error", "msg": "error 1"},
-            {"task_name": "name_2", "status_code": "ok"},
-            {"task_name": "name_3", "status_code": "warn", "msg": "warn 1"},
-            {"task_name": "name_4", "status_code": "optional"},
-            {"task_name": "name_5", "status_code": "skip", "msg": "skip 1"},
+        results = [
+            MagicMock(
+                return_value={
+                    "path": "name_1",
+                    "status_code": "error",
+                    "msg": "error 1",
+                }
+            ),
+            MagicMock(return_value={"path": "name_2", "status_code": "ok"}),
+            MagicMock(
+                return_value={"path": "name_3", "status_code": "warn", "msg": "warn 1"}
+            ),
+            MagicMock(return_value={"path": "name_4", "status_code": "optional"}),
+            MagicMock(
+                return_value={"path": "name_5", "status_code": "skip", "msg": "skip 1"}
+            ),
         ]
+        flow_coordinator = MagicMock(results=results)
 
-        preflight_flow._post_flow()
+        callbacks = PreflightFlowCallback(pfr)
+        callbacks.post_flow(flow_coordinator)
 
         assert pfr.results == {
             step1.id: [{"status": "error", "message": "error 1"}],
@@ -124,18 +127,17 @@ class TestPreflightFlow:
         }
 
     @pytest.mark.django_db
-    def test_post_task_exception(
+    def test_post_task__exception(
         self, mocker, user_factory, plan_factory, preflight_result_factory
     ):
-        init = mocker.patch("cumulusci.core.flows.BaseFlow.__init__")
-        init.return_value = None
         user = user_factory()
         plan = plan_factory()
         pfr = preflight_result_factory(user=user, plan=plan)
-        preflight_flow = PreflightFlow(result=pfr)
+        callbacks = PreflightFlowCallback(pfr)
 
-        exc = ValueError("A value error.")
-        preflight_flow._post_task_exception(None, exc)
+        step = MagicMock()
+        step.result = MagicMock(exception=ValueError("A value error."))
+        callbacks.post_task(step, step.result)
 
         assert pfr.results == {
             "plan": [{"status": "error", "message": "A value error."}]

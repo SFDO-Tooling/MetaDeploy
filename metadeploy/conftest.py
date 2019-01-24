@@ -132,7 +132,7 @@ class PlanFactory(factory.django.DjangoModelFactory):
     version = factory.SubFactory(VersionFactory)
     _ensure_slug = factory.PostGenerationMethodCall("ensure_slug")
     preflight_flow_name = "slow_steps_preflight_good"
-    flow_name = "slow_steps_flow"
+
     visible_to = None
 
 
@@ -143,7 +143,9 @@ class StepFactory(factory.django.DjangoModelFactory):
 
     name = "Sample step"
     plan = factory.SubFactory(PlanFactory)
-    task_name = "main_task"
+    path = "main_task"
+    task_class = "cumulusci.core.tests.test_tasks._TaskHasResult"
+    step_num = factory.Sequence("1.{}".format)
 
 
 @register

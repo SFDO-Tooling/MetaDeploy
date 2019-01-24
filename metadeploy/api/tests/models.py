@@ -258,8 +258,8 @@ class TestPlan:
 
 @pytest.mark.django_db
 def test_step_str(step_factory):
-    step = step_factory(name="Test step", order_key=3, plan__title="The Plan")
-    assert str(step) == "Step Test step of The Plan (3)"
+    step = step_factory(name="Test step", step_num="3.1", plan__title="The Plan")
+    assert str(step) == "Step Test step of The Plan (3.1)"
 
 
 @pytest.mark.django_db
@@ -323,12 +323,12 @@ def test_plan_post_install_markdown(plan_factory):
 class TestJob:
     def test_skip_tasks(self, plan_factory, step_factory, job_factory):
         plan = plan_factory()
-        step1 = step_factory(plan=plan, task_name="task1")
-        step2 = step_factory(plan=plan, task_name="task2")
-        step3 = step_factory(plan=plan, task_name="task3")
+        step1 = step_factory(plan=plan, path="task1")
+        step2 = step_factory(plan=plan, path="task2")
+        step3 = step_factory(plan=plan, path="task3")
         job = job_factory(plan=plan, steps=[step1, step3])
 
-        assert job.skip_tasks() == [step2.task_name]
+        assert job.skip_tasks() == [step2.path]
 
     def test_invalidate_related_preflight(self, job_factory, preflight_result_factory):
         job = job_factory()
