@@ -41,11 +41,11 @@ class MetaDeployCCI(BaseCumulusCI):
     ):
         steps = [step.to_spec(skip=step.path in skip) for step in plan.steps.all()]
 
-        if isinstance(ctx, PreflightResult):
+        if isinstance(ctx, PreflightResult):  # pragma: no cover
             callbacks = PreflightFlowCallback(ctx)
         elif isinstance(ctx, Job):
             callbacks = JobFlowCallback(ctx)
-        else:
+        else:  # pragma: no cover
             raise AttributeError(
                 f"ctx must be either a PreflightResult "
                 f"or Job, but was passed {type(ctx)}."
