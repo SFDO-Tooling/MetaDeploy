@@ -8,8 +8,8 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v1-metadeploy-py-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
-            - v1-metadeploy-py-
+            - v1-metadeploy-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+            - v1-metadeploy-py-3.7-
       - restore_cache:
           keys:
             - v1-metadeploy-npm-{{ checksum "yarn.lock" }}
@@ -47,7 +47,7 @@ jobs:
           paths:
             - '~/metadeploy/node'
       - save_cache:
-          key: v1-metadeploy-py-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+          key: v1-metadeploy-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
           paths:
             - '~/.cache/pip'
             - ./venv
@@ -66,7 +66,7 @@ jobs:
       - restore_cache:
           key: v1-metadeploy-node-{{ checksum "bin/unpack-node" }}
       - restore_cache:
-          key: v1-metadeploy-py-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+          key: v1-metadeploy-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
       - restore_cache:
           keys:
             - v1-metadeploy-npm-{{ checksum "yarn.lock" }}
@@ -130,7 +130,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: v1-metadeploy-py-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+          key: v1-metadeploy-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
       - run:
           name: Install Dockerize
           command: wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && sudo tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
@@ -174,7 +174,7 @@ jobs:
             - v1-metadeploy-npm-{{ checksum "yarn.lock" }}
             - v1-metadeploy-npm-
       - restore_cache:
-          key: v1-metadeploy-py-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+          key: v1-metadeploy-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
       - run:
           name: Set $PATH
           command: |
