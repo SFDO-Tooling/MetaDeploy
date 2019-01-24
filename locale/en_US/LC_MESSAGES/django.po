@@ -1,0 +1,84 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-01-24 20:33+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: metadeploy/api/models.py:197 metadeploy/api/models.py:332
+msgid "If multiple slugs are active, we will default to the most recent."
+msgstr ""
+
+#: metadeploy/api/models.py:238
+msgid "This will take precedence over Color and the SLDS Icons."
+msgstr ""
+
+#: metadeploy/api/models.py:292
+msgid "This is usually a tag, sometimes a branch."
+msgstr ""
+
+#: metadeploy/api/models.py:344
+msgid "This must be unique for the Plan's Version."
+msgstr ""
+
+#: metadeploy/api/models.py:385
+msgid "Metadata"
+msgstr ""
+
+#: metadeploy/api/models.py:386
+msgid "One Time Apex"
+msgstr ""
+
+#: metadeploy/api/models.py:387
+msgid "Managed Package"
+msgstr ""
+
+#: metadeploy/api/models.py:388
+msgid "Data"
+msgstr ""
+
+#: metadeploy/api/push.py:87
+msgid "There was an error"
+msgstr ""
+
+#: metadeploy/api/serializers.py:341
+msgid "You are not allowed to install this plan."
+msgstr ""
+
+#: metadeploy/api/serializers.py:345
+msgid "You are not allowed to install this product."
+msgstr ""
+
+#: metadeploy/api/serializers.py:361
+msgid "No valid preflight."
+msgstr ""
+
+#: metadeploy/api/serializers.py:367
+msgid "Invalid steps for plan."
+msgstr ""
+
+#: metadeploy/api/serializers.py:373
+#, python-brace-format
+msgid "Pending job {pending_job.id} exists. Please try again later, or "
+msgstr ""
+
+#: metadeploy/consumers.py:65
+msgid "Invalid subscription."
+msgstr ""
+
+#: metadeploy/consumers.py:74
+#, python-brace-format
+msgid "Subscribed to {model}.id = {id_}"
+msgstr ""
