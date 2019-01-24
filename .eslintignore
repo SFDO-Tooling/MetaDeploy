@@ -1,3 +1,4 @@
 dist/
 !.*
 flow-typed/
+venv/
