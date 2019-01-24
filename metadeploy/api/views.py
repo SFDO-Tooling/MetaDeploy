@@ -71,10 +71,20 @@ class PlanViewSet(viewsets.ModelViewSet):
         ) and plan.version.product.is_visible_to(request.user)
         if not is_visible_to:
             return Response("", status=status.HTTP_403_FORBIDDEN)
-        preflight_result = PreflightResult.objects.create(
-            user=request.user, plan=plan, organization_url=request.user.instance_url
-        )
-        preflight_job.delay(preflight_result.pk)
+        # @@@ temporary hack to avoid actually running preflight
+        # until we sort out how it is modeled
+        if plan.preflight_flow_name:
+            preflight_result = PreflightResult.objects.create(
+                user=request.user, plan=plan, organization_url=request.user.instance_url
+            )
+            preflight_job.delay(preflight_result.pk)
+        else:
+            preflight_result = PreflightResult.objects.create(
+                user=request.user,
+                plan=plan,
+                organization_url=request.user.instance_url,
+                status=PreflightResult.Status.complete,
+            )
         serializer = PreflightResultSerializer(instance=preflight_result)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

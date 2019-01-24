@@ -7,6 +7,8 @@ from allauth.socialaccount.models import SocialToken
 from asgiref.sync import async_to_sync
 from colorfield.fields import ColorField
 from cumulusci.core.flowrunner import StepSpec
+from cumulusci.core.tasks import BaseTask
+from cumulusci.core.utils import import_class
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
@@ -60,7 +62,9 @@ class AllowedListAccessMixin(models.Model):
     class Meta:
         abstract = True
 
-    visible_to = models.ForeignKey(AllowedList, on_delete=models.SET_NULL, null=True)
+    visible_to = models.ForeignKey(
+        AllowedList, on_delete=models.SET_NULL, null=True, blank=True
+    )
 
     def is_visible_to(self, user):
         return not self.visible_to or (
@@ -232,7 +236,7 @@ class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, models.Model):
     objects = ProductQuerySet.as_manager()
 
     title = models.CharField(max_length=256)
-    description = MarkdownField(property_suffix="_markdown")
+    description = MarkdownField(property_suffix="_markdown", blank=True)
     category = models.ForeignKey(ProductCategory, on_delete=models.PROTECT)
     color = ColorField(blank=True)
     image = models.ImageField(blank=True)
@@ -286,7 +290,7 @@ class Version(HashIdMixin, models.Model):
     label = models.CharField(
         max_length=1024, validators=[RegexValidator(regex=VERSION_STRING)]
     )
-    description = models.TextField()
+    description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     is_production = models.BooleanField(default=True)
     commit_ish = models.CharField(
@@ -397,6 +401,7 @@ class Step(HashIdMixin, models.Model):
         ("onetime", _("One Time Apex")),
         ("managed", _("Managed Package")),
         ("data", _("Data")),
+        ("other", _("Other")),
     )
 
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT, related_name="steps")
@@ -417,9 +422,7 @@ class Step(HashIdMixin, models.Model):
     task_config = JSONField(default=dict, blank=True)
 
     class Meta:
-        ordering = (
-            DottedArray(F("step_num")),
-        )  # TODO: does postgres sort step_num the way I expect
+        ordering = (DottedArray(F("step_num")),)
 
     @property
     def kind_icon(self):
@@ -434,11 +437,13 @@ class Step(HashIdMixin, models.Model):
         return None
 
     def to_spec(self, skip: bool = False):
+        task_class = import_class(self.task_class)
+        assert issubclass(task_class, BaseTask)
         return StepSpec(
             step_num=self.step_num,
             task_name=self.path,  # skip from_flow path construction in StepSpec ctr
             task_config=self.task_config,
-            task_class=self.task_class,
+            task_class=task_class,
             skip=skip,
         )
 
