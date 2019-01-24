@@ -30,9 +30,9 @@ class AllowedListOrgAdmin(admin.ModelAdmin):
     list_filter = ("allowed_list", "created_by")
 
     def save_model(self, request, obj, form, change):
-        if not obj.created_by:
+        if obj._state.adding:
             obj.created_by = request.user
-        obj.save()
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(Step)

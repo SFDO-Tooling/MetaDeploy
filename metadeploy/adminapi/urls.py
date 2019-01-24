@@ -1,6 +1,7 @@
 from rest_framework import routers
 
 from .api import (
+    AllowedListOrgViewSet,
     AllowedListViewSet,
     PlanSlugViewSet,
     PlanViewSet,
@@ -19,6 +20,7 @@ app_name = "admin_api"
 router = routers.DefaultRouter(trailing_slash=False)
 router.get_default_basename = _get_api_basename
 router.register(r"allowedlists", AllowedListViewSet)
+router.register(r"allowedlistorgs", AllowedListOrgViewSet)
 router.register(r"plans", PlanViewSet)
 router.register(r"planslug", PlanSlugViewSet)
 router.register(r"productcategory", ProductCategoryViewSet)
