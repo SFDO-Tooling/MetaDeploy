@@ -78,7 +78,7 @@ class PlanViewSet(viewsets.ModelViewSet):
                 user=request.user, plan=plan, organization_url=request.user.instance_url
             )
             preflight_job.delay(preflight_result.pk)
-        else:
+        else:  # pragma: no cover
             preflight_result = PreflightResult.objects.create(
                 user=request.user,
                 plan=plan,
