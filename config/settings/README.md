@@ -52,9 +52,9 @@ was not set. It's functionally similar to
 pitfalls. If you don't provide a default, an exception will be raised if the env
 var is not present in the environment.
 
-Minimize values that are optional but don't have a default (such as SENTRY_DSN).
-It happens, but it requires more defensive coding to check for a value of `""`
-everywhere it's in use.
+Minimize values that are optional but don't have a default (such as
+`SENTRY_DSN`). It happens, but it requires more defensive coding to check for a
+value of `""` everywhere it's in use.
 
 Frequently, your `type_` is just `str` or `int`, but we also include `boolish`
 which accepts (`"True"`, `"true"`, `"T"`, `"t"`, `"1"`, `1`) as true and
