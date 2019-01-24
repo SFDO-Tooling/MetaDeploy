@@ -295,7 +295,7 @@ CACHES = {
 RQ_QUEUES = {
     "default": {
         "USE_REDIS_CACHE": "default",
-        "DEFAULT_TIMEOUT": 360,
+        "DEFAULT_TIMEOUT": 3600,
         "DEFAULT_RESULT_TTL": 720,
     },
     "short": {

@@ -125,6 +125,9 @@ jobs:
           POSTGRES_USER: ubuntu
           POSTGRES_DB: circle_test
           POSTGRES_PASSWORD: circle_test
+          AWS_BUCKET_NAME: None
+          AWS_SECRET_ACCESS_KEY: None
+          AWS_ACCESS_KEY_ID: None
     steps:
       - checkout
       - restore_cache:
