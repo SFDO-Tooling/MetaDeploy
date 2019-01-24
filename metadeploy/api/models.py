@@ -388,12 +388,12 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, models.Model):
 
 
 class DottedArray(Func):
-    """ Turns a dotted string into an array of strings.
+    """ Turns a dotted string into an array of ints.
 
-    Useful for version numbers. Particularly if you further cast to int. """
+    Useful for version numbers."""
 
     function = "string_to_array"
-    template = "%(function)s(%(expressions)s, '.')"
+    template = "%(function)s(%(expressions)s, '.')::int[]"
 
 
 class Step(HashIdMixin, models.Model):
