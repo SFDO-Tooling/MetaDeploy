@@ -72,6 +72,7 @@ export const LoginBtn = ({
     buttonVariant="brand"
     triggerClassName="slds-size_full"
     label={label}
+    menuPosition="relative"
     nubbinPosition="top"
     redirectParams={redirectParams}
   />
