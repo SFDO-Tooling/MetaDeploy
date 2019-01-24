@@ -32,6 +32,7 @@ from django_rq import job
 from rq.worker import StopRequested
 
 from .cci_configs import MetaDeployCCI, extract_user_and_repo
+from .flows import StopFlowException
 from .models import Job, PreflightResult
 from .push import report_error
 
@@ -49,7 +50,7 @@ def finalize_result(result):
         yield
         result.status = success_status
     except Exception as e:
-        if not isinstance(e, StopRequested):
+        if not isinstance(e, (StopRequested, StopFlowException)):
             result.status = error_status
         result.exception = str(e)
         logger.error(f"{result._meta.model_name} {result.id} failed.")
@@ -88,7 +89,7 @@ def mark_canceled(result):
     """
     try:
         yield
-    except StopRequested:
+    except (StopRequested, StopFlowException):
         result.status = result.Status.canceled
         result.canceled_at = timezone.now()
         result.save()

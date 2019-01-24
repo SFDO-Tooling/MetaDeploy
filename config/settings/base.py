@@ -9,10 +9,10 @@ https://docs.djangoproject.com/en/1.11/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
-
 from ipaddress import IPv4Network
 from os import environ
 from pathlib import Path
+from typing import List
 
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
@@ -20,11 +20,11 @@ from django.core.exceptions import ImproperlyConfigured
 BOOLS = ("True", "true", "T", "t", "1", 1)
 
 
-def boolish(val):
+def boolish(val: str) -> bool:
     return val in BOOLS
 
 
-def ipv4_networks(val):
+def ipv4_networks(val: str) -> List[IPv4Network]:
     return [IPv4Network(s.strip()) for s in val.split(",")]
 
 
@@ -239,9 +239,16 @@ USE_TZ = True
 # Media files
 DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 
-AWS_ACCESS_KEY_ID = env("BUCKETEER_AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = env("BUCKETEER_AWS_SECRET_ACCESS_KEY")
-AWS_STORAGE_BUCKET_NAME = env("BUCKETEER_BUCKET_NAME")
+AWS_ACCESS_KEY_ID = env(
+    "BUCKETEER_AWS_ACCESS_KEY_ID", default=env("AWS_ACCESS_KEY_ID", default=None)
+)
+AWS_SECRET_ACCESS_KEY = env(
+    "BUCKETEER_AWS_SECRET_ACCESS_KEY",
+    default=env("AWS_SECRET_ACCESS_KEY", default=None),
+)
+AWS_STORAGE_BUCKET_NAME = env(
+    "BUCKETEER_BUCKET_NAME", default=env("AWS_BUCKET_NAME", default=None)
+)
 
 
 # Static files (CSS, JavaScript, Images)
@@ -294,7 +301,7 @@ CACHES = {
 RQ_QUEUES = {
     "default": {
         "USE_REDIS_CACHE": "default",
-        "DEFAULT_TIMEOUT": 360,
+        "DEFAULT_TIMEOUT": 3600,
         "DEFAULT_RESULT_TTL": 720,
     },
     "short": {

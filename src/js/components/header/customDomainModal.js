@@ -7,9 +7,12 @@ import Modal from '@salesforce/design-system-react/components/modal';
 
 import { addUrlParams } from 'utils/api';
 
+import type { UrlParams } from 'utils/api';
+
 type Props = {
   isOpen: boolean,
   toggleModal: boolean => void,
+  redirectParams: UrlParams,
 };
 
 class CustomDomainModal extends React.Component<Props, { url: string }> {
@@ -30,10 +33,11 @@ class CustomDomainModal extends React.Component<Props, { url: string }> {
       return;
     }
     const baseUrl = window.api_urls.salesforce_custom_login();
+    const { redirectParams } = this.props;
     window.location.assign(
       addUrlParams(baseUrl, {
         custom_domain: val,
-        next: window.location.pathname,
+        next: addUrlParams(window.location.href, redirectParams),
       }),
     );
   };
