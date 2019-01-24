@@ -1,13 +1,15 @@
 // @flow
 
 import * as React from 'react';
+import JobProgressIndicator from 'components/jobs/progressIndicator';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
+import PlanProgressIndicator from 'components/plans/progressIndicator';
 import ProductIcon from 'components/products/icon';
-import ProgressIndicator from 'components/plans/progressIndicator';
 import { Link } from 'react-router-dom';
 
 import routes from 'utils/routes';
 
+import type { Job as JobType } from 'jobs/reducer';
 import type { Plan as PlanType } from 'plans/reducer';
 import type {
   Product as ProductType,
@@ -19,7 +21,7 @@ const Header = ({
   version,
   plan,
   navRight,
-  showProgressIndicator,
+  job,
   userLoggedIn,
   preflightStatus,
   preflightIsValid,
@@ -29,7 +31,7 @@ const Header = ({
   version: VersionType,
   plan: PlanType,
   navRight?: React.Node,
-  showProgressIndicator: boolean,
+  job?: JobType,
   userLoggedIn?: boolean,
   preflightStatus?: ?string,
   preflightIsValid?: boolean,
@@ -54,14 +56,16 @@ const Header = ({
       icon={<ProductIcon item={product} />}
       variant="objectHome"
     />
-    {showProgressIndicator ? (
-      <ProgressIndicator
+    {job ? (
+      <JobProgressIndicator job={job} />
+    ) : (
+      <PlanProgressIndicator
         userLoggedIn={userLoggedIn}
         preflightStatus={preflightStatus}
         preflightIsValid={preflightIsValid}
         preflightIsReady={preflightIsReady}
       />
-    ) : null}
+    )}
   </>
 );
 
