@@ -7,6 +7,7 @@ Websocket notifications you can subscribe to:
     preflightresult.:id
         PREFLIGHT_COMPLETED
         PREFLIGHT_FAILED
+        PREFLIGHT_CANCELED
         PREFLIGHT_INVALIDATED
     job.:id
         TASK_COMPLETED
@@ -68,6 +69,14 @@ async def preflight_failed(preflight):
 
     payload = PreflightResultSerializer(instance=preflight).data
     message = {"type": "PREFLIGHT_FAILED", "payload": payload}
+    await push_message_about_instance(preflight, message)
+
+
+async def preflight_canceled(preflight):
+    from .serializers import PreflightResultSerializer
+
+    payload = PreflightResultSerializer(instance=preflight).data
+    message = {"type": "PREFLIGHT_CANCELED", "payload": payload}
     await push_message_about_instance(preflight, message)
 
 

@@ -1,5 +1,5 @@
 // flow-typed signature: ab5dcf325d82a5f5112b4788616b9471
-// flow-typed version: <<STUB>>/@salesforce/design-system-react_v^0.9.0/flow_v0.90.0
+// flow-typed version: <<STUB>>/@salesforce/design-system-react_v^0.9.0/flow_v0.91.0
 
 declare module '@salesforce/design-system-react/components/icon-settings' {
   import typeof { Component } from 'react';
@@ -146,6 +146,24 @@ declare module '@salesforce/design-system-react/components/radio-group' {
 }
 
 declare module '@salesforce/design-system-react/components/radio-group/radio' {
+  import typeof { Component } from 'react';
+
+  declare export default Component;
+}
+
+declare module '@salesforce/design-system-react/components/alert' {
+  import typeof { Component } from 'react';
+
+  declare export default Component;
+}
+
+declare module '@salesforce/design-system-react/components/alert/container' {
+  import typeof { Component } from 'react';
+
+  declare export default Component;
+}
+
+declare module '@salesforce/design-system-react/components/progress-indicator' {
   import typeof { Component } from 'react';
 
   declare export default Component;

@@ -1,4 +1,5 @@
 import factory
+import factory.fuzzy
 import pytest
 from allauth.socialaccount.models import SocialAccount, SocialApp, SocialToken
 from django.contrib.auth import get_user_model
@@ -7,6 +8,7 @@ from rest_framework.test import APIClient
 
 from metadeploy.api.models import (
     AllowedList,
+    AllowedListOrg,
     Job,
     Plan,
     PlanSlug,
@@ -76,7 +78,15 @@ class AllowedListFactory(factory.django.DjangoModelFactory):
         model = AllowedList
 
     title = factory.Sequence("Allowed List {}".format)
-    organization_ids = []
+
+
+@register
+class AllowedListOrgFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = AllowedListOrg
+
+    org_id = factory.fuzzy.FuzzyText(length=15, prefix="00D")
+    description = factory.Sequence("Allowed List Org {}".format)
 
 
 @register
@@ -132,7 +142,7 @@ class PlanFactory(factory.django.DjangoModelFactory):
     version = factory.SubFactory(VersionFactory)
     _ensure_slug = factory.PostGenerationMethodCall("ensure_slug")
     preflight_flow_name = "slow_steps_preflight_good"
-    flow_name = "slow_steps_flow"
+
     visible_to = None
 
 
@@ -143,7 +153,9 @@ class StepFactory(factory.django.DjangoModelFactory):
 
     name = "Sample step"
     plan = factory.SubFactory(PlanFactory)
-    task_name = "main_task"
+    path = "main_task"
+    task_class = "cumulusci.core.tests.test_tasks._TaskHasResult"
+    step_num = factory.Sequence("1.{}".format)
 
 
 @register
@@ -186,6 +198,15 @@ class PreflightResultFactory(factory.django.DjangoModelFactory):
 @pytest.fixture
 def client(user_factory):
     user = user_factory()
+    client = APIClient()
+    client.force_login(user)
+    client.user = user
+    return client
+
+
+@pytest.fixture
+def admin_api_client(user_factory):
+    user = user_factory(is_superuser=True)
     client = APIClient()
     client.force_login(user)
     client.user = user

@@ -1,7 +1,16 @@
 import React from 'react';
 import { render, fireEvent } from 'react-testing-library';
 
+import { getUrlParam, removeUrlParam } from 'utils/api';
+
 import CtaButton from 'components/plans/ctaButton';
+
+jest.mock('utils/api');
+
+afterEach(() => {
+  getUrlParam.mockClear();
+  removeUrlParam.mockClear();
+});
 
 const defaultPlan = {
   id: 'plan-1',
@@ -39,7 +48,8 @@ describe('<CtaButton />', () => {
       preventAction: false,
     };
     const opts = { ...defaults, ...options };
-    const { getByText, getByLabelText, container } = render(
+    const renderFn = opts.rerenderFn || render;
+    return renderFn(
       <CtaButton
         history={opts.history}
         user={opts.user}
@@ -53,7 +63,6 @@ describe('<CtaButton />', () => {
         doStartJob={opts.doStartJob}
       />,
     );
-    return { getByText, getByLabelText, container };
   };
 
   describe('no user', () => {
@@ -148,6 +157,16 @@ describe('<CtaButton />', () => {
           getByText('Log In to Re-Run Pre-Install Validation'),
         ).toBeVisible();
       });
+    });
+  });
+
+  describe('canceled preflight', () => {
+    test('renders re-run-preflight btn', () => {
+      const { getByText } = setup({
+        preflight: { status: 'canceled', is_valid: true, error_count: 0 },
+      });
+
+      expect(getByText('Re-Run Pre-Install Validation')).toBeVisible();
     });
   });
 
@@ -290,6 +309,85 @@ describe('<CtaButton />', () => {
             '/products/product/version/my-plan/jobs/job-1',
           );
         });
+      });
+    });
+  });
+
+  describe('auto-start preflight after login', () => {
+    const history = { replace: jest.fn() };
+
+    beforeEach(() => {
+      history.replace.mockClear();
+      removeUrlParam.mockReturnValue('');
+      getUrlParam.mockReturnValue('true');
+    });
+
+    test('removes param from search string', () => {
+      setup({ preflight: undefined, history });
+
+      expect(removeUrlParam).toHaveBeenCalledWith('start_preflight');
+      expect(history.replace).toHaveBeenCalledWith({ search: '' });
+    });
+
+    describe('no preflight', () => {
+      test('starts preflight', () => {
+        const doStartPreflight = jest.fn();
+        setup({ preflight: null, doStartPreflight, history });
+
+        expect(doStartPreflight).toHaveBeenCalledWith('plan-1');
+      });
+    });
+
+    describe('no user', () => {
+      test('does not start preflight', () => {
+        const doStartPreflight = jest.fn();
+        setup({ user: null, doStartPreflight, history });
+
+        expect(doStartPreflight).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('running preflight', () => {
+      test('does not start preflight', () => {
+        const doStartPreflight = jest.fn();
+        setup({
+          preflight: { ...defaultPreflight, status: 'started' },
+          doStartPreflight,
+          history,
+        });
+
+        expect(doStartPreflight).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('successful preflight', () => {
+      test('does not start preflight', () => {
+        const doStartPreflight = jest.fn();
+        setup({ doStartPreflight, history });
+
+        expect(doStartPreflight).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('fetching preflight', () => {
+      test('starts preflight after fetched', () => {
+        const doStartPreflight = jest.fn();
+        const { rerender } = setup({
+          preflight: undefined,
+          doStartPreflight,
+          history,
+        });
+
+        expect(doStartPreflight).not.toHaveBeenCalled();
+
+        setup({
+          rerenderFn: rerender,
+          preflight: null,
+          doStartPreflight,
+          history,
+        });
+
+        expect(doStartPreflight).toHaveBeenCalledWith('plan-1');
       });
     });
   });

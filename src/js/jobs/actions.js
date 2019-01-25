@@ -37,11 +37,12 @@ type JobCancelRequested = {
   type: 'JOB_CANCEL_REQUESTED',
   payload: string,
 };
-type JobCanceled = { type: 'JOB_CANCEL_ACCEPTED', payload: string };
+type JobCancelAccepted = { type: 'JOB_CANCEL_ACCEPTED', payload: string };
 type JobCancelRejected = {
   type: 'JOB_CANCEL_REJECTED',
   payload: string,
 };
+export type JobCanceled = { type: 'JOB_CANCELED', payload: Job };
 export type JobsAction =
   | FetchJobStarted
   | FetchJobSucceeded
@@ -56,8 +57,9 @@ export type JobsAction =
   | JobUpdated
   | JobUpdateRejected
   | JobCancelRequested
-  | JobCanceled
-  | JobCancelRejected;
+  | JobCancelAccepted
+  | JobCancelRejected
+  | JobCanceled;
 
 export const fetchJob = (jobId: string): ThunkAction => (
   dispatch,
@@ -67,7 +69,7 @@ export const fetchJob = (jobId: string): ThunkAction => (
   dispatch({ type: 'FETCH_JOB_STARTED', payload: jobId });
   return apiFetch(window.api_urls.job_detail(jobId))
     .then(response => {
-      if (response) {
+      if (response && window.socket) {
         window.socket.subscribe({
           model: 'job',
           id: response.id,
@@ -99,10 +101,13 @@ export const startJob = (data: JobData): ThunkAction => (
     },
   })
     .then(response => {
-      window.socket.subscribe({
-        model: 'job',
-        id: response.id,
-      });
+      /* istanbul ignore else */
+      if (window.socket) {
+        window.socket.subscribe({
+          model: 'job',
+          id: response.id,
+        });
+      }
       return dispatch({ type: 'JOB_STARTED', payload: response });
     })
     .catch(err => {
@@ -147,7 +152,7 @@ export const updateJob = (payload: {
     });
 };
 
-export const cancelJob = (id: string): ThunkAction => (
+export const requestCancelJob = (id: string): ThunkAction => (
   dispatch,
   getState,
   { apiFetch },
@@ -163,3 +168,8 @@ export const cancelJob = (id: string): ThunkAction => (
       throw err;
     });
 };
+
+export const cancelJob = (payload: Job): JobCanceled => ({
+  type: 'JOB_CANCELED',
+  payload,
+});

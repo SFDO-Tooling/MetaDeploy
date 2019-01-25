@@ -9,9 +9,10 @@ https://docs.djangoproject.com/en/1.11/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
-
+from ipaddress import IPv4Network
 from os import environ
 from pathlib import Path
+from typing import List
 
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
@@ -19,8 +20,12 @@ from django.core.exceptions import ImproperlyConfigured
 BOOLS = ("True", "true", "T", "t", "1", 1)
 
 
-def boolish(val):
+def boolish(val: str) -> bool:
     return val in BOOLS
+
+
+def ipv4_networks(val: str) -> List[IPv4Network]:
+    return [IPv4Network(s.strip()) for s in val.split(",")]
 
 
 class NoDefaultValue:
@@ -115,10 +120,12 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "colorfield",
     "rest_framework",
+    "rest_framework.authtoken",
     "django_filters",
     "metadeploy",
     "metadeploy.multisalesforce",
     "metadeploy.api",
+    "metadeploy.adminapi.apps.AdminapiConfig",
     "django_js_reverse",
 ]
 
@@ -179,6 +186,10 @@ ROOT_URLCONF = "metadeploy.urls"
 # Must end in a /, or you will experience surprises:
 ADMIN_AREA_PREFIX = "admin/"
 
+ADMIN_API_ALLOWED_SUBNETS = env(
+    "ADMIN_API_ALLOWED_SUBNETS", default="127.0.0.1/32", type_=ipv4_networks
+)
+
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 
@@ -228,9 +239,16 @@ USE_TZ = True
 # Media files
 DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 
-AWS_ACCESS_KEY_ID = env("BUCKETEER_AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = env("BUCKETEER_AWS_SECRET_ACCESS_KEY")
-AWS_STORAGE_BUCKET_NAME = env("BUCKETEER_BUCKET_NAME")
+AWS_ACCESS_KEY_ID = env(
+    "BUCKETEER_AWS_ACCESS_KEY_ID", default=env("AWS_ACCESS_KEY_ID", default=None)
+)
+AWS_SECRET_ACCESS_KEY = env(
+    "BUCKETEER_AWS_SECRET_ACCESS_KEY",
+    default=env("AWS_SECRET_ACCESS_KEY", default=None),
+)
+AWS_STORAGE_BUCKET_NAME = env(
+    "BUCKETEER_BUCKET_NAME", default=env("AWS_BUCKET_NAME", default=None)
+)
 
 
 # Static files (CSS, JavaScript, Images)
@@ -260,10 +278,11 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = False
+ACCOUNT_EMAIL_VERIFICATION = "none"
 SOCIALACCOUNT_ADAPTER = "metadeploy.multisalesforce.adapter.CustomSocialAccountAdapter"
 
 JS_REVERSE_JS_VAR_NAME = "api_urls"
-JS_REVERSE_EXCLUDE_NAMESPACES = ["admin"]
+JS_REVERSE_EXCLUDE_NAMESPACES = ["admin", "admin_rest"]
 
 
 # Redis configuration:
@@ -282,7 +301,7 @@ CACHES = {
 RQ_QUEUES = {
     "default": {
         "USE_REDIS_CACHE": "default",
-        "DEFAULT_TIMEOUT": 360,
+        "DEFAULT_TIMEOUT": 3600,
         "DEFAULT_RESULT_TTL": 720,
     },
     "short": {
@@ -303,7 +322,11 @@ CHANNEL_LAYERS = {
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticatedOrReadOnly",
-    )
+    ),
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.TokenAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ),
 }
 
 

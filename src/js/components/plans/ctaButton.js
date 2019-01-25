@@ -6,6 +6,7 @@ import Spinner from '@salesforce/design-system-react/components/spinner';
 
 import routes from 'utils/routes';
 import { CONSTANTS } from 'plans/reducer';
+import { getUrlParam, removeUrlParam } from 'utils/api';
 
 import Login from 'components/header/login';
 import PreflightWarningModal from 'components/plans/preflightWarningModal';
@@ -16,6 +17,7 @@ import type {
   Preflight as PreflightType,
 } from 'plans/reducer';
 import type { SelectedSteps as SelectedStepsType } from 'components/plans/detail';
+import type { UrlParams } from 'utils/api';
 import type { User as UserType } from 'user/reducer';
 import typeof { startJob as StartJobType } from 'jobs/actions';
 import typeof { startPreflight as StartPreflightType } from 'plans/actions';
@@ -33,7 +35,7 @@ type Props = {
   doStartJob: StartJobType,
 };
 
-const { STATUS } = CONSTANTS;
+const { STATUS, AUTO_START_PREFLIGHT } = CONSTANTS;
 const btnClasses = 'slds-size_full slds-p-vertical_xx-small';
 
 // For use as a "loading" button label
@@ -58,9 +60,11 @@ export const LabelWithSpinner = ({
 export const LoginBtn = ({
   id,
   label,
+  redirectParams,
 }: {
   id?: string,
   label: string,
+  redirectParams?: UrlParams,
 }): React.Node => (
   <Login
     id={id || 'plan-detail-login'}
@@ -69,6 +73,7 @@ export const LoginBtn = ({
     triggerClassName="slds-size_full"
     label={label}
     nubbinPosition="top"
+    redirectParams={redirectParams}
   />
 );
 
@@ -91,10 +96,65 @@ export const ActionBtn = ({
   />
 );
 
-class CtaButton extends React.Component<Props, { modalOpen: boolean }> {
+class CtaButton extends React.Component<
+  Props,
+  { modalOpen: boolean, startPreflight: boolean },
+> {
   constructor(props: Props) {
     super(props);
-    this.state = { modalOpen: false };
+    this.state = { modalOpen: false, startPreflight: false };
+  }
+
+  componentDidMount() {
+    const startPreflight = getUrlParam(AUTO_START_PREFLIGHT);
+    if (startPreflight === 'true') {
+      const { history, preflight } = this.props;
+      // `preflight === null`: no prior preflight exists
+      // `preflight === undefined`: still fetching prior preflights
+      // If we don't know about past preflights yet, wait until we do...
+      if (preflight === undefined) {
+        this.setState({ startPreflight: true });
+      } else {
+        this.autoStartPreflight();
+      }
+      // Remove query-string from URL
+      history.replace({ search: removeUrlParam(AUTO_START_PREFLIGHT) });
+    }
+  }
+
+  componentDidUpdate(prevProps: Props) {
+    const { preflight } = this.props;
+    const { startPreflight } = this.state;
+    const preflightChanged = preflight !== prevProps.preflight;
+    if (startPreflight && preflightChanged && preflight !== undefined) {
+      this.autoStartPreflight();
+    }
+  }
+
+  autoStartPreflight(): void {
+    const { plan, doStartPreflight } = this.props;
+    this.setState({ startPreflight: false });
+    if (this.canStartPreflight()) {
+      doStartPreflight(plan.id);
+    }
+  }
+
+  canStartPreflight(): boolean {
+    const { user, preflight, preventAction } = this.props;
+    // We only want to auto-start a preflight if all of the following are true:
+    //   - user is logged in, with a valid token
+    //   - no other preflights/jobs are running on the current SF org
+    //   - no prior preflight exists OR
+    //     prior preflight exists, but was unsuccessful (not ready for install)
+    return Boolean(
+      user &&
+        user.valid_token_for !== null &&
+        !preventAction &&
+        (preflight === null ||
+          (preflight &&
+            preflight.status !== STATUS.STARTED &&
+            !preflight.is_ready)),
+    );
   }
 
   toggleModal = (isOpen: boolean) => {
@@ -126,7 +186,11 @@ class CtaButton extends React.Component<Props, { modalOpen: boolean }> {
 
   // Returns an action btn if logged in with a valid token;
   // otherwise returns a login dropdown
-  getLoginOrActionBtn(label: string, onClick?: () => void): React.Node {
+  getLoginOrActionBtn(
+    label: string,
+    onClick: () => void,
+    startPreflightAfterLogin?: boolean = false,
+  ): React.Node {
     const { user, preventAction } = this.props;
     const hasValidToken = user && user.valid_token_for !== null;
     if (hasValidToken) {
@@ -135,14 +199,26 @@ class CtaButton extends React.Component<Props, { modalOpen: boolean }> {
       );
     }
     // Require login first...
-    return <LoginBtn label={`Log In to ${label}`} />;
+    return (
+      <LoginBtn
+        label={`Log In to ${label}`}
+        redirectParams={
+          startPreflightAfterLogin ? { [AUTO_START_PREFLIGHT]: true } : {}
+        }
+      />
+    );
   }
 
   render(): React.Node {
     const { user, plan, preflight, doStartPreflight } = this.props;
     if (!user) {
       // Require login first...
-      return <LoginBtn label="Log In to Start Pre-Install Validation" />;
+      return (
+        <LoginBtn
+          label="Log In to Start Pre-Install Validation"
+          redirectParams={{ [AUTO_START_PREFLIGHT]: true }}
+        />
+      );
     }
 
     // An `undefined` preflight means we don't know whether a preflight exists
@@ -161,6 +237,7 @@ class CtaButton extends React.Component<Props, { modalOpen: boolean }> {
       return this.getLoginOrActionBtn(
         'Start Pre-Install Validation',
         startPreflight,
+        true,
       );
     }
 
@@ -206,13 +283,16 @@ class CtaButton extends React.Component<Props, { modalOpen: boolean }> {
         return this.getLoginOrActionBtn(
           'Re-Run Pre-Install Validation',
           startPreflight,
+          true,
         );
       }
+      case STATUS.CANCELED:
       case STATUS.FAILED: {
         // Prior preflight exists, but failed or had plan-level errors
         return this.getLoginOrActionBtn(
           'Re-Run Pre-Install Validation',
           startPreflight,
+          true,
         );
       }
     }

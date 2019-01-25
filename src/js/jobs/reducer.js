@@ -13,7 +13,7 @@ export type Job = {|
     +is_staff: boolean,
   } | null,
   +plan: string,
-  +status: 'started' | 'complete' | 'failed',
+  +status: 'started' | 'complete' | 'failed' | 'canceled',
   +steps: Array<string>,
   +results: {|
     [string]: Array<StepResult>,
@@ -45,6 +45,7 @@ const reducer = (
     case 'JOB_STARTED':
     case 'JOB_COMPLETED':
     case 'JOB_FAILED':
+    case 'JOB_CANCELED':
     case 'JOB_UPDATED':
     case 'JOB_STEP_COMPLETED': {
       const job = action.payload;

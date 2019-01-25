@@ -126,7 +126,7 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
         read_only=True, pk_field=serializers.CharField()
     )
     is_allowed = serializers.SerializerMethodField()
-    steps = StepSerializer(source="step_set", many=True)
+    steps = StepSerializer(many=True)
     preflight_message = serializers.CharField(source="preflight_message_markdown")
     not_allowed_instructions = serializers.SerializerMethodField()
 

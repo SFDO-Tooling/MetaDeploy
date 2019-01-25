@@ -1,16 +1,15 @@
 version: 2
 jobs:
-
   build:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.6.6
+      - image: circleci/python:3.7
     steps:
       - checkout
       - restore_cache:
           keys:
-            - v1-metadeploy-py-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
-            - v1-metadeploy-py-
+            - v1-metadeploy-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+            - v1-metadeploy-py-3.7-
       - restore_cache:
           keys:
             - v1-metadeploy-npm-{{ checksum "yarn.lock" }}
@@ -46,28 +45,28 @@ jobs:
       - save_cache:
           key: v1-metadeploy-node-{{ checksum "bin/unpack-node" }}
           paths:
-            - "~/metadeploy/node"
+            - '~/metadeploy/node'
       - save_cache:
-          key: v1-metadeploy-py-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+          key: v1-metadeploy-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
           paths:
-            - "~/.cache/pip"
+            - '~/.cache/pip'
             - ./venv
       - save_cache:
           key: v1-metadeploy-npm-{{ checksum "yarn.lock" }}
           paths:
-            - "~/.cache/yarn"
-            - "~/metadeploy/node_modules"
+            - '~/.cache/yarn'
+            - '~/metadeploy/node_modules'
 
   lint:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.6.6
+      - image: circleci/python:3.7
     steps:
       - checkout
       - restore_cache:
           key: v1-metadeploy-node-{{ checksum "bin/unpack-node" }}
       - restore_cache:
-          key: v1-metadeploy-py-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+          key: v1-metadeploy-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
       - restore_cache:
           keys:
             - v1-metadeploy-npm-{{ checksum "yarn.lock" }}
@@ -87,7 +86,7 @@ jobs:
   test-client:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.6.6
+      - image: circleci/python:3.7
     steps:
       - checkout
       - restore_cache:
@@ -118,17 +117,20 @@ jobs:
   test-python:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.6.6
+      - image: circleci/python:3.7
       - image: circleci/redis:latest
       - image: circleci/postgres:latest
         environment:
           POSTGRES_USER: ubuntu
           POSTGRES_DB: circle_test
           POSTGRES_PASSWORD: circle_test
+          AWS_BUCKET_NAME: None
+          AWS_SECRET_ACCESS_KEY: None
+          AWS_ACCESS_KEY_ID: None
     steps:
       - checkout
       - restore_cache:
-          key: v1-metadeploy-py-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+          key: v1-metadeploy-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
       - run:
           name: Install Dockerize
           command: wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && sudo tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
@@ -160,7 +162,7 @@ jobs:
   report-test-coverage:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.6.6
+      - image: circleci/python:3.7
     steps:
       - checkout
       - attach_workspace:
@@ -172,7 +174,7 @@ jobs:
             - v1-metadeploy-npm-{{ checksum "yarn.lock" }}
             - v1-metadeploy-npm-
       - restore_cache:
-          key: v1-metadeploy-py-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+          key: v1-metadeploy-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
       - run:
           name: Set $PATH
           command: |
