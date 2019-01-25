@@ -20,6 +20,26 @@ class TestAllowedList:
 
 
 @pytest.mark.django_db
+class TestAllowedListOrg:
+    def test_save(self, allowed_list_factory, allowed_list_org_factory):
+        allowed_list = allowed_list_factory(title="A title")
+        org_id = "00D1F0000009GpnUAE"
+        allowed_list_org = allowed_list_org_factory(
+            allowed_list=allowed_list, org_id=org_id
+        )
+        assert allowed_list_org.org_id == org_id
+
+    def test_save_15char(self, allowed_list_factory, allowed_list_org_factory):
+        allowed_list = allowed_list_factory(title="A title")
+        org_id = "00D1F0000009Gpn"
+        expected_org_id = "00D1F0000009GpnUAE"
+        allowed_list_org = allowed_list_org_factory(
+            allowed_list=allowed_list, org_id=org_id
+        )
+        assert allowed_list_org.org_id == expected_org_id
+
+
+@pytest.mark.django_db
 class TestUser:
     def test_org_name(self, user_factory):
         user = user_factory()

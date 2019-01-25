@@ -212,3 +212,7 @@ class ProductCategoryViewSet(AdminAPIViewSet):
 
 class AllowedListViewSet(AdminAPIViewSet):
     model_name = "AllowedList"
+
+
+class AllowedListOrgViewSet(AdminAPIViewSet):
+    model_name = "AllowedListOrg"

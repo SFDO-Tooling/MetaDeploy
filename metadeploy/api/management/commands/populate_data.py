@@ -265,7 +265,6 @@ class Command(BaseCommand):
                 "This item is restricted. "
                 "No [OddBirds](http://www.oddbird.net/birds) allowed!"
             ),
-            organization_ids=[],
         )
 
         product3 = self.create_product(

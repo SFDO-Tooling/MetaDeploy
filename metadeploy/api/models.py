@@ -12,7 +12,7 @@ from cumulusci.core.utils import import_class
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
-from django.contrib.postgres.fields import ArrayField, JSONField
+from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
@@ -24,6 +24,7 @@ from hashid_field import HashidAutoField
 from model_utils import Choices, FieldTracker
 from sfdo_template_helpers.fields import MarkdownField
 
+from .belvedere_utils import convert_to_18
 from .constants import ERROR, OPTIONAL, ORGANIZATION_DETAILS
 from .push import (
     notify_org_result_changed,
@@ -51,12 +52,28 @@ class HashIdMixin(models.Model):
 class AllowedList(models.Model):
     title = models.CharField(max_length=128, unique=True)
     description = MarkdownField(blank=True, property_suffix="_markdown")
-    organization_ids = ArrayField(
-        models.CharField(max_length=1024), default=list, blank=True
-    )
 
     def __str__(self):
         return self.title
+
+
+class AllowedListOrg(models.Model):
+    allowed_list = models.ForeignKey(
+        AllowedList, related_name="orgs", on_delete=models.PROTECT
+    )
+    org_id = models.CharField(max_length=18)
+    description = models.TextField(
+        help_text=("A description of the org for future reference",)
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if len(self.org_id) == 15:
+            self.org_id = convert_to_18(self.org_id)
+        super().save(*args, **kwargs)
 
 
 class AllowedListAccessMixin(models.Model):
@@ -69,7 +86,11 @@ class AllowedListAccessMixin(models.Model):
 
     def is_visible_to(self, user):
         return not self.visible_to or (
-            user.is_authenticated and user.org_id in self.visible_to.organization_ids
+            user.is_authenticated
+            and (
+                user.is_superuser
+                or self.visible_to.orgs.filter(org_id=user.org_id).exists()
+            )
         )
 
 

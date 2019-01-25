@@ -5,6 +5,28 @@ These utils are taken from Mr. Belvedere.
 import re
 
 
+# From https://gist.github.com/KorbenC/7356677
+def convert_to_18(id):
+    # check valid input
+    if len(id) == 18:
+        return id
+    if len(id) != 15:
+        raise ValueError("Not a valid 15 digit OrgId")
+    suffix = ""
+    for i in range(0, 3):
+        flags = 0
+        for x in range(0, 5):
+            c = id[i * 5 + x]
+            # add flag if c is uppercase
+            if c.upper() == c and c >= "A" and c <= "Z":
+                flags = flags + (1 << x)
+        if flags <= 25:
+            suffix = suffix + "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[flags]
+        else:
+            suffix = suffix + "012345"[flags - 26]
+    return id + suffix
+
+
 def obscure_salesforce_log(text):
     text = obscure_mpinstaller_deployment_test_failure(text)
     text = obscure_salesforce_ids(text)
