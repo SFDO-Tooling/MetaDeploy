@@ -17,6 +17,7 @@ type Props = {
   buttonVariant: string,
   triggerClassName?: string,
   disabled: boolean,
+  menuPosition: string,
   nubbinPosition: string,
   redirectParams: UrlParams,
 };
@@ -36,6 +37,7 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
     buttonClassName: 'slds-button_outline-brand',
     buttonVariant: 'base',
     disabled: false,
+    menuPosition: 'overflowBoundaryElement',
     nubbinPosition: 'top right',
     redirectParams: {},
   };
@@ -109,6 +111,7 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
       buttonClassName,
       buttonVariant,
       disabled,
+      menuPosition,
       nubbinPosition,
       redirectParams,
     } = this.props;
@@ -124,7 +127,7 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
           buttonClassName={buttonClassName}
           buttonVariant={buttonVariant}
           disabled={disabled}
-          menuPosition="relative"
+          menuPosition={menuPosition}
           nubbinPosition={nubbinPosition}
           iconCategory="utility"
           iconName="down"

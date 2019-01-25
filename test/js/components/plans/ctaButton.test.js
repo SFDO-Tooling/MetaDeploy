@@ -314,10 +314,10 @@ describe('<CtaButton />', () => {
   });
 
   describe('auto-start preflight after login', () => {
-    const history = { replace: jest.fn() };
+    const history = { push: jest.fn() };
 
     beforeEach(() => {
-      history.replace.mockClear();
+      history.push.mockClear();
       removeUrlParam.mockReturnValue('');
       getUrlParam.mockReturnValue('true');
     });
@@ -326,7 +326,7 @@ describe('<CtaButton />', () => {
       setup({ preflight: undefined, history });
 
       expect(removeUrlParam).toHaveBeenCalledWith('start_preflight');
-      expect(history.replace).toHaveBeenCalledWith({ search: '' });
+      expect(history.push).toHaveBeenCalledWith({ search: '' });
     });
 
     describe('no preflight', () => {
