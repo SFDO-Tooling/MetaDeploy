@@ -214,8 +214,8 @@ class Command(BaseCommand):
 
         version1 = self.create_version(product1, commit_ish="feature/preflight")
         plan = self.create_plan(
-            # version1, preflight_flow_name="slow_steps_preflight_good"
             version1,
+            # preflight_flow_name="slow_steps_preflight_good",
             preflight_flow_name="",
         )
         self.add_steps(plan)
