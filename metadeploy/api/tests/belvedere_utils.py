@@ -19,6 +19,12 @@ def test_convert_to_18():
     assert convert_to_18(text) == expected
 
 
+def test_convert_to_18_caps():
+    text = "00DABCDEFGHIJKL"
+    expected = "00DABCDEFGHIJKL255"
+    assert convert_to_18(text) == expected
+
+
 def test_convert_to_18_already_18():
     text = "00D1F0000009GpnUAE"
     assert convert_to_18(text) == text
