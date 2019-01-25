@@ -6,3 +6,16 @@
     background-color: var(--custom-color);
   }
 }
+
+.product-description > * {
+  &:first-child {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &:not(:first-child) {
+    display: none;
+  }
+}
