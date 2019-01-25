@@ -186,3 +186,11 @@ need to generate scratch orgs to test against.
 
 Instead, we will use some stable testing credentials for a stable test
 org. If you are part of OddBirds, you can find them in keybase.
+
+Internationalization
+--------------------
+
+To build and compile ``.mo`` and ``.po`` files for the backend, run::
+
+   $ python manage.py makemessages --locale <locale>
+   $ python manage.py compilemessages

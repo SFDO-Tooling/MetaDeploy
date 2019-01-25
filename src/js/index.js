@@ -39,6 +39,30 @@ import JobDetail from 'components/jobs/detail';
 import PlanDetail from 'components/plans/detail';
 import ProductsList from 'components/products/list';
 import { ProductDetail, VersionDetail } from 'components/products/detail';
+import i18n from 'i18next';
+import { reactI18nextModule } from 'react-i18next';
+
+i18n
+  .use(reactI18nextModule) // passes i18n down to react-i18next
+  .init({
+    resources: {
+      en: {
+        translation: {
+          // We just put key: value mappings for English here. Like:
+          // "Log In": "Go Forth"
+          // Anything missing will fall back to the key.
+          // What I don't know is how to abstract this out and populate its
+          // keys, à la makemessages.
+        },
+      },
+    },
+    lng: 'en',
+    fallbackLng: 'en',
+
+    interpolation: {
+      escapeValue: false,
+    },
+  });
 
 const SF_logo = require('images/salesforce-logo.png');
 

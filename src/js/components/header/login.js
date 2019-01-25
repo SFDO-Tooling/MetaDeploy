@@ -9,6 +9,7 @@ import { logError } from 'utils/logging';
 import CustomDomainModal from 'components/header/customDomainModal';
 
 import type { UrlParams } from 'utils/api';
+import { withI18n } from 'react-i18next';
 
 type Props = {
   id: string,
@@ -20,6 +21,7 @@ type Props = {
   menuPosition: string,
   nubbinPosition: string,
   redirectParams: UrlParams,
+  t: (string | React.Node) => string,
 };
 type MenuOption =
   | {|
@@ -30,7 +32,7 @@ type MenuOption =
     |}
   | {| type: string |};
 
-class Login extends React.Component<Props, { modalOpen: boolean }> {
+class BaseLogin extends React.Component<Props, { modalOpen: boolean }> {
   static defaultProps = {
     id: 'login',
     label: 'Log In',
@@ -75,17 +77,18 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
     }
   };
 
-  static getMenuOpts(): Array<MenuOption> {
+  getMenuOpts(): Array<MenuOption> {
+    const { t } = this.props;
     return [
       {
-        label: 'Production or Developer Org',
+        label: t('Production or Developer Org'),
         href:
           window.api_urls.salesforce_production_login &&
           window.api_urls.salesforce_production_login(),
         disabled: !window.api_urls.salesforce_production_login,
       },
       {
-        label: 'Sandbox or Scratch Org',
+        label: t('Sandbox or Scratch Org'),
         href:
           window.api_urls.salesforce_test_login &&
           window.api_urls.salesforce_test_login(),
@@ -95,7 +98,7 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
         type: 'divider',
       },
       {
-        label: 'Use Custom Domain',
+        label: t('Use Custom Domain'),
         modal: Boolean(window.api_urls.salesforce_custom_login),
         disabled: !window.api_urls.salesforce_custom_login,
       },
@@ -116,11 +119,12 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
       redirectParams,
     } = this.props;
     const { modalOpen } = this.state;
+    const { t } = this.props;
     return (
       <>
         <Dropdown
           id={id}
-          label={label}
+          label={t(this.props.label)}
           className="slds-dropdown_actions
             slds-dropdown_medium"
           triggerClassName={triggerClassName}
@@ -144,5 +148,7 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
     );
   }
 }
+
+const Login = withI18n()(BaseLogin);
 
 export default Login;
