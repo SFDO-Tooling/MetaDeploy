@@ -48,7 +48,24 @@ export type PreflightsState = {
   [string]: Preflight,
 };
 
-export const CONSTANTS = {
+type Constants = {|
+  STATUS: {|
+    STARTED: 'started',
+    COMPLETE: 'complete',
+    FAILED: 'failed',
+    CANCELED: 'canceled',
+  |},
+  RESULT_STATUS: {|
+    OK: 'ok',
+    WARN: 'warn',
+    ERROR: 'error',
+    SKIP: 'skip',
+    OPTIONAL: 'optional',
+  |},
+  AUTO_START_PREFLIGHT: 'start_preflight',
+|};
+
+export const CONSTANTS: Constants = {
   STATUS: {
     STARTED: 'started',
     COMPLETE: 'complete',

@@ -5,7 +5,7 @@ import SLDSProgressIndicator from '@salesforce/design-system-react/components/pr
 
 import { CONSTANTS } from 'plans/reducer';
 
-const steps = [
+export const STEPS = [
   {
     id: 0,
     label: 'Log in',
@@ -17,6 +17,10 @@ const steps = [
   {
     id: 2,
     label: 'Pre-install validation complete',
+  },
+  {
+    id: 3,
+    label: 'Install',
   },
 ];
 
@@ -33,24 +37,26 @@ const ProgressIndicator = ({
 }) => {
   let activeStep = 0;
   if (userLoggedIn) {
-    activeStep = preflightStatus && preflightIsValid ? 2 : 1;
+    activeStep = 1;
+    if (preflightIsReady) {
+      activeStep = 3;
+    } else if (preflightIsValid) {
+      activeStep = 2;
+    }
   }
-  const completedSteps = preflightIsReady
-    ? steps.slice()
-    : steps.slice(0, activeStep);
+  const completedSteps = STEPS.slice(0, activeStep);
   const errorSteps =
     userLoggedIn &&
     preflightIsValid &&
-    preflightStatus &&
     preflightStatus !== CONSTANTS.STATUS.STARTED &&
     !preflightIsReady
-      ? steps.slice(activeStep, activeStep + 1)
+      ? STEPS.slice(activeStep, activeStep + 1)
       : [];
-  const selectedStep = steps[activeStep];
+  const selectedStep = STEPS[activeStep];
   return (
     <SLDSProgressIndicator
       className="slds-m-top_medium"
-      steps={steps}
+      steps={STEPS}
       completedSteps={completedSteps}
       selectedStep={selectedStep}
       errorSteps={errorSteps}
