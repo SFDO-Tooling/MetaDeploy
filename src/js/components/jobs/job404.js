@@ -43,7 +43,6 @@ const JobNotFound = ({
         label={isLoggedIn ? 'Log In With a Different Org' : 'Log In'}
         buttonClassName="slds-p-horizontal_xxx-small"
         buttonVariant="base"
-        nubbinPosition="top"
       />
     </div>
   </>

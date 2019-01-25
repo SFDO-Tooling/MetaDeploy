@@ -43,7 +43,6 @@ const NotAllowed = ({
         label={isLoggedIn ? 'log in with a different org' : 'log in'}
         buttonClassName="slds-p-horizontal_xxx-small"
         buttonVariant="base"
-        nubbinPosition="top"
       />
     </div>
   </>

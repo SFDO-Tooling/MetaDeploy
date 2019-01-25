@@ -72,6 +72,7 @@ export const LoginBtn = ({
     buttonVariant="brand"
     triggerClassName="slds-size_full"
     label={label}
+    menuPosition="relative"
     nubbinPosition="top"
     redirectParams={redirectParams}
   />
@@ -118,7 +119,7 @@ class CtaButton extends React.Component<
         this.autoStartPreflight();
       }
       // Remove query-string from URL
-      history.replace({ search: removeUrlParam(AUTO_START_PREFLIGHT) });
+      history.push({ search: removeUrlParam(AUTO_START_PREFLIGHT) });
     }
   }
 
