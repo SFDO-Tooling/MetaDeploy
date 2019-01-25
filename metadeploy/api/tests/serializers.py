@@ -334,7 +334,7 @@ class TestJob:
         user = user_factory()
         request = rf.get("/")
         request.user = user
-        allowed_list = allowed_list_factory(organization_ids=[])
+        allowed_list = allowed_list_factory()
         plan = plan_factory(visible_to=allowed_list)
         preflight_result_factory(
             plan=plan, user=user, status=PreflightResult.Status.complete, results={}
@@ -360,7 +360,7 @@ class TestJob:
         user = user_factory()
         request = rf.get("/")
         request.user = user
-        allowed_list = allowed_list_factory(organization_ids=[])
+        allowed_list = allowed_list_factory()
         product = product_factory(visible_to=allowed_list)
         plan = plan_factory(version__product=product)
         preflight_result_factory(

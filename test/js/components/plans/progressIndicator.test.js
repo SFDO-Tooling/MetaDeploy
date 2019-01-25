@@ -8,7 +8,7 @@ describe('<ProgressIndicator />', () => {
     const defaults = {
       userLoggedIn: true,
       preflightStatus: null,
-      preflightIsValid: true,
+      preflightIsValid: false,
       preflightIsReady: false,
     };
     const opts = { ...defaults, ...options };
@@ -34,6 +34,7 @@ describe('<ProgressIndicator />', () => {
       expect(
         getByText('Step 3: Pre-install validation complete'),
       ).toBeVisible();
+      expect(getByText('Step 4: Install')).toBeVisible();
     });
   });
 
@@ -46,6 +47,7 @@ describe('<ProgressIndicator />', () => {
       expect(
         getByText('Step 3: Pre-install validation complete'),
       ).toBeVisible();
+      expect(getByText('Step 4: Install')).toBeVisible();
     });
   });
 
@@ -53,6 +55,7 @@ describe('<ProgressIndicator />', () => {
     test('shows first two steps complete', () => {
       const { getByText } = setup({
         preflightStatus: 'started',
+        preflightIsValid: true,
       });
 
       expect(getByText('Step 1: Log in - Completed')).toBeVisible();
@@ -62,6 +65,7 @@ describe('<ProgressIndicator />', () => {
       expect(
         getByText('Step 3: Pre-install validation complete'),
       ).toBeVisible();
+      expect(getByText('Step 4: Install')).toBeVisible();
     });
   });
 
@@ -69,7 +73,6 @@ describe('<ProgressIndicator />', () => {
     test('shows first step complete', () => {
       const { getByText } = setup({
         preflightStatus: 'complete',
-        preflightIsValid: false,
       });
 
       expect(getByText('Step 1: Log in - Completed')).toBeVisible();
@@ -77,6 +80,7 @@ describe('<ProgressIndicator />', () => {
       expect(
         getByText('Step 3: Pre-install validation complete'),
       ).toBeVisible();
+      expect(getByText('Step 4: Install')).toBeVisible();
     });
   });
 
@@ -84,6 +88,7 @@ describe('<ProgressIndicator />', () => {
     test('shows all steps complete', () => {
       const { getByText } = setup({
         preflightStatus: 'complete',
+        preflightIsValid: true,
         preflightIsReady: true,
       });
 
@@ -94,6 +99,7 @@ describe('<ProgressIndicator />', () => {
       expect(
         getByText('Step 3: Pre-install validation complete - Completed'),
       ).toBeVisible();
+      expect(getByText('Step 4: Install')).toBeVisible();
     });
   });
 
@@ -101,6 +107,7 @@ describe('<ProgressIndicator />', () => {
     test('shows error step', () => {
       const { getByText } = setup({
         preflightStatus: 'complete',
+        preflightIsValid: true,
       });
 
       expect(getByText('Step 1: Log in - Completed')).toBeVisible();
@@ -110,6 +117,7 @@ describe('<ProgressIndicator />', () => {
       expect(
         getByText('Step 3: Pre-install validation complete - Error'),
       ).toBeVisible();
+      expect(getByText('Step 4: Install')).toBeVisible();
     });
   });
 });

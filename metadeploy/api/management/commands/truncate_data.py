@@ -3,6 +3,7 @@ from scheduler.models import RepeatableJob
 
 from ...models import (
     AllowedList,
+    AllowedListOrg,
     Job,
     Plan,
     PlanSlug,
@@ -30,6 +31,7 @@ class Command(BaseCommand):
             ProductSlug,
             Product,
             ProductCategory,
+            AllowedListOrg,
             AllowedList,
         ]
 

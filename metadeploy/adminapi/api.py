@@ -170,26 +170,26 @@ class ProductSlugViewSet(AdminAPIViewSet):
 class PlanStepSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Step
-        exclude = ("id", "plan", "order_key")
+        exclude = ("id", "plan")
 
 
 class PlanSerializer(AdminAPISerializer):
-    steps = PlanStepSerializer(source="step_set", many=True, required=False)
+    steps = PlanStepSerializer(many=True, required=False)
 
     class Meta:
         fields = "__all__"
 
     def create(self, validated_data):
-        steps = validated_data.pop("step_set") or []
+        steps = validated_data.pop("steps") or []
         plan = self.Meta.model.objects.create(**validated_data)
-        for i, step_data in enumerate(steps):
-            plan.step_set.create(order_key=i, **step_data)
+        for step_data in steps:
+            plan.steps.create(**step_data)
         return plan
 
     def update(self, instance, validated_data):
-        if "step_set" in validated_data:
+        if "steps" in validated_data:
             raise serializers.ValidationError(detail="Updating steps not supported.")
-        validated_data.pop("step_set", None)
+        validated_data.pop("steps", None)
         return super().update(instance, validated_data)
 
 
@@ -212,3 +212,7 @@ class ProductCategoryViewSet(AdminAPIViewSet):
 
 class AllowedListViewSet(AdminAPIViewSet):
     model_name = "AllowedList"
+
+
+class AllowedListOrgViewSet(AdminAPIViewSet):
+    model_name = "AllowedListOrg"

@@ -205,6 +205,7 @@ class JobDetail extends React.Component<Props, State> {
             product={product}
             version={version}
             plan={plan}
+            job={job}
             navRight={
               <>
                 {this.getCancelBtn()}
@@ -217,7 +218,6 @@ class JobDetail extends React.Component<Props, State> {
                 />
               </>
             }
-            showProgressIndicator={false}
           />
           <ShareModal
             isOpen={this.state.modalOpen}

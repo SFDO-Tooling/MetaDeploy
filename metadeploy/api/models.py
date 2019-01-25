@@ -1,18 +1,22 @@
 import itertools
 import logging
 from datetime import timedelta
+from typing import Union
 
 from allauth.socialaccount.models import SocialToken
 from asgiref.sync import async_to_sync
 from colorfield.fields import ColorField
+from cumulusci.core.flowrunner import StepSpec
+from cumulusci.core.tasks import BaseTask
+from cumulusci.core.utils import import_class
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
-from django.contrib.postgres.fields import ArrayField, JSONField
+from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
-from django.db.models import Count, Q
+from django.db.models import Count, F, Func, Q
 from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
@@ -20,6 +24,7 @@ from hashid_field import HashidAutoField
 from model_utils import Choices, FieldTracker
 from sfdo_template_helpers.fields import MarkdownField
 
+from .belvedere_utils import convert_to_18
 from .constants import ERROR, OPTIONAL, ORGANIZATION_DETAILS
 from .push import (
     notify_org_result_changed,
@@ -34,6 +39,7 @@ from .push import (
 
 logger = logging.getLogger(__name__)
 VERSION_STRING = r"^[a-zA-Z0-9._+-]+$"
+WorkableModel = Union["Job", "PreflightReference"]
 
 
 class HashIdMixin(models.Model):
@@ -46,12 +52,28 @@ class HashIdMixin(models.Model):
 class AllowedList(models.Model):
     title = models.CharField(max_length=128, unique=True)
     description = MarkdownField(blank=True, property_suffix="_markdown")
-    organization_ids = ArrayField(
-        models.CharField(max_length=1024), default=list, blank=True
-    )
 
     def __str__(self):
         return self.title
+
+
+class AllowedListOrg(models.Model):
+    allowed_list = models.ForeignKey(
+        AllowedList, related_name="orgs", on_delete=models.PROTECT
+    )
+    org_id = models.CharField(max_length=18)
+    description = models.TextField(
+        help_text=("A description of the org for future reference",)
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if len(self.org_id) == 15:
+            self.org_id = convert_to_18(self.org_id)
+        super().save(*args, **kwargs)
 
 
 class AllowedListAccessMixin(models.Model):
@@ -64,7 +86,11 @@ class AllowedListAccessMixin(models.Model):
 
     def is_visible_to(self, user):
         return not self.visible_to or (
-            user.is_authenticated and user.org_id in self.visible_to.organization_ids
+            user.is_authenticated
+            and (
+                user.is_superuser
+                or self.visible_to.orgs.filter(org_id=user.org_id).exists()
+            )
         )
 
 
@@ -232,7 +258,7 @@ class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, models.Model):
     objects = ProductQuerySet.as_manager()
 
     title = models.CharField(max_length=256)
-    description = MarkdownField(property_suffix="_markdown")
+    description = MarkdownField(property_suffix="_markdown", blank=True)
     category = models.ForeignKey(ProductCategory, on_delete=models.PROTECT)
     color = ColorField(blank=True)
     image = models.ImageField(blank=True)
@@ -286,7 +312,7 @@ class Version(HashIdMixin, models.Model):
     label = models.CharField(
         max_length=1024, validators=[RegexValidator(regex=VERSION_STRING)]
     )
-    description = models.TextField()
+    description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     is_production = models.BooleanField(default=True)
     commit_ish = models.CharField(
@@ -361,7 +387,6 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, models.Model):
     version = models.ForeignKey(Version, on_delete=models.PROTECT)
     preflight_message = MarkdownField(blank=True, property_suffix="_markdown")
     preflight_flow_name = models.CharField(max_length=256, blank=True)
-    flow_name = models.CharField(max_length=64)
     tier = models.CharField(choices=Tier, default=Tier.primary, max_length=64)
     post_install_message = MarkdownField(blank=True, property_suffix="_markdown")
     is_listed = models.BooleanField(default=True)
@@ -370,7 +395,7 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, models.Model):
 
     @property
     def required_step_ids(self):
-        return self.step_set.filter(is_required=True).values_list("id", flat=True)
+        return self.steps.filter(is_required=True).values_list("id", flat=True)
 
     @property
     def slug_queryset(self):
@@ -383,25 +408,43 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, models.Model):
         return "{}, Plan {}".format(self.version, self.title)
 
 
+class DottedArray(Func):
+    """ Turns a dotted string into an array of ints.
+
+    Useful for version numbers."""
+
+    function = "string_to_array"
+    template = "%(function)s(%(expressions)s, '.')::int[]"
+
+
 class Step(HashIdMixin, models.Model):
     Kind = Choices(
         ("metadata", _("Metadata")),
         ("onetime", _("One Time Apex")),
         ("managed", _("Managed Package")),
         ("data", _("Data")),
+        ("other", _("Other")),
     )
 
-    plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
-    name = models.CharField(max_length=1024)
+    plan = models.ForeignKey(Plan, on_delete=models.PROTECT, related_name="steps")
+    name = models.CharField(max_length=1024, help_text="Customer facing label")
     description = models.TextField(blank=True)
     is_required = models.BooleanField(default=True)
     is_recommended = models.BooleanField(default=True)
     kind = models.CharField(choices=Kind, default=Kind.metadata, max_length=64)
-    order_key = models.PositiveIntegerField(default=0)
-    task_name = models.CharField(max_length=64)
+    path = models.CharField(
+        max_length=2048, help_text="dotted path e.g. flow1.flow2.task_name"
+    )
+    step_num = models.CharField(
+        max_length=64, help_text="dotted step number for CCI task"
+    )
+    task_class = models.CharField(
+        max_length=2048, help_text="dotted module path to BaseTask implementation"
+    )
+    task_config = JSONField(default=dict, blank=True)
 
     class Meta:
-        ordering = ("order_key", "name")
+        ordering = (DottedArray(F("step_num")),)
 
     @property
     def kind_icon(self):
@@ -415,8 +458,19 @@ class Step(HashIdMixin, models.Model):
             return "paste"
         return None
 
+    def to_spec(self, skip: bool = False):
+        task_class = import_class(self.task_class)
+        assert issubclass(task_class, BaseTask)
+        return StepSpec(
+            step_num=self.step_num,
+            task_name=self.path,  # skip from_flow path construction in StepSpec ctr
+            task_config=self.task_config,
+            task_class=task_class,
+            skip=skip,
+        )
+
     def __str__(self):
-        return f"Step {self.name} of {self.plan.title} ({self.order_key})"
+        return f"Step {self.name} of {self.plan.title} ({self.step_num})"
 
 
 class Job(HashIdMixin, models.Model):
@@ -452,8 +506,7 @@ class Job(HashIdMixin, models.Model):
 
     def skip_tasks(self):
         return [
-            step.task_name
-            for step in set(self.plan.step_set.all()) - set(self.steps.all())
+            step.path for step in set(self.plan.steps.all()) - set(self.steps.all())
         ]
 
     def _push_if_condition(self, condition, fn):

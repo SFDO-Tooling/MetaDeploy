@@ -7,7 +7,6 @@ import vcr
 from django.utils import timezone
 from rq.worker import StopRequested
 
-from ..flows import JobFlow
 from ..jobs import (
     enqueuer,
     expire_preflights,
@@ -33,8 +32,6 @@ def test_report_error(mocker, job_factory, user_factory, plan_factory, step_fact
             plan=plan,
             skip_tasks=steps,
             organization_url=job.organization_url,
-            flow_class=JobFlow,
-            flow_name=plan.flow_name,
             result_class=Job,
             result_id=job.id,
         )
@@ -47,7 +44,7 @@ def test_report_error(mocker, job_factory, user_factory, plan_factory, step_fact
 @pytest.mark.django_db
 @vcr.use_cassette()
 def test_run_flows(mocker, job_factory, user_factory, plan_factory, step_factory):
-    job_flow = mocker.patch("metadeploy.api.jobs.JobFlow")
+    run_flow = mocker.patch("cumulusci.core.flowrunner.FlowCoordinator.run")
 
     user = user_factory()
     plan = plan_factory()
@@ -59,13 +56,11 @@ def test_run_flows(mocker, job_factory, user_factory, plan_factory, step_factory
         plan=plan,
         skip_tasks=steps,
         organization_url=job.organization_url,
-        flow_class=job_flow,
-        flow_name=plan.flow_name,
         result_class=Job,
         result_id=job.id,
     )
 
-    assert job_flow.called
+    assert run_flow.called
 
 
 @pytest.mark.django_db
@@ -104,7 +99,7 @@ def test_malicious_zip_file(
     mocker.patch("metadeploy.api.jobs.OrgConfig")
     mocker.patch("metadeploy.api.jobs.ServiceConfig")
     mocker.patch("metadeploy.api.jobs.MetaDeployCCI")
-    job_flow = mocker.patch("metadeploy.api.jobs.JobFlow")
+    job_flow = mocker.patch("metadeploy.api.flows.JobFlowCallback")
 
     user = user_factory()
     plan = plan_factory()
@@ -116,8 +111,6 @@ def test_malicious_zip_file(
         plan=plan,
         skip_tasks=steps,
         organization_url=job.organization_url,
-        flow_class=job_flow,
-        flow_name=plan.flow_name,
         result_class=Job,
         result_id=job.id,
     )
@@ -143,16 +136,7 @@ def test_expire_user_tokens(user_factory):
 
 @pytest.mark.django_db
 def test_preflight(mocker, user_factory, plan_factory, preflight_result_factory):
-    mocker.patch("shutil.move")
-    mocker.patch("shutil.rmtree")
-    glob = mocker.patch("metadeploy.api.jobs.glob")
-    glob.return_value = ["test"]
-    mocker.patch("github3.login")
-    mocker.patch("zipfile.ZipFile")
-    mocker.patch("metadeploy.api.jobs.OrgConfig")
-    mocker.patch("metadeploy.api.jobs.ServiceConfig")
-    mocker.patch("metadeploy.api.jobs.MetaDeployCCI")
-    preflight_flow = mocker.patch("metadeploy.api.jobs.PreflightFlow")
+    run_flows = mocker.patch("metadeploy.api.jobs.run_flows")
 
     user = user_factory()
     plan = plan_factory()
@@ -161,7 +145,7 @@ def test_preflight(mocker, user_factory, plan_factory, preflight_result_factory)
     )
     preflight(preflight_result.pk)
 
-    assert preflight_flow.called
+    assert run_flows.called
 
 
 @pytest.mark.django_db

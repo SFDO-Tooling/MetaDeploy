@@ -20,6 +20,26 @@ class TestAllowedList:
 
 
 @pytest.mark.django_db
+class TestAllowedListOrg:
+    def test_save(self, allowed_list_factory, allowed_list_org_factory):
+        allowed_list = allowed_list_factory(title="A title")
+        org_id = "00D1F0000009GpnUAE"
+        allowed_list_org = allowed_list_org_factory(
+            allowed_list=allowed_list, org_id=org_id
+        )
+        assert allowed_list_org.org_id == org_id
+
+    def test_save_15char(self, allowed_list_factory, allowed_list_org_factory):
+        allowed_list = allowed_list_factory(title="A title")
+        org_id = "00D1F0000009Gpn"
+        expected_org_id = "00D1F0000009GpnUAE"
+        allowed_list_org = allowed_list_org_factory(
+            allowed_list=allowed_list, org_id=org_id
+        )
+        assert allowed_list_org.org_id == expected_org_id
+
+
+@pytest.mark.django_db
 class TestUser:
     def test_org_name(self, user_factory):
         user = user_factory()
@@ -258,8 +278,8 @@ class TestPlan:
 
 @pytest.mark.django_db
 def test_step_str(step_factory):
-    step = step_factory(name="Test step", order_key=3, plan__title="The Plan")
-    assert str(step) == "Step Test step of The Plan (3)"
+    step = step_factory(name="Test step", step_num="3.1", plan__title="The Plan")
+    assert str(step) == "Step Test step of The Plan (3.1)"
 
 
 @pytest.mark.django_db
@@ -323,12 +343,12 @@ def test_plan_post_install_markdown(plan_factory):
 class TestJob:
     def test_skip_tasks(self, plan_factory, step_factory, job_factory):
         plan = plan_factory()
-        step1 = step_factory(plan=plan, task_name="task1")
-        step2 = step_factory(plan=plan, task_name="task2")
-        step3 = step_factory(plan=plan, task_name="task3")
+        step1 = step_factory(plan=plan, path="task1")
+        step2 = step_factory(plan=plan, path="task2")
+        step3 = step_factory(plan=plan, path="task3")
         job = job_factory(plan=plan, steps=[step1, step3])
 
-        assert job.skip_tasks() == [step2.task_name]
+        assert job.skip_tasks() == [step2.path]
 
     def test_invalidate_related_preflight(self, job_factory, preflight_result_factory):
         job = job_factory()

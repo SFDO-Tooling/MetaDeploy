@@ -47,7 +47,6 @@ class Command(BaseCommand):
     def create_plan(self, version, title="Full Install", tier="primary", **kwargs):
         combined_kwargs = {
             "preflight_flow_name": "static_preflight",
-            "flow_name": "slow_steps_flow",
             "preflight_message": (
                 "Preflight message consists of generic product message and "
                 "step pre-check info — run in one operation before the "
@@ -64,8 +63,11 @@ class Command(BaseCommand):
         return plan
 
     def create_step(self, **kwargs):
-        task_name = kwargs.pop("task_name", "quick_task")
-        return Step.objects.create(task_name=task_name, **kwargs)
+        path = kwargs.pop("path", "quick_task")
+        kwargs.setdefault(
+            "task_class", "cumulusci.core.tests.test_flowrunner._SfdcTask"
+        )
+        return Step.objects.create(path=path, **kwargs)
 
     def add_steps(self, plan):
         self.create_step(
@@ -76,15 +78,16 @@ class Command(BaseCommand):
                 "optional or required. The description wraps."
             ),
             is_recommended=False,
-            task_name="quick_task",
+            path="quick_task",
+            step_num="0.9",
         )
         self.create_step(
             plan=plan,
             name="Slow step",
             is_required=False,
             is_recommended=False,
-            order_key=1,
-            task_name="slow_task",
+            step_num="1",
+            path="slow_task",
         )
         self.create_step(
             plan=plan,
@@ -92,69 +95,69 @@ class Command(BaseCommand):
             description="This is a step description.",
             kind="onetime",
             is_recommended=False,
-            order_key=2,
-            task_name="medium_task",
+            step_num="2",
+            path="medium_task",
         )
         self.create_step(
-            task_name="relationships",
+            path="relationships",
             plan=plan,
             name="Relationships",
             kind="managed",
             is_required=False,
             is_recommended=False,
-            order_key=3,
+            step_num="3",
         )
         self.create_step(
-            task_name="affiliations",
+            path="affiliations",
             plan=plan,
             name="Affiliations",
             description="This is a step description.",
             kind="managed",
             is_required=False,
-            order_key=4,
+            step_num="4",
         )
         self.create_step(
-            task_name="update_admin_profile",
+            path="update_admin_profile",
             plan=plan,
             name="Account Record Types",
             kind="managed",
             is_recommended=False,
-            order_key=5,
+            step_num="5",
         )
         self.create_step(
-            task_name="install_managed",
+            path="install_managed",
             plan=plan,
             name="Nonprofit Success Pack",
             kind="managed",
             is_recommended=False,
-            order_key=6,
+            step_num="6",
         )
         self.create_step(
-            task_name="deploy_pre",
+            path="deploy_pre",
             plan=plan,
             name="NPSP Config for Salesforce1",
             description="This is a step description.",
             kind="data",
             is_recommended=False,
-            order_key=7,
+            step_num="7",
         )
         self.create_step(
-            task_name="deploy_post",
+            path="deploy_post",
             plan=plan,
             name="Contacts and Organizations",
             description="This is a step description.",
             kind="managed",
             is_recommended=False,
-            order_key=8,
+            step_num="8",
         )
         self.create_step(
-            task_name="ordered_step",
+            path="ordered_step",
             plan=plan,
             name="Another Ordered Step",
             description="This is a step description.",
             kind="managed",
             is_required=False,
-            order_key=9,
+            step_num="9",
         )
 
     def create_enqueuer_job(self):
@@ -210,9 +213,7 @@ class Command(BaseCommand):
 
         version1 = self.create_version(product1, commit_ish="feature/preflight")
         plan = self.create_plan(
-            version1,
-            preflight_flow_name="slow_steps_preflight_good",
-            flow_name="slow_steps_flow",
+            version1, preflight_flow_name="slow_steps_preflight_good"
         )
         self.add_steps(plan)
 
@@ -221,7 +222,6 @@ class Command(BaseCommand):
             title="Reports and Dashboards",
             tier="secondary",
             preflight_flow_name="slow_steps_preflight_good",
-            flow_name="slow_steps_flow_bad",
         )
         self.add_steps(plan2)
 
@@ -246,7 +246,6 @@ class Command(BaseCommand):
             title="Preflight With Warnings",
             tier="additional",
             preflight_flow_name="slow_steps_preflight_warn",
-            flow_name="slow_steps_flow",
         )
         self.add_steps(plan5)
 
@@ -266,7 +265,6 @@ class Command(BaseCommand):
                 "This item is restricted. "
                 "No [OddBirds](http://www.oddbird.net/birds) allowed!"
             ),
-            organization_ids=[],
         )
 
         product3 = self.create_product(

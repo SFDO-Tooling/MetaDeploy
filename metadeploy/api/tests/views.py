@@ -1,6 +1,7 @@
 import pytest
 from django.urls import reverse
 
+from ..constants import ORGANIZATION_DETAILS
 from ..models import Job, PreflightResult
 
 
@@ -224,9 +225,7 @@ class TestBasicGetViews:
         }
 
     def test_plan__not_visible(self, client, allowed_list_factory, plan_factory):
-        allowed_list = allowed_list_factory(
-            organization_ids=[], description="Sample instructions."
-        )
+        allowed_list = allowed_list_factory(description="Sample instructions.")
         plan = plan_factory(visible_to=allowed_list)
         response = client.get(reverse("plan-detail", kwargs={"pk": plan.id}))
 
@@ -240,6 +239,61 @@ class TestBasicGetViews:
             "slug": "sample-plan",
             "steps": None,
             "is_allowed": False,
+            "is_listed": True,
+            "not_allowed_instructions": "<p>Sample instructions.</p>",
+        }
+
+    def test_plan__visible(
+        self,
+        client,
+        allowed_list_factory,
+        allowed_list_org_factory,
+        plan_factory,
+        user_factory,
+    ):
+        allowed_list = allowed_list_factory(description="Sample instructions.")
+        allowed_list_org = allowed_list_org_factory(allowed_list=allowed_list)
+        plan = plan_factory(visible_to=allowed_list)
+        user = user_factory()
+        social_account = user.socialaccount_set.all()[0]
+        social_account.extra_data[ORGANIZATION_DETAILS]["Id"] = allowed_list_org.org_id
+        social_account.save()
+        client.force_login(user)
+        response = client.get(reverse("plan-detail", kwargs={"pk": plan.id}))
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "id": str(plan.id),
+            "title": "Sample plan",
+            "version": str(plan.version.id),
+            "preflight_message": "",
+            "tier": "primary",
+            "slug": "sample-plan",
+            "steps": [],
+            "is_allowed": True,
+            "is_listed": True,
+            "not_allowed_instructions": "<p>Sample instructions.</p>",
+        }
+
+    def test_plan__visible_superuser(
+        self, client, allowed_list_factory, plan_factory, user_factory
+    ):
+        allowed_list = allowed_list_factory(description="Sample instructions.")
+        plan = plan_factory(visible_to=allowed_list)
+        user = user_factory(is_superuser=True)
+        client.force_login(user)
+        response = client.get(reverse("plan-detail", kwargs={"pk": plan.id}))
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "id": str(plan.id),
+            "title": "Sample plan",
+            "version": str(plan.version.id),
+            "preflight_message": "",
+            "tier": "primary",
+            "slug": "sample-plan",
+            "steps": [],
+            "is_allowed": True,
             "is_listed": True,
             "not_allowed_instructions": "<p>Sample instructions.</p>",
         }
@@ -283,7 +337,7 @@ class TestPreflight:
         assert response.status_code == 404
 
     def test_post__unallowed(self, client, plan_factory, allowed_list_factory):
-        allowed_list = allowed_list_factory(organization_ids=[])
+        allowed_list = allowed_list_factory()
         plan = plan_factory(visible_to=allowed_list)
         response = client.post(reverse("plan-preflight", kwargs={"pk": plan.id}))
 
