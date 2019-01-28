@@ -123,7 +123,7 @@ class PreflightWarningModal extends React.Component<Props, State> {
             );
           })}
           <Checkbox
-            id={`preflight-warning-confirm`}
+            id="preflight-warning-confirm"
             className="slds-p-top_x-small"
             checked={this.state.confirmed}
             labels={{

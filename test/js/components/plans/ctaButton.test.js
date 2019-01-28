@@ -46,6 +46,7 @@ describe('<CtaButton />', () => {
       user: { valid_token_for: 'foo' },
       preflight: defaultPreflight,
       preventAction: false,
+      clickThroughAgreement: null,
     };
     const opts = { ...defaults, ...options };
     const renderFn = opts.rerenderFn || render;
@@ -54,6 +55,7 @@ describe('<CtaButton />', () => {
         history={opts.history}
         user={opts.user}
         productSlug="product"
+        clickThroughAgreement={opts.clickThroughAgreement}
         versionLabel="version"
         plan={opts.plan}
         preflight={opts.preflight}
@@ -242,6 +244,21 @@ describe('<CtaButton />', () => {
       fireEvent.click(getByText('Re-Run Pre-Install Validation'));
 
       expect(doStartPreflight).toHaveBeenCalledWith('plan-1');
+    });
+  });
+
+  describe('start-install (with click-through agreement) click', () => {
+    test('opens modal', () => {
+      const { getByText, getByLabelText } = setup({
+        clickThroughAgreement: '<p>Please and thank you.</p>',
+      });
+      fireEvent.click(getByText('Install'));
+
+      expect(getByText('Product Terms of Use and Licenses')).toBeVisible();
+      expect(getByText('Please and thank you.')).toBeVisible();
+      expect(
+        getByLabelText('confirm I have read and agree to', { exact: false }),
+      ).toBeVisible();
     });
   });
 
