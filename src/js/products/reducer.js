@@ -33,6 +33,7 @@ export type Product = {
   +is_listed: boolean,
   +is_allowed: boolean,
   +not_allowed_instructions: string | null,
+  +click_through_agreement: string | null,
 };
 export type Products = Array<Product>;
 

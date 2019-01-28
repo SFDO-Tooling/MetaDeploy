@@ -32,7 +32,38 @@ class Command(BaseCommand):
                 "dictumst. Nulla facilisi etiam dignissim diam."
             ),
         )
-        product = Product.objects.create(title=title, description=description, **kwargs)
+        click_through_agreement = kwargs.pop(
+            "click_through_agreement",
+            (
+                f"Lorem ipsum dolor sit amet, consectetur adipiscing elit, "
+                "sed do eiusmod tempor incididunt ut labore et dolore "
+                "magna aliqua. Tellus elementum sagittis vitae et leo "
+                "duis ut diam. Sem fringilla ut morbi tincidunt augue "
+                "interdum velit euismod. Volutpat est velit egestas dui "
+                "id ornare arcu. Viverra tellus in hac habitasse platea "
+                "dictumst. Nulla facilisi etiam dignissim diam.\n\n"
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, "
+                "sed do eiusmod tempor incididunt ut labore et dolore "
+                "magna aliqua. Tellus elementum sagittis vitae et leo "
+                "duis ut diam. Sem fringilla ut morbi tincidunt augue "
+                "interdum velit euismod. Volutpat est velit egestas dui "
+                "id ornare arcu. Viverra tellus in hac habitasse platea "
+                "dictumst. Nulla facilisi etiam dignissim diam.\n\n"
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, "
+                "sed do eiusmod tempor incididunt ut labore et dolore "
+                "magna aliqua. Tellus elementum sagittis vitae et leo "
+                "duis ut diam. Sem fringilla ut morbi tincidunt augue "
+                "interdum velit euismod. Volutpat est velit egestas dui "
+                "id ornare arcu. Viverra tellus in hac habitasse platea "
+                "dictumst. Nulla facilisi etiam dignissim diam.\n\n"
+            ),
+        )
+        product = Product.objects.create(
+            title=title,
+            description=description,
+            click_through_agreement=click_through_agreement,
+            **kwargs,
+        )
         product.ensure_slug()
         return product
 

@@ -8,6 +8,7 @@ import routes from 'utils/routes';
 import { CONSTANTS } from 'plans/reducer';
 import { getUrlParam, removeUrlParam } from 'utils/api';
 
+import ClickThroughAgreementModal from 'components/plans/clickThroughAgreementModal';
 import Login from 'components/header/login';
 import PreflightWarningModal from 'components/plans/preflightWarningModal';
 
@@ -26,6 +27,7 @@ type Props = {
   history: RouterHistory,
   user: UserType,
   productSlug: string,
+  clickThroughAgreement: string | null,
   versionLabel: string,
   plan: PlanType,
   preflight: ?PreflightType,
@@ -99,11 +101,19 @@ export const ActionBtn = ({
 
 class CtaButton extends React.Component<
   Props,
-  { modalOpen: boolean, startPreflight: boolean },
+  {
+    preflightModalOpen: boolean,
+    clickThroughModal: boolean,
+    startPreflight: boolean,
+  },
 > {
   constructor(props: Props) {
     super(props);
-    this.state = { modalOpen: false, startPreflight: false };
+    this.state = {
+      preflightModalOpen: false,
+      clickThroughModal: false,
+      startPreflight: false,
+    };
   }
 
   componentDidMount() {
@@ -158,8 +168,12 @@ class CtaButton extends React.Component<
     );
   }
 
-  toggleModal = (isOpen: boolean) => {
-    this.setState({ modalOpen: isOpen });
+  togglePreflightModal = (isOpen: boolean) => {
+    this.setState({ preflightModalOpen: isOpen });
+  };
+
+  toggleClickThroughModal = (isOpen: boolean) => {
+    this.setState({ clickThroughModal: isOpen });
   };
 
   startJob = () => {
@@ -211,7 +225,13 @@ class CtaButton extends React.Component<
   }
 
   render(): React.Node {
-    const { user, plan, preflight, doStartPreflight } = this.props;
+    const {
+      user,
+      clickThroughAgreement,
+      plan,
+      preflight,
+      doStartPreflight,
+    } = this.props;
     if (!user) {
       // Require login first...
       return (
@@ -260,25 +280,40 @@ class CtaButton extends React.Component<
           const hasWarnings =
             preflight.warning_count !== undefined &&
             preflight.warning_count > 0;
-          if (hasWarnings) {
-            // Warnings must be confirmed before proceeding
-            const btn = this.getLoginOrActionBtn('Install', () => {
-              this.toggleModal(true);
-            });
-            return (
-              <>
-                {btn}
+          // Terms must be confirmed before proceeding
+          const action = clickThroughAgreement
+            ? () => {
+                this.toggleClickThroughModal(true);
+              }
+            : this.startJob;
+          // Warnings must be confirmed before proceeding
+          const btn = hasWarnings
+            ? this.getLoginOrActionBtn('Install', () => {
+                this.togglePreflightModal(true);
+              })
+            : this.getLoginOrActionBtn('Install', action);
+          return (
+            <>
+              {btn}
+              {hasWarnings ? (
                 <PreflightWarningModal
-                  isOpen={this.state.modalOpen}
-                  toggleModal={this.toggleModal}
-                  startJob={this.startJob}
+                  isOpen={this.state.preflightModalOpen}
+                  toggleModal={this.togglePreflightModal}
+                  startJob={action}
                   results={preflight.results}
                   steps={plan.steps || []}
                 />
-              </>
-            );
-          }
-          return this.getLoginOrActionBtn('Install', this.startJob);
+              ) : null}
+              {clickThroughAgreement ? (
+                <ClickThroughAgreementModal
+                  isOpen={this.state.clickThroughModal}
+                  text={clickThroughAgreement}
+                  toggleModal={this.toggleClickThroughModal}
+                  startJob={this.startJob}
+                />
+              ) : null}
+            </>
+          );
         }
         // Prior preflight exists, but is no longer valid or has errors
         return this.getLoginOrActionBtn(
