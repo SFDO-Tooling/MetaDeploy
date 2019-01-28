@@ -70,6 +70,8 @@
     "@salesforce/design-system-react": "^0.9.4",
     "classnames": "^2.2.6",
     "i18next": "^14.0.1",
+    "i18next-browser-languagedetector": "^2.2.4",
+    "i18next-xhr-backend": "^1.5.1",
     "js-cookie": "^2.2.0",
     "money-clip": "^3.0.1",
     "raven-js": "^3.27.0",
