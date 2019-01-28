@@ -25,10 +25,10 @@ describe('<LicenseRequirementsModal />', () => {
   test('displays text', () => {
     const { getByLabelText, getByText } = setup();
 
-    expect(getByText('License Requirements', { exact: false })).toBeVisible();
+    expect(getByText('Product Terms of Use and Licenses')).toBeVisible();
     expect(getByText('Please and thank you.')).toBeVisible();
     expect(
-      getByLabelText('continue with installation', { exact: false }),
+      getByLabelText('confirm I have read and agree to', { exact: false }),
     ).toBeVisible();
   });
 
@@ -37,7 +37,7 @@ describe('<LicenseRequirementsModal />', () => {
       const startJob = jest.fn();
       const { getByText, getByLabelText } = setup({ startJob });
       const btn = getByText('Confirm');
-      const confirm = getByLabelText('continue with installation', {
+      const confirm = getByLabelText('confirm I have read and agree to', {
         exact: false,
       });
 

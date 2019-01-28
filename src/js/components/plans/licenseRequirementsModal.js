@@ -49,8 +49,7 @@ class LicenseRequirementsModal extends React.Component<Props, State> {
     return (
       <Modal
         isOpen={isOpen}
-        title="@@@ License Requirements"
-        tagline="@@@ (legalese)"
+        title="Product Terms of Use and Licenses"
         onRequestClose={this.handleClose}
         footer={footer}
       >
@@ -67,8 +66,8 @@ class LicenseRequirementsModal extends React.Component<Props, State> {
             checked={this.state.confirmed}
             labels={{
               label:
-                '@@@ I have read and agreed to this legalese, ' +
-                'and want to continue with installation.',
+                'I confirm I have read and agree to these ' +
+                'product terms of use and licenses.',
             }}
             onChange={this.handleChange}
           />

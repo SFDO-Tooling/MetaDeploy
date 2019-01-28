@@ -254,10 +254,10 @@ describe('<CtaButton />', () => {
       });
       fireEvent.click(getByText('Install'));
 
-      expect(getByText('License Requirements', { exact: false })).toBeVisible();
+      expect(getByText('Product Terms of Use and Licenses')).toBeVisible();
       expect(getByText('Please and thank you.')).toBeVisible();
       expect(
-        getByLabelText('continue with installation', { exact: false }),
+        getByLabelText('confirm I have read and agree to', { exact: false }),
       ).toBeVisible();
     });
   });
