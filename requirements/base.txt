@@ -24,7 +24,7 @@ rq-scheduler==0.8.3  # pyup: ==0.8.3
 Pillow==5.4.1
 django-model-utils==3.1.2
 django-storages==1.7.1
-boto3==1.9.82
+boto3==1.9.86
 github3.py==1.2.0
 bleach==3.1.0
 django-hashid-field==2.1.5
