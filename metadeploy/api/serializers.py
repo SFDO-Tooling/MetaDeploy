@@ -187,6 +187,7 @@ class ProductSerializer(CircumspectSerializerMixin, serializers.ModelSerializer)
     most_recent_version = VersionSerializer()
     is_allowed = serializers.SerializerMethodField()
     description = serializers.CharField(source="description_markdown")
+    license_requirements = serializers.CharField(source="license_requirements_markdown")
     not_allowed_instructions = serializers.SerializerMethodField()
 
     class Meta:
@@ -195,6 +196,7 @@ class ProductSerializer(CircumspectSerializerMixin, serializers.ModelSerializer)
             "id",
             "title",
             "description",
+            "license_requirements",
             "category",
             "color",
             "icon",

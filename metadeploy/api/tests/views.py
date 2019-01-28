@@ -167,6 +167,7 @@ class TestBasicGetViews:
             "id": str(product.id),
             "title": product.title,
             "description": "<p>This is a sample product.</p>",
+            "license_requirements": "",
             "category": "salesforce",
             "color": "#FFFFFF",
             "icon": None,
