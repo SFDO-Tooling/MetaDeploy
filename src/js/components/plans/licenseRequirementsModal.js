@@ -56,8 +56,10 @@ class LicenseRequirementsModal extends React.Component<Props, State> {
         <div className="slds-p-horizontal_large slds-p-vertical_medium">
           {/* This text is pre-cleaned by the API */}
           <div
-            className="slds-text-longform"
-            style={{ maxHeight: '250px', overflowY: 'auto' }}
+            className="
+              slds-text-longform
+              slds-scrollable_y"
+            style={{ maxHeight: '250px' }}
             dangerouslySetInnerHTML={{
               __html: text,
             }}
