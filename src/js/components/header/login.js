@@ -9,6 +9,7 @@ import { logError } from 'utils/logging';
 import CustomDomainModal from 'components/header/customDomainModal';
 
 import type { UrlParams } from 'utils/api';
+import type { I18nProps } from 'components/utils';
 import { withI18n } from 'react-i18next';
 
 type Props = {
@@ -21,7 +22,7 @@ type Props = {
   menuPosition: string,
   nubbinPosition: string,
   redirectParams: UrlParams,
-  t: (string | React.Node) => string,
+  ...I18nProps,
 };
 type MenuOption =
   | {|
@@ -106,7 +107,7 @@ class BaseLogin extends React.Component<Props, { modalOpen: boolean }> {
   }
 
   render(): React.Node {
-    const menuOpts = Login.getMenuOpts();
+    const menuOpts = this.getMenuOpts();
     const {
       id,
       label,
@@ -117,14 +118,16 @@ class BaseLogin extends React.Component<Props, { modalOpen: boolean }> {
       menuPosition,
       nubbinPosition,
       redirectParams,
+      t,
     } = this.props;
     const { modalOpen } = this.state;
-    const { t } = this.props;
+
+    const dropdownLabel = typeof label === 'string' ? t(label) : label;
     return (
       <>
         <Dropdown
           id={id}
-          label={t(this.props.label)}
+          label={dropdownLabel}
           className="slds-dropdown_actions
             slds-dropdown_medium"
           triggerClassName={triggerClassName}
