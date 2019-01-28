@@ -1,7 +1,7 @@
-// Products
-// ========
+// Icons
+// =====
 
-.slds-icon-standard-account {
+[class*='slds-icon'] {
   [style*='--custom-color'] & {
     background-color: var(--custom-color);
   }
