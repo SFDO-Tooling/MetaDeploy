@@ -247,7 +247,7 @@ describe('<CtaButton />', () => {
     });
   });
 
-  describe('start-install (with license requirements) click', () => {
+  describe('start-install (with click-through agreement) click', () => {
     test('opens modal', () => {
       const { getByText, getByLabelText } = setup({
         clickThroughAgreement: '<p>Please and thank you.</p>',

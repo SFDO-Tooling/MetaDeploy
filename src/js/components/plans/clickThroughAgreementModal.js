@@ -66,7 +66,7 @@ class ClickThroughAgreementModal extends React.Component<Props, State> {
             }}
           />
           <Checkbox
-            id="license-requirements-confirm"
+            id="click-through-confirm"
             className="slds-p-top_medium"
             checked={this.state.confirmed}
             labels={{

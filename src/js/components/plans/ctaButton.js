@@ -103,7 +103,7 @@ class CtaButton extends React.Component<
   Props,
   {
     preflightModalOpen: boolean,
-    licenseModalOpen: boolean,
+    clickThroughModal: boolean,
     startPreflight: boolean,
   },
 > {
@@ -111,7 +111,7 @@ class CtaButton extends React.Component<
     super(props);
     this.state = {
       preflightModalOpen: false,
-      licenseModalOpen: false,
+      clickThroughModal: false,
       startPreflight: false,
     };
   }
@@ -172,8 +172,8 @@ class CtaButton extends React.Component<
     this.setState({ preflightModalOpen: isOpen });
   };
 
-  toggleLicenseModal = (isOpen: boolean) => {
-    this.setState({ licenseModalOpen: isOpen });
+  toggleClickThroughModal = (isOpen: boolean) => {
+    this.setState({ clickThroughModal: isOpen });
   };
 
   startJob = () => {
@@ -280,10 +280,10 @@ class CtaButton extends React.Component<
           const hasWarnings =
             preflight.warning_count !== undefined &&
             preflight.warning_count > 0;
-          // License requirements must be confirmed before proceeding
+          // Terms must be confirmed before proceeding
           const action = clickThroughAgreement
             ? () => {
-                this.toggleLicenseModal(true);
+                this.toggleClickThroughModal(true);
               }
             : this.startJob;
           // Warnings must be confirmed before proceeding
@@ -306,9 +306,9 @@ class CtaButton extends React.Component<
               ) : null}
               {clickThroughAgreement ? (
                 <ClickThroughAgreementModal
-                  isOpen={this.state.licenseModalOpen}
+                  isOpen={this.state.clickThroughModal}
                   text={clickThroughAgreement}
-                  toggleModal={this.toggleLicenseModal}
+                  toggleModal={this.toggleClickThroughModal}
                   startJob={this.startJob}
                 />
               ) : null}
