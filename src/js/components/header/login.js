@@ -2,15 +2,15 @@
 
 import * as React from 'react';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
+import { withI18n } from 'react-i18next';
 
 import { addUrlParams } from 'utils/api';
 import { logError } from 'utils/logging';
 
 import CustomDomainModal from 'components/header/customDomainModal';
 
-import type { UrlParams } from 'utils/api';
 import type { I18nProps } from 'components/utils';
-import { withI18n } from 'react-i18next';
+import type { UrlParams } from 'utils/api';
 
 type Props = {
   id: string,

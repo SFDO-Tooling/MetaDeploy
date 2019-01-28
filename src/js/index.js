@@ -4,6 +4,9 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import DocumentTitle from 'react-document-title';
 import IconSettings from '@salesforce/design-system-react/components/icon-settings';
+import i18n from 'i18next';
+import i18n_backend from 'i18next-xhr-backend';
+import i18n_detector from 'i18next-browser-languagedetector';
 import logger from 'redux-logger';
 import settings from '@salesforce/design-system-react/components/settings';
 import thunk from 'redux-thunk';
@@ -11,6 +14,7 @@ import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import { createStore, applyMiddleware } from 'redux';
+import { reactI18nextModule } from 'react-i18next';
 
 import actionSprite from '@salesforce-ux/design-system/assets/icons/action-sprite/svg/symbols.svg';
 import customSprite from '@salesforce-ux/design-system/assets/icons/custom-sprite/svg/symbols.svg';
@@ -39,14 +43,10 @@ import JobDetail from 'components/jobs/detail';
 import PlanDetail from 'components/plans/detail';
 import ProductsList from 'components/products/list';
 import { ProductDetail, VersionDetail } from 'components/products/detail';
-import i18n from 'i18next';
-import detector from 'i18next-browser-languagedetector';
-import backend from 'i18next-xhr-backend';
-import { reactI18nextModule } from 'react-i18next';
 
 i18n
-  .use(detector)
-  .use(backend)
+  .use(i18n_detector)
+  .use(i18n_backend)
   .use(reactI18nextModule)
   .init({
     lng: 'en',
@@ -55,8 +55,12 @@ i18n
     interpolation: {
       escapeValue: false,
     },
+    saveMissing: true,
     react: {
       wait: true,
+    },
+    backend: {
+      loadPath: '/static/{{lng}}/{{ns}}.json',
     },
   });
 

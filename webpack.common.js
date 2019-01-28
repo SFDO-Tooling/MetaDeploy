@@ -7,7 +7,6 @@ process.env.BROWSERSLIST_CONFIG = './.browserslistrc';
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const path = require('path');
-const I18nextWebpackPlugin = require('i18next-scanner-webpack');
 
 module.exports = {
   context: path.join(__dirname, 'src', 'js'),
@@ -99,20 +98,6 @@ module.exports = {
     new HtmlWebpackPlugin({
       inject: false,
       template: path.join(__dirname, 'src', 'index.html'),
-    }),
-    new I18nextWebpackPlugin({
-      src: './src/js/',
-      options: {
-        func: {
-          list: ['t', '$t', 'i18next.t', 'i18n.t'],
-          extensions: ['js', 'jsx'],
-        },
-        lngs: ['en'],
-        resource: {
-          loadPath: '{{lng}}/{{ns}}.json',
-          savePath: '{{lng}}/{{ns}}.json',
-        },
-      },
     }),
   ],
 };
