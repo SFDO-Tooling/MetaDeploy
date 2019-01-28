@@ -58,15 +58,16 @@ class LicenseRequirementsModal extends React.Component<Props, State> {
           <div
             className="
               slds-text-longform
-              slds-scrollable_y"
+              slds-scrollable_y
+              slds-box"
             style={{ maxHeight: '250px' }}
             dangerouslySetInnerHTML={{
               __html: text,
             }}
           />
           <Checkbox
-            id={`license-requirements-confirm`}
-            className="slds-p-top_x-small"
+            id="license-requirements-confirm"
+            className="slds-p-top_medium"
             checked={this.state.confirmed}
             labels={{
               label:
