@@ -15,7 +15,7 @@ type State = {
   confirmed: boolean,
 };
 
-class LicenseRequirementsModal extends React.Component<Props, State> {
+class ClickThroughAgreementModal extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = { confirmed: false };
@@ -82,4 +82,4 @@ class LicenseRequirementsModal extends React.Component<Props, State> {
   }
 }
 
-export default LicenseRequirementsModal;
+export default ClickThroughAgreementModal;

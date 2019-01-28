@@ -46,7 +46,7 @@ describe('<CtaButton />', () => {
       user: { valid_token_for: 'foo' },
       preflight: defaultPreflight,
       preventAction: false,
-      licenseRequirements: null,
+      clickThroughAgreement: null,
     };
     const opts = { ...defaults, ...options };
     const renderFn = opts.rerenderFn || render;
@@ -55,7 +55,7 @@ describe('<CtaButton />', () => {
         history={opts.history}
         user={opts.user}
         productSlug="product"
-        licenseRequirements={opts.licenseRequirements}
+        clickThroughAgreement={opts.clickThroughAgreement}
         versionLabel="version"
         plan={opts.plan}
         preflight={opts.preflight}
@@ -250,7 +250,7 @@ describe('<CtaButton />', () => {
   describe('start-install (with license requirements) click', () => {
     test('opens modal', () => {
       const { getByText, getByLabelText } = setup({
-        licenseRequirements: '<p>Please and thank you.</p>',
+        clickThroughAgreement: '<p>Please and thank you.</p>',
       });
       fireEvent.click(getByText('Install'));
 

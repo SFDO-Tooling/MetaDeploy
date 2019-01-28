@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, fireEvent } from 'react-testing-library';
 
-import LicenseRequirementsModal from 'components/plans/licenseRequirementsModal';
+import ClickThroughAgreementModal from 'components/plans/clickThroughAgreementModal';
 
-describe('<LicenseRequirementsModal />', () => {
+describe('<ClickThroughAgreementModal />', () => {
   const setup = options => {
     const defaults = {
       toggleModal: jest.fn(),
@@ -12,7 +12,7 @@ describe('<LicenseRequirementsModal />', () => {
     };
     const opts = { ...defaults, ...options };
     const { getByLabelText, getByText } = render(
-      <LicenseRequirementsModal
+      <ClickThroughAgreementModal
         isOpen={true}
         toggleModal={opts.toggleModal}
         startJob={opts.startJob}

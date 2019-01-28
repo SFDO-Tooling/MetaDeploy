@@ -273,7 +273,7 @@ class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, models.Model):
     repo_url = models.URLField(blank=True)
     is_listed = models.BooleanField(default=True)
     order_key = models.PositiveIntegerField(default=0)
-    license_requirements = MarkdownField(blank=True, property_suffix="_markdown")
+    click_through_agreement = MarkdownField(blank=True, property_suffix="_markdown")
 
     slug_class = ProductSlug
 

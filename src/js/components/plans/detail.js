@@ -250,7 +250,7 @@ class PlanDetail extends React.Component<Props, State> {
           history={history}
           user={user}
           productSlug={product.slug}
-          licenseRequirements={product.license_requirements}
+          clickThroughAgreement={product.click_through_agreement}
           versionLabel={version.label}
           plan={plan}
           preflight={preflight}

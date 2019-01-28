@@ -8,7 +8,7 @@ import routes from 'utils/routes';
 import { CONSTANTS } from 'plans/reducer';
 import { getUrlParam, removeUrlParam } from 'utils/api';
 
-import LicenseRequirementsModal from 'components/plans/licenseRequirementsModal';
+import ClickThroughAgreementModal from 'components/plans/clickThroughAgreementModal';
 import Login from 'components/header/login';
 import PreflightWarningModal from 'components/plans/preflightWarningModal';
 
@@ -27,7 +27,7 @@ type Props = {
   history: RouterHistory,
   user: UserType,
   productSlug: string,
-  licenseRequirements: string | null,
+  clickThroughAgreement: string | null,
   versionLabel: string,
   plan: PlanType,
   preflight: ?PreflightType,
@@ -227,7 +227,7 @@ class CtaButton extends React.Component<
   render(): React.Node {
     const {
       user,
-      licenseRequirements,
+      clickThroughAgreement,
       plan,
       preflight,
       doStartPreflight,
@@ -281,7 +281,7 @@ class CtaButton extends React.Component<
             preflight.warning_count !== undefined &&
             preflight.warning_count > 0;
           // License requirements must be confirmed before proceeding
-          const action = licenseRequirements
+          const action = clickThroughAgreement
             ? () => {
                 this.toggleLicenseModal(true);
               }
@@ -304,10 +304,10 @@ class CtaButton extends React.Component<
                   steps={plan.steps || []}
                 />
               ) : null}
-              {licenseRequirements ? (
-                <LicenseRequirementsModal
+              {clickThroughAgreement ? (
+                <ClickThroughAgreementModal
                   isOpen={this.state.licenseModalOpen}
-                  text={licenseRequirements}
+                  text={clickThroughAgreement}
                   toggleModal={this.toggleLicenseModal}
                   startJob={this.startJob}
                 />

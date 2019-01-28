@@ -32,8 +32,8 @@ class Command(BaseCommand):
                 "dictumst. Nulla facilisi etiam dignissim diam."
             ),
         )
-        license_requirements = kwargs.pop(
-            "license_requirements",
+        click_through_agreement = kwargs.pop(
+            "click_through_agreement",
             (
                 f"Lorem ipsum dolor sit amet, consectetur adipiscing elit, "
                 "sed do eiusmod tempor incididunt ut labore et dolore "
@@ -61,7 +61,7 @@ class Command(BaseCommand):
         product = Product.objects.create(
             title=title,
             description=description,
-            license_requirements=license_requirements,
+            click_through_agreement=click_through_agreement,
             **kwargs,
         )
         product.ensure_slug()
