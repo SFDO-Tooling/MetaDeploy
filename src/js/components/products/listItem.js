@@ -32,7 +32,7 @@ const ProductItem = ({ item }: { item: ProductType }) => {
           Version {item.most_recent_version.label}
         </div>
         <div
-          className="product-description"
+          className="md-truncate-children"
           // This description is pre-cleaned by the API
           dangerouslySetInnerHTML={{ __html: item.description }}
         />
