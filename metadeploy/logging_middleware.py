@@ -41,8 +41,10 @@ class LoggingMiddleware(RequestIDMiddleware):
         user = getattr(request, "user", None)
         user_id = getattr(user, "pk", None) or getattr(user, "id", None)
         ip_str, _ = get_client_ip(request)
-        if not ip_str:
-            ip_str = "unknown"
+        if not ip_str:  # pragma: nocover
+            ip_str = (
+                "unknown"
+            )  # on the mysterious chance that the request has no IP, don't screw up.
 
         message = "method=%s path=%s status=%s source_ip=%s user_agent=%s time=%s"
         args = (
