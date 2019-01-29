@@ -2,13 +2,14 @@ import logging
 import time
 
 from django.conf import settings
-from ipware import get_client_ip
 from log_request_id import (
     LOG_REQUESTS_SETTING,
     REQUEST_ID_RESPONSE_HEADER_SETTING,
     local,
 )
 from log_request_id.middleware import RequestIDMiddleware
+
+from metadeploy import get_client_ip
 
 logger = logging.getLogger(__name__)
 
