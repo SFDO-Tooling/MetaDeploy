@@ -46,8 +46,12 @@ class LoggingMiddleware(RequestIDMiddleware):
             ip_str = (
                 "unknown"
             )  # on the mysterious chance that the request has no IP, don't screw up.
+        x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
 
-        message = "method=%s path=%s status=%s source_ip=%s user_agent=%s time=%s"
+        message = (
+            "method=%s path=%s status=%s source_ip=%s user_agent=%s"
+            ' time=%s forwardedfor="%s"'
+        )
         args = (
             request.method,
             request.path,
@@ -55,6 +59,7 @@ class LoggingMiddleware(RequestIDMiddleware):
             ip_str,
             repr(request.META.get("HTTP_USER_AGENT", "unknown")),
             time.time() - local.start_time,
+            x_forwarded_for,
         )
 
         if user_id:
