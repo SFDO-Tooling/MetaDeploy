@@ -131,6 +131,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "metadeploy.logging_middleware.LoggingMiddleware",
+    "metadeploy.admin_middleware.AdminRestrictMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",

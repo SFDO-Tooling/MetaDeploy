@@ -9,6 +9,8 @@ from log_request_id import (
 )
 from log_request_id.middleware import RequestIDMiddleware
 
+from metadeploy.utils import get_client_ip
+
 logger = logging.getLogger(__name__)
 
 
@@ -39,13 +41,18 @@ class LoggingMiddleware(RequestIDMiddleware):
 
         user = getattr(request, "user", None)
         user_id = getattr(user, "pk", None) or getattr(user, "id", None)
+        ip_str, _ = get_client_ip(request)
+        if not ip_str:  # pragma: nocover
+            ip_str = (
+                "unknown"
+            )  # on the mysterious chance that the request has no IP, don't screw up.
 
         message = "method=%s path=%s status=%s source_ip=%s user_agent=%s time=%s"
         args = (
             request.method,
             request.path,
             response.status_code,
-            request.META.get("REMOTE_ADDR", "unknown"),
+            ip_str,
             repr(request.META.get("HTTP_USER_AGENT", "unknown")),
             time.time() - local.start_time,
         )
