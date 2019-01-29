@@ -81,12 +81,12 @@ class PlanAdmin(admin.ModelAdmin):
     def product(self, obj):
         return obj.version.product
 
-    product.admin_order_field = "plan__version__product__title"
+    product.admin_order_field = "version__product__title"
 
     def version_label(self, obj):
         return obj.version.label
 
-    version_label.admin_order_field = "plan__version__label"
+    version_label.admin_order_field = "version__label"
     version_label.short_description = "Version"
 
 
