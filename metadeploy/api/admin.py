@@ -54,7 +54,7 @@ class AllowedListOrgAdmin(admin.ModelAdmin):
 
 @admin.register(Job)
 class JobAdmin(admin.ModelAdmin, PlanMixin):
-    autosuggest_fields = ("plan", "steps", "user")
+    autocomplete_fields = ("plan", "steps", "user")
     list_filter = ("status", "plan__version__product")
     list_display = (
         "user",
@@ -72,7 +72,7 @@ class JobAdmin(admin.ModelAdmin, PlanMixin):
 
 @admin.register(Plan)
 class PlanAdmin(admin.ModelAdmin):
-    autosuggest_fields = ("version",)
+    autocomplete_fields = ("version",)
     list_filter = ("version__product", "tier", "is_listed")
     list_display = ("title", "product", "version_label", "tier", "is_listed")
     list_select_related = ("version", "version__product")
@@ -97,7 +97,7 @@ class PlanSlugAdmin(admin.ModelAdmin):
 
 @admin.register(PreflightResult)
 class PreflightResult(admin.ModelAdmin, PlanMixin):
-    autosuggest_fields = ("plan", "user")
+    autocomplete_fields = ("plan", "user")
     list_filter = ("status", "is_valid", "plan__version__product")
     list_display = ("user", "status", "is_valid", "plan_title", "product", "version")
     list_select_related = ("user", "plan", "plan__version", "plan__version__product")
@@ -122,7 +122,7 @@ class ProductSlugAdmin(admin.ModelAdmin):
 
 @admin.register(Step)
 class StepAdmin(admin.ModelAdmin, PlanMixin):
-    autosuggest_fields = ("plan",)
+    autocomplete_fields = ("plan",)
     list_display = (
         "name",
         "plan_title",
@@ -134,14 +134,24 @@ class StepAdmin(admin.ModelAdmin, PlanMixin):
         "path",
     )
     list_filter = ("plan__version__product",)
+    search_fields = (
+        "name",
+        "plan__title",
+        "plan__version__label",
+        "plan__version__product",
+        "step_num",
+        "path",
+    )
 
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = ("username", "is_active", "is_staff", "is_superuser", "date_joined")
+    search_fields = ("username",)
 
 
 @admin.register(Version)
 class VersionAdmin(admin.ModelAdmin):
     list_filter = ("product", "is_production", "is_listed")
     list_display = ("label", "product", "is_production", "is_listed", "commit_ish")
+    search_fields = ("label", "product")
