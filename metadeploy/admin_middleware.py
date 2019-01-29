@@ -3,7 +3,7 @@ from ipaddress import IPv4Address
 from django.conf import settings
 from django.core.exceptions import SuspiciousOperation
 
-from metadeploy import get_client_ip
+from metadeploy.utils import get_client_ip
 
 
 class AdminRestrictMiddleware:

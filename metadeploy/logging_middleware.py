@@ -9,7 +9,7 @@ from log_request_id import (
 )
 from log_request_id.middleware import RequestIDMiddleware
 
-from metadeploy import get_client_ip
+from metadeploy.utils import get_client_ip
 
 logger = logging.getLogger(__name__)
 
