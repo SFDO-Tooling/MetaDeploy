@@ -3,6 +3,8 @@
 import * as React from 'react';
 import Card from '@salesforce/design-system-react/components/card';
 import Icon from '@salesforce/design-system-react/components/icon';
+import { Trans } from 'react-i18next';
+import * as i18n from 'i18next';
 
 import type { Job as JobType } from 'jobs/reducer';
 
@@ -16,23 +18,29 @@ const UserInfo = ({ job }: { job: JobType }): React.Node => {
       >
         <Card
           bodyClassName="slds-card__body_inner"
-          heading="Salesforce Org Information"
+          heading={i18n.t('Salesforce Org Information')}
           icon={<Icon category="utility" name="user" />}
         >
           <ul>
             {job.creator && job.creator.username ? (
               <li>
-                <strong>User:</strong> {job.creator.username}
+                <Trans i18nKey="jobUserName">
+                  <strong>User:</strong> {job.creator.username}
+                </Trans>
               </li>
             ) : null}
             {job.org_name ? (
               <li>
-                <strong>Org:</strong> {job.org_name}
+                <Trans i18nKey="jobOrgName">
+                  <strong>Org:</strong> {job.org_name}
+                </Trans>
               </li>
             ) : null}
             {job.org_type ? (
               <li>
-                <strong>Type:</strong> {job.org_type}
+                <Trans i18nKey="jobOrgType">
+                  <strong>Type:</strong> {job.org_type}
+                </Trans>
               </li>
             ) : null}
           </ul>

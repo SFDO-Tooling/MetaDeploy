@@ -3,6 +3,7 @@
 import * as React from 'react';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import classNames from 'classnames';
+import * as i18n from 'i18next';
 
 import { CONSTANTS } from 'plans/reducer';
 
@@ -38,8 +39,8 @@ const RequiredDataCell = (props: DataCellProps): React.Node => {
     text = 'Required';
   }
   return (
-    <DataTableCell title={text} {...props}>
-      <span className={classes}>{text}</span>
+    <DataTableCell title={i18n.t(text)} {...props}>
+      <span className={classes}>{i18n.t(text)}</span>
     </DataTableCell>
   );
 };

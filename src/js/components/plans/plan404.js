@@ -7,6 +7,8 @@ import routes from 'utils/routes';
 
 import FourOhFour from 'components/404';
 
+import { Trans } from 'react-i18next';
+
 import type {
   Product as ProductType,
   Version as VersionType,
@@ -21,13 +23,13 @@ const PlanNotFound = ({
 }) => (
   <FourOhFour
     message={
-      <>
+      <Trans i18nKey="planNotFound">
         We can’t find the plan you’re looking for. Try{' '}
         <Link to={routes.version_detail(product.slug, version.label)}>
           another plan
         </Link>{' '}
         from that product version?
-      </>
+      </Trans>
     }
   />
 );

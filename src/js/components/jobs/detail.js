@@ -4,6 +4,7 @@ import * as React from 'react';
 import Button from '@salesforce/design-system-react/components/button';
 import DocumentTitle from 'react-document-title';
 import { connect } from 'react-redux';
+import * as i18n from 'i18next';
 
 import routes from 'utils/routes';
 import { CONSTANTS } from 'plans/reducer';
@@ -140,7 +141,7 @@ class JobDetail extends React.Component<Props, State> {
           <Button
             label={
               <LabelWithSpinner
-                label="Canceling Installation..."
+                label={i18n.t('Canceling Installation...')}
                 variant="base"
                 size="x-small"
               />
@@ -151,7 +152,7 @@ class JobDetail extends React.Component<Props, State> {
       }
       return (
         <Button
-          label="Cancel Installation"
+          label={i18n.t('Cancel Installation')}
           variant="base"
           className="slds-button_text-destructive"
           onClick={this.requestCancelJob}
@@ -198,7 +199,9 @@ class JobDetail extends React.Component<Props, State> {
     const { canceling } = this.state;
     return (
       <DocumentTitle
-        title={`Installation | ${plan.title} | ${product.title} | MetaDeploy`}
+        title={i18n.t(
+          `Installation | ${plan.title} | ${product.title} | MetaDeploy`,
+        )}
       >
         <>
           <Header
@@ -210,7 +213,7 @@ class JobDetail extends React.Component<Props, State> {
               <>
                 {this.getCancelBtn()}
                 <Button
-                  label="Share Installation"
+                  label={i18n.t('Share Installation')}
                   iconCategory="utility"
                   iconName="share"
                   iconPosition="left"
@@ -226,9 +229,9 @@ class JobDetail extends React.Component<Props, State> {
             updateJob={doUpdateJob}
           />
           <BodyContainer>
-            <Toasts job={job} label="Installation" />
+            <Toasts job={job} label={i18n.t('Installation')} />
             <Intro
-              results={<JobResults job={job} label="Installation" />}
+              results={<JobResults job={job} label={i18n.t('Installation')} />}
               cta={
                 <CtaButton
                   job={job}

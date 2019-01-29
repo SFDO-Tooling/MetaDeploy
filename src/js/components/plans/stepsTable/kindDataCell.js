@@ -3,6 +3,7 @@
 import * as React from 'react';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import Icon from '@salesforce/design-system-react/components/icon';
+import * as i18n from 'i18next';
 
 import type { DataCellProps } from 'components/plans/stepsTable/index';
 
@@ -21,12 +22,12 @@ const KindDataCell = (props: DataCellProps): React.Node => {
           category="utility"
           name={iconName}
           assistiveText={{
-            label: value,
+            label: i18n.t(value),
           }}
           size="x-small"
         />
       ) : null}
-      <span>{value}</span>
+      <span>{i18n.t(value)}</span>
     </DataTableCell>
   );
 };

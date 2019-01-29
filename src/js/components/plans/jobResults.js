@@ -2,8 +2,11 @@
 
 import * as React from 'react';
 import Icon from '@salesforce/design-system-react/components/icon';
+import * as i18n from 'i18next';
 
 import { CONSTANTS } from 'plans/reducer';
+
+import { Trans } from 'react-i18next';
 
 import type { Job as JobType } from 'jobs/reducer';
 import type {
@@ -19,7 +22,7 @@ export const ErrorIcon = ({
   containerClassName?: string,
 }): React.Node => (
   <Icon
-    assistiveText={{ label: 'Error' }}
+    assistiveText={{ label: i18n.t('Error') }}
     category="utility"
     name="error"
     colorVariant="error"
@@ -31,7 +34,7 @@ export const ErrorIcon = ({
 
 export const WarningIcon = (): React.Node => (
   <Icon
-    assistiveText={{ label: 'Warning' }}
+    assistiveText={{ label: i18n.t('Warning') }}
     category="utility"
     name="warning"
     colorVariant="warning"
@@ -117,12 +120,18 @@ const JobResults = ({
     const errorCount = currentJob.error_count || 0;
     const warningCount = currentJob.warning_count || 0;
     let msg = 'errors';
-    const errorMsg = `${errorCount} error${errorCount === 1 ? '' : 's'}`;
-    const warningMsg = `${warningCount} warning${
-      warningCount === 1 ? '' : 's'
-    }`;
+    const errorMsg = i18n.t(
+      `${errorCount} error${errorCount === 1 ? '' : 's'}`,
+      {
+        count: errorCount,
+      },
+    );
+    const warningMsg = i18n.t(
+      `${warningCount} warning${warningCount === 1 ? '' : 's'}`,
+      { count: warningCount },
+    );
     if (errorCount > 0 && warningCount > 0) {
-      msg = `${errorMsg} and ${warningMsg}`;
+      msg = i18n.t(`${errorMsg} and ${warningMsg}`);
     } else if (errorCount > 0) {
       msg = errorMsg;
     } else if (warningCount > 0) {
@@ -143,8 +152,8 @@ const JobResults = ({
               because jobs do not have `is_valid` property.
            */}
           {currentJob.is_valid === false && !failed
-            ? `${label} has expired; please run it again.`
-            : `${label} encountered ${msg}.`}
+            ? i18n.t(`${label} has expired; please run it again.`)
+            : i18n.t(`${label} encountered ${msg}.`)}
         </p>
         {failed && failMessage ? <p>{failMessage}</p> : null}
         {jobErrors ? <ErrorsList errorList={jobErrors} /> : null}
@@ -157,7 +166,7 @@ const JobResults = ({
     return (
       <p className="slds-text-color_error">
         <ErrorIcon />
-        {label} was canceled.
+        <Trans i18nKey="labelWasCanceled">{label} was canceled.</Trans>
       </p>
     );
   }
@@ -168,7 +177,9 @@ const JobResults = ({
     return (
       <p>
         <WarningIcon />
-        {label} has expired; please run it again.
+        <Trans i18nKey="labelHasExpired">
+          {label} has expired; please run it again.
+        </Trans>
       </p>
     );
   }
@@ -176,7 +187,11 @@ const JobResults = ({
   // Successful job
   return (
     <>
-      <p className="slds-text-color_success">{label} completed successfully.</p>
+      <p className="slds-text-color_success">
+        <Trans i18nKey="labelCompletedSuccessfully">
+          {label} completed successfully.
+        </Trans>
+      </p>
       {successMessage ? <p>{successMessage}</p> : null}
     </>
   );

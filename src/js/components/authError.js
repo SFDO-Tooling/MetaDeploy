@@ -4,6 +4,8 @@ import * as React from 'react';
 import DocumentTitle from 'react-document-title';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
+import * as i18n from 'i18next';
+import { Trans } from 'react-i18next';
 
 import routes from 'utils/routes';
 import { selectUserState } from 'user/selectors';
@@ -16,14 +18,14 @@ import type { InitialProps } from 'components/utils';
 import type { User as UserType } from 'user/reducer';
 
 const AuthError = ({ user }: { user: UserType }) => (
-  <DocumentTitle title="Authentication Error | MetaDeploy">
+  <DocumentTitle title={i18n.t('Authentication Error | MetaDeploy')}>
     <>
       <EmptyIllustration
         message={
-          <>
+          <Trans i18nKey="errorWithAccount">
             An error occurred with your account. Try the{' '}
             <Link to={routes.home()}>home page</Link>?
-          </>
+          </Trans>
         }
       />
       <div className="slds-align_absolute-center">

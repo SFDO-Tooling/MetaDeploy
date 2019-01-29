@@ -1,5 +1,15 @@
 {
   "Production or Developer Org": "Production or Developer Org",
   "Sandbox or Scratch Org": "Sandbox or Scratch Org",
-  "Use Custom Domain": "Use Custom Domain"
+  "Use Custom Domain": "Use Custom Domain",
+  "We couldn’t find any products": {
+    " Try again later?": " Try again later?"
+  },
+  "Version {item": {
+    "most_recent_version": {
+      "label}": "label}"
+    }
+  },
+  "log in with a different org": "log in with a different org",
+  "log in": "log in"
 }

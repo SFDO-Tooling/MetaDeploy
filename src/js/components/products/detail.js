@@ -4,6 +4,8 @@ import * as React from 'react';
 import DocumentTitle from 'react-document-title';
 import { Redirect, Link } from 'react-router-dom';
 import { connect } from 'react-redux';
+import { Trans } from 'react-i18next';
+import * as i18n from 'i18next';
 
 import routes from 'utils/routes';
 import { fetchVersion } from 'products/actions';
@@ -114,17 +116,18 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     const listedAdditionalPlans = version.additional_plans.filter(
       plan => plan.is_listed && plan.is_allowed,
     );
+    const secondary_plan = version.secondary_plan;
     return (
-      <DocumentTitle title={`${product.title} | MetaDeploy`}>
+      <DocumentTitle title={i18n.t(`${product.title} | MetaDeploy`)}>
         <>
-          <Header product={product} versionLabel={version.label} />
+          <Header product={product} versionLabel={i18n.t(version.label)} />
           {product.is_allowed ? (
             <BodyContainer>
               <BodySection>
                 <h3 className="slds-text-heading_small">
-                  Select a Plan to Install
+                  {i18n.t('Select a Plan to Install')}
                 </h3>
-                <p>{version.description}</p>
+                <p>{i18n.t(version.description)}</p>
                 {version.primary_plan.is_listed &&
                 version.primary_plan.is_allowed ? (
                   <p>
@@ -138,32 +141,32 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                         slds-button_brand
                         slds-size_full"
                     >
-                      {version.primary_plan.title}
+                      {i18n.t(version.primary_plan.title)}
                     </Link>
                   </p>
                 ) : null}
-                {version.secondary_plan &&
-                version.secondary_plan.is_listed &&
-                version.secondary_plan.is_allowed ? (
+                {secondary_plan &&
+                secondary_plan.is_listed &&
+                secondary_plan.is_allowed ? (
                   <p>
                     <Link
                       to={routes.plan_detail(
                         product.slug,
                         version.label,
-                        version.secondary_plan.slug,
+                        secondary_plan.slug,
                       )}
                       className="slds-button
                         slds-button_outline-brand
                         slds-size_full"
                     >
-                      {version.secondary_plan.title}
+                      {i18n.t(secondary_plan.title)}
                     </Link>
                   </p>
                 ) : null}
                 {listedAdditionalPlans.length ? (
                   <div className="slds-p-top_x-large">
                     <h3 className="slds-text-heading_small">
-                      Additional Plans
+                      {i18n.t('Additional Plans')}
                     </h3>
                     {listedAdditionalPlans.map(plan => (
                       <p key={plan.id}>
@@ -174,7 +177,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                             plan.slug,
                           )}
                         >
-                          {plan.title}
+                          {i18n.t(plan.title)}
                         </Link>
                       </p>
                     ))}
@@ -183,13 +186,15 @@ class VersionDetail extends React.Component<VersionDetailProps> {
               </BodySection>
               <BodySection>
                 <h3 className="slds-text-heading_small">
-                  About {product.title}
+                  <Trans i18nKey="aboutProductTitle">
+                    About {product.title}
+                  </Trans>
                 </h3>
                 {product.image ? (
                   <img
                     className="slds-size_full"
                     src={product.image}
-                    alt={product.title}
+                    alt={i18n.t(product.title)}
                   />
                 ) : null}
                 {/* This description is pre-cleaned by the API */}
@@ -201,12 +206,16 @@ class VersionDetail extends React.Component<VersionDetailProps> {
           ) : (
             <ProductNotAllowed
               isLoggedIn={user !== null}
-              message={product.not_allowed_instructions}
+              message={
+                typeof product.not_allowed_instructions === 'string'
+                  ? i18n.t(product.not_allowed_instructions)
+                  : product.not_allowed_instructions
+              }
               link={
-                <>
+                <Trans i18nKey="tryListAllProducts">
                   Try the{' '}
                   <Link to={routes.product_list()}>list of all products</Link>
-                </>
+                </Trans>
               }
             />
           )}

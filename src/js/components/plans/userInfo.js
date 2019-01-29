@@ -4,6 +4,8 @@ import * as React from 'react';
 import Card from '@salesforce/design-system-react/components/card';
 import Icon from '@salesforce/design-system-react/components/icon';
 import Illustration from '@salesforce/design-system-react/components/illustration';
+import { Trans } from 'react-i18next';
+import * as i18n from 'i18next';
 
 import Login from 'components/header/login';
 
@@ -13,23 +15,23 @@ import type { User as UserType } from 'user/reducer';
 
 const LoggedOut = (): React.Node => (
   <Illustration
-    heading="Not Connected to Salesforce"
-    name="No Connection"
+    heading={i18n.t('Not Connected to Salesforce')}
+    name={i18n.t('No Connection')}
     path={`${svgPath}#no-connection`}
     style={{ height: '200px' }}
   />
 );
 
 const Footer = (): React.Node => (
-  <>
+  <Trans i18nKey="isThisCorrectOrg">
     Is this the correct org? If not, please{' '}
     <Login
       id="user-info-login"
-      label="log in with a different org"
+      label={i18n.t('log in with a different org')}
       buttonClassName="slds-p-horizontal_xxx-small"
       buttonVariant="base"
     />
-  </>
+  </Trans>
 );
 
 const UserInfo = ({ user }: { user: UserType }): React.Node => {
@@ -42,7 +44,7 @@ const UserInfo = ({ user }: { user: UserType }): React.Node => {
     >
       <Card
         bodyClassName="slds-card__body_inner"
-        heading={hasValidToken ? 'Connected to Salesforce' : ''}
+        heading={hasValidToken ? i18n.t('Connected to Salesforce') : ''}
         icon={
           hasValidToken ? (
             <Icon category="utility" name="connected_apps" />
@@ -54,24 +56,32 @@ const UserInfo = ({ user }: { user: UserType }): React.Node => {
         <ul>
           {user && user.username ? (
             <li>
-              <strong>User:</strong> {user.username}
+              <Trans i18nKey="username">
+                <strong>User:</strong> {user.username}
+              </Trans>
             </li>
           ) : null}
           {user && user.org_name ? (
             <li>
-              <strong>Org:</strong> {user.org_name}
+              <Trans i18nKey="orgname">
+                <strong>Org:</strong> {user.org_name}
+              </Trans>
             </li>
           ) : null}
           {user && user.org_type ? (
             <li>
-              <strong>Type:</strong> {user.org_type}
+              <Trans i18nKey="orgtype">
+                <strong>Type:</strong> {user.org_type}
+              </Trans>
             </li>
           ) : null}
         </ul>
         <p className="slds-p-top_small">
-          The credentials to your Salesforce org will only be held for
-          {` ${window.GLOBALS.TOKEN_LIFETIME_MINUTES || 10} `}
-          minutes or until your requested installation is complete.
+          <Trans i18nKey="credentialsHoldTime">
+            The credentials to your Salesforce org will only be held for
+            {` ${window.GLOBALS.TOKEN_LIFETIME_MINUTES || 10} `}
+            minutes or until your requested installation is complete.
+          </Trans>
         </p>
       </Card>
     </div>

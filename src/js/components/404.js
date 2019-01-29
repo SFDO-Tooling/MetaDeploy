@@ -4,6 +4,7 @@ import * as React from 'react';
 import DocumentTitle from 'react-document-title';
 import Illustration from '@salesforce/design-system-react/components/illustration';
 import { Link } from 'react-router-dom';
+import { Trans } from 'react-i18next';
 
 import routes from 'utils/routes';
 
@@ -24,10 +25,10 @@ const FourOhFour = ({ message }: { message?: React.Node }) => (
     <EmptyIllustration
       message={
         message === undefined ? (
-          <>
+          <Trans i18nKey="pageCannotBeFound">
             That page cannot be found. Try the{' '}
             <Link to={routes.home()}>home page</Link>?
-          </>
+          </Trans>
         ) : (
           message
         )

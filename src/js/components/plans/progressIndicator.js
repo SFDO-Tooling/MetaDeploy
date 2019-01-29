@@ -5,22 +5,24 @@ import SLDSProgressIndicator from '@salesforce/design-system-react/components/pr
 
 import { CONSTANTS } from 'plans/reducer';
 
+import i18n from 'i18next';
+
 export const STEPS = [
   {
     id: 0,
-    label: 'Log in',
+    label: i18n.t('Log in'),
   },
   {
     id: 1,
-    label: 'Run pre-install validation',
+    label: i18n.t('Run pre-install validation'),
   },
   {
     id: 2,
-    label: 'Pre-install validation complete',
+    label: i18n.t('Pre-install validation complete'),
   },
   {
     id: 3,
-    label: 'Install',
+    label: i18n.t('Install'),
   },
 ];
 

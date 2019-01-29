@@ -4,6 +4,7 @@ import * as React from 'react';
 import Button from '@salesforce/design-system-react/components/button';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Modal from '@salesforce/design-system-react/components/modal';
+import * as i18n from 'i18next';
 
 import { CONSTANTS } from 'plans/reducer';
 
@@ -57,7 +58,7 @@ const WarningList = ({
           className="slds-text-heading_small
             slds-p-bottom_x-small"
         >
-          {name}
+          {i18n.t(name)}
         </h3>
       ) : null}
       <ul>{warnings}</ul>
@@ -87,10 +88,14 @@ class PreflightWarningModal extends React.Component<Props, State> {
     const { isOpen, startJob, results, steps } = this.props;
     const { confirmed } = this.state;
     const footer = [
-      <Button key="cancel" label="Cancel" onClick={this.handleClose} />,
+      <Button
+        key="cancel"
+        label={i18n.t('Cancel')}
+        onClick={this.handleClose}
+      />,
       <Button
         key="submit"
-        label="Confirm"
+        label={i18n.t('Confirm')}
         variant="brand"
         onClick={startJob}
         disabled={!confirmed}
@@ -99,8 +104,8 @@ class PreflightWarningModal extends React.Component<Props, State> {
     return (
       <Modal
         isOpen={isOpen}
-        title="Potential Issues"
-        tagline="(confirm to continue)"
+        title={i18n.t('Potential Issues')}
+        tagline={i18n.t('(confirm to continue)')}
         onRequestClose={this.handleClose}
         footer={footer}
       >
@@ -127,9 +132,10 @@ class PreflightWarningModal extends React.Component<Props, State> {
             className="slds-p-top_x-small"
             checked={this.state.confirmed}
             labels={{
-              label:
+              label: i18n.t(
                 'I understand these warnings, ' +
-                'and want to continue with installation.',
+                  'and want to continue with installation.',
+              ),
             }}
             onChange={this.handleChange}
           />

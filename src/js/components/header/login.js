@@ -2,14 +2,13 @@
 
 import * as React from 'react';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
-import { withI18n } from 'react-i18next';
+import * as i18n from 'i18next';
 
 import { addUrlParams } from 'utils/api';
 import { logError } from 'utils/logging';
 
 import CustomDomainModal from 'components/header/customDomainModal';
 
-import type { I18nProps } from 'components/utils';
 import type { UrlParams } from 'utils/api';
 
 type Props = {
@@ -22,7 +21,6 @@ type Props = {
   menuPosition: string,
   nubbinPosition: string,
   redirectParams: UrlParams,
-  ...I18nProps,
 };
 type MenuOption =
   | {|
@@ -33,7 +31,7 @@ type MenuOption =
     |}
   | {| type: string |};
 
-class BaseLogin extends React.Component<Props, { modalOpen: boolean }> {
+class Login extends React.Component<Props, { modalOpen: boolean }> {
   static defaultProps = {
     id: 'login',
     label: 'Log In',
@@ -79,17 +77,16 @@ class BaseLogin extends React.Component<Props, { modalOpen: boolean }> {
   };
 
   getMenuOpts(): Array<MenuOption> {
-    const { t } = this.props;
     return [
       {
-        label: t('Production or Developer Org'),
+        label: i18n.t('Production or Developer Org'),
         href:
           window.api_urls.salesforce_production_login &&
           window.api_urls.salesforce_production_login(),
         disabled: !window.api_urls.salesforce_production_login,
       },
       {
-        label: t('Sandbox or Scratch Org'),
+        label: i18n.t('Sandbox or Scratch Org'),
         href:
           window.api_urls.salesforce_test_login &&
           window.api_urls.salesforce_test_login(),
@@ -99,7 +96,7 @@ class BaseLogin extends React.Component<Props, { modalOpen: boolean }> {
         type: 'divider',
       },
       {
-        label: t('Use Custom Domain'),
+        label: i18n.t('Use Custom Domain'),
         modal: Boolean(window.api_urls.salesforce_custom_login),
         disabled: !window.api_urls.salesforce_custom_login,
       },
@@ -118,11 +115,10 @@ class BaseLogin extends React.Component<Props, { modalOpen: boolean }> {
       menuPosition,
       nubbinPosition,
       redirectParams,
-      t,
     } = this.props;
     const { modalOpen } = this.state;
 
-    const dropdownLabel = typeof label === 'string' ? t(label) : label;
+    const dropdownLabel = typeof label === 'string' ? i18n.t(label) : label;
     return (
       <>
         <Dropdown
@@ -151,7 +147,5 @@ class BaseLogin extends React.Component<Props, { modalOpen: boolean }> {
     );
   }
 }
-
-const Login = withI18n()(BaseLogin);
 
 export default Login;

@@ -1,6 +1,7 @@
 // @flow
 
 import * as React from 'react';
+import * as i18n from 'i18next';
 
 const Footer = (props: { logoSrc: string }) => (
   <footer
@@ -25,7 +26,9 @@ const Footer = (props: { logoSrc: string }) => (
       className="footer-item
         slds-grid"
     >
-      <p>Copyright 2000–2018 Salesforce.org. All rights reserved.</p>
+      <p>
+        {i18n.t('Copyright 2000–2018 Salesforce.org. All rights reserved.')}
+      </p>
     </div>
   </footer>
 );

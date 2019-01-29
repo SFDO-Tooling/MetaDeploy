@@ -3,28 +3,25 @@
 import * as React from 'react';
 import Avatar from '@salesforce/design-system-react/components/avatar';
 import Icon from '@salesforce/design-system-react/components/icon';
+import * as i18n from 'i18next';
 
 import type { Product as ProductType } from 'products/reducer';
 
 const ProductIcon = ({ item }: { item: ProductType }) => {
-  if (item.icon && item.icon.type === 'url' && item.icon.url) {
+  const icon = item.icon;
+  if (icon && icon.type === 'url' && icon.url) {
     // Custom icon at provided URL
     return (
       <Avatar
         variant="entity"
-        label={item.title}
-        imgSrc={item.icon.url}
-        imgAlt={item.title}
-        title={item.title}
+        label={i18n.t(item.title)}
+        imgSrc={icon.url}
+        imgAlt={i18n.t(item.title)}
+        title={i18n.t(item.title)}
       />
     );
   }
-  if (
-    item.icon &&
-    item.icon.type === 'slds' &&
-    item.icon.category &&
-    item.icon.name
-  ) {
+  if (icon && icon.type === 'slds' && icon.category && icon.name) {
     // Custom SLDS svg icon
     return (
       <span
@@ -32,9 +29,9 @@ const ProductIcon = ({ item }: { item: ProductType }) => {
           slds-avatar_medium"
       >
         <Icon
-          assistiveText={{ label: item.title }}
-          category={item.icon.category}
-          name={item.icon.name}
+          assistiveText={{ label: i18n.t(item.title) }}
+          category={icon.category}
+          name={i18n.t(icon.name)}
         />
       </span>
     );
@@ -43,12 +40,12 @@ const ProductIcon = ({ item }: { item: ProductType }) => {
     // Standard entity icon (initials) with custom color
     return (
       <div style={{ '--custom-color': item.color }}>
-        <Avatar variant="entity" label={item.title} />
+        <Avatar variant="entity" label={i18n.t(item.title)} />
       </div>
     );
   }
   // Standard entity icon (initials)
-  return <Avatar variant="entity" label={item.title} />;
+  return <Avatar variant="entity" label={i18n.t(item.title)} />;
 };
 
 export default ProductIcon;

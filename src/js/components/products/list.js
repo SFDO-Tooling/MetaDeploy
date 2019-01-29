@@ -5,6 +5,7 @@ import DocumentTitle from 'react-document-title';
 import Tabs from '@salesforce/design-system-react/components/tabs';
 import TabsPanel from '@salesforce/design-system-react/components/tabs/panel';
 import { connect } from 'react-redux';
+import * as i18n from 'i18next';
 
 import {
   selectProductCategories,
@@ -70,7 +71,7 @@ class ProductsList extends React.Component<Props, State> {
     switch (this.props.productsByCategory.size) {
       case 0: {
         // No products; show empty message
-        const msg = 'We couldn’t find any products. Try again later?';
+        const msg = i18n.t('We couldn’t find any products. Try again later?');
         contents = <EmptyIllustration message={msg} />;
         break;
       }

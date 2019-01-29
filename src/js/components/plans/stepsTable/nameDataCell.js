@@ -5,6 +5,8 @@ import Accordion from '@salesforce/design-system-react/components/accordion';
 import AccordionPanel from '@salesforce/design-system-react/components/accordion/panel';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import classNames from 'classnames';
+import { Trans } from 'react-i18next';
+import * as i18n from 'i18next';
 
 import { CONSTANTS } from 'plans/reducer';
 
@@ -62,18 +64,18 @@ class NameDataCell extends React.Component<
         <ErrorsList errorList={result} />
       ) : null;
     return (
-      <DataTableCell title={name} className={classes} {...otherProps}>
+      <DataTableCell title={i18n.t(name)} className={classes} {...otherProps}>
         {description ? (
           <>
             <Accordion className="slds-cell-wrap">
               <AccordionPanel
                 id={id}
-                title={name}
-                summary={<p className="slds-cell-wrap">{display}</p>}
+                title={i18n.t(name)}
+                summary={<p className="slds-cell-wrap">{i18n.t(display)}</p>}
                 expanded={this.state.expanded}
                 onTogglePanel={this.togglePanel}
               >
-                {description}
+                {i18n.t(description)}
               </AccordionPanel>
             </Accordion>
             {errorList ? (
@@ -82,7 +84,7 @@ class NameDataCell extends React.Component<
                   slds-p-bottom_small
                   slds-cell-wrap"
               >
-                {errorList}
+                <Trans i18nKey="errorList">{errorList}</Trans>
               </div>
             ) : null}
           </>
@@ -92,8 +94,10 @@ class NameDataCell extends React.Component<
               slds-p-vertical_small
               slds-cell-wrap"
           >
-            <p className={errorList ? 'slds-p-bottom_small' : ''}>{display}</p>
-            {errorList}
+            <p className={errorList ? 'slds-p-bottom_small' : ''}>
+              {i18n.t(display)}
+            </p>
+            <Trans i18nKey="errorList">{errorList}</Trans>
           </div>
         )}
       </DataTableCell>

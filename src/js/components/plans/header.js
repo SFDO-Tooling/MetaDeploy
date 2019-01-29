@@ -6,6 +6,8 @@ import PageHeader from '@salesforce/design-system-react/components/page-header';
 import PlanProgressIndicator from 'components/plans/progressIndicator';
 import ProductIcon from 'components/products/icon';
 import { Link } from 'react-router-dom';
+import { Trans } from 'react-i18next';
+import * as i18n from 'i18next';
 
 import routes from 'utils/routes';
 
@@ -41,13 +43,15 @@ const Header = ({
     <PageHeader
       className="page-header
       slds-p-around_x-large"
-      title={plan.title}
+      title={i18n.t(plan.title)}
       trail={[
         <Link
           to={routes.version_detail(product.slug, version.label)}
           key={product.slug}
         >
-          {product.title}, {version.label}
+          <Trans i18nKey="productTitleVersionLabel">
+            {product.title}, {version.label}
+          </Trans>
         </Link>,
       ]}
       navRight={

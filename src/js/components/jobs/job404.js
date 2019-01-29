@@ -2,6 +2,8 @@
 
 import * as React from 'react';
 import { Link } from 'react-router-dom';
+import * as i18n from 'i18next';
+import { Trans } from 'react-i18next';
 
 import routes from 'utils/routes';
 
@@ -28,19 +30,21 @@ const JobNotFound = ({
   <>
     <FourOhFour
       message={
-        <>
+        <Trans i18nKey="installationNotFound">
           We can’t find the installation you’re looking for. Try{' '}
           <Link to={routes.plan_detail(product.slug, version.label, plan.slug)}>
             starting a new installation
           </Link>
           ?
-        </>
+        </Trans>
       }
     />
     <div className="slds-align_absolute-center">
       <Login
         id="job-404-login"
-        label={isLoggedIn ? 'Log In With a Different Org' : 'Log In'}
+        label={
+          isLoggedIn ? i18n.t('Log In With a Different Org') : i18n.t('Log In')
+        }
         buttonClassName="slds-p-horizontal_xxx-small"
         buttonVariant="base"
       />

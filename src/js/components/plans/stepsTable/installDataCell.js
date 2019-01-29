@@ -6,6 +6,7 @@ import DataTableCell from '@salesforce/design-system-react/components/data-table
 import Icon from '@salesforce/design-system-react/components/icon';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
+import * as i18n from 'i18next';
 
 import { CONSTANTS } from 'plans/reducer';
 
@@ -13,10 +14,12 @@ import { ErrorIcon } from 'components/plans/jobResults';
 
 import type { DataCellProps } from 'components/plans/stepsTable/index';
 
+import { Trans } from 'react-i18next';
+
 const { STATUS, RESULT_STATUS } = CONSTANTS;
 
 export const InstallDataColumnLabel = (): React.Node => (
-  <>
+  <Trans i18nKey="installDataColumnLabel">
     <span title="Install">Install</span>
     <Tooltip
       align="top right"
@@ -31,13 +34,13 @@ export const InstallDataColumnLabel = (): React.Node => (
           category="utility"
           name="info"
           assistiveText={{
-            label: 'Learn More',
+            label: i18n.t('Learn More'),
           }}
           size="xx-small"
         />
       </a>
     </Tooltip>
-  </>
+  </Trans>
 );
 
 const JobCell = (props: DataCellProps): React.Node => {
@@ -62,7 +65,7 @@ const JobCell = (props: DataCellProps): React.Node => {
         category="utility"
         name="dash"
         assistiveText={{
-          label: title,
+          label: i18n.t(title),
         }}
         size="x-small"
         colorVariant="light"
@@ -76,7 +79,7 @@ const JobCell = (props: DataCellProps): React.Node => {
         category="action"
         name="approval"
         assistiveText={{
-          label: title,
+          label: i18n.t(title),
         }}
         size="xx-small"
         containerClassName="slds-icon-standard-approval
@@ -92,7 +95,7 @@ const JobCell = (props: DataCellProps): React.Node => {
           containerClassName="slds-m-left_xx-small
             slds-m-right_x-small"
         />
-        {title}
+        {i18n.t(title)}
       </>
     );
   } else if (job.status === STATUS.STARTED) {
@@ -107,7 +110,7 @@ const JobCell = (props: DataCellProps): React.Node => {
           >
             <Spinner size="small" />
           </span>
-          Installing...
+          {i18n.t('Installing...')}
         </>
       );
     } else {
@@ -117,7 +120,7 @@ const JobCell = (props: DataCellProps): React.Node => {
           id={`step-${id}`}
           className="slds-p-around_x-small"
           assistiveText={{
-            label: title,
+            label: i18n.t(title),
           }}
           checked
           disabled
@@ -131,7 +134,7 @@ const JobCell = (props: DataCellProps): React.Node => {
         id={`step-${id}`}
         className="slds-p-around_x-small"
         assistiveText={{
-          label: title,
+          label: i18n.t(title),
         }}
         checked
         disabled
@@ -139,7 +142,7 @@ const JobCell = (props: DataCellProps): React.Node => {
     );
   }
   return (
-    <DataTableCell title={title} {...props}>
+    <DataTableCell title={i18n.t(title)} {...props}>
       {contents}
     </DataTableCell>
   );
@@ -191,7 +194,7 @@ class PreflightCell extends React.Component<DataCellProps> {
       label = 'recommended';
     }
     return (
-      <DataTableCell title={title} {...this.props}>
+      <DataTableCell title={i18n.t(title)} {...this.props}>
         <Checkbox
           id={`step-${id}`}
           checked={selectedSteps && selectedSteps.has(id)}
@@ -199,7 +202,7 @@ class PreflightCell extends React.Component<DataCellProps> {
           className="slds-p-vertical_x-small"
           labels={{ label }}
           assistiveText={{
-            label: title,
+            label: i18n.t(title),
           }}
           onChange={this.handleChange}
         />

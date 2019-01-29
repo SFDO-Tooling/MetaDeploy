@@ -4,6 +4,8 @@ import * as React from 'react';
 import DocumentTitle from 'react-document-title';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
+import * as i18n from 'i18next';
+import { Trans } from 'react-i18next';
 
 import routes from 'utils/routes';
 import { CONSTANTS } from 'plans/reducer';
@@ -174,13 +176,17 @@ class PlanDetail extends React.Component<Props, State> {
           <div className="slds-p-bottom_xx-small">
             <ErrorIcon />
             <span className="slds-text-color_error">
-              Oops! It looks like you don’t have permissions to run an
-              installation on this org.
+              <Trans i18nKey="noPermissionsForInstall">
+                Oops! It looks like you don’t have permissions to run an
+                installation on this org.
+              </Trans>
             </span>
           </div>
           <p>
-            Please contact an Admin within your org or use the button below to
-            log in with a different org.
+            <Trans i18nKey="pleaseContactAdmin">
+              Please contact an Admin within your org or use the button below to
+              log in with a different org.
+            </Trans>
           </p>
         </>
       );
@@ -191,18 +197,20 @@ class PlanDetail extends React.Component<Props, State> {
           <p>
             <WarningIcon />
             <span>
-              An installation is currently running on this org.{' '}
-              <Link
-                to={routes.job_detail(
-                  product.slug,
-                  version.label,
-                  plan.slug,
-                  org.current_job,
-                )}
-              >
-                View the running installation
-              </Link>{' '}
-              to cancel it.
+              <Trans i18nKey="installationCurrentlyRunning">
+                An installation is currently running on this org.{' '}
+                <Link
+                  to={routes.job_detail(
+                    product.slug,
+                    version.label,
+                    plan.slug,
+                    org.current_job,
+                  )}
+                >
+                  View the running installation
+                </Link>{' '}
+                to cancel it.
+              </Trans>
             </span>
           </p>
         );
@@ -212,7 +220,9 @@ class PlanDetail extends React.Component<Props, State> {
           <p>
             <WarningIcon />
             <span>
-              A pre-install validation is currently running on this org.
+              <Trans i18nKey="preflightCurrentlyRunning">
+                A pre-install validation is currently running on this org.
+              </Trans>
             </span>
           </p>
         );
@@ -292,7 +302,9 @@ class PlanDetail extends React.Component<Props, State> {
     }
     const selectedSteps = this.getSelectedSteps();
     return (
-      <DocumentTitle title={`${plan.title} | ${product.title} | MetaDeploy`}>
+      <DocumentTitle
+        title={i18n.t(`${plan.title} | ${product.title} | MetaDeploy`)}
+      >
         <>
           <Header
             product={product}
@@ -306,7 +318,10 @@ class PlanDetail extends React.Component<Props, State> {
           {product.is_allowed && plan.is_allowed ? (
             <BodyContainer>
               {preflight && user ? (
-                <Toasts preflight={preflight} label="Pre-install validation" />
+                <Toasts
+                  preflight={preflight}
+                  label={i18n.t('Pre-install validation')}
+                />
               ) : null}
               <Intro
                 preMessage={
@@ -323,18 +338,19 @@ class PlanDetail extends React.Component<Props, State> {
                   preflight && user ? (
                     <JobResults
                       preflight={preflight}
-                      label="Pre-install validation"
-                      failMessage={
+                      label={i18n.t('Pre-install validation')}
+                      failMessage={i18n.t(
                         'After resolving all errors, ' +
-                        'run the pre-install validation again.'
-                      }
-                      successMessage={
+                          'run the pre-install validation again.',
+                      )}
+                      successMessage={i18n.t(
                         'Pre-install validation will expire if install is ' +
-                        'not run within ' +
-                        `${window.GLOBALS.PREFLIGHT_LIFETIME_MINUTES || 10} ` +
-                        'minutes, and you will need to run pre-install ' +
-                        'validation again.'
-                      }
+                          'not run within ' +
+                          `${window.GLOBALS.PREFLIGHT_LIFETIME_MINUTES ||
+                            10} ` +
+                          'minutes, and you will need to run pre-install ' +
+                          'validation again.',
+                      )}
                     />
                   ) : null
                 }
@@ -355,15 +371,15 @@ class PlanDetail extends React.Component<Props, State> {
           ) : (
             <PlanNotAllowed
               isLoggedIn={user !== null}
-              message={plan.not_allowed_instructions}
+              message={i18n.t(plan.not_allowed_instructions)}
               link={
-                <>
+                <Trans i18nKey="tryAnotherPlan">
                   Try{' '}
                   <Link to={routes.version_detail(product.slug, version.label)}>
                     another plan
                   </Link>{' '}
                   from that product version
-                </>
+                </Trans>
               }
             />
           )}
