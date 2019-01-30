@@ -9,7 +9,7 @@ from log_request_id import (
 )
 from log_request_id.middleware import RequestIDMiddleware
 
-from metadeploy.utils import get_client_ip
+from metadeploy.utils import get_remote_ip
 
 logger = logging.getLogger(__name__)
 
@@ -41,11 +41,7 @@ class LoggingMiddleware(RequestIDMiddleware):
 
         user = getattr(request, "user", None)
         user_id = getattr(user, "pk", None) or getattr(user, "id", None)
-        ip_str, _ = get_client_ip(request)
-        if not ip_str:  # pragma: nocover
-            ip_str = (
-                "unknown"
-            )  # on the mysterious chance that the request has no IP, don't screw up.
+        ip_str = get_remote_ip(request) or "unknown"
         x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
 
         message = (

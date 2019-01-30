@@ -1,13 +1,9 @@
-from ipware import get_client_ip as get_ip_original
+def get_remote_ip(request):
+    """Get the IP address of the host that connected to Heroku
 
-
-def get_client_ip(request, *args, **kwargs):
-    """Retrieve the client's IP from a request object
-
-    trusting dj-ipware to do the right thing, but here's an application level wrapper
-    for it in case we need t adjust per environment or something.
-
-    OUT OF DATE: using the 'right most' proxy ordering in order to get the IP that
-    originated the request to the Heroku LB.
+    (This may be a proxy, so don't assume it's the client's actual IP address.)
     """
-    return get_ip_original(request, *args, **kwargs)
+    value = request.META.get("X_HTTP_FORWARDED_FOR") or request.META.get("REMOTE_ADDR")
+    # X-Forwarded-For may be a list of multiple IP addresses.
+    # The last one was added by Heroku so should be trustworthy.
+    return value.split(",")[-1].strip()
