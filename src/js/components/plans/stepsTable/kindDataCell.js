@@ -3,7 +3,7 @@
 import * as React from 'react';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import Icon from '@salesforce/design-system-react/components/icon';
-import * as i18n from 'i18next';
+import i18n from 'i18n';
 
 import type { DataCellProps } from 'components/plans/stepsTable/index';
 

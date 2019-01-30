@@ -6,7 +6,7 @@ import AccordionPanel from '@salesforce/design-system-react/components/accordion
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import classNames from 'classnames';
 import { Trans } from 'react-i18next';
-import * as i18n from 'i18next';
+import i18n from 'i18n';
 
 import { CONSTANTS } from 'plans/reducer';
 

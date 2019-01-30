@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Alert from '@salesforce/design-system-react/components/alert';
 import AlertContainer from '@salesforce/design-system-react/components/alert/container';
-import * as i18n from 'i18next';
+import i18n from 'i18n';
 
 const reloadPage = (): void => {
   window.location.reload();

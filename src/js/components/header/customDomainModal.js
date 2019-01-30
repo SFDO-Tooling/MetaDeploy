@@ -4,7 +4,7 @@ import * as React from 'react';
 import Button from '@salesforce/design-system-react/components/button';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
-import * as i18n from 'i18next';
+import i18n from 'i18n';
 
 import { addUrlParams } from 'utils/api';
 

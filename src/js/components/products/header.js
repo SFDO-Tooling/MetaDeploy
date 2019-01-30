@@ -3,7 +3,7 @@
 import * as React from 'react';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import ProductIcon from 'components/products/icon';
-import * as i18n from 'i18next';
+import i18n from 'i18n';
 
 import type { Product as ProductType } from 'products/reducer';
 

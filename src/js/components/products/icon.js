@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Avatar from '@salesforce/design-system-react/components/avatar';
 import Icon from '@salesforce/design-system-react/components/icon';
-import * as i18n from 'i18next';
+import i18n from 'i18n';
 
 import type { Product as ProductType } from 'products/reducer';
 

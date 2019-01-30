@@ -6,7 +6,7 @@ import DataTableCell from '@salesforce/design-system-react/components/data-table
 import Icon from '@salesforce/design-system-react/components/icon';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
-import * as i18n from 'i18next';
+import i18n from 'i18n';
 
 import { CONSTANTS } from 'plans/reducer';
 

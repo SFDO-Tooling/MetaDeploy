@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Icon from '@salesforce/design-system-react/components/icon';
-import * as i18n from 'i18next';
+import i18n from 'i18n';
 
 import { CONSTANTS } from 'plans/reducer';
 

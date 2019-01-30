@@ -5,7 +5,7 @@ import DocumentTitle from 'react-document-title';
 import Tabs from '@salesforce/design-system-react/components/tabs';
 import TabsPanel from '@salesforce/design-system-react/components/tabs/panel';
 import { connect } from 'react-redux';
-import * as i18n from 'i18next';
+import i18n from 'i18n';
 
 import {
   selectProductCategories,

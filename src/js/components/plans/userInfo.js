@@ -5,7 +5,7 @@ import Card from '@salesforce/design-system-react/components/card';
 import Icon from '@salesforce/design-system-react/components/icon';
 import Illustration from '@salesforce/design-system-react/components/illustration';
 import { Trans } from 'react-i18next';
-import * as i18n from 'i18next';
+import i18n from 'i18n';
 
 import Login from 'components/header/login';
 

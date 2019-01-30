@@ -4,7 +4,7 @@ import * as React from 'react';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
-import * as i18n from 'i18next';
+import i18n from 'i18n';
 
 import routes from 'utils/routes';
 import { logout } from 'user/actions';

@@ -6,7 +6,7 @@ import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Radio from '@salesforce/design-system-react/components/radio-group/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
-import * as i18n from 'i18next';
+import i18n from 'i18n';
 import { Trans } from 'react-i18next';
 
 import { withTransientMessage } from 'components/utils';

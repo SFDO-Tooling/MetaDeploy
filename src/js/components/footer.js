@@ -1,7 +1,7 @@
 // @flow
 
 import * as React from 'react';
-import * as i18n from 'i18next';
+import i18n from 'i18n';
 
 const Footer = (props: { logoSrc: string }) => (
   <footer

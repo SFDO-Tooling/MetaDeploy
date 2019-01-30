@@ -4,7 +4,7 @@ import * as React from 'react';
 import DocumentTitle from 'react-document-title';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
-import * as i18n from 'i18next';
+import i18n from 'i18n';
 import { Trans } from 'react-i18next';
 
 import routes from 'utils/routes';

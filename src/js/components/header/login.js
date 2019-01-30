@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
-import * as i18n from 'i18next';
+import i18n from 'i18n';
 
 import { addUrlParams } from 'utils/api';
 import { logError } from 'utils/logging';

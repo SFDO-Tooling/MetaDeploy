@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Button from '@salesforce/design-system-react/components/button';
 import Spinner from '@salesforce/design-system-react/components/spinner';
-import * as i18n from 'i18next';
+import i18n from 'i18n';
 
 import routes from 'utils/routes';
 import { CONSTANTS } from 'plans/reducer';

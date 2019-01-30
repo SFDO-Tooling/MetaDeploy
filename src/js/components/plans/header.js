@@ -7,7 +7,7 @@ import PlanProgressIndicator from 'components/plans/progressIndicator';
 import ProductIcon from 'components/products/icon';
 import { Link } from 'react-router-dom';
 import { Trans } from 'react-i18next';
-import * as i18n from 'i18next';
+import i18n from 'i18n';
 
 import routes from 'utils/routes';
 

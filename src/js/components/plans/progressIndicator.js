@@ -5,7 +5,7 @@ import SLDSProgressIndicator from '@salesforce/design-system-react/components/pr
 
 import { CONSTANTS } from 'plans/reducer';
 
-import i18n from 'i18next';
+import i18n from 'i18n';
 
 export const STEPS = [
   {

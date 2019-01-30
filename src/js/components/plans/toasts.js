@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Toast from '@salesforce/design-system-react/components/toast';
 import ToastContainer from '@salesforce/design-system-react/components/toast/container';
-import * as i18n from 'i18next';
+import i18n from 'i18n';
 
 import { CONSTANTS } from 'plans/reducer';
 

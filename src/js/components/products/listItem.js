@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Card from '@salesforce/design-system-react/components/card';
 import { Link } from 'react-router-dom';
-import * as i18n from 'i18next';
+import i18n from 'i18n';
 
 import routes from 'utils/routes';
 
