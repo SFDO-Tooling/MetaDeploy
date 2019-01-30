@@ -29,9 +29,7 @@ def ipv4_networks(val: str) -> List[IPv4Network]:
 
 
 def url_prefix(val: str) -> str:
-    if val[-1] != "/":
-        val += "/"
-    return val
+    return val.rstrip("/") + "/"
 
 
 class NoDefaultValue:
