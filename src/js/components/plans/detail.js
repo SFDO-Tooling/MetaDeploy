@@ -3,9 +3,9 @@
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
 import { Link } from 'react-router-dom';
-import { connect } from 'react-redux';
-import i18n from 'i18n';
 import { Trans } from 'react-i18next';
+import { connect } from 'react-redux';
+import { t } from 'i18next';
 
 import routes from 'utils/routes';
 import { CONSTANTS } from 'plans/reducer';
@@ -176,17 +176,17 @@ class PlanDetail extends React.Component<Props, State> {
           <div className="slds-p-bottom_xx-small">
             <ErrorIcon />
             <span className="slds-text-color_error">
-              <Trans i18nKey="noPermissionsForInstall">
-                Oops! It looks like you don’t have permissions to run an
-                installation on this org.
-              </Trans>
+              {t(
+                'Oops! It looks like you don’t have permissions to run an ' +
+                  'installation on this org.',
+              )}
             </span>
           </div>
           <p>
-            <Trans i18nKey="pleaseContactAdmin">
-              Please contact an Admin within your org or use the button below to
-              log in with a different org.
-            </Trans>
+            {t(
+              'Please contact an Admin within your org or use the button ' +
+                'below to log in with a different org.',
+            )}
           </p>
         </>
       );
@@ -220,9 +220,7 @@ class PlanDetail extends React.Component<Props, State> {
           <p>
             <WarningIcon />
             <span>
-              <Trans i18nKey="preflightCurrentlyRunning">
-                A pre-install validation is currently running on this org.
-              </Trans>
+              {t('A pre-install validation is currently running on this org.')}
             </span>
           </p>
         );
@@ -251,7 +249,7 @@ class PlanDetail extends React.Component<Props, State> {
       return (
         <LoginBtn
           id="org-not-allowed-login"
-          label="Log in with a different org"
+          label={t('Log in with a different org')}
         />
       );
     } else if (plan.steps && plan.steps.length) {
@@ -302,9 +300,7 @@ class PlanDetail extends React.Component<Props, State> {
     }
     const selectedSteps = this.getSelectedSteps();
     return (
-      <DocumentTitle
-        title={i18n.t(`${plan.title} | ${product.title} | MetaDeploy`)}
-      >
+      <DocumentTitle title={t(`${plan.title} | ${product.title} | MetaDeploy`)}>
         <>
           <Header
             product={product}
@@ -320,7 +316,7 @@ class PlanDetail extends React.Component<Props, State> {
               {preflight && user ? (
                 <Toasts
                   preflight={preflight}
-                  label={i18n.t('Pre-install validation')}
+                  label={t('Pre-install validation')}
                 />
               ) : null}
               <Intro
@@ -338,12 +334,12 @@ class PlanDetail extends React.Component<Props, State> {
                   preflight && user ? (
                     <JobResults
                       preflight={preflight}
-                      label={i18n.t('Pre-install validation')}
-                      failMessage={i18n.t(
+                      label="Pre-install validation"
+                      failMessage={t(
                         'After resolving all errors, ' +
                           'run the pre-install validation again.',
                       )}
-                      successMessage={i18n.t(
+                      successMessage={t(
                         'Pre-install validation will expire if install is ' +
                           'not run within ' +
                           `${window.GLOBALS.PREFLIGHT_LIFETIME_MINUTES ||
@@ -371,15 +367,15 @@ class PlanDetail extends React.Component<Props, State> {
           ) : (
             <PlanNotAllowed
               isLoggedIn={user !== null}
-              message={i18n.t(plan.not_allowed_instructions)}
+              message={plan.not_allowed_instructions}
               link={
-                <Trans i18nKey="tryAnotherPlan">
+                <>
                   Try{' '}
                   <Link to={routes.version_detail(product.slug, version.label)}>
                     another plan
                   </Link>{' '}
                   from that product version
-                </Trans>
+                </>
               }
             />
           )}

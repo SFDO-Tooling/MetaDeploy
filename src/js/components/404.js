@@ -5,6 +5,7 @@ import DocumentTitle from 'react-document-title';
 import Illustration from '@salesforce/design-system-react/components/illustration';
 import { Link } from 'react-router-dom';
 import { Trans } from 'react-i18next';
+import { t } from 'i18next';
 
 import routes from 'utils/routes';
 
@@ -21,7 +22,7 @@ export const EmptyIllustration = ({ message }: { message: React.Node }) => (
 );
 
 const FourOhFour = ({ message }: { message?: React.Node }) => (
-  <DocumentTitle title="404 | MetaDeploy">
+  <DocumentTitle title={t('404 | MetaDeploy')}>
     <EmptyIllustration
       message={
         message === undefined ? (

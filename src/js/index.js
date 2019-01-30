@@ -11,6 +11,7 @@ import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import { createStore, applyMiddleware } from 'redux';
+import { t } from 'i18next';
 
 import actionSprite from '@salesforce-ux/design-system/assets/icons/action-sprite/svg/symbols.svg';
 import customSprite from '@salesforce-ux/design-system/assets/icons/custom-sprite/svg/symbols.svg';
@@ -19,7 +20,7 @@ import standardSprite from '@salesforce-ux/design-system/assets/icons/standard-s
 import utilitySprite from '@salesforce-ux/design-system/assets/icons/utility-sprite/svg/symbols.svg';
 
 import getApiFetch from 'utils/api';
-import { cache, persistMiddleware } from 'utils/caching';
+import i18nInstance from 'utils/i18n';
 import { createSocket } from 'utils/websockets';
 import { logError } from 'utils/logging';
 import { routePatterns } from 'utils/routes';
@@ -40,12 +41,10 @@ import PlanDetail from 'components/plans/detail';
 import ProductsList from 'components/products/list';
 import { ProductDetail, VersionDetail } from 'components/products/detail';
 
-import './i18n';
-
 const SF_logo = require('images/salesforce-logo.png');
 
 const App = () => (
-  <DocumentTitle title="MetaDeploy">
+  <DocumentTitle title={t('MetaDeploy')}>
     <div
       className="slds-grid
         slds-grid_frame
@@ -100,21 +99,19 @@ const App = () => (
   </DocumentTitle>
 );
 
-cache
-  .getAll()
-  .then(data => {
+i18nInstance
+  .finally(() => {
     const el = document.getElementById('app');
     if (el) {
       // Create store
       const appStore = createStore(
         reducer,
-        data,
+        {},
         composeWithDevTools(
           applyMiddleware(
             thunk.withExtraArgument({
               apiFetch: getApiFetch(),
             }),
-            persistMiddleware,
             logger,
           ),
         ),

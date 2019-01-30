@@ -5,8 +5,7 @@ import Accordion from '@salesforce/design-system-react/components/accordion';
 import AccordionPanel from '@salesforce/design-system-react/components/accordion/panel';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import classNames from 'classnames';
-import { Trans } from 'react-i18next';
-import i18n from 'i18n';
+import { t } from 'i18next';
 
 import { CONSTANTS } from 'plans/reducer';
 
@@ -36,7 +35,9 @@ class NameDataCell extends React.Component<
       return null;
     }
     const currentJob = preflight || job;
-    const { name, description } = item;
+    let { name, description } = item;
+    name = t(name);
+    description = t(description);
     const { id } = item;
     const result = currentJob && currentJob.results && currentJob.results[id];
     let hasError = false;
@@ -53,7 +54,7 @@ class NameDataCell extends React.Component<
     }
     let display = name;
     if (optionalMsg) {
-      display = `${name} — ${optionalMsg}`;
+      display = `${name} — ${t(optionalMsg)}`;
     }
     const classes = classNames(className, {
       'has-warning': hasWarning,
@@ -64,18 +65,18 @@ class NameDataCell extends React.Component<
         <ErrorsList errorList={result} />
       ) : null;
     return (
-      <DataTableCell title={i18n.t(name)} className={classes} {...otherProps}>
+      <DataTableCell title={name} className={classes} {...otherProps}>
         {description ? (
           <>
             <Accordion className="slds-cell-wrap">
               <AccordionPanel
                 id={id}
-                title={i18n.t(name)}
-                summary={<p className="slds-cell-wrap">{i18n.t(display)}</p>}
+                title={name}
+                summary={<p className="slds-cell-wrap">{display}</p>}
                 expanded={this.state.expanded}
                 onTogglePanel={this.togglePanel}
               >
-                {i18n.t(description)}
+                {description}
               </AccordionPanel>
             </Accordion>
             {errorList ? (
@@ -84,7 +85,7 @@ class NameDataCell extends React.Component<
                   slds-p-bottom_small
                   slds-cell-wrap"
               >
-                <Trans i18nKey="errorList">{errorList}</Trans>
+                {errorList}
               </div>
             ) : null}
           </>
@@ -94,10 +95,8 @@ class NameDataCell extends React.Component<
               slds-p-vertical_small
               slds-cell-wrap"
           >
-            <p className={errorList ? 'slds-p-bottom_small' : ''}>
-              {i18n.t(display)}
-            </p>
-            <Trans i18nKey="errorList">{errorList}</Trans>
+            <p className={errorList ? 'slds-p-bottom_small' : ''}>{display}</p>
+            {errorList}
           </div>
         )}
       </DataTableCell>

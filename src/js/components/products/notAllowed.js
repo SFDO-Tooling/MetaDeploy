@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Illustration from '@salesforce/design-system-react/components/illustration';
 import { Trans } from 'react-i18next';
-import i18n from 'i18n';
+import { t } from 'i18next';
 
 import Login from 'components/header/login';
 
@@ -20,7 +20,7 @@ const NotAllowed = ({
 }) => (
   <>
     <Illustration
-      heading="Restricted Access"
+      heading={t('Restricted Access')}
       name="No Access"
       path={`${svgPath}#no-access`}
       size="large"
@@ -38,13 +38,11 @@ const NotAllowed = ({
     ) : null}
     <div className="slds-align_absolute-center">
       <div className="slds-text-longform slds-text-body_regular">
-        <Trans i18nKey="">{link} or&nbsp;</Trans>
+        <Trans i18nKey="notAllowedLink">{link} or&nbsp;</Trans>
       </div>
       <Login
         id="product-not-allowed-login"
-        label={
-          isLoggedIn ? i18n.t('log in with a different org') : i18n.t('log in')
-        }
+        label={isLoggedIn ? t('log in with a different org') : t('log in')}
         buttonClassName="slds-p-horizontal_xxx-small"
         buttonVariant="base"
       />

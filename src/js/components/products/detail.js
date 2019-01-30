@@ -4,8 +4,7 @@ import * as React from 'react';
 import DocumentTitle from 'react-document-title';
 import { Redirect, Link } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { Trans } from 'react-i18next';
-import i18n from 'i18n';
+import { t } from 'i18next';
 
 import routes from 'utils/routes';
 import { fetchVersion } from 'products/actions';
@@ -118,16 +117,16 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     );
     const secondary_plan = version.secondary_plan;
     return (
-      <DocumentTitle title={i18n.t(`${product.title} | MetaDeploy`)}>
+      <DocumentTitle title={t(`${product.title} | MetaDeploy`)}>
         <>
-          <Header product={product} versionLabel={i18n.t(version.label)} />
+          <Header product={product} versionLabel={t(version.label)} />
           {product.is_allowed ? (
             <BodyContainer>
               <BodySection>
                 <h3 className="slds-text-heading_small">
-                  {i18n.t('Select a Plan to Install')}
+                  {t('Select a Plan to Install')}
                 </h3>
-                <p>{i18n.t(version.description)}</p>
+                <p>{t(version.description)}</p>
                 {version.primary_plan.is_listed &&
                 version.primary_plan.is_allowed ? (
                   <p>
@@ -141,7 +140,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                         slds-button_brand
                         slds-size_full"
                     >
-                      {i18n.t(version.primary_plan.title)}
+                      {t(version.primary_plan.title)}
                     </Link>
                   </p>
                 ) : null}
@@ -159,14 +158,14 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                         slds-button_outline-brand
                         slds-size_full"
                     >
-                      {i18n.t(secondary_plan.title)}
+                      {t(secondary_plan.title)}
                     </Link>
                   </p>
                 ) : null}
                 {listedAdditionalPlans.length ? (
                   <div className="slds-p-top_x-large">
                     <h3 className="slds-text-heading_small">
-                      {i18n.t('Additional Plans')}
+                      {t('Additional Plans')}
                     </h3>
                     {listedAdditionalPlans.map(plan => (
                       <p key={plan.id}>
@@ -177,7 +176,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                             plan.slug,
                           )}
                         >
-                          {i18n.t(plan.title)}
+                          {t(plan.title)}
                         </Link>
                       </p>
                     ))}
@@ -186,15 +185,13 @@ class VersionDetail extends React.Component<VersionDetailProps> {
               </BodySection>
               <BodySection>
                 <h3 className="slds-text-heading_small">
-                  <Trans i18nKey="aboutProductTitle">
-                    About {product.title}
-                  </Trans>
+                  {t(`About ${product.title}`)}
                 </h3>
                 {product.image ? (
                   <img
                     className="slds-size_full"
                     src={product.image}
-                    alt={i18n.t(product.title)}
+                    alt={t(product.title)}
                   />
                 ) : null}
                 {/* This description is pre-cleaned by the API */}
@@ -206,16 +203,12 @@ class VersionDetail extends React.Component<VersionDetailProps> {
           ) : (
             <ProductNotAllowed
               isLoggedIn={user !== null}
-              message={
-                typeof product.not_allowed_instructions === 'string'
-                  ? i18n.t(product.not_allowed_instructions)
-                  : product.not_allowed_instructions
-              }
+              message={product.not_allowed_instructions}
               link={
-                <Trans i18nKey="tryListAllProducts">
+                <>
                   Try the{' '}
                   <Link to={routes.product_list()}>list of all products</Link>
-                </Trans>
+                </>
               }
             />
           )}

@@ -4,7 +4,7 @@ import * as React from 'react';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
-import i18n from 'i18n';
+import { t } from 'i18next';
 
 import routes from 'utils/routes';
 import { logout } from 'user/actions';
@@ -52,7 +52,7 @@ const Header = ({ user, doLogout, socket }: Props) => (
               slds-text-link_reset
               slds-align-middle"
           >
-            {i18n.t('Products')}
+            {t('Products')}
           </Link>
           {user ? <Logout user={user} doLogout={doLogout} /> : <Login />}
         </>

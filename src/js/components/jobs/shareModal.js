@@ -6,8 +6,7 @@ import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Radio from '@salesforce/design-system-react/components/radio-group/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
-import i18n from 'i18n';
-import { Trans } from 'react-i18next';
+import { t } from 'i18next';
 
 import { withTransientMessage } from 'components/utils';
 
@@ -66,7 +65,7 @@ class ShareModal extends React.Component<WrappedProps> {
     return (
       <Modal
         isOpen={this.props.isOpen}
-        title={i18n.t('Share Link to Installation Job')}
+        title={t('Share Link to Installation Job')}
         onRequestClose={this.handleClose}
       >
         <div
@@ -82,7 +81,7 @@ class ShareModal extends React.Component<WrappedProps> {
             readOnly
             fixedTextRight={
               <Button
-                label={i18n.t('Copy Link')}
+                label={t('Copy Link')}
                 variant="brand"
                 onClick={this.handleCopy}
                 style={{ whiteSpace: 'nowrap' }}
@@ -95,7 +94,7 @@ class ShareModal extends React.Component<WrappedProps> {
               className="slds-form-element__help
                 slds-text-color_success"
             >
-              {transientMessageVisible ? i18n.t('Copied to clipboard') : ''}
+              {transientMessageVisible ? t('Copied to clipboard') : ''}
               {/* Space added to preserve height even when empty. */}
               &nbsp;
             </div>
@@ -104,13 +103,13 @@ class ShareModal extends React.Component<WrappedProps> {
           {job.user_can_edit ? (
             <>
               <RadioGroup
-                labels={{ label: i18n.t('Who can access this shared link?') }}
+                labels={{ label: t('Who can access this shared link?') }}
                 name="is_public"
                 onChange={this.handleChange}
               >
                 <Radio
                   id="is_public-false"
-                  label={i18n.t(
+                  label={t(
                     'Only I and Salesforce staff ' +
                       'can view this installation job.',
                   )}
@@ -119,7 +118,7 @@ class ShareModal extends React.Component<WrappedProps> {
                 />
                 <Radio
                   id="is_public-true"
-                  label={i18n.t(
+                  label={t(
                     'Anyone with the link can view this installation job.',
                   )}
                   value="true"
@@ -130,10 +129,10 @@ class ShareModal extends React.Component<WrappedProps> {
                 className="slds-text-body_small
                   slds-p-top_small"
               >
-                <Trans i18nKey="accessExplainer">
-                  Access to view the installation job does not provide access to
-                  your Salesforce org.
-                </Trans>
+                {t(
+                  'Access to view the installation job does not provide ' +
+                    'access to your Salesforce org.',
+                )}
               </p>
             </>
           ) : null}

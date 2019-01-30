@@ -2,8 +2,8 @@
 
 import * as React from 'react';
 import Button from '@salesforce/design-system-react/components/button';
-import i18n from 'i18n';
 import { Trans } from 'react-i18next';
+import { t } from 'i18next';
 
 import { CONSTANTS } from 'plans/reducer';
 
@@ -26,12 +26,12 @@ const JobMessage = ({
     {job.status === CONSTANTS.STATUS.FAILED ||
     job.status === CONSTANTS.STATUS.CANCELED ? (
       <p>
+        <Button
+          label={t('Share the link to this installation job')}
+          variant="link"
+          onClick={openModal}
+        />{' '}
         <Trans i18nKey="shareOrGetHelp">
-          <Button
-            label={i18n.t('Share the link to this installation job')}
-            variant="link"
-            onClick={openModal}
-          />{' '}
           or get help on the{' '}
           <a
             href="https://powerofus.force.com/"

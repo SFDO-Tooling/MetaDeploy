@@ -2,8 +2,7 @@
 
 import * as React from 'react';
 import classNames from 'classnames';
-import i18n from 'i18n';
-import { Trans } from 'react-i18next';
+import { t } from 'i18next';
 
 import { CONSTANTS } from 'plans/reducer';
 
@@ -44,25 +43,23 @@ const ProgressBar = ({ job }: { job: JobType }): React.Node => {
       >
         <span>
           <strong>
-            <Trans i18nKey="InstallationProgress">
-              Installation Progress
-              {isFailed ? (
-                <>
-                  :{' '}
-                  <span className="slds-text-color_error">
-                    {job.status === CONSTANTS.STATUS.CANCELED
-                      ? i18n.t('Canceled')
-                      : i18n.t('Failed')}
-                  </span>
-                </>
-              ) : null}
-            </Trans>
+            {t('Installation Progress')}
+            {isFailed ? (
+              <>
+                :{' '}
+                <span className="slds-text-color_error">
+                  {job.status === CONSTANTS.STATUS.CANCELED
+                    ? t('Canceled')
+                    : t('Failed')}
+                </span>
+              </>
+            ) : null}
           </strong>
         </span>
         {isFailed ? null : (
           <span aria-hidden="true">
             <strong>
-              <Trans i18nKey="progressComplete">{progress}% Complete</Trans>
+              {progress}% {t('Complete')}
             </strong>
           </span>
         )}
@@ -84,7 +81,7 @@ const ProgressBar = ({ job }: { job: JobType }): React.Node => {
           style={{ width: `${progress}%` }}
         >
           <span className="slds-assistive-text">
-            <Trans i18nKey="progressAssistiveText">Progress: {progress}%</Trans>
+            {t('Progress')}: {progress}%
           </span>
         </span>
       </div>

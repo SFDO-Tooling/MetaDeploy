@@ -5463,11 +5463,6 @@ icss-utils@^4.0.0:
   dependencies:
     postcss "^7.0.5"
 
-idb-keyval@3.1.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/idb-keyval/-/idb-keyval-3.1.0.tgz#cce9ed320734446784d52ed398c4b075a4273f51"
-  integrity sha512-iFwFN5n00KNNnVxlOOK280SJJfXWY7pbMUOQXdIXehvvc/mGCV/6T2Ae+Pk2KwAkkATDTwfMavOiDH5lrJKWXQ==
-
 ieee754@^1.1.4:
   version "1.1.12"
   resolved "https://registry.yarnpkg.com/ieee754/-/ieee754-1.1.12.tgz#50bf24e5b9c8bb98af4964c941cdb0918da7b60b"
@@ -7552,13 +7547,6 @@ mkdirp@0.5.x, "mkdirp@>=0.5 0", mkdirp@^0.5.0, mkdirp@^0.5.1, mkdirp@~0.5.0, mkd
   dependencies:
     minimist "0.0.8"
 
-money-clip@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/money-clip/-/money-clip-3.0.1.tgz#d476cdf5534bb44cab76ce7175b866f40517f3ea"
-  integrity sha512-4vRnMOoMYCHonM4PNHlMmj+WsF7hrES0UN0DjDljP1I2eLI2rXo50kQftXGQn3b1+Ko0crTPtSy3kb9xzBKmow==
-  dependencies:
-    idb-keyval "3.1.0"
-
 move-concurrently@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/move-concurrently/-/move-concurrently-1.0.1.tgz#be2c005fda32e0b29af1f05d7c4b33214c701f92"
@@ -9477,11 +9465,6 @@ redux-mock-store@^1.5.3:
   integrity sha512-ryhkkb/4D4CUGpAV2ln1GOY/uh51aczjcRz9k2L2bPx/Xja3c5pSGJJPyR25GNVRXtKIExScdAgFdiXp68GmJA==
   dependencies:
     lodash.isplainobject "^4.0.6"
-
-redux-persist-middleware@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/redux-persist-middleware/-/redux-persist-middleware-1.0.1.tgz#3c2b4bdc52d7cebf5685989222268e689689c5e9"
-  integrity sha512-OulM18BEicxV2xVOiExkQzdOORZKcs5gIRIcgv4QdO/KBIOQEzypGld1w/QJq0yBOvCgeczZ96OVi8IFhQoQ9Q==
 
 redux-thunk@^2.3.0:
   version "2.3.0"

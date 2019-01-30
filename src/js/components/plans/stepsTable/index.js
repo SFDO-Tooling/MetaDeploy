@@ -3,6 +3,7 @@
 import * as React from 'react';
 import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
+import { t } from 'i18next';
 
 import InstallDataCell, {
   InstallDataColumnLabel,
@@ -68,13 +69,13 @@ const StepsTable = ({
         <DataTable items={plan.steps} id="plan-steps-table">
           <DataTableColumn
             key="name"
-            label="Steps"
+            label={t('Steps')}
             property="name"
             primaryColumn
           >
             <NameDataCell preflight={preflight} job={job} />
           </DataTableColumn>
-          <DataTableColumn key="kind" label="Type" property="kind">
+          <DataTableColumn key="kind" label={t('Type')} property="kind">
             <KindDataCell />
           </DataTableColumn>
           <DataTableColumn key="is_required" property="is_required">

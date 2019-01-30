@@ -6,7 +6,7 @@ import DataTableCell from '@salesforce/design-system-react/components/data-table
 import Icon from '@salesforce/design-system-react/components/icon';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
-import i18n from 'i18n';
+import { t } from 'i18next';
 
 import { CONSTANTS } from 'plans/reducer';
 
@@ -14,17 +14,17 @@ import { ErrorIcon } from 'components/plans/jobResults';
 
 import type { DataCellProps } from 'components/plans/stepsTable/index';
 
-import { Trans } from 'react-i18next';
-
 const { STATUS, RESULT_STATUS } = CONSTANTS;
 
 export const InstallDataColumnLabel = (): React.Node => (
-  <Trans i18nKey="installDataColumnLabel">
-    <span title="Install">Install</span>
+  <>
+    <span title={t('Install')}>{t('Install')}</span>
     <Tooltip
       align="top right"
       content={
-        <span className="step-column-tooltip">Select steps to install.</span>
+        <span className="step-column-tooltip">
+          {t('Select steps to install.')}
+        </span>
       }
       triggerClassName="slds-p-left_x-small"
       position="overflowBoundaryElement"
@@ -34,13 +34,13 @@ export const InstallDataColumnLabel = (): React.Node => (
           category="utility"
           name="info"
           assistiveText={{
-            label: i18n.t('Learn More'),
+            label: t('Learn More'),
           }}
           size="xx-small"
         />
       </a>
     </Tooltip>
-  </Trans>
+  </>
 );
 
 const JobCell = (props: DataCellProps): React.Node => {
@@ -59,13 +59,13 @@ const JobCell = (props: DataCellProps): React.Node => {
       result.find(res => res.status === RESULT_STATUS.ERROR) !== undefined;
   }
   if (!job.steps.includes(id)) {
-    title = 'skipped';
+    title = t('skipped');
     contents = (
       <Icon
         category="utility"
         name="dash"
         assistiveText={{
-          label: i18n.t(title),
+          label: title,
         }}
         size="x-small"
         colorVariant="light"
@@ -73,13 +73,13 @@ const JobCell = (props: DataCellProps): React.Node => {
       />
     );
   } else if (complete) {
-    title = 'completed';
+    title = t('completed');
     contents = (
       <Icon
         category="action"
         name="approval"
         assistiveText={{
-          label: i18n.t(title),
+          label: title,
         }}
         size="xx-small"
         containerClassName="slds-icon-standard-approval
@@ -87,7 +87,7 @@ const JobCell = (props: DataCellProps): React.Node => {
       />
     );
   } else if (error) {
-    title = 'error';
+    title = t('error');
     contents = (
       <>
         <ErrorIcon
@@ -95,12 +95,12 @@ const JobCell = (props: DataCellProps): React.Node => {
           containerClassName="slds-m-left_xx-small
             slds-m-right_x-small"
         />
-        {i18n.t(title)}
+        {title}
       </>
     );
   } else if (job.status === STATUS.STARTED) {
     if (activeJobStep && id === activeJobStep) {
-      title = 'installing';
+      title = t('installing');
       contents = (
         <>
           <span
@@ -110,17 +110,17 @@ const JobCell = (props: DataCellProps): React.Node => {
           >
             <Spinner size="small" />
           </span>
-          {i18n.t('Installing...')}
+          {t('Installing...')}
         </>
       );
     } else {
-      title = 'waiting to install';
+      title = t('waiting to install');
       contents = (
         <Checkbox
           id={`step-${id}`}
           className="slds-p-around_x-small"
           assistiveText={{
-            label: i18n.t(title),
+            label: title,
           }}
           checked
           disabled
@@ -128,13 +128,13 @@ const JobCell = (props: DataCellProps): React.Node => {
       );
     }
   } else {
-    title = 'not installed';
+    title = t('not installed');
     contents = (
       <Checkbox
         id={`step-${id}`}
         className="slds-p-around_x-small"
         assistiveText={{
-          label: i18n.t(title),
+          label: title,
         }}
         checked
         disabled
@@ -142,7 +142,7 @@ const JobCell = (props: DataCellProps): React.Node => {
     );
   }
   return (
-    <DataTableCell title={i18n.t(title)} {...props}>
+    <DataTableCell title={title} {...props}>
       {contents}
     </DataTableCell>
   );
@@ -179,22 +179,22 @@ class PreflightCell extends React.Component<DataCellProps> {
     const recommended = !required && item.is_recommended;
     const disabled =
       Boolean(skipped) || required || !hasValidToken || !hasReadyPreflight;
-    let title = 'optional';
+    let title = t('optional');
     if (skipped) {
-      title = skipped.message || 'skipped';
+      title = skipped.message || t('skipped');
     } else if (required) {
-      title = 'required';
+      title = t('required');
     } else if (recommended) {
-      title = 'recommended';
+      title = t('recommended');
     }
     let label = '';
     if (skipped && skipped.message) {
       label = skipped.message;
     } else if (recommended) {
-      label = 'recommended';
+      label = t('recommended');
     }
     return (
-      <DataTableCell title={i18n.t(title)} {...this.props}>
+      <DataTableCell title={title} {...this.props}>
         <Checkbox
           id={`step-${id}`}
           checked={selectedSteps && selectedSteps.has(id)}
@@ -202,7 +202,7 @@ class PreflightCell extends React.Component<DataCellProps> {
           className="slds-p-vertical_x-small"
           labels={{ label }}
           assistiveText={{
-            label: i18n.t(title),
+            label: title,
           }}
           onChange={this.handleChange}
         />

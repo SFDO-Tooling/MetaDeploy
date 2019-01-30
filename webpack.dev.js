@@ -38,13 +38,17 @@ module.exports = merge(common, {
     new I18nextWebpackPlugin({
       src: ['./src/js/'],
       options: {
+        sort: true,
+        attr: false,
         func: {
-          list: ['t', '$t', 'i18next.t', 'i18n.t'],
+          list: ['t', 'i18next.t', 'i18n.t'],
+          extensions: ['.js'],
         },
+        nsSeparator: false,
+        keySeparator: false,
         lngs: ['en'],
-        resource: {
-          loadPath: '{{lng}}/{{ns}}.json',
-          savePath: '{{lng}}/{{ns}}.json',
+        trans: {
+          extensions: ['.js'],
         },
         defaultValue(lng, ns, key) {
           if (lng === 'en') {

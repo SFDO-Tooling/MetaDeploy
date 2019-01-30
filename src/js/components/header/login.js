@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
-import i18n from 'i18n';
+import { t } from 'i18next';
 
 import { addUrlParams } from 'utils/api';
 import { logError } from 'utils/logging';
@@ -34,7 +34,7 @@ type MenuOption =
 class Login extends React.Component<Props, { modalOpen: boolean }> {
   static defaultProps = {
     id: 'login',
-    label: 'Log In',
+    label: t('Log In'),
     buttonClassName: 'slds-button_outline-brand',
     buttonVariant: 'base',
     disabled: false,
@@ -76,17 +76,17 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
     }
   };
 
-  getMenuOpts(): Array<MenuOption> {
+  static getMenuOpts(): Array<MenuOption> {
     return [
       {
-        label: i18n.t('Production or Developer Org'),
+        label: t('Production or Developer Org'),
         href:
           window.api_urls.salesforce_production_login &&
           window.api_urls.salesforce_production_login(),
         disabled: !window.api_urls.salesforce_production_login,
       },
       {
-        label: i18n.t('Sandbox or Scratch Org'),
+        label: t('Sandbox or Scratch Org'),
         href:
           window.api_urls.salesforce_test_login &&
           window.api_urls.salesforce_test_login(),
@@ -96,7 +96,7 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
         type: 'divider',
       },
       {
-        label: i18n.t('Use Custom Domain'),
+        label: t('Use Custom Domain'),
         modal: Boolean(window.api_urls.salesforce_custom_login),
         disabled: !window.api_urls.salesforce_custom_login,
       },
@@ -104,7 +104,7 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
   }
 
   render(): React.Node {
-    const menuOpts = this.getMenuOpts();
+    const menuOpts = Login.getMenuOpts();
     const {
       id,
       label,
@@ -118,12 +118,11 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
     } = this.props;
     const { modalOpen } = this.state;
 
-    const dropdownLabel = typeof label === 'string' ? i18n.t(label) : label;
     return (
       <>
         <Dropdown
           id={id}
-          label={dropdownLabel}
+          label={label}
           className="slds-dropdown_actions
             slds-dropdown_medium"
           triggerClassName={triggerClassName}

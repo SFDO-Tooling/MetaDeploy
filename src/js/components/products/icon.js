@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Avatar from '@salesforce/design-system-react/components/avatar';
 import Icon from '@salesforce/design-system-react/components/icon';
-import i18n from 'i18n';
+import { t } from 'i18next';
 
 import type { Product as ProductType } from 'products/reducer';
 
@@ -14,10 +14,10 @@ const ProductIcon = ({ item }: { item: ProductType }) => {
     return (
       <Avatar
         variant="entity"
-        label={i18n.t(item.title)}
+        label={t(item.title)}
         imgSrc={icon.url}
-        imgAlt={i18n.t(item.title)}
-        title={i18n.t(item.title)}
+        imgAlt={t(item.title)}
+        title={t(item.title)}
       />
     );
   }
@@ -29,9 +29,9 @@ const ProductIcon = ({ item }: { item: ProductType }) => {
           slds-avatar_medium"
       >
         <Icon
-          assistiveText={{ label: i18n.t(item.title) }}
+          assistiveText={{ label: t(item.title) }}
           category={icon.category}
-          name={i18n.t(icon.name)}
+          name={icon.name}
         />
       </span>
     );
@@ -40,12 +40,12 @@ const ProductIcon = ({ item }: { item: ProductType }) => {
     // Standard entity icon (initials) with custom color
     return (
       <div style={{ '--custom-color': item.color }}>
-        <Avatar variant="entity" label={i18n.t(item.title)} />
+        <Avatar variant="entity" label={t(item.title)} />
       </div>
     );
   }
   // Standard entity icon (initials)
-  return <Avatar variant="entity" label={i18n.t(item.title)} />;
+  return <Avatar variant="entity" label={t(item.title)} />;
 };
 
 export default ProductIcon;

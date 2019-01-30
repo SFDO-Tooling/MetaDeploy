@@ -1,6 +1,5 @@
 // @flow
 
-import { cache } from 'utils/caching';
 import { fetchOrgJobs } from 'org/actions';
 import { fetchProducts } from 'products/actions';
 
@@ -40,7 +39,6 @@ export const logout = (): ThunkAction => (dispatch, getState, { apiFetch }) =>
   apiFetch(window.api_urls.account_logout(), {
     method: 'POST',
   }).then(() => {
-    cache.clear();
     /* istanbul ignore else */
     if (window.socket) {
       window.socket.reconnect();
