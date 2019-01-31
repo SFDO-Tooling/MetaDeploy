@@ -6,22 +6,22 @@ import { t } from 'i18next';
 
 import { CONSTANTS } from 'plans/reducer';
 
-export const STEPS = [
+export const getSteps = (translate: string => string) => [
   {
     id: 0,
-    label: t('Log in'),
+    label: translate('Log in'),
   },
   {
     id: 1,
-    label: t('Run pre-install validation'),
+    label: translate('Run pre-install validation'),
   },
   {
     id: 2,
-    label: t('Pre-install validation complete'),
+    label: translate('Pre-install validation complete'),
   },
   {
     id: 3,
-    label: t('Install'),
+    label: translate('Install'),
   },
 ];
 
@@ -45,19 +45,20 @@ const ProgressIndicator = ({
       activeStep = 2;
     }
   }
-  const completedSteps = STEPS.slice(0, activeStep);
+  const steps = getSteps(t);
+  const completedSteps = steps.slice(0, activeStep);
   const errorSteps =
     userLoggedIn &&
     preflightIsValid &&
     preflightStatus !== CONSTANTS.STATUS.STARTED &&
     !preflightIsReady
-      ? STEPS.slice(activeStep, activeStep + 1)
+      ? steps.slice(activeStep, activeStep + 1)
       : [];
-  const selectedStep = STEPS[activeStep];
+  const selectedStep = steps[activeStep];
   return (
     <SLDSProgressIndicator
       className="slds-m-top_medium"
-      steps={STEPS}
+      steps={steps}
       completedSteps={completedSteps}
       selectedStep={selectedStep}
       errorSteps={errorSteps}
