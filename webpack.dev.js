@@ -54,6 +54,10 @@ module.exports = merge(common, {
         trans: {
           extensions: [],
         },
+        resource: {
+          loadPath: 'locales/{{lng}}/{{ns}}.json',
+          savePath: 'generated/{{lng}}/{{ns}}.json',
+        },
         defaultValue(lng, ns, key) {
           if (lng === 'en') {
             // Return key as the default value for English language
