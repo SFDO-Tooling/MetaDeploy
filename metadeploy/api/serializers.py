@@ -198,6 +198,7 @@ class ProductSerializer(CircumspectSerializerMixin, serializers.ModelSerializer)
             "id",
             "title",
             "description",
+            "short_description",
             "click_through_agreement",
             "category",
             "color",
