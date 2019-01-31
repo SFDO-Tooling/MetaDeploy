@@ -3,7 +3,7 @@ from ipaddress import IPv4Address
 from django.conf import settings
 from django.core.exceptions import SuspiciousOperation
 
-from metadeploy.utils import get_client_ip
+from metadeploy.utils import get_remote_ip
 
 
 class AdminRestrictMiddleware:
@@ -22,7 +22,7 @@ class AdminRestrictMiddleware:
         return self.get_response(request)
 
     def _validate_ip(self, request):
-        ip_str, _ = get_client_ip(request)
+        ip_str = get_remote_ip(request)
         ip_addr = IPv4Address(ip_str)
 
         if not any(ip_addr in subnet for subnet in self.ip_ranges):
