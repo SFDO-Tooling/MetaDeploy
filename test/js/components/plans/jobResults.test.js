@@ -71,7 +71,7 @@ describe('<JobResults />', () => {
       });
 
       expect(
-        getByText('Pre-install validation encountered 1 error.'),
+        getByText('Pre-install validation encountered errorMsg.'),
       ).toBeVisible();
       expect(getByText('Do something to fix it.')).toBeVisible();
     });
@@ -90,7 +90,7 @@ describe('<JobResults />', () => {
       const { getByText } = setup({ job });
 
       expect(
-        getByText('Pre-install validation encountered 1 warning.'),
+        getByText('Pre-install validation encountered warningMsg.'),
       ).toBeVisible();
     });
 
@@ -120,7 +120,7 @@ describe('<JobResults />', () => {
 
       expect(
         getByText(
-          'Pre-install validation encountered 4 errors and 3 warnings.',
+          'Pre-install validation encountered errorMsg and warningMsg.',
         ),
       ).toBeVisible();
       expect(getByText('This plan error.')).toBeVisible();
