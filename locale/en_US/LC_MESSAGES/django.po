@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-24 20:33+0000\n"
+"POT-Creation-Date: 2019-01-31 20:19+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,59 +17,63 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: metadeploy/api/models.py:197 metadeploy/api/models.py:332
+#: metadeploy/api/models.py:226 metadeploy/api/models.py:362
 msgid "If multiple slugs are active, we will default to the most recent."
 msgstr ""
 
-#: metadeploy/api/models.py:238
+#: metadeploy/api/models.py:267
 msgid "This will take precedence over Color and the SLDS Icons."
 msgstr ""
 
-#: metadeploy/api/models.py:292
+#: metadeploy/api/models.py:322
 msgid "This is usually a tag, sometimes a branch."
 msgstr ""
 
-#: metadeploy/api/models.py:344
+#: metadeploy/api/models.py:374
 msgid "This must be unique for the Plan's Version."
 msgstr ""
 
-#: metadeploy/api/models.py:385
+#: metadeploy/api/models.py:423
 msgid "Metadata"
 msgstr ""
 
-#: metadeploy/api/models.py:386
+#: metadeploy/api/models.py:424
 msgid "One Time Apex"
 msgstr ""
 
-#: metadeploy/api/models.py:387
+#: metadeploy/api/models.py:425
 msgid "Managed Package"
 msgstr ""
 
-#: metadeploy/api/models.py:388
+#: metadeploy/api/models.py:426
 msgid "Data"
 msgstr ""
 
-#: metadeploy/api/push.py:87
+#: metadeploy/api/models.py:427
+msgid "Other"
+msgstr ""
+
+#: metadeploy/api/push.py:96
 msgid "There was an error"
 msgstr ""
 
-#: metadeploy/api/serializers.py:341
+#: metadeploy/api/serializers.py:345
 msgid "You are not allowed to install this plan."
 msgstr ""
 
-#: metadeploy/api/serializers.py:345
+#: metadeploy/api/serializers.py:349
 msgid "You are not allowed to install this product."
 msgstr ""
 
-#: metadeploy/api/serializers.py:361
+#: metadeploy/api/serializers.py:365
 msgid "No valid preflight."
 msgstr ""
 
-#: metadeploy/api/serializers.py:367
+#: metadeploy/api/serializers.py:371
 msgid "Invalid steps for plan."
 msgstr ""
 
-#: metadeploy/api/serializers.py:373
+#: metadeploy/api/serializers.py:377
 #, python-brace-format
 msgid "Pending job {pending_job.id} exists. Please try again later, or "
 msgstr ""
