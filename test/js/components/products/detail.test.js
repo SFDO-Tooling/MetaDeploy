@@ -1,12 +1,10 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import { fetchVersion } from 'products/actions';
-
 import { renderWithRedux } from './../../utils';
 
+import { fetchVersion } from 'products/actions';
 import routes from 'utils/routes';
-
 import { ProductDetail, VersionDetail } from 'components/products/detail';
 
 jest.mock('products/actions');

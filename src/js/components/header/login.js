@@ -6,14 +6,12 @@ import { t } from 'i18next';
 
 import { addUrlParams } from 'utils/api';
 import { logError } from 'utils/logging';
-
 import CustomDomainModal from 'components/header/customDomainModal';
-
 import type { UrlParams } from 'utils/api';
 
 type Props = {
   id: string,
-  label: string | React.Node,
+  label?: string | React.Node,
   buttonClassName: string,
   buttonVariant: string,
   triggerClassName?: string,
@@ -34,7 +32,6 @@ type MenuOption =
 class Login extends React.Component<Props, { modalOpen: boolean }> {
   static defaultProps = {
     id: 'login',
-    label: t('Log In'),
     buttonClassName: 'slds-button_outline-brand',
     buttonVariant: 'base',
     disabled: false,
@@ -122,7 +119,7 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
       <>
         <Dropdown
           id={id}
-          label={label}
+          label={label === undefined ? t('Log In') : label}
           className="slds-dropdown_actions
             slds-dropdown_medium"
           triggerClassName={triggerClassName}

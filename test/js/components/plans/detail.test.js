@@ -2,11 +2,10 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { fireEvent } from 'react-testing-library';
 
-import { fetchVersion } from 'products/actions';
-import { fetchPreflight } from 'plans/actions';
-
 import { renderWithRedux, storeWithApi } from './../../utils';
 
+import { fetchVersion } from 'products/actions';
+import { fetchPreflight } from 'plans/actions';
 import PlanDetail from 'components/plans/detail';
 
 jest.mock('products/actions');

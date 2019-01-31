@@ -6,7 +6,6 @@ import { Trans } from 'react-i18next';
 import { t } from 'i18next';
 
 import { CONSTANTS } from 'plans/reducer';
-
 import type { Job as JobType } from 'jobs/reducer';
 
 const JobMessage = ({

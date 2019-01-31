@@ -6,9 +6,7 @@ import { Link } from 'react-router-dom';
 import { t } from 'i18next';
 
 import routes from 'utils/routes';
-
 import ProductIcon from 'components/products/icon';
-
 import type { Product as ProductType } from 'products/reducer';
 
 const ProductItem = ({ item }: { item: ProductType }) => {

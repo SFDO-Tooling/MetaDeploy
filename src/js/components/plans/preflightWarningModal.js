@@ -7,12 +7,10 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import { t } from 'i18next';
 
 import { CONSTANTS } from 'plans/reducer';
-
 import { WarningIcon } from 'components/plans/jobResults';
-
 import type {
-  StepResult as StepResultType,
   PreflightErrors as PreflightErrorsType,
+  StepResult as StepResultType,
   Step as StepType,
 } from 'plans/reducer';
 
@@ -129,8 +127,7 @@ class PreflightWarningModal extends React.Component<Props, State> {
             checked={this.state.confirmed}
             labels={{
               label: t(
-                'I understand these warnings, ' +
-                  'and want to continue with installation.',
+                'I understand these warnings, and want to continue with installation.',
               ),
             }}
             onChange={this.handleChange}

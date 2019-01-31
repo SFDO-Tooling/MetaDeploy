@@ -6,10 +6,8 @@ import { Trans } from 'react-i18next';
 import { t } from 'i18next';
 
 import routes from 'utils/routes';
-
 import FourOhFour from 'components/404';
 import Login from 'components/header/login';
-
 import type { Plan as PlanType } from 'plans/reducer';
 import type {
   Product as ProductType,

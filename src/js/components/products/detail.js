@@ -2,7 +2,8 @@
 
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
-import { Redirect, Link } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
+import { Trans } from 'react-i18next';
 import { connect } from 'react-redux';
 import { t } from 'i18next';
 
@@ -14,14 +15,12 @@ import {
   selectVersionLabel,
 } from 'products/selectors';
 import { selectUserState } from 'user/selectors';
-import { shouldFetchVersion, getLoadingOrNotFound } from 'products/utils';
-
+import { getLoadingOrNotFound, shouldFetchVersion } from 'products/utils';
 import BodyContainer from 'components/bodyContainer';
 import Header from 'components/products/header';
 import ProductNotAllowed from 'components/products/notAllowed';
 import ProductNotFound from 'components/products/product404';
 import VersionNotFound from 'components/products/version404';
-
 import type { AppState } from 'app/reducer';
 import type { InitialProps } from 'components/utils';
 import type {
@@ -205,10 +204,10 @@ class VersionDetail extends React.Component<VersionDetailProps> {
               isLoggedIn={user !== null}
               message={product.not_allowed_instructions}
               link={
-                <>
+                <Trans i18nKey="productNotAllowed">
                   Try the{' '}
                   <Link to={routes.product_list()}>list of all products</Link>
-                </>
+                </Trans>
               }
             />
           )}

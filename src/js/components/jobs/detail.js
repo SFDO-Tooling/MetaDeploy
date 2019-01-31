@@ -8,7 +8,7 @@ import { t } from 'i18next';
 
 import routes from 'utils/routes';
 import { CONSTANTS } from 'plans/reducer';
-import { fetchJob, updateJob, requestCancelJob } from 'jobs/actions';
+import { fetchJob, requestCancelJob, updateJob } from 'jobs/actions';
 import { fetchVersion } from 'products/actions';
 import { selectJob, selectJobId } from 'jobs/selectors';
 import { selectPlan } from 'plans/selectors';
@@ -18,8 +18,7 @@ import {
   selectVersionLabel,
 } from 'products/selectors';
 import { selectUserState } from 'user/selectors';
-import { shouldFetchVersion, getLoadingOrNotFound } from 'products/utils';
-
+import { getLoadingOrNotFound, shouldFetchVersion } from 'products/utils';
 import BodyContainer from 'components/bodyContainer';
 import CtaButton from 'components/jobs/ctaButton';
 import Header from 'components/plans/header';
@@ -33,7 +32,6 @@ import StepsTable from 'components/plans/stepsTable';
 import Toasts from 'components/plans/toasts';
 import UserInfo from 'components/jobs/userInfo';
 import { LabelWithSpinner } from 'components/plans/ctaButton';
-
 import type { AppState } from 'app/reducer';
 import type { InitialProps } from 'components/utils';
 import type { Job as JobType } from 'jobs/reducer';

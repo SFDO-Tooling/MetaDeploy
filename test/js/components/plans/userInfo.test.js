@@ -22,7 +22,7 @@ describe('<UserInfo />', () => {
 
   describe('no user', () => {
     test('renders empty message', () => {
-      const { getByText } = setup({ user: { valid_token_for: null } });
+      const { getByText } = setup({ user: null });
 
       expect(getByText('Not Connected to Salesforce')).toBeVisible();
     });

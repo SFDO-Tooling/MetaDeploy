@@ -11,10 +11,8 @@ import {
   selectProductCategories,
   selectProductsByCategory,
 } from 'products/selectors';
-
 import ProductItem from 'components/products/listItem';
 import { EmptyIllustration } from 'components/404';
-
 import type { AppState } from 'app/reducer';
 import type { ProductsMapType } from 'products/selectors';
 import type { Products as ProductsType } from 'products/reducer';

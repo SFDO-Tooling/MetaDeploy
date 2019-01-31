@@ -9,10 +9,8 @@ import { t } from 'i18next';
 
 import routes from 'utils/routes';
 import { selectUserState } from 'user/selectors';
-
 import Login from 'components/header/login';
 import { EmptyIllustration } from 'components/404';
-
 import type { AppState } from 'app/reducer';
 import type { InitialProps } from 'components/utils';
 import type { User as UserType } from 'user/reducer';

@@ -1,9 +1,9 @@
 // @flow
 
+import type { ThunkAction } from 'redux-thunk';
+
 import { fetchOrgJobs } from 'org/actions';
 import { fetchProducts } from 'products/actions';
-
-import type { ThunkAction } from 'redux-thunk';
 import type { User } from 'user/reducer';
 
 type LoginAction = { type: 'USER_LOGGED_IN', payload: User };

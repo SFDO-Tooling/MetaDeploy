@@ -1,8 +1,7 @@
 import React from 'react';
-import { render, fireEvent } from 'react-testing-library';
+import { fireEvent, render } from 'react-testing-library';
 
 import { getUrlParam, removeUrlParam } from 'utils/api';
-
 import CtaButton from 'components/plans/ctaButton';
 
 jest.mock('utils/api');

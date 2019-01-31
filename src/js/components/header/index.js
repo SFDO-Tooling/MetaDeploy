@@ -10,11 +10,9 @@ import routes from 'utils/routes';
 import { logout } from 'user/actions';
 import { selectSocketState } from 'socket/selectors';
 import { selectUserState } from 'user/selectors';
-
 import Login from 'components/header/login';
 import Logout from 'components/header/logout';
 import OfflineAlert from 'components/offlineAlert';
-
 import type { AppState } from 'app/reducer';
 import type { Socket } from 'socket/reducer';
 import type { User } from 'user/reducer';

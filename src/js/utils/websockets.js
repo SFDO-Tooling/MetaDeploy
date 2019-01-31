@@ -1,34 +1,33 @@
 // @flow
 
 import Sockette from 'sockette';
+import type { Dispatch } from 'redux-thunk';
 
-import { completeJobStep, completeJob, failJob, cancelJob } from 'jobs/actions';
+import { cancelJob, completeJob, completeJobStep, failJob } from 'jobs/actions';
 import {
+  cancelPreflight,
   completePreflight,
   failPreflight,
-  cancelPreflight,
   invalidatePreflight,
 } from 'plans/actions';
 import { connectSocket, disconnectSocket } from 'socket/actions';
 import { invalidateToken } from 'user/actions';
 import { log } from 'utils/logging';
 import { updateOrg } from 'org/actions';
-
-import type { Dispatch } from 'redux-thunk';
 import type { Job } from 'jobs/reducer';
 import type {
-  JobStepCompleted,
+  JobCanceled,
   JobCompleted,
   JobFailed,
-  JobCanceled,
+  JobStepCompleted,
 } from 'jobs/actions';
 import type { Org } from 'org/reducer';
 import type { OrgChanged } from 'org/actions';
 import type { Preflight } from 'plans/reducer';
 import type {
+  PreflightCanceled,
   PreflightCompleted,
   PreflightFailed,
-  PreflightCanceled,
   PreflightInvalid,
 } from 'plans/actions';
 import type { TokenInvalidAction } from 'user/actions';

@@ -2,7 +2,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { render } from 'react-testing-library';
 
-import { shouldFetchVersion, getLoadingOrNotFound } from 'products/utils';
+import { getLoadingOrNotFound, shouldFetchVersion } from 'products/utils';
 
 const defaultProduct = {
   id: 'p1',

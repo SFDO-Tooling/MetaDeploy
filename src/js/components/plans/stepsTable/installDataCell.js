@@ -9,9 +9,7 @@ import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import { t } from 'i18next';
 
 import { CONSTANTS } from 'plans/reducer';
-
 import { ErrorIcon } from 'components/plans/jobResults';
-
 import type { DataCellProps } from 'components/plans/stepsTable/index';
 
 const { STATUS, RESULT_STATUS } = CONSTANTS;

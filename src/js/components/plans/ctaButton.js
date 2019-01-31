@@ -4,16 +4,14 @@ import * as React from 'react';
 import Button from '@salesforce/design-system-react/components/button';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import { t } from 'i18next';
+import type { RouterHistory } from 'react-router-dom';
 
 import routes from 'utils/routes';
 import { CONSTANTS } from 'plans/reducer';
 import { getUrlParam, removeUrlParam } from 'utils/api';
-
 import ClickThroughAgreementModal from 'components/plans/clickThroughAgreementModal';
 import Login from 'components/header/login';
 import PreflightWarningModal from 'components/plans/preflightWarningModal';
-
-import type { RouterHistory } from 'react-router-dom';
 import type {
   Plan as PlanType,
   Preflight as PreflightType,

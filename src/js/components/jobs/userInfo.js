@@ -10,6 +10,8 @@ import type { Job as JobType } from 'jobs/reducer';
 
 const UserInfo = ({ job }: { job: JobType }): React.Node => {
   if ((job.creator && job.creator.username) || job.org_name || job.org_type) {
+    const { username } = job.creator ? job.creator : {};
+    const { org_name, org_type } = job;
     return (
       <div
         className="slds-p-around_medium
@@ -22,24 +24,24 @@ const UserInfo = ({ job }: { job: JobType }): React.Node => {
           icon={<Icon category="utility" name="user" />}
         >
           <ul>
-            {job.creator && job.creator.username ? (
+            {username ? (
               <li>
                 <Trans i18nKey="jobUserName">
-                  <strong>User:</strong> {job.creator.username}
+                  <strong>User:</strong> {{ username }}
                 </Trans>
               </li>
             ) : null}
-            {job.org_name ? (
+            {org_name ? (
               <li>
                 <Trans i18nKey="jobOrgName">
-                  <strong>Org:</strong> {job.org_name}
+                  <strong>Org:</strong> {{ org_name }}
                 </Trans>
               </li>
             ) : null}
-            {job.org_type ? (
+            {org_type ? (
               <li>
                 <Trans i18nKey="jobOrgType">
-                  <strong>Type:</strong> {job.org_type}
+                  <strong>Type:</strong> {{ org_type }}
                 </Trans>
               </li>
             ) : null}

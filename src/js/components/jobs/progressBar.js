@@ -5,7 +5,6 @@ import classNames from 'classnames';
 import { t } from 'i18next';
 
 import { CONSTANTS } from 'plans/reducer';
-
 import type { Job as JobType } from 'jobs/reducer';
 
 // Progress Bar has not been implemented yet in design-system-react

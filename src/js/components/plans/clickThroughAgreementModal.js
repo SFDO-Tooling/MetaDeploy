@@ -72,8 +72,7 @@ class ClickThroughAgreementModal extends React.Component<Props, State> {
             checked={this.state.confirmed}
             labels={{
               label: t(
-                'I confirm I have read and agree to these ' +
-                  'product terms of use and licenses.',
+                'I confirm I have read and agree to these product terms of use and licenses.',
               ),
             }}
             onChange={this.handleChange}

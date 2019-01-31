@@ -6,7 +6,6 @@ import ToastContainer from '@salesforce/design-system-react/components/toast/con
 import { t } from 'i18next';
 
 import { CONSTANTS } from 'plans/reducer';
-
 import type { Job as JobType } from 'jobs/reducer';
 import type { Preflight as PreflightType } from 'plans/reducer';
 

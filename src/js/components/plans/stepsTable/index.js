@@ -11,9 +11,7 @@ import InstallDataCell, {
 import KindDataCell from 'components/plans/stepsTable/kindDataCell';
 import NameDataCell from 'components/plans/stepsTable/nameDataCell';
 import RequiredDataCell from 'components/plans/stepsTable/requiredDataCell';
-
 import { CONSTANTS } from 'plans/reducer';
-
 import type { Job as JobType } from 'jobs/reducer';
 import type {
   Plan as PlanType,

@@ -43,6 +43,11 @@ rules:
     - singleQuote: true
       trailingComma: all
 
+  # Import
+  import/order:
+    - 1
+    - newlines-between: always
+
   # Possible Errors
   getter-return: 2
   no-await-in-loop: 2
@@ -93,9 +98,9 @@ rules:
   no-warning-comments:
     - 1
     - terms:
-      - todo
-      - fixme
-      - '@@@'
+        - todo
+        - fixme
+        - '@@@'
   no-with: 2
   prefer-promise-reject-errors:
     - 2
@@ -138,12 +143,13 @@ rules:
   max-len:
     - 2
     - ignoreComments: true
+      ignoreStrings: true
       ignorePattern: '^import .*'
   new-cap:
     - 2
     - capIsNewExceptions:
-      - Deferred
-      - Event
+        - Deferred
+        - Event
   no-array-constructor: 2
   no-bitwise: 2
   no-continue: 2
@@ -180,4 +186,5 @@ rules:
   prefer-rest-params: 2
   prefer-spread: 2
   prefer-template: 2
+  sort-imports: 0
   symbol-description: 2

@@ -8,9 +8,7 @@ import { Trans } from 'react-i18next';
 import { t } from 'i18next';
 
 import Login from 'components/header/login';
-
 import svgPath from 'images/no-connection.svg';
-
 import type { User as UserType } from 'user/reducer';
 
 const LoggedOut = (): React.Node => (
@@ -36,6 +34,8 @@ const Footer = (): React.Node => (
 
 const UserInfo = ({ user }: { user: UserType }): React.Node => {
   const hasValidToken = user && user.valid_token_for !== null;
+  const { username, org_name, org_type } = user === null ? {} : user;
+  const token_minutes = window.GLOBALS.TOKEN_LIFETIME_MINUTES || 10;
   return (
     <div
       className="slds-p-around_medium
@@ -54,33 +54,33 @@ const UserInfo = ({ user }: { user: UserType }): React.Node => {
         footer={hasValidToken ? <Footer /> : null}
       >
         <ul>
-          {user && user.username ? (
+          {username ? (
             <li>
               <Trans i18nKey="username">
-                <strong>User:</strong> {user.username}
+                <strong>User:</strong> {{ username }}
               </Trans>
             </li>
           ) : null}
-          {user && user.org_name ? (
+          {org_name ? (
             <li>
-              <Trans i18nKey="orgname">
-                <strong>Org:</strong> {user.org_name}
+              <Trans i18nKey="orgName">
+                <strong>Org:</strong> {{ org_name }}
               </Trans>
             </li>
           ) : null}
-          {user && user.org_type ? (
+          {org_type ? (
             <li>
-              <Trans i18nKey="orgtype">
-                <strong>Type:</strong> {user.org_type}
+              <Trans i18nKey="orgType">
+                <strong>Type:</strong> {{ org_type }}
               </Trans>
             </li>
           ) : null}
         </ul>
         <p className="slds-p-top_small">
-          <Trans i18nKey="credentialsHoldTime">
-            The credentials to your Salesforce org will only be held for
-            {` ${window.GLOBALS.TOKEN_LIFETIME_MINUTES || 10} `}
-            minutes or until your requested installation is complete.
+          <Trans i18nKey="credentialsHoldTime" count={token_minutes}>
+            The credentials to your Salesforce org will only be held for{' '}
+            {{ token_minutes }} minutes or until your requested installation is
+            complete.
           </Trans>
         </p>
       </Card>

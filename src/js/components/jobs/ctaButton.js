@@ -6,9 +6,7 @@ import { Link } from 'react-router-dom';
 import { t } from 'i18next';
 
 import { CONSTANTS } from 'plans/reducer';
-
 import { ActionBtn, LabelWithSpinner } from 'components/plans/ctaButton';
-
 import type { Job as JobType } from 'jobs/reducer';
 
 const { STATUS } = CONSTANTS;

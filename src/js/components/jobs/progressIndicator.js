@@ -5,7 +5,6 @@ import SLDSProgressIndicator from '@salesforce/design-system-react/components/pr
 
 import { CONSTANTS } from 'plans/reducer';
 import { STEPS } from 'components/plans/progressIndicator';
-
 import type { Job as JobType } from 'jobs/reducer';
 
 const ProgressIndicator = ({ job }: { job: JobType }) => {

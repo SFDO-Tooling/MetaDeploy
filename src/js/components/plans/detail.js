@@ -19,9 +19,8 @@ import {
   selectVersionLabel,
 } from 'products/selectors';
 import { selectUserState } from 'user/selectors';
-import { shouldFetchVersion, getLoadingOrNotFound } from 'products/utils';
+import { getLoadingOrNotFound, shouldFetchVersion } from 'products/utils';
 import { startJob } from 'jobs/actions';
-
 import BodyContainer from 'components/bodyContainer';
 import CtaButton, { LoginBtn } from 'components/plans/ctaButton';
 import Header from 'components/plans/header';
@@ -35,7 +34,6 @@ import ProductNotFound from 'components/products/product404';
 import StepsTable from 'components/plans/stepsTable';
 import Toasts from 'components/plans/toasts';
 import UserInfo from 'components/plans/userInfo';
-
 import type { AppState } from 'app/reducer';
 import type { InitialProps } from 'components/utils';
 import type { Org as OrgType } from 'org/reducer';
@@ -177,15 +175,13 @@ class PlanDetail extends React.Component<Props, State> {
             <ErrorIcon />
             <span className="slds-text-color_error">
               {t(
-                'Oops! It looks like you don’t have permissions to run an ' +
-                  'installation on this org.',
+                'Oops! It looks like you don’t have permissions to run an installation on this org.',
               )}
             </span>
           </div>
           <p>
             {t(
-              'Please contact an Admin within your org or use the button ' +
-                'below to log in with a different org.',
+              'Please contact an Admin within your org or use the button below to log in with a different org.',
             )}
           </p>
         </>
@@ -299,6 +295,7 @@ class PlanDetail extends React.Component<Props, State> {
       return <ProductNotFound />;
     }
     const selectedSteps = this.getSelectedSteps();
+    const preflight_minutes = window.GLOBALS.PREFLIGHT_LIFETIME_MINUTES || 10;
     return (
       <DocumentTitle title={t(`${plan.title} | ${product.title} | MetaDeploy`)}>
         <>
@@ -336,17 +333,18 @@ class PlanDetail extends React.Component<Props, State> {
                       preflight={preflight}
                       label="Pre-install validation"
                       failMessage={t(
-                        'After resolving all errors, ' +
-                          'run the pre-install validation again.',
+                        'After resolving all errors, run the pre-install validation again.',
                       )}
-                      successMessage={t(
-                        'Pre-install validation will expire if install is ' +
-                          'not run within ' +
-                          `${window.GLOBALS.PREFLIGHT_LIFETIME_MINUTES ||
-                            10} ` +
-                          'minutes, and you will need to run pre-install ' +
-                          'validation again.',
-                      )}
+                      successMessage={
+                        <Trans
+                          i18nKey="preflightValidTime"
+                          count={preflight_minutes}
+                        >
+                          Pre-install validation will expire if install is not
+                          run within {{ preflight_minutes }} minutes, and you
+                          will need to run pre-install validation again.
+                        </Trans>
+                      }
                     />
                   ) : null
                 }
@@ -369,13 +367,13 @@ class PlanDetail extends React.Component<Props, State> {
               isLoggedIn={user !== null}
               message={plan.not_allowed_instructions}
               link={
-                <>
+                <Trans i18nKey="planNotAllowed">
                   Try{' '}
                   <Link to={routes.version_detail(product.slug, version.label)}>
                     another plan
                   </Link>{' '}
                   from that product version
-                </>
+                </Trans>
               }
             />
           )}

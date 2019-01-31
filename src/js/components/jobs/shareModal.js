@@ -9,7 +9,6 @@ import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import { t } from 'i18next';
 
 import { withTransientMessage } from 'components/utils';
-
 import type { Job as JobType } from 'jobs/reducer';
 import type { TransientMessageProps } from 'components/utils';
 import typeof { updateJob as UpdateJobType } from 'jobs/actions';
@@ -110,8 +109,7 @@ class ShareModal extends React.Component<WrappedProps> {
                 <Radio
                   id="is_public-false"
                   label={t(
-                    'Only I and Salesforce staff ' +
-                      'can view this installation job.',
+                    'Only I and Salesforce staff can view this installation job.',
                   )}
                   value="false"
                   checked={!job.is_public}
@@ -130,8 +128,7 @@ class ShareModal extends React.Component<WrappedProps> {
                   slds-p-top_small"
               >
                 {t(
-                  'Access to view the installation job does not provide ' +
-                    'access to your Salesforce org.',
+                  'Access to view the installation job does not provide access to your Salesforce org.',
                 )}
               </p>
             </>

@@ -7,7 +7,6 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import { t } from 'i18next';
 
 import { addUrlParams } from 'utils/api';
-
 import type { UrlParams } from 'utils/api';
 
 type Props = {
@@ -70,8 +69,7 @@ class CustomDomainModal extends React.Component<Props, { url: string }> {
               slds-p-bottom_small"
           >
             {t(
-              'To go to your company’s login page, enter the custom ' +
-                'domain name.',
+              'To go to your company’s login page, enter the custom domain name.',
             )}
           </div>
           <Input

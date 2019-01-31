@@ -4,12 +4,16 @@
 
 process.env.NODE_ENV = 'development';
 
+const fs = require('fs');
+const path = require('path');
+
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const I18nextWebpackPlugin = require('i18next-scanner-webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const common = require('./webpack.common.js');
 const merge = require('webpack-merge');
-const path = require('path');
+const babel = require('@babel/core');
+
+const common = require('./webpack.common.js');
 
 module.exports = merge(common, {
   mode: 'development',
@@ -48,7 +52,7 @@ module.exports = merge(common, {
         keySeparator: false,
         lngs: ['en'],
         trans: {
-          extensions: ['.js'],
+          extensions: [],
         },
         defaultValue(lng, ns, key) {
           if (lng === 'en') {
@@ -58,6 +62,36 @@ module.exports = merge(common, {
           // Return the string '__NOT_TRANSLATED__' for other languages
           return '__NOT_TRANSLATED__';
         },
+      },
+      // Custom transform to allow parsing Js with Flow types
+      // https://github.com/i18next/i18next-scanner/issues/88
+      transform(file, enc, done) {
+        const extname = path.extname(file.path);
+        if (['.js'].includes(extname)) {
+          const parser = this.parser;
+          fs.readFile(file.path, enc, (err, data) => {
+            if (err) {
+              done(err);
+            } else {
+              const options = {
+                presets: ['@babel/preset-flow'],
+                plugins: [
+                  '@babel/plugin-syntax-jsx',
+                  '@babel/plugin-proposal-class-properties',
+                  '@babel/plugin-proposal-object-rest-spread',
+                ],
+                configFile: false,
+              };
+
+              const code = babel.transform(data, options).code;
+
+              parser.parseTransFromString(code);
+              done();
+            }
+          });
+        } else {
+          done();
+        }
       },
     }),
   ],
