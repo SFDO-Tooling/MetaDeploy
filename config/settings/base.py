@@ -28,6 +28,10 @@ def ipv4_networks(val: str) -> List[IPv4Network]:
     return [IPv4Network(s.strip()) for s in val.split(",")]
 
 
+def url_prefix(val: str) -> str:
+    return val.rstrip("/") + "/"
+
+
 class NoDefaultValue:
     pass
 
@@ -131,6 +135,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "metadeploy.logging_middleware.LoggingMiddleware",
+    "metadeploy.admin_middleware.AdminRestrictMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -183,8 +188,7 @@ AUTH_USER_MODEL = "api.User"
 # URL configuration:
 ROOT_URLCONF = "metadeploy.urls"
 
-# Must end in a /, or you will experience surprises:
-ADMIN_AREA_PREFIX = "admin/"
+ADMIN_AREA_PREFIX = env("DJANGO_ADMIN_URL", default="admin/", type_=url_prefix)
 
 ADMIN_API_ALLOWED_SUBNETS = env(
     "ADMIN_API_ALLOWED_SUBNETS", default="127.0.0.1/32", type_=ipv4_networks
