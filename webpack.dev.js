@@ -57,7 +57,7 @@ module.exports = merge(common, {
           extensions: [],
         },
         resource: {
-          savePath: 'dev/{{lng}}/{{ns}}.json',
+          savePath: '../locales_dev/{{lng}}/{{ns}}.json',
         },
         defaultValue(lng, ns, key) {
           if (lng === 'en') {

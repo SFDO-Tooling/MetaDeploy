@@ -202,7 +202,7 @@ For the front-end, translation JSON files are served from
 runtime`_.
 
 During development, strings are parsed automatically from the JS, and an English
-translation file is auto-generated to ``locales/dev/en/translation.json`` on
+translation file is auto-generated to ``locales_dev/en/translation.json`` on
 every build (``yarn build`` or ``yarn serve``). When this file changes,
 translations must be copied over to the ``locales/en/translation.json`` file in
 order to have any effect.

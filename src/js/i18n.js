@@ -7,6 +7,10 @@ import { use } from 'i18next';
 
 import { logError } from 'utils/logging';
 
+// Note: The `t` function should only be used inside Component lifecycle
+// handlers, not in code executed immediately at runtime (before translations
+// are loaded).
+
 const init = (cb: () => void): void =>
   use(i18n_detector)
     .use(i18n_backend)
