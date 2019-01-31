@@ -3,7 +3,6 @@
 import * as React from 'react';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import { Link } from 'react-router-dom';
-import { t } from 'i18next';
 
 import JobProgressIndicator from 'components/jobs/progressIndicator';
 import PlanProgressIndicator from 'components/plans/progressIndicator';
@@ -41,13 +40,13 @@ const Header = ({
     <PageHeader
       className="page-header
       slds-p-around_x-large"
-      title={t(plan.title)}
+      title={plan.title}
       trail={[
         <Link
           to={routes.version_detail(product.slug, version.label)}
           key={product.slug}
         >
-          {t(product.title)}, {t(version.label)}
+          {product.title}, {version.label}
         </Link>,
       ]}
       navRight={

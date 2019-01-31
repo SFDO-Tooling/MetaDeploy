@@ -56,23 +56,17 @@ const UserInfo = ({ user }: { user: UserType }): React.Node => {
         <ul>
           {username ? (
             <li>
-              <Trans i18nKey="username">
-                <strong>User:</strong> {{ username }}
-              </Trans>
+              <strong>{t('User')}:</strong> {username}
             </li>
           ) : null}
           {org_name ? (
             <li>
-              <Trans i18nKey="orgName">
-                <strong>Org:</strong> {{ org_name }}
-              </Trans>
+              <strong>{t('Org')}:</strong> {org_name}
             </li>
           ) : null}
           {org_type ? (
             <li>
-              <Trans i18nKey="orgType">
-                <strong>Type:</strong> {{ org_type }}
-              </Trans>
+              <strong>{t('Type')}:</strong> {org_type}
             </li>
           ) : null}
         </ul>

@@ -194,3 +194,20 @@ To build and compile ``.mo`` and ``.po`` files for the backend, run::
 
    $ python manage.py makemessages --locale <locale>
    $ python manage.py compilemessages
+
+For the front-end, translation JSON files are served from
+``locales/<language>/`` directories, and the `user language is auto-detected at
+runtime`_.
+
+During development, strings are parsed automatically from the JS, and an English
+translation file is auto-generated to ``locales/dev/en/translation.json`` on
+every build (``yarn build`` or ``yarn serve``). When this file changes,
+translations must be copied over to the ``locales/en/translation.json`` file in
+order to have any effect.
+
+Strings with dynamic content (i.e. known only at runtime) cannot be
+automatically parsed, but will log errors while the app is running if they're
+missing from the served translation files. To resolve, add the missing key:value
+translations to ``locales/<language>/translation.json``.
+
+.. _user language is auto-detected at runtime: https://github.com/i18next/i18next-browser-languageDetector

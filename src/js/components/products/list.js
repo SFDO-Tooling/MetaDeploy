@@ -106,7 +106,7 @@ class ProductsList extends React.Component<Props, State> {
       }
     }
     return (
-      <DocumentTitle title={t('Products | MetaDeploy')}>
+      <DocumentTitle title={`${t('Products')} | ${t('MetaDeploy')}`}>
         <div className="slds-p-around_x-large">{contents}</div>
       </DocumentTitle>
     );

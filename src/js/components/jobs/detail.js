@@ -197,9 +197,9 @@ class JobDetail extends React.Component<Props, State> {
     const { canceling } = this.state;
     return (
       <DocumentTitle
-        title={t(
-          `Installation | ${plan.title} | ${product.title} | MetaDeploy`,
-        )}
+        title={`${t('Installation')} | ${plan.title} | ${product.title} | ${t(
+          'MetaDeploy',
+        )}`}
       >
         <>
           <Header
@@ -229,7 +229,7 @@ class JobDetail extends React.Component<Props, State> {
           <BodyContainer>
             <Toasts job={job} label={t('Installation')} />
             <Intro
-              results={<JobResults job={job} label="Installation" />}
+              results={<JobResults job={job} label={t('Installation')} />}
               cta={
                 <CtaButton
                   job={job}

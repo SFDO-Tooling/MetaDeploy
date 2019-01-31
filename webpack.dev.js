@@ -39,24 +39,25 @@ module.exports = merge(common, {
     new MiniCssExtractPlugin({
       filename: '[name].css',
     }),
+    // Parse for translatable text strings
     new I18nextWebpackPlugin({
       src: ['./src/js/'],
       options: {
         sort: true,
         attr: false,
         func: {
-          list: ['t', 'i18next.t', 'i18n.t'],
+          list: ['t', 'i18next.t', 'i18n.t', 'translate'],
           extensions: ['.js'],
         },
         nsSeparator: false,
         keySeparator: false,
         lngs: ['en'],
+        // See custom transform below for <Trans> components
         trans: {
           extensions: [],
         },
         resource: {
-          loadPath: 'locales/{{lng}}/{{ns}}.json',
-          savePath: 'generated/{{lng}}/{{ns}}.json',
+          savePath: 'dev/{{lng}}/{{ns}}.json',
         },
         defaultValue(lng, ns, key) {
           if (lng === 'en') {

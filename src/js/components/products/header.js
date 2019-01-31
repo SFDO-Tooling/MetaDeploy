@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
-import { t } from 'i18next';
 
 import ProductIcon from 'components/products/icon';
 import type { Product as ProductType } from 'products/reducer';
@@ -17,8 +16,8 @@ const Header = ({
   <PageHeader
     className="page-header
       slds-p-around_x-large"
-    title={t(product.title)}
-    info={t(versionLabel)}
+    title={product.title}
+    info={versionLabel}
     icon={<ProductIcon item={product} />}
   />
 );

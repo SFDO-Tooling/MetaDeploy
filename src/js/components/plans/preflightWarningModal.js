@@ -117,7 +117,7 @@ class PreflightWarningModal extends React.Component<Props, State> {
                 key={step.id}
                 id={step.id}
                 results={stepResults}
-                name={t(step.name)}
+                name={step.name}
               />
             );
           })}

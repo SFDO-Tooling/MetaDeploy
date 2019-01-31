@@ -3,7 +3,6 @@
 import * as React from 'react';
 import Avatar from '@salesforce/design-system-react/components/avatar';
 import Icon from '@salesforce/design-system-react/components/icon';
-import { t } from 'i18next';
 
 import type { Product as ProductType } from 'products/reducer';
 
@@ -14,10 +13,10 @@ const ProductIcon = ({ item }: { item: ProductType }) => {
     return (
       <Avatar
         variant="entity"
-        label={t(item.title)}
+        label={item.title}
         imgSrc={icon.url}
-        imgAlt={t(item.title)}
-        title={t(item.title)}
+        imgAlt={item.title}
+        title={item.title}
       />
     );
   }
@@ -29,7 +28,7 @@ const ProductIcon = ({ item }: { item: ProductType }) => {
           slds-avatar_medium"
       >
         <Icon
-          assistiveText={{ label: t(item.title) }}
+          assistiveText={{ label: item.title }}
           category={icon.category}
           name={icon.name}
         />
@@ -40,12 +39,12 @@ const ProductIcon = ({ item }: { item: ProductType }) => {
     // Standard entity icon (initials) with custom color
     return (
       <div style={{ '--custom-color': item.color }}>
-        <Avatar variant="entity" label={t(item.title)} />
+        <Avatar variant="entity" label={item.title} />
       </div>
     );
   }
   // Standard entity icon (initials)
-  return <Avatar variant="entity" label={t(item.title)} />;
+  return <Avatar variant="entity" label={item.title} />;
 };
 
 export default ProductIcon;

@@ -13,6 +13,7 @@ const ProductItem = ({ item }: { item: ProductType }) => {
   if (!item.most_recent_version) {
     return null;
   }
+  const { label } = item.most_recent_version;
   return (
     <Link
       to={routes.product_detail(item.slug)}
@@ -23,12 +24,12 @@ const ProductItem = ({ item }: { item: ProductType }) => {
         slds-large-size_1-of-3"
     >
       <Card
-        heading={t(item.title)}
+        heading={item.title}
         icon={<ProductIcon item={item} />}
         bodyClassName="slds-card__body_inner"
       >
         <div className="slds-text-title">
-          {t(`Version ${item.most_recent_version.label}`)}
+          {t('Version')} {label}
         </div>
         <div
           className="md-truncate-children"

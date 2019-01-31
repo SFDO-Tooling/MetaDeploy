@@ -297,7 +297,9 @@ class PlanDetail extends React.Component<Props, State> {
     const selectedSteps = this.getSelectedSteps();
     const preflight_minutes = window.GLOBALS.PREFLIGHT_LIFETIME_MINUTES || 10;
     return (
-      <DocumentTitle title={t(`${plan.title} | ${product.title} | MetaDeploy`)}>
+      <DocumentTitle
+        title={`${plan.title} | ${product.title} | ${t('MetaDeploy')}`}
+      >
         <>
           <Header
             product={product}
@@ -331,7 +333,7 @@ class PlanDetail extends React.Component<Props, State> {
                   preflight && user ? (
                     <JobResults
                       preflight={preflight}
-                      label="Pre-install validation"
+                      label={t('Pre-install validation')}
                       failMessage={t(
                         'After resolving all errors, run the pre-install validation again.',
                       )}

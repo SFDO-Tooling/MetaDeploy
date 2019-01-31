@@ -16,7 +16,7 @@ import type { InitialProps } from 'components/utils';
 import type { User as UserType } from 'user/reducer';
 
 const AuthError = ({ user }: { user: UserType }) => (
-  <DocumentTitle title={t('Authentication Error | MetaDeploy')}>
+  <DocumentTitle title={`${t('Authentication Error')} | ${t('MetaDeploy')}`}>
     <>
       <EmptyIllustration
         message={

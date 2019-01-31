@@ -3,7 +3,6 @@
 import * as React from 'react';
 import Card from '@salesforce/design-system-react/components/card';
 import Icon from '@salesforce/design-system-react/components/icon';
-import { Trans } from 'react-i18next';
 import { t } from 'i18next';
 
 import type { Job as JobType } from 'jobs/reducer';
@@ -26,23 +25,17 @@ const UserInfo = ({ job }: { job: JobType }): React.Node => {
           <ul>
             {username ? (
               <li>
-                <Trans i18nKey="jobUserName">
-                  <strong>User:</strong> {{ username }}
-                </Trans>
+                <strong>{t('User')}:</strong> {username}
               </li>
             ) : null}
             {org_name ? (
               <li>
-                <Trans i18nKey="jobOrgName">
-                  <strong>Org:</strong> {{ org_name }}
-                </Trans>
+                <strong>{t('Org')}:</strong> {org_name}
               </li>
             ) : null}
             {org_type ? (
               <li>
-                <Trans i18nKey="jobOrgType">
-                  <strong>Type:</strong> {{ org_type }}
-                </Trans>
+                <strong>{t('Type')}:</strong> {org_type}
               </li>
             ) : null}
           </ul>

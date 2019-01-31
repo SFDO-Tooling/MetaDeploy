@@ -5,7 +5,6 @@ import Accordion from '@salesforce/design-system-react/components/accordion';
 import AccordionPanel from '@salesforce/design-system-react/components/accordion/panel';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import classNames from 'classnames';
-import { t } from 'i18next';
 
 import { CONSTANTS } from 'plans/reducer';
 import { ErrorsList } from 'components/plans/jobResults';
@@ -33,9 +32,7 @@ class NameDataCell extends React.Component<
       return null;
     }
     const currentJob = preflight || job;
-    let { name, description } = item;
-    name = t(name);
-    description = t(description);
+    const { name, description } = item;
     const { id } = item;
     const result = currentJob && currentJob.results && currentJob.results[id];
     let hasError = false;
@@ -52,7 +49,7 @@ class NameDataCell extends React.Component<
     }
     let display = name;
     if (optionalMsg) {
-      display = `${name} — ${t(optionalMsg)}`;
+      display = `${name} — ${optionalMsg}`;
     }
     const classes = classNames(className, {
       'has-warning': hasWarning,

@@ -116,16 +116,16 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     );
     const secondary_plan = version.secondary_plan;
     return (
-      <DocumentTitle title={t(`${product.title} | MetaDeploy`)}>
+      <DocumentTitle title={`${product.title} | ${t('MetaDeploy')}`}>
         <>
-          <Header product={product} versionLabel={t(version.label)} />
+          <Header product={product} versionLabel={version.label} />
           {product.is_allowed ? (
             <BodyContainer>
               <BodySection>
                 <h3 className="slds-text-heading_small">
                   {t('Select a Plan to Install')}
                 </h3>
-                <p>{t(version.description)}</p>
+                <p>{version.description}</p>
                 {version.primary_plan.is_listed &&
                 version.primary_plan.is_allowed ? (
                   <p>
@@ -139,7 +139,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                         slds-button_brand
                         slds-size_full"
                     >
-                      {t(version.primary_plan.title)}
+                      {version.primary_plan.title}
                     </Link>
                   </p>
                 ) : null}
@@ -157,7 +157,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                         slds-button_outline-brand
                         slds-size_full"
                     >
-                      {t(secondary_plan.title)}
+                      {secondary_plan.title}
                     </Link>
                   </p>
                 ) : null}
@@ -175,7 +175,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                             plan.slug,
                           )}
                         >
-                          {t(plan.title)}
+                          {plan.title}
                         </Link>
                       </p>
                     ))}
@@ -184,13 +184,13 @@ class VersionDetail extends React.Component<VersionDetailProps> {
               </BodySection>
               <BodySection>
                 <h3 className="slds-text-heading_small">
-                  {t(`About ${product.title}`)}
+                  {t('About')} {product.title}
                 </h3>
                 {product.image ? (
                   <img
                     className="slds-size_full"
                     src={product.image}
-                    alt={t(product.title)}
+                    alt={product.title}
                   />
                 ) : null}
                 {/* This description is pre-cleaned by the API */}

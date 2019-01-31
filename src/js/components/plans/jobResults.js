@@ -116,17 +116,15 @@ const JobResults = ({
     // Show errors/warnings
     const errorCount = currentJob.error_count || 0;
     const warningCount = currentJob.warning_count || 0;
-    let msg = 'errors';
-    const errorMsg = `${errorCount} error${errorCount === 1 ? '' : 's'}`;
-    const warningMsg = `${warningCount} warning${
-      warningCount === 1 ? '' : 's'
-    }`;
+    let msg = t('errors');
+    const errorMsg = t('errorMsg', { count: errorCount });
+    const warningMsg = t('warningMsg', { count: warningCount });
     if (errorCount > 0 && warningCount > 0) {
-      msg = t(`${errorMsg} and ${warningMsg}`);
+      msg = `${errorMsg} ${t('and')} ${warningMsg}`;
     } else if (errorCount > 0) {
-      msg = t(errorMsg);
+      msg = errorMsg;
     } else if (warningCount > 0) {
-      msg = t(warningMsg);
+      msg = warningMsg;
     }
     const jobErrors = currentJob.results && currentJob.results.plan;
     const failed =
@@ -142,9 +140,13 @@ const JobResults = ({
               We check `is_valid === false` instead of simply `!is_valid`
               because jobs do not have `is_valid` property.
            */}
-          {currentJob.is_valid === false && !failed
-            ? t(`${label} has expired; please run it again.`)
-            : t(`${label} encountered ${msg}.`)}
+          {currentJob.is_valid === false && !failed ? (
+            t(`${label} has expired; please run it again.`)
+          ) : (
+            <>
+              {t(`${label} encountered`)} {msg}.
+            </>
+          )}
         </p>
         {failed && failMessage ? <p>{failMessage}</p> : null}
         {jobErrors ? <ErrorsList errorList={jobErrors} /> : null}
