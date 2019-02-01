@@ -167,6 +167,7 @@ class TestBasicGetViews:
             "id": str(product.id),
             "title": product.title,
             "description": "<p>This is a sample product.</p>",
+            "short_description": "",
             "click_through_agreement": "",
             "category": "salesforce",
             "color": "#FFFFFF",

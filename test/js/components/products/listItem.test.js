@@ -25,6 +25,7 @@ describe('<ProductItem />', () => {
           id: 'p1',
           title: 'Product 1',
           description: 'This is a test product.',
+          short_description: 'I am short.',
           category: 'salesforce',
           icon: {
             type: 'url',
@@ -54,6 +55,8 @@ describe('<ProductItem />', () => {
     const { getByText, queryByText } = setup(initialState);
 
     expect(getByText('Product 1')).toBeVisible();
+    expect(getByText('I am short.')).toBeVisible();
     expect(queryByText('Product 2')).toBeNull();
+    expect(queryByText('This is a test product')).toBeNull();
   });
 });
