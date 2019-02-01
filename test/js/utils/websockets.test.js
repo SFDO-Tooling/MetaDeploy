@@ -164,7 +164,7 @@ describe('createSocket', () => {
         socketInstance.onreconnect();
 
         expect(window.console.info).toHaveBeenCalledWith(
-          '[WebSocket] reconnecting...',
+          '[WebSocket] reconnecting…',
         );
       });
     });

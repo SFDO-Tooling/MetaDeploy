@@ -322,7 +322,7 @@ describe('<JobDetail />', () => {
       expect.assertions(2);
       expect(requestCancelJob).toHaveBeenCalledWith('job-1');
       return canceled.then(() => {
-        expect(getByText('Canceling Installation...')).toBeVisible();
+        expect(getByText('Canceling Installation…')).toBeVisible();
       });
     });
   });

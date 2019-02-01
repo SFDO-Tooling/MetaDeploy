@@ -108,7 +108,7 @@ const JobCell = (props: DataCellProps): React.Node => {
           >
             <Spinner size="small" />
           </span>
-          {t('Installing...')}
+          {t('Installing…')}
         </>
       );
     } else {

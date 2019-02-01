@@ -117,8 +117,16 @@ const JobResults = ({
     const errorCount = currentJob.error_count || 0;
     const warningCount = currentJob.warning_count || 0;
     let msg = t('errors');
-    const errorMsg = t('errorMsg', { count: errorCount });
-    const warningMsg = t('warningMsg', { count: warningCount });
+    const errorDefault = `${errorCount} error${errorCount === 1 ? '' : 's'}`;
+    const warningDefault = `${warningCount} warning${
+      warningCount === 1 ? '' : 's'
+    }`;
+    const errorMsg = t('errorMsg', errorDefault, {
+      count: errorCount,
+    });
+    const warningMsg = t('warningMsg', warningDefault, {
+      count: warningCount,
+    });
     if (errorCount > 0 && warningCount > 0) {
       msg = `${errorMsg} ${t('and')} ${warningMsg}`;
     } else if (errorCount > 0) {

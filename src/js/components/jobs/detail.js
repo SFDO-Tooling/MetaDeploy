@@ -139,7 +139,7 @@ class JobDetail extends React.Component<Props, State> {
           <Button
             label={
               <LabelWithSpinner
-                label={t('Canceling Installation...')}
+                label={t('Canceling Installation…')}
                 variant="base"
                 size="x-small"
               />

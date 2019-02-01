@@ -28,8 +28,8 @@ const CtaButton = ({
             <LabelWithSpinner
               label={
                 canceling
-                  ? t('Canceling Installation...')
-                  : t('Installation In Progress...')
+                  ? t('Canceling Installation…')
+                  : t('Installation In Progress…')
               }
             />
           }

@@ -245,7 +245,7 @@ class CtaButton extends React.Component<
     if (preflight === undefined) {
       return (
         <ActionBtn
-          label={<LabelWithSpinner label={t('Loading...')} />}
+          label={<LabelWithSpinner label={t('Loading…')} />}
           disabled
         />
       );
@@ -271,7 +271,7 @@ class CtaButton extends React.Component<
           <ActionBtn
             label={
               <LabelWithSpinner
-                label={t('Pre-Install Validation In Progress...')}
+                label={t('Pre-Install Validation In Progress…')}
               />
             }
             disabled

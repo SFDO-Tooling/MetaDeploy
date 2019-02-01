@@ -114,7 +114,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     const listedAdditionalPlans = version.additional_plans.filter(
       plan => plan.is_listed && plan.is_allowed,
     );
-    const secondary_plan = version.secondary_plan;
+    const { secondary_plan } = version;
     return (
       <DocumentTitle title={`${product.title} | ${t('MetaDeploy')}`}>
         <>

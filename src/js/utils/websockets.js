@@ -169,7 +169,7 @@ export const createSocket = ({
       opts.onmessage(e);
     },
     onreconnect: e => {
-      log('[WebSocket] reconnecting...');
+      log('[WebSocket] reconnecting…');
       opts.onreconnect(e);
     },
     onmaximum: e => {

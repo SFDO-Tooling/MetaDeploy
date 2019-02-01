@@ -33,7 +33,7 @@ describe('<CtaButton />', () => {
     test('renders progress btn', () => {
       const { getByText } = setup({ job: { status: 'started' } });
 
-      expect(getByText('Installation In Progress...')).toBeVisible();
+      expect(getByText('Installation In Progress…')).toBeVisible();
     });
   });
 
@@ -44,7 +44,7 @@ describe('<CtaButton />', () => {
         canceling: true,
       });
 
-      expect(getByText('Canceling Installation...')).toBeVisible();
+      expect(getByText('Canceling Installation…')).toBeVisible();
     });
   });
 
