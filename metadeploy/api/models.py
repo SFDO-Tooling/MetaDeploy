@@ -259,6 +259,7 @@ class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, models.Model):
 
     title = models.CharField(max_length=256)
     description = MarkdownField(property_suffix="_markdown", blank=True)
+    short_description = models.TextField(blank=True)
     category = models.ForeignKey(ProductCategory, on_delete=models.PROTECT)
     color = ColorField(blank=True)
     image = models.ImageField(blank=True)

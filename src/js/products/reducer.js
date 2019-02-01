@@ -19,6 +19,7 @@ export type Product = {
   +slug: string,
   +title: string,
   +description: string | null,
+  +short_description: string,
   +category: string,
   +color: string,
   +icon: {
