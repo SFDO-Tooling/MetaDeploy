@@ -7,24 +7,20 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import type { Product as ProductType } from 'products/reducer';
 
 const ProductIcon = ({ item }: { item: ProductType }) => {
-  if (item.icon && item.icon.type === 'url' && item.icon.url) {
+  const icon = item.icon;
+  if (icon && icon.type === 'url' && icon.url) {
     // Custom icon at provided URL
     return (
       <Avatar
         variant="entity"
         label={item.title}
-        imgSrc={item.icon.url}
+        imgSrc={icon.url}
         imgAlt={item.title}
         title={item.title}
       />
     );
   }
-  if (
-    item.icon &&
-    item.icon.type === 'slds' &&
-    item.icon.category &&
-    item.icon.name
-  ) {
+  if (icon && icon.type === 'slds' && icon.category && icon.name) {
     // Custom SLDS svg icon
     return (
       <span
@@ -33,8 +29,8 @@ const ProductIcon = ({ item }: { item: ProductType }) => {
       >
         <Icon
           assistiveText={{ label: item.title }}
-          category={item.icon.category}
-          name={item.icon.name}
+          category={icon.category}
+          name={icon.name}
         />
       </span>
     );

@@ -2,8 +2,8 @@
 
 import * as React from 'react';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
-import ProductIcon from 'components/products/icon';
 
+import ProductIcon from 'components/products/icon';
 import type { Product as ProductType } from 'products/reducer';
 
 const Header = ({

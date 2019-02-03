@@ -4,6 +4,7 @@ from importlib import import_module
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.apps import apps
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
+from django.utils.translation import gettext as _
 
 from .api.constants import CHANNELS_GROUP_NAME
 from .api.hash_url import convert_org_url_to_key
@@ -61,7 +62,7 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         has_good_permissions = self.has_good_permissions(content)
         all_good = is_valid and is_known_model and has_good_permissions
         if not all_good:
-            await self.send_json({"error": "Invalid subscription."})
+            await self.send_json({"error": _("Invalid subscription.")})
             return
         group_name = CHANNELS_GROUP_NAME.format(
             model=content["model"], id=content["id"]
@@ -69,7 +70,11 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         self.groups.append(group_name)
         await self.channel_layer.group_add(group_name, self.channel_name)
         await self.send_json(
-            {"ok": f"Subscribed to {content['model']}.id = {content['id']}"}
+            {
+                "ok": _("Subscribed to {model}.id = {id_}").format(
+                    model=content["model"], id_=content["id"]
+                )
+            }
         )
 
     def is_valid(self, content):

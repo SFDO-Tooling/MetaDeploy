@@ -1,8 +1,7 @@
 import React from 'react';
-import { render, fireEvent } from 'react-testing-library';
+import { fireEvent, render } from 'react-testing-library';
 
 import { addUrlParams } from 'utils/api';
-
 import Login from 'components/header/login';
 
 describe('<Login />', () => {

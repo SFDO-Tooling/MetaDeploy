@@ -4,10 +4,11 @@ import * as React from 'react';
 import Button from '@salesforce/design-system-react/components/button';
 import DocumentTitle from 'react-document-title';
 import { connect } from 'react-redux';
+import { t } from 'i18next';
 
 import routes from 'utils/routes';
 import { CONSTANTS } from 'plans/reducer';
-import { fetchJob, updateJob, requestCancelJob } from 'jobs/actions';
+import { fetchJob, requestCancelJob, updateJob } from 'jobs/actions';
 import { fetchVersion } from 'products/actions';
 import { selectJob, selectJobId } from 'jobs/selectors';
 import { selectPlan } from 'plans/selectors';
@@ -17,8 +18,7 @@ import {
   selectVersionLabel,
 } from 'products/selectors';
 import { selectUserState } from 'user/selectors';
-import { shouldFetchVersion, getLoadingOrNotFound } from 'products/utils';
-
+import { getLoadingOrNotFound, shouldFetchVersion } from 'products/utils';
 import BodyContainer from 'components/bodyContainer';
 import CtaButton from 'components/jobs/ctaButton';
 import Header from 'components/plans/header';
@@ -32,7 +32,6 @@ import StepsTable from 'components/plans/stepsTable';
 import Toasts from 'components/plans/toasts';
 import UserInfo from 'components/jobs/userInfo';
 import { LabelWithSpinner } from 'components/plans/ctaButton';
-
 import type { AppState } from 'app/reducer';
 import type { InitialProps } from 'components/utils';
 import type { Job as JobType } from 'jobs/reducer';
@@ -140,7 +139,7 @@ class JobDetail extends React.Component<Props, State> {
           <Button
             label={
               <LabelWithSpinner
-                label="Canceling Installation..."
+                label={t('Canceling Installation…')}
                 variant="base"
                 size="x-small"
               />
@@ -151,7 +150,7 @@ class JobDetail extends React.Component<Props, State> {
       }
       return (
         <Button
-          label="Cancel Installation"
+          label={t('Cancel Installation')}
           variant="base"
           className="slds-button_text-destructive"
           onClick={this.requestCancelJob}
@@ -198,7 +197,9 @@ class JobDetail extends React.Component<Props, State> {
     const { canceling } = this.state;
     return (
       <DocumentTitle
-        title={`Installation | ${plan.title} | ${product.title} | MetaDeploy`}
+        title={`${t('Installation')} | ${plan.title} | ${product.title} | ${t(
+          'MetaDeploy',
+        )}`}
       >
         <>
           <Header
@@ -210,7 +211,7 @@ class JobDetail extends React.Component<Props, State> {
               <>
                 {this.getCancelBtn()}
                 <Button
-                  label="Share Installation"
+                  label={t('Share Installation')}
                   iconCategory="utility"
                   iconName="share"
                   iconPosition="left"
@@ -226,9 +227,9 @@ class JobDetail extends React.Component<Props, State> {
             updateJob={doUpdateJob}
           />
           <BodyContainer>
-            <Toasts job={job} label="Installation" />
+            <Toasts job={job} label={t('Installation')} />
             <Intro
-              results={<JobResults job={job} label="Installation" />}
+              results={<JobResults job={job} label={t('Installation')} />}
               cta={
                 <CtaButton
                   job={job}

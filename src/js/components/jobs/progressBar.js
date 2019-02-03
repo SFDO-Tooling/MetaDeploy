@@ -2,9 +2,9 @@
 
 import * as React from 'react';
 import classNames from 'classnames';
+import { t } from 'i18next';
 
 import { CONSTANTS } from 'plans/reducer';
-
 import type { Job as JobType } from 'jobs/reducer';
 
 // Progress Bar has not been implemented yet in design-system-react
@@ -42,14 +42,14 @@ const ProgressBar = ({ job }: { job: JobType }): React.Node => {
       >
         <span>
           <strong>
-            Installation Progress
+            {t('Installation Progress')}
             {isFailed ? (
               <>
                 :{' '}
                 <span className="slds-text-color_error">
                   {job.status === CONSTANTS.STATUS.CANCELED
-                    ? 'Canceled'
-                    : 'Failed'}
+                    ? t('Canceled')
+                    : t('Failed')}
                 </span>
               </>
             ) : null}
@@ -57,7 +57,9 @@ const ProgressBar = ({ job }: { job: JobType }): React.Node => {
         </span>
         {isFailed ? null : (
           <span aria-hidden="true">
-            <strong>{progress}% Complete</strong>
+            <strong>
+              {progress}% {t('Complete')}
+            </strong>
           </span>
         )}
       </div>
@@ -77,7 +79,9 @@ const ProgressBar = ({ job }: { job: JobType }): React.Node => {
           })}
           style={{ width: `${progress}%` }}
         >
-          <span className="slds-assistive-text">Progress: {progress}%</span>
+          <span className="slds-assistive-text">
+            {t('Progress')}: {progress}%
+          </span>
         </span>
       </div>
     </div>

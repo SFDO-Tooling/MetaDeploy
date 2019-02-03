@@ -3,16 +3,15 @@
 import * as React from 'react';
 import Button from '@salesforce/design-system-react/components/button';
 import Spinner from '@salesforce/design-system-react/components/spinner';
+import { t } from 'i18next';
+import type { RouterHistory } from 'react-router-dom';
 
 import routes from 'utils/routes';
 import { CONSTANTS } from 'plans/reducer';
 import { getUrlParam, removeUrlParam } from 'utils/api';
-
 import ClickThroughAgreementModal from 'components/plans/clickThroughAgreementModal';
 import Login from 'components/header/login';
 import PreflightWarningModal from 'components/plans/preflightWarningModal';
-
-import type { RouterHistory } from 'react-router-dom';
 import type {
   Plan as PlanType,
   Preflight as PreflightType,
@@ -216,7 +215,7 @@ class CtaButton extends React.Component<
     // Require login first...
     return (
       <LoginBtn
-        label={`Log In to ${label}`}
+        label={t(`Log In to ${label}`)}
         redirectParams={
           startPreflightAfterLogin ? { [AUTO_START_PREFLIGHT]: true } : {}
         }
@@ -236,7 +235,7 @@ class CtaButton extends React.Component<
       // Require login first...
       return (
         <LoginBtn
-          label="Log In to Start Pre-Install Validation"
+          label={t('Log In to Start Pre-Install Validation')}
           redirectParams={{ [AUTO_START_PREFLIGHT]: true }}
         />
       );
@@ -245,7 +244,10 @@ class CtaButton extends React.Component<
     // An `undefined` preflight means we don't know whether a preflight exists
     if (preflight === undefined) {
       return (
-        <ActionBtn label={<LabelWithSpinner label="Loading..." />} disabled />
+        <ActionBtn
+          label={<LabelWithSpinner label={t('Loading…')} />}
+          disabled
+        />
       );
     }
 
@@ -256,7 +258,7 @@ class CtaButton extends React.Component<
     if (preflight === null) {
       // No prior preflight exists
       return this.getLoginOrActionBtn(
-        'Start Pre-Install Validation',
+        t('Start Pre-Install Validation'),
         startPreflight,
         true,
       );
@@ -268,7 +270,9 @@ class CtaButton extends React.Component<
         return (
           <ActionBtn
             label={
-              <LabelWithSpinner label="Pre-Install Validation In Progress..." />
+              <LabelWithSpinner
+                label={t('Pre-Install Validation In Progress…')}
+              />
             }
             disabled
           />
@@ -288,10 +292,10 @@ class CtaButton extends React.Component<
             : this.startJob;
           // Warnings must be confirmed before proceeding
           const btn = hasWarnings
-            ? this.getLoginOrActionBtn('Install', () => {
+            ? this.getLoginOrActionBtn(t('Install'), () => {
                 this.togglePreflightModal(true);
               })
-            : this.getLoginOrActionBtn('Install', action);
+            : this.getLoginOrActionBtn(t('Install'), action);
           return (
             <>
               {btn}
@@ -317,7 +321,7 @@ class CtaButton extends React.Component<
         }
         // Prior preflight exists, but is no longer valid or has errors
         return this.getLoginOrActionBtn(
-          'Re-Run Pre-Install Validation',
+          t('Re-Run Pre-Install Validation'),
           startPreflight,
           true,
         );
@@ -326,7 +330,7 @@ class CtaButton extends React.Component<
       case STATUS.FAILED: {
         // Prior preflight exists, but failed or had plan-level errors
         return this.getLoginOrActionBtn(
-          'Re-Run Pre-Install Validation',
+          t('Re-Run Pre-Install Validation'),
           startPreflight,
           true,
         );

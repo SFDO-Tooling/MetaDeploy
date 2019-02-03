@@ -1,8 +1,7 @@
 import React from 'react';
-import { render, fireEvent } from 'react-testing-library';
+import { fireEvent, render } from 'react-testing-library';
 
 import { getUrlParam, removeUrlParam } from 'utils/api';
-
 import CtaButton from 'components/plans/ctaButton';
 
 jest.mock('utils/api');
@@ -88,7 +87,7 @@ describe('<CtaButton />', () => {
     test('renders loading btn', () => {
       const { getByText } = setup({ preflight: undefined });
 
-      expect(getByText('Loading...')).toBeVisible();
+      expect(getByText('Loading…')).toBeVisible();
     });
   });
 
@@ -117,7 +116,7 @@ describe('<CtaButton />', () => {
     test('renders progress btn', () => {
       const { getByText } = setup({ preflight: { status: 'started' } });
 
-      expect(getByText('Pre-Install Validation In Progress...')).toBeVisible();
+      expect(getByText('Pre-Install Validation In Progress…')).toBeVisible();
     });
   });
 

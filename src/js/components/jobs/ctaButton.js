@@ -3,11 +3,10 @@
 import * as React from 'react';
 import Icon from '@salesforce/design-system-react/components/icon';
 import { Link } from 'react-router-dom';
+import { t } from 'i18next';
 
 import { CONSTANTS } from 'plans/reducer';
-
 import { ActionBtn, LabelWithSpinner } from 'components/plans/ctaButton';
-
 import type { Job as JobType } from 'jobs/reducer';
 
 const { STATUS } = CONSTANTS;
@@ -29,8 +28,8 @@ const CtaButton = ({
             <LabelWithSpinner
               label={
                 canceling
-                  ? 'Canceling Installation...'
-                  : 'Installation In Progress...'
+                  ? t('Canceling Installation…')
+                  : t('Installation In Progress…')
               }
             />
           }
@@ -56,7 +55,7 @@ const CtaButton = ({
               size="x-small"
               inverse
             />
-            View Org
+            {t('View Org')}
           </a>
         );
       }
@@ -72,7 +71,7 @@ const CtaButton = ({
             slds-size_full
             slds-p-vertical_xx-small"
         >
-          Return to Pre-Install Validation
+          {t('Return to Pre-Install Validation')}
         </Link>
       );
     }

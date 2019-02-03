@@ -4,9 +4,9 @@ import * as React from 'react';
 import Button from '@salesforce/design-system-react/components/button';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
+import { t } from 'i18next';
 
 import { addUrlParams } from 'utils/api';
-
 import type { UrlParams } from 'utils/api';
 
 type Props = {
@@ -48,10 +48,10 @@ class CustomDomainModal extends React.Component<Props, { url: string }> {
 
   render(): React.Node {
     const footer = [
-      <Button key="cancel" label="Cancel" onClick={this.handleClose} />,
+      <Button key="cancel" label={t('Cancel')} onClick={this.handleClose} />,
       <Button
         key="submit"
-        label="Continue"
+        label={t('Continue')}
         variant="brand"
         onClick={this.handleSubmit}
       />,
@@ -59,7 +59,7 @@ class CustomDomainModal extends React.Component<Props, { url: string }> {
     return (
       <Modal
         isOpen={this.props.isOpen}
-        title="Use Custom Domain"
+        title={t('Use Custom Domain')}
         onRequestClose={this.handleClose}
         footer={footer}
       >
@@ -68,11 +68,13 @@ class CustomDomainModal extends React.Component<Props, { url: string }> {
             className="slds-form-element__help
               slds-p-bottom_small"
           >
-            To go to your company’s login page, enter the custom domain name.
+            {t(
+              'To go to your company’s login page, enter the custom domain name.',
+            )}
           </div>
           <Input
             id="login-custom-domain"
-            label="Custom Domain"
+            label={t('Custom Domain')}
             value={this.state.url}
             onChange={this.handleChange}
             aria-describedby="login-custom-domain-help"

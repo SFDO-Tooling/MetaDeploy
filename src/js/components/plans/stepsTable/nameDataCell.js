@@ -7,9 +7,7 @@ import DataTableCell from '@salesforce/design-system-react/components/data-table
 import classNames from 'classnames';
 
 import { CONSTANTS } from 'plans/reducer';
-
 import { ErrorsList } from 'components/plans/jobResults';
-
 import type { DataCellProps } from 'components/plans/stepsTable/index';
 
 const { RESULT_STATUS } = CONSTANTS;

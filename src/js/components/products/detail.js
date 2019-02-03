@@ -2,8 +2,10 @@
 
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
-import { Redirect, Link } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
+import { Trans } from 'react-i18next';
 import { connect } from 'react-redux';
+import { t } from 'i18next';
 
 import routes from 'utils/routes';
 import { fetchVersion } from 'products/actions';
@@ -13,14 +15,12 @@ import {
   selectVersionLabel,
 } from 'products/selectors';
 import { selectUserState } from 'user/selectors';
-import { shouldFetchVersion, getLoadingOrNotFound } from 'products/utils';
-
+import { getLoadingOrNotFound, shouldFetchVersion } from 'products/utils';
 import BodyContainer from 'components/bodyContainer';
 import Header from 'components/products/header';
 import ProductNotAllowed from 'components/products/notAllowed';
 import ProductNotFound from 'components/products/product404';
 import VersionNotFound from 'components/products/version404';
-
 import type { AppState } from 'app/reducer';
 import type { InitialProps } from 'components/utils';
 import type {
@@ -114,15 +114,16 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     const listedAdditionalPlans = version.additional_plans.filter(
       plan => plan.is_listed && plan.is_allowed,
     );
+    const { secondary_plan } = version;
     return (
-      <DocumentTitle title={`${product.title} | MetaDeploy`}>
+      <DocumentTitle title={`${product.title} | ${t('MetaDeploy')}`}>
         <>
           <Header product={product} versionLabel={version.label} />
           {product.is_allowed ? (
             <BodyContainer>
               <BodySection>
                 <h3 className="slds-text-heading_small">
-                  Select a Plan to Install
+                  {t('Select a Plan to Install')}
                 </h3>
                 <p>{version.description}</p>
                 {version.primary_plan.is_listed &&
@@ -142,28 +143,28 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                     </Link>
                   </p>
                 ) : null}
-                {version.secondary_plan &&
-                version.secondary_plan.is_listed &&
-                version.secondary_plan.is_allowed ? (
+                {secondary_plan &&
+                secondary_plan.is_listed &&
+                secondary_plan.is_allowed ? (
                   <p>
                     <Link
                       to={routes.plan_detail(
                         product.slug,
                         version.label,
-                        version.secondary_plan.slug,
+                        secondary_plan.slug,
                       )}
                       className="slds-button
                         slds-button_outline-brand
                         slds-size_full"
                     >
-                      {version.secondary_plan.title}
+                      {secondary_plan.title}
                     </Link>
                   </p>
                 ) : null}
                 {listedAdditionalPlans.length ? (
                   <div className="slds-p-top_x-large">
                     <h3 className="slds-text-heading_small">
-                      Additional Plans
+                      {t('Additional Plans')}
                     </h3>
                     {listedAdditionalPlans.map(plan => (
                       <p key={plan.id}>
@@ -183,7 +184,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
               </BodySection>
               <BodySection>
                 <h3 className="slds-text-heading_small">
-                  About {product.title}
+                  {t('About')} {product.title}
                 </h3>
                 {product.image ? (
                   <img
@@ -203,10 +204,10 @@ class VersionDetail extends React.Component<VersionDetailProps> {
               isLoggedIn={user !== null}
               message={product.not_allowed_instructions}
               link={
-                <>
+                <Trans i18nKey="productNotAllowed">
                   Try the{' '}
                   <Link to={routes.product_list()}>list of all products</Link>
-                </>
+                </Trans>
               }
             />
           )}

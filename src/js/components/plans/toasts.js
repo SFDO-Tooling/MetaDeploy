@@ -3,9 +3,9 @@
 import * as React from 'react';
 import Toast from '@salesforce/design-system-react/components/toast';
 import ToastContainer from '@salesforce/design-system-react/components/toast/container';
+import { t } from 'i18next';
 
 import { CONSTANTS } from 'plans/reducer';
-
 import type { Job as JobType } from 'jobs/reducer';
 import type { Preflight as PreflightType } from 'plans/reducer';
 
@@ -35,7 +35,7 @@ class Toasts extends React.Component<Props, State> {
     return (
       <Toast
         labels={{
-          heading: [label],
+          heading: [t(label)],
         }}
         variant={variant}
         duration={20 * 1000}

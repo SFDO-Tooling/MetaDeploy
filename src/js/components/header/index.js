@@ -4,16 +4,15 @@ import * as React from 'react';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
+import { t } from 'i18next';
 
 import routes from 'utils/routes';
 import { logout } from 'user/actions';
 import { selectSocketState } from 'socket/selectors';
 import { selectUserState } from 'user/selectors';
-
 import Login from 'components/header/login';
 import Logout from 'components/header/logout';
 import OfflineAlert from 'components/offlineAlert';
-
 import type { AppState } from 'app/reducer';
 import type { Socket } from 'socket/reducer';
 import type { User } from 'user/reducer';
@@ -51,7 +50,7 @@ const Header = ({ user, doLogout, socket }: Props) => (
               slds-text-link_reset
               slds-align-middle"
           >
-            Products
+            {t('Products')}
           </Link>
           {user ? <Logout user={user} doLogout={doLogout} /> : <Login />}
         </>

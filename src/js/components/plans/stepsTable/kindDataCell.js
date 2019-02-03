@@ -11,8 +11,8 @@ const KindDataCell = (props: DataCellProps): React.Node => {
   if (!props.item) {
     return null;
   }
-  const value = props.item.kind;
   const iconName = props.item.kind_icon;
+  const value = props.item.kind;
   return (
     <DataTableCell title={value} {...props}>
       {iconName ? (

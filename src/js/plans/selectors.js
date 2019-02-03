@@ -3,7 +3,6 @@
 import { createSelector } from 'reselect';
 
 import { selectProduct, selectVersion } from 'products/selectors';
-
 import type { AppState } from 'app/reducer';
 import type { InitialProps } from 'components/utils';
 import type {

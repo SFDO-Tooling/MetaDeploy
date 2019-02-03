@@ -1,14 +1,13 @@
 // @flow
 
 import * as React from 'react';
-import JobProgressIndicator from 'components/jobs/progressIndicator';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
-import PlanProgressIndicator from 'components/plans/progressIndicator';
-import ProductIcon from 'components/products/icon';
 import { Link } from 'react-router-dom';
 
+import JobProgressIndicator from 'components/jobs/progressIndicator';
+import PlanProgressIndicator from 'components/plans/progressIndicator';
+import ProductIcon from 'components/products/icon';
 import routes from 'utils/routes';
-
 import type { Job as JobType } from 'jobs/reducer';
 import type { Plan as PlanType } from 'plans/reducer';
 import type {

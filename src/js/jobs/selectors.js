@@ -4,7 +4,7 @@ import { createSelector } from 'reselect';
 
 import type { AppState } from 'app/reducer';
 import type { InitialProps } from 'components/utils';
-import type { JobsState, Job as JobType } from 'jobs/reducer';
+import type { Job as JobType, JobsState } from 'jobs/reducer';
 
 export const selectJobsState = (appState: AppState): JobsState => appState.jobs;
 

@@ -5,15 +5,14 @@ import DocumentTitle from 'react-document-title';
 import Tabs from '@salesforce/design-system-react/components/tabs';
 import TabsPanel from '@salesforce/design-system-react/components/tabs/panel';
 import { connect } from 'react-redux';
+import { t } from 'i18next';
 
 import {
   selectProductCategories,
   selectProductsByCategory,
 } from 'products/selectors';
-
 import ProductItem from 'components/products/listItem';
 import { EmptyIllustration } from 'components/404';
-
 import type { AppState } from 'app/reducer';
 import type { ProductsMapType } from 'products/selectors';
 import type { Products as ProductsType } from 'products/reducer';
@@ -70,7 +69,7 @@ class ProductsList extends React.Component<Props, State> {
     switch (this.props.productsByCategory.size) {
       case 0: {
         // No products; show empty message
-        const msg = 'We couldn’t find any products. Try again later?';
+        const msg = t('We couldn’t find any products. Try again later?');
         contents = <EmptyIllustration message={msg} />;
         break;
       }
@@ -107,7 +106,7 @@ class ProductsList extends React.Component<Props, State> {
       }
     }
     return (
-      <DocumentTitle title="Products | MetaDeploy">
+      <DocumentTitle title={`${t('Products')} | ${t('MetaDeploy')}`}>
         <div className="slds-p-around_x-large">{contents}</div>
       </DocumentTitle>
     );

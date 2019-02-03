@@ -7,7 +7,6 @@ import PlanNotFound from 'components/plans/plan404';
 import ProductNotFound from 'components/products/product404';
 import VersionNotFound from 'components/products/version404';
 import JobNotFound from 'components/jobs/job404';
-
 import type { Job as JobType } from 'jobs/reducer';
 import type { Plan as PlanType } from 'plans/reducer';
 import type {

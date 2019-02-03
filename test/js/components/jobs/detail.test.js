@@ -2,11 +2,10 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { fireEvent } from 'react-testing-library';
 
-import { fetchJob, requestCancelJob } from 'jobs/actions';
-import { fetchVersion } from 'products/actions';
-
 import { renderWithRedux, storeWithApi } from './../../utils';
 
+import { fetchJob, requestCancelJob } from 'jobs/actions';
+import { fetchVersion } from 'products/actions';
 import JobDetail from 'components/jobs/detail';
 
 jest.mock('jobs/actions');
@@ -323,7 +322,7 @@ describe('<JobDetail />', () => {
       expect.assertions(2);
       expect(requestCancelJob).toHaveBeenCalledWith('job-1');
       return canceled.then(() => {
-        expect(getByText('Canceling Installation...')).toBeVisible();
+        expect(getByText('Canceling Installation…')).toBeVisible();
       });
     });
   });

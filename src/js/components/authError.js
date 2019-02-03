@@ -3,33 +3,33 @@
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
 import { Link } from 'react-router-dom';
+import { Trans } from 'react-i18next';
 import { connect } from 'react-redux';
+import { t } from 'i18next';
 
 import routes from 'utils/routes';
 import { selectUserState } from 'user/selectors';
-
 import Login from 'components/header/login';
 import { EmptyIllustration } from 'components/404';
-
 import type { AppState } from 'app/reducer';
 import type { InitialProps } from 'components/utils';
 import type { User as UserType } from 'user/reducer';
 
 const AuthError = ({ user }: { user: UserType }) => (
-  <DocumentTitle title="Authentication Error | MetaDeploy">
+  <DocumentTitle title={`${t('Authentication Error')} | ${t('MetaDeploy')}`}>
     <>
       <EmptyIllustration
         message={
-          <>
+          <Trans i18nKey="errorWithAccount">
             An error occurred with your account. Try the{' '}
             <Link to={routes.home()}>home page</Link>?
-          </>
+          </Trans>
         }
       />
       <div className="slds-align_absolute-center">
         <Login
           id="auth-error-login"
-          label={user ? 'Log In With a Different Org' : 'Log In'}
+          label={user ? t('Log In With a Different Org') : t('Log In')}
           buttonClassName="slds-p-horizontal_xxx-small"
           buttonVariant="base"
         />

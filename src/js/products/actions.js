@@ -1,9 +1,8 @@
 // @flow
 
-import { addUrlParams } from 'utils/api';
-
 import type { ThunkAction } from 'redux-thunk';
 
+import { addUrlParams } from 'utils/api';
 import type { Products, Version } from 'products/reducer';
 
 type VersionFilters = {| product: string, label: string |};

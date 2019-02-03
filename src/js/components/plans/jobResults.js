@@ -2,9 +2,9 @@
 
 import * as React from 'react';
 import Icon from '@salesforce/design-system-react/components/icon';
+import { t } from 'i18next';
 
 import { CONSTANTS } from 'plans/reducer';
-
 import type { Job as JobType } from 'jobs/reducer';
 import type {
   Preflight as PreflightType,
@@ -19,7 +19,7 @@ export const ErrorIcon = ({
   containerClassName?: string,
 }): React.Node => (
   <Icon
-    assistiveText={{ label: 'Error' }}
+    assistiveText={{ label: t('Error') }}
     category="utility"
     name="error"
     colorVariant="error"
@@ -31,7 +31,7 @@ export const ErrorIcon = ({
 
 export const WarningIcon = (): React.Node => (
   <Icon
-    assistiveText={{ label: 'Warning' }}
+    assistiveText={{ label: t('Warning') }}
     category="utility"
     name="warning"
     colorVariant="warning"
@@ -89,7 +89,7 @@ const JobResults = ({
   preflight?: PreflightType,
   label: string,
   failMessage?: string,
-  successMessage?: string,
+  successMessage?: React.Node,
 }): React.Node => {
   const currentJob = job || preflight;
   if (
@@ -116,13 +116,19 @@ const JobResults = ({
     // Show errors/warnings
     const errorCount = currentJob.error_count || 0;
     const warningCount = currentJob.warning_count || 0;
-    let msg = 'errors';
-    const errorMsg = `${errorCount} error${errorCount === 1 ? '' : 's'}`;
-    const warningMsg = `${warningCount} warning${
+    let msg = t('errors');
+    const errorDefault = `${errorCount} error${errorCount === 1 ? '' : 's'}`;
+    const warningDefault = `${warningCount} warning${
       warningCount === 1 ? '' : 's'
     }`;
+    const errorMsg = t('errorMsg', errorDefault, {
+      count: errorCount,
+    });
+    const warningMsg = t('warningMsg', warningDefault, {
+      count: warningCount,
+    });
     if (errorCount > 0 && warningCount > 0) {
-      msg = `${errorMsg} and ${warningMsg}`;
+      msg = `${errorMsg} ${t('and')} ${warningMsg}`;
     } else if (errorCount > 0) {
       msg = errorMsg;
     } else if (warningCount > 0) {
@@ -142,9 +148,13 @@ const JobResults = ({
               We check `is_valid === false` instead of simply `!is_valid`
               because jobs do not have `is_valid` property.
            */}
-          {currentJob.is_valid === false && !failed
-            ? `${label} has expired; please run it again.`
-            : `${label} encountered ${msg}.`}
+          {currentJob.is_valid === false && !failed ? (
+            t(`${label} has expired; please run it again.`)
+          ) : (
+            <>
+              {t(`${label} encountered`)} {msg}.
+            </>
+          )}
         </p>
         {failed && failMessage ? <p>{failMessage}</p> : null}
         {jobErrors ? <ErrorsList errorList={jobErrors} /> : null}
@@ -157,7 +167,7 @@ const JobResults = ({
     return (
       <p className="slds-text-color_error">
         <ErrorIcon />
-        {label} was canceled.
+        {t(`${label} was canceled.`)}
       </p>
     );
   }
@@ -168,7 +178,7 @@ const JobResults = ({
     return (
       <p>
         <WarningIcon />
-        {label} has expired; please run it again.
+        {t(`${label} has expired; please run it again.`)}
       </p>
     );
   }
@@ -176,8 +186,10 @@ const JobResults = ({
   // Successful job
   return (
     <>
-      <p className="slds-text-color_success">{label} completed successfully.</p>
-      {successMessage ? <p>{successMessage}</p> : null}
+      <p className="slds-text-color_success">
+        {t(`${label} completed successfully.`)}
+      </p>
+      {successMessage === undefined ? null : <p>{successMessage}</p>}
     </>
   );
 };

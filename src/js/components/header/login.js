@@ -2,17 +2,16 @@
 
 import * as React from 'react';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
+import { t } from 'i18next';
 
 import { addUrlParams } from 'utils/api';
 import { logError } from 'utils/logging';
-
 import CustomDomainModal from 'components/header/customDomainModal';
-
 import type { UrlParams } from 'utils/api';
 
 type Props = {
   id: string,
-  label: string | React.Node,
+  label?: string | React.Node,
   buttonClassName: string,
   buttonVariant: string,
   triggerClassName?: string,
@@ -33,7 +32,6 @@ type MenuOption =
 class Login extends React.Component<Props, { modalOpen: boolean }> {
   static defaultProps = {
     id: 'login',
-    label: 'Log In',
     buttonClassName: 'slds-button_outline-brand',
     buttonVariant: 'base',
     disabled: false,
@@ -78,14 +76,14 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
   static getMenuOpts(): Array<MenuOption> {
     return [
       {
-        label: 'Production or Developer Org',
+        label: t('Production or Developer Org'),
         href:
           window.api_urls.salesforce_production_login &&
           window.api_urls.salesforce_production_login(),
         disabled: !window.api_urls.salesforce_production_login,
       },
       {
-        label: 'Sandbox or Scratch Org',
+        label: t('Sandbox or Scratch Org'),
         href:
           window.api_urls.salesforce_test_login &&
           window.api_urls.salesforce_test_login(),
@@ -95,7 +93,7 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
         type: 'divider',
       },
       {
-        label: 'Use Custom Domain',
+        label: t('Use Custom Domain'),
         modal: Boolean(window.api_urls.salesforce_custom_login),
         disabled: !window.api_urls.salesforce_custom_login,
       },
@@ -116,11 +114,12 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
       redirectParams,
     } = this.props;
     const { modalOpen } = this.state;
+
     return (
       <>
         <Dropdown
           id={id}
-          label={label}
+          label={label === undefined ? t('Log In') : label}
           className="slds-dropdown_actions
             slds-dropdown_medium"
           triggerClassName={triggerClassName}

@@ -2,11 +2,10 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { fireEvent } from 'react-testing-library';
 
-import { fetchVersion } from 'products/actions';
-import { fetchPreflight } from 'plans/actions';
-
 import { renderWithRedux, storeWithApi } from './../../utils';
 
+import { fetchVersion } from 'products/actions';
+import { fetchPreflight } from 'plans/actions';
 import PlanDetail from 'components/plans/detail';
 
 jest.mock('products/actions');
@@ -38,7 +37,7 @@ const defaultState = {
           id: 'plan-1',
           slug: 'my-plan',
           title: 'My Plan',
-          preflight_message: 'Preflight text...',
+          preflight_message: 'Preflight text…',
           steps: [
             {
               id: 'step-1',
@@ -80,7 +79,7 @@ const defaultState = {
             id: 'plan-3',
             slug: 'third-plan',
             title: 'My Third Plan',
-            preflight_message: 'Third preflight text...',
+            preflight_message: 'Third preflight text…',
             steps: [],
             is_allowed: true,
           },
@@ -254,7 +253,7 @@ describe('<PlanDetail />', () => {
 
     expect(getByText('Product 1, 1.0.0')).toBeVisible();
     expect(getByText('My Plan')).toBeVisible();
-    expect(getByText('Preflight text...')).toBeVisible();
+    expect(getByText('Preflight text…')).toBeVisible();
     expect(getByText('Step 1')).toBeVisible();
   });
 
@@ -289,7 +288,7 @@ describe('<PlanDetail />', () => {
     });
 
     expect(getByText('Product 1, 1.0.0')).toBeVisible();
-    expect(getByText('Third preflight text...')).toBeVisible();
+    expect(getByText('Third preflight text…')).toBeVisible();
   });
 
   describe('no plan', () => {
