@@ -126,6 +126,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "django_filters",
+    "parler",
     "metadeploy",
     "metadeploy.multisalesforce",
     "metadeploy.api",
@@ -175,6 +176,8 @@ AUTHENTICATION_BACKENDS = [
 ASGI_APPLICATION = "metadeploy.routing.application"
 
 SITE_ID = 1
+
+PARLER_LANGUAGES = {1: ({"code": "en-us"},), "default": {"fallback": "en-us"}}
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases

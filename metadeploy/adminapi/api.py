@@ -137,6 +137,9 @@ class ProductSlugViewSet(AdminAPIViewSet):
 
 
 class PlanStepSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(required=False)
+    description = serializers.CharField(required=False)
+
     class Meta:
         model = models.Step
         exclude = ("id", "plan")
@@ -144,6 +147,9 @@ class PlanStepSerializer(serializers.ModelSerializer):
 
 class PlanSerializer(AdminAPISerializer):
     steps = PlanStepSerializer(many=True, required=False)
+    post_install_message = serializers.CharField(required=False)
+    preflight_message = serializers.CharField(required=False)
+    title = serializers.CharField(required=False)
 
     class Meta:
         fields = "__all__"

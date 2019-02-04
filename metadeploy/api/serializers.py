@@ -106,6 +106,8 @@ class LimitedUserSerializer(serializers.ModelSerializer):
 class StepSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     kind = serializers.CharField(source="get_kind_display")
+    name = serializers.CharField()
+    description = serializers.CharField()
 
     class Meta:
         model = Step
@@ -127,6 +129,7 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
     )
     is_allowed = serializers.SerializerMethodField()
     steps = StepSerializer(many=True)
+    title = serializers.CharField()
     preflight_message = serializers.CharField(source="preflight_message_markdown")
     not_allowed_instructions = serializers.SerializerMethodField()
 
@@ -166,6 +169,7 @@ class VersionSerializer(serializers.ModelSerializer):
     primary_plan = PlanSerializer()
     secondary_plan = PlanSerializer()
     additional_plans = PlanSerializer(many=True)
+    description = serializers.CharField()
 
     class Meta:
         model = Version
@@ -191,6 +195,8 @@ class ProductSerializer(CircumspectSerializerMixin, serializers.ModelSerializer)
     click_through_agreement = serializers.CharField(
         source="click_through_agreement_markdown"
     )
+    title = serializers.CharField
+    short_description = serializers.CharField()
     not_allowed_instructions = serializers.SerializerMethodField()
 
     class Meta:
