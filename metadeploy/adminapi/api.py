@@ -137,7 +137,7 @@ class ProductSlugViewSet(AdminAPIViewSet):
 
 
 class PlanStepSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(required=False)
+    name = serializers.CharField()
     description = serializers.CharField(required=False)
 
     class Meta:
@@ -149,7 +149,7 @@ class PlanSerializer(AdminAPISerializer):
     steps = PlanStepSerializer(many=True, required=False)
     post_install_message = serializers.CharField(required=False)
     preflight_message = serializers.CharField(required=False)
-    title = serializers.CharField(required=False)
+    title = serializers.CharField()
 
     class Meta:
         fields = "__all__"
