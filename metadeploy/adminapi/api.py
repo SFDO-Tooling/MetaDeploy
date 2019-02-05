@@ -128,8 +128,19 @@ class AdminAPIViewSet(viewsets.ModelViewSet):
         return ctx
 
 
+class ProductSerializer(AdminAPISerializer):
+    title = serializers.CharField()
+    short_description = serializers.CharField()
+    description = serializers.CharField()
+    click_through_agreement = serializers.CharField()
+
+    class Meta:
+        fields = "__all__"
+
+
 class ProductViewSet(AdminAPIViewSet):
     model_name = "Product"
+    serializer_base = ProductSerializer
 
 
 class ProductSlugViewSet(AdminAPIViewSet):
