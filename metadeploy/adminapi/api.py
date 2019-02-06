@@ -128,8 +128,19 @@ class AdminAPIViewSet(viewsets.ModelViewSet):
         return ctx
 
 
+class ProductSerializer(AdminAPISerializer):
+    title = serializers.CharField()
+    short_description = serializers.CharField()
+    description = serializers.CharField()
+    click_through_agreement = serializers.CharField()
+
+    class Meta:
+        fields = "__all__"
+
+
 class ProductViewSet(AdminAPIViewSet):
     model_name = "Product"
+    serializer_base = ProductSerializer
 
 
 class ProductSlugViewSet(AdminAPIViewSet):
@@ -137,6 +148,9 @@ class ProductSlugViewSet(AdminAPIViewSet):
 
 
 class PlanStepSerializer(serializers.ModelSerializer):
+    name = serializers.CharField()
+    description = serializers.CharField(required=False)
+
     class Meta:
         model = models.Step
         exclude = ("id", "plan")
@@ -144,6 +158,9 @@ class PlanStepSerializer(serializers.ModelSerializer):
 
 class PlanSerializer(AdminAPISerializer):
     steps = PlanStepSerializer(many=True, required=False)
+    post_install_message = serializers.CharField(required=False)
+    preflight_message = serializers.CharField(required=False)
+    title = serializers.CharField()
 
     class Meta:
         fields = "__all__"

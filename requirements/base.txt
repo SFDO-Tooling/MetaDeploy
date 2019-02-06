@@ -30,3 +30,4 @@ django-hashid-field==2.1.5
 redis==2.10.6  # pyup: <3.0
 logfmt==0.4
 -e git+https://github.com/SFDO-Tooling/sfdo-template-helpers.git@v0.1.0#egg=sfdo_template_helpers
+django-parler==1.9.2
