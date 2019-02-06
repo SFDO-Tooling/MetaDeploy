@@ -56,7 +56,7 @@ module.exports = {
   Interpolate: reactI18next.Interpolate,
   I18nextProvider: reactI18next.I18nextProvider,
   loadNamespaces: reactI18next.loadNamespaces,
-  reactI18nextModule: reactI18next.reactI18nextModule,
+  initReactI18next: reactI18next.initReactI18next,
   setDefaults: reactI18next.setDefaults,
   getDefaults: reactI18next.getDefaults,
   setI18n: reactI18next.setI18n,
