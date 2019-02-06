@@ -2,7 +2,7 @@
 
 import i18n_backend from 'i18next-xhr-backend';
 import i18n_detector from 'i18next-browser-languagedetector';
-import { reactI18nextModule } from 'react-i18next';
+import { initReactI18next } from 'react-i18next';
 import { use } from 'i18next';
 
 import { logError } from 'utils/logging';
@@ -14,7 +14,7 @@ import { logError } from 'utils/logging';
 const init = (cb: () => void): void =>
   use(i18n_detector)
     .use(i18n_backend)
-    .use(reactI18nextModule)
+    .use(initReactI18next)
     .init(
       {
         fallbackLng: 'en',
