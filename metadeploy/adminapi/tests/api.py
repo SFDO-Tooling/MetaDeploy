@@ -91,7 +91,7 @@ class TestPlanViewSet:
             format="json",
         )
 
-        assert response.status_code == 201
+        assert response.status_code == 201, response.json()
         json = response.json()
         plan_id = json["id"]
         assert response.json() == {

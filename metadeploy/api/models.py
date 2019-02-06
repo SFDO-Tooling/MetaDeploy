@@ -22,6 +22,7 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from hashid_field import HashidAutoField
 from model_utils import Choices, FieldTracker
+from parler.models import TranslatableModel, TranslatedFields
 from sfdo_template_helpers.fields import MarkdownField
 
 from .belvedere_utils import convert_to_18
@@ -242,7 +243,7 @@ class ProductQuerySet(models.QuerySet):
         )
 
 
-class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, models.Model):
+class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
     SLDS_ICON_CHOICES = (
         ("", ""),
         ("action", "action"),
@@ -257,9 +258,21 @@ class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, models.Model):
 
     objects = ProductQuerySet.as_manager()
 
-    title = models.CharField(max_length=256)
-    description = MarkdownField(property_suffix="_markdown", blank=True)
-    short_description = models.TextField(blank=True)
+    translations = TranslatedFields(
+        title=models.CharField(max_length=256),
+        short_description=models.TextField(blank=True),
+        description=MarkdownField(property_suffix="_markdown", blank=True),
+        click_through_agreement=MarkdownField(blank=True, property_suffix="_markdown"),
+    )
+
+    @property
+    def description_markdown(self):
+        return self.get_translation("en-us").description_markdown
+
+    @property
+    def click_through_agreement_markdown(self):
+        return self.get_translation("en-us").click_through_agreement_markdown
+
     category = models.ForeignKey(ProductCategory, on_delete=models.PROTECT)
     color = ColorField(blank=True)
     image = models.ImageField(blank=True)
@@ -274,7 +287,6 @@ class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, models.Model):
     repo_url = models.URLField(blank=True)
     is_listed = models.BooleanField(default=True)
     order_key = models.PositiveIntegerField(default=0)
-    click_through_agreement = MarkdownField(blank=True, property_suffix="_markdown")
 
     slug_class = ProductSlug
 
@@ -307,14 +319,15 @@ class VersionQuerySet(models.QuerySet):
         return self.get(product=product, label=label)
 
 
-class Version(HashIdMixin, models.Model):
+class Version(HashIdMixin, TranslatableModel):
     objects = VersionQuerySet.as_manager()
+
+    translations = TranslatedFields(description=models.TextField(blank=True))
 
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
     label = models.CharField(
         max_length=1024, validators=[RegexValidator(regex=VERSION_STRING)]
     )
-    description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     is_production = models.BooleanField(default=True)
     commit_ish = models.CharField(
@@ -382,15 +395,26 @@ class PlanSlug(models.Model):
         return self.slug
 
 
-class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, models.Model):
+class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
     Tier = Choices("primary", "secondary", "additional")
 
-    title = models.CharField(max_length=128)
+    translations = TranslatedFields(
+        title=models.CharField(max_length=128),
+        preflight_message=MarkdownField(blank=True, property_suffix="_markdown"),
+        post_install_message=MarkdownField(blank=True, property_suffix="_markdown"),
+    )
+
+    @property
+    def preflight_message_markdown(self):
+        return self.get_translation("en-us").preflight_message_markdown
+
+    @property
+    def post_install_message_markdown(self):
+        return self.get_translation("en-us").post_install_message_markdown
+
     version = models.ForeignKey(Version, on_delete=models.PROTECT)
-    preflight_message = MarkdownField(blank=True, property_suffix="_markdown")
     preflight_flow_name = models.CharField(max_length=256, blank=True)
     tier = models.CharField(choices=Tier, default=Tier.primary, max_length=64)
-    post_install_message = MarkdownField(blank=True, property_suffix="_markdown")
     is_listed = models.BooleanField(default=True)
 
     slug_class = PlanSlug
@@ -419,7 +443,7 @@ class DottedArray(Func):
     template = "%(function)s(%(expressions)s, '.')::int[]"
 
 
-class Step(HashIdMixin, models.Model):
+class Step(HashIdMixin, TranslatableModel):
     Kind = Choices(
         ("metadata", _("Metadata")),
         ("onetime", _("One Time Apex")),
@@ -428,9 +452,12 @@ class Step(HashIdMixin, models.Model):
         ("other", _("Other")),
     )
 
+    translations = TranslatedFields(
+        name=models.CharField(max_length=1024, help_text="Customer facing label"),
+        description=models.TextField(blank=True),
+    )
+
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT, related_name="steps")
-    name = models.CharField(max_length=1024, help_text="Customer facing label")
-    description = models.TextField(blank=True)
     is_required = models.BooleanField(default=True)
     is_recommended = models.BooleanField(default=True)
     kind = models.CharField(choices=Kind, default=Kind.metadata, max_length=64)
