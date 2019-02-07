@@ -78,7 +78,7 @@ class PreflightFlowCallback(BasicFlowCallback):
         """
         results = {}
         for result in coordinator.results:
-            kv = self._emit_k_v_for_status_dict(result.return_value)
+            kv = self._emit_k_v_for_status_dict(result.return_values)
             if kv is None:
                 continue
             k, v = kv
@@ -102,28 +102,28 @@ class PreflightFlowCallback(BasicFlowCallback):
             return None
 
         if status["status_code"] == ERROR:
-            step_id = self._get_step_id(status["path"])
+            step_id = self._get_step_id(status["task_name"])
             return (
                 step_id,
                 [{"status": ERROR, "message": bleach.clean(status.get("msg", ""))}],
             )
 
         if status["status_code"] == WARN:
-            step_id = self._get_step_id(status["path"])
+            step_id = self._get_step_id(status["task_name"])
             return (
                 step_id,
                 [{"status": WARN, "message": bleach.clean(status.get("msg", ""))}],
             )
 
         if status["status_code"] == SKIP:
-            step_id = self._get_step_id(status["path"])
+            step_id = self._get_step_id(status["task_name"])
             return (
                 step_id,
                 [{"status": SKIP, "message": bleach.clean(status.get("msg", ""))}],
             )
 
         if status["status_code"] == OPTIONAL:
-            step_id = self._get_step_id(status["path"])
+            step_id = self._get_step_id(status["task_name"])
             return (
                 step_id,
                 [{"status": OPTIONAL, "message": bleach.clean(status.get("msg", ""))}],

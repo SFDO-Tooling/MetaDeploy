@@ -40,7 +40,7 @@ from .push import (
 
 logger = logging.getLogger(__name__)
 VERSION_STRING = r"^[a-zA-Z0-9._+-]+$"
-WorkableModel = Union["Job", "PreflightReference"]
+WorkableModel = Union["Job", "PreflightResult"]
 
 
 class HashIdMixin(models.Model):

@@ -77,8 +77,7 @@ class Command(BaseCommand):
 
     def create_plan(self, version, title="Full Install", tier="primary", **kwargs):
         combined_kwargs = {
-            # "preflight_flow_name": "static_preflight",
-            "preflight_flow_name": "",
+            "preflight_flow_name": "static_preflight",
             "preflight_message": (
                 "Preflight message consists of generic product message and "
                 "step pre-check info — run in one operation before the "
@@ -245,9 +244,7 @@ class Command(BaseCommand):
 
         version1 = self.create_version(product1, commit_ish="feature/preflight")
         plan = self.create_plan(
-            version1,
-            # preflight_flow_name="slow_steps_preflight_good",
-            preflight_flow_name="",
+            version1, preflight_flow_name="slow_steps_preflight_good"
         )
         self.add_steps(plan)
 
@@ -255,8 +252,7 @@ class Command(BaseCommand):
             version1,
             title="Reports and Dashboards",
             tier="secondary",
-            # preflight_flow_name="slow_steps_preflight_good",
-            preflight_flow_name="",
+            preflight_flow_name="slow_steps_preflight_good",
         )
         self.add_steps(plan2)
 
@@ -264,8 +260,7 @@ class Command(BaseCommand):
             version1,
             title="Account Record Types",
             tier="additional",
-            # preflight_flow_name="messy_preflight",
-            preflight_flow_name="",
+            preflight_flow_name="messy_preflight",
         )
         self.add_steps(plan3)
 
@@ -273,8 +268,7 @@ class Command(BaseCommand):
             version1,
             title="Plan-Level Failing Preflight",
             tier="additional",
-            # preflight_flow_name="error_preflight",
-            preflight_flow_name="",
+            preflight_flow_name="error_preflight",
         )
         self.add_steps(plan4)
 
@@ -282,8 +276,7 @@ class Command(BaseCommand):
             version1,
             title="Preflight With Warnings",
             tier="additional",
-            # preflight_flow_name="slow_steps_preflight_warn",
-            preflight_flow_name="",
+            preflight_flow_name="slow_steps_preflight_warn",
         )
         self.add_steps(plan5)
 
