@@ -64,6 +64,30 @@ def test_run_flows(mocker, job_factory, user_factory, plan_factory, step_factory
 
 
 @pytest.mark.django_db
+@vcr.use_cassette()
+def test_run_flows__preflight(
+    mocker, preflight_result_factory, user_factory, plan_factory, step_factory
+):
+    run_flow = mocker.patch("cumulusci.core.flowrunner.FlowCoordinator.run")
+
+    user = user_factory()
+    plan = plan_factory()
+    steps = [step_factory(plan=plan)]
+    preflight_result = preflight_result_factory(user=user, plan=plan)
+
+    run_flows(
+        user=user,
+        plan=plan,
+        skip_tasks=steps,
+        organization_url=preflight_result.organization_url,
+        result_class=PreflightResult,
+        result_id=preflight_result.id,
+    )
+
+    assert run_flow.called
+
+
+@pytest.mark.django_db
 def test_enqueuer(mocker, job_factory):
     delay = mocker.patch("metadeploy.api.jobs.run_flows_job.delay")
     # Just a random UUID:
