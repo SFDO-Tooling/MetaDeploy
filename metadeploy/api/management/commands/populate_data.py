@@ -98,6 +98,7 @@ class Command(BaseCommand):
         kwargs.setdefault(
             "task_class", "cumulusci.core.tests.test_flowrunner._SfdcTask"
         )
+        kwargs.setdefault("task_config", {"options": {}})
         return Step.objects.create(path=path, **kwargs)
 
     def add_steps(self, plan):
