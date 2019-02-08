@@ -309,7 +309,7 @@ CACHES = {
 RQ_QUEUES = {
     "default": {
         "USE_REDIS_CACHE": "default",
-        "DEFAULT_TIMEOUT": 3600,
+        "DEFAULT_TIMEOUT": env("METADEPLOY_JOB_TIMEOUT", type_=int, default=3600),
         "DEFAULT_RESULT_TTL": 720,
     },
     "short": {
