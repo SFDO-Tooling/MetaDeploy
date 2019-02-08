@@ -360,6 +360,21 @@ class Version(HashIdMixin, TranslatableModel):
         return self.plan_set.filter(tier=Plan.Tier.additional).order_by("id")
 
 
+class PlanTemplate(TranslatableModel):
+    translations = TranslatedFields(
+        preflight_message=MarkdownField(blank=True, property_suffix="_markdown"),
+        post_install_message=MarkdownField(blank=True, property_suffix="_markdown"),
+    )
+
+    @property
+    def preflight_message_markdown(self):
+        return self.get_translation("en-us").preflight_message_markdown
+
+    @property
+    def post_install_message_markdown(self):
+        return self.get_translation("en-us").post_install_message_markdown
+
+
 class PlanSlug(models.Model):
     """
     Rather than have a slugfield directly on the Plan model, we have
@@ -400,18 +415,23 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
 
     translations = TranslatedFields(
         title=models.CharField(max_length=128),
-        preflight_message=MarkdownField(blank=True, property_suffix="_markdown"),
-        post_install_message=MarkdownField(blank=True, property_suffix="_markdown"),
+        preflight_message_additional=MarkdownField(
+            blank=True, property_suffix="_markdown"
+        ),
+        post_install_message_additional=MarkdownField(
+            blank=True, property_suffix="_markdown"
+        ),
     )
 
     @property
-    def preflight_message_markdown(self):
-        return self.get_translation("en-us").preflight_message_markdown
+    def preflight_message_additional_markdown(self):
+        return self.get_translation("en-us").preflight_message_additional_markdown
 
     @property
-    def post_install_message_markdown(self):
-        return self.get_translation("en-us").post_install_message_markdown
+    def post_install_message_additional_markdown(self):
+        return self.get_translation("en-us").post_install_message_additional_markdown
 
+    plan_template = models.ForeignKey(PlanTemplate, on_delete=models.PROTECT)
     version = models.ForeignKey(Version, on_delete=models.PROTECT)
     preflight_flow_name = models.CharField(max_length=256, blank=True)
     tier = models.CharField(choices=Tier, default=Tier.primary, max_length=64)

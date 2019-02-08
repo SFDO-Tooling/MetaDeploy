@@ -130,7 +130,12 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
     is_allowed = serializers.SerializerMethodField()
     steps = StepSerializer(many=True)
     title = serializers.CharField()
-    preflight_message = serializers.CharField(source="preflight_message_markdown")
+    preflight_message = serializers.CharField(
+        source="plan_template.preflight_message_markdown"
+    )
+    preflight_message_additional = serializers.CharField(
+        source="preflight_message_additional_markdown"
+    )
     not_allowed_instructions = serializers.SerializerMethodField()
 
     class Meta:
@@ -140,6 +145,7 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
             "title",
             "version",
             "preflight_message",
+            "preflight_message_additional",
             "tier",
             "slug",
             "steps",
@@ -249,7 +255,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
     creator = serializers.SerializerMethodField()
     user_can_edit = serializers.SerializerMethodField()
     message = serializers.CharField(
-        source="plan.post_install_message_markdown", read_only=True
+        source="plan.plan_template.post_install_message_markdown", read_only=True
     )
 
     class Meta:
