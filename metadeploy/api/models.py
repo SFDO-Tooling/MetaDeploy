@@ -40,7 +40,7 @@ from .push import (
 
 logger = logging.getLogger(__name__)
 VERSION_STRING = r"^[a-zA-Z0-9._+-]+$"
-WorkableModel = Union["Job", "PreflightReference"]
+WorkableModel = Union["Job", "PreflightResult"]
 
 
 class HashIdMixin(models.Model):
@@ -513,7 +513,7 @@ class Step(HashIdMixin, TranslatableModel):
         return StepSpec(
             step_num=self.step_num,
             task_name=self.path,  # skip from_flow path construction in StepSpec ctr
-            task_config=self.task_config,
+            task_config=self.task_config or {"options": {}},
             task_class=task_class,
             skip=skip,
         )

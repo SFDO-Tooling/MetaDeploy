@@ -142,6 +142,9 @@ def run_flows(*, user, plan, skip_tasks, organization_url, result_class, result_
         gh = github3.login(token=settings.GITHUB_TOKEN)
         user, repo_name = extract_user_and_repo(repo_url)
         repo = gh.repository(user, repo_name)
+        # Make sure we have the actual owner/repo name if we were redirected
+        user = repo.owner.login
+        repo_name = repo.name
         zip_file_name = "archive.zip"
         repo.archive("zipball", path=zip_file_name, ref=commit_ish)
         zip_file = zipfile.ZipFile(zip_file_name)

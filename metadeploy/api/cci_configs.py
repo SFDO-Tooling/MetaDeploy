@@ -41,16 +41,23 @@ class MetaDeployCCI(BaseCumulusCI):
     ):
         steps = [step.to_spec(skip=step.path in skip) for step in plan.steps.all()]
 
-        if isinstance(ctx, PreflightResult):  # pragma: no cover
-            callbacks = PreflightFlowCallback(ctx)
+        if isinstance(ctx, PreflightResult):
+            flow_config = self.project_config.get_flow(plan.preflight_flow_name)
+            return FlowCoordinator(
+                self.project_config,
+                flow_config,
+                name=plan.preflight_flow_name,
+                callbacks=PreflightFlowCallback(ctx),
+            )
         elif isinstance(ctx, Job):
-            callbacks = JobFlowCallback(ctx)
+            return FlowCoordinator.from_steps(
+                self.project_config,
+                steps,
+                name="default",
+                callbacks=JobFlowCallback(ctx),
+            )
         else:  # pragma: no cover
             raise AttributeError(
                 f"ctx must be either a PreflightResult "
                 f"or Job, but was passed {type(ctx)}."
             )
-
-        return FlowCoordinator.from_steps(
-            self.project_config, steps, name="default", callbacks=callbacks
-        )

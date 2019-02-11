@@ -99,19 +99,27 @@ class TestPreflightFlow:
         pfr = preflight_result_factory(user=user, plan=plan)
         results = [
             MagicMock(
-                return_value={
-                    "path": "name_1",
+                return_values={
+                    "task_name": "name_1",
                     "status_code": "error",
                     "msg": "error 1",
                 }
             ),
-            MagicMock(return_value={"path": "name_2", "status_code": "ok"}),
+            MagicMock(return_values={"task_name": "name_2", "status_code": "ok"}),
             MagicMock(
-                return_value={"path": "name_3", "status_code": "warn", "msg": "warn 1"}
+                return_values={
+                    "task_name": "name_3",
+                    "status_code": "warn",
+                    "msg": "warn 1",
+                }
             ),
-            MagicMock(return_value={"path": "name_4", "status_code": "optional"}),
+            MagicMock(return_values={"task_name": "name_4", "status_code": "optional"}),
             MagicMock(
-                return_value={"path": "name_5", "status_code": "skip", "msg": "skip 1"}
+                return_values={
+                    "task_name": "name_5",
+                    "status_code": "skip",
+                    "msg": "skip 1",
+                }
             ),
         ]
         flow_coordinator = MagicMock(results=results)
