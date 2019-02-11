@@ -55,14 +55,8 @@
     }
   },
   "image": "heroku/python",
-  "addons": [
-    "heroku-postgresql",
-    "heroku-redis"
-  ],
-  "buildpacks": [
-      {"url": "heroku/node"},
-      {"url": "heroku/python"}
-  ],
+  "addons": ["heroku-postgresql", "heroku-redis"],
+  "buildpacks": [{ "url": "heroku/nodejs" }, { "url": "heroku/python" }],
   "environments": {
     "test": {
       "scripts": {
