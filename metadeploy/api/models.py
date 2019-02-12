@@ -361,6 +361,7 @@ class Version(HashIdMixin, TranslatableModel):
 
 
 class PlanTemplate(TranslatableModel):
+    name = models.CharField(max_length=100, blank=True)
     translations = TranslatedFields(
         preflight_message=MarkdownField(blank=True, property_suffix="_markdown"),
         post_install_message=MarkdownField(blank=True, property_suffix="_markdown"),
