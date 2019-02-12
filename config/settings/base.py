@@ -85,6 +85,7 @@ PROJECT_ROOT = Path(__file__).absolute().parent.parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 HASHID_FIELD_SALT = env("DJANGO_HASHID_SALT")
+DB_ENCRYPTION_KEY = env("DB_ENCRYPTION_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DJANGO_DEBUG", default=False, type_=boolish)
