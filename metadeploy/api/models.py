@@ -431,7 +431,9 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
     def post_install_message_additional_markdown(self):
         return self.get_translation("en-us").post_install_message_additional_markdown
 
-    plan_template = models.ForeignKey(PlanTemplate, on_delete=models.PROTECT)
+    plan_template = models.ForeignKey(
+        PlanTemplate, on_delete=models.SET_NULL, null=True, blank=True
+    )
     version = models.ForeignKey(Version, on_delete=models.PROTECT)
     preflight_flow_name = models.CharField(max_length=256, blank=True)
     tier = models.CharField(choices=Tier, default=Tier.primary, max_length=64)
