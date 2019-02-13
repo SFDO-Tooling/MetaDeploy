@@ -17,9 +17,11 @@ class TestPlanViewSet:
                 {
                     "id": f"{plan.id}",
                     "is_listed": True,
-                    "post_install_message": "",
                     "preflight_flow_name": "slow_steps_preflight_good",
-                    "preflight_message": "",
+                    "plan_template": (
+                        f"http://testserver/admin/rest/plantemplates/"
+                        f"{plan.plan_template.id}"
+                    ),
                     "steps": [],
                     "tier": "primary",
                     "title": "Sample plan",
@@ -42,9 +44,10 @@ class TestPlanViewSet:
         assert response.json() == {
             "id": str(plan.id),
             "is_listed": True,
-            "post_install_message": "",
             "preflight_flow_name": "slow_steps_preflight_good",
-            "preflight_message": "",
+            "plan_template": (
+                f"http://testserver/admin/rest/plantemplates/{plan.plan_template.id}"
+            ),
             "steps": [
                 {
                     "description": "",
@@ -65,13 +68,17 @@ class TestPlanViewSet:
             "visible_to": None,
         }
 
-    def test_create(self, admin_api_client, version_factory):
+    def test_create(self, admin_api_client, version_factory, plan_template_factory):
+        plan_template = plan_template_factory()
         version = version_factory()
         url = "http://testserver/admin/rest/plans"
         response = admin_api_client.post(
             url,
             {
                 "title": "Sample plan",
+                "plan_template": (
+                    f"http://testserver/admin/rest/plantemplates/{plan_template.id}"
+                ),
                 "steps": [
                     {
                         "path": "task1",
@@ -97,9 +104,10 @@ class TestPlanViewSet:
         assert response.json() == {
             "id": plan_id,
             "is_listed": True,
-            "post_install_message": "",
             "preflight_flow_name": "",
-            "preflight_message": "",
+            "plan_template": (
+                f"http://testserver/admin/rest/plantemplates/{plan_template.id}"
+            ),
             "steps": [
                 {
                     "description": "",
@@ -142,7 +150,7 @@ class TestPlanViewSet:
             },
             format="json",
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, response.json()
 
         response = admin_api_client.put(
             f"http://testserver/admin/rest/plans/{plan.id}",

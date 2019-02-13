@@ -22,7 +22,7 @@ settings:
             - static
             - node_modules
   react:
-    version: '16.7.0'
+    version: 'detect'
     flowVersion: '0.92.0'
 plugins:
   - react

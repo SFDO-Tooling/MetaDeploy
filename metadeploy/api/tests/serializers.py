@@ -16,7 +16,9 @@ class TestPlanSerializer:
     ):
         user = user_factory()
         allowed_list = allowed_list_factory()
-        plan = plan_factory(visible_to=allowed_list, preflight_message="test")
+        plan = plan_factory(
+            visible_to=allowed_list, preflight_message_additional="test"
+        )
         [step_factory(plan=plan) for _ in range(3)]
 
         request = rf.get("/")
@@ -35,11 +37,13 @@ class TestPlanSerializer:
         allowed_list_factory,
         step_factory,
         product_factory,
+        plan_template_factory,
     ):
         user = user_factory()
         allowed_list = allowed_list_factory(description="Test.")
         product = product_factory(visible_to=allowed_list)
-        plan = plan_factory(preflight_message="test", version__product=product)
+        plan_template = plan_template_factory(preflight_message="test")
+        plan = plan_factory(plan_template=plan_template, version__product=product)
         [step_factory(plan=plan) for _ in range(3)]
 
         request = rf.get("/")
