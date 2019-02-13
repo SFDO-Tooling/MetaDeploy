@@ -3,6 +3,7 @@ from django.contrib import admin
 from .models import (
     AllowedList,
     AllowedListOrg,
+    ClickThroughAgreement,
     Job,
     Plan,
     PlanSlug,
@@ -155,3 +156,8 @@ class VersionAdmin(admin.ModelAdmin):
     list_filter = ("product", "is_production", "is_listed")
     list_display = ("label", "product", "is_production", "is_listed", "commit_ish")
     search_fields = ("label", "product")
+
+
+@admin.register(ClickThroughAgreement)
+class ClickThroughAgreementAdmin(admin.ModelAdmin):
+    pass
