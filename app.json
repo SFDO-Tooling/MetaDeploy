@@ -2,13 +2,7 @@
   "name": "MetaDeploy",
   "description": "The future, today.",
   "repository": "https://github.com/SFDO-Tooling/metadeploy",
-  "keywords": [
-    "ci",
-    "python",
-    "django",
-    "salesforce",
-    "github"
-  ],
+  "keywords": ["ci", "python", "django", "salesforce", "github"],
   "env": {
     "DJANGO_ALLOWED_HOSTS": {
       "description": "Heroku proxies web requests and Django needs to be configured to allow the forwards",
@@ -50,7 +44,7 @@
     },
     "DB_ENCRYPTION_KEY": {
       "description": "A key for encrypting using cryptography.fernet. Generate using cryptography.fernet.Fernet.generate_key"
-    },
+    }
   },
   "formation": {
     "web": {
@@ -64,18 +58,8 @@
     }
   },
   "image": "heroku/python",
-  "addons": [
-    "heroku-postgresql",
-    "heroku-redis"
-  ],
-  "buildpacks": [
-    {
-      "url": "heroku/node"
-    },
-    {
-      "url": "heroku/python"
-    }
-  ],
+  "addons": ["heroku-postgresql", "heroku-redis"],
+  "buildpacks": [{ "url": "heroku/nodejs" }, { "url": "heroku/python" }],
   "environments": {
     "test": {
       "scripts": {

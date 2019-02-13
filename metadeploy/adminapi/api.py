@@ -164,6 +164,7 @@ class PlanSerializer(AdminAPISerializer):
 
     class Meta:
         fields = "__all__"
+        extra_kwargs = {"plan_template": {"required": False}}
 
     def create(self, validated_data):
         steps = validated_data.pop("steps") or []
@@ -177,6 +178,10 @@ class PlanSerializer(AdminAPISerializer):
             raise serializers.ValidationError(detail="Updating steps not supported.")
         validated_data.pop("steps", None)
         return super().update(instance, validated_data)
+
+
+class PlanTemplateViewSet(AdminAPIViewSet):
+    model_name = "PlanTemplate"
 
 
 class PlanViewSet(AdminAPIViewSet):

@@ -130,7 +130,7 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
     is_allowed = serializers.SerializerMethodField()
     steps = StepSerializer(many=True)
     title = serializers.CharField()
-    preflight_message = serializers.CharField(source="preflight_message_markdown")
+    preflight_message = serializers.SerializerMethodField()
     not_allowed_instructions = serializers.SerializerMethodField()
 
     class Meta:
@@ -148,6 +148,12 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
             "not_allowed_instructions",
         )
         circumspect_fields = ("steps", "preflight_message")
+
+    def get_preflight_message(self, obj):
+        return (
+            getattr(obj.plan_template, "preflight_message_markdown", "")
+            + obj.preflight_message_additional_markdown
+        )
 
     def circumspect_visible(self, obj, user):
         return obj.is_visible_to(user) and obj.version.product.is_visible_to(user)
@@ -248,9 +254,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
     # Emitted fields:
     creator = serializers.SerializerMethodField()
     user_can_edit = serializers.SerializerMethodField()
-    message = serializers.CharField(
-        source="plan.post_install_message_markdown", read_only=True
-    )
+    message = serializers.SerializerMethodField()
 
     class Meta:
         model = Job
@@ -296,6 +300,12 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             return user.is_staff or user == self.instance.user
         except (AttributeError, KeyError):
             return False
+
+    def get_message(self, obj):
+        return (
+            getattr(obj.plan.plan_template, "post_install_message_markdown", "")
+            + obj.plan.post_install_message_additional_markdown
+        )
 
     def get_user_can_edit(self, obj):
         try:

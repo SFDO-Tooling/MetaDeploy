@@ -7,6 +7,7 @@ from ...models import (
     AllowedList,
     Plan,
     PlanSlug,
+    PlanTemplate,
     Product,
     ProductCategory,
     Step,
@@ -76,19 +77,23 @@ class Command(BaseCommand):
         )
 
     def create_plan(self, version, title="Full Install", tier="primary", **kwargs):
-        combined_kwargs = {
-            "preflight_flow_name": "static_preflight",
-            "preflight_message": (
+        combined_kwargs = {"preflight_flow_name": "static_preflight"}
+        combined_kwargs.update(kwargs)
+        plan_template = PlanTemplate.objects.create(
+            preflight_message=(
                 "Preflight message consists of generic product message and "
                 "step pre-check info — run in one operation before the "
                 "install begins. Preflight includes the name of what is being "
                 "installed. Lorem Ipsum has been the industry's standard "
                 "dummy text ever since the 1500s."
-            ),
-        }
-        combined_kwargs.update(kwargs)
+            )
+        )
         plan = Plan.objects.create(
-            version=version, title=title, tier=tier, **combined_kwargs
+            version=version,
+            title=title,
+            tier=tier,
+            plan_template=plan_template,
+            **combined_kwargs,
         )
         PlanSlug.objects.create(parent=plan, slug=slugify(title))
         return plan
