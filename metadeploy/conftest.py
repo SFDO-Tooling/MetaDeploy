@@ -20,6 +20,7 @@ from metadeploy.api.models import (
     Step,
     Version,
 )
+from metadeploy.utils import fernet_encrypt
 
 User = get_user_model()
 
@@ -40,8 +41,8 @@ class SocialTokenFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = SocialToken
 
-    token = "0123456789abcdef"
-    token_secret = "secret.0123456789abcdef"
+    token = fernet_encrypt("0123456789abcdef")
+    token_secret = fernet_encrypt("secret.0123456789abcdef")
     app = factory.SubFactory(SocialAppFactory)
 
 

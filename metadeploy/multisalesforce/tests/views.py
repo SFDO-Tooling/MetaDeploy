@@ -2,11 +2,13 @@ from unittest import mock
 
 import requests
 
+from metadeploy.utils import fernet_decrypt, fernet_encrypt
+
 from ..views import (
     LoggingOAuth2CallbackView,
     LoggingOAuth2LoginView,
     SalesforceOAuth2CustomAdapter,
-    SaveInstanceUrlMixin,
+    SalesforceOAuth2Mixin,
 )
 
 
@@ -17,13 +19,13 @@ def test_SalesforceOAuth2CustomAdapter_base_url(rf):
     assert adapter.base_url == "https://foo.my.salesforce.com"
 
 
-class TestSaveInstanceUrlMixin:
+class TestSalesforceOAuth2Mixin:
     def test_complete_login(self, mocker, rf):
         # This is a mess of terrible mocking and I do not like it.
         # This is really just to exercise the mixin, and confirm that it
         # assigns instance_url
         mocker.patch("requests.get")
-        adapter = SaveInstanceUrlMixin()
+        adapter = SalesforceOAuth2Mixin()
         adapter.userinfo_url = None
         adapter.get_provider = mock.MagicMock()
         slfr = mock.MagicMock()
@@ -33,9 +35,11 @@ class TestSaveInstanceUrlMixin:
         adapter.get_provider.return_value = prov_ret
         request = rf.get("/")
         request.session = {"socialaccount_state": (None, "some-verifier")}
+        token = mock.MagicMock()
+        token.token = fernet_encrypt("token")
 
         ret = adapter.complete_login(
-            request, None, None, response={"instance_url": "https://example.com"}
+            request, None, token, response={"instance_url": "https://example.com"}
         )
         assert ret.account.extra_data["instance_url"] == "https://example.com"
 
@@ -51,7 +55,7 @@ class TestSaveInstanceUrlMixin:
             "userSettings": {"canModifyAllData": False}
         }
         get.side_effect = [mock.MagicMock(), insufficient_perms_mock]
-        adapter = SaveInstanceUrlMixin()
+        adapter = SalesforceOAuth2Mixin()
         adapter.userinfo_url = None
         adapter.get_provider = mock.MagicMock()
         slfr = mock.MagicMock()
@@ -61,9 +65,18 @@ class TestSaveInstanceUrlMixin:
         adapter.get_provider.return_value = prov_ret
         request = rf.get("/")
         request.session = {"socialaccount_state": (None, "some-verifier")}
+        token = mock.MagicMock()
+        token.token = fernet_encrypt("token")
 
-        ret = adapter.complete_login(request, None, None, response={})
+        ret = adapter.complete_login(request, None, token, response={})
         assert ret.account.extra_data["organization_details"] is None
+
+    def test_parse_token(self):
+        adapter = SalesforceOAuth2CustomAdapter(request=None)
+        data = {"access_token": "token", "refresh_token": "token"}
+
+        token = adapter.parse_token(data)
+        assert "token" == fernet_decrypt(token.token)
 
 
 class TestLoggingOAuth2LoginView:

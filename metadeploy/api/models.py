@@ -25,6 +25,8 @@ from model_utils import Choices, FieldTracker
 from parler.models import TranslatableModel, TranslatedFields
 from sfdo_template_helpers.fields import MarkdownField
 
+from metadeploy.utils import fernet_decrypt
+
 from .belvedere_utils import convert_to_18
 from .constants import ERROR, OPTIONAL, ORGANIZATION_DETAILS
 from .push import (
@@ -146,7 +148,7 @@ class User(HashIdMixin, AbstractUser):
         account = self.social_account
         if account and account.socialtoken_set.exists():
             token = self.social_account.socialtoken_set.first()
-            return (token.token, token.token_secret)
+            return (fernet_decrypt(token.token), fernet_decrypt(token.token_secret))
         return (None, None)
 
     @property

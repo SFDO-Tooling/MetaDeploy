@@ -11,6 +11,7 @@ from allauth.socialaccount.providers.salesforce.views import (
 from allauth.utils import get_request_param
 
 from metadeploy.api.constants import ORGANIZATION_DETAILS
+from metadeploy.utils import fernet_decrypt, fernet_encrypt
 
 from .provider import (
     SalesforceCustomProvider,
@@ -25,9 +26,9 @@ class SalesforcePermissionsError(Exception):
     pass
 
 
-class SaveInstanceUrlMixin:
+class SalesforceOAuth2Mixin:
     def get_org_details(self, extra_data, token):
-        headers = {"Authorization": "Bearer {}".format(token)}
+        headers = {"Authorization": f"Bearer {token}"}
 
         # Confirm canModifyAllData:
         org_info_url = (extra_data["urls"]["rest"] + "connect/organization").format(
@@ -50,12 +51,14 @@ class SaveInstanceUrlMixin:
         return resp.json()
 
     def complete_login(self, request, app, token, **kwargs):
+        token = fernet_decrypt(token.token)
+        headers = {"Authorization": f"Bearer {token}"}
         verifier = request.session["socialaccount_state"][1]
         logger.info(
             "Calling back to Salesforce to complete login.",
             extra={"tag": "oauth", "context": {"verifier": verifier}},
         )
-        resp = requests.get(self.userinfo_url, params={"oauth_token": token})
+        resp = requests.get(self.userinfo_url, headers=headers)
         resp.raise_for_status()
         extra_data = resp.json()
         instance_url = kwargs.get("response", {}).get("instance_url", None)
@@ -69,18 +72,28 @@ class SaveInstanceUrlMixin:
         ret.account.extra_data[ORGANIZATION_DETAILS] = org_details
         return ret
 
+    def parse_token(self, data):
+        """Wrap OAuth2Base.parse_token to encrypt tokens for storage.
+
+        Called from OAuth2CallbackView"""
+        data["access_token"] = fernet_encrypt(data["access_token"])
+        data["refresh_token"] = fernet_encrypt(data["refresh_token"])
+        return super().parse_token(data)
+
 
 class SalesforceOAuth2ProductionAdapter(
-    SaveInstanceUrlMixin, SalesforceOAuth2BaseAdapter
+    SalesforceOAuth2Mixin, SalesforceOAuth2BaseAdapter
 ):
     provider_id = SalesforceProductionProvider.id
 
 
-class SalesforceOAuth2SandboxAdapter(SaveInstanceUrlMixin, SalesforceOAuth2BaseAdapter):
+class SalesforceOAuth2SandboxAdapter(
+    SalesforceOAuth2Mixin, SalesforceOAuth2BaseAdapter
+):
     provider_id = SalesforceTestProvider.id
 
 
-class SalesforceOAuth2CustomAdapter(SaveInstanceUrlMixin, SalesforceOAuth2BaseAdapter):
+class SalesforceOAuth2CustomAdapter(SalesforceOAuth2Mixin, SalesforceOAuth2BaseAdapter):
     provider_id = SalesforceCustomProvider.id
 
     @property
