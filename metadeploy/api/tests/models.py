@@ -345,6 +345,8 @@ class TestJob:
         plan = plan_factory(version__product__click_through_agreement="Test")
         job = job_factory(plan=plan)
 
+        job.refresh_from_db()
+
         assert job.click_through_agreement.text == "Test"
 
     def test_skip_tasks(self, plan_factory, step_factory, job_factory):
