@@ -341,6 +341,14 @@ def test_plan_post_install_markdown(plan_factory):
 
 @pytest.mark.django_db
 class TestJob:
+    def test_job_saves_click_through_text(self, plan_factory, job_factory):
+        plan = plan_factory(version__product__click_through_agreement="Test")
+        job = job_factory(plan=plan)
+
+        job.refresh_from_db()
+
+        assert job.click_through_agreement.text == "Test"
+
     def test_skip_tasks(self, plan_factory, step_factory, job_factory):
         plan = plan_factory()
         step1 = step_factory(plan=plan, path="task1")
