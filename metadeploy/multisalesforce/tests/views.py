@@ -2,13 +2,13 @@ from unittest import mock
 
 import requests
 
+from metadeploy.utils import fernet_decrypt, fernet_encrypt
+
 from ..views import (
     LoggingOAuth2CallbackView,
     LoggingOAuth2LoginView,
     SalesforceOAuth2CustomAdapter,
     SalesforceOAuth2Mixin,
-    fernet_decrypt,
-    fernet_encrypt,
 )
 
 

@@ -2,7 +2,7 @@
 
 from django.db import migrations
 
-from metadeploy.multisalesforce.views import fernet_decrypt, fernet_encrypt
+from metadeploy.utils import fernet_decrypt, fernet_encrypt
 
 
 def forwards(apps, schema_editor):

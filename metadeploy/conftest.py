@@ -20,7 +20,7 @@ from metadeploy.api.models import (
     Step,
     Version,
 )
-from metadeploy.multisalesforce.views import fernet_encrypt
+from metadeploy.utils import fernet_encrypt
 
 User = get_user_model()
 

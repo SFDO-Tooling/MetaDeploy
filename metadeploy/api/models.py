@@ -25,7 +25,7 @@ from model_utils import Choices, FieldTracker
 from parler.models import TranslatableModel, TranslatedFields
 from sfdo_template_helpers.fields import MarkdownField
 
-from metadeploy.multisalesforce.views import fernet_decrypt
+from metadeploy.utils import fernet_decrypt
 
 from .belvedere_utils import convert_to_18
 from .constants import ERROR, OPTIONAL, ORGANIZATION_DETAILS

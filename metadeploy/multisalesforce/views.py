@@ -9,10 +9,9 @@ from allauth.socialaccount.providers.salesforce.views import (
     SalesforceOAuth2Adapter as SalesforceOAuth2BaseAdapter,
 )
 from allauth.utils import get_request_param
-from cryptography.fernet import Fernet
-from django.conf import settings
 
 from metadeploy.api.constants import ORGANIZATION_DETAILS
+from metadeploy.utils import fernet_decrypt, fernet_encrypt
 
 from .provider import (
     SalesforceCustomProvider,
@@ -21,15 +20,6 @@ from .provider import (
 )
 
 logger = logging.getLogger(__name__)
-FERNET = Fernet(settings.DB_ENCRYPTION_KEY)
-
-
-def fernet_encrypt(s):
-    return FERNET.encrypt(s.encode("utf-8")).decode("utf-8")
-
-
-def fernet_decrypt(s):
-    return FERNET.decrypt(s.encode("utf-8")).decode("utf-8")
 
 
 class SalesforcePermissionsError(Exception):
@@ -83,7 +73,9 @@ class SalesforceOAuth2Mixin:
         return ret
 
     def parse_token(self, data):
-        # Encrypt tokens for storage in database
+        """Wrap OAuth2Base.parse_token to encrypt tokens for storage.
+
+        Called from OAuth2CallbackView"""
         data["access_token"] = fernet_encrypt(data["access_token"])
         data["refresh_token"] = fernet_encrypt(data["refresh_token"])
         return super().parse_token(data)
