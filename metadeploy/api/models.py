@@ -525,6 +525,10 @@ class Step(HashIdMixin, TranslatableModel):
         return f"Step {self.name} of {self.plan.title} ({self.step_num})"
 
 
+class ClickThroughAgreement(models.Model):
+    text = models.TextField()
+
+
 class Job(HashIdMixin, models.Model):
     Status = Choices("started", "complete", "failed", "canceled")
     tracker = FieldTracker(fields=("results", "status"))
@@ -552,6 +556,9 @@ class Job(HashIdMixin, models.Model):
     )
     exception = models.TextField(null=True)
     log = models.TextField(blank=True)
+    click_through_agreement = models.ForeignKey(
+        ClickThroughAgreement, on_delete=models.PROTECT, null=True
+    )
 
     def subscribable_by(self, user):
         return self.is_public or user.is_staff or user == self.user
@@ -582,6 +589,13 @@ class Job(HashIdMixin, models.Model):
 
     def save(self, *args, **kwargs):
         is_new = self._state.adding
+
+        if is_new:
+            ctt, _ = ClickThroughAgreement.objects.get_or_create(
+                text=self.plan.version.product.click_through_agreement
+            )
+            self.click_through_agreement = ctt
+
         ret = super().save(*args, **kwargs)
 
         try:
