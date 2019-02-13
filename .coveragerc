@@ -2,3 +2,6 @@
 omit = 
     metadeploy/tests/integration.py
     metadeploy/*/migrations/*
+
+[report]
+show_missing = True

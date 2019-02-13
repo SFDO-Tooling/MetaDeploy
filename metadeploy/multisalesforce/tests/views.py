@@ -1,6 +1,8 @@
 from unittest import mock
 
+import pytest
 import requests
+from django.core.exceptions import SuspiciousOperation
 
 from metadeploy.utils import fernet_decrypt, fernet_encrypt
 
@@ -24,7 +26,13 @@ class TestSalesforceOAuth2Mixin:
         # This is a mess of terrible mocking and I do not like it.
         # This is really just to exercise the mixin, and confirm that it
         # assigns instance_url
-        mocker.patch("requests.get")
+        get = mocker.patch("requests.get")
+        userinfo_mock = mock.MagicMock()
+        userinfo_mock.json.return_value = {
+            "organization_id": "00D000000000001EAA",
+            "urls": mock.MagicMock(),
+        }
+        get.side_effect = [userinfo_mock, mock.MagicMock(), mock.MagicMock()]
         adapter = SalesforceOAuth2Mixin()
         adapter.userinfo_url = None
         adapter.get_provider = mock.MagicMock()
@@ -77,6 +85,11 @@ class TestSalesforceOAuth2Mixin:
 
         token = adapter.parse_token(data)
         assert "token" == fernet_decrypt(token.token)
+
+    def test_validate_org_id__invalid(self):
+        adapter = SalesforceOAuth2Mixin()
+        with pytest.raises(SuspiciousOperation):
+            adapter._validate_org_id("bogus")
 
 
 class TestLoggingOAuth2LoginView:

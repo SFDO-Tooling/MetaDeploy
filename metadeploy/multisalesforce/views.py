@@ -1,4 +1,5 @@
 import logging
+import re
 
 import requests
 from allauth.socialaccount.providers.oauth2.views import (
@@ -9,6 +10,7 @@ from allauth.socialaccount.providers.salesforce.views import (
     SalesforceOAuth2Adapter as SalesforceOAuth2BaseAdapter,
 )
 from allauth.utils import get_request_param
+from django.core.exceptions import SuspiciousOperation
 
 from metadeploy.api.constants import ORGANIZATION_DETAILS
 from metadeploy.utils import fernet_decrypt, fernet_encrypt
@@ -20,6 +22,7 @@ from .provider import (
 )
 
 logger = logging.getLogger(__name__)
+ORGID_RE = re.compile(r"^00D[a-zA-Z0-9]{15}$")
 
 
 class SalesforcePermissionsError(Exception):
@@ -43,8 +46,10 @@ class SalesforceOAuth2Mixin:
             raise SalesforcePermissionsError
 
         # Get org name and type:
+        org_id = extra_data["organization_id"]
+        self._validate_org_id(org_id)
         org_url = (extra_data["urls"]["sobjects"] + "Organization/{org_id}").format(
-            version="44.0", org_id=extra_data["organization_id"]
+            version="44.0", org_id=org_id
         )
         resp = requests.get(org_url, headers=headers)
         resp.raise_for_status()
@@ -79,6 +84,10 @@ class SalesforceOAuth2Mixin:
         data["access_token"] = fernet_encrypt(data["access_token"])
         data["refresh_token"] = fernet_encrypt(data["refresh_token"])
         return super().parse_token(data)
+
+    def _validate_org_id(self, org_id):
+        if not ORGID_RE.match(org_id):
+            raise SuspiciousOperation("Invalid org Id")
 
 
 class SalesforceOAuth2ProductionAdapter(
