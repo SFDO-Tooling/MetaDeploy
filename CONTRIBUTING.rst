@@ -14,9 +14,8 @@ Making a virtual env
 
 MetaDeploy development requires Python v3.7. If ``which python3.7`` returns a
 non-empty path, it's already installed and you can continue to the next step. If
-it returns nothing, then install Python v3.7 using
-``brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/f2a764ef944b1080be64bd88dca9a1d80130c558/Formula/python.rb``,
-or from `Python.org`_.
+it returns nothing, then install Python v3.7 using ``brew install python``, or
+from `Python.org`_.
 
 .. _Python.org: https://www.python.org/downloads/
 

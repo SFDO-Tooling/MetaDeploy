@@ -12,6 +12,7 @@ from metadeploy.api.models import (
     Job,
     Plan,
     PlanSlug,
+    PlanTemplate,
     PreflightResult,
     Product,
     ProductCategory,
@@ -134,11 +135,21 @@ class VersionFactory(factory.django.DjangoModelFactory):
 
 
 @register
+class PlanTemplateFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = PlanTemplate
+
+    preflight_message = ""
+    post_install_message = ""
+
+
+@register
 class PlanFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Plan
 
     title = "Sample plan"
+    plan_template = factory.SubFactory(PlanTemplateFactory)
     version = factory.SubFactory(VersionFactory)
     _ensure_slug = factory.PostGenerationMethodCall("ensure_slug")
     preflight_flow_name = "slow_steps_preflight_good"
