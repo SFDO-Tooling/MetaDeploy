@@ -86,7 +86,8 @@ class Command(BaseCommand):
                 "install begins. Preflight includes the name of what is being "
                 "installed. Lorem Ipsum has been the industry's standard "
                 "dummy text ever since the 1500s."
-            )
+            ),
+            post_install_message="Success! You installed it.",
         )
         plan = Plan.objects.create(
             version=version,
