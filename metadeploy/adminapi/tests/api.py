@@ -18,10 +18,12 @@ class TestPlanViewSet:
                     "id": f"{plan.id}",
                     "is_listed": True,
                     "preflight_flow_name": "slow_steps_preflight_good",
+                    "preflight_message_additional": "",
                     "plan_template": (
                         f"http://testserver/admin/rest/plantemplates/"
                         f"{plan.plan_template.id}"
                     ),
+                    "post_install_message_additional": "",
                     "steps": [],
                     "tier": "primary",
                     "title": "Sample plan",
@@ -45,9 +47,11 @@ class TestPlanViewSet:
             "id": str(plan.id),
             "is_listed": True,
             "preflight_flow_name": "slow_steps_preflight_good",
+            "preflight_message_additional": "",
             "plan_template": (
                 f"http://testserver/admin/rest/plantemplates/{plan.plan_template.id}"
             ),
+            "post_install_message_additional": "",
             "steps": [
                 {
                     "description": "",
@@ -79,6 +83,8 @@ class TestPlanViewSet:
                 "plan_template": (
                     f"http://testserver/admin/rest/plantemplates/{plan_template.id}"
                 ),
+                "preflight_message_additional": "",
+                "post_install_message_additional": "",
                 "steps": [
                     {
                         "path": "task1",
@@ -105,9 +111,11 @@ class TestPlanViewSet:
             "id": plan_id,
             "is_listed": True,
             "preflight_flow_name": "",
+            "preflight_message_additional": "",
             "plan_template": (
                 f"http://testserver/admin/rest/plantemplates/{plan_template.id}"
             ),
+            "post_install_message_additional": "",
             "steps": [
                 {
                     "description": "",

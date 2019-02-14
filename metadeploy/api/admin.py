@@ -1,4 +1,5 @@
 from django.contrib import admin
+from parler.admin import TranslatableAdmin
 
 from .models import (
     AllowedList,
@@ -7,6 +8,7 @@ from .models import (
     Job,
     Plan,
     PlanSlug,
+    PlanTemplate,
     PreflightResult,
     Product,
     ProductCategory,
@@ -71,13 +73,18 @@ class JobAdmin(admin.ModelAdmin, PlanMixin):
     search_fields = ("user", "plan", "org_name")
 
 
+@admin.register(PlanTemplate)
+class PlanTemplateAdmin(TranslatableAdmin):
+    pass
+
+
 @admin.register(Plan)
-class PlanAdmin(admin.ModelAdmin):
+class PlanAdmin(TranslatableAdmin):
     autocomplete_fields = ("version",)
     list_filter = ("version__product", "tier", "is_listed")
     list_display = ("title", "product", "version_label", "tier", "is_listed")
     list_select_related = ("version", "version__product")
-    search_fields = ("title", "version", "version__product")
+    search_fields = ("translations__title", "version", "version__product")
 
     def product(self, obj):
         return obj.version.product
@@ -106,9 +113,9 @@ class PreflightResult(admin.ModelAdmin, PlanMixin):
 
 
 @admin.register(Product)
-class ProductAdmin(admin.ModelAdmin):
+class ProductAdmin(TranslatableAdmin):
     list_display = ("title", "category", "order_key")
-    search_fields = ("title", "description")
+    search_fields = ("translations__title", "translations__description")
 
 
 @admin.register(ProductCategory)
@@ -122,7 +129,7 @@ class ProductSlugAdmin(admin.ModelAdmin):
 
 
 @admin.register(Step)
-class StepAdmin(admin.ModelAdmin, PlanMixin):
+class StepAdmin(TranslatableAdmin, PlanMixin):
     autocomplete_fields = ("plan",)
     list_display = (
         "name",
@@ -136,7 +143,7 @@ class StepAdmin(admin.ModelAdmin, PlanMixin):
     )
     list_filter = ("plan__version__product",)
     search_fields = (
-        "name",
+        "translations__name",
         "plan__title",
         "plan__version__label",
         "plan__version__product",

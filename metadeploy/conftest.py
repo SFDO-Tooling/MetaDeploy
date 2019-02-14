@@ -140,6 +140,7 @@ class PlanTemplateFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = PlanTemplate
 
+    name = "install"
     preflight_message = ""
     post_install_message = ""
 

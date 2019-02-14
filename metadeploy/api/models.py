@@ -22,6 +22,7 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from hashid_field import HashidAutoField
 from model_utils import Choices, FieldTracker
+from parler.managers import TranslatableQuerySet
 from parler.models import TranslatableModel, TranslatedFields
 from sfdo_template_helpers.fields import MarkdownField
 
@@ -238,7 +239,7 @@ class ProductSlug(models.Model):
         return self.slug
 
 
-class ProductQuerySet(models.QuerySet):
+class ProductQuerySet(TranslatableQuerySet):
     def published(self):
         return self.annotate(version__count=Count("version")).filter(
             version__count__gte=1
@@ -316,7 +317,7 @@ class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel)
         return None
 
 
-class VersionQuerySet(models.QuerySet):
+class VersionQuerySet(TranslatableQuerySet):
     def get_by_natural_key(self, *, product, label):
         return self.get(product=product, label=label)
 
@@ -376,6 +377,9 @@ class PlanTemplate(TranslatableModel):
     @property
     def post_install_message_markdown(self):
         return self.get_translation("en-us").post_install_message_markdown
+
+    def __str__(self):
+        return self.name
 
 
 class PlanSlug(models.Model):
