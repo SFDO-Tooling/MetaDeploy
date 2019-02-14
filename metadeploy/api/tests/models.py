@@ -224,6 +224,13 @@ def test_product_most_recent_version__delisted(product_factory, version_factory)
 
 
 @pytest.mark.django_db
+class TestPlanTemplate:
+    def test_str(self, plan_template_factory):
+        plan_template = plan_template_factory()
+        assert str(plan_template) == "install"
+
+
+@pytest.mark.django_db
 class TestPlanSlug:
     def test_present(self, plan_factory, plan_slug_factory):
         plan = plan_factory(title="a plan")

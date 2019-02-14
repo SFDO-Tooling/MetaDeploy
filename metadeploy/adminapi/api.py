@@ -158,9 +158,13 @@ class PlanStepSerializer(serializers.ModelSerializer):
 
 class PlanSerializer(AdminAPISerializer):
     steps = PlanStepSerializer(many=True, required=False)
-    post_install_message = serializers.CharField(required=False)
-    preflight_message = serializers.CharField(required=False)
     title = serializers.CharField()
+    preflight_message_additional = serializers.CharField(
+        required=False, allow_blank=True
+    )
+    post_install_message_additional = serializers.CharField(
+        required=False, allow_blank=True
+    )
 
     class Meta:
         fields = "__all__"

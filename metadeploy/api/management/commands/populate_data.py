@@ -80,13 +80,15 @@ class Command(BaseCommand):
         combined_kwargs = {"preflight_flow_name": "static_preflight"}
         combined_kwargs.update(kwargs)
         plan_template = PlanTemplate.objects.create(
+            name="{} for {}".format(title, version),
             preflight_message=(
                 "Preflight message consists of generic product message and "
                 "step pre-check info — run in one operation before the "
                 "install begins. Preflight includes the name of what is being "
                 "installed. Lorem Ipsum has been the industry's standard "
                 "dummy text ever since the 1500s."
-            )
+            ),
+            post_install_message="Success! You installed it.",
         )
         plan = Plan.objects.create(
             version=version,
