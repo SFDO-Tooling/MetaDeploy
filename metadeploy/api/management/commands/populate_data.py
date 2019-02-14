@@ -80,6 +80,7 @@ class Command(BaseCommand):
         combined_kwargs = {"preflight_flow_name": "static_preflight"}
         combined_kwargs.update(kwargs)
         plan_template = PlanTemplate.objects.create(
+            name="{} for {}".format(title, version),
             preflight_message=(
                 "Preflight message consists of generic product message and "
                 "step pre-check info — run in one operation before the "
