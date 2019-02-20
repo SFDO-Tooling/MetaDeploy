@@ -13,6 +13,7 @@ sketchy-null-string=off
 sketchy-null-bool=off
 inexact-spread=off
 deprecated-utility=off
+dynamic-export=off
 
 [options]
 include_warnings=true
