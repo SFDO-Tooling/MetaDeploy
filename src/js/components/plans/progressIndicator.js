@@ -4,7 +4,7 @@ import * as React from 'react';
 import SLDSProgressIndicator from '@salesforce/design-system-react/components/progress-indicator';
 import { t } from 'i18next';
 
-import { CONSTANTS } from 'plans/reducer';
+import { CONSTANTS } from 'store/plans/reducer';
 
 export const getSteps = (translate: string => string) => [
   {

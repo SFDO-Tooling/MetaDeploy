@@ -8,19 +8,19 @@ import { connect } from 'react-redux';
 import { t } from 'i18next';
 
 import routes from 'utils/routes';
-import { CONSTANTS } from 'plans/reducer';
-import { fetchPreflight, startPreflight } from 'plans/actions';
-import { fetchVersion } from 'products/actions';
-import { selectOrg } from 'org/selectors';
-import { selectPlan, selectPreflight } from 'plans/selectors';
+import { CONSTANTS } from 'store/plans/reducer';
+import { fetchPreflight, startPreflight } from 'store/plans/actions';
+import { fetchVersion } from 'store/products/actions';
+import { selectOrg } from 'store/org/selectors';
+import { selectPlan, selectPreflight } from 'store/plans/selectors';
 import {
   selectProduct,
   selectVersion,
   selectVersionLabel,
-} from 'products/selectors';
-import { selectUserState } from 'user/selectors';
-import { getLoadingOrNotFound, shouldFetchVersion } from 'products/utils';
-import { startJob } from 'jobs/actions';
+} from 'store/products/selectors';
+import { selectUserState } from 'store/user/selectors';
+import { getLoadingOrNotFound, shouldFetchVersion } from 'components/utils';
+import { startJob } from 'store/jobs/actions';
 import BodyContainer from 'components/bodyContainer';
 import CtaButton, { LoginBtn } from 'components/plans/ctaButton';
 import Header from 'components/plans/header';
@@ -34,18 +34,18 @@ import ProductNotFound from 'components/products/product404';
 import StepsTable from 'components/plans/stepsTable';
 import Toasts from 'components/plans/toasts';
 import UserInfo from 'components/plans/userInfo';
-import type { AppState } from 'app/reducer';
+import type { AppState } from 'store';
 import type { InitialProps } from 'components/utils';
-import type { Org as OrgType } from 'org/reducer';
+import type { Org as OrgType } from 'store/org/reducer';
 import type {
   Plan as PlanType,
   Preflight as PreflightType,
-} from 'plans/reducer';
+} from 'store/plans/reducer';
 import type {
   Product as ProductType,
   Version as VersionType,
-} from 'products/reducer';
-import type { User as UserType } from 'user/reducer';
+} from 'store/products/reducer';
+import type { User as UserType } from 'store/user/reducer';
 
 export type SelectedSteps = Set<string>;
 type Props = {

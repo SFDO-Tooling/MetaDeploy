@@ -9,7 +9,7 @@ import FourOhFour from 'components/404';
 import type {
   Product as ProductType,
   Version as VersionType,
-} from 'products/reducer';
+} from 'store/products/reducer';
 
 const PlanNotFound = ({
   product,

@@ -11,15 +11,15 @@ import InstallDataCell, {
 import KindDataCell from 'components/plans/stepsTable/kindDataCell';
 import NameDataCell from 'components/plans/stepsTable/nameDataCell';
 import RequiredDataCell from 'components/plans/stepsTable/requiredDataCell';
-import { CONSTANTS } from 'plans/reducer';
-import type { Job as JobType } from 'jobs/reducer';
+import { CONSTANTS } from 'store/plans/reducer';
+import type { Job as JobType } from 'store/jobs/reducer';
 import type {
   Plan as PlanType,
   Preflight as PreflightType,
   Step as StepType,
-} from 'plans/reducer';
+} from 'store/plans/reducer';
 import type { SelectedSteps as SelectedStepsType } from 'components/plans/detail';
-import type { User as UserType } from 'user/reducer';
+import type { User as UserType } from 'store/user/reducer';
 
 export type DataCellProps = {
   [string]: mixed,

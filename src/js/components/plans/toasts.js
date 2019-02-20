@@ -5,9 +5,9 @@ import Toast from '@salesforce/design-system-react/components/toast';
 import ToastContainer from '@salesforce/design-system-react/components/toast/container';
 import { t } from 'i18next';
 
-import { CONSTANTS } from 'plans/reducer';
-import type { Job as JobType } from 'jobs/reducer';
-import type { Preflight as PreflightType } from 'plans/reducer';
+import { CONSTANTS } from 'store/plans/reducer';
+import type { Job as JobType } from 'store/jobs/reducer';
+import type { Preflight as PreflightType } from 'store/plans/reducer';
 
 type Props = {
   job?: JobType,

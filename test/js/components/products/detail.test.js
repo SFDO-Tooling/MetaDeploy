@@ -3,11 +3,11 @@ import { MemoryRouter } from 'react-router-dom';
 
 import { renderWithRedux } from './../../utils';
 
-import { fetchVersion } from 'products/actions';
+import { fetchVersion } from 'store/products/actions';
 import routes from 'utils/routes';
 import { ProductDetail, VersionDetail } from 'components/products/detail';
 
-jest.mock('products/actions');
+jest.mock('store/products/actions');
 
 fetchVersion.mockReturnValue({ type: 'TEST' });
 

@@ -6,7 +6,7 @@ import AccordionPanel from '@salesforce/design-system-react/components/accordion
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import classNames from 'classnames';
 
-import { CONSTANTS } from 'plans/reducer';
+import { CONSTANTS } from 'store/plans/reducer';
 import { ErrorsList } from 'components/plans/jobResults';
 import type { DataCellProps } from 'components/plans/stepsTable/index';
 

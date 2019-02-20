@@ -3,34 +3,39 @@
 import Sockette from 'sockette';
 import type { Dispatch } from 'redux-thunk';
 
-import { cancelJob, completeJob, completeJobStep, failJob } from 'jobs/actions';
+import {
+  cancelJob,
+  completeJob,
+  completeJobStep,
+  failJob,
+} from 'store/jobs/actions';
 import {
   cancelPreflight,
   completePreflight,
   failPreflight,
   invalidatePreflight,
-} from 'plans/actions';
-import { connectSocket, disconnectSocket } from 'socket/actions';
-import { invalidateToken } from 'user/actions';
+} from 'store/plans/actions';
+import { connectSocket, disconnectSocket } from 'store/socket/actions';
+import { invalidateToken } from 'store/user/actions';
 import { log } from 'utils/logging';
-import { updateOrg } from 'org/actions';
-import type { Job } from 'jobs/reducer';
+import { updateOrg } from 'store/org/actions';
+import type { Job } from 'store/jobs/reducer';
 import type {
   JobCanceled,
   JobCompleted,
   JobFailed,
   JobStepCompleted,
-} from 'jobs/actions';
-import type { Org } from 'org/reducer';
-import type { OrgChanged } from 'org/actions';
-import type { Preflight } from 'plans/reducer';
+} from 'store/jobs/actions';
+import type { Org } from 'store/org/reducer';
+import type { OrgChanged } from 'store/org/actions';
+import type { Preflight } from 'store/plans/reducer';
 import type {
   PreflightCanceled,
   PreflightCompleted,
   PreflightFailed,
   PreflightInvalid,
-} from 'plans/actions';
-import type { TokenInvalidAction } from 'user/actions';
+} from 'store/plans/actions';
+import type { TokenInvalidAction } from 'store/user/actions';
 
 type SubscriptionEvent = {|
   ok?: string,

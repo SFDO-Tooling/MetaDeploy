@@ -4,12 +4,12 @@ import { fireEvent } from 'react-testing-library';
 
 import { renderWithRedux, storeWithApi } from './../../utils';
 
-import { fetchVersion } from 'products/actions';
-import { fetchPreflight } from 'plans/actions';
+import { fetchVersion } from 'store/products/actions';
+import { fetchPreflight } from 'store/plans/actions';
 import PlanDetail from 'components/plans/detail';
 
-jest.mock('products/actions');
-jest.mock('plans/actions');
+jest.mock('store/products/actions');
+jest.mock('store/plans/actions');
 
 fetchVersion.mockReturnValue({ type: 'TEST' });
 fetchPreflight.mockReturnValue({ type: 'TEST' });

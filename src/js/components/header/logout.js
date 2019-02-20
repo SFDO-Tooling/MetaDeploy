@@ -7,8 +7,8 @@ import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import DropdownTrigger from '@salesforce/design-system-react/components/menu-dropdown/button-trigger';
 import { t } from 'i18next';
 
-import type { User } from 'user/reducer';
-import typeof { logout as LogoutType } from 'user/actions';
+import type { User } from 'store/user/reducer';
+import typeof { logout as LogoutType } from 'store/user/actions';
 
 const Logout = ({
   user,
