@@ -7,7 +7,7 @@ import { t } from 'i18next';
 import type { RouterHistory } from 'react-router-dom';
 
 import routes from 'utils/routes';
-import { CONSTANTS } from 'plans/reducer';
+import { CONSTANTS } from 'store/plans/reducer';
 import { getUrlParam, removeUrlParam } from 'utils/api';
 import ClickThroughAgreementModal from 'components/plans/clickThroughAgreementModal';
 import Login from 'components/header/login';
@@ -15,12 +15,12 @@ import PreflightWarningModal from 'components/plans/preflightWarningModal';
 import type {
   Plan as PlanType,
   Preflight as PreflightType,
-} from 'plans/reducer';
+} from 'store/plans/reducer';
 import type { SelectedSteps as SelectedStepsType } from 'components/plans/detail';
 import type { UrlParams } from 'utils/api';
-import type { User as UserType } from 'user/reducer';
-import typeof { startJob as StartJobType } from 'jobs/actions';
-import typeof { startPreflight as StartPreflightType } from 'plans/actions';
+import type { User as UserType } from 'store/user/reducer';
+import typeof { startJob as StartJobType } from 'store/jobs/actions';
+import typeof { startPreflight as StartPreflightType } from 'store/plans/actions';
 
 type Props = {
   history: RouterHistory,

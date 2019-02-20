@@ -1,11 +1,11 @@
 import Sockette from 'sockette';
 
-import * as jobActions from 'jobs/actions';
-import * as preflightActions from 'plans/actions';
+import * as jobActions from 'store/jobs/actions';
+import * as preflightActions from 'store/plans/actions';
 import * as sockets from 'utils/websockets';
-import { connectSocket, disconnectSocket } from 'socket/actions';
-import { invalidateToken } from 'user/actions';
-import { updateOrg } from 'org/actions';
+import { connectSocket, disconnectSocket } from 'store/socket/actions';
+import { invalidateToken } from 'store/user/actions';
+import { updateOrg } from 'store/org/actions';
 
 const mockJson = jest.fn();
 const mockClose = jest.fn();

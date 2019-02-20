@@ -8,26 +8,26 @@ import { connect } from 'react-redux';
 import { t } from 'i18next';
 
 import routes from 'utils/routes';
-import { fetchVersion } from 'products/actions';
+import { fetchVersion } from 'store/products/actions';
 import {
   selectProduct,
   selectVersion,
   selectVersionLabel,
-} from 'products/selectors';
-import { selectUserState } from 'user/selectors';
-import { getLoadingOrNotFound, shouldFetchVersion } from 'products/utils';
+} from 'store/products/selectors';
+import { selectUserState } from 'store/user/selectors';
+import { getLoadingOrNotFound, shouldFetchVersion } from 'components/utils';
 import BodyContainer from 'components/bodyContainer';
 import Header from 'components/products/header';
 import ProductNotAllowed from 'components/products/notAllowed';
 import ProductNotFound from 'components/products/product404';
 import VersionNotFound from 'components/products/version404';
-import type { AppState } from 'app/reducer';
+import type { AppState } from 'store';
 import type { InitialProps } from 'components/utils';
 import type {
   Product as ProductType,
   Version as VersionType,
-} from 'products/reducer';
-import type { User as UserType } from 'user/reducer';
+} from 'store/products/reducer';
+import type { User as UserType } from 'store/user/reducer';
 
 type ProductDetailProps = { product: ProductType | null };
 type VersionDetailProps = {

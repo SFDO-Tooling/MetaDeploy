@@ -7,7 +7,7 @@ import { t } from 'i18next';
 
 import routes from 'utils/routes';
 import ProductIcon from 'components/products/icon';
-import type { Product as ProductType } from 'products/reducer';
+import type { Product as ProductType } from 'store/products/reducer';
 
 const ProductItem = ({ item }: { item: ProductType }) => {
   if (!item.most_recent_version) {

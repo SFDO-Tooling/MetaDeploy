@@ -8,12 +8,12 @@ import JobProgressIndicator from 'components/jobs/progressIndicator';
 import PlanProgressIndicator from 'components/plans/progressIndicator';
 import ProductIcon from 'components/products/icon';
 import routes from 'utils/routes';
-import type { Job as JobType } from 'jobs/reducer';
-import type { Plan as PlanType } from 'plans/reducer';
+import type { Job as JobType } from 'store/jobs/reducer';
+import type { Plan as PlanType } from 'store/plans/reducer';
 import type {
   Product as ProductType,
   Version as VersionType,
-} from 'products/reducer';
+} from 'store/products/reducer';
 
 const Header = ({
   product,

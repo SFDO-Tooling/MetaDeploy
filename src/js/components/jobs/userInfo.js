@@ -5,7 +5,7 @@ import Card from '@salesforce/design-system-react/components/card';
 import Icon from '@salesforce/design-system-react/components/icon';
 import { t } from 'i18next';
 
-import type { Job as JobType } from 'jobs/reducer';
+import type { Job as JobType } from 'store/jobs/reducer';
 
 const UserInfo = ({ job }: { job: JobType }): React.Node => {
   if ((job.creator && job.creator.username) || job.org_name || job.org_type) {

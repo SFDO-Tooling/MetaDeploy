@@ -9,7 +9,7 @@ import { t } from 'i18next';
 
 import Login from 'components/header/login';
 import svgPath from 'images/no-connection.svg';
-import type { User as UserType } from 'user/reducer';
+import type { User as UserType } from 'store/user/reducer';
 
 const LoggedOut = (): React.Node => (
   <Illustration
