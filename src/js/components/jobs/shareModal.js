@@ -9,9 +9,9 @@ import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import { t } from 'i18next';
 
 import { withTransientMessage } from 'components/utils';
-import type { Job as JobType } from 'jobs/reducer';
+import type { Job as JobType } from 'store/jobs/reducer';
 import type { TransientMessageProps } from 'components/utils';
-import typeof { updateJob as UpdateJobType } from 'jobs/actions';
+import typeof { updateJob as UpdateJobType } from 'store/jobs/actions';
 
 type Props = {|
   isOpen: boolean,

@@ -4,12 +4,12 @@ import * as React from 'react';
 import Icon from '@salesforce/design-system-react/components/icon';
 import { t } from 'i18next';
 
-import { CONSTANTS } from 'plans/reducer';
-import type { Job as JobType } from 'jobs/reducer';
+import { CONSTANTS } from 'store/plans/reducer';
+import type { Job as JobType } from 'store/jobs/reducer';
 import type {
   Preflight as PreflightType,
   StepResult as StepResultType,
-} from 'plans/reducer';
+} from 'store/plans/reducer';
 
 export const ErrorIcon = ({
   size,

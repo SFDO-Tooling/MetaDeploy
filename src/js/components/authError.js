@@ -8,12 +8,12 @@ import { connect } from 'react-redux';
 import { t } from 'i18next';
 
 import routes from 'utils/routes';
-import { selectUserState } from 'user/selectors';
+import { selectUserState } from 'store/user/selectors';
 import Login from 'components/header/login';
 import { EmptyIllustration } from 'components/404';
-import type { AppState } from 'app/reducer';
+import type { AppState } from 'store';
 import type { InitialProps } from 'components/utils';
-import type { User as UserType } from 'user/reducer';
+import type { User as UserType } from 'store/user/reducer';
 
 const AuthError = ({ user }: { user: UserType }) => (
   <DocumentTitle title={`${t('Authentication Error')} | ${t('MetaDeploy')}`}>

@@ -10,12 +10,12 @@ import { t } from 'i18next';
 import {
   selectProductCategories,
   selectProductsByCategory,
-} from 'products/selectors';
+} from 'store/products/selectors';
 import ProductItem from 'components/products/listItem';
 import { EmptyIllustration } from 'components/404';
-import type { AppState } from 'app/reducer';
-import type { ProductsMapType } from 'products/selectors';
-import type { Products as ProductsType } from 'products/reducer';
+import type { AppState } from 'store';
+import type { ProductsMapType } from 'store/products/selectors';
+import type { Products as ProductsType } from 'store/products/reducer';
 
 type Props = {
   productsByCategory: ProductsMapType,

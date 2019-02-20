@@ -4,12 +4,12 @@ import { fireEvent } from 'react-testing-library';
 
 import { renderWithRedux, storeWithApi } from './../../utils';
 
-import { fetchJob, requestCancelJob } from 'jobs/actions';
-import { fetchVersion } from 'products/actions';
+import { fetchJob, requestCancelJob } from 'store/jobs/actions';
+import { fetchVersion } from 'store/products/actions';
 import JobDetail from 'components/jobs/detail';
 
-jest.mock('jobs/actions');
-jest.mock('products/actions');
+jest.mock('store/jobs/actions');
+jest.mock('store/products/actions');
 
 fetchVersion.mockReturnValue({ type: 'TEST' });
 fetchJob.mockReturnValue({ type: 'TEST' });

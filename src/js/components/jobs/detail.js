@@ -7,18 +7,18 @@ import { connect } from 'react-redux';
 import { t } from 'i18next';
 
 import routes from 'utils/routes';
-import { CONSTANTS } from 'plans/reducer';
-import { fetchJob, requestCancelJob, updateJob } from 'jobs/actions';
-import { fetchVersion } from 'products/actions';
-import { selectJob, selectJobId } from 'jobs/selectors';
-import { selectPlan } from 'plans/selectors';
+import { CONSTANTS } from 'store/plans/reducer';
+import { fetchJob, requestCancelJob, updateJob } from 'store/jobs/actions';
+import { fetchVersion } from 'store/products/actions';
+import { selectJob, selectJobId } from 'store/jobs/selectors';
+import { selectPlan } from 'store/plans/selectors';
 import {
   selectProduct,
   selectVersion,
   selectVersionLabel,
-} from 'products/selectors';
-import { selectUserState } from 'user/selectors';
-import { getLoadingOrNotFound, shouldFetchVersion } from 'products/utils';
+} from 'store/products/selectors';
+import { selectUserState } from 'store/user/selectors';
+import { getLoadingOrNotFound, shouldFetchVersion } from 'components/utils';
 import BodyContainer from 'components/bodyContainer';
 import CtaButton from 'components/jobs/ctaButton';
 import Header from 'components/plans/header';
@@ -32,15 +32,15 @@ import StepsTable from 'components/plans/stepsTable';
 import Toasts from 'components/plans/toasts';
 import UserInfo from 'components/jobs/userInfo';
 import { LabelWithSpinner } from 'components/plans/ctaButton';
-import type { AppState } from 'app/reducer';
+import type { AppState } from 'store';
 import type { InitialProps } from 'components/utils';
-import type { Job as JobType } from 'jobs/reducer';
-import type { Plan as PlanType } from 'plans/reducer';
+import type { Job as JobType } from 'store/jobs/reducer';
+import type { Plan as PlanType } from 'store/plans/reducer';
 import type {
   Product as ProductType,
   Version as VersionType,
-} from 'products/reducer';
-import type { User as UserType } from 'user/reducer';
+} from 'store/products/reducer';
+import type { User as UserType } from 'store/user/reducer';
 
 type Props = {
   ...InitialProps,

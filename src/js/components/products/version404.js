@@ -6,7 +6,7 @@ import { Trans } from 'react-i18next';
 
 import routes from 'utils/routes';
 import FourOhFour from 'components/404';
-import type { Product as ProductType } from 'products/reducer';
+import type { Product as ProductType } from 'store/products/reducer';
 
 const VersionNotFound = ({ product }: { product: ProductType }) => (
   <FourOhFour

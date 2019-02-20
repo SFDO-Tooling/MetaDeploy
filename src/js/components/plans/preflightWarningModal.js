@@ -6,13 +6,13 @@ import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Modal from '@salesforce/design-system-react/components/modal';
 import { t } from 'i18next';
 
-import { CONSTANTS } from 'plans/reducer';
+import { CONSTANTS } from 'store/plans/reducer';
 import { WarningIcon } from 'components/plans/jobResults';
 import type {
   PreflightErrors as PreflightErrorsType,
   StepResult as StepResultType,
   Step as StepType,
-} from 'plans/reducer';
+} from 'store/plans/reducer';
 
 type Props = {
   isOpen: boolean,
