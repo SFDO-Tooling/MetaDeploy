@@ -126,7 +126,8 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                   {t('Select a Plan to Install')}
                 </h3>
                 <p>{version.description}</p>
-                {version.primary_plan.is_listed &&
+                {version.primary_plan &&
+                version.primary_plan.is_listed &&
                 version.primary_plan.is_allowed ? (
                   <p>
                     <Link
@@ -163,9 +164,11 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                 ) : null}
                 {listedAdditionalPlans.length ? (
                   <div className="slds-p-top_x-large">
-                    <h3 className="slds-text-heading_small">
-                      {t('Additional Plans')}
-                    </h3>
+                    {version.primary_plan ? (
+                      <h3 className="slds-text-heading_small">
+                        {t('Additional Plans')}
+                      </h3>
+                    ) : null}
                     {listedAdditionalPlans.map(plan => (
                       <p key={plan.id}>
                         <Link

@@ -27,7 +27,7 @@ class ErrorBoundary extends React.Component<Props, { hasError: boolean }> {
         <EmptyIllustration
           message={
             <Trans i18nKey="anErrorOccurred">
-              An error occured. Try the <a href={routes.home()}>home page</a>?
+              An error occurred. Try the <a href={routes.home()}>home page</a>?
             </Trans>
           }
         />
