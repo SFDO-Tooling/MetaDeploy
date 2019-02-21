@@ -2,11 +2,7 @@ from datetime import timedelta
 
 import pytest
 from allauth.socialaccount.models import SocialAccount
-from django.core.exceptions import (
-    MultipleObjectsReturned,
-    ObjectDoesNotExist,
-    ValidationError,
-)
+from django.core.exceptions import MultipleObjectsReturned, ValidationError
 from django.utils import timezone
 
 from ..models import Job, User, Version
@@ -129,10 +125,9 @@ class TestIconProperty:
 
 @pytest.mark.django_db
 class TestPlansProperties:
-    def test_primary_plan__missing(self, version_factory):
+    def test_primary_plan__none(self, version_factory):
         version = version_factory()
-        with pytest.raises(ObjectDoesNotExist):
-            version.primary_plan
+        assert version.primary_plan is None
 
     def test_primary_plan__too_many(self, version_factory, plan_factory):
         version = version_factory()

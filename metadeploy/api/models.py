@@ -13,7 +13,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
 from django.contrib.postgres.fields import JSONField
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import Count, F, Func, Q
@@ -351,8 +351,10 @@ class Version(HashIdMixin, TranslatableModel):
 
     @property
     def primary_plan(self):
-        # This will raise an error if the number of primary plans != 1:
-        return self.plan_set.filter(tier=Plan.Tier.primary).get()
+        try:
+            return self.plan_set.filter(tier=Plan.Tier.primary).get()
+        except ObjectDoesNotExist:
+            return None
 
     @property
     def secondary_plan(self):

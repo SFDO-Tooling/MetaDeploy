@@ -114,7 +114,11 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     const listedAdditionalPlans = version.additional_plans.filter(
       plan => plan.is_listed && plan.is_allowed,
     );
-    const { secondary_plan } = version;
+    const { primary_plan, secondary_plan } = version;
+    const visiblePrimaryPlan =
+      primary_plan && primary_plan.is_listed && primary_plan.is_allowed;
+    const visibleSecondaryPlan =
+      secondary_plan && secondary_plan.is_listed && secondary_plan.is_allowed;
     return (
       <DocumentTitle title={`${product.title} | ${t('MetaDeploy')}`}>
         <>
@@ -126,26 +130,23 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                   {t('Select a Plan to Install')}
                 </h3>
                 <p>{version.description}</p>
-                {version.primary_plan.is_listed &&
-                version.primary_plan.is_allowed ? (
+                {primary_plan && visiblePrimaryPlan ? (
                   <p>
                     <Link
                       to={routes.plan_detail(
                         product.slug,
                         version.label,
-                        version.primary_plan.slug,
+                        primary_plan.slug,
                       )}
                       className="slds-button
                         slds-button_brand
                         slds-size_full"
                     >
-                      {version.primary_plan.title}
+                      {primary_plan.title}
                     </Link>
                   </p>
                 ) : null}
-                {secondary_plan &&
-                secondary_plan.is_listed &&
-                secondary_plan.is_allowed ? (
+                {secondary_plan && visibleSecondaryPlan ? (
                   <p>
                     <Link
                       to={routes.plan_detail(
@@ -163,9 +164,11 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                 ) : null}
                 {listedAdditionalPlans.length ? (
                   <div className="slds-p-top_x-large">
-                    <h3 className="slds-text-heading_small">
-                      {t('Additional Plans')}
-                    </h3>
+                    {visiblePrimaryPlan || visibleSecondaryPlan ? (
+                      <h3 className="slds-text-heading_small">
+                        {t('Additional Plans')}
+                      </h3>
+                    ) : null}
                     {listedAdditionalPlans.map(plan => (
                       <p key={plan.id}>
                         <Link
