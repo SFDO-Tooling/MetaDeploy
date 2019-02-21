@@ -33,7 +33,7 @@ export const selectPlan: (
     if (!product || !version || !planSlug) {
       return null;
     }
-    if (version.primary_plan.slug === planSlug) {
+    if (version.primary_plan && version.primary_plan.slug === planSlug) {
       return version.primary_plan;
     }
     if (version.secondary_plan && version.secondary_plan.slug === planSlug) {

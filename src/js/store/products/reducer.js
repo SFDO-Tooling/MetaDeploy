@@ -9,7 +9,7 @@ export type Version = {
   +label: string,
   +description: string,
   +created_at: string,
-  +primary_plan: Plan,
+  +primary_plan: Plan | null,
   +secondary_plan: Plan | null,
   +additional_plans: Plans,
   +is_listed: boolean,

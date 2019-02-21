@@ -249,6 +249,44 @@ describe('<VersionDetail />', () => {
       expect(queryByText('My Secondary Plan')).toBeNull();
       expect(queryByText('My Additional Plan')).toBeNull();
     });
+
+    test('handles missing primary/secondary plans', () => {
+      const product = {
+        id: 'p1',
+        slug: 'product-1',
+        title: 'Product 1',
+        description: 'This is a test product.',
+        category: 'salesforce',
+        most_recent_version: {
+          id: 'v1',
+          product: 'p1',
+          label: '1.0.0',
+          description: 'This is a test product version.',
+          primary_plan: null,
+          secondary_plan: null,
+          additional_plans: [
+            {
+              id: 'plan-1',
+              slug: 'my-plan',
+              title: 'My Plan',
+              is_listed: true,
+              is_allowed: true,
+            },
+          ],
+          is_listed: true,
+        },
+        is_listed: true,
+        is_allowed: true,
+      };
+      const { getByText, queryByText } = setup({
+        initialState: { products: [product] },
+      });
+
+      expect(getByText('Product 1')).toBeVisible();
+      expect(getByText('This is a test product version.')).toBeVisible();
+      expect(getByText('My Plan')).toBeVisible();
+      expect(queryByText('Additional Plans')).toBeNull();
+    });
   });
 
   describe('version is not most_recent_version', () => {
