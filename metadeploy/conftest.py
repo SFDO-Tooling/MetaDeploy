@@ -5,6 +5,7 @@ from allauth.socialaccount.models import SocialAccount, SocialApp, SocialToken
 from django.contrib.auth import get_user_model
 from pytest_factoryboy import register
 from rest_framework.test import APIClient
+from sfdo_template_helpers.crypto import fernet_encrypt
 
 from metadeploy.api.models import (
     AllowedList,
@@ -20,7 +21,6 @@ from metadeploy.api.models import (
     Step,
     Version,
 )
-from metadeploy.utils import fernet_encrypt
 
 User = get_user_model()
 

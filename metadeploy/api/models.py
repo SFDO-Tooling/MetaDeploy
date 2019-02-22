@@ -24,9 +24,8 @@ from hashid_field import HashidAutoField
 from model_utils import Choices, FieldTracker
 from parler.managers import TranslatableQuerySet
 from parler.models import TranslatableModel, TranslatedFields
+from sfdo_template_helpers.crypto import fernet_decrypt
 from sfdo_template_helpers.fields import MarkdownField
-
-from metadeploy.utils import fernet_decrypt
 
 from .belvedere_utils import convert_to_18
 from .constants import ERROR, OPTIONAL, ORGANIZATION_DETAILS
