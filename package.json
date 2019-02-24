@@ -31,7 +31,7 @@
     "eslint-config-prettier": "^4.0.0",
     "eslint-import-resolver-webpack": "^0.11.0",
     "eslint-plugin-flowtype": "^3.4.2",
-    "eslint-plugin-flowtype-errors": "^3.6.0",
+    "eslint-plugin-flowtype-errors": "^4.0.0",
     "eslint-plugin-import": "^2.16.0",
     "eslint-plugin-prettier": "^3.0.1",
     "eslint-plugin-react": "^7.12.4",
