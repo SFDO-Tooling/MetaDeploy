@@ -16,14 +16,48 @@ describe('<ProgressBar />', () => {
       job: defaultJob,
     };
     const opts = { ...defaults, ...options };
-    const { getByText, queryByText } = render(<ProgressBar job={opts.job} />);
-    return { getByText, queryByText };
+    const { getByText, queryByText, rerender } = render(
+      <ProgressBar job={opts.job} />,
+    );
+    return { getByText, queryByText, rerender };
   };
 
   test('renders progress bar', () => {
     const { getByText } = setup();
 
     expect(getByText('25% Complete')).toBeVisible();
+  });
+
+  describe('step progress', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    test('shows incremental progress within steps', () => {
+      const job = { ...defaultJob };
+      const { getByText, queryByText, rerender } = setup({ job });
+
+      expect(getByText('25% Complete')).toBeVisible();
+
+      jest.advanceTimersByTime(10 * 1000);
+
+      expect(getByText('38% Complete')).toBeVisible();
+
+      jest.advanceTimersByTime(10 * 1000);
+
+      expect(getByText('45% Complete')).toBeVisible();
+
+      job.results['2'] = [{ status: 'ok' }];
+      rerender(<ProgressBar job={job} />);
+
+      expect(getByText('50% Complete')).toBeVisible();
+
+      job.status = 'failed';
+      rerender(<ProgressBar job={job} />);
+
+      expect(clearInterval).toHaveBeenCalledTimes(2);
+      expect(queryByText('50% Complete')).toBeNull();
+    });
   });
 
   describe('complete', () => {
