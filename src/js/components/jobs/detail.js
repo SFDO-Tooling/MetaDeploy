@@ -128,12 +128,12 @@ class JobDetail extends React.Component<Props, State> {
   };
 
   getCancelBtn(): React.Node {
-    const { job } = this.props;
+    const { user, job } = this.props;
     /* istanbul ignore if */
     if (!job) {
       return null;
     }
-    if (job.status === CONSTANTS.STATUS.STARTED && job.user_can_edit) {
+    if (job.status === CONSTANTS.STATUS.STARTED && user && user.is_staff) {
       const { canceling } = this.state;
       if (canceling) {
         return (

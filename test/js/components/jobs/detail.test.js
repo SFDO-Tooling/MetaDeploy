@@ -308,11 +308,11 @@ describe('<JobDetail />', () => {
       const { getByText } = setup({
         initialState: {
           ...defaultState,
+          user: { is_staff: true },
           jobs: {
             [id]: {
               ...defaultState.jobs[id],
               status: 'started',
-              user_can_edit: true,
             },
           },
         },
