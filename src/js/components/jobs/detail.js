@@ -19,6 +19,7 @@ import {
 } from 'store/products/selectors';
 import { selectUserState } from 'store/user/selectors';
 import { getLoadingOrNotFound, shouldFetchVersion } from 'components/utils';
+import BackLink from 'components/backLink';
 import BodyContainer from 'components/bodyContainer';
 import CtaButton from 'components/jobs/ctaButton';
 import Header from 'components/plans/header';
@@ -238,6 +239,13 @@ class JobDetail extends React.Component<Props, State> {
                 />
               }
               postMessage={<JobMessage job={job} openModal={this.openModal} />}
+              backLink={
+                <BackLink
+                  label={t('Install another product')}
+                  url={routes.product_list()}
+                  className="slds-p-top_small"
+                />
+              }
             />
             <UserInfo job={job} />
             <ProgressBar job={job} />

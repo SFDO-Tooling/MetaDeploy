@@ -7,11 +7,13 @@ const Intro = ({
   cta,
   preMessage,
   postMessage,
+  backLink,
 }: {
   results: React.Node,
   cta: React.Node,
   preMessage?: React.Node,
   postMessage?: React.Node,
+  backLink?: React.Node,
 }): React.Node => (
   <div
     className="slds-p-around_medium
@@ -24,6 +26,7 @@ const Intro = ({
       {postMessage}
     </div>
     {cta}
+    {backLink}
   </div>
 );
 

@@ -4,7 +4,6 @@ import * as React from 'react';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { t } from 'i18next';
 
 import routes from 'utils/routes';
 import { logout } from 'store/user/actions';
@@ -42,18 +41,7 @@ const Header = ({ user, doLogout, socket }: Props) => (
         </Link>
       }
       navRight={
-        <>
-          <Link
-            to={routes.product_list()}
-            className="slds-text-heading_small
-              slds-p-right_large
-              slds-text-link_reset
-              slds-align-middle"
-          >
-            {t('Products')}
-          </Link>
-          {user ? <Logout user={user} doLogout={doLogout} /> : <Login />}
-        </>
+        <>{user ? <Logout user={user} doLogout={doLogout} /> : <Login />}</>
       }
       variant="objectHome"
     />
