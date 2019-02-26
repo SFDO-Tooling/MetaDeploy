@@ -176,7 +176,7 @@ describe('<VersionDetail />', () => {
     test('renders version detail', () => {
       const { getByText, getByAltText } = setup();
 
-      expect(getByText('Product 1')).toBeVisible();
+      expect(getByText('Product 1, 1.0.0')).toBeVisible();
       expect(getByText('This is a test product version.')).toBeVisible();
       expect(getByText('View My Plan')).toBeVisible();
       expect(getByText('View My Secondary Plan')).toBeVisible();
@@ -206,7 +206,7 @@ describe('<VersionDetail />', () => {
         },
       });
 
-      expect(getByText('Product 1')).toBeVisible();
+      expect(getByText('Product 1, 1.0.0')).toBeVisible();
       expect(getByText('This is a test product version.')).toBeVisible();
       expect(queryByText('View My Plan')).toBeNull();
       expect(getByText('View My Secondary Plan')).toBeVisible();
@@ -243,7 +243,7 @@ describe('<VersionDetail />', () => {
         initialState: { products: [product] },
       });
 
-      expect(getByText('Product 1')).toBeVisible();
+      expect(getByText('Product 1, 1.0.0')).toBeVisible();
       expect(getByText('This is a test product version.')).toBeVisible();
       expect(getByText('View My Plan')).toBeVisible();
       expect(queryByText('View My Secondary Plan')).toBeNull();
@@ -282,7 +282,7 @@ describe('<VersionDetail />', () => {
         initialState: { products: [product] },
       });
 
-      expect(getByText('Product 1')).toBeVisible();
+      expect(getByText('Product 1, 1.0.0')).toBeVisible();
       expect(getByText('This is a test product version.')).toBeVisible();
       expect(getByText('My Plan')).toBeVisible();
       expect(queryByText('Additional Plans')).toBeNull();
@@ -315,7 +315,7 @@ describe('<VersionDetail />', () => {
         versionLabel: '2.0.0',
       });
 
-      expect(getByText('Product 1')).toBeVisible();
+      expect(getByText('Product 1, 2.0.0')).toBeVisible();
       expect(getByText('This is another test product version.')).toBeVisible();
       expect(getByText('View My Plan 4')).toBeVisible();
     });

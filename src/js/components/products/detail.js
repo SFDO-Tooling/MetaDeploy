@@ -127,9 +127,6 @@ class VersionDetail extends React.Component<VersionDetailProps> {
           {product.is_allowed ? (
             <BodyContainer>
               <BodySection>
-                <h3 className="slds-text-heading_small">
-                  {t('Select a Plan')}
-                </h3>
                 <p>{version.description}</p>
                 {primary_plan && visiblePrimaryPlan ? (
                   <p>
