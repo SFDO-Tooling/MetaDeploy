@@ -6,7 +6,7 @@ import classNames from 'classnames';
 import { t } from 'i18next';
 
 import { CONSTANTS } from 'store/plans/reducer';
-import type { DataCellProps } from 'components/plans/stepsTable/index';
+import type { DataCellProps } from 'components/plans/stepsTable';
 
 const { RESULT_STATUS } = CONSTANTS;
 

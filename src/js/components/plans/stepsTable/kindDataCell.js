@@ -4,7 +4,7 @@ import * as React from 'react';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import Icon from '@salesforce/design-system-react/components/icon';
 
-import type { DataCellProps } from 'components/plans/stepsTable/index';
+import type { DataCellProps } from 'components/plans/stepsTable';
 
 const KindDataCell = (props: DataCellProps): React.Node => {
   /* istanbul ignore if */

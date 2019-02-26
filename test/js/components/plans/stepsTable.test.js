@@ -193,28 +193,25 @@ describe('<StepsTable />', () => {
       });
     });
 
-    test('disabled if no user', () => {
+    test('hidden if no user', () => {
       const { container } = setup();
+      const checkboxes = container.querySelectorAll('input[type="checkbox"]');
 
-      expect(
-        container.querySelectorAll('input[type="checkbox"][disabled]'),
-      ).toHaveLength(4);
+      expect(checkboxes).toHaveLength(0);
     });
 
-    test('disabled if no valid token', () => {
+    test('hidden if no valid token', () => {
       const { container } = setup({ user: {} });
+      const checkboxes = container.querySelectorAll('input[type="checkbox"]');
 
-      expect(
-        container.querySelectorAll('input[type="checkbox"][disabled]'),
-      ).toHaveLength(4);
+      expect(checkboxes).toHaveLength(0);
     });
 
-    test('disabled if no ready preflight', () => {
+    test('hidden if no ready preflight', () => {
       const { container } = setup({ user: { valid_token_for: 'foo' } });
+      const checkboxes = container.querySelectorAll('input[type="checkbox"]');
 
-      expect(
-        container.querySelectorAll('input[type="checkbox"][disabled]'),
-      ).toHaveLength(4);
+      expect(checkboxes).toHaveLength(0);
     });
 
     test('disabled if required', () => {
@@ -253,7 +250,9 @@ describe('<StepsTable />', () => {
 
     describe('checkbox change', () => {
       test('calls handleStepsChange with step id and checked boolean', () => {
-        const { container } = setup();
+        const { container } = setup({
+          preflight: { status: 'complete', is_valid: true, is_ready: true },
+        });
         const checkbox = container.querySelector(
           'input[type="checkbox"]:not(:checked)',
         );
