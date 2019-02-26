@@ -11,6 +11,7 @@ import {
   selectProductCategories,
   selectProductsByCategory,
 } from 'store/products/selectors';
+import Header from 'components/products/listHeader';
 import ProductItem from 'components/products/listItem';
 import { EmptyIllustration } from 'components/404';
 import type { AppState } from 'store';
@@ -107,7 +108,10 @@ class ProductsList extends React.Component<Props, State> {
     }
     return (
       <DocumentTitle title={`${t('Products')} | ${t('MetaDeploy')}`}>
-        <div className="slds-p-around_x-large">{contents}</div>
+        <>
+          <Header />
+          <div className="slds-p-around_x-large">{contents}</div>
+        </>
       </DocumentTitle>
     );
   }
