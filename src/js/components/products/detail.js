@@ -127,7 +127,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
             <BodyContainer>
               <BodySection>
                 <h3 className="slds-text-heading_small">
-                  {t('Select a Plan to Install')}
+                  {t('Select a Plan')}
                 </h3>
                 <p>{version.description}</p>
                 {primary_plan && visiblePrimaryPlan ? (
@@ -142,7 +142,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                         slds-button_brand
                         slds-size_full"
                     >
-                      {primary_plan.title}
+                      {t('View')} {primary_plan.title}
                     </Link>
                   </p>
                 ) : null}
@@ -158,7 +158,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                         slds-button_outline-brand
                         slds-size_full"
                     >
-                      {secondary_plan.title}
+                      {t('View')} {secondary_plan.title}
                     </Link>
                   </p>
                 ) : null}

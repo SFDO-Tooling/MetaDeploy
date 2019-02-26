@@ -178,8 +178,8 @@ describe('<VersionDetail />', () => {
 
       expect(getByText('Product 1')).toBeVisible();
       expect(getByText('This is a test product version.')).toBeVisible();
-      expect(getByText('My Plan')).toBeVisible();
-      expect(getByText('My Secondary Plan')).toBeVisible();
+      expect(getByText('View My Plan')).toBeVisible();
+      expect(getByText('View My Secondary Plan')).toBeVisible();
       expect(getByText('My Additional Plan')).toBeVisible();
       expect(getByAltText('Product 1')).toHaveAttribute(
         'src',
@@ -208,8 +208,8 @@ describe('<VersionDetail />', () => {
 
       expect(getByText('Product 1')).toBeVisible();
       expect(getByText('This is a test product version.')).toBeVisible();
-      expect(queryByText('My Plan')).toBeNull();
-      expect(getByText('My Secondary Plan')).toBeVisible();
+      expect(queryByText('View My Plan')).toBeNull();
+      expect(getByText('View My Secondary Plan')).toBeVisible();
       expect(getByText('My Additional Plan')).toBeVisible();
     });
 
@@ -245,8 +245,8 @@ describe('<VersionDetail />', () => {
 
       expect(getByText('Product 1')).toBeVisible();
       expect(getByText('This is a test product version.')).toBeVisible();
-      expect(getByText('My Plan')).toBeVisible();
-      expect(queryByText('My Secondary Plan')).toBeNull();
+      expect(getByText('View My Plan')).toBeVisible();
+      expect(queryByText('View My Secondary Plan')).toBeNull();
       expect(queryByText('My Additional Plan')).toBeNull();
     });
 
@@ -317,7 +317,7 @@ describe('<VersionDetail />', () => {
 
       expect(getByText('Product 1')).toBeVisible();
       expect(getByText('This is another test product version.')).toBeVisible();
-      expect(getByText('My Plan 4')).toBeVisible();
+      expect(getByText('View My Plan 4')).toBeVisible();
     });
   });
 
