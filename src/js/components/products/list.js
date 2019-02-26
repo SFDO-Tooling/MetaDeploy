@@ -85,7 +85,7 @@ class ProductsList extends React.Component<Props, State> {
         const tabs = [];
         for (const [category, products] of this.props.productsByCategory) {
           const panel = (
-            <TabsPanel label={category} key={category}>
+            <TabsPanel label={`${category} products`} key={category}>
               {ProductsList.getProductsList(products)}
             </TabsPanel>
           );

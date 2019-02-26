@@ -239,7 +239,9 @@ class Command(BaseCommand):
         self.create_enqueuer_job()
         self.create_token_expiry_job()
         self.create_preflight_expiry_job()
-        sf_category = ProductCategory.objects.create(title="salesforce", order_key=0)
+        sf_category = ProductCategory.objects.create(
+            title="salesforce.org", order_key=0
+        )
         co_category = ProductCategory.objects.create(title="community", order_key=1)
         product1 = self.create_product(
             title="Product With Useful Data",
