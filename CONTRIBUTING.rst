@@ -128,7 +128,7 @@ Logging in with Salesforce
 --------------------------
 
 To setup the Salesforce OAuth integration, run the ``populate_social_apps``
-management command. The values to use in place of the ``XXX` and ``YYY`` flags
+management command. The values to use in place of the ``XXX`` and ``YYY`` flags
 can be found on the Connected App you've made in your Salesforce configuration,
 or if you're an OddBird, you can find these values in the shared Keybase team
 folder (``metadeploy/prod.db``)::
