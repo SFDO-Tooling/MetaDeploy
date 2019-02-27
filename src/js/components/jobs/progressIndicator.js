@@ -13,18 +13,18 @@ const ProgressIndicator = ({ job }: { job: JobType }) => {
   const completedSteps =
     job.status === CONSTANTS.STATUS.COMPLETE
       ? steps.slice()
-      : steps.slice(0, 2);
+      : steps.slice(0, -1);
   const errorSteps =
     job.status === CONSTANTS.STATUS.FAILED ||
     job.status === CONSTANTS.STATUS.CANCELED
-      ? steps.slice(2)
+      ? steps.slice(-1)
       : [];
   return (
     <SLDSProgressIndicator
       className="slds-m-top_medium"
       steps={steps}
       completedSteps={completedSteps}
-      selectedStep={steps[2]}
+      selectedStep={steps[steps.length - 1]}
       errorSteps={errorSteps}
     />
   );

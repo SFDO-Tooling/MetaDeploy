@@ -46,7 +46,7 @@ const ProgressIndicator = ({
     preflightIsValid &&
     preflightStatus !== CONSTANTS.STATUS.STARTED &&
     !preflightIsReady
-      ? steps.slice(1, 2)
+      ? steps.slice(activeStep, activeStep + 1)
       : [];
   const selectedStep = steps[activeStep];
   return (
