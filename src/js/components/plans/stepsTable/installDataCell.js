@@ -10,7 +10,7 @@ import { t } from 'i18next';
 
 import { CONSTANTS } from 'store/plans/reducer';
 import { ErrorIcon } from 'components/plans/jobResults';
-import type { DataCellProps } from 'components/plans/stepsTable/index';
+import type { DataCellProps } from 'components/plans/stepsTable';
 
 const { STATUS, RESULT_STATUS } = CONSTANTS;
 
