@@ -102,10 +102,8 @@ class Command(BaseCommand):
 
     def create_step(self, **kwargs):
         path = kwargs.pop("path", "quick_task")
-        kwargs.setdefault(
-            "task_class", "cumulusci.core.tests.test_flowrunner._SfdcTask"
-        )
-        kwargs.setdefault("task_config", {"options": {}})
+        kwargs.setdefault("task_class", "cumulusci.tasks.util.Sleep")
+        kwargs.setdefault("task_config", {"options": {"seconds": 3}})
         return Step.objects.create(path=path, **kwargs)
 
     def add_steps(self, plan):
@@ -127,6 +125,7 @@ class Command(BaseCommand):
             is_recommended=False,
             step_num="1",
             path="slow_task",
+            task_config={"options": {"seconds": 7}},
         )
         self.create_step(
             plan=plan,
@@ -136,6 +135,7 @@ class Command(BaseCommand):
             is_recommended=False,
             step_num="2",
             path="medium_task",
+            task_config={"options": {"seconds": 5}},
         )
         self.create_step(
             path="relationships",
