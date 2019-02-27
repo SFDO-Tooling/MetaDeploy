@@ -79,20 +79,22 @@ const StepsTable = ({
           <DataTableColumn key="is_required" property="is_required">
             <RequiredDataCell preflight={preflight} job={job} />
           </DataTableColumn>
-          <DataTableColumn
-            key="is_recommended"
-            label={<InstallDataColumnLabel />}
-            property="is_recommended"
-          >
-            <InstallDataCell
-              user={user}
-              preflight={preflight}
-              selectedSteps={selectedSteps}
-              handleStepsChange={handleStepsChange}
-              job={job}
-              activeJobStep={activeJobStep}
-            />
-          </DataTableColumn>
+          {job || (preflight && preflight.is_ready) ? (
+            <DataTableColumn
+              key="is_recommended"
+              label={<InstallDataColumnLabel />}
+              property="is_recommended"
+            >
+              <InstallDataCell
+                user={user}
+                preflight={preflight}
+                selectedSteps={selectedSteps}
+                handleStepsChange={handleStepsChange}
+                job={job}
+                activeJobStep={activeJobStep}
+              />
+            </DataTableColumn>
+          ) : null}
         </DataTable>
       </article>
     </div>

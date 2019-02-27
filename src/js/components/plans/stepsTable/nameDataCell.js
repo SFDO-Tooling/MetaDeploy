@@ -8,7 +8,7 @@ import classNames from 'classnames';
 
 import { CONSTANTS } from 'store/plans/reducer';
 import { ErrorsList } from 'components/plans/jobResults';
-import type { DataCellProps } from 'components/plans/stepsTable/index';
+import type { DataCellProps } from 'components/plans/stepsTable';
 
 const { RESULT_STATUS } = CONSTANTS;
 
