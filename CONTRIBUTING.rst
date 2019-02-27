@@ -60,8 +60,8 @@ Your ``PATH`` (and environment variables) will be updated when you
 that whenever you are working on MD, you use the MD-specific version of Node
 instead of any system-wide Node you may have.
 
-**All of the remaining steps assume that you have the virtualenv activated
-(``workon metadeploy``).**
+**All of the remaining steps assume that you have the virtualenv activated.**
+(``workon metadeploy``)
 
 .. _virtualenvwrapper: https://virtualenvwrapper.readthedocs.io/en/latest/
 
@@ -128,7 +128,7 @@ Logging in with Salesforce
 --------------------------
 
 To setup the Salesforce OAuth integration, run the ``populate_social_apps``
-management command. The values to use in place of the ``XXX` and ``YYY`` flags
+management command. The values to use in place of the ``XXX`` and ``YYY`` flags
 can be found on the Connected App you've made in your Salesforce configuration,
 or if you're an OddBird, you can find these values in the shared Keybase team
 folder (``metadeploy/prod.db``)::
