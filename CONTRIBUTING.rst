@@ -42,6 +42,9 @@ two different arbitrary string values. Also set ``DB_ENCRYPTION_KEY``::
     from cryptography.fernet import Fernet
     Fernet.generate_key()
 
+This will output a string, e.g. ``b'mystring='``. Copy just the contents of
+``'...'``, e.g. ``export DB_ENCRYPTION_KEY='mystring='``.
+
 Finally, edit the following environment variables (if you're an OddBird, you can
 find these values in the shared Keybase team folder -- ``metadeploy/env``)::
 
