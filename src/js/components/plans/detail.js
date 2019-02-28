@@ -323,6 +323,7 @@ class PlanDetail extends React.Component<Props, State> {
                   plan.preflight_message ? (
                     // These messages are pre-cleaned by the API
                     <div
+                      className="markdown"
                       dangerouslySetInnerHTML={{
                         __html: plan.preflight_message,
                       }}

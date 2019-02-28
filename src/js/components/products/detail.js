@@ -198,6 +198,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                 ) : null}
                 {/* This description is pre-cleaned by the API */}
                 <div
+                  className="markdown"
                   dangerouslySetInnerHTML={{ __html: product.description }}
                 />
               </BodySection>
