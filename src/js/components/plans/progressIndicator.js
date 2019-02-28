@@ -17,10 +17,6 @@ export const getSteps = (translate: string => string) => [
   },
   {
     id: 2,
-    label: translate('Pre-install validation complete'),
-  },
-  {
-    id: 3,
     label: translate('Install'),
   },
 ];
@@ -40,8 +36,6 @@ const ProgressIndicator = ({
   if (userLoggedIn) {
     activeStep = 1;
     if (preflightIsReady) {
-      activeStep = 3;
-    } else if (preflightIsValid) {
       activeStep = 2;
     }
   }

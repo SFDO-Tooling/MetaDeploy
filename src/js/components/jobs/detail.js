@@ -19,6 +19,7 @@ import {
 } from 'store/products/selectors';
 import { selectUserState } from 'store/user/selectors';
 import { getLoadingOrNotFound, shouldFetchVersion } from 'components/utils';
+import BackLink from 'components/backLink';
 import BodyContainer from 'components/bodyContainer';
 import CtaButton from 'components/jobs/ctaButton';
 import Header from 'components/plans/header';
@@ -127,12 +128,12 @@ class JobDetail extends React.Component<Props, State> {
   };
 
   getCancelBtn(): React.Node {
-    const { job } = this.props;
+    const { user, job } = this.props;
     /* istanbul ignore if */
     if (!job) {
       return null;
     }
-    if (job.status === CONSTANTS.STATUS.STARTED && job.user_can_edit) {
+    if (job.status === CONSTANTS.STATUS.STARTED && user && user.is_staff) {
       const { canceling } = this.state;
       if (canceling) {
         return (
@@ -238,6 +239,13 @@ class JobDetail extends React.Component<Props, State> {
                 />
               }
               postMessage={<JobMessage job={job} openModal={this.openModal} />}
+              backLink={
+                <BackLink
+                  label={t('Install another product')}
+                  url={routes.product_list()}
+                  className="slds-p-top_small"
+                />
+              }
             />
             <UserInfo job={job} />
             <ProgressBar job={job} />

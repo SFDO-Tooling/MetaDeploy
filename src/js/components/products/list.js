@@ -11,6 +11,7 @@ import {
   selectProductCategories,
   selectProductsByCategory,
 } from 'store/products/selectors';
+import Header from 'components/products/listHeader';
 import ProductItem from 'components/products/listItem';
 import { EmptyIllustration } from 'components/404';
 import type { AppState } from 'store';
@@ -84,7 +85,7 @@ class ProductsList extends React.Component<Props, State> {
         const tabs = [];
         for (const [category, products] of this.props.productsByCategory) {
           const panel = (
-            <TabsPanel label={category} key={category}>
+            <TabsPanel label={`${category} ${t('Products')}`} key={category}>
               {ProductsList.getProductsList(products)}
             </TabsPanel>
           );
@@ -107,7 +108,10 @@ class ProductsList extends React.Component<Props, State> {
     }
     return (
       <DocumentTitle title={`${t('Products')} | ${t('MetaDeploy')}`}>
-        <div className="slds-p-around_x-large">{contents}</div>
+        <>
+          <Header />
+          <div className="slds-p-around_x-large">{contents}</div>
+        </>
       </DocumentTitle>
     );
   }

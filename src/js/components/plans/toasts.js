@@ -38,7 +38,6 @@ class Toasts extends React.Component<Props, State> {
           heading: [t(label)],
         }}
         variant={variant}
-        duration={20 * 1000}
         onRequestClose={this.handleClose}
       />
     );
