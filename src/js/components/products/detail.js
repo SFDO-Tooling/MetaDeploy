@@ -140,7 +140,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                         slds-button_brand
                         slds-size_full"
                     >
-                      {t('View')} {primary_plan.title}
+                      {t('View Plan')}: {primary_plan.title}
                     </Link>
                   </p>
                 ) : null}
@@ -156,7 +156,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                         slds-button_outline-brand
                         slds-size_full"
                     >
-                      {t('View')} {secondary_plan.title}
+                      {t('View Plan')}: {secondary_plan.title}
                     </Link>
                   </p>
                 ) : null}
