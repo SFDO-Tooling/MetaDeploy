@@ -6,6 +6,7 @@ export type User = {
   +id: string,
   +username: string,
   +email: string,
+  +is_staff: boolean,
   +valid_token_for: string | null,
   +org_name: string | null,
   +org_type: string | null,

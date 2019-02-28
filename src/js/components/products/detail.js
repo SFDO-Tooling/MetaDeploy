@@ -16,6 +16,7 @@ import {
 } from 'store/products/selectors';
 import { selectUserState } from 'store/user/selectors';
 import { getLoadingOrNotFound, shouldFetchVersion } from 'components/utils';
+import BackLink from 'components/backLink';
 import BodyContainer from 'components/bodyContainer';
 import Header from 'components/products/header';
 import ProductNotAllowed from 'components/products/notAllowed';
@@ -126,9 +127,6 @@ class VersionDetail extends React.Component<VersionDetailProps> {
           {product.is_allowed ? (
             <BodyContainer>
               <BodySection>
-                <h3 className="slds-text-heading_small">
-                  {t('Select a Plan to Install')}
-                </h3>
                 <p>{version.description}</p>
                 {primary_plan && visiblePrimaryPlan ? (
                   <p>
@@ -142,7 +140,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                         slds-button_brand
                         slds-size_full"
                     >
-                      {primary_plan.title}
+                      {t('View Plan')}: {primary_plan.title}
                     </Link>
                   </p>
                 ) : null}
@@ -158,10 +156,14 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                         slds-button_outline-brand
                         slds-size_full"
                     >
-                      {secondary_plan.title}
+                      {t('View Plan')}: {secondary_plan.title}
                     </Link>
                   </p>
                 ) : null}
+                <BackLink
+                  label={t('Select a different product')}
+                  url={routes.product_list()}
+                />
                 {listedAdditionalPlans.length ? (
                   <div className="slds-p-top_x-large">
                     {visiblePrimaryPlan || visibleSecondaryPlan ? (

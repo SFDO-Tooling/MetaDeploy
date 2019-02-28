@@ -21,6 +21,7 @@ import {
 import { selectUserState } from 'store/user/selectors';
 import { getLoadingOrNotFound, shouldFetchVersion } from 'components/utils';
 import { startJob } from 'store/jobs/actions';
+import BackLink from 'components/backLink';
 import BodyContainer from 'components/bodyContainer';
 import CtaButton, { LoginBtn } from 'components/plans/ctaButton';
 import Header from 'components/plans/header';
@@ -352,6 +353,13 @@ class PlanDetail extends React.Component<Props, State> {
                 }
                 postMessage={this.getPostMessage()}
                 cta={this.getCTA(selectedSteps)}
+                backLink={
+                  <BackLink
+                    label={t('Select a different plan')}
+                    url={routes.version_detail(product.slug, version.label)}
+                    className="slds-p-top_small"
+                  />
+                }
               />
               <UserInfo user={user} />
               {plan.steps && plan.steps.length ? (

@@ -10,7 +10,7 @@ const defaultJob = {
   },
   plan: 'plan-1',
   status: 'started',
-  steps: ['step-1', 'step-2', 'step-4'],
+  steps: ['step-1', 'step-2', 'step-3'],
   results: { 'step-1': [{ status: 'ok' }] },
   org_name: 'Test Org',
   org_type: null,
@@ -28,17 +28,14 @@ describe('<ProgressIndicator />', () => {
   };
 
   describe('started', () => {
-    test('shows three steps complete', () => {
+    test('shows two steps complete', () => {
       const { getByText } = setup();
 
       expect(getByText('Step 1: Log in - Completed')).toBeVisible();
       expect(
         getByText('Step 2: Run pre-install validation - Completed'),
       ).toBeVisible();
-      expect(
-        getByText('Step 3: Pre-install validation complete - Completed'),
-      ).toBeVisible();
-      expect(getByText('Step 4: Install')).toBeVisible();
+      expect(getByText('Step 3: Install')).toBeVisible();
     });
   });
 
@@ -52,10 +49,7 @@ describe('<ProgressIndicator />', () => {
       expect(
         getByText('Step 2: Run pre-install validation - Completed'),
       ).toBeVisible();
-      expect(
-        getByText('Step 3: Pre-install validation complete - Completed'),
-      ).toBeVisible();
-      expect(getByText('Step 4: Install - Completed')).toBeVisible();
+      expect(getByText('Step 3: Install - Completed')).toBeVisible();
     });
   });
 
@@ -67,10 +61,7 @@ describe('<ProgressIndicator />', () => {
       expect(
         getByText('Step 2: Run pre-install validation - Completed'),
       ).toBeVisible();
-      expect(
-        getByText('Step 3: Pre-install validation complete - Completed'),
-      ).toBeVisible();
-      expect(getByText('Step 4: Install - Error')).toBeVisible();
+      expect(getByText('Step 3: Install - Error')).toBeVisible();
     });
   });
 
@@ -84,10 +75,7 @@ describe('<ProgressIndicator />', () => {
       expect(
         getByText('Step 2: Run pre-install validation - Completed'),
       ).toBeVisible();
-      expect(
-        getByText('Step 3: Pre-install validation complete - Completed'),
-      ).toBeVisible();
-      expect(getByText('Step 4: Install - Error')).toBeVisible();
+      expect(getByText('Step 3: Install - Error')).toBeVisible();
     });
   });
 });
