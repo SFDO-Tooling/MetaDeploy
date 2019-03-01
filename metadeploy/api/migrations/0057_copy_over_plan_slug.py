@@ -7,7 +7,7 @@ def forwards(apps, schema_editor):
     PlanSlug = apps.get_model("api", "PlanSlug")
 
     for slug in PlanSlug.objects.all():
-        slug.new_parent = slug.plan.plan_template
+        slug.new_parent = slug.parent.plan_template
         slug.save()
 
 

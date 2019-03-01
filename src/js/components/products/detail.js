@@ -76,6 +76,23 @@ class VersionDetail extends React.Component<VersionDetailProps> {
       versionLabel &&
       shouldFetchVersion({ product, version, versionLabel })
     ) {
+      // There's a chance that the versionLabel is really a planSlug.
+      // In that case, check the most recent version in the product and see.
+      if (
+        product.most_recent_version &&
+        product.most_recent_version.primary_plan &&
+        product.most_recent_version.secondary_plan &&
+        product.most_recent_version.additional_plans
+      ) {
+        const slugs = [
+          product.most_recent_version.primary_plan.slug,
+          product.most_recent_version.secondary_plan.slug,
+          ...product.most_recent_version.additional_plans.map(e => e.slug),
+        ];
+        if (slugs.includes(versionLabel)) {
+          return; // Redirect routes.plan_detail(product.slug, product.most_recent_version.slug, versionLabel)
+        }
+      }
       // Fetch version from API
       doFetchVersion({ product: product.id, label: versionLabel });
     }
