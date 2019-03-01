@@ -229,23 +229,23 @@ class TestPlanTemplate:
 class TestPlanSlug:
     def test_present(self, plan_factory, plan_slug_factory):
         plan = plan_factory(title="a plan")
-        plan.planslug_set.all().delete()
-        plan_slug_factory(parent=plan, slug="a-slug-1", is_active=False)
-        plan_slug_factory(parent=plan, slug="a-slug-2", is_active=True)
-        plan_slug_factory(parent=plan, slug="a-slug-3", is_active=True)
-        plan_slug_factory(parent=plan, slug="a-slug-4", is_active=False)
+        plan.plan_template.planslug_set.all().delete()
+        plan_slug_factory(parent=plan.plan_template, slug="a-slug-1", is_active=False)
+        plan_slug_factory(parent=plan.plan_template, slug="a-slug-2", is_active=True)
+        plan_slug_factory(parent=plan.plan_template, slug="a-slug-3", is_active=True)
+        plan_slug_factory(parent=plan.plan_template, slug="a-slug-4", is_active=False)
 
         assert plan.slug == "a-slug-3"
 
     def test_absent(self, plan_factory):
         plan = plan_factory(title="a plan")
-        plan.planslug_set.all().delete()
+        plan.plan_template.planslug_set.all().delete()
 
         assert plan.slug is None
 
     def test_ensure_slug(self, plan_factory):
         plan = plan_factory(title="a plan")
-        plan.planslug_set.all().delete()
+        plan.plan_template.planslug_set.all().delete()
 
         plan.ensure_slug()
 
@@ -255,12 +255,23 @@ class TestPlanSlug:
         plan_slug = plan_slug_factory(slug="a-slug")
         assert str(plan_slug) == "a-slug"
 
-    def test_unique_per_version(self, plan_slug_factory, version_factory):
-        v1 = version_factory()
-        v2 = version_factory()
-        plan_slug_factory(slug="test", parent__version=v1)
-        plan_slug_factory(slug="test", parent__version=v2)
-        pslug = plan_slug_factory(slug="test", parent__version=v1)
+    def test_unique_per_product(
+        self, plan_slug_factory, plan_template_factory, product_factory, plan_factory
+    ):
+        product1 = product_factory()
+        product2 = product_factory()
+
+        plan_template1 = plan_template_factory()
+        plan_template2 = plan_template_factory()
+
+        plan_factory(version__product=product1, plan_template=plan_template1)
+        plan_factory(version__product=product2, plan_template=plan_template2)
+
+        plan_slug_factory(slug="test", parent=plan_template1)
+        plan_slug_factory(slug="test", parent=plan_template2)
+
+        pslug = plan_slug_factory(slug="test", parent=plan_template1)
+
         with pytest.raises(ValidationError):
             pslug.validate_unique()
 

@@ -177,7 +177,7 @@ class PlanSlugFactory(factory.django.DjangoModelFactory):
         model = PlanSlug
 
     slug = factory.Sequence("this-is-a-slug-{}".format)
-    parent = factory.SubFactory(PlanFactory)
+    parent = factory.SubFactory(PlanTemplateFactory)
 
 
 @register

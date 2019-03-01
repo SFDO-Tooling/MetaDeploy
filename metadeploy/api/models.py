@@ -174,6 +174,7 @@ class SlugMixin:
         self.slug_class: the class that implements slugs for this model.
         self.slug_queryset: the name of the queryset for slugs for this
             model.
+        self.slug_parent: the instance to assign as the slug parent.
     """
 
     def _find_unique_slug(self, original):
@@ -194,11 +195,17 @@ class SlugMixin:
             return slug.slug
         return None
 
+    @property
+    def slug_parent(self):
+        return self
+
     def ensure_slug(self):
         if not self.slug_queryset.filter(is_active=True).exists():
             slug = slugify(self.title)
             slug = self._find_unique_slug(slug)
-            self.slug_class.objects.create(parent=self, slug=slug, is_active=True)
+            self.slug_class.objects.create(
+                parent=self.slug_parent, slug=slug, is_active=True
+            )
 
 
 class ProductCategory(models.Model):
@@ -364,35 +371,16 @@ class Version(HashIdMixin, TranslatableModel):
         return self.plan_set.filter(tier=Plan.Tier.additional).order_by("id")
 
 
-class PlanTemplate(TranslatableModel):
-    name = models.CharField(max_length=100, blank=True)
-    translations = TranslatedFields(
-        preflight_message=MarkdownField(blank=True, property_suffix="_markdown"),
-        post_install_message=MarkdownField(blank=True, property_suffix="_markdown"),
-    )
-
-    @property
-    def preflight_message_markdown(self):
-        return self.get_translation("en-us").preflight_message_markdown
-
-    @property
-    def post_install_message_markdown(self):
-        return self.get_translation("en-us").post_install_message_markdown
-
-    def __str__(self):
-        return self.name
-
-
 class PlanSlug(models.Model):
     """
-    Rather than have a slugfield directly on the Plan model, we have
-    a related model. That way, we can have a bunch of slugs that pertain
-    to a particular model, and even if the slug changes and someone uses
-    an old slug, we can redirect them appropriately.
+    Rather than have a slugfield directly on the PlanTemplate model, we
+    have a related model. That way, we can have a bunch of slugs that
+    pertain to a particular model, and even if the slug changes and
+    someone uses an old slug, we can redirect them appropriately.
     """
 
     slug = models.SlugField()
-    parent = models.ForeignKey("Plan", on_delete=models.PROTECT)
+    parent = models.ForeignKey("PlanTemplate", on_delete=models.PROTECT)
     is_active = models.BooleanField(
         default=True,
         help_text=_(
@@ -404,18 +392,43 @@ class PlanSlug(models.Model):
     def validate_unique(self, *args, **kwargs):
         super().validate_unique(*args, **kwargs)
         qs = PlanSlug.objects.filter(
-            parent__version=self.parent.version, slug=self.slug
+            parent__plan__version__product__in=self.get_associated_products(),
+            slug=self.slug,
         )
         if qs.exists():
             raise ValidationError(
                 {"slug": [_("This must be unique for the Plan's Version.")]}
             )
 
+    def get_associated_products(self):
+        return Product.objects.filter(version__plan__plan_template=self.parent)
+
     class Meta:
         ordering = ("-created_at",)
 
     def __str__(self):
         return self.slug
+
+
+class PlanTemplate(SlugMixin, TranslatableModel):
+    name = models.CharField(max_length=100, blank=True)
+    translations = TranslatedFields(
+        preflight_message=MarkdownField(blank=True, property_suffix="_markdown"),
+        post_install_message=MarkdownField(blank=True, property_suffix="_markdown"),
+    )
+
+    slug_class = PlanSlug
+
+    @property
+    def preflight_message_markdown(self):
+        return self.get_translation("en-us").preflight_message_markdown
+
+    @property
+    def post_install_message_markdown(self):
+        return self.get_translation("en-us").post_install_message_markdown
+
+    def __str__(self):
+        return self.name
 
 
 class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
@@ -452,8 +465,12 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
         return self.steps.filter(is_required=True).values_list("id", flat=True)
 
     @property
+    def slug_parent(self):
+        return self.plan_template
+
+    @property
     def slug_queryset(self):
-        return self.planslug_set
+        return self.plan_template.planslug_set
 
     def natural_key(self):
         return (self.version, self.title)

@@ -97,7 +97,7 @@ class Command(BaseCommand):
             plan_template=plan_template,
             **combined_kwargs,
         )
-        PlanSlug.objects.create(parent=plan, slug=slugify(title))
+        PlanSlug.objects.create(parent=plan.plan_template, slug=slugify(title))
         return plan
 
     def create_step(self, **kwargs):
