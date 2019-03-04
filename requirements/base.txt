@@ -5,7 +5,7 @@ whitenoise==4.1.2
 channels==2.1.7
 channels_redis==2.3.3
 service_identity==18.1.0
-django-allauth==0.38.0
+django-allauth==0.39.1
 werkzeug==0.14.1
 pyopenssl==19.0.0
 django-js-reverse==0.8.2
