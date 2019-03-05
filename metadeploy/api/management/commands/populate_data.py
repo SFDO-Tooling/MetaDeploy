@@ -89,6 +89,7 @@ class Command(BaseCommand):
                 "dummy text ever since the 1500s."
             ),
             post_install_message="Success! You installed it.",
+            product=version.product,
         )
         plan = Plan.objects.create(
             version=version,

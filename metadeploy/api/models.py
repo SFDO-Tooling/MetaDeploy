@@ -416,6 +416,7 @@ class PlanTemplate(SlugMixin, TranslatableModel):
         preflight_message=MarkdownField(blank=True, property_suffix="_markdown"),
         post_install_message=MarkdownField(blank=True, property_suffix="_markdown"),
     )
+    product = models.ForeignKey(Product, on_delete=models.PROTECT)
 
     slug_class = PlanSlug
 
