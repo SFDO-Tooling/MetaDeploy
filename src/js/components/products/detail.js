@@ -12,7 +12,7 @@ import { fetchVersion } from 'store/products/actions';
 import {
   selectProduct,
   selectVersion,
-  selectVersionLabel,
+  selectVersionOrPlan,
 } from 'store/products/selectors';
 import { selectUserState } from 'store/user/selectors';
 import { getLoadingOrNotFound, shouldFetchVersion } from 'components/utils';
@@ -35,7 +35,10 @@ type VersionDetailProps = {
   user: UserType,
   product: ProductType | null,
   version: VersionType | null,
-  versionLabel: ?string,
+  versionLabelAndProductSlug: {
+    label: string,
+    slug: string,
+  },
   doFetchVersion: typeof fetchVersion,
 };
 
@@ -70,31 +73,21 @@ const BodySection = ({ children }: { children: ?React.Node }) => (
 
 class VersionDetail extends React.Component<VersionDetailProps> {
   fetchVersionIfMissing() {
-    const { product, version, versionLabel, doFetchVersion } = this.props;
+    const {
+      product,
+      version,
+      versionLabelAndProductSlug,
+      doFetchVersion,
+    } = this.props;
+    const { label, slug } = versionLabelAndProductSlug;
     if (
       product &&
-      versionLabel &&
-      shouldFetchVersion({ product, version, versionLabel })
+      label &&
+      !slug &&
+      shouldFetchVersion({ product, version, label })
     ) {
-      // There's a chance that the versionLabel is really a planSlug.
-      // In that case, check the most recent version in the product and see.
-      if (
-        product.most_recent_version &&
-        product.most_recent_version.primary_plan &&
-        product.most_recent_version.secondary_plan &&
-        product.most_recent_version.additional_plans
-      ) {
-        const slugs = [
-          product.most_recent_version.primary_plan.slug,
-          product.most_recent_version.secondary_plan.slug,
-          ...product.most_recent_version.additional_plans.map(e => e.slug),
-        ];
-        if (slugs.includes(versionLabel)) {
-          return; // Redirect routes.plan_detail(product.slug, product.most_recent_version.slug, versionLabel)
-        }
-      }
       // Fetch version from API
-      doFetchVersion({ product: product.id, label: versionLabel });
+      doFetchVersion({ product: product.id, label });
     }
   }
 
@@ -103,22 +96,23 @@ class VersionDetail extends React.Component<VersionDetailProps> {
   }
 
   componentDidUpdate(prevProps) {
-    const { product, version, versionLabel } = this.props;
+    const { product, version, versionLabelAndProductSlug } = this.props;
     const versionChanged =
       product !== prevProps.product ||
       version !== prevProps.version ||
-      versionLabel !== prevProps.versionLabel;
+      versionLabelAndProductSlug !== prevProps.versionLabelAndProductSlug;
     if (versionChanged) {
       this.fetchVersionIfMissing();
     }
   }
 
   render(): React.Node {
-    const { user, product, version, versionLabel } = this.props;
+    const { user, product, version, versionLabelAndProductSlug } = this.props;
+    const { label } = versionLabelAndProductSlug;
     const loadingOrNotFound = getLoadingOrNotFound({
       product,
       version,
-      versionLabel,
+      label,
     });
     if (loadingOrNotFound !== false) {
       return loadingOrNotFound;
@@ -247,7 +241,7 @@ const selectVersionDetail = (appState: AppState, props: InitialProps) => ({
   user: selectUserState(appState),
   product: selectProduct(appState, props),
   version: selectVersion(appState, props),
-  versionLabel: selectVersionLabel(appState, props),
+  versionLabelAndProductSlug: selectVersionOrPlan(appState, props),
 });
 
 const actions = {
