@@ -392,8 +392,7 @@ class PlanSlug(models.Model):
     def validate_unique(self, *args, **kwargs):
         super().validate_unique(*args, **kwargs)
         qs = PlanSlug.objects.filter(
-            parent__plan__version__product__in=self.get_associated_products(),
-            slug=self.slug,
+            parent__product__in=self.get_associated_products(), slug=self.slug
         )
         if qs.exists():
             raise ValidationError(
@@ -445,14 +444,6 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
         ),
     )
 
-    @property
-    def preflight_message_additional_markdown(self):
-        return self.get_translation("en-us").preflight_message_additional_markdown
-
-    @property
-    def post_install_message_additional_markdown(self):
-        return self.get_translation("en-us").post_install_message_additional_markdown
-
     plan_template = models.ForeignKey(PlanTemplate, on_delete=models.PROTECT)
     version = models.ForeignKey(Version, on_delete=models.PROTECT)
     preflight_flow_name = models.CharField(max_length=256, blank=True)
@@ -460,6 +451,14 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
     is_listed = models.BooleanField(default=True)
 
     slug_class = PlanSlug
+
+    @property
+    def preflight_message_additional_markdown(self):
+        return self.get_translation("en-us").preflight_message_additional_markdown
+
+    @property
+    def post_install_message_additional_markdown(self):
+        return self.get_translation("en-us").post_install_message_additional_markdown
 
     @property
     def required_step_ids(self):

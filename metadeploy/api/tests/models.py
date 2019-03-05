@@ -261,8 +261,8 @@ class TestPlanSlug:
         product1 = product_factory()
         product2 = product_factory()
 
-        plan_template1 = plan_template_factory()
-        plan_template2 = plan_template_factory()
+        plan_template1 = plan_template_factory(product=product1)
+        plan_template2 = plan_template_factory(product=product2)
 
         plan_factory(version__product=product1, plan_template=plan_template1)
         plan_factory(version__product=product2, plan_template=plan_template2)
