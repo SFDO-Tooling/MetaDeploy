@@ -28,6 +28,7 @@ import type {
   Product as ProductType,
   Version as VersionType,
 } from 'store/products/reducer';
+import type { VersionPlanType } from 'store/products/selectors';
 import type { User as UserType } from 'store/user/reducer';
 
 type ProductDetailProps = { product: ProductType | null };
@@ -35,10 +36,7 @@ type VersionDetailProps = {
   user: UserType,
   product: ProductType | null,
   version: VersionType | null,
-  versionLabelAndProductSlug: {
-    label: string,
-    slug: string,
-  },
+  versionLabelAndPlanSlug: VersionPlanType,
   doFetchVersion: typeof fetchVersion,
 };
 
@@ -76,15 +74,15 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     const {
       product,
       version,
-      versionLabelAndProductSlug,
+      versionLabelAndPlanSlug,
       doFetchVersion,
     } = this.props;
-    const { label, slug } = versionLabelAndProductSlug;
+    const { label, slug } = versionLabelAndPlanSlug;
     if (
       product &&
       label &&
       !slug &&
-      shouldFetchVersion({ product, version, label })
+      shouldFetchVersion({ product, version, versionLabel: label })
     ) {
       // Fetch version from API
       doFetchVersion({ product: product.id, label });
@@ -96,23 +94,25 @@ class VersionDetail extends React.Component<VersionDetailProps> {
   }
 
   componentDidUpdate(prevProps) {
-    const { product, version, versionLabelAndProductSlug } = this.props;
+    const { product, version, versionLabelAndPlanSlug } = this.props;
     const versionChanged =
       product !== prevProps.product ||
       version !== prevProps.version ||
-      versionLabelAndProductSlug !== prevProps.versionLabelAndProductSlug;
+      versionLabelAndPlanSlug.label !==
+        prevProps.versionLabelAndPlanSlug.label ||
+      versionLabelAndPlanSlug.slug !== prevProps.versionLabelAndPlanSlug.slug;
     if (versionChanged) {
       this.fetchVersionIfMissing();
     }
   }
 
   render(): React.Node {
-    const { user, product, version, versionLabelAndProductSlug } = this.props;
-    const { label } = versionLabelAndProductSlug;
+    const { user, product, version, versionLabelAndPlanSlug } = this.props;
+    const { label, slug } = versionLabelAndPlanSlug;
     const loadingOrNotFound = getLoadingOrNotFound({
       product,
       version,
-      label,
+      versionLabel: label,
     });
     if (loadingOrNotFound !== false) {
       return loadingOrNotFound;
@@ -122,6 +122,9 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     /* istanbul ignore if */
     if (!product || !version) {
       return <ProductNotFound />;
+    }
+    if (slug && label) {
+      return <Redirect to={routes.plan_detail(product.slug, label, slug)} />;
     }
     const listedAdditionalPlans = version.additional_plans.filter(
       plan => plan.is_listed && plan.is_allowed,
@@ -241,7 +244,7 @@ const selectVersionDetail = (appState: AppState, props: InitialProps) => ({
   user: selectUserState(appState),
   product: selectProduct(appState, props),
   version: selectVersion(appState, props),
-  versionLabelAndProductSlug: selectVersionOrPlan(appState, props),
+  versionLabelAndPlanSlug: selectVersionOrPlan(appState, props),
 });
 
 const actions = {
