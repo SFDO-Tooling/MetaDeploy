@@ -35,7 +35,7 @@ module.exports = merge(common, {
     writeToDisk: true,
   },
   plugins: [
-    new CleanWebpackPlugin(['dist/*.*']),
+    new CleanWebpackPlugin(),
     new MiniCssExtractPlugin({
       filename: '[name].css',
     }),
