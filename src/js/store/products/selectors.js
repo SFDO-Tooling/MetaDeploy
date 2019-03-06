@@ -13,8 +13,8 @@ import type {
 export type ProductsMapType = Map<string, Array<ProductType>>;
 
 export type VersionPlanType = {
-  +label: ?string,
-  +slug: ?string,
+  +label: string | null,
+  +slug: string | null,
 };
 
 const selectProductsState = (appState: AppState): ProductsType =>
