@@ -111,7 +111,12 @@ describe('<VersionDetail />', () => {
     const { getByText, queryByText, getByAltText, rerender } = renderWithRedux(
       <MemoryRouter>
         <VersionDetail
-          match={{ params: { productSlug, versionLabelAndPlanSlug } }}
+          match={{
+            params: {
+              productSlug,
+              versionLabel: versionLabelAndPlanSlug.label,
+            },
+          }}
         />
       </MemoryRouter>,
       opts.initialState,
@@ -377,6 +382,49 @@ describe('<VersionDetail />', () => {
 
       expect(getByText('list of all products')).toBeVisible();
       expect(getByText('log in')).toBeVisible();
+    });
+  });
+
+  describe('version label is a plan slug', () => {
+    test('renders <Redirect />', () => {
+      setup({
+        versionLabelAndPlanSlug: { label: 'my-plan', slug: null },
+      });
+
+      expect(window.location.toString()).toEqual('product-1/1.0.0/my-plan');
+    });
+  });
+
+  describe('selectVersionLabelOrPlanSlug', () => {
+    test('returns null slug if slug not in most recent version', () => {
+      setup({
+        versionLabelAndPlanSlug: {
+          label: 'i am not a slug or label',
+          slug: null,
+        },
+      });
+
+      expect(false).toBeTruthy();
+    });
+
+    test('returns null slug if no version', () => {
+      setup({
+        initialState: {
+          products: [
+            {
+              id: 'p1',
+              slug: 'product-1',
+              title: 'Product 1',
+              description: 'This is a test product.',
+              category: 'salesforce',
+              image: 'http://foo.bar',
+              most_recent_version: null,
+            },
+          ],
+        },
+      });
+
+      expect(false).toBeTruthy();
     });
   });
 });

@@ -113,6 +113,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
       product,
       version,
       versionLabel: label,
+      planSlug: slug,
     });
     if (loadingOrNotFound !== false) {
       return loadingOrNotFound;
@@ -122,9 +123,6 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     /* istanbul ignore if */
     if (!product || !version) {
       return <ProductNotFound />;
-    }
-    if (slug && label) {
-      return <Redirect to={routes.plan_detail(product.slug, label, slug)} />;
     }
     const listedAdditionalPlans = version.additional_plans.filter(
       plan => plan.is_listed && plan.is_allowed,
