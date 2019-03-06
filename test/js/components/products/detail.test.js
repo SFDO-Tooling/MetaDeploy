@@ -104,14 +104,14 @@ describe('<VersionDetail />', () => {
     const defaults = {
       initialState: defaultState,
       productSlug: 'product-1',
-      versionLabelAndProductSlug: { label: '1.0.0', slug: '' },
+      versionLabelAndPlanSlug: { label: '1.0.0', slug: null },
     };
     const opts = Object.assign({}, defaults, options);
-    const { productSlug, versionLabelAndProductSlug, rerenderFn } = opts;
+    const { productSlug, versionLabelAndPlanSlug, rerenderFn } = opts;
     const { getByText, queryByText, getByAltText, rerender } = renderWithRedux(
       <MemoryRouter>
         <VersionDetail
-          match={{ params: { productSlug, versionLabelAndProductSlug } }}
+          match={{ params: { productSlug, versionLabelAndPlanSlug } }}
         />
       </MemoryRouter>,
       opts.initialState,
@@ -132,7 +132,7 @@ describe('<VersionDetail />', () => {
   describe('unknown version', () => {
     test('fetches version', () => {
       setup({
-        versionLabelAndProductSlug: { label: '2.0.0', slug: '' },
+        versionLabelAndPlanSlug: { label: '2.0.0', slug: null },
       });
 
       expect(fetchVersion).toHaveBeenCalledWith({
@@ -158,7 +158,7 @@ describe('<VersionDetail />', () => {
     describe('version is removed', () => {
       test('fetches version', () => {
         const { rerender } = setup({
-          versionLabelAndProductSlug: { label: '2.0.0', slug: '' },
+          versionLabelAndPlanSlug: { label: '2.0.0', slug: null },
         });
 
         expect(fetchVersion).toHaveBeenCalledWith({
@@ -167,7 +167,7 @@ describe('<VersionDetail />', () => {
         });
 
         setup({
-          versionLabelAndProductSlug: { label: '3.0.0', slug: '' },
+          versionLabelAndPlanSlug: { label: '3.0.0', slug: null },
           rerenderFn: rerender,
         });
 
@@ -319,7 +319,7 @@ describe('<VersionDetail />', () => {
     test('renders version detail', () => {
       const { getByText } = setup({
         initialState: { products: [product] },
-        versionLabelAndProductSlug: { label: '2.0.0', slug: '' },
+        versionLabelAndPlanSlug: { label: '2.0.0', slug: null },
       });
 
       expect(getByText('Product 1, 2.0.0')).toBeVisible();
@@ -334,7 +334,7 @@ describe('<VersionDetail />', () => {
       product.versions = { '2.0.0': null };
       const { getByText } = setup({
         initialState: { products: [product] },
-        versionLabelAndProductSlug: { label: '2.0.0', slug: '' },
+        versionLabelAndPlanSlug: { label: '2.0.0', slug: null },
       });
 
       expect(getByText('most recent version')).toBeVisible();

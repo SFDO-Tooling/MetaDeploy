@@ -82,7 +82,7 @@ const selectVersion: (
   },
 );
 
-const selectVersionOrPlan: (
+const selectVersionLabelOrPlanSlug: (
   AppState,
   InitialProps,
 ) => VersionPlanType = createSelector(
@@ -96,38 +96,24 @@ const selectVersionOrPlan: (
     if (!product || !maybeVersionLabel) {
       return { label: null, slug: null };
     }
-    if (
-      product.most_recent_version &&
-      (product.most_recent_version.primary_plan ||
-        product.most_recent_version.secondary_plan ||
-        product.most_recent_version.additional_plans)
-    ) {
-      const slugs = [
-        (product.most_recent_version.primary_plan &&
-          product.most_recent_version.primary_plan.slug) ||
-          '',
-        (product.most_recent_version.secondary_plan &&
-          product.most_recent_version.secondary_plan.slug) ||
-          '',
-        ...((product.most_recent_version.additional_plans &&
-          product.most_recent_version.additional_plans.map(e => e.slug)) ||
-          []),
-      ];
+    const version = product.most_recent_version;
+    if (version) {
+      const slugs = version.additional_plans.map(plan => plan.slug);
+      if (version.primary_plan) {
+        slugs.push(version.primary_plan.slug);
+      }
+      if (version.secondary_plan) {
+        slugs.push(version.secondary_plan.slug);
+      }
       if (slugs.includes(maybeVersionLabel)) {
         return {
-          // This is never missing, because of the surrounding
-          // conditional, but flow doesn't seem to understand
-          // that.
-          label:
-            (product.most_recent_version &&
-              product.most_recent_version.label) ||
-            null,
-          slug: maybeVersionLabel || null,
+          label: version.label,
+          slug: maybeVersionLabel,
         };
       }
     }
     return {
-      label: maybeVersionLabel || null,
+      label: maybeVersionLabel,
       slug: null,
     };
   },
@@ -140,5 +126,5 @@ export {
   selectProduct,
   selectVersionLabel,
   selectVersion,
-  selectVersionOrPlan,
+  selectVersionLabelOrPlanSlug,
 };

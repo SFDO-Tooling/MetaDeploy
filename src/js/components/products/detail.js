@@ -12,7 +12,7 @@ import { fetchVersion } from 'store/products/actions';
 import {
   selectProduct,
   selectVersion,
-  selectVersionOrPlan,
+  selectVersionLabelOrPlanSlug,
 } from 'store/products/selectors';
 import { selectUserState } from 'store/user/selectors';
 import { getLoadingOrNotFound, shouldFetchVersion } from 'components/utils';
@@ -244,7 +244,7 @@ const selectVersionDetail = (appState: AppState, props: InitialProps) => ({
   user: selectUserState(appState),
   product: selectProduct(appState, props),
   version: selectVersion(appState, props),
-  versionLabelAndPlanSlug: selectVersionOrPlan(appState, props),
+  versionLabelAndPlanSlug: selectVersionLabelOrPlanSlug(appState, props),
 });
 
 const actions = {
