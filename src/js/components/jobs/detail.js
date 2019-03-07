@@ -240,11 +240,13 @@ class JobDetail extends React.Component<Props, State> {
               }
               postMessage={<JobMessage job={job} openModal={this.openModal} />}
               backLink={
-                <BackLink
-                  label={t('Install another product')}
-                  url={routes.product_list()}
-                  className="slds-p-top_small"
-                />
+                job.status === CONSTANTS.STATUS.STARTED ? null : (
+                  <BackLink
+                    label={t('Install another product')}
+                    url={routes.product_list()}
+                    className="slds-p-top_small"
+                  />
+                )
               }
             />
             <UserInfo job={job} />
