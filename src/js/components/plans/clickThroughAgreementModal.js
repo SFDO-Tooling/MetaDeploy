@@ -57,10 +57,10 @@ class ClickThroughAgreementModal extends React.Component<Props, State> {
         <div className="slds-p-horizontal_large slds-p-vertical_medium">
           {/* This text is pre-cleaned by the API */}
           <div
-            className="
-              slds-text-longform
+            className="slds-text-longform
               slds-scrollable_y
-              slds-box"
+              slds-box
+              markdown"
             style={{ maxHeight: '250px' }}
             dangerouslySetInnerHTML={{
               __html: text,

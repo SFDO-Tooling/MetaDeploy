@@ -20,7 +20,10 @@ const JobMessage = ({
     !job.error_count &&
     job.message ? (
       // These messages are pre-cleaned by the API
-      <div dangerouslySetInnerHTML={{ __html: job.message }} />
+      <div
+        className="markdown"
+        dangerouslySetInnerHTML={{ __html: job.message }}
+      />
     ) : null}
     {job.status === CONSTANTS.STATUS.FAILED ||
     job.status === CONSTANTS.STATUS.CANCELED ? (
