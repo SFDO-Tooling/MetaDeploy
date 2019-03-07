@@ -56,7 +56,7 @@ describe('<Products />', () => {
     const { getByText, queryByText } = setup(initialState);
 
     expect(getByText('Product 1')).toBeVisible();
-    expect(queryByText('salesforce Products')).toBeNull();
+    expect(queryByText('salesforce')).toBeNull();
   });
 
   describe('2 categories', () => {
@@ -142,24 +142,24 @@ describe('<Products />', () => {
 
     test('renders products list', () => {
       const { getByText, queryByText } = setup(initialState);
-      const activeTab = getByText('salesforce Products');
+      const activeTab = getByText('salesforce');
 
       expect(getByText('Product 1')).toBeVisible();
       expect(getByText('Product 2')).toBeInTheDocument();
       expect(queryByText('Product 3')).toBeNull();
       expect(activeTab).toBeVisible();
-      expect(getByText('community Products')).toBeVisible();
+      expect(getByText('community')).toBeVisible();
       expect(activeTab).toHaveClass('slds-active');
     });
 
     test('uses saved active tab', () => {
       window.sessionStorage.setItem('activeProductsTab', 'community');
       const { getByText } = setup(initialState);
-      const activeTab = getByText('community Products');
+      const activeTab = getByText('community');
 
       expect(getByText('Product 1')).toBeVisible();
       expect(getByText('Product 2')).toBeInTheDocument();
-      expect(getByText('salesforce Products')).toBeVisible();
+      expect(getByText('salesforce')).toBeVisible();
       expect(activeTab).toBeVisible();
       expect(activeTab).toHaveClass('slds-active');
     });
@@ -167,7 +167,7 @@ describe('<Products />', () => {
     describe('tab onSelect', () => {
       test('saves new activeProductsTab', () => {
         const { getByText } = setup(initialState);
-        const communityTab = getByText('community Products');
+        const communityTab = getByText('community');
         fireEvent.click(communityTab);
         const actual = window.sessionStorage.getItem('activeProductsTab');
 
