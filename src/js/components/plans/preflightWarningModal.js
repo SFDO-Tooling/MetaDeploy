@@ -52,12 +52,12 @@ const WarningList = ({
   return (
     <div className="slds-p-vertical_x-small">
       {name && id !== 'plan' ? (
-        <h3
+        <h2
           className="slds-text-heading_small
             slds-p-bottom_x-small"
         >
           {name}
-        </h3>
+        </h2>
       ) : null}
       <ul>{warnings}</ul>
     </div>

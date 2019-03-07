@@ -179,9 +179,9 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                 {listedAdditionalPlans.length ? (
                   <div className="slds-p-top_x-large">
                     {visiblePrimaryPlan || visibleSecondaryPlan ? (
-                      <h3 className="slds-text-heading_small">
+                      <h2 className="slds-text-heading_small">
                         {t('Additional Plans')}
-                      </h3>
+                      </h2>
                     ) : null}
                     {listedAdditionalPlans.map(plan => (
                       <p key={plan.id}>
@@ -200,9 +200,9 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                 ) : null}
               </BodySection>
               <BodySection>
-                <h3 className="slds-text-heading_small">
+                <h2 className="slds-text-heading_small">
                   {t('About')} {product.title}
-                </h3>
+                </h2>
                 {product.image ? (
                   <img
                     className="slds-size_full"
@@ -212,6 +212,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                 ) : null}
                 {/* This description is pre-cleaned by the API */}
                 <div
+                  className="markdown"
                   dangerouslySetInnerHTML={{ __html: product.description }}
                 />
               </BodySection>

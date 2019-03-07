@@ -241,9 +241,11 @@ class Command(BaseCommand):
         self.create_token_expiry_job()
         self.create_preflight_expiry_job()
         sf_category = ProductCategory.objects.create(
-            title="salesforce.org", order_key=0
+            title="salesforce.org products", order_key=0
         )
-        co_category = ProductCategory.objects.create(title="community", order_key=1)
+        co_category = ProductCategory.objects.create(
+            title="community products", order_key=1
+        )
         product1 = self.create_product(
             title="Product With Useful Data",
             repo_url="https://github.com/SFDO-Tooling/CumulusCI-Test",

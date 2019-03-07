@@ -4,7 +4,7 @@
 .global-header {
   @include z-index('global-header');
   border-radius: 0;
-  background: $color-background-backdrop-tint;
+  background: $color-background-alt;
 }
 
 [data-logo-bit='end'] {
@@ -16,6 +16,5 @@
 .page-header {
   border: none;
   border-radius: 0;
-  background: $color-background-reminder;
   box-shadow: none;
 }
