@@ -22,7 +22,7 @@ module.exports = merge(common, {
   },
   devtool: 'source-map',
   plugins: [
-    new CleanWebpackPlugin(['dist/prod/*.*']),
+    new CleanWebpackPlugin(),
     new OptimizeCSSAssetsPlugin(),
     new MiniCssExtractPlugin({
       filename: '[name].[chunkhash].min.css',
