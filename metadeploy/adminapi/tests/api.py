@@ -7,14 +7,16 @@ class TestProductViewSet:
     def test_get__filter_by_repo_url(self, admin_api_client, product_factory):
         product = product_factory()
 
-        url = "http://testserver/admin/rest/products"
-        response = admin_api_client.get(url, params={"repo_url": product.repo_url})
+        url = "http://testserver/admin/rest/"
+        response = admin_api_client.get(
+            f"{url}/products", params={"repo_url": product.repo_url}
+        )
 
         assert response.status_code == 200
         assert response.json() == {
             "data": [
                 {
-                    "category": "http://testserver/admin/rest/productcategory/1",
+                    "category": f"{url}/productcategory/{product.category.id}",
                     "click_through_agreement": "",
                     "color": "#FFFFFF",
                     "description": "This is a sample product.",
@@ -28,7 +30,7 @@ class TestProductViewSet:
                     "slds_icon_category": "",
                     "slds_icon_name": "",
                     "title": "Sample Product 0",
-                    "url": "http://testserver/admin/rest/products/74r6Vrl",
+                    "url": f"{url}/products/{product.id}",
                     "visible_to": None,
                 }
             ],
