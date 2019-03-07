@@ -1,3 +1,4 @@
+from django_filters import rest_framework as filters
 from rest_framework import serializers
 from sfdo_template_helpers.admin.serializers import AdminAPISerializer
 from sfdo_template_helpers.admin.views import AdminAPIViewSet
@@ -15,9 +16,16 @@ class ProductSerializer(AdminAPISerializer):
         fields = "__all__"
 
 
+class ProductFilter(filters.FilterSet):
+    class Meta:
+        model_name = "Product"
+        exclude = ("image",)
+
+
 class ProductViewSet(AdminAPIViewSet):
     model_name = "Product"
     serializer_base = ProductSerializer
+    filterset_class = ProductFilter
 
 
 class ProductSlugViewSet(AdminAPIViewSet):

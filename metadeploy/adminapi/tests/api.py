@@ -3,6 +3,41 @@ from rest_framework.test import APIClient
 
 
 @pytest.mark.django_db
+class TestProductViewSet:
+    def test_get__filter_by_repo_url(self, admin_api_client, product_factory):
+        product = product_factory()
+
+        url = "http://testserver/admin/rest/products"
+        response = admin_api_client.get(url, params={"repo_url": product.repo_url})
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "data": [
+                {
+                    "category": "http://testserver/admin/rest/productcategory/1",
+                    "click_through_agreement": "",
+                    "color": "#FFFFFF",
+                    "description": "This is a sample product.",
+                    "icon_url": "",
+                    "id": product.id,
+                    "image": None,
+                    "is_listed": True,
+                    "order_key": 0,
+                    "repo_url": "https://github.com/SFDO-Tooling/CumulusCI-Test",
+                    "short_description": "",
+                    "slds_icon_category": "",
+                    "slds_icon_name": "",
+                    "title": "Sample Product 0",
+                    "url": "http://testserver/admin/rest/products/74r6Vrl",
+                    "visible_to": None,
+                }
+            ],
+            "links": {"next": None, "previous": None},
+            "meta": {"page": {"total": 1}},
+        }
+
+
+@pytest.mark.django_db
 class TestPlanViewSet:
     def test_list(self, admin_api_client, plan_factory):
         plan = plan_factory()
