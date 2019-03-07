@@ -18,7 +18,7 @@ class ProductSerializer(AdminAPISerializer):
 
 class ProductFilter(filters.FilterSet):
     class Meta:
-        model_name = "Product"
+        model = models.Product
         exclude = ("image",)
 
 
