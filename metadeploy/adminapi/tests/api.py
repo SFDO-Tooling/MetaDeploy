@@ -7,7 +7,7 @@ class TestProductViewSet:
     def test_get__filter_by_repo_url(self, admin_api_client, product_factory):
         product = product_factory()
 
-        url = "http://testserver/admin/rest/"
+        url = "http://testserver/admin/rest"
         response = admin_api_client.get(
             f"{url}/products", params={"repo_url": product.repo_url}
         )
