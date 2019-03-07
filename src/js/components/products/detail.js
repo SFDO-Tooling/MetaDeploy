@@ -28,8 +28,8 @@ import type {
   Product as ProductType,
   Version as VersionType,
 } from 'store/products/reducer';
-import type { VersionPlanType } from 'store/products/selectors';
 import type { User as UserType } from 'store/user/reducer';
+import type { VersionPlanType } from 'store/products/selectors';
 
 type ProductDetailProps = { product: ProductType | null };
 type VersionDetailProps = {
@@ -78,6 +78,8 @@ class VersionDetail extends React.Component<VersionDetailProps> {
       doFetchVersion,
     } = this.props;
     const { label, slug } = versionLabelAndPlanSlug;
+    // If we have a plan slug, do not try to fetch version
+    // (redirect to plan-detail instead)
     if (
       product &&
       label &&
@@ -95,12 +97,12 @@ class VersionDetail extends React.Component<VersionDetailProps> {
 
   componentDidUpdate(prevProps) {
     const { product, version, versionLabelAndPlanSlug } = this.props;
+    const { label, slug } = versionLabelAndPlanSlug;
     const versionChanged =
       product !== prevProps.product ||
       version !== prevProps.version ||
-      versionLabelAndPlanSlug.label !==
-        prevProps.versionLabelAndPlanSlug.label ||
-      versionLabelAndPlanSlug.slug !== prevProps.versionLabelAndPlanSlug.slug;
+      label !== prevProps.versionLabelAndPlanSlug.label ||
+      slug !== prevProps.versionLabelAndPlanSlug.slug;
     if (versionChanged) {
       this.fetchVersionIfMissing();
     }

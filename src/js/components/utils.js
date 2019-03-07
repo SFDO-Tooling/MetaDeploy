@@ -2,13 +2,13 @@
 
 import * as React from 'react';
 import Spinner from '@salesforce/design-system-react/components/spinner';
-import type { Match, RouterHistory } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
+import type { Match, RouterHistory } from 'react-router-dom';
 
+import JobNotFound from 'components/jobs/job404';
 import PlanNotFound from 'components/plans/plan404';
 import ProductNotFound from 'components/products/product404';
 import VersionNotFound from 'components/products/version404';
-import JobNotFound from 'components/jobs/job404';
 import routes from 'utils/routes';
 import type { Job as JobType } from 'store/jobs/reducer';
 import type { Plan as PlanType } from 'store/plans/reducer';
@@ -134,6 +134,7 @@ export const getLoadingOrNotFound = ({
   if (product === null) {
     return <ProductNotFound />;
   }
+  // If we have a plan slug but no plan, redirect to that plan detail page
   if (planSlug && versionLabel && !plan) {
     return (
       <Redirect to={routes.plan_detail(product.slug, versionLabel, planSlug)} />

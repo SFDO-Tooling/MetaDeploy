@@ -1,12 +1,11 @@
-import { createMemoryHistory } from 'history';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
 import { renderWithRedux } from './../../utils';
 
-import { fetchVersion } from 'store/products/actions';
 import routes from 'utils/routes';
 import { ProductDetail, VersionDetail } from 'components/products/detail';
+import { fetchVersion } from 'store/products/actions';
 
 jest.mock('store/products/actions');
 
@@ -105,18 +104,17 @@ describe('<VersionDetail />', () => {
     const defaults = {
       initialState: defaultState,
       productSlug: 'product-1',
-      versionLabelAndPlanSlug: { label: '1.0.0', slug: null },
+      versionLabel: '1.0.0',
     };
     const opts = Object.assign({}, defaults, options);
-    const { productSlug, versionLabelAndPlanSlug, rerenderFn } = opts;
-    const history = createMemoryHistory({ initialEntries: ['/'] });
+    const { productSlug, versionLabel, rerenderFn } = opts;
     const { getByText, queryByText, getByAltText, rerender } = renderWithRedux(
-      <MemoryRouter history={history}>
+      <MemoryRouter>
         <VersionDetail
           match={{
             params: {
               productSlug,
-              versionLabel: versionLabelAndPlanSlug.label,
+              versionLabel,
             },
           }}
         />
@@ -125,7 +123,7 @@ describe('<VersionDetail />', () => {
       opts.customStore,
       rerenderFn,
     );
-    return { getByText, queryByText, getByAltText, rerender, history };
+    return { getByText, queryByText, getByAltText, rerender };
   };
 
   describe('no product', () => {
@@ -139,7 +137,7 @@ describe('<VersionDetail />', () => {
   describe('unknown version', () => {
     test('fetches version', () => {
       setup({
-        versionLabelAndPlanSlug: { label: '2.0.0', slug: null },
+        versionLabel: '2.0.0',
       });
 
       expect(fetchVersion).toHaveBeenCalledWith({
@@ -165,7 +163,7 @@ describe('<VersionDetail />', () => {
     describe('version is removed', () => {
       test('fetches version', () => {
         const { rerender } = setup({
-          versionLabelAndPlanSlug: { label: '2.0.0', slug: null },
+          versionLabel: '2.0.0',
         });
 
         expect(fetchVersion).toHaveBeenCalledWith({
@@ -174,7 +172,7 @@ describe('<VersionDetail />', () => {
         });
 
         setup({
-          versionLabelAndPlanSlug: { label: '3.0.0', slug: null },
+          versionLabel: '3.0.0',
           rerenderFn: rerender,
         });
 
@@ -326,7 +324,7 @@ describe('<VersionDetail />', () => {
     test('renders version detail', () => {
       const { getByText } = setup({
         initialState: { products: [product] },
-        versionLabelAndPlanSlug: { label: '2.0.0', slug: null },
+        versionLabel: '2.0.0',
       });
 
       expect(getByText('Product 1, 2.0.0')).toBeVisible();
@@ -341,10 +339,25 @@ describe('<VersionDetail />', () => {
       product.versions = { '2.0.0': null };
       const { getByText } = setup({
         initialState: { products: [product] },
-        versionLabelAndPlanSlug: { label: '2.0.0', slug: null },
+        versionLabel: '2.0.0',
       });
 
       expect(getByText('most recent version')).toBeVisible();
+    });
+  });
+
+  describe('no version and no most_recent_version', () => {
+    test('renders <VersionNotFound />', () => {
+      const product = Object.assign({}, defaultState.products[0], {
+        versions: { '2.0.0': null },
+        most_recent_version: null,
+      });
+      const { getByText } = setup({
+        initialState: { products: [product] },
+        versionLabel: '2.0.0',
+      });
+
+      expect(getByText('list of all products')).toBeVisible();
     });
   });
 
@@ -388,45 +401,18 @@ describe('<VersionDetail />', () => {
   });
 
   describe('version label is a plan slug', () => {
-    test('renders <Redirect />', () => {
-      const { history } = setup({
-        versionLabelAndPlanSlug: { label: 'my-plan', slug: null },
+    test('redirects to plan_detail', () => {
+      jest.spyOn(routes, 'plan_detail');
+      setup({
+        versionLabel: 'my-secondary-plan',
       });
 
-      expect(history.location.pathname).toEqual('/product-1/1.0.0/my-plan');
-    });
-  });
-
-  describe('selectVersionLabelOrPlanSlug', () => {
-    test('returns null slug if slug not in most recent version', () => {
-      const { getByText } = setup({
-        versionLabelAndPlanSlug: {
-          label: 'i am not a slug or label',
-          slug: null,
-        },
-      });
-
-      expect(getByText('Loading...')).toBeVisible();
-    });
-
-    test('returns null slug if no version', () => {
-      const { getByText } = setup({
-        initialState: {
-          products: [
-            {
-              id: 'p1',
-              slug: 'product-1',
-              title: 'Product 1',
-              description: 'This is a test product.',
-              category: 'salesforce',
-              image: 'http://foo.bar',
-              most_recent_version: null,
-            },
-          ],
-        },
-      });
-
-      expect(getByText('Loading...')).toBeVisible();
+      expect(routes.plan_detail).toHaveBeenCalledTimes(1);
+      expect(routes.plan_detail).toHaveBeenCalledWith(
+        'product-1',
+        '1.0.0',
+        'my-secondary-plan',
+      );
     });
   });
 });
