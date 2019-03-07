@@ -1,3 +1,4 @@
+import { createMemoryHistory } from 'history';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
@@ -108,8 +109,9 @@ describe('<VersionDetail />', () => {
     };
     const opts = Object.assign({}, defaults, options);
     const { productSlug, versionLabelAndPlanSlug, rerenderFn } = opts;
+    const history = createMemoryHistory({ initialEntries: ['/'] });
     const { getByText, queryByText, getByAltText, rerender } = renderWithRedux(
-      <MemoryRouter>
+      <MemoryRouter history={history}>
         <VersionDetail
           match={{
             params: {
@@ -123,7 +125,7 @@ describe('<VersionDetail />', () => {
       opts.customStore,
       rerenderFn,
     );
-    return { getByText, queryByText, getByAltText, rerender };
+    return { getByText, queryByText, getByAltText, rerender, history };
   };
 
   describe('no product', () => {
@@ -387,28 +389,28 @@ describe('<VersionDetail />', () => {
 
   describe('version label is a plan slug', () => {
     test('renders <Redirect />', () => {
-      setup({
+      const { history } = setup({
         versionLabelAndPlanSlug: { label: 'my-plan', slug: null },
       });
 
-      expect(window.location.toString()).toEqual('product-1/1.0.0/my-plan');
+      expect(history.location.pathname).toEqual('/product-1/1.0.0/my-plan');
     });
   });
 
   describe('selectVersionLabelOrPlanSlug', () => {
     test('returns null slug if slug not in most recent version', () => {
-      setup({
+      const { getByText } = setup({
         versionLabelAndPlanSlug: {
           label: 'i am not a slug or label',
           slug: null,
         },
       });
 
-      expect(false).toBeTruthy();
+      expect(getByText('Loading...')).toBeVisible();
     });
 
     test('returns null slug if no version', () => {
-      setup({
+      const { getByText } = setup({
         initialState: {
           products: [
             {
@@ -424,7 +426,7 @@ describe('<VersionDetail />', () => {
         },
       });
 
-      expect(false).toBeTruthy();
+      expect(getByText('Loading...')).toBeVisible();
     });
   });
 });
