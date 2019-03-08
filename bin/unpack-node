@@ -18,7 +18,7 @@ function get_from_package {
     python << EOF
 import json
 with open('../package.json') as f:
-    out = json.loads(''.join(f.readlines())).get('engines', {}).get('$1', '')
+    out = json.load(f).get('engines', {}).get('$1', '')
 print(out)
 EOF
 }
