@@ -3,9 +3,9 @@ import { MemoryRouter } from 'react-router-dom';
 
 import { renderWithRedux } from './../../utils';
 
-import { fetchVersion } from 'store/products/actions';
 import routes from 'utils/routes';
 import { ProductDetail, VersionDetail } from 'components/products/detail';
+import { fetchVersion } from 'store/products/actions';
 
 jest.mock('store/products/actions');
 
@@ -110,7 +110,14 @@ describe('<VersionDetail />', () => {
     const { productSlug, versionLabel, rerenderFn } = opts;
     const { getByText, queryByText, getByAltText, rerender } = renderWithRedux(
       <MemoryRouter>
-        <VersionDetail match={{ params: { productSlug, versionLabel } }} />
+        <VersionDetail
+          match={{
+            params: {
+              productSlug,
+              versionLabel,
+            },
+          }}
+        />
       </MemoryRouter>,
       opts.initialState,
       opts.customStore,
@@ -155,14 +162,19 @@ describe('<VersionDetail />', () => {
 
     describe('version is removed', () => {
       test('fetches version', () => {
-        const { rerender } = setup({ versionLabel: '2.0.0' });
+        const { rerender } = setup({
+          versionLabel: '2.0.0',
+        });
 
         expect(fetchVersion).toHaveBeenCalledWith({
           product: 'p1',
           label: '2.0.0',
         });
 
-        setup({ versionLabel: '3.0.0', rerenderFn: rerender });
+        setup({
+          versionLabel: '3.0.0',
+          rerenderFn: rerender,
+        });
 
         expect(fetchVersion).toHaveBeenCalledWith({
           product: 'p1',
@@ -334,6 +346,21 @@ describe('<VersionDetail />', () => {
     });
   });
 
+  describe('no version and no most_recent_version', () => {
+    test('renders <VersionNotFound />', () => {
+      const product = Object.assign({}, defaultState.products[0], {
+        versions: { '2.0.0': null },
+        most_recent_version: null,
+      });
+      const { getByText } = setup({
+        initialState: { products: [product] },
+        versionLabel: '2.0.0',
+      });
+
+      expect(getByText('list of all products')).toBeVisible();
+    });
+  });
+
   describe('product is restricted', () => {
     test('renders <ProductNotAllowed />', () => {
       const { getByText } = setup({
@@ -370,6 +397,22 @@ describe('<VersionDetail />', () => {
 
       expect(getByText('list of all products')).toBeVisible();
       expect(getByText('log in')).toBeVisible();
+    });
+  });
+
+  describe('version label is a plan slug', () => {
+    test('redirects to plan_detail', () => {
+      jest.spyOn(routes, 'plan_detail');
+      setup({
+        versionLabel: 'my-secondary-plan',
+      });
+
+      expect(routes.plan_detail).toHaveBeenCalledTimes(1);
+      expect(routes.plan_detail).toHaveBeenCalledWith(
+        'product-1',
+        '1.0.0',
+        'my-secondary-plan',
+      );
     });
   });
 });

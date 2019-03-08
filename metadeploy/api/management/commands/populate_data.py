@@ -89,6 +89,7 @@ class Command(BaseCommand):
                 "dummy text ever since the 1500s."
             ),
             post_install_message="Success! You installed it.",
+            product=version.product,
         )
         plan = Plan.objects.create(
             version=version,
@@ -97,7 +98,7 @@ class Command(BaseCommand):
             plan_template=plan_template,
             **combined_kwargs,
         )
-        PlanSlug.objects.create(parent=plan, slug=slugify(title))
+        PlanSlug.objects.create(parent=plan.plan_template, slug=slugify(title))
         return plan
 
     def create_step(self, **kwargs):

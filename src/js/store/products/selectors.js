@@ -12,6 +12,11 @@ import type {
 
 export type ProductsMapType = Map<string, Array<ProductType>>;
 
+export type VersionPlanType = {
+  +label: string | null,
+  +slug: string | null,
+};
+
 const selectProductsState = (appState: AppState): ProductsType =>
   appState.products;
 
@@ -77,6 +82,43 @@ const selectVersion: (
   },
 );
 
+const selectVersionLabelOrPlanSlug: (
+  AppState,
+  InitialProps,
+) => VersionPlanType = createSelector(
+  [selectProduct, selectVersionLabel],
+  (
+    product: ProductType | null,
+    maybeVersionLabel: ?string,
+  ): VersionPlanType => {
+    // There's a chance that the versionLabel is really a planSlug.
+    // In that case, check the most recent version in the product and see.
+    if (!product || !maybeVersionLabel) {
+      return { label: null, slug: null };
+    }
+    const version = product.most_recent_version;
+    if (version) {
+      const slugs = version.additional_plans.map(plan => plan.slug);
+      if (version.primary_plan) {
+        slugs.push(version.primary_plan.slug);
+      }
+      if (version.secondary_plan) {
+        slugs.push(version.secondary_plan.slug);
+      }
+      if (slugs.includes(maybeVersionLabel)) {
+        return {
+          label: version.label,
+          slug: maybeVersionLabel,
+        };
+      }
+    }
+    return {
+      label: maybeVersionLabel,
+      slug: null,
+    };
+  },
+);
+
 export {
   selectProductsState,
   selectProductsByCategory,
@@ -84,4 +126,5 @@ export {
   selectProduct,
   selectVersionLabel,
   selectVersion,
+  selectVersionLabelOrPlanSlug,
 };

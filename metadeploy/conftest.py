@@ -143,6 +143,7 @@ class PlanTemplateFactory(factory.django.DjangoModelFactory):
     name = "install"
     preflight_message = ""
     post_install_message = ""
+    product = factory.SubFactory(ProductFactory)
 
 
 @register
@@ -151,12 +152,15 @@ class PlanFactory(factory.django.DjangoModelFactory):
         model = Plan
 
     title = "Sample plan"
-    plan_template = factory.SubFactory(PlanTemplateFactory)
-    version = factory.SubFactory(VersionFactory)
     _ensure_slug = factory.PostGenerationMethodCall("ensure_slug")
     preflight_flow_name = "slow_steps_preflight_good"
 
     visible_to = None
+
+    version = factory.SubFactory(VersionFactory)
+    plan_template = factory.SubFactory(
+        PlanTemplateFactory, product=factory.SelfAttribute("..version.product")
+    )
 
 
 @register
@@ -177,7 +181,7 @@ class PlanSlugFactory(factory.django.DjangoModelFactory):
         model = PlanSlug
 
     slug = factory.Sequence("this-is-a-slug-{}".format)
-    parent = factory.SubFactory(PlanFactory)
+    parent = factory.SubFactory(PlanTemplateFactory)
 
 
 @register

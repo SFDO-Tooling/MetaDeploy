@@ -2,6 +2,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { render } from 'react-testing-library';
 
+import routes from 'utils/routes';
 import { getLoadingOrNotFound, shouldFetchVersion } from 'components/utils';
 
 const defaultProduct = {
@@ -81,6 +82,24 @@ describe('getLoadingOrNotFound', () => {
       const { getByText } = setup({ product: null });
 
       expect(getByText('list of all products')).toBeVisible();
+    });
+  });
+
+  describe('plan slug but no plan', () => {
+    test('redirects to plan_detail', () => {
+      jest.spyOn(routes, 'plan_detail');
+      setup({
+        product: defaultProduct,
+        versionLabel: '1.0.0',
+        planSlug: 'plan-1',
+      });
+
+      expect(routes.plan_detail).toHaveBeenCalledTimes(1);
+      expect(routes.plan_detail).toHaveBeenCalledWith(
+        'product-1',
+        '1.0.0',
+        'plan-1',
+      );
     });
   });
 
