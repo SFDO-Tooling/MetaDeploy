@@ -367,26 +367,37 @@ LOGGING = {
         "job_id": {"()": "metadeploy.logfmt.JobIDFilter"},
     },
     "formatters": {
-        "verbose": {
+        "logfmt": {
             "()": "metadeploy.logfmt.LogfmtFormatter",
             "format": (
                 "%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d "
                 "%(message)s"
             ),
-        }
+        },
+        "simple": {
+            "()": "django.utils.log.ServerFormatter",
+            "format": "{levelname} {message}",
+            "style": "{",
+        },
     },
     "handlers": {
+        "console_error": {
+            "level": "ERROR",
+            "class": "logging.StreamHandler",
+            "filters": ["request_id"],
+            "formatter": "simple",
+        },
         "console": {
             "level": "DEBUG",
             "class": "logging.StreamHandler",
             "filters": ["request_id"],
-            "formatter": "verbose",
+            "formatter": "logfmt",
         },
         "rq_console": {
             "level": "DEBUG",
             "class": "logging.StreamHandler",
             "filters": ["job_id"],
-            "formatter": "verbose",
+            "formatter": "logfmt",
         },
     },
     "loggers": {
@@ -396,6 +407,7 @@ LOGGING = {
             "propagate": False,
         },
         "django.server": {"handlers": ["console"], "level": "INFO", "propagate": False},
+        "django.request": {"handlers": ["console_error"], "level": "INFO"},
         "rq.worker": {"handlers": ["rq_console"], "level": "DEBUG"},
         "metadeploy.multisalesforce": {"handlers": ["console"], "level": "DEBUG"},
         "metadeploy.api.jobs": {"handlers": ["console"], "level": "DEBUG"},
