@@ -2,6 +2,6 @@
 
 -r test.txt
 
-Sphinx==1.8.4
+Sphinx==1.8.5
 django-extensions==2.1.6
 ipython==7.3.0
