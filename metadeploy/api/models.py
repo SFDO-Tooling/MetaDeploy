@@ -428,7 +428,7 @@ class PlanTemplate(SlugMixin, TranslatableModel):
         return self.get_translation("en-us").post_install_message_markdown
 
     def __str__(self):
-        return self.name
+        return f"{self.product.title}: {self.name}"
 
 
 class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
