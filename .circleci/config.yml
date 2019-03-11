@@ -43,7 +43,7 @@ jobs:
           name: Compile Front-End Assets
           command: yarn prod
       - save_cache:
-          key: v1-metadeploy-node-{{ checksum "bin/unpack-node" }}
+          key: v1-metadeploy-node-{{ checksum "package.json" }}
           paths:
             - '~/metadeploy/node'
       - save_cache:
@@ -64,7 +64,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: v1-metadeploy-node-{{ checksum "bin/unpack-node" }}
+          key: v1-metadeploy-node-{{ checksum "package.json" }}
       - restore_cache:
           key: v1-metadeploy-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
       - restore_cache:
@@ -90,7 +90,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: v1-metadeploy-node-{{ checksum "bin/unpack-node" }}
+          key: v1-metadeploy-node-{{ checksum "package.json" }}
       - restore_cache:
           keys:
             - v1-metadeploy-npm-{{ checksum "yarn.lock" }}
@@ -168,7 +168,7 @@ jobs:
       - attach_workspace:
           at: .
       - restore_cache:
-          key: v1-metadeploy-node-{{ checksum "bin/unpack-node" }}
+          key: v1-metadeploy-node-{{ checksum "package.json" }}
       - restore_cache:
           keys:
             - v1-metadeploy-npm-{{ checksum "yarn.lock" }}
