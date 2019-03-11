@@ -1,7 +1,7 @@
 {
   "name": "MetaDeploy",
   "description": "The future, today.",
-  "repository": "https://github.com/SFDO-Tooling/metadeploy",
+  "repository": "https://github.com/SFDO-Tooling/MetaDeploy",
   "keywords": ["ci", "python", "django", "salesforce", "github"],
   "env": {
     "DJANGO_ALLOWED_HOSTS": {
