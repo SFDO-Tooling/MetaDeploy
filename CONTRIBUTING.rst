@@ -6,8 +6,8 @@ Cloning the project
 
 ::
 
-    git clone git@github.com:SFDO-Tooling/metadeploy
-    cd metadeploy
+    git clone git@github.com:SFDO-Tooling/MetaDeploy
+    cd MetaDeploy
 
 Making a virtual env
 --------------------
@@ -71,12 +71,12 @@ instead of any system-wide Node you may have.
 Installing JavaScript requirements
 ----------------------------------
 
-The project-local version of `Node.js`_ is bundled with the repo and can be
-unpacked locally (in the git-ignored ``node/`` directory), so you don't have to
-install it system-wide (and possibly conflict with other projects wanting other
-Node versions).
+The project-local version of `Node.js`_ can be downloaded and unpacked locally
+(in the git-ignored ``node/`` directory), so you don't have to install it
+system-wide (and possibly conflict with other projects wanting other Node
+versions).
 
-To install the project-local version of Node (and `yarn`_)::
+To download and install the project-local version of Node (and `yarn`_)::
 
     bin/unpack-node
 
@@ -179,7 +179,6 @@ automatically prepended to commit messages):
 - 📦 (``:package:``) -> ``pip install -r requirements/local.txt``
 - 🛢 (``:oil_drum:``) -> ``python manage.py migrate``
 - 🐈 (``:cat2:``) -> ``yarn``
-- 🙀 (``:scream_cat:``) -> ``rm -rf node_modules/; bin/unpack-node; yarn``
 
 Writing integration tests
 -------------------------

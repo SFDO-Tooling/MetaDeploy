@@ -16,6 +16,7 @@ import logging
 import os
 import shutil
 import sys
+import traceback
 import zipfile
 from datetime import timedelta
 from glob import glob
@@ -63,9 +64,10 @@ def finalize_result(result):
 def report_errors_to(user):
     try:
         yield
-    except Exception as e:
+    except Exception:
         sync_report_error(user)
-        logger.error(e)
+        tb = traceback.format_exc()
+        logger.error(tb)
         raise
 
 

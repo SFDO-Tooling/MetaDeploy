@@ -110,3 +110,7 @@ ENV/
 # Database things
 *.sql
 *.dump
+
+# Node and Yarn packages:
+requirements/*.tar.gz
+requirements/*.tar.xz

@@ -36,21 +36,8 @@ has_yarn () {
     fi
 }
 
-has_nodepocalypse () {
-    if [[ $CHANGED == *"bin/unpack-node"* ]]; then
-        return 0
-    else
-        return 1
-    fi
-}
-
-
-if has_nodepocalypse; then
-    prepend_emoji 🙀
-else
-    if has_yarn; then
-        prepend_emoji 🐈
-    fi
+if has_yarn; then
+    prepend_emoji 🐈
 fi
 
 if has_migrations; then
