@@ -6,8 +6,8 @@ Cloning the project
 
 ::
 
-    git clone git@github.com:SFDO-Tooling/metadeploy
-    cd metadeploy
+    git clone git@github.com:SFDO-Tooling/MetaDeploy
+    cd MetaDeploy
 
 Making a virtual env
 --------------------
