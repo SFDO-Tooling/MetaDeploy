@@ -2,10 +2,11 @@ from datetime import timedelta
 
 import pytest
 from allauth.socialaccount.models import SocialAccount
+from django.contrib.sites.models import Site
 from django.core.exceptions import MultipleObjectsReturned, ValidationError
 from django.utils import timezone
 
-from ..models import Job, User, Version
+from ..models import Job, SiteProfile, User, Version
 
 
 @pytest.mark.django_db
@@ -379,3 +380,13 @@ class TestJob:
 
         preflight.refresh_from_db()
         assert not preflight.is_valid
+
+
+@pytest.mark.django_db
+def test_site_profile_markdown():
+    site = Site.objects.create(name="Test")
+    site_profile = SiteProfile.objects.create(
+        site=site, name=site.name, welcome_text="Welcome one and all."
+    )
+
+    assert site_profile.welcome_text_markdown == "<p>Welcome one and all.</p>"
