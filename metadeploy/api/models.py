@@ -769,12 +769,17 @@ class SiteProfile(TranslatableModel):
     site = models.OneToOneField(Site, on_delete=models.CASCADE)
 
     translations = TranslatedFields(
-        welcome_text=MarkdownField(property_suffix="_markdown", blank=True)
+        name=models.CharField(max_length=64),
+        welcome_text=MarkdownField(property_suffix="_markdown", blank=True),
+        copyright_notice=MarkdownField(property_suffix="_markdown", blank=True),
     )
 
     logo = models.ImageField(blank=True)
-    name = models.CharField(max_length=64)
 
     @property
     def welcome_text_markdown(self):
         return self.get_translation("en-us").welcome_text_markdown
+
+    @property
+    def copyright_notice_markdown(self):
+        return self.get_translation("en-us").copyright_notice_markdown
