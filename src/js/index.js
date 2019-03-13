@@ -40,7 +40,9 @@ import { ProductDetail, VersionDetail } from 'components/products/detail';
 const SF_logo = require('images/salesforce-logo.png');
 
 const App = () => (
-  <DocumentTitle title={t('MetaDeploy')}>
+  <DocumentTitle
+    title={(window.GLOBALS.SITE && window.GLOBALS.SITE.name) || t('MetaDeploy')}
+  >
     <div
       className="slds-grid
         slds-grid_frame

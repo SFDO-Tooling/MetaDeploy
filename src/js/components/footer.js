@@ -26,7 +26,10 @@ const Footer = (props: { logoSrc: string }) => (
       className="footer-item
         slds-grid"
     >
-      <p>{t('Copyright 2000–2019 Salesforce.org. All rights reserved.')}</p>
+      <p>
+        {(window.GLOBALS.SITE && window.GLOBALS.SITE.copyright_notice) ||
+          t('Copyright 2000–2019 Salesforce.org. All rights reserved.')}
+      </p>
     </div>
   </footer>
 );

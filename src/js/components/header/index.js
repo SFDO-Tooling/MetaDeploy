@@ -22,6 +22,8 @@ type Props = {
   socket: Socket,
 };
 
+// TODO how do we split the title up to style it?
+// TODO do we have a logo image anywhere?
 const Header = ({ user, doLogout, socket }: Props) => (
   <>
     {socket ? null : <OfflineAlert />}
