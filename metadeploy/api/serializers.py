@@ -7,7 +7,7 @@ from rest_framework.fields import SkipField
 from rest_framework.relations import PKOnlyObject
 
 from .constants import ERROR, WARN
-from .models import Job, Plan, PreflightResult, Product, Step, Version
+from .models import Job, Plan, PreflightResult, Product, SiteProfile, Step, Version
 
 User = get_user_model()
 
@@ -446,3 +446,12 @@ class PreflightResultSerializer(ErrorWarningCountMixin, serializers.ModelSeriali
 class OrgSerializer(serializers.Serializer):
     current_job = IdOnlyField()
     current_preflight = IdOnlyField()
+
+
+class SiteSerializer(serializers.ModelSerializer):
+    welcome_text = serializers.CharField(source="welcome_text_markdown")
+    copyright_notice = serializers.CharField(source="copyright_notice_markdown")
+
+    class Meta:
+        model = SiteProfile
+        fields = ("name", "welcome_text", "copyright_notice", "logo")

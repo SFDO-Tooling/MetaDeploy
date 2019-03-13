@@ -6,3 +6,8 @@ class OnlyOwnerCanDelete(permissions.IsAuthenticatedOrReadOnly):
         if request.method == "DELETE":
             return request.user.is_authenticated and request.user == obj.user
         return super().has_object_permission(request, view, obj)
+
+
+class ReadOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.method in permissions.SAFE_METHODS

@@ -7,14 +7,15 @@ from rest_framework.response import Response
 
 from .constants import REDIS_JOB_CANCEL_KEY
 from .jobs import preflight_job
-from .models import Job, Plan, PreflightResult, Product, Version
-from .permissions import OnlyOwnerCanDelete
+from .models import Job, Plan, PreflightResult, Product, SiteProfile, Version
+from .permissions import OnlyOwnerCanDelete, ReadOnly
 from .serializers import (
     JobSerializer,
     OrgSerializer,
     PlanSerializer,
     PreflightResultSerializer,
     ProductSerializer,
+    SiteSerializer,
     VersionSerializer,
 )
 
@@ -114,3 +115,9 @@ class OrgViewSet(viewsets.ViewSet):
             {"current_job": current_job, "current_preflight": current_preflight}
         )
         return Response(serializer.data)
+
+
+class SiteViewSet(viewsets.ModelViewSet):
+    serializer_class = SiteSerializer
+    queryset = SiteProfile.objects.all()
+    permission_classes = (ReadOnly,)
