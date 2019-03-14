@@ -25,7 +25,7 @@ def forwards(apps, schema_editor):
     Site = apps.get_model("sites", "Site")
     SiteProfile = apps.get_model("api", "SiteProfile")
     SiteProfileTranslation = apps.get_model("api", "SiteProfileTranslation")
-    activate("en")
+    activate("en-us")
     SiteProfileTranslation.get_translated_fields = get_translated_fields
     SiteProfile._parler_meta = ParlerOptions(
         None,
