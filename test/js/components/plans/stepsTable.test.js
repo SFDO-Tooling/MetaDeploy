@@ -214,18 +214,18 @@ describe('<StepsTable />', () => {
       expect(checkboxes).toHaveLength(0);
     });
 
-    test('disabled if required', () => {
+    test('no checkbox if required', () => {
       const { container } = setup({
         user: { valid_token_for: 'foo' },
         preflight: { status: 'complete', is_valid: true, is_ready: true },
       });
 
-      expect(
-        container.querySelectorAll('input[type="checkbox"][disabled]'),
-      ).toHaveLength(2);
+      expect(container.querySelectorAll('input[type="checkbox"]')).toHaveLength(
+        2,
+      );
     });
 
-    test('disabled if skipped, enabled if optional', () => {
+    test('no checkbox if skipped, checkbox if optional', () => {
       const { container, getByText } = setup({
         user: { valid_token_for: 'foo' },
         preflight: {
@@ -242,9 +242,9 @@ describe('<StepsTable />', () => {
         },
       });
 
-      expect(
-        container.querySelectorAll('input[type="checkbox"][disabled]'),
-      ).toHaveLength(3);
+      expect(container.querySelectorAll('input[type="checkbox"]')).toHaveLength(
+        1,
+      );
       expect(getByText('This was skipped.')).toBeVisible();
     });
 
@@ -252,10 +252,10 @@ describe('<StepsTable />', () => {
       test('calls handleStepsChange with step id and checked boolean', () => {
         const { container } = setup({
           preflight: { status: 'complete', is_valid: true, is_ready: true },
+          user: { valid_token_for: 'me' },
         });
-        const checkbox = container.querySelector(
-          'input[type="checkbox"]:not(:checked)',
-        );
+
+        const checkbox = container.querySelector('#step-step-4');
         fireEvent.click(checkbox);
 
         expect(handleStepsChange).toHaveBeenCalledWith('step-4', true);
