@@ -26,10 +26,16 @@ const Footer = (props: { logoSrc: string }) => (
       className="footer-item
         slds-grid"
     >
-      <p>
-        {(window.GLOBALS.SITE && window.GLOBALS.SITE.copyright_notice) ||
-          t('Copyright 2000–2019 Salesforce.org. All rights reserved.')}
-      </p>
+      {window.GLOBALS.SITE && window.GLOBALS.SITE.copyright_notice ? (
+        // These messages are pre-cleaned by the API
+        <div
+          dangerouslySetInnerHTML={{
+            __html: window.GLOBALS.SITE.copyright_notice,
+          }}
+        />
+      ) : (
+        <p>{t('Copyright 2000–2019 Salesforce.org. All rights reserved.')}</p>
+      )}
     </div>
   </footer>
 );
