@@ -114,28 +114,30 @@ const JobCell = (props: DataCellProps): React.Node => {
     } else {
       title = t('waiting to install');
       contents = (
-        <Checkbox
-          id={`step-${id}`}
-          className="slds-p-around_x-small"
+        <Icon
+          category="utility"
+          name="check"
           assistiveText={{
             label: title,
           }}
-          checked
-          disabled
+          size="x-small"
+          colorVariant="light"
+          className="slds-m-horizontal_x-small"
         />
       );
     }
   } else {
     title = t('not installed');
     contents = (
-      <Checkbox
-        id={`step-${id}`}
-        className="slds-p-around_x-small"
+      <Icon
+        category="utility"
+        name="dash"
         assistiveText={{
           label: title,
         }}
-        checked
-        disabled
+        size="x-small"
+        colorVariant="light"
+        className="slds-m-horizontal_x-small"
       />
     );
   }
@@ -159,24 +161,20 @@ class PreflightCell extends React.Component<DataCellProps> {
   };
 
   render(): React.Node {
-    const { preflight, item, selectedSteps, user } = this.props;
+    const { preflight, item, selectedSteps } = this.props;
     /* istanbul ignore if */
     if (!item) {
       return null;
     }
     const { id } = item;
-    const hasValidToken = user && user.valid_token_for !== null;
-    const hasReadyPreflight = preflight && preflight.is_ready;
     const result = preflight && preflight.results && preflight.results[id];
-    let skipped, optional;
+    let skipped, optional, content;
     if (result) {
       skipped = result.find(res => res.status === RESULT_STATUS.SKIP);
       optional = result.find(res => res.status === RESULT_STATUS.OPTIONAL);
     }
     const required = item.is_required && !optional;
     const recommended = !required && item.is_recommended;
-    const disabled =
-      Boolean(skipped) || required || !hasValidToken || !hasReadyPreflight;
     let title = t('optional');
     if (skipped) {
       title = skipped.message || t('skipped');
@@ -191,12 +189,23 @@ class PreflightCell extends React.Component<DataCellProps> {
     } else if (recommended) {
       label = t('recommended');
     }
-    return (
-      <DataTableCell title={title} {...this.props}>
+    if (skipped || required) {
+      content = (
+        <Icon
+          category="utility"
+          name={skipped ? 'dash' : 'check'}
+          assistiveText={{
+            label: title,
+          }}
+          size="x-small"
+          colorVariant="light"
+        />
+      );
+    } else {
+      content = (
         <Checkbox
           id={`step-${id}`}
           checked={selectedSteps && selectedSteps.has(id)}
-          disabled={disabled}
           className="slds-p-vertical_x-small"
           labels={{ label }}
           assistiveText={{
@@ -204,6 +213,11 @@ class PreflightCell extends React.Component<DataCellProps> {
           }}
           onChange={this.handleChange}
         />
+      );
+    }
+    return (
+      <DataTableCell title={title} {...this.props}>
+        {content}
       </DataTableCell>
     );
   }

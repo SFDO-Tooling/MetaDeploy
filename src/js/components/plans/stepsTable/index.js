@@ -58,6 +58,8 @@ const StepsTable = ({
       }
     }
   }
+  const hasValidToken = user && user.valid_token_for !== null;
+  const hasReadyPreflight = preflight && preflight.is_ready;
   return (
     <div
       className="slds-p-around_medium
@@ -79,14 +81,13 @@ const StepsTable = ({
           <DataTableColumn key="is_required" property="is_required">
             <RequiredDataCell preflight={preflight} job={job} />
           </DataTableColumn>
-          {job || (preflight && preflight.is_ready) ? (
+          {job || (hasValidToken && hasReadyPreflight) ? (
             <DataTableColumn
               key="is_recommended"
               label={<InstallDataColumnLabel />}
               property="is_recommended"
             >
               <InstallDataCell
-                user={user}
                 preflight={preflight}
                 selectedSteps={selectedSteps}
                 handleStepsChange={handleStepsChange}
