@@ -20,6 +20,7 @@ const Footer = (props: { logoSrc: string }) => (
         slds-m-right_medium
         slds-grow"
       style={{ backgroundImage: `url(${props.logoSrc})` }}
+      title={window.SITE_NAME}
       data-testid="footer-logo"
     />
     <div

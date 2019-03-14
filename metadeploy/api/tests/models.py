@@ -383,14 +383,20 @@ class TestJob:
 
 
 @pytest.mark.django_db
-def test_site_profile_markdown():
-    site = Site.objects.create(name="Test")
-    site_profile = SiteProfile.objects.create(
-        site=site,
-        name=site.name,
-        welcome_text="Welcome one and all.",
-        copyright_notice="This is the copyright.",
-    )
+class TestSiteProfile:
+    def test_markdown(self):
+        site = Site.objects.create(name="Test")
+        site_profile = SiteProfile.objects.create(
+            site=site,
+            name=site.name,
+            welcome_text="Welcome one and all.",
+            copyright_notice="This is the copyright.",
+        )
 
-    assert site_profile.welcome_text_markdown == "<p>Welcome one and all.</p>"
-    assert site_profile.copyright_notice_markdown == "<p>This is the copyright.</p>"
+        assert site_profile.welcome_text_markdown == "<p>Welcome one and all.</p>"
+        assert site_profile.copyright_notice_markdown == "<p>This is the copyright.</p>"
+
+    def test_str(self):
+        site = Site.objects.create(name="Test")
+        site_profile = SiteProfile.objects.create(site=site, name="A name")
+        assert str(site_profile) == "A name"

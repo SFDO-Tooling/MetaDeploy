@@ -40,6 +40,7 @@ const Header = ({ user, doLogout, socket }: Props) => (
               className="slds-size_small"
               src={window.GLOBALS.SITE.logo}
               alt={window.SITE_NAME}
+              title={window.SITE_NAME}
             />
           ) : (
             <>
