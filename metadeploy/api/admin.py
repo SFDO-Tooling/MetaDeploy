@@ -172,5 +172,5 @@ class ClickThroughAgreementAdmin(admin.ModelAdmin):
 
 
 @admin.register(SiteProfile)
-class SiteProfileAdmin(admin.ModelAdmin):
-    pass
+class SiteProfileAdmin(TranslatableAdmin):
+    list_display = ("name", "site")

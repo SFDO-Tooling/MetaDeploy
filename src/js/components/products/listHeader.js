@@ -11,7 +11,6 @@ const Header = (): React.Node => (
         slds-p-around_x-large"
       title={t('Select a Product to Install')}
     />
-    <p>{window.GLOBALS.SITE && window.GLOBALS.SITE.welcome_text}</p>
   </>
 );
 

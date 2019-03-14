@@ -12,6 +12,7 @@ describe('<Header />', () => {
       container,
       getByLabelText,
       getByText,
+      getByAltText,
       queryByText,
     } = renderWithRedux(
       <MemoryRouter>
@@ -19,8 +20,28 @@ describe('<Header />', () => {
       </MemoryRouter>,
       initialState,
     );
-    return { container, getByLabelText, getByText, queryByText };
+    return { container, getByLabelText, getByText, getByAltText, queryByText };
   };
+
+  describe('site logo', () => {
+    beforeAll(() => {
+      window.SITE_NAME = 'My Site';
+      window.GLOBALS.SITE = {
+        logo: 'my/logo.png',
+      };
+    });
+
+    afterAll(() => {
+      window.SITE_NAME = 'MetaDeploy';
+      window.GLOBALS = {};
+    });
+
+    test('renders logo', () => {
+      const { getByAltText } = setup();
+
+      expect(getByAltText('My Site')).toBeVisible();
+    });
+  });
 
   describe('logged out', () => {
     test('renders login dropdown', () => {

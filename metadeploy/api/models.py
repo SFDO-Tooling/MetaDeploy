@@ -783,3 +783,6 @@ class SiteProfile(TranslatableModel):
     @property
     def copyright_notice_markdown(self):
         return self.get_translation("en-us").copyright_notice_markdown
+
+    def __str__(self):
+        return self.name

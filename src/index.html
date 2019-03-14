@@ -12,7 +12,7 @@
     <meta name="language" content="en-us" />
 
     <!-- Page Info -->
-    <title>{% block title %}MetaDeploy{% endblock %}</title>
+    <title>{% block title %}{% if GLOBALS.SITE and GLOBALS.SITE.name %}{{ GLOBALS.SITE.name }}{% else %}MetaDeploy{% endif %}{% endblock %}</title>
     <meta name="description" content="{% block description %}{% endblock description %}" />
 
     <!-- Styles -->

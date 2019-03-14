@@ -22,8 +22,6 @@ type Props = {
   socket: Socket,
 };
 
-// TODO how do we split the title up to style it?
-// TODO do we have a logo image anywhere?
 const Header = ({ user, doLogout, socket }: Props) => (
   <>
     {socket ? null : <OfflineAlert />}
@@ -34,12 +32,21 @@ const Header = ({ user, doLogout, socket }: Props) => (
       title={
         <Link
           to={routes.home()}
-          className="slds-page-header__title
-            slds-text-heading_large
+          className="slds-text-heading_large
             slds-text-link_reset"
         >
-          <span data-logo-bit="start">meta</span>
-          <span data-logo-bit="end">deploy</span>
+          {window.GLOBALS.SITE && window.GLOBALS.SITE.logo ? (
+            <img
+              className="slds-size_small"
+              src={window.GLOBALS.SITE.logo}
+              alt={window.SITE_NAME}
+            />
+          ) : (
+            <>
+              <span data-logo-bit="start">meta</span>
+              <span data-logo-bit="end">deploy</span>
+            </>
+          )}
         </Link>
       }
       navRight={

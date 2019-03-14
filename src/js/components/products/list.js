@@ -107,10 +107,21 @@ class ProductsList extends React.Component<Props, State> {
       }
     }
     return (
-      <DocumentTitle title={`${t('Products')} | ${t('MetaDeploy')}`}>
+      <DocumentTitle title={`${t('Products')} | ${window.SITE_NAME}`}>
         <>
           <Header />
-          <div className="slds-p-around_x-large">{contents}</div>
+          <div className="slds-p-around_x-large">
+            {window.GLOBALS.SITE && window.GLOBALS.SITE.welcome_text ? (
+              // These messages are pre-cleaned by the API
+              <div
+                className="markdown slds-p-bottom_x-large"
+                dangerouslySetInnerHTML={{
+                  __html: window.GLOBALS.SITE.welcome_text,
+                }}
+              />
+            ) : null}
+            {contents}
+          </div>
         </>
       </DocumentTitle>
     );

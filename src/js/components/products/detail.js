@@ -135,7 +135,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     const visibleSecondaryPlan =
       secondary_plan && secondary_plan.is_listed && secondary_plan.is_allowed;
     return (
-      <DocumentTitle title={`${product.title} | ${t('MetaDeploy')}`}>
+      <DocumentTitle title={`${product.title} | ${window.SITE_NAME}`}>
         <>
           <Header product={product} versionLabel={version.label} />
           {product.is_allowed ? (
