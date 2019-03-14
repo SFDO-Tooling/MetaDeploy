@@ -20,7 +20,6 @@ const Footer = (props: { logoSrc: string }) => (
         slds-m-right_medium
         slds-grow"
       style={{ backgroundImage: `url(${props.logoSrc})` }}
-      title={window.SITE_NAME}
       data-testid="footer-logo"
     />
     <div
@@ -35,7 +34,7 @@ const Footer = (props: { logoSrc: string }) => (
           }}
         />
       ) : (
-        <p>{t('Copyright 2000–2019 Salesforce.org. All rights reserved.')}</p>
+        <p>{`${t('Copyright')} ${window.GLOBALS.YEAR} ${window.SITE_NAME}.`}</p>
       )}
     </div>
   </footer>

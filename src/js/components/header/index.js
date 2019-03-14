@@ -37,7 +37,7 @@ const Header = ({ user, doLogout, socket }: Props) => (
         >
           {window.GLOBALS.SITE && window.GLOBALS.SITE.logo ? (
             <img
-              className="slds-size_small"
+              className="site-logo"
               src={window.GLOBALS.SITE.logo}
               alt={window.SITE_NAME}
               title={window.SITE_NAME}
