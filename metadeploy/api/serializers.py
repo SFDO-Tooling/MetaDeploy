@@ -454,4 +454,12 @@ class SiteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SiteProfile
-        fields = ("name", "welcome_text", "copyright_notice", "logo")
+        fields = (
+            "name",
+            "company_name",
+            "welcome_text",
+            "copyright_notice",
+            "product_logo",
+            "company_logo",
+            "favicon",
+        )

@@ -770,11 +770,14 @@ class SiteProfile(TranslatableModel):
 
     translations = TranslatedFields(
         name=models.CharField(max_length=64),
+        company_name=models.CharField(max_length=64, blank=True),
         welcome_text=MarkdownField(property_suffix="_markdown", blank=True),
         copyright_notice=MarkdownField(property_suffix="_markdown", blank=True),
     )
 
-    logo = models.ImageField(blank=True)
+    product_logo = models.ImageField(blank=True)
+    company_logo = models.ImageField(blank=True)
+    favicon = models.ImageField(blank=True)
 
     @property
     def welcome_text_markdown(self):
