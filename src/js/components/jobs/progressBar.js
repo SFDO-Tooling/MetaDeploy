@@ -109,6 +109,7 @@ class ProgressBar extends React.Component<Props, State> {
 
   render(): React.Node {
     const { job } = this.props;
+    const isRunning = job.status === CONSTANTS.STATUS.STARTED;
     const isFailed =
       job.status === CONSTANTS.STATUS.FAILED ||
       job.status === CONSTANTS.STATUS.CANCELED;
@@ -151,8 +152,11 @@ class ProgressBar extends React.Component<Props, State> {
           )}
         </div>
         <div
-          className="slds-progress-bar
-            slds-progress-bar_large"
+          className={classNames(
+            'slds-progress-bar',
+            'slds-progress-bar_large',
+            { 'is-running': isRunning },
+          )}
           aria-valuemin="0"
           aria-valuemax="100"
           aria-valuenow={progress}
