@@ -7,7 +7,7 @@ import { t } from 'i18next';
 const Header = (): React.Node => (
   <PageHeader
     className="page-header
-        slds-p-around_x-large"
+      slds-p-around_x-large"
     title={t('Select a Product to Install')}
   />
 );

@@ -37,8 +37,6 @@ import PlanDetail from 'components/plans/detail';
 import ProductsList from 'components/products/list';
 import { ProductDetail, VersionDetail } from 'components/products/detail';
 
-const SF_logo = require('images/salesforce-logo.png');
-
 const App = () => (
   <DocumentTitle title={window.SITE_NAME}>
     <div
@@ -90,7 +88,11 @@ const App = () => (
           </ErrorBoundary>
         </div>
         <Footer
-          logoSrc={(window.GLOBALS.SITE && window.GLOBALS.SITE.logo) || SF_logo}
+          logoSrc={
+            window.GLOBALS.SITE && window.GLOBALS.SITE.company_logo
+              ? window.GLOBALS.SITE.company_logo
+              : undefined
+          }
         />
       </ErrorBoundary>
     </div>

@@ -35,10 +35,10 @@ const Header = ({ user, doLogout, socket }: Props) => (
           className="slds-text-heading_large
             slds-text-link_reset"
         >
-          {window.GLOBALS.SITE && window.GLOBALS.SITE.logo ? (
+          {window.GLOBALS.SITE && window.GLOBALS.SITE.product_logo ? (
             <img
               className="site-logo"
-              src={window.GLOBALS.SITE.logo}
+              src={window.GLOBALS.SITE.product_logo}
               alt={window.SITE_NAME}
               title={window.SITE_NAME}
             />
