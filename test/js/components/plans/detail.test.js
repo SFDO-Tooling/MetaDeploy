@@ -316,13 +316,9 @@ describe('<PlanDetail />', () => {
     test('updates checkbox', () => {
       const { container } = setup();
       const checkbox1 = container.querySelector('#step-step-1');
-      const checkbox2 = container.querySelector('#step-step-2');
-      const checkbox3 = container.querySelector('#step-step-3');
       const checkbox4 = container.querySelector('#step-step-4');
 
       expect(checkbox1.checked).toBe(true);
-      expect(checkbox2.checked).toBe(true);
-      expect(checkbox3.checked).toBe(false);
       expect(checkbox4.checked).toBe(false);
 
       fireEvent.click(checkbox4);
