@@ -48,14 +48,17 @@ class TestJobFlow:
         stepspecs = [MagicMock() for _ in range(3)]
         for i, stepspec in enumerate(stepspecs):
             stepspec.path = f"task_{i}"
-        result = MagicMock(exception=None)
+        result = MagicMock(exception=None, result=None, return_values={})
 
         callbacks.pre_flow(sentinel.flow_coordinator)
         for stepspec in stepspecs:
             callbacks.post_task(stepspec, result)
         callbacks.post_flow(sentinel.flow_coordinator)
 
-        assert job.results == {str(step.id): [{"status": "ok"}] for step in steps}
+        assert job.results == {
+            str(step.id): [{"status": "ok", "result": None, "return_values": {}}]
+            for step in steps
+        }
 
     @pytest.mark.django_db
     def test_post_task__exception(
