@@ -59,7 +59,13 @@ class JobFlowCallback(BasicFlowCallback):
                     {"status": ERROR, "message": bleach.clean(str(result.exception))}
                 ]
             else:
-                self.context.results[step_id] = [{"status": OK}]
+                self.context.results[step_id] = [
+                    {
+                        "status": OK,
+                        "result": result.result,
+                        "return_values": result.return_values,
+                    }
+                ]
             self.context.log = obscure_salesforce_log(self.string_buffer.getvalue())
             self.context.save()
 
@@ -73,8 +79,7 @@ class PreflightFlowCallback(BasicFlowCallback):
         [error_dict]) pair. This is then turned into a dict, merging any
         identical keys by combining their lists of error dicts.
 
-        Finally, this is attached to the result object, which the caller
-        must then save.
+        Finally, this is attached to the result object, and saved.
         """
         results = {}
         for result in coordinator.results:
@@ -87,6 +92,7 @@ class PreflightFlowCallback(BasicFlowCallback):
             except KeyError:
                 results[k] = v
         self.context.results.update(results)
+        self.context.save()
 
     def post_task(self, step, result):
         if result.exception:
@@ -96,6 +102,7 @@ class PreflightFlowCallback(BasicFlowCallback):
                 ]
             }
             self.context.results.update(error_result)
+            self.context.save()
 
     def _emit_k_v_for_status_dict(self, status):
         if status["status_code"] == OK:
