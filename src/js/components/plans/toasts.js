@@ -100,7 +100,11 @@ class Toasts extends React.Component<Props, State> {
 
   render(): React.Node {
     const { isOpen } = this.state;
-    return <ToastContainer>{isOpen ? this.getToast() : null}</ToastContainer>;
+    return (
+      <ToastContainer className="half-container">
+        {isOpen ? this.getToast() : null}
+      </ToastContainer>
+    );
   }
 }
 
