@@ -59,13 +59,7 @@ class JobFlowCallback(BasicFlowCallback):
                     {"status": ERROR, "message": bleach.clean(str(result.exception))}
                 ]
             else:
-                self.context.results[step_id] = [
-                    {
-                        "status": OK,
-                        "result": result.result,
-                        "return_values": result.return_values,
-                    }
-                ]
+                self.context.results[step_id] = [{"status": OK}]
             self.context.log = obscure_salesforce_log(self.string_buffer.getvalue())
             self.context.save()
 

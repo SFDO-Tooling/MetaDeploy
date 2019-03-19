@@ -24,7 +24,7 @@ class Sleep(BaseTask):
         "seconds": {"description": "The number of seconds to sleep", "required": True}
     }
 
-    def _run_task(self):
+    def _run_task(self):  # pragma: nocover
         seconds = int(self.options["seconds"])
         self.logger.info("Sleeping for {} seconds".format(seconds))
         for t in range(seconds):
