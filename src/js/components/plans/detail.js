@@ -299,7 +299,7 @@ class PlanDetail extends React.Component<Props, State> {
     const preflight_minutes = window.GLOBALS.PREFLIGHT_LIFETIME_MINUTES || 10;
     return (
       <DocumentTitle
-        title={`${plan.title} | ${product.title} | ${t('MetaDeploy')}`}
+        title={`${plan.title} | ${product.title} | ${window.SITE_NAME}`}
       >
         <>
           <Header

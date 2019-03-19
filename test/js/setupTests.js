@@ -17,6 +17,7 @@ beforeAll(() => {
     org_list: () => '/api/org/',
   };
   window.GLOBALS = {};
+  window.SITE_NAME = 'MetaDeploy';
   window.console.error = jest.fn();
   window.console.warn = jest.fn();
   window.console.info = jest.fn();

@@ -198,9 +198,9 @@ class JobDetail extends React.Component<Props, State> {
     const { canceling } = this.state;
     return (
       <DocumentTitle
-        title={`${t('Installation')} | ${plan.title} | ${product.title} | ${t(
-          'MetaDeploy',
-        )}`}
+        title={`${t('Installation')} | ${plan.title} | ${product.title} | ${
+          window.SITE_NAME
+        }`}
       >
         <>
           <Header

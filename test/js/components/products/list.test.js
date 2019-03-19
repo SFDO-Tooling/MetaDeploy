@@ -7,7 +7,12 @@ import { renderWithRedux } from './../../utils';
 import ProductsList from 'components/products/list';
 
 describe('<Products />', () => {
-  const setup = (initialState, props = {}) => {
+  const setup = (
+    initialState = {
+      products: [],
+    },
+    props = {},
+  ) => {
     const { getByText, queryByText } = renderWithRedux(
       <MemoryRouter>
         <ProductsList {...props} />
@@ -17,11 +22,26 @@ describe('<Products />', () => {
     return { getByText, queryByText };
   };
 
+  describe('site welcome_text', () => {
+    beforeAll(() => {
+      window.GLOBALS.SITE = {
+        welcome_text: 'Hi there!',
+      };
+    });
+
+    afterAll(() => {
+      window.GLOBALS = {};
+    });
+
+    test('renders welcome text', () => {
+      const { getByText } = setup();
+
+      expect(getByText('Hi there!')).toBeVisible();
+    });
+  });
+
   test('renders products list (empty)', () => {
-    const initialState = {
-      products: [],
-    };
-    const { getByText } = setup(initialState);
+    const { getByText } = setup();
 
     expect(getByText('¯\\_(ツ)_/¯')).toBeVisible();
   });
