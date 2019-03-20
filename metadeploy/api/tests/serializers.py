@@ -261,7 +261,7 @@ class TestJob:
         assert serializer.is_valid(), serializer.errors
 
     def test_no_context(self, job_factory):
-        job = job_factory(status=Job.Status.complete, results={"log": "===="})
+        job = job_factory(status=Job.Status.complete, results={"logs": "===="})
         serializer = JobSerializer(instance=job)
 
         assert serializer.data["error_count"] == 0
