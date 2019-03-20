@@ -32,12 +32,22 @@ const Header = ({ user, doLogout, socket }: Props) => (
       title={
         <Link
           to={routes.home()}
-          className="slds-page-header__title
-            slds-text-heading_large
+          className="slds-text-heading_large
             slds-text-link_reset"
         >
-          <span data-logo-bit="start">meta</span>
-          <span data-logo-bit="end">deploy</span>
+          {window.GLOBALS.SITE && window.GLOBALS.SITE.product_logo ? (
+            <img
+              className="site-logo"
+              src={window.GLOBALS.SITE.product_logo}
+              alt={window.SITE_NAME}
+              title={window.SITE_NAME}
+            />
+          ) : (
+            <>
+              <span data-logo-bit="start">meta</span>
+              <span data-logo-bit="end">deploy</span>
+            </>
+          )}
         </Link>
       }
       navRight={

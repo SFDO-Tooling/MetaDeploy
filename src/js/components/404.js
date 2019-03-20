@@ -21,7 +21,7 @@ export const EmptyIllustration = ({ message }: { message: React.Node }) => (
 );
 
 const FourOhFour = ({ message }: { message?: React.Node }) => (
-  <DocumentTitle title={`${t('404')} | ${t('MetaDeploy')}`}>
+  <DocumentTitle title={`${t('404')} | ${window.SITE_NAME}`}>
     <EmptyIllustration
       message={
         message === undefined ? (

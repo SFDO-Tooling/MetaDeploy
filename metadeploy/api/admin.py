@@ -13,6 +13,7 @@ from .models import (
     Product,
     ProductCategory,
     ProductSlug,
+    SiteProfile,
     Step,
     User,
     Version,
@@ -168,3 +169,8 @@ class VersionAdmin(admin.ModelAdmin):
 @admin.register(ClickThroughAgreement)
 class ClickThroughAgreementAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(SiteProfile)
+class SiteProfileAdmin(TranslatableAdmin):
+    list_display = ("name", "site")

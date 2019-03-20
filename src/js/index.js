@@ -37,10 +37,8 @@ import PlanDetail from 'components/plans/detail';
 import ProductsList from 'components/products/list';
 import { ProductDetail, VersionDetail } from 'components/products/detail';
 
-const SF_logo = require('images/salesforce-logo.png');
-
 const App = () => (
-  <DocumentTitle title={t('MetaDeploy')}>
+  <DocumentTitle title={window.SITE_NAME}>
     <div
       className="slds-grid
         slds-grid_frame
@@ -89,7 +87,13 @@ const App = () => (
             </Switch>
           </ErrorBoundary>
         </div>
-        <Footer logoSrc={SF_logo} />
+        <Footer
+          logoSrc={
+            window.GLOBALS.SITE && window.GLOBALS.SITE.company_logo
+              ? window.GLOBALS.SITE.company_logo
+              : undefined
+          }
+        />
       </ErrorBoundary>
     </div>
   </DocumentTitle>
@@ -131,6 +135,8 @@ init_i18n(() => {
       logError(err);
     }
     window.GLOBALS = GLOBALS;
+    window.SITE_NAME =
+      (window.GLOBALS.SITE && window.GLOBALS.SITE.name) || t('MetaDeploy');
 
     // Get logged-in/out status
     const userString = el.getAttribute('data-user');
