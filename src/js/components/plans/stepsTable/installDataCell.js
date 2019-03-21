@@ -83,7 +83,7 @@ const JobCell = (props: DataCellProps): React.Node => {
             slds-m-left_xxx-small"
         />
         <pre>
-          <code>{job.results[id] ? job.results[id].logs : ''}</code>
+          <code>{result && result.logs}</code>
         </pre>
       </>
     );
@@ -113,7 +113,7 @@ const JobCell = (props: DataCellProps): React.Node => {
           </span>
           {t('Installing…')}
           <pre>
-            <code>{job.results[id] ? job.results[id].logs : ''}</code>
+            <code>{result && result.logs}</code>
           </pre>
         </>
       );
