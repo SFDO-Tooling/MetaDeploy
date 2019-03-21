@@ -20,11 +20,14 @@ from ..models import Job, PreflightResult
 
 @pytest.mark.django_db
 def test_report_error(mocker, job_factory, user_factory, plan_factory, step_factory):
+    login = mocker.patch("metadeploy.api.jobs.github3.login")
+    login.side_effect = Exception
     report_error = mocker.patch("metadeploy.api.jobs.sync_report_error")
+
     user = user_factory()
     plan = plan_factory()
-    job = job_factory(user=user)
     steps = [step_factory(plan=plan)]
+    job = job_factory(user=user, plan=plan)
 
     with pytest.raises(Exception):
         run_flows(
@@ -49,7 +52,7 @@ def test_run_flows(mocker, job_factory, user_factory, plan_factory, step_factory
     user = user_factory()
     plan = plan_factory()
     steps = [step_factory(plan=plan)]
-    job = job_factory(user=user)
+    job = job_factory(user=user, plan=plan)
 
     run_flows(
         user=user,

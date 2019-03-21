@@ -21,20 +21,41 @@ def test_get_step_id(mocker):
     assert result is None
 
 
+@pytest.mark.django_db
 class TestJobFlow:
     def test_init(self, mocker):
         callbacks = JobFlowCallback(sentinel.job)
         assert callbacks.context == sentinel.job
 
-    @pytest.mark.django_db
     def test_cancel_job(self, mocker, job_factory):
         job = job_factory()
         callbacks = JobFlowCallback(job)
         cache.set(REDIS_JOB_CANCEL_KEY.format(id=job.id), True)
         with pytest.raises(StopFlowException):
             callbacks.pre_task(None)
+        cache.delete(REDIS_JOB_CANCEL_KEY.format(id=job.id))
 
-    @pytest.mark.django_db
+    def test_pre_task(
+        self, mocker, user_factory, plan_factory, step_factory, job_factory
+    ):
+        plan = plan_factory()
+        steps = [step_factory(plan=plan, path=f"task_{i}") for i in range(3)]
+
+        job = job_factory(plan=plan, steps=steps)
+
+        callbacks = JobFlowCallback(job)
+
+        stepspecs = [MagicMock(path=f"task_{i}") for i in range(3)]
+        MagicMock(exception=None)
+
+        callbacks.pre_flow(sentinel.flow_coordinator)
+        assert callbacks.result_handler.current_key is None
+        for i, stepspec in enumerate(stepspecs):
+            callbacks.pre_task(stepspec)
+            assert callbacks.result_handler.current_key == str(steps[i].pk)
+        callbacks.pre_task(None)
+        assert callbacks.result_handler.current_key is None
+
     def test_post_task(
         self, mocker, user_factory, plan_factory, step_factory, job_factory
     ):
@@ -55,9 +76,8 @@ class TestJobFlow:
             callbacks.post_task(stepspec, result)
         callbacks.post_flow(sentinel.flow_coordinator)
 
-        assert job.results == {str(step.id): [{"status": "ok"}] for step in steps}
+        assert job.results == {str(step.id): {"status": "ok"} for step in steps}
 
-    @pytest.mark.django_db
     def test_post_task__exception(
         self, mocker, user_factory, plan_factory, step_factory, job_factory
     ):
@@ -76,7 +96,7 @@ class TestJobFlow:
         callbacks.post_task(step, step.result)
 
         assert job.results == {
-            str(steps[0].id): [{"status": "error", "message": "Some error"}]
+            str(steps[0].id): {"status": "error", "message": "Some error"}
         }
 
 
@@ -128,10 +148,10 @@ class TestPreflightFlow:
         callbacks.post_flow(flow_coordinator)
 
         assert pfr.results == {
-            step1.id: [{"status": "error", "message": "error 1"}],
-            step3.id: [{"status": "warn", "message": "warn 1"}],
-            step4.id: [{"status": "optional", "message": ""}],
-            step5.id: [{"status": "skip", "message": "skip 1"}],
+            step1.id: {"status": "error", "message": "error 1"},
+            step3.id: {"status": "warn", "message": "warn 1"},
+            step4.id: {"status": "optional", "message": ""},
+            step5.id: {"status": "skip", "message": "skip 1"},
         }
 
     @pytest.mark.django_db
@@ -147,6 +167,4 @@ class TestPreflightFlow:
         step.result = MagicMock(exception=ValueError("A value error."))
         callbacks.post_task(step, step.result)
 
-        assert pfr.results == {
-            "plan": [{"status": "error", "message": "A value error."}]
-        }
+        assert pfr.results == {"plan": {"status": "error", "message": "A value error."}}

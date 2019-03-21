@@ -36,7 +36,6 @@ from .cci_configs import MetaDeployCCI, extract_user_and_repo
 from .flows import StopFlowException
 from .models import Job, PreflightResult
 from .push import report_error
-from .result_spool_logger import ResultSpoolLogger
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -212,7 +211,6 @@ def run_flows(*, user, plan, skip_tasks, organization_url, result_class, result_
         ctx.keychain.set_service("github", github_app, True)
 
         flow_coordinator = ctx.get_flow_from_plan(plan, result, skip=skip_tasks)
-        flow_coordinator.logger.addHandler(ResultSpoolLogger(result=result))
         flow_coordinator.run(ctx.keychain.get_org(current_org))
 
 
