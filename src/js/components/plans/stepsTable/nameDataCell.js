@@ -40,11 +40,9 @@ class NameDataCell extends React.Component<
     let optional;
     let optionalMsg = '';
     if (result) {
-      hasError =
-        result.find(err => err.status === RESULT_STATUS.ERROR) !== undefined;
-      hasWarning =
-        result.find(err => err.status === RESULT_STATUS.WARN) !== undefined;
-      optional = result.find(res => res.status === RESULT_STATUS.OPTIONAL);
+      hasError = result.status === RESULT_STATUS.ERROR;
+      hasWarning = result.status === RESULT_STATUS.WARN;
+      optional = result.status === RESULT_STATUS.OPTIONAL ? result : null;
       optionalMsg = optional && optional.message;
     }
     let display = name;
@@ -57,7 +55,7 @@ class NameDataCell extends React.Component<
     });
     const errorList =
       result && (hasError || hasWarning) ? (
-        <ErrorsList errorList={result} />
+        <ErrorsList errorList={[result]} />
       ) : null;
     return (
       <DataTableCell title={name} className={classes} {...otherProps}>

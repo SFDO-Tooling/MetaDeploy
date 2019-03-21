@@ -51,10 +51,8 @@ const JobCell = (props: DataCellProps): React.Node => {
   const result = job.results[id];
   let complete, error, contents, title;
   if (result) {
-    complete =
-      result.find(res => res.status === RESULT_STATUS.OK) !== undefined;
-    error =
-      result.find(res => res.status === RESULT_STATUS.ERROR) !== undefined;
+    complete = result.status === RESULT_STATUS.OK;
+    error = result.status === RESULT_STATUS.ERROR;
   }
   if (!job.steps.includes(id)) {
     title = t('skipped');
@@ -73,16 +71,21 @@ const JobCell = (props: DataCellProps): React.Node => {
   } else if (complete) {
     title = t('completed');
     contents = (
-      <Icon
-        category="action"
-        name="approval"
-        assistiveText={{
-          label: title,
-        }}
-        size="xx-small"
-        containerClassName="slds-icon-standard-approval
-          slds-m-left_xxx-small"
-      />
+      <>
+        <Icon
+          category="action"
+          name="approval"
+          assistiveText={{
+            label: title,
+          }}
+          size="xx-small"
+          containerClassName="slds-icon-standard-approval
+            slds-m-left_xxx-small"
+        />
+        <pre>
+          <code>{job.results[id] ? job.results[id].logs : ''}</code>
+        </pre>
+      </>
     );
   } else if (error) {
     title = t('error');
@@ -109,6 +112,9 @@ const JobCell = (props: DataCellProps): React.Node => {
             <Spinner size="small" />
           </span>
           {t('Installing…')}
+          <pre>
+            <code>{job.results[id] ? job.results[id].logs : ''}</code>
+          </pre>
         </>
       );
     } else {
@@ -170,8 +176,8 @@ class PreflightCell extends React.Component<DataCellProps> {
     const result = preflight && preflight.results && preflight.results[id];
     let skipped, optional, content;
     if (result) {
-      skipped = result.find(res => res.status === RESULT_STATUS.SKIP);
-      optional = result.find(res => res.status === RESULT_STATUS.OPTIONAL);
+      skipped = result.status === RESULT_STATUS.SKIP ? result : null;
+      optional = result.status === RESULT_STATUS.OPTIONAL ? result : null;
     }
     const required = item.is_required && !optional;
     const recommended = !required && item.is_recommended;
