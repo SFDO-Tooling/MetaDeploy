@@ -1,5 +1,5 @@
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { StaticRouter } from 'react-router-dom';
 
 import { renderWithRedux } from './../../utils';
 
@@ -63,21 +63,21 @@ const defaultState = {
 
 describe('<ProductDetail />', () => {
   const setup = (initialState = defaultState, productSlug = 'product-1') => {
+    const context = {};
     const { getByText } = renderWithRedux(
-      <MemoryRouter>
+      <StaticRouter context={context}>
         <ProductDetail match={{ params: { productSlug } }} />
-      </MemoryRouter>,
+      </StaticRouter>,
       initialState,
     );
-    return { getByText };
+    return { getByText, context };
   };
 
   test('redirects to version_detail', () => {
-    jest.spyOn(routes, 'version_detail');
-    setup();
+    const { context } = setup();
 
-    expect(routes.version_detail).toHaveBeenCalledTimes(1);
-    expect(routes.version_detail).toHaveBeenCalledWith('product-1', '1.0.0');
+    expect(context.action).toEqual('REPLACE');
+    expect(context.url).toEqual(routes.version_detail('product-1', '1.0.0'));
   });
 
   describe('no most_recent_version', () => {
@@ -108,8 +108,9 @@ describe('<VersionDetail />', () => {
     };
     const opts = Object.assign({}, defaults, options);
     const { productSlug, versionLabel, rerenderFn } = opts;
+    const context = {};
     const { getByText, queryByText, getByAltText, rerender } = renderWithRedux(
-      <MemoryRouter>
+      <StaticRouter context={context}>
         <VersionDetail
           match={{
             params: {
@@ -118,12 +119,12 @@ describe('<VersionDetail />', () => {
             },
           }}
         />
-      </MemoryRouter>,
+      </StaticRouter>,
       opts.initialState,
       opts.customStore,
       rerenderFn,
     );
-    return { getByText, queryByText, getByAltText, rerender };
+    return { getByText, queryByText, getByAltText, rerender, context };
   };
 
   describe('no product', () => {
@@ -402,16 +403,13 @@ describe('<VersionDetail />', () => {
 
   describe('version label is a plan slug', () => {
     test('redirects to plan_detail', () => {
-      jest.spyOn(routes, 'plan_detail');
-      setup({
+      const { context } = setup({
         versionLabel: 'my-secondary-plan',
       });
 
-      expect(routes.plan_detail).toHaveBeenCalledTimes(1);
-      expect(routes.plan_detail).toHaveBeenCalledWith(
-        'product-1',
-        '1.0.0',
-        'my-secondary-plan',
+      expect(context.action).toEqual('REPLACE');
+      expect(context.url).toEqual(
+        routes.plan_detail('product-1', '1.0.0', 'my-secondary-plan'),
       );
     });
   });
