@@ -117,16 +117,21 @@ const JobCell = (props: DataCellProps): React.Node => {
     } else {
       title = t('waiting to install');
       contents = (
-        <Icon
-          category="utility"
-          name="check"
-          assistiveText={{
-            label: title,
-          }}
-          size="x-small"
-          colorVariant="light"
-          className="slds-m-horizontal_x-small"
-        />
+        <>
+          <Icon
+            category="utility"
+            name="check"
+            assistiveText={{
+              label: title,
+            }}
+            size="x-small"
+            colorVariant="light"
+            className="slds-m-horizontal_x-small"
+          />
+          <pre>
+            <code>{result && result.logs}</code>
+          </pre>
+        </>
       );
     }
   } else {
