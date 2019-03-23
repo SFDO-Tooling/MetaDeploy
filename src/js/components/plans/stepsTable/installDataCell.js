@@ -82,9 +82,6 @@ const JobCell = (props: DataCellProps): React.Node => {
           containerClassName="slds-icon-standard-approval
             slds-m-left_xxx-small"
         />
-        <pre>
-          <code>{result && result.logs}</code>
-        </pre>
       </>
     );
   } else if (error) {
@@ -128,9 +125,6 @@ const JobCell = (props: DataCellProps): React.Node => {
             colorVariant="light"
             className="slds-m-horizontal_x-small"
           />
-          <pre>
-            <code>{result && result.logs}</code>
-          </pre>
         </>
       );
     }

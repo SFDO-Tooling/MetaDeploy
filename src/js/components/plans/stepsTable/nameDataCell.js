@@ -72,6 +72,9 @@ class NameDataCell extends React.Component<
                 {description}
               </AccordionPanel>
             </Accordion>
+            <pre>
+              <code>{result && result.logs}</code>
+            </pre>
             {errorList ? (
               <div
                 className="step-name-no-icon
