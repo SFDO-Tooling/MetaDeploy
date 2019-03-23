@@ -71,18 +71,16 @@ const JobCell = (props: DataCellProps): React.Node => {
   } else if (complete) {
     title = t('completed');
     contents = (
-      <>
-        <Icon
-          category="action"
-          name="approval"
-          assistiveText={{
-            label: title,
-          }}
-          size="xx-small"
-          containerClassName="slds-icon-standard-approval
-            slds-m-left_xxx-small"
-        />
-      </>
+      <Icon
+        category="action"
+        name="approval"
+        assistiveText={{
+          label: title,
+        }}
+        size="xx-small"
+        containerClassName="slds-icon-standard-approval
+        slds-m-left_xxx-small"
+      />
     );
   } else if (error) {
     title = t('error');
@@ -114,18 +112,16 @@ const JobCell = (props: DataCellProps): React.Node => {
     } else {
       title = t('waiting to install');
       contents = (
-        <>
-          <Icon
-            category="utility"
-            name="check"
-            assistiveText={{
-              label: title,
-            }}
-            size="x-small"
-            colorVariant="light"
-            className="slds-m-horizontal_x-small"
-          />
-        </>
+        <Icon
+          category="utility"
+          name="check"
+          assistiveText={{
+            label: title,
+          }}
+          size="x-small"
+          colorVariant="light"
+          className="slds-m-horizontal_x-small"
+        />
       );
     }
   } else {

@@ -30,7 +30,7 @@ export type StepResult = {|
   +logs?: string,
 |};
 export type PreflightErrors = {|
-  +plan?: Array<StepResult>,
+  +plan?: StepResult,
   [string]: StepResult,
 |};
 export type Preflight = {|

@@ -55,7 +55,7 @@ class NameDataCell extends React.Component<
     });
     const errorList =
       result && (hasError || hasWarning) ? (
-        <ErrorsList errorList={[result]} />
+        <ErrorsList errorList={result} />
       ) : null;
     return (
       <DataTableCell title={name} className={classes} {...otherProps}>

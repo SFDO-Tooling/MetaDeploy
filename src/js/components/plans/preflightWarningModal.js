@@ -31,20 +31,18 @@ const WarningList = ({
   name,
 }: {
   id: string,
-  results: Array<StepResultType>,
+  results: StepResultType,
   name?: string,
 }): React.Node => {
   const warnings = [];
-  for (const [idx, result] of results.entries()) {
-    if (result.message && result.status === CONSTANTS.RESULT_STATUS.WARN) {
-      warnings.push(
-        <li key={`${id}-${idx}`}>
-          <WarningIcon />
-          {/* These messages are pre-cleaned by the API */}
-          <span dangerouslySetInnerHTML={{ __html: result.message }} />
-        </li>,
-      );
-    }
+  if (results.message && results.status === CONSTANTS.RESULT_STATUS.WARN) {
+    warnings.push(
+      <li key={`${id}-1`}>
+        <WarningIcon />
+        {/* These messages are pre-cleaned by the API */}
+        <span dangerouslySetInnerHTML={{ __html: results.message }} />
+      </li>,
+    );
   }
   if (!warnings.length) {
     return null;
