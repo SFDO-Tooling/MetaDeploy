@@ -48,10 +48,7 @@ export const ErrorsList = ({
   errorList: StepResultType,
 }): React.Node => {
   const err = errorList;
-  let node;
-  if (!err.message) {
-    node = null;
-  }
+  let node = null;
   switch (err.status) {
     case CONSTANTS.RESULT_STATUS.ERROR:
       node = (
@@ -73,9 +70,6 @@ export const ErrorsList = ({
           <span dangerouslySetInnerHTML={{ __html: err.message }} />
         </li>
       );
-      break;
-    default:
-      node = null;
       break;
   }
 

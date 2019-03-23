@@ -9,20 +9,9 @@ const defaultJob = {
   warning_count: 3,
   is_valid: true,
   results: {
-    plan: [
-      { status: 'error', message: 'This plan error.' },
-      { status: 'error' },
-      { status: 'unknown', message: 'How did this happen?' },
-      { status: 'warn', message: 'This plan warning.' },
-    ],
-    1: [
-      { status: 'error', message: 'This error.' },
-      { status: 'warn', message: 'This warning.' },
-    ],
-    2: [
-      { status: 'error', message: 'This other error.' },
-      { status: 'warn', message: 'This other warning.' },
-    ],
+    plan: { status: 'error', message: 'This plan error.' },
+    1: { status: 'warn', message: 'This warning.' },
+    2: { status: 'error', message: 'This other error.' },
     malformed: { foo: 'bar' },
   },
 };
@@ -116,7 +105,7 @@ describe('<JobResults />', () => {
 
   describe('completed preflight with errors and warnings', () => {
     test('displays error/warning messages', () => {
-      const { getByText, queryByText } = setup();
+      const { getByText } = setup();
 
       expect(
         getByText(
@@ -124,8 +113,6 @@ describe('<JobResults />', () => {
         ),
       ).toBeVisible();
       expect(getByText('This plan error.')).toBeVisible();
-      expect(getByText('This plan warning.')).toBeVisible();
-      expect(queryByText('How did this happen?')).toBeNull();
     });
   });
 
