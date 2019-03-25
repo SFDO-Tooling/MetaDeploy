@@ -56,10 +56,7 @@ class JobFlowCallback(BasicFlowCallback):
 
     def pre_task(self, step):
         super().pre_task(step)
-        if step is not None:
-            self.result_handler.current_key = self._get_step_id(step.path)
-        else:
-            self.result_handler.current_key = None
+        self.set_current_key_by_step(step)
 
     def post_task(self, step, result):
         step_id = self._get_step_id(step.path)
@@ -74,6 +71,13 @@ class JobFlowCallback(BasicFlowCallback):
                 self.context.results[step_id].update({"status": OK})
             self.context.log = obscure_salesforce_log(self.string_buffer.getvalue())
             self.context.save()
+        self.set_current_key_by_step(None)
+
+    def set_current_key_by_step(self, step):
+        if step is not None:
+            self.result_handler.current_key = self._get_step_id(step.path)
+        else:
+            self.result_handler.current_key = None
 
 
 class PreflightFlowCallback(BasicFlowCallback):
