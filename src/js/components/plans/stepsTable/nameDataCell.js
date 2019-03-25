@@ -26,7 +26,14 @@ class NameDataCell extends React.Component<
   };
 
   render(): React.Node {
-    const { preflight, job, item, className, ...otherProps } = this.props;
+    const {
+      preflight,
+      job,
+      item,
+      className,
+      activeJobStep,
+      ...otherProps
+    } = this.props;
     /* istanbul ignore if */
     if (!item) {
       return null;
@@ -35,6 +42,7 @@ class NameDataCell extends React.Component<
     const { name, description } = item;
     const { id } = item;
     const result = currentJob && currentJob.results && currentJob.results[id];
+    const currentlyActive = activeJobStep && activeJobStep === id;
     let hasError = false;
     let hasWarning = false;
     let optional;
@@ -71,10 +79,18 @@ class NameDataCell extends React.Component<
               >
                 {description}
               </AccordionPanel>
+              <AccordionPanel
+                id={`logs-${id}`}
+                title="Logs"
+                summary="Logs for this step"
+                expanded={currentlyActive || this.state.expanded}
+                onTogglePanel={this.togglePanel}
+              >
+                <pre>
+                  <code>{result && result.logs}</code>
+                </pre>
+              </AccordionPanel>
             </Accordion>
-            <pre>
-              <code>{result && result.logs}</code>
-            </pre>
             {errorList ? (
               <div
                 className="step-name-no-icon

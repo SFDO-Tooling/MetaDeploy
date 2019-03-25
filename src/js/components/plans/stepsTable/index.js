@@ -51,12 +51,15 @@ const StepsTable = ({
   // Get the currently-running step
   let activeJobStep;
   if (job && job.status === CONSTANTS.STATUS.STARTED) {
+    let lastSeenStep;
     for (const step of job.steps) {
-      if (!job.results[step]) {
-        activeJobStep = step;
+      if (job.results[step]) {
+        lastSeenStep = step;
+      } else {
         break;
       }
     }
+    activeJobStep = lastSeenStep;
   }
   const hasValidToken = user && user.valid_token_for !== null;
   const hasReadyPreflight = preflight && preflight.is_ready;
@@ -73,7 +76,11 @@ const StepsTable = ({
             property="name"
             primaryColumn
           >
-            <NameDataCell preflight={preflight} job={job} />
+            <NameDataCell
+              preflight={preflight}
+              job={job}
+              activeJobStep={activeJobStep}
+            />
           </DataTableColumn>
           <DataTableColumn key="kind" label={t('Type')} property="kind">
             <KindDataCell />

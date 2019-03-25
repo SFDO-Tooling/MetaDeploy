@@ -155,6 +155,7 @@ describe('<StepsTable />', () => {
             steps: ['step-1', 'step-2', 'step-4'],
             results: {
               'step-1': { status: 'ok', logs: 'Test log' },
+              'step-2': { logs: 'Test log' },
               foo: { status: 'ok', logs: 'Another test log' },
             },
           },
