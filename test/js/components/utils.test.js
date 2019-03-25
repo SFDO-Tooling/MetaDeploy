@@ -1,5 +1,5 @@
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { StaticRouter } from 'react-router-dom';
 import { render } from 'react-testing-library';
 
 import routes from 'utils/routes';
@@ -71,10 +71,13 @@ describe('shouldFetchVersion', () => {
 
 describe('getLoadingOrNotFound', () => {
   const setup = opts => {
+    const context = {};
     const { getByText } = render(
-      <MemoryRouter>{getLoadingOrNotFound(opts)}</MemoryRouter>,
+      <StaticRouter context={context}>
+        {getLoadingOrNotFound(opts)}
+      </StaticRouter>,
     );
-    return { getByText };
+    return { getByText, context };
   };
 
   describe('no product', () => {
@@ -87,18 +90,15 @@ describe('getLoadingOrNotFound', () => {
 
   describe('plan slug but no plan', () => {
     test('redirects to plan_detail', () => {
-      jest.spyOn(routes, 'plan_detail');
-      setup({
+      const { context } = setup({
         product: defaultProduct,
         versionLabel: '1.0.0',
         planSlug: 'plan-1',
       });
 
-      expect(routes.plan_detail).toHaveBeenCalledTimes(1);
-      expect(routes.plan_detail).toHaveBeenCalledWith(
-        'product-1',
-        '1.0.0',
-        'plan-1',
+      expect(context.action).toEqual('REPLACE');
+      expect(context.url).toEqual(
+        routes.plan_detail('product-1', '1.0.0', 'plan-1'),
       );
     });
   });
