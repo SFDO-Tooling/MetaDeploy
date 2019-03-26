@@ -26,7 +26,14 @@ class NameDataCell extends React.Component<
   };
 
   render(): React.Node {
-    const { preflight, job, item, className, ...otherProps } = this.props;
+    const {
+      preflight,
+      job,
+      item,
+      className,
+      activeJobStep,
+      ...otherProps
+    } = this.props;
     /* istanbul ignore if */
     if (!item) {
       return null;
@@ -35,16 +42,15 @@ class NameDataCell extends React.Component<
     const { name, description } = item;
     const { id } = item;
     const result = currentJob && currentJob.results && currentJob.results[id];
+    const currentlyActive = activeJobStep && activeJobStep === id;
     let hasError = false;
     let hasWarning = false;
     let optional;
     let optionalMsg = '';
     if (result) {
-      hasError =
-        result.find(err => err.status === RESULT_STATUS.ERROR) !== undefined;
-      hasWarning =
-        result.find(err => err.status === RESULT_STATUS.WARN) !== undefined;
-      optional = result.find(res => res.status === RESULT_STATUS.OPTIONAL);
+      hasError = result.status === RESULT_STATUS.ERROR;
+      hasWarning = result.status === RESULT_STATUS.WARN;
+      optional = result.status === RESULT_STATUS.OPTIONAL ? result : null;
       optionalMsg = optional && optional.message;
     }
     let display = name;
@@ -72,6 +78,17 @@ class NameDataCell extends React.Component<
                 onTogglePanel={this.togglePanel}
               >
                 {description}
+              </AccordionPanel>
+              <AccordionPanel
+                id={`logs-${id}`}
+                title="Logs"
+                summary="Logs for this step"
+                expanded={currentlyActive || this.state.expanded}
+                onTogglePanel={this.togglePanel}
+              >
+                <pre>
+                  <code>{result && result.logs}</code>
+                </pre>
               </AccordionPanel>
             </Accordion>
             {errorList ? (

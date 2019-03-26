@@ -210,7 +210,7 @@ describe('<CtaButton />', () => {
           plan: 'plan-1',
           status: 'complete',
           results: {
-            'step-1': [{ status: 'warn', message: 'This is a warning.' }],
+            'step-1': { status: 'warn', message: 'This is a warning.' },
           },
           is_valid: true,
           error_count: 0,
@@ -268,7 +268,7 @@ describe('<CtaButton />', () => {
           plan: 'plan-1',
           status: 'complete',
           results: {
-            'step-1': [{ status: 'warn', message: 'This is a warning.' }],
+            'step-1': { status: 'warn', message: 'This is a warning.' },
           },
           is_valid: true,
           error_count: 0,

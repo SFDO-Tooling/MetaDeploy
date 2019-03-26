@@ -1,3 +1,6 @@
+import time
+
+from cumulusci.core.tasks import BaseTask
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.utils.text import slugify
@@ -13,6 +16,21 @@ from ...models import (
     Step,
     Version,
 )
+
+
+class Sleep(BaseTask):
+    name = "Sleep"
+    task_options = {
+        "seconds": {"description": "The number of seconds to sleep", "required": True}
+    }
+
+    def _run_task(self):  # pragma: nocover
+        seconds = int(self.options["seconds"])
+        self.logger.info("Sleeping for {} seconds".format(seconds))
+        for t in range(seconds):
+            time.sleep(1)
+            self.logger.info(str(t + 1))
+        self.logger.info("Done")
 
 
 class Command(BaseCommand):
@@ -103,7 +121,9 @@ class Command(BaseCommand):
 
     def create_step(self, **kwargs):
         path = kwargs.pop("path", "quick_task")
-        kwargs.setdefault("task_class", "cumulusci.tasks.util.Sleep")
+        kwargs.setdefault(
+            "task_class", "metadeploy.api.management.commands.populate_data.Sleep"
+        )
         kwargs.setdefault("task_config", {"options": {"seconds": 3}})
         return Step.objects.create(path=path, **kwargs)
 

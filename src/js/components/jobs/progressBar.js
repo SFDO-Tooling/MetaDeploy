@@ -88,9 +88,7 @@ class ProgressBar extends React.Component<Props, State> {
     return job.steps.filter(
       step =>
         job.results[step] &&
-        job.results[step].find(
-          res => res.status === CONSTANTS.RESULT_STATUS.OK,
-        ) !== undefined,
+        job.results[step].status === CONSTANTS.RESULT_STATUS.OK,
     ).length;
   }
 

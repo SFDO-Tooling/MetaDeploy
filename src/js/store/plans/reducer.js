@@ -27,10 +27,11 @@ export type Plans = Array<Plan>;
 export type StepResult = {|
   +status: 'ok' | 'warn' | 'error' | 'skip' | 'optional',
   +message?: string,
+  +logs?: string,
 |};
 export type PreflightErrors = {|
-  +plan?: Array<StepResult>,
-  [string]: Array<StepResult>,
+  +plan?: StepResult,
+  [string]: StepResult,
 |};
 export type Preflight = {|
   +id: string,

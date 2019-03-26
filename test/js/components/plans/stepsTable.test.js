@@ -79,9 +79,10 @@ describe('<StepsTable />', () => {
           preflight: {
             status: 'complete',
             results: {
-              'step-1': [
-                { status: 'optional', message: 'This became optional.' },
-              ],
+              'step-1': {
+                status: 'optional',
+                message: 'This became optional.',
+              },
             },
           },
         });
@@ -94,22 +95,14 @@ describe('<StepsTable />', () => {
           preflight: {
             status: 'complete',
             results: {
-              'step-1': [
-                { status: 'error', message: 'This error.' },
-                { status: 'warn', message: 'This warning.' },
-              ],
-              'step-2': [
-                { status: 'error', message: 'This other error.' },
-                { status: 'warn', message: 'This other warning.' },
-              ],
+              'step-1': { status: 'warn', message: 'This warning.' },
+              'step-2': { status: 'error', message: 'This other error.' },
             },
           },
         });
 
-        expect(getByText('This error.')).toBeVisible();
         expect(getByText('This warning.')).toBeVisible();
         expect(getByText('This other error.')).toBeVisible();
-        expect(getByText('This other warning.')).toBeVisible();
       });
     });
 
@@ -127,8 +120,8 @@ describe('<StepsTable />', () => {
         preflight: {
           status: 'complete',
           results: {
-            'step-1': [{ status: 'optional' }],
-            'step-2': [{ status: 'optional' }],
+            'step-1': { status: 'optional' },
+            'step-2': { status: 'optional' },
           },
         },
       });
@@ -160,7 +153,11 @@ describe('<StepsTable />', () => {
             plan: 'plan-1',
             status: 'started',
             steps: ['step-1', 'step-2', 'step-4'],
-            results: { 'step-1': [{ status: 'ok' }], foo: [{ status: 'ok' }] },
+            results: {
+              'step-1': { status: 'ok', logs: 'Test log' },
+              'step-2': { logs: 'Test log' },
+              foo: { status: 'ok', logs: 'Another test log' },
+            },
           },
         });
 
@@ -179,8 +176,8 @@ describe('<StepsTable />', () => {
               status: 'failed',
               steps: ['step-1', 'step-2', 'step-4'],
               results: {
-                'step-1': [{ status: 'ok' }],
-                'step-2': [{ status: 'error', message: 'totally failed' }],
+                'step-1': { status: 'ok' },
+                'step-2': { status: 'error', message: 'totally failed' },
               },
             },
           });
@@ -234,9 +231,9 @@ describe('<StepsTable />', () => {
           error_count: 0,
           warning_count: 0,
           results: {
-            'step-1': [{ status: 'optional' }],
-            'step-3': [{ status: 'skip', message: 'This was skipped.' }],
-            'step-4': [{ status: 'skip' }],
+            'step-1': { status: 'optional' },
+            'step-3': { status: 'skip', message: 'This was skipped.' },
+            'step-4': { status: 'skip', logs: 'Test log' },
           },
           is_ready: true,
         },

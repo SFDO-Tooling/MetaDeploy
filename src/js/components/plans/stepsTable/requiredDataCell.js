@@ -20,8 +20,8 @@ const RequiredDataCell = (props: DataCellProps): React.Node => {
   const result = preflight && preflight.results && preflight.results[id];
   let skipped, optional;
   if (result) {
-    skipped = result.find(res => res.status === RESULT_STATUS.SKIP);
-    optional = result.find(res => res.status === RESULT_STATUS.OPTIONAL);
+    skipped = result.status === RESULT_STATUS.SKIP ? result : null;
+    optional = result.status === RESULT_STATUS.OPTIONAL ? result : null;
   }
   const required =
     item.is_required && !optional && (!job || job.steps.includes(id));

@@ -45,38 +45,36 @@ export const WarningIcon = (): React.Node => (
 export const ErrorsList = ({
   errorList,
 }: {
-  errorList: Array<StepResultType>,
-}): React.Node => (
-  <ul className="plan-error-list">
-    {errorList.map((err, idx) => {
-      if (!err.message) {
-        return null;
-      }
-      switch (err.status) {
-        case CONSTANTS.RESULT_STATUS.ERROR:
-          return (
-            <li key={idx}>
-              <ErrorIcon />
-              {/* These messages are pre-cleaned by the API */}
-              <span
-                className="slds-text-color_error"
-                dangerouslySetInnerHTML={{ __html: err.message }}
-              />
-            </li>
-          );
-        case CONSTANTS.RESULT_STATUS.WARN:
-          return (
-            <li key={idx}>
-              <WarningIcon />
-              {/* These messages are pre-cleaned by the API */}
-              <span dangerouslySetInnerHTML={{ __html: err.message }} />
-            </li>
-          );
-      }
-      return null;
-    })}
-  </ul>
-);
+  errorList: StepResultType,
+}): React.Node => {
+  const err = errorList;
+  let node = null;
+  switch (err.status) {
+    case CONSTANTS.RESULT_STATUS.ERROR:
+      node = (
+        <li>
+          <ErrorIcon />
+          {/* These messages are pre-cleaned by the API */}
+          <span
+            className="slds-text-color_error"
+            dangerouslySetInnerHTML={{ __html: err.message }}
+          />
+        </li>
+      );
+      break;
+    case CONSTANTS.RESULT_STATUS.WARN:
+      node = (
+        <li>
+          <WarningIcon />
+          {/* These messages are pre-cleaned by the API */}
+          <span dangerouslySetInnerHTML={{ __html: err.message }} />
+        </li>
+      );
+      break;
+  }
+
+  return <ul className="plan-error-list">{node}</ul>;
+};
 
 const JobResults = ({
   job,
