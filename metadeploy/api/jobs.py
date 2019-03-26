@@ -30,6 +30,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django_rq import job
+from rq.exceptions import ShutDownImminentException
 from rq.worker import StopRequested
 
 from .cci_configs import MetaDeployCCI, extract_user_and_repo
@@ -51,7 +52,9 @@ def finalize_result(result):
         yield
         result.status = success_status
     except Exception as e:
-        if not isinstance(e, (StopRequested, StopFlowException)):
+        if not isinstance(
+            e, (StopRequested, ShutDownImminentException, StopFlowException)
+        ):
             result.status = error_status
         result.exception = str(e)
         logger.error(f"{result._meta.model_name} {result.id} failed.")
@@ -85,13 +88,13 @@ def prepend_python_path(path):
 def mark_canceled(result):
     """
     When an RQ worker gets a SIGTERM, it will initiate a warm shutdown, trying to wrap
-    up existing tasks and then raising a StopRequested exception. So we want to mark any
-    job that's not done by then as canceled by catching that exception as it propagates
-    back up.
+    up existing tasks and then raising a ShutDownImminentException or StopRequested
+    exception. So we want to mark any job that's not done by then as canceled
+    by catching that exception as it propagates back up.
     """
     try:
         yield
-    except (StopRequested, StopFlowException):
+    except (StopRequested, ShutDownImminentException, StopFlowException):
         result.status = result.Status.canceled
         result.canceled_at = timezone.now()
         result.save()
