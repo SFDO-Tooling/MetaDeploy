@@ -473,6 +473,18 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
     def slug_queryset(self):
         return self.plan_template.planslug_set
 
+    @property
+    def average_duration(self):
+        durations = [
+            (job.success_at - job.enqueued_at)
+            for job in Job.objects.filter(plan=self, status=Job.Status.complete)
+            if job.success_at is not None and job.enqueued_at is not None
+        ]
+        try:
+            return sum(durations, timedelta()) / len(durations)
+        except ZeroDivisionError:
+            return None
+
     def natural_key(self):
         return (self.version, self.title)
 
@@ -570,6 +582,10 @@ class Job(HashIdMixin, models.Model):
     org_name = models.CharField(blank=True, max_length=256)
     org_type = models.CharField(blank=True, max_length=256)
     is_public = models.BooleanField(default=False)
+    success_at = models.DateTimeField(
+        null=True,
+        help_text=("If the job completed successfully, the time of that success."),
+    )
     canceled_at = models.DateTimeField(
         null=True,
         help_text=(
