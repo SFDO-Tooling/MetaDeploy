@@ -319,6 +319,12 @@ class PlanDetail extends React.Component<Props, State> {
                   label={t('Pre-install validation')}
                 />
               ) : null}
+              {plan.average_duration ? (
+                <p>
+                  <strong>Average Install Time:</strong> {plan.average_duration}{' '}
+                  seconds.
+                </p>
+              ) : null}
               <Intro
                 preMessage={
                   plan.preflight_message ? (

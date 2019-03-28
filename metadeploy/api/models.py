@@ -477,8 +477,9 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
     def average_duration(self):
         durations = [
             (job.success_at - job.enqueued_at)
-            for job in Job.objects.filter(plan=self, status=Job.Status.complete)
-            if job.success_at is not None and job.enqueued_at is not None
+            for job in Job.objects.filter(
+                plan=self, status=Job.Status.complete
+            ).exclude(Q(success_at__isnull=True) | Q(enqueued_at__isnull=True))
         ]
         if len(durations) < settings.MINIMUM_JOBS_FOR_AVERAGE:
             return None

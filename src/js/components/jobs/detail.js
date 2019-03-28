@@ -229,6 +229,12 @@ class JobDetail extends React.Component<Props, State> {
           />
           <BodyContainer>
             <Toasts job={job} label={t('Installation')} />
+            {plan.average_duration ? (
+              <p>
+                <strong>Average Install Time:</strong> {plan.average_duration}{' '}
+                seconds.
+              </p>
+            ) : null}
             <Intro
               results={<JobResults job={job} label={t('Installation')} />}
               cta={
