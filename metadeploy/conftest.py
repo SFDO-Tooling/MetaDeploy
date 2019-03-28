@@ -87,8 +87,10 @@ class AllowedListOrgFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = AllowedListOrg
 
+    allowed_list = factory.SubFactory(AllowedListFactory)
     org_id = factory.fuzzy.FuzzyText(length=15, prefix="00D")
     description = factory.Sequence("Allowed List Org {}".format)
+    created_by = factory.SubFactory(UserFactory)
 
 
 @register

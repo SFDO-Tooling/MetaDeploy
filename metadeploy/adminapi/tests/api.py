@@ -218,3 +218,14 @@ class TestPlanViewSet:
         response = client.get(f"http://testserver/admin/rest/plans/{plan.id}")
 
         assert response.status_code == 400
+
+
+@pytest.mark.django_db
+class TestAllowedListOrgViewSet:
+    def test_get(self, admin_api_client, allowed_list_org_factory):
+        allowed_list_org_factory()
+
+        url = "http://testserver/admin/rest/allowedlistorgs"
+        response = admin_api_client.get(url)
+        assert response.status_code == 200
+        assert len(response.json()["data"]) == 1
