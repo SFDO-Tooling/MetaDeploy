@@ -257,6 +257,14 @@ describe('<PlanDetail />', () => {
     expect(getByText('Step 1')).toBeVisible();
   });
 
+  test('renders average time', () => {
+    const { getByText } = setup({
+      initialState: { ...defaultState, average_duration: '30' },
+    });
+
+    expect(getByText('30 seconds')).toBeVisible();
+  });
+
   test('renders preflight expiration warning', () => {
     const { getByText } = setup({
       initialState: {

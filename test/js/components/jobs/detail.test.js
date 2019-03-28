@@ -203,6 +203,17 @@ describe('<JobDetail />', () => {
   });
 
   describe('job complete', () => {
+    test('renders average time', () => {
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          plan: { id: 'plan-1', average_duration: '30' },
+        },
+      });
+
+      expect(getByText('30 seconds')).toBeVisible();
+    });
+
     test('renders job detail', () => {
       const { getByText, queryByText } = setup();
 
