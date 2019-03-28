@@ -4,4 +4,4 @@
 
 Sphinx==1.8.5
 django-extensions==2.1.6
-ipython==7.3.0
+ipython==7.4.0

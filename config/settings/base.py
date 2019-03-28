@@ -257,7 +257,7 @@ AWS_SECRET_ACCESS_KEY = env(
 AWS_STORAGE_BUCKET_NAME = env(
     "BUCKETEER_BUCKET_NAME", default=env("AWS_BUCKET_NAME", default=None)
 )
-
+AWS_DEFAULT_ACL = None
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
