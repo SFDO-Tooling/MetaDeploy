@@ -480,10 +480,9 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
             for job in Job.objects.filter(plan=self, status=Job.Status.complete)
             if job.success_at is not None and job.enqueued_at is not None
         ]
-        try:
-            return sum(durations, timedelta()) / len(durations)
-        except ZeroDivisionError:
+        if len(durations) < settings.MINIMUM_JOBS_FOR_AVERAGE:
             return None
+        return sum(durations, timedelta()) / len(durations)
 
     def natural_key(self):
         return (self.version, self.title)
