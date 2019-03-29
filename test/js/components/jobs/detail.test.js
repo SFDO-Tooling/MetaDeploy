@@ -204,14 +204,13 @@ describe('<JobDetail />', () => {
 
   describe('job complete', () => {
     test('renders average time', () => {
-      const { getByText } = setup({
-        initialState: {
-          ...defaultState,
-          plan: { id: 'plan-1', average_duration: '30' },
-        },
-      });
+      // Deep copy:
+      const initialState = JSON.parse(JSON.stringify(defaultState));
+      const { products } = initialState;
+      products[0].most_recent_version.primary_plan.average_duration = '30';
+      const { getByText } = setup({ initialState });
 
-      expect(getByText('30 seconds')).toBeVisible();
+      expect(getByText('Average Install Time:')).toBeVisible();
     });
 
     test('renders job detail', () => {
