@@ -26,6 +26,7 @@ import { logError } from 'utils/logging';
 import { routePatterns } from 'utils/routes';
 import reducer from 'store';
 import { login } from 'store/user/actions';
+// import { fetchOrgJobs } from 'store/org/actions';
 import { fetchProducts } from 'store/products/actions';
 import AuthError from 'components/authError';
 import ErrorBoundary from 'components/error';
@@ -122,6 +123,20 @@ init_i18n(() => {
     window.socket = createSocket({
       url: `${protocol}//${host}${window.api_urls.ws_notifications()}`,
       dispatch: appStore.dispatch,
+      onconnect: () => {
+        /* * /
+        apiFetch(window.api_urls.user(), {
+          method: 'GET',
+        }).then(user => {
+          appStore.dispatch({ type: 'USER_LOGGED_OUT' });
+          appStore.dispatch({
+            type: 'USER_LOGGED_IN',
+            user,
+          });
+          appStore.dispatch(fetchOrgJobs());
+        });
+        /* */
+      },
     });
 
     // Get JS globals
