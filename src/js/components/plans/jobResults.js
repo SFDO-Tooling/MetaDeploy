@@ -41,36 +41,33 @@ export const WarningIcon = (): React.Node => (
   />
 );
 
-// List of job "error" and "warning" messages
-export const ErrorsList = ({
-  errorList,
-}: {
-  errorList: StepResultType,
-}): React.Node => {
-  const err = errorList;
+// Job "error" or "warning" message
+export const JobError = ({ err }: { err: StepResultType }): React.Node => {
   let node = null;
-  switch (err.status) {
-    case CONSTANTS.RESULT_STATUS.ERROR:
-      node = (
-        <li>
-          <ErrorIcon />
-          {/* These messages are pre-cleaned by the API */}
-          <span
-            className="slds-text-color_error"
-            dangerouslySetInnerHTML={{ __html: err.message }}
-          />
-        </li>
-      );
-      break;
-    case CONSTANTS.RESULT_STATUS.WARN:
-      node = (
-        <li>
-          <WarningIcon />
-          {/* These messages are pre-cleaned by the API */}
-          <span dangerouslySetInnerHTML={{ __html: err.message }} />
-        </li>
-      );
-      break;
+  if (err.message) {
+    switch (err.status) {
+      case CONSTANTS.RESULT_STATUS.ERROR:
+        node = (
+          <li>
+            <ErrorIcon />
+            {/* These messages are pre-cleaned by the API */}
+            <span
+              className="slds-text-color_error"
+              dangerouslySetInnerHTML={{ __html: err.message }}
+            />
+          </li>
+        );
+        break;
+      case CONSTANTS.RESULT_STATUS.WARN:
+        node = (
+          <li>
+            <WarningIcon />
+            {/* These messages are pre-cleaned by the API */}
+            <span dangerouslySetInnerHTML={{ __html: err.message }} />
+          </li>
+        );
+        break;
+    }
   }
 
   return <ul className="plan-error-list">{node}</ul>;
@@ -132,7 +129,7 @@ const JobResults = ({
     } else if (warningCount > 0) {
       msg = warningMsg;
     }
-    const jobErrors = currentJob.results && currentJob.results.plan;
+    const jobError = currentJob.results && currentJob.results.plan;
     const failed =
       errorCount > 0 ||
       currentJob.status === CONSTANTS.STATUS.FAILED ||
@@ -155,7 +152,7 @@ const JobResults = ({
           )}
         </p>
         {failed && failMessage ? <p>{failMessage}</p> : null}
-        {jobErrors ? <ErrorsList errorList={jobErrors} /> : null}
+        {jobError ? <JobError err={jobError} /> : null}
       </>
     );
   }
