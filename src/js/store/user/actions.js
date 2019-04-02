@@ -53,3 +53,27 @@ export const logout = (): ThunkAction => (dispatch, getState, { apiFetch }) =>
 export const invalidateToken = (): TokenInvalidAction => ({
   type: 'USER_TOKEN_INVALIDATED',
 });
+
+export const refetchAllData = (): ThunkAction => (
+  dispatch,
+  getState,
+  { apiFetch },
+) => {
+  dispatch({ type: 'REFETCH_DATA_STARTED' });
+  return apiFetch(window.api_urls.user())
+    .then(payload => {
+      dispatch({ type: 'USER_LOGGED_OUT' });
+      if (!payload) {
+        return null;
+      }
+      dispatch({
+        type: 'USER_LOGGED_IN',
+        payload,
+      });
+      return dispatch(fetchOrgJobs());
+    })
+    .catch(err => {
+      dispatch({ type: 'REFETCH_DATA_FAILED' });
+      throw err;
+    });
+};
