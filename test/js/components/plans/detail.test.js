@@ -258,13 +258,27 @@ describe('<PlanDetail />', () => {
   });
 
   test('renders average time', () => {
-    // Deep copy:
-    const initialState = JSON.parse(JSON.stringify(defaultState));
-    initialState.products[0].most_recent_version.primary_plan.average_duration =
-      '30';
-    const { getByText } = setup({ initialState });
+    const product = defaultState.products[0];
+    const { getByText } = setup({
+      initialState: {
+        ...defaultState,
+        products: [
+          {
+            ...product,
+            most_recent_version: {
+              ...product.most_recent_version,
+              primary_plan: {
+                ...product.most_recent_version.primary_plan,
+                average_duration: '30',
+              },
+            },
+          },
+        ],
+      },
+    });
 
     expect(getByText('Average Install Time:')).toBeVisible();
+    expect(getByText('30 seconds.')).toBeVisible();
   });
 
   test('renders preflight expiration warning', () => {
