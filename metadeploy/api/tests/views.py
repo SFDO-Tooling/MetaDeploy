@@ -13,6 +13,14 @@ def format_timestamp(value):
 
 
 @pytest.mark.django_db
+def test_user_view(client):
+    response = client.get(reverse("user"))
+
+    assert response.status_code == 200
+    assert response.json()["username"].endswith("@example.com")
+
+
+@pytest.mark.django_db
 class TestJobViewset:
     def test_job__cannot_see(self, client, job_factory):
         job = job_factory()

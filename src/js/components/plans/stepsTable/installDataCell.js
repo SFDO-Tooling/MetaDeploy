@@ -79,7 +79,7 @@ const JobCell = (props: DataCellProps): React.Node => {
         }}
         size="xx-small"
         containerClassName="slds-icon-standard-approval
-        slds-m-left_xxx-small"
+          slds-m-left_xxx-small"
       />
     );
   } else if (error) {

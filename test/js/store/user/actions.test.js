@@ -162,3 +162,72 @@ describe('invalidateToken', () => {
     expect(actions.invalidateToken()).toEqual(expected);
   });
 });
+
+describe('refetchAllData', () => {
+  describe('success', () => {
+    test('GETs user from api', () => {
+      const store = storeWithApi({});
+      const user = { id: 'me' };
+      fetchMock.getOnce(window.api_urls.user(), user);
+      const started = { type: 'REFETCH_DATA_STARTED' };
+      const succeeded = { type: 'REFETCH_DATA_SUCCEEDED' };
+      const loggedOut = { type: 'USER_LOGGED_OUT' };
+      const loggedIn = {
+        type: 'USER_LOGGED_IN',
+        payload: user,
+      };
+      const org = {
+        current_job: null,
+        current_preflight: null,
+      };
+      fetchMock.getOnce(window.api_urls.org_list(), org);
+      const fetchingOrg = {
+        type: 'FETCH_ORG_JOBS_STARTED',
+      };
+      const fetchedOrg = {
+        type: 'FETCH_ORG_JOBS_SUCCEEDED',
+        payload: org,
+      };
+
+      expect.assertions(1);
+      return store.dispatch(actions.refetchAllData()).then(() => {
+        expect(store.getActions()).toEqual([
+          started,
+          succeeded,
+          loggedOut,
+          loggedIn,
+          fetchingOrg,
+          fetchedOrg,
+        ]);
+      });
+    });
+
+    test('handles missing user', () => {
+      const store = storeWithApi({});
+      fetchMock.getOnce(window.api_urls.user(), 401);
+      const started = { type: 'REFETCH_DATA_STARTED' };
+      const succeeded = { type: 'REFETCH_DATA_SUCCEEDED' };
+      const loggedOut = { type: 'USER_LOGGED_OUT' };
+
+      expect.assertions(1);
+      return store.dispatch(actions.refetchAllData()).then(() => {
+        expect(store.getActions()).toEqual([started, succeeded, loggedOut]);
+      });
+    });
+  });
+
+  describe('error', () => {
+    test('dispatches REFETCH_DATA_FAILED action', () => {
+      const store = storeWithApi({});
+      fetchMock.getOnce(window.api_urls.user(), 500);
+      const started = { type: 'REFETCH_DATA_STARTED' };
+      const failed = { type: 'REFETCH_DATA_FAILED' };
+
+      expect.assertions(2);
+      return store.dispatch(actions.refetchAllData()).catch(() => {
+        expect(store.getActions()).toEqual([started, failed]);
+        expect(window.console.error).toHaveBeenCalled();
+      });
+    });
+  });
+});

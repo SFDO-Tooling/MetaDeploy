@@ -15,6 +15,7 @@ beforeAll(() => {
     job_list: () => '/api/jobs/',
     job_detail: id => `/api/jobs/${id}/`,
     org_list: () => '/api/org/',
+    user: () => '/api/user/',
   };
   window.GLOBALS = {};
   window.SITE_NAME = 'MetaDeploy';

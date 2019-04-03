@@ -1,8 +1,10 @@
+from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import status, viewsets
+from rest_framework import generics, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .constants import REDIS_JOB_CANCEL_KEY
@@ -10,6 +12,7 @@ from .jobs import preflight_job
 from .models import Job, Plan, PreflightResult, Product, Version
 from .permissions import OnlyOwnerOrSuperuserCanDelete
 from .serializers import (
+    FullUserSerializer,
     JobSerializer,
     OrgSerializer,
     PlanSerializer,
@@ -17,6 +20,20 @@ from .serializers import (
     ProductSerializer,
     VersionSerializer,
 )
+
+User = get_user_model()
+
+
+class UserView(generics.RetrieveAPIView):
+    model = User
+    serializer_class = FullUserSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        return self.model.objects.filter(id=self.request.user.id)
+
+    def get_object(self):
+        return self.get_queryset().get()
 
 
 class JobViewSet(viewsets.ModelViewSet):
