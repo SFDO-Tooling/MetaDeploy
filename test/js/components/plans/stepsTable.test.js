@@ -106,11 +106,45 @@ describe('<StepsTable />', () => {
       });
     });
 
-    test('click expands accordion', () => {
-      const { getByText } = setup();
-      fireEvent.click(getByText('Step 1'));
+    describe('existing job', () => {
+      test('displays error/warning messages', () => {
+        const { getByText } = setup({
+          job: {
+            id: 'job-1',
+            plan: 'plan-1',
+            status: 'complete',
+            steps: ['step-1', 'step-2', 'step-4'],
+            results: {
+              'step-1': {
+                status: 'error',
+                message: 'This error.',
+                logs: 'These logs.',
+              },
+            },
+          },
+        });
 
-      expect(getByText('This is a step description.')).toBeVisible();
+        expect(getByText('This error.')).toBeVisible();
+      });
+
+      test('click expands accordion logs', () => {
+        const { getByText } = setup({
+          job: {
+            id: 'job-1',
+            plan: 'plan-1',
+            status: 'started',
+            steps: ['step-1', 'step-2', 'step-4'],
+            results: {
+              'step-1': { status: 'ok', logs: 'Test log 1' },
+              'step-2': { logs: 'Test log 2' },
+              foo: { status: 'ok', logs: 'Another test log' },
+            },
+          },
+        });
+        fireEvent.click(getByText('Step 1'));
+
+        expect(getByText('Test log 1')).toBeVisible();
+      });
     });
   });
 

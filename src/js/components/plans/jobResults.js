@@ -44,6 +44,7 @@ export const WarningIcon = (): React.Node => (
 // Job "error" or "warning" message
 export const JobError = ({ err }: { err: StepResultType }): React.Node => {
   let node = null;
+  /* istanbul ignore else */
   if (err.message) {
     switch (err.status) {
       case CONSTANTS.RESULT_STATUS.ERROR:
