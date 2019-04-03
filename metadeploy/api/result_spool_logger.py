@@ -8,6 +8,8 @@ class ResultSpoolLogger(Handler):
         super().__init__(*args, **kwargs)
 
     def emit(self, record):
+        if self.current_key is None:
+            return
         try:
             msg = f"\n{record.getMessage()}"
             self.result.results[self.current_key]["logs"] += msg
