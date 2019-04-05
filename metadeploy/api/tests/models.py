@@ -312,12 +312,10 @@ class TestPlan:
 
         assert plan.average_duration is None
 
-        job_factory(
-            plan=plan, status=Job.Status.complete, success_at=end, enqueued_at=start
-        )
-        job_factory(
-            plan=plan, status=Job.Status.complete, success_at=end, enqueued_at=start
-        )
+        for _ in range(4):
+            job_factory(
+                plan=plan, status=Job.Status.complete, success_at=end, enqueued_at=start
+            )
 
         assert plan.average_duration == timedelta(seconds=30)
 

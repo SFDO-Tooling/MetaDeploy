@@ -447,8 +447,26 @@ class PreflightResultSerializer(ErrorWarningCountMixin, serializers.ModelSeriali
         }
 
 
+class JobSummarySerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
+    product_slug = serializers.CharField(source="plan.version.product.slug")
+    version_label = serializers.CharField(source="plan.version.label")
+    plan_slug = serializers.CharField(source="plan.slug")
+    plan_average_duration = serializers.CharField(source="plan.average_duration")
+
+    class Meta:
+        model = Job
+        fields = (
+            "id",
+            "product_slug",
+            "version_label",
+            "plan_slug",
+            "plan_average_duration",
+        )
+
+
 class OrgSerializer(serializers.Serializer):
-    current_job = IdOnlyField()
+    current_job = JobSummarySerializer()
     current_preflight = IdOnlyField()
 
 

@@ -367,7 +367,7 @@ class TestOrgViewset:
         )
         response = client.get(reverse("org-list"))
 
-        assert response.json()["current_job"] == str(job.id)
+        assert response.json()["current_job"]["id"] == str(job.id)
         assert response.json()["current_preflight"] is None
 
     def test_get_preflight(self, client, preflight_result_factory, plan_factory):
