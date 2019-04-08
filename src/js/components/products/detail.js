@@ -134,6 +134,9 @@ class VersionDetail extends React.Component<VersionDetailProps> {
       primary_plan && primary_plan.is_listed && primary_plan.is_allowed;
     const visibleSecondaryPlan =
       secondary_plan && secondary_plan.is_listed && secondary_plan.is_allowed;
+    const productDescriptionHasTitle =
+      (product.description && product.description.startsWith('<h1>')) ||
+      (product.description && product.description.startsWith('<h2>'));
     return (
       <DocumentTitle title={`${product.title} | ${window.SITE_NAME}`}>
         <>
@@ -202,9 +205,11 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                 ) : null}
               </BodySection>
               <BodySection>
-                <h2 className="slds-text-heading_small">
-                  {t('About')} {product.title}
-                </h2>
+                {!productDescriptionHasTitle && (
+                  <h2 className="slds-text-heading_small">
+                    {t('About')} {product.title}
+                  </h2>
+                )}
                 {product.image ? (
                   <img
                     className="slds-size_full"
