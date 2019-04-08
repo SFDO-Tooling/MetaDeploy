@@ -134,10 +134,10 @@ class VersionDetail extends React.Component<VersionDetailProps> {
       primary_plan && primary_plan.is_listed && primary_plan.is_allowed;
     const visibleSecondaryPlan =
       secondary_plan && secondary_plan.is_listed && secondary_plan.is_allowed;
-    const productDescriptionHasTitle = product.description
-      ? product.description.startsWith('<h1>') ||
-        product.description.startsWith('<h2')
-      : null;
+    const productDescriptionHasTitle =
+      product.description &&
+      (product.description.startsWith('<h1>') ||
+        product.description.startsWith('<h2>'));
     return (
       <DocumentTitle title={`${product.title} | ${window.SITE_NAME}`}>
         <>
