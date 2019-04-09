@@ -22,7 +22,7 @@ import init_i18n from './i18n';
 
 import getApiFetch from 'utils/api';
 import { createSocket } from 'utils/websockets';
-import { logError } from 'utils/logging';
+import { log, logError } from 'utils/logging';
 import { routePatterns } from 'utils/routes';
 import reducer from 'store';
 import { login, refetchAllData } from 'store/user/actions';
@@ -99,7 +99,10 @@ const App = () => (
   </DocumentTitle>
 );
 
-init_i18n(() => {
+init_i18n(i18nError => {
+  if (i18nError) {
+    log(i18nError);
+  }
   const el = document.getElementById('app');
   if (el) {
     // Create store
