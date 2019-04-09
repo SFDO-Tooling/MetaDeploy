@@ -4,7 +4,6 @@
 #plan-steps-table {
   // Borders are added by parent .slds-card
   border: none;
-
   .slds-accordion__section {
     padding-left: 0;
     padding-right: 0;
@@ -33,5 +32,11 @@
   .has-error {
     border-left: 1rem solid $color-border-error;
     padding-left: 0.5rem;
+  }
+
+  .slds-badge_inverse {
+    background-color: $color-background-highlight;
+    border: 0.0625rem solid $color-border;
+    color: $color-gray-13;
   }
 }
