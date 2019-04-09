@@ -39,7 +39,7 @@ urlpatterns = [
     # 'admin/', because we don't want to do string munging to get just
     # the part without the regex and path cruft on it.
     re_path(
-        r"^(?!admin|accounts|api)",
+        r"^(?!{admin}|accounts|api|static)".format(admin=PREFIX),
         TemplateView.as_view(template_name="index.html"),
         name="frontend",
     ),
