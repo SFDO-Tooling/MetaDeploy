@@ -24,6 +24,17 @@ class TestResultSpoolLogger:
         job.refresh_from_db()
         assert job.results == {"test": {"logs": "\ntest"}}
 
+    def test_emit_none(self, job_factory):
+        job = job_factory(results={})
+        handler = ResultSpoolLogger(result=job)
+        handler.current_key = None
+        record = MockRecord("test")
+
+        handler.emit(record)
+
+        job.refresh_from_db()
+        assert job.results == {}
+
     def test_emit_no_logs_key(self, job_factory):
         job = job_factory(results={"test": {}})
         handler = ResultSpoolLogger(result=job)

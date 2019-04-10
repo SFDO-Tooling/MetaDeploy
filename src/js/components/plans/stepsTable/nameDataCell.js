@@ -3,9 +3,9 @@
 import * as React from 'react';
 import Accordion from '@salesforce/design-system-react/components/accordion';
 import AccordionPanel from '@salesforce/design-system-react/components/accordion/panel';
-import Button from '@salesforce/design-system-react/components/button';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
-import Popover from '@salesforce/design-system-react/components/popover';
+import Icon from '@salesforce/design-system-react/components/icon';
+import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
 import { t } from 'i18next';
 
@@ -53,6 +53,7 @@ class NameDataCell extends React.Component<
     if (optionalMsg) {
       display = `${name} — ${optionalMsg}`;
     }
+    display = <span className="slds-p-right_x-small">{display}</span>;
     const classes = classNames(className, {
       'has-warning': hasWarning,
       'has-error': hasError,
@@ -60,22 +61,23 @@ class NameDataCell extends React.Component<
     const errorList =
       result && (hasError || hasWarning) ? <JobError err={result} /> : null;
     const desc = description ? (
-      <Popover
-        body={description}
+      <Tooltip
+        content={description}
         id={`step-${id}-description`}
         align="top left"
         position="overflowBoundaryElement"
-        heading={name}
       >
-        <Button
-          variant="icon"
-          className="slds-p-left_x-small"
-          title={t('View Description')}
-          iconCategory="utility"
-          iconName="info_alt"
-          assistiveText={{ icon: t('View Description') }}
-        />
-      </Popover>
+        <a>
+          <Icon
+            category="utility"
+            name="info_alt"
+            assistiveText={{
+              label: t('View Description'),
+            }}
+            size="x-small"
+          />
+        </a>
+      </Tooltip>
     ) : null;
     return (
       <DataTableCell title={name} className={classes} {...otherProps}>
@@ -85,7 +87,12 @@ class NameDataCell extends React.Component<
               <AccordionPanel
                 id={id}
                 title={name}
-                summary={<div className="slds-cell-wrap">{display}</div>}
+                summary={
+                  <div className="slds-cell-wrap">
+                    {display}
+                    {desc}
+                  </div>
+                }
                 expanded={this.state.expanded}
                 onTogglePanel={this.togglePanel}
               >
@@ -94,7 +101,6 @@ class NameDataCell extends React.Component<
                 </pre>
               </AccordionPanel>
             </Accordion>
-            {desc}
             {errorList ? (
               <div
                 className="step-name-no-icon
