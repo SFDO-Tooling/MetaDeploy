@@ -117,19 +117,6 @@ describe('<JobDetail />', () => {
     return { getByText, queryByText, getByAltText, container, rerender };
   };
 
-  describe('missing parameters', () => {
-    test('tries to fetch job', () => {
-      setup({
-        productSlug: null,
-        versionLabel: null,
-        planSlug: null,
-        initialState: { ...defaultState, jobs: {} },
-      });
-
-      expect(fetchJob).toHaveBeenCalledWith('job-1', '', '', '');
-    });
-  });
-
   describe('unknown version', () => {
     test('fetches version', () => {
       setup({ versionLabel: '2.0.0' });
@@ -147,12 +134,12 @@ describe('<JobDetail />', () => {
         initialState: { ...defaultState, jobs: {} },
       });
 
-      expect(fetchJob).toHaveBeenCalledWith(
-        'job-1',
-        'product-1',
-        '1.0.0',
-        'my-plan',
-      );
+      expect(fetchJob).toHaveBeenCalledWith({
+        jobId: 'job-1',
+        productSlug: 'product-1',
+        versionLabel: '1.0.0',
+        planSlug: 'my-plan',
+      });
     });
   });
 
@@ -188,6 +175,23 @@ describe('<JobDetail />', () => {
     });
   });
 
+  describe('job does not match plan', () => {
+    test('renders <JobNotFound />', () => {
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          jobs: {
+            ...defaultState.jobs,
+            'job-1': { ...defaultState.jobs['job-1'], plan: 'other-plan' },
+          },
+        },
+      });
+
+      expect(getByText('starting a new installation')).toBeVisible();
+      expect(getByText('Log In')).toBeVisible();
+    });
+  });
+
   describe('componentDidUpdate', () => {
     describe('version is removed', () => {
       test('fetches version', () => {
@@ -215,12 +219,12 @@ describe('<JobDetail />', () => {
           rerenderFn: rerender,
         });
 
-        expect(fetchJob).toHaveBeenCalledWith(
-          'other-job',
-          'product-1',
-          '1.0.0',
-          'my-plan',
-        );
+        expect(fetchJob).toHaveBeenCalledWith({
+          jobId: 'other-job',
+          productSlug: 'product-1',
+          versionLabel: '1.0.0',
+          planSlug: 'my-plan',
+        });
       });
     });
   });

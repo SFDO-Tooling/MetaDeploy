@@ -82,14 +82,14 @@ class JobDetail extends React.Component<Props, State> {
 
   fetchJobIfMissing() {
     const { job, jobId, doFetchJob, product, versionLabel, plan } = this.props;
-    if (job === undefined && jobId) {
+    if (product && versionLabel && plan && jobId && job === undefined) {
       // Fetch job from API
-      doFetchJob(
+      doFetchJob({
         jobId,
-        product ? product.slug : '',
-        versionLabel || '',
-        plan ? plan.slug : '',
-      );
+        productSlug: product.slug,
+        versionLabel,
+        planSlug: plan.slug,
+      });
     }
   }
 
