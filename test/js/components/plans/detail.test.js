@@ -162,7 +162,15 @@ describe('<PlanDetail />', () => {
       const { getByText } = setup({
         initialState: {
           ...defaultState,
-          org: { current_job: '1', current_preflight: null },
+          org: {
+            current_job: {
+              id: '1',
+              product_slug: 'product-1',
+              version_label: '1.0.0',
+              plan_slug: 'my-plan',
+            },
+            current_preflight: null,
+          },
         },
       });
 

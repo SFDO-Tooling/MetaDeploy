@@ -72,7 +72,15 @@ describe('getAction', () => {
 
   describe('ORG_CHANGED', () => {
     test('handles msg', () => {
-      const payload = { current_job: 'id', current_preflight: null };
+      const payload = {
+        current_job: {
+          id: 'my-job',
+          product_slug: 'my-product',
+          version_label: 'my-version',
+          plan_slug: 'my-plan',
+        },
+        current_preflight: null,
+      };
       const msg = { type: 'ORG_CHANGED', payload };
       const expected = updateOrg(payload);
       const actual = sockets.getAction(msg);
