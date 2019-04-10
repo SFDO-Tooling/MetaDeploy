@@ -29,7 +29,7 @@ const RequiredDataCell = (props: DataCellProps): React.Node => {
     'slds-align-middle',
     'slds-badge',
     'slds-m-horizontal_large',
-    { 'slds-badge_inverse': !required },
+    { 'slds-badge_lightest': !required },
   );
   let text = t('Optional');
   if (skipped) {
