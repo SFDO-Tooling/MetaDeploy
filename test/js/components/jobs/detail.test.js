@@ -134,7 +134,12 @@ describe('<JobDetail />', () => {
         initialState: { ...defaultState, jobs: {} },
       });
 
-      expect(fetchJob).toHaveBeenCalledWith('job-1');
+      expect(fetchJob).toHaveBeenCalledWith({
+        jobId: 'job-1',
+        productSlug: 'product-1',
+        versionLabel: '1.0.0',
+        planSlug: 'my-plan',
+      });
     });
   });
 
@@ -170,6 +175,23 @@ describe('<JobDetail />', () => {
     });
   });
 
+  describe('job does not match plan', () => {
+    test('renders <JobNotFound />', () => {
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          jobs: {
+            ...defaultState.jobs,
+            'job-1': { ...defaultState.jobs['job-1'], plan: 'other-plan' },
+          },
+        },
+      });
+
+      expect(getByText('starting a new installation')).toBeVisible();
+      expect(getByText('Log In')).toBeVisible();
+    });
+  });
+
   describe('componentDidUpdate', () => {
     describe('version is removed', () => {
       test('fetches version', () => {
@@ -197,7 +219,12 @@ describe('<JobDetail />', () => {
           rerenderFn: rerender,
         });
 
-        expect(fetchJob).toHaveBeenCalledWith('other-job');
+        expect(fetchJob).toHaveBeenCalledWith({
+          jobId: 'other-job',
+          productSlug: 'product-1',
+          versionLabel: '1.0.0',
+          planSlug: 'my-plan',
+        });
       });
     });
   });

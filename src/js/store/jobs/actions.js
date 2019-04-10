@@ -2,6 +2,7 @@
 
 import type { ThunkAction } from 'redux-thunk';
 
+import { addUrlParams } from 'utils/api';
 import type { Job } from 'store/jobs/reducer';
 
 type JobData = { plan: string, steps: Array<string> };
@@ -61,13 +62,25 @@ export type JobsAction =
   | JobCancelRejected
   | JobCanceled;
 
-export const fetchJob = (jobId: string): ThunkAction => (
-  dispatch,
-  getState,
-  { apiFetch },
-) => {
+export const fetchJob = ({
+  jobId,
+  productSlug,
+  versionLabel,
+  planSlug,
+}: {
+  jobId: string,
+  productSlug: string,
+  versionLabel: string,
+  planSlug: string,
+}): ThunkAction => (dispatch, getState, { apiFetch }) => {
   dispatch({ type: 'FETCH_JOB_STARTED', payload: jobId });
-  return apiFetch(window.api_urls.job_detail(jobId))
+  const url = window.api_urls.job_detail(jobId);
+  const params = {
+    plan__plan_template__planslug__slug: planSlug,
+    plan__version__label: versionLabel,
+    plan__version__product__productslug__slug: productSlug,
+  };
+  return apiFetch(addUrlParams(url, params))
     .then(response => {
       if (response && window.socket) {
         window.socket.subscribe({
