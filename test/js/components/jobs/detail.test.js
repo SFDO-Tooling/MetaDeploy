@@ -117,6 +117,19 @@ describe('<JobDetail />', () => {
     return { getByText, queryByText, getByAltText, container, rerender };
   };
 
+  describe('missing parameters', () => {
+    test('tries to fetch job', () => {
+      setup({
+        productSlug: null,
+        versionLabel: null,
+        planSlug: null,
+        initialState: { ...defaultState, jobs: {} },
+      });
+
+      expect(fetchJob).toHaveBeenCalledWith('job-1', '', '', '');
+    });
+  });
+
   describe('unknown version', () => {
     test('fetches version', () => {
       setup({ versionLabel: '2.0.0' });
@@ -134,7 +147,12 @@ describe('<JobDetail />', () => {
         initialState: { ...defaultState, jobs: {} },
       });
 
-      expect(fetchJob).toHaveBeenCalledWith('job-1');
+      expect(fetchJob).toHaveBeenCalledWith(
+        'job-1',
+        'product-1',
+        '1.0.0',
+        'my-plan',
+      );
     });
   });
 
@@ -197,7 +215,12 @@ describe('<JobDetail />', () => {
           rerenderFn: rerender,
         });
 
-        expect(fetchJob).toHaveBeenCalledWith('other-job');
+        expect(fetchJob).toHaveBeenCalledWith(
+          'other-job',
+          'product-1',
+          '1.0.0',
+          'my-plan',
+        );
       });
     });
   });

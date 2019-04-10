@@ -74,6 +74,7 @@
     "i18next-browser-languagedetector": "^3.0.1",
     "i18next-xhr-backend": "^2.0.1",
     "js-cookie": "^2.2.0",
+    "query-string": "^6.4.2",
     "raven-js": "^3.27.0",
     "react": "^16.8.6",
     "react-document-title": "^2.0.3",
