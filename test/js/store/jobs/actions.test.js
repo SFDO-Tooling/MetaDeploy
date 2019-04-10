@@ -2,9 +2,27 @@ import fetchMock from 'fetch-mock';
 
 import { storeWithApi } from './../../utils';
 
+import { addUrlParams } from 'utils/api';
 import * as actions from 'store/jobs/actions';
 
 describe('fetchJob', () => {
+  let args, params, url;
+
+  beforeEach(() => {
+    args = {
+      jobId: 'job-1',
+      productSlug: 'my-product',
+      versionLabel: 'my-version',
+      planSlug: 'plan-1',
+    };
+    params = {
+      plan__plan_template__planslug__slug: args.planSlug,
+      plan__version__label: args.versionLabel,
+      plan__version__product__productslug__slug: args.productSlug,
+    };
+    url = addUrlParams(window.api_urls.job_detail('job-1'), params);
+  });
+
   describe('success', () => {
     beforeEach(() => {
       window.socket = { subscribe: jest.fn() };
@@ -26,7 +44,7 @@ describe('fetchJob', () => {
         org_name: null,
         org_type: null,
       };
-      fetchMock.getOnce(window.api_urls.job_detail('job-1'), job);
+      fetchMock.getOnce(url, job);
       const started = {
         type: 'FETCH_JOB_STARTED',
         payload: 'job-1',
@@ -41,7 +59,7 @@ describe('fetchJob', () => {
       };
 
       expect.assertions(2);
-      return store.dispatch(actions.fetchJob('job-1')).then(() => {
+      return store.dispatch(actions.fetchJob(args)).then(() => {
         expect(store.getActions()).toEqual([started, succeeded]);
         expect(window.socket.subscribe).toHaveBeenCalledWith(expected);
       });
@@ -49,7 +67,7 @@ describe('fetchJob', () => {
 
     test('handles missing job', () => {
       const store = storeWithApi({});
-      fetchMock.getOnce(window.api_urls.job_detail('job-1'), 404);
+      fetchMock.getOnce(url, 404);
       const started = {
         type: 'FETCH_JOB_STARTED',
         payload: 'job-1',
@@ -60,7 +78,7 @@ describe('fetchJob', () => {
       };
 
       expect.assertions(2);
-      return store.dispatch(actions.fetchJob('job-1')).then(() => {
+      return store.dispatch(actions.fetchJob(args)).then(() => {
         expect(store.getActions()).toEqual([started, succeeded]);
         expect(window.socket.subscribe).not.toHaveBeenCalled();
       });
@@ -70,7 +88,7 @@ describe('fetchJob', () => {
   describe('error', () => {
     test('dispatches FETCH_JOB_FAILED action', () => {
       const store = storeWithApi({});
-      fetchMock.getOnce(window.api_urls.job_detail('job-1'), 500);
+      fetchMock.getOnce(url, 500);
       const started = {
         type: 'FETCH_JOB_STARTED',
         payload: 'job-1',
@@ -81,7 +99,7 @@ describe('fetchJob', () => {
       };
 
       expect.assertions(2);
-      return store.dispatch(actions.fetchJob('job-1')).catch(() => {
+      return store.dispatch(actions.fetchJob(args)).catch(() => {
         expect(store.getActions()).toEqual([started, failed]);
         expect(window.console.error).toHaveBeenCalled();
       });

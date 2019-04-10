@@ -39,7 +39,15 @@ class UserView(generics.RetrieveAPIView):
 class JobViewSet(viewsets.ModelViewSet):
     serializer_class = JobSerializer
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ("plan", "user", "status", "organization_url")
+    filterset_fields = (
+        "plan_id",
+        "user_id",
+        "status",
+        "organization_url",
+        "plan__plan_template__planslug__slug",
+        "plan__version__label",
+        "plan__version__product__productslug__slug",
+    )
     permission_classes = (OnlyOwnerOrSuperuserCanDelete,)
 
     def get_queryset(self):
