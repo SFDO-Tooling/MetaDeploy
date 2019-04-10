@@ -190,6 +190,7 @@ class PlanDetail extends React.Component<Props, State> {
     }
     if (org) {
       if (org.current_job) {
+        const { product_slug, version_label, plan_slug, id } = org.current_job;
         return (
           <p>
             <WarningIcon />
@@ -198,10 +199,10 @@ class PlanDetail extends React.Component<Props, State> {
                 An installation is currently running on this org.{' '}
                 <Link
                   to={routes.job_detail(
-                    product.slug,
-                    version.label,
-                    plan.slug,
-                    org.current_job,
+                    product_slug,
+                    version_label,
+                    plan_slug,
+                    id,
                   )}
                 >
                   View the running installation
