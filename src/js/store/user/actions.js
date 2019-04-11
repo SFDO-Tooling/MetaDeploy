@@ -67,11 +67,7 @@ export const refetchAllData = (): ThunkAction => (
       if (!payload) {
         return null;
       }
-      dispatch({
-        type: 'USER_LOGGED_IN',
-        payload,
-      });
-      return dispatch(fetchOrgJobs());
+      return dispatch(login(payload));
     })
     .catch(err => {
       dispatch({ type: 'REFETCH_DATA_FAILED' });
