@@ -54,8 +54,17 @@ class HashIdMixin(models.Model):
 
 
 class AllowedList(models.Model):
+    ORG_TYPES = (
+        ("", ""),
+        ("Production", "Production"),
+        ("Scratch", "Scratch"),
+        ("Sandbox", "Sandbox"),
+        ("Developer", "Developer"),
+    )
+
     title = models.CharField(max_length=128, unique=True)
     description = MarkdownField(blank=True, property_suffix="_markdown")
+    org_type = models.CharField(max_length=64, choices=ORG_TYPES, blank=True)
 
     def __str__(self):
         return self.title
@@ -93,6 +102,7 @@ class AllowedListAccessMixin(models.Model):
             user.is_authenticated
             and (
                 user.is_superuser
+                or user.full_org_type == self.visible_to.org_type
                 or self.visible_to.orgs.filter(org_id=user.org_id).exists()
             )
         )
@@ -136,6 +146,22 @@ class User(HashIdMixin, AbstractUser):
     @property
     def org_type(self):
         return self._get_org_property("OrganizationType")
+
+    @property
+    def full_org_type(self):
+        org_type = self._get_org_property("OrganizationType")
+        is_sandbox = self._get_org_property("IsSandbox")
+        has_expiration = self._get_org_property("TrialExpirationDate") is not None
+        if org_type is None or is_sandbox is None:
+            return None
+        if org_type == "Developer Edition" and not is_sandbox:
+            return "Developer"
+        if org_type != "Developer Edition" and not is_sandbox:
+            return "Production"
+        if is_sandbox and not has_expiration:
+            return "Sandbox"
+        if is_sandbox and has_expiration:
+            return "Scratch"
 
     @property
     def instance_url(self):
