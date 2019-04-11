@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
                     ("Production", "Production"),
                     ("Scratch", "Scratch"),
                     ("Sandbox", "Sandbox"),
-                    ("Developer Edition", "Developer Edition"),
+                    ("Developer", "Developer"),
                 ],
                 max_length=64,
             ),
