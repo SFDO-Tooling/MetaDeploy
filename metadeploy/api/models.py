@@ -55,7 +55,6 @@ class HashIdMixin(models.Model):
 
 class AllowedList(models.Model):
     ORG_TYPES = (
-        ("", ""),
         ("Production", "Production"),
         ("Scratch", "Scratch"),
         ("Sandbox", "Sandbox"),
