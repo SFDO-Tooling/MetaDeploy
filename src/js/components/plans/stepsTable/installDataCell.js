@@ -140,7 +140,7 @@ const JobCell = (props: DataCellProps): React.Node => {
     );
   }
   return (
-    <DataTableCell title={title} {...props}>
+    <DataTableCell title={title} {...props} className="plan-step-item">
       {contents}
     </DataTableCell>
   );

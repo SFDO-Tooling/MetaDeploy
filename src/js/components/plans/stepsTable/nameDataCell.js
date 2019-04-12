@@ -80,7 +80,11 @@ class NameDataCell extends React.Component<
       </Tooltip>
     ) : null;
     return (
-      <DataTableCell title={name} className={classes} {...otherProps}>
+      <DataTableCell
+        title={name}
+        className={classNames('plan-step-item', { classes })}
+        {...otherProps}
+      >
         {logs ? (
           <>
             <Accordion>
@@ -114,7 +118,6 @@ class NameDataCell extends React.Component<
         ) : (
           <div
             className="step-name-no-icon
-              slds-p-vertical_small
               slds-cell-wrap"
           >
             <div className={errorList ? 'slds-p-bottom_small' : ''}>
