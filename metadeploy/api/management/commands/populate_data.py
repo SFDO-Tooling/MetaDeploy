@@ -30,6 +30,7 @@ class Sleep(BaseTask):
         for t in range(seconds):
             time.sleep(1)
             self.logger.info(str(t + 1))
+            self.logger.info(" ".join(["la"] * 40))
         self.logger.info("Done")
 
 
