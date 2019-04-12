@@ -41,7 +41,7 @@ const RequiredDataCell = (props: DataCellProps): React.Node => {
     <DataTableCell
       title={text}
       {...props}
-      className="plan-step-item pill-holder"
+      className="plan-step-item plan-step-badge-container"
     >
       <span className={classes}>{text}</span>
     </DataTableCell>

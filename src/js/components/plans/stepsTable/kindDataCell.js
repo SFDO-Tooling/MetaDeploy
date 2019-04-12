@@ -14,7 +14,11 @@ const KindDataCell = (props: DataCellProps): React.Node => {
   const iconName = props.item.kind_icon;
   const value = props.item.kind;
   return (
-    <DataTableCell title={value} {...props} className="plan-step-item">
+    <DataTableCell
+      title={value}
+      {...props}
+      className="plan-step-item plan-step-type"
+    >
       {iconName ? (
         <Icon
           className="slds-m-right_x-small"

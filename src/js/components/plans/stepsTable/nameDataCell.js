@@ -82,7 +82,9 @@ class NameDataCell extends React.Component<
     return (
       <DataTableCell
         title={name}
-        className={classNames('plan-step-item', { classes })}
+        className={classNames('plan-step-item plan-step-item-name', {
+          classes,
+        })}
         {...otherProps}
       >
         {logs ? (
@@ -92,7 +94,7 @@ class NameDataCell extends React.Component<
                 id={id}
                 title={name}
                 summary={
-                  <div className="slds-cell-wrap">
+                  <div className="slds-cell-wrap plan-step-name">
                     {display}
                     {desc}
                   </div>

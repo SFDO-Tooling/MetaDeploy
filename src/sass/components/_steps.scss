@@ -35,22 +35,42 @@
   }
 
   .plan-step-item {
+    padding-bottom: $var-spacing-small;
+    padding-top: $var-spacing-small;
     vertical-align: text-top;
   }
 
-  th,
-  td {
-    padding-bottom: $var-spacing-x-small;
-    padding-top: $var-spacing-x-small;
+  .plan-step-name {
+    align-items: end;
+    display: flex;
+  }
+
+  .plan-step-type {
+    // aligns the type text with other cell text
+    > div {
+      align-items: baseline;
+      display: flex;
+
+      // center the type icon to the label only
+      span:first-child {
+        align-self: center;
+        display: flex;
+      }
+    }
+  }
+
+  .plan-step-badge-container {
+    div {
+      display: flex;
+    }
   }
 
   .slds-badge_lightest {
     background-color: $color-background-highlight;
   }
-}
 
-.pill-holder {
-  div {
-    display: flex;
+  .plan-step-icon-container {
+    padding-bottom: 0;
+    padding-top: 0;
   }
 }
