@@ -12,7 +12,7 @@ from cumulusci.core.utils import import_class
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
-from django.contrib.postgres.fields import JSONField
+from django.contrib.postgres.fields import ArrayField, JSONField
 from django.contrib.sites.models import Site
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import RegexValidator
@@ -64,7 +64,11 @@ class AllowedList(models.Model):
 
     title = models.CharField(max_length=128, unique=True)
     description = MarkdownField(blank=True, property_suffix="_markdown")
-    org_type = models.CharField(max_length=64, choices=ORG_TYPES, blank=True)
+    org_type = ArrayField(
+        models.CharField(max_length=64, choices=ORG_TYPES, blank=True),
+        size=4,
+        default=list,
+    )
 
     def __str__(self):
         return self.title
@@ -102,7 +106,7 @@ class AllowedListAccessMixin(models.Model):
             user.is_authenticated
             and (
                 user.is_superuser
-                or user.full_org_type == self.visible_to.org_type
+                or user.full_org_type in self.visible_to.org_type
                 or self.visible_to.orgs.filter(org_id=user.org_id).exists()
             )
         )
