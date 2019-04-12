@@ -67,6 +67,7 @@ class AllowedList(models.Model):
         models.CharField(max_length=64, choices=ORG_TYPES, blank=True),
         size=4,
         default=list,
+        help_text="All orgs of these types will be automatically allowed.",
     )
 
     def __str__(self):
