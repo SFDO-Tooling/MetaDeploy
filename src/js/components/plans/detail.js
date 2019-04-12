@@ -26,11 +26,11 @@ import BodyContainer from 'components/bodyContainer';
 import CtaButton, { LoginBtn } from 'components/plans/ctaButton';
 import Header from 'components/plans/header';
 import Intro from 'components/plans/intro';
+import PlanNotAllowed from 'components/products/notAllowed';
 import PreflightResults, {
   ErrorIcon,
   WarningIcon,
 } from 'components/plans/preflightResults';
-import PlanNotAllowed from 'components/products/notAllowed';
 import ProductNotFound from 'components/products/product404';
 import StepsTable from 'components/plans/stepsTable';
 import Toasts from 'components/plans/toasts';

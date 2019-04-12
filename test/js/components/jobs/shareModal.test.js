@@ -8,6 +8,7 @@ describe('<ShareModal />', () => {
     id: 'job-1',
     is_public: false,
     user_can_edit: true,
+    status: 'complete',
   };
 
   const setup = options => {
@@ -30,6 +31,26 @@ describe('<ShareModal />', () => {
 
   beforeEach(() => {
     jest.useFakeTimers();
+  });
+
+  describe('with error', () => {
+    test('displays default error message', () => {
+      const { getByText } = setup({
+        job: { ...defaultJob, status: 'failed' },
+      });
+
+      expect(getByText('Resolve Installation Error')).toBeVisible();
+      expect(getByText('Power of Us Hub')).toBeVisible();
+    });
+
+    test('displays custom error message', () => {
+      const { getByText } = setup({
+        job: { ...defaultJob, status: 'failed', error_message: 'Sorry!' },
+      });
+
+      expect(getByText('Resolve Installation Error')).toBeVisible();
+      expect(getByText('Sorry!')).toBeVisible();
+    });
   });
 
   test('displays link', () => {

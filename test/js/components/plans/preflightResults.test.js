@@ -1,9 +1,11 @@
 import React from 'react';
 import { render } from 'react-testing-library';
 
-import PreflightResults from 'components/plans/preflightResults';
+import PreflightResults, {
+  getErrorInfo,
+} from 'components/plans/preflightResults';
 
-const defaultJob = {
+const defaultPreflight = {
   status: 'complete',
   error_count: 4,
   warning_count: 3,
@@ -30,25 +32,18 @@ const defaultJob = {
 describe('<PreflightResults />', () => {
   const setup = options => {
     const defaults = {
-      job: defaultJob,
-      label: 'Pre-install validation',
-      failMessage: '',
+      preflight: defaultPreflight,
     };
     const opts = { ...defaults, ...options };
     const { getByText, queryByText, container } = render(
-      <PreflightResults
-        job={opts.job}
-        label={opts.label}
-        failMessage={opts.failMessage}
-        successMessage={opts.successMessage}
-      />,
+      <PreflightResults preflight={opts.preflight} />,
     );
     return { getByText, queryByText, container };
   };
 
   describe('started preflight', () => {
     test('renders nothing', () => {
-      const { container } = setup({ job: { status: 'started' } });
+      const { container } = setup({ preflight: { status: 'started' } });
 
       expect(container.children).toHaveLength(0);
     });
@@ -56,7 +51,7 @@ describe('<PreflightResults />', () => {
 
   describe('completed preflight with error', () => {
     test('displays error message', () => {
-      const job = {
+      const preflight = {
         status: 'complete',
         error_count: 1,
         warning_count: 0,
@@ -66,37 +61,36 @@ describe('<PreflightResults />', () => {
         },
       };
       const { getByText } = setup({
-        job,
-        failMessage: 'Do something to fix it.',
+        preflight,
       });
 
       expect(
         getByText('Pre-install validation encountered 1 error.'),
       ).toBeVisible();
-      expect(getByText('Do something to fix it.')).toBeVisible();
     });
   });
 
   describe('completed preflight with warning', () => {
     test('displays warning message', () => {
-      const job = {
+      const preflight = {
         status: 'complete',
         error_count: 0,
         warning_count: 1,
         results: {
           1: [{ status: 'warn', message: 'This warning.' }],
         },
+        is_valid: true,
       };
-      const { getByText } = setup({ job });
+      const { getByText } = setup({ preflight });
 
       expect(
         getByText('Pre-install validation encountered 1 warning.'),
       ).toBeVisible();
     });
 
-    describe('invalid preflight', () => {
+    describe('invalid preflight with warning', () => {
       test('displays invalid message', () => {
-        const job = {
+        const preflight = {
           status: 'complete',
           error_count: 0,
           warning_count: 1,
@@ -105,7 +99,7 @@ describe('<PreflightResults />', () => {
             1: [{ status: 'warn', message: 'This warning.' }],
           },
         };
-        const { getByText } = setup({ job });
+        const { getByText } = setup({ preflight });
 
         expect(
           getByText('Pre-install validation has expired; please run it again.'),
@@ -131,12 +125,13 @@ describe('<PreflightResults />', () => {
 
   describe('failed preflight', () => {
     test('displays error message', () => {
-      const job = {
+      const preflight = {
         status: 'failed',
         error_count: 0,
         warning_count: 0,
+        is_valid: true,
       };
-      const { getByText } = setup({ job });
+      const { getByText } = setup({ preflight });
 
       expect(
         getByText('Pre-install validation encountered errors.'),
@@ -146,61 +141,61 @@ describe('<PreflightResults />', () => {
 
   describe('canceled preflight', () => {
     test('displays error message', () => {
-      const job = {
+      const preflight = {
         status: 'canceled',
         error_count: 0,
         warning_count: 0,
+        is_valid: true,
       };
-      const { getByText } = setup({ job });
+      const { getByText } = setup({ preflight });
 
-      expect(getByText('Pre-install validation was canceled.')).toBeVisible();
+      expect(
+        getByText('Pre-install validation encountered errors.'),
+      ).toBeVisible();
     });
   });
 
   describe('completed successful preflight', () => {
     test('displays standard success message', () => {
-      const job = {
+      const preflight = {
         status: 'complete',
         error_count: 0,
         warning_count: 0,
         is_valid: true,
         results: {},
       };
-      const { getByText } = setup({ job });
+      const { getByText } = setup({ preflight });
 
       expect(
         getByText('Pre-install validation completed successfully.'),
       ).toBeVisible();
     });
-
-    test('displays custom success message', () => {
-      const job = {
-        status: 'complete',
-        error_count: 0,
-        warning_count: 0,
-        is_valid: true,
-        results: {},
-      };
-      const { getByText } = setup({ job, successMessage: 'Yay!' });
-
-      expect(getByText('Yay!')).toBeVisible();
-    });
   });
 
   describe('invalid preflight', () => {
     test('displays invalid message', () => {
-      const job = {
+      const preflight = {
         status: 'complete',
         error_count: 0,
         warning_count: 0,
         is_valid: false,
         results: {},
       };
-      const { getByText } = setup({ job });
+      const { getByText } = setup({ preflight });
 
       expect(
         getByText('Pre-install validation has expired; please run it again.'),
       ).toBeVisible();
+    });
+  });
+});
+
+describe('getErrorInfo', () => {
+  describe('no job or preflight', () => {
+    test('renders nothing', () => {
+      const result = getErrorInfo({});
+
+      expect(result).toEqual({ failed: false, message: null });
     });
   });
 });
