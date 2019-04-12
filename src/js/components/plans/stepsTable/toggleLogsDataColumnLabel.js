@@ -11,10 +11,10 @@ type Props = {
 const ToggleLogsDataColumnLabel = ({ hasJob }: Props) => {
   const [hideLogs, toggleLogs] = useState(true);
   return (
-    <div className="slds-col_padded">
+    <div className="plan-steps-heading-steps">
       {hasJob && (
         <Tooltip
-          align="top right"
+          align="top left"
           content={hideLogs ? 'Hide Logs' : 'Show Logs'}
           position="overflowBoundaryElement"
         >
@@ -29,7 +29,7 @@ const ToggleLogsDataColumnLabel = ({ hasJob }: Props) => {
           />
         </Tooltip>
       )}
-      <span className="slds-p-left_medium">Steps</span>
+      <span className="slds-p-left_x-small">Steps</span>
     </div>
   );
 };
