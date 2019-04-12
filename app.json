@@ -33,6 +33,9 @@
     "AWS_BUCKET_NAME": {
       "description": "The S3 bucket name to use for S3 storages."
     },
+    "CONNECTED_APP_CLIENT_ID": {
+      "description": "The client id (consumer key) for the connected app used to auth with Salesforce."
+    },
     "CONNECTED_APP_CLIENT_SECRET": {
       "description": "The client secret (consumer secret) for the connected app used to auth with Salesforce."
     },
