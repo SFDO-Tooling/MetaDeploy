@@ -184,5 +184,5 @@ export const requestCancelJob = (id: string): ThunkAction => (
 
 export const cancelJob = (payload: Job): JobCanceled => ({
   type: 'JOB_CANCELED',
-  payload,
+  payload: { ...payload, status: 'failed' },
 });

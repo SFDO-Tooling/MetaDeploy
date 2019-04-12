@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from 'react-testing-library';
 
-import JobResults from 'components/plans/jobResults';
+import PreflightResults from 'components/plans/preflightResults';
 
 const defaultJob = {
   status: 'complete',
@@ -27,7 +27,7 @@ const defaultJob = {
   },
 };
 
-describe('<JobResults />', () => {
+describe('<PreflightResults />', () => {
   const setup = options => {
     const defaults = {
       job: defaultJob,
@@ -36,7 +36,7 @@ describe('<JobResults />', () => {
     };
     const opts = { ...defaults, ...options };
     const { getByText, queryByText, container } = render(
-      <JobResults
+      <PreflightResults
         job={opts.job}
         label={opts.label}
         failMessage={opts.failMessage}

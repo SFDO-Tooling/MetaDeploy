@@ -6,8 +6,10 @@ import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Radio from '@salesforce/design-system-react/components/radio-group/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
+import { Trans } from 'react-i18next';
 import { t } from 'i18next';
 
+import { CONSTANTS } from 'store/plans/reducer';
 import { withTransientMessage } from 'components/utils';
 import type { Job as JobType } from 'store/jobs/reducer';
 import type { TransientMessageProps } from 'components/utils';
@@ -61,10 +63,44 @@ class ShareModal extends React.Component<WrappedProps> {
 
   render(): React.Node {
     const { job, transientMessageVisible } = this.props;
+    const hasError = job.error_count !== undefined && job.error_count > 0;
+    const isFailed = job.status === CONSTANTS.STATUS.FAILED;
+    const showError = hasError || isFailed;
+    let tagline = null;
+    if (showError) {
+      tagline = job.error_message ? (
+        <span
+          className="markdown"
+          dangerouslySetInnerHTML={{ __html: job.error_message }}
+        />
+      ) : (
+        <Trans i18nKey="shareOrGetHelp">
+          Share the link to this installation job below, or get help on the
+          relevant product page on the{' '}
+          <a
+            href="https://powerofus.force.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Power of Us Hub
+          </a>
+          .
+        </Trans>
+      );
+    }
     return (
       <Modal
         isOpen={this.props.isOpen}
-        title={t('Share Link to Installation Job')}
+        title={
+          showError ? (
+            <span className="slds-text-color_error">
+              {t('Resolve Installation Error')}
+            </span>
+          ) : (
+            t('Share Link to Installation Job')
+          )
+        }
+        tagline={tagline}
         onRequestClose={this.handleClose}
       >
         <div
