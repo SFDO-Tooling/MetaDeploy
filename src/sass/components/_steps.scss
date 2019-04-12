@@ -5,6 +5,20 @@
   // Borders are added by parent .slds-card
   border: none;
 
+  // set up layout
+  tr {
+    display: grid;
+    grid-template-columns: [step-row-start name-start] 1fr [name-end type-start] 15vw [type-end badge-start] 15vw [badge-end install-start]10vw [install-end step-row-end];
+
+    &:focus,
+    &:hover {
+      > td:not(.slds-is-selected),
+      > th:not(.slds-is-selected) {
+        box-shadow: none;
+      }
+    }
+  }
+
   .slds-accordion__section {
     padding: 0;
   }
@@ -37,7 +51,11 @@
   .plan-step-item {
     padding-bottom: $var-spacing-small;
     padding-top: $var-spacing-small;
-    vertical-align: text-top;
+  }
+
+  .plan-step-item-name {
+    grid-column: name-start / step-row-end;
+    grid-row: 1 / 3;
   }
 
   .plan-step-name {
@@ -46,6 +64,9 @@
   }
 
   .plan-step-type {
+    grid-column: type-start / type-end;
+    grid-row: 1 / 2;
+
     // aligns the type text with other cell text
     > div {
       align-items: baseline;
@@ -60,6 +81,9 @@
   }
 
   .plan-step-badge-container {
+    grid-column: badge-start / badge-end;
+    grid-row: 1 / 2;
+
     div {
       display: flex;
     }
@@ -69,8 +93,24 @@
     background-color: $color-background-highlight;
   }
 
+  td:nth-child(4n),
   .plan-step-icon-container {
-    padding-bottom: 0;
-    padding-top: 0;
+    grid-column: install-start / install-end;
+    grid-row: 1 / 2;
+    // less padding since slds `action icons` have a large container
+    padding-bottom: $var-spacing-x-small;
+    padding-top: $var-spacing-x-small;
+  }
+
+  .slds-is-open > .slds-accordion__content {
+    margin-left: -1.5rem;
+    // full width of the page minus padding ===
+    // full width of table so scroll goes edge to edge
+    max-width: calc(100vw - 4rem);
+    overflow: auto;
+  }
+
+  pre {
+    padding: 0 1.5rem;
   }
 }
