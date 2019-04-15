@@ -47,13 +47,26 @@ const selectProductCategories: AppState => Array<string> = createSelector(
   ],
 );
 
-const selectProduct = (
+const selectProductSlug = (
   appState: AppState,
   { match: { params } }: InitialProps,
-): ProductType | null => {
-  const product = appState.products.find(p => p.slug === params.productSlug);
-  return product || null;
-};
+): ?string => params.productSlug;
+
+const selectProduct: (
+  AppState,
+  InitialProps,
+) => ProductType | null = createSelector(
+  [selectProductsState, selectProductSlug],
+  (products: ProductsType, productSlug: ?string): ProductType | null => {
+    if (!productSlug) {
+      return null;
+    }
+    const product = products.find(
+      p => p.slug === productSlug || p.old_slugs.includes(productSlug),
+    );
+    return product || null;
+  },
+);
 
 const selectVersionLabel = (
   appState: AppState,
@@ -123,6 +136,7 @@ export {
   selectProductsState,
   selectProductsByCategory,
   selectProductCategories,
+  selectProductSlug,
   selectProduct,
   selectVersionLabel,
   selectVersion,

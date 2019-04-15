@@ -11,6 +11,7 @@ import routes from 'utils/routes';
 import { fetchVersion } from 'store/products/actions';
 import {
   selectProduct,
+  selectProductSlug,
   selectVersion,
   selectVersionLabelOrPlanSlug,
 } from 'store/products/selectors';
@@ -31,17 +32,22 @@ import type {
 import type { User as UserType } from 'store/user/reducer';
 import type { VersionPlanType } from 'store/products/selectors';
 
-type ProductDetailProps = { product: ProductType | null };
+type ProductDetailProps = { product: ProductType | null, productSlug: ?string };
 type VersionDetailProps = {
   user: UserType,
   product: ProductType | null,
+  productSlug: ?string,
   version: VersionType | null,
   versionLabelAndPlanSlug: VersionPlanType,
   doFetchVersion: typeof fetchVersion,
 };
 
-const ProductDetail = ({ product }: ProductDetailProps) => {
-  const loadingOrNotFound = getLoadingOrNotFound({ product });
+const ProductDetail = ({ product, productSlug }: ProductDetailProps) => {
+  const loadingOrNotFound = getLoadingOrNotFound({
+    product,
+    productSlug,
+    route: 'product_detail',
+  });
   if (loadingOrNotFound !== false) {
     return loadingOrNotFound;
   }
@@ -109,13 +115,21 @@ class VersionDetail extends React.Component<VersionDetailProps> {
   }
 
   render(): React.Node {
-    const { user, product, version, versionLabelAndPlanSlug } = this.props;
+    const {
+      user,
+      product,
+      productSlug,
+      version,
+      versionLabelAndPlanSlug,
+    } = this.props;
     const { label, slug } = versionLabelAndPlanSlug;
     const loadingOrNotFound = getLoadingOrNotFound({
       product,
+      productSlug,
       version,
       versionLabel: label,
       planSlug: slug,
+      route: 'version_detail',
     });
     if (loadingOrNotFound !== false) {
       return loadingOrNotFound;
@@ -244,11 +258,13 @@ class VersionDetail extends React.Component<VersionDetailProps> {
 
 const selectProductDetail = (appState: AppState, props: InitialProps) => ({
   product: selectProduct(appState, props),
+  productSlug: selectProductSlug(appState, props),
 });
 
 const selectVersionDetail = (appState: AppState, props: InitialProps) => ({
   user: selectUserState(appState),
   product: selectProduct(appState, props),
+  productSlug: selectProductSlug(appState, props),
   version: selectVersion(appState, props),
   versionLabelAndPlanSlug: selectVersionLabelOrPlanSlug(appState, props),
 });
