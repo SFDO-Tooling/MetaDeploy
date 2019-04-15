@@ -54,6 +54,7 @@ class TestJobViewset:
             "is_public": False,
             "user_can_edit": False,
             "message": "",
+            "error_message": "",
             "edited_at": format_timestamp(job.edited_at),
         }
 
@@ -80,6 +81,7 @@ class TestJobViewset:
             "is_public": False,
             "user_can_edit": True,
             "message": "",
+            "error_message": "",
             "edited_at": format_timestamp(job.edited_at),
         }
 
@@ -106,6 +108,7 @@ class TestJobViewset:
             "is_public": True,
             "user_can_edit": False,
             "message": "",
+            "error_message": "",
             "edited_at": format_timestamp(job.edited_at),
         }
 
@@ -133,6 +136,7 @@ class TestJobViewset:
             "is_public": True,
             "user_can_edit": False,
             "message": "",
+            "error_message": "",
             "edited_at": format_timestamp(job.edited_at),
         }
 
