@@ -1,11 +1,12 @@
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { StaticRouter } from 'react-router-dom';
 import { fireEvent } from 'react-testing-library';
 
 import { renderWithRedux, storeWithApi } from './../../utils';
 
-import { fetchVersion } from 'store/products/actions';
+import routes from 'utils/routes';
 import { fetchPreflight } from 'store/plans/actions';
+import { fetchVersion } from 'store/products/actions';
 import PlanDetail from 'components/plans/detail';
 
 jest.mock('store/products/actions');
@@ -24,6 +25,7 @@ const defaultState = {
     {
       id: 'p1',
       slug: 'product-1',
+      old_slugs: ['old-product'],
       title: 'Product 1',
       description: 'This is a test product.',
       category: 'salesforce',
@@ -36,6 +38,7 @@ const defaultState = {
         primary_plan: {
           id: 'plan-1',
           slug: 'my-plan',
+          old_slugs: ['old-plan'],
           title: 'My Plan',
           preflight_message: 'Preflight text…',
           steps: [
@@ -69,6 +72,7 @@ const defaultState = {
         secondary_plan: {
           id: 'plan-2',
           slug: 'other-plan',
+          old_slugs: [],
           title: 'My Other Plan',
           preflight_message: '',
           steps: [{ id: 'step-5', name: 'My Other Step' }],
@@ -78,6 +82,7 @@ const defaultState = {
           {
             id: 'plan-3',
             slug: 'third-plan',
+            old_slugs: [],
             title: 'My Third Plan',
             preflight_message: 'Third preflight text…',
             steps: [],
@@ -86,6 +91,7 @@ const defaultState = {
           {
             id: 'plan-4',
             slug: 'fourth-plan',
+            old_slugs: [],
             title: 'My Restricted Plan',
             preflight_message: null,
             steps: null,
@@ -125,6 +131,7 @@ describe('<PlanDetail />', () => {
     };
     const opts = { ...defaults, ...options };
     const { productSlug, versionLabel, planSlug, rerenderFn } = opts;
+    const context = {};
     const {
       getByText,
       queryByText,
@@ -132,16 +139,23 @@ describe('<PlanDetail />', () => {
       container,
       rerender,
     } = renderWithRedux(
-      <MemoryRouter>
+      <StaticRouter context={context}>
         <PlanDetail
           match={{ params: { productSlug, versionLabel, planSlug } }}
         />
-      </MemoryRouter>,
+      </StaticRouter>,
       opts.initialState,
       storeWithApi,
       rerenderFn,
     );
-    return { getByText, queryByText, getByAltText, container, rerender };
+    return {
+      getByText,
+      queryByText,
+      getByAltText,
+      container,
+      rerender,
+      context,
+    };
   };
 
   describe('insufficient permissions for user', () => {
@@ -200,6 +214,17 @@ describe('<PlanDetail />', () => {
       const { getByText } = setup({ initialState: { products: [] } });
 
       expect(getByText('list of all products')).toBeVisible();
+    });
+  });
+
+  describe('product has old_slug', () => {
+    test('redirects to plan_detail with new slug', () => {
+      const { context } = setup({ productSlug: 'old-product' });
+
+      expect(context.action).toEqual('REPLACE');
+      expect(context.url).toEqual(
+        routes.plan_detail('product-1', '1.0.0', 'my-plan'),
+      );
     });
   });
 
@@ -306,6 +331,31 @@ describe('<PlanDetail />', () => {
       });
 
       expect(getByText('another plan')).toBeVisible();
+    });
+  });
+
+  describe('plan has old_slug', () => {
+    test('redirects to plan_detail with new slug', () => {
+      const { context } = setup({ planSlug: 'old-plan' });
+
+      expect(context.action).toEqual('REPLACE');
+      expect(context.url).toEqual(
+        routes.plan_detail('product-1', '1.0.0', 'my-plan'),
+      );
+    });
+  });
+
+  describe('product and plan have old_slugs', () => {
+    test('redirects to plan_detail with new slug', () => {
+      const { context } = setup({
+        productSlug: 'old-product',
+        planSlug: 'old-plan',
+      });
+
+      expect(context.action).toEqual('REPLACE');
+      expect(context.url).toEqual(
+        routes.plan_detail('product-1', '1.0.0', 'my-plan'),
+      );
     });
   });
 

@@ -11,9 +11,10 @@ import { CONSTANTS } from 'store/plans/reducer';
 import { fetchJob, requestCancelJob, updateJob } from 'store/jobs/actions';
 import { fetchVersion } from 'store/products/actions';
 import { selectJob, selectJobId } from 'store/jobs/selectors';
-import { selectPlan } from 'store/plans/selectors';
+import { selectPlan, selectPlanSlug } from 'store/plans/selectors';
 import {
   selectProduct,
+  selectProductSlug,
   selectVersion,
   selectVersionLabel,
 } from 'store/products/selectors';
@@ -47,9 +48,11 @@ type Props = {
   ...InitialProps,
   user: UserType,
   product: ProductType | null,
+  productSlug: ?string,
   version: VersionType | null,
   versionLabel: ?string,
   plan: PlanType | null,
+  planSlug: ?string,
   job: ?JobType,
   jobId: ?string,
   doFetchVersion: typeof fetchVersion,
@@ -185,21 +188,26 @@ class JobDetail extends React.Component<Props, State> {
     const {
       user,
       product,
+      productSlug,
       version,
       versionLabel,
       plan,
+      planSlug,
       job,
       jobId,
       doUpdateJob,
     } = this.props;
     const loadingOrNotFound = getLoadingOrNotFound({
       product,
+      productSlug,
       version,
       versionLabel,
       plan,
+      planSlug,
       job,
       jobId,
       isLoggedIn: user !== null,
+      route: 'job_detail',
     });
     if (loadingOrNotFound !== false) {
       return loadingOrNotFound;
@@ -284,9 +292,11 @@ class JobDetail extends React.Component<Props, State> {
 const select = (appState: AppState, props: InitialProps) => ({
   user: selectUserState(appState),
   product: selectProduct(appState, props),
+  productSlug: selectProductSlug(appState, props),
   version: selectVersion(appState, props),
   versionLabel: selectVersionLabel(appState, props),
   plan: selectPlan(appState, props),
+  planSlug: selectPlanSlug(appState, props),
   job: selectJob(appState, props),
   jobId: selectJobId(appState, props),
 });

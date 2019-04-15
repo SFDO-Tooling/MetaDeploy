@@ -114,6 +114,7 @@ export const shouldFetchVersion = ({
 
 export const getLoadingOrNotFound = ({
   product,
+  productSlug,
   version,
   versionLabel,
   plan,
@@ -121,8 +122,10 @@ export const getLoadingOrNotFound = ({
   job,
   jobId,
   isLoggedIn,
+  route,
 }: {
   product: ProductType | null,
+  productSlug: ?string,
   version?: VersionType | null,
   versionLabel?: ?string,
   plan?: PlanType | null,
@@ -130,12 +133,13 @@ export const getLoadingOrNotFound = ({
   job?: JobType | null,
   jobId?: ?string,
   isLoggedIn?: boolean,
+  route: string,
 }): React.Node | false => {
   if (product === null) {
     return <ProductNotFound />;
   }
   // If we have a plan slug but no plan, redirect to that plan detail page
-  if (planSlug && versionLabel && !plan) {
+  if (planSlug && versionLabel && plan === undefined) {
     return (
       <Redirect to={routes.plan_detail(product.slug, versionLabel, planSlug)} />
     );
@@ -170,6 +174,23 @@ export const getLoadingOrNotFound = ({
     }
     // Fetching job from API
     return <Spinner />;
+  }
+  // Redirect to most recent product/plan slug
+  if (
+    route &&
+    ((productSlug && productSlug !== product.slug) ||
+      (plan && planSlug && planSlug !== plan.slug))
+  ) {
+    return (
+      <Redirect
+        to={routes[route](
+          product.slug,
+          (version && version.label) || versionLabel,
+          (plan && plan.slug) || planSlug,
+          (job && job.id) || jobId,
+        )}
+      />
+    );
   }
   return false;
 };
