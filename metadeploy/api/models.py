@@ -12,7 +12,7 @@ from cumulusci.core.utils import import_class
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
-from django.contrib.postgres.fields import JSONField
+from django.contrib.postgres.fields import ArrayField, JSONField
 from django.contrib.sites.models import Site
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import RegexValidator
@@ -54,8 +54,21 @@ class HashIdMixin(models.Model):
 
 
 class AllowedList(models.Model):
+    ORG_TYPES = (
+        ("Production", "Production"),
+        ("Scratch", "Scratch"),
+        ("Sandbox", "Sandbox"),
+        ("Developer", "Developer"),
+    )
+
     title = models.CharField(max_length=128, unique=True)
     description = MarkdownField(blank=True, property_suffix="_markdown")
+    org_type = ArrayField(
+        models.CharField(max_length=64, choices=ORG_TYPES, blank=True),
+        size=4,
+        default=list,
+        help_text="All orgs of these types will be automatically allowed.",
+    )
 
     def __str__(self):
         return self.title
@@ -93,6 +106,7 @@ class AllowedListAccessMixin(models.Model):
             user.is_authenticated
             and (
                 user.is_superuser
+                or user.full_org_type in self.visible_to.org_type
                 or self.visible_to.orgs.filter(org_id=user.org_id).exists()
             )
         )
@@ -136,6 +150,22 @@ class User(HashIdMixin, AbstractUser):
     @property
     def org_type(self):
         return self._get_org_property("OrganizationType")
+
+    @property
+    def full_org_type(self):
+        org_type = self._get_org_property("OrganizationType")
+        is_sandbox = self._get_org_property("IsSandbox")
+        has_expiration = self._get_org_property("TrialExpirationDate") is not None
+        if org_type is None or is_sandbox is None:
+            return None
+        if org_type == "Developer Edition" and not is_sandbox:
+            return "Developer"
+        if org_type != "Developer Edition" and not is_sandbox:
+            return "Production"
+        if is_sandbox and not has_expiration:
+            return "Sandbox"
+        if is_sandbox and has_expiration:
+            return "Scratch"
 
     @property
     def instance_url(self):
