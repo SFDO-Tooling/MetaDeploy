@@ -8,6 +8,7 @@ import { getLoadingOrNotFound, shouldFetchVersion } from 'components/utils';
 const defaultProduct = {
   id: 'p1',
   slug: 'product-1',
+  old_slugs: ['old-product'],
   title: 'Product 1',
   description: 'This is a test product.',
   category: 'salesforce',
@@ -20,6 +21,7 @@ const defaultProduct = {
     primary_plan: {
       id: 'plan-1',
       slug: 'my-plan',
+      old_slugs: ['old-plan'],
       title: 'My Plan',
     },
     secondary_plan: null,
@@ -182,6 +184,55 @@ describe('getLoadingOrNotFound', () => {
 
         expect(getByText('Loading...')).toBeVisible();
       });
+    });
+  });
+
+  describe('product has old_slug', () => {
+    test('redirects to product_detail with new slug', () => {
+      const { context } = setup({
+        product: defaultProduct,
+        productSlug: 'old-product',
+        route: 'product_detail',
+      });
+
+      expect(context.action).toEqual('REPLACE');
+      expect(context.url).toEqual(routes.product_detail('product-1'));
+    });
+  });
+
+  describe('plan has old_slug', () => {
+    test('redirects to route with new slug', () => {
+      const { context } = setup({
+        product: defaultProduct,
+        productSlug: 'product-1',
+        version: defaultProduct.most_recent_version,
+        plan: defaultProduct.most_recent_version.primary_plan,
+        planSlug: 'old-plan',
+        route: 'plan_detail',
+      });
+
+      expect(context.action).toEqual('REPLACE');
+      expect(context.url).toEqual(
+        routes.plan_detail('product-1', '1.0.0', 'my-plan'),
+      );
+    });
+  });
+
+  describe('product and plan have old_slugs', () => {
+    test('redirects to route with new slugs', () => {
+      const { context } = setup({
+        product: defaultProduct,
+        productSlug: 'old-product',
+        version: defaultProduct.most_recent_version,
+        plan: defaultProduct.most_recent_version.primary_plan,
+        planSlug: 'old-plan',
+        route: 'plan_detail',
+      });
+
+      expect(context.action).toEqual('REPLACE');
+      expect(context.url).toEqual(
+        routes.plan_detail('product-1', '1.0.0', 'my-plan'),
+      );
     });
   });
 });
