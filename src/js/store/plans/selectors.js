@@ -15,7 +15,7 @@ import type {
   Version as VersionType,
 } from 'store/products/reducer';
 
-const selectPlanSlug = (
+export const selectPlanSlug = (
   appState: AppState,
   { match: { params } }: InitialProps,
 ): ?string => params.planSlug;
@@ -33,13 +33,24 @@ export const selectPlan: (
     if (!product || !version || !planSlug) {
       return null;
     }
-    if (version.primary_plan && version.primary_plan.slug === planSlug) {
-      return version.primary_plan;
+    const { primary_plan, secondary_plan, additional_plans } = version;
+    if (
+      primary_plan &&
+      (primary_plan.slug === planSlug ||
+        primary_plan.old_slugs.includes(planSlug))
+    ) {
+      return primary_plan;
     }
-    if (version.secondary_plan && version.secondary_plan.slug === planSlug) {
-      return version.secondary_plan;
+    if (
+      secondary_plan &&
+      (secondary_plan.slug === planSlug ||
+        secondary_plan.old_slugs.includes(planSlug))
+    ) {
+      return secondary_plan;
     }
-    const plan = version.additional_plans.find(p => p.slug === planSlug);
+    const plan = additional_plans.find(
+      p => p.slug === planSlug || p.old_slugs.includes(planSlug),
+    );
     return plan || null;
   },
 );

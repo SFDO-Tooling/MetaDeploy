@@ -227,6 +227,11 @@ class SlugMixin:
         return None
 
     @property
+    def old_slugs(self):
+        slugs = self.slug_queryset.filter(is_active=True)[1:]
+        return [slug.slug for slug in slugs]
+
+    @property
     def slug_parent(self):
         return self
 

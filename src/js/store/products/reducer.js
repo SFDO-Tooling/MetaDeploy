@@ -17,6 +17,7 @@ export type Version = {
 export type Product = {
   +id: string,
   +slug: string,
+  +old_slugs: string[],
   +title: string,
   +description: string | null,
   +short_description: string,
