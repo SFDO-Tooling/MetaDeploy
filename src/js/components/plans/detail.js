@@ -12,9 +12,14 @@ import { CONSTANTS } from 'store/plans/reducer';
 import { fetchPreflight, startPreflight } from 'store/plans/actions';
 import { fetchVersion } from 'store/products/actions';
 import { selectOrg } from 'store/org/selectors';
-import { selectPlan, selectPreflight } from 'store/plans/selectors';
+import {
+  selectPlan,
+  selectPlanSlug,
+  selectPreflight,
+} from 'store/plans/selectors';
 import {
   selectProduct,
+  selectProductSlug,
   selectVersion,
   selectVersionLabel,
 } from 'store/products/selectors';
@@ -53,9 +58,11 @@ type Props = {
   ...InitialProps,
   user: UserType,
   product: ProductType | null,
+  productSlug: ?string,
   version: VersionType | null,
   versionLabel: ?string,
   plan: PlanType | null,
+  planSlug: ?string,
   preflight: ?PreflightType,
   org: OrgType,
   doFetchVersion: typeof fetchVersion,
@@ -276,16 +283,21 @@ class PlanDetail extends React.Component<Props, State> {
     const {
       user,
       product,
+      productSlug,
       version,
       versionLabel,
       plan,
+      planSlug,
       preflight,
     } = this.props;
     const loadingOrNotFound = getLoadingOrNotFound({
       product,
+      productSlug,
       version,
       versionLabel,
       plan,
+      planSlug,
+      route: 'plan_detail',
     });
     if (loadingOrNotFound !== false) {
       return loadingOrNotFound;
@@ -399,9 +411,11 @@ class PlanDetail extends React.Component<Props, State> {
 const select = (appState: AppState, props: InitialProps) => ({
   user: selectUserState(appState),
   product: selectProduct(appState, props),
+  productSlug: selectProductSlug(appState, props),
   version: selectVersion(appState, props),
   versionLabel: selectVersionLabel(appState, props),
   plan: selectPlan(appState, props),
+  planSlug: selectPlanSlug(appState, props),
   preflight: selectPreflight(appState, props),
   org: selectOrg(appState),
 });

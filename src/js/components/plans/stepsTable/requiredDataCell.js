@@ -38,7 +38,11 @@ const RequiredDataCell = (props: DataCellProps): React.Node => {
     text = t('Required');
   }
   return (
-    <DataTableCell title={text} {...props}>
+    <DataTableCell
+      title={text}
+      {...props}
+      className="plan-step-item plan-step-badge-container"
+    >
       <span className={classes}>{text}</span>
     </DataTableCell>
   );

@@ -81,6 +81,70 @@ class TestUser:
         user.socialaccount_set.first().socialtoken_set.all().delete()
         assert user.valid_token_for is None
 
+    def test_full_org_type(self, user_factory, social_account_factory):
+        user = user_factory(socialaccount_set=[])
+        social_account_factory(
+            user=user,
+            extra_data={
+                "instance_url": "https://example.com",
+                "organization_details": {
+                    "Name": "Sample Org",
+                    "OrganizationType": "Developer Edition",
+                    "IsSandbox": False,
+                    "TrialExpirationDate": None,
+                },
+            },
+        )
+        assert user.full_org_type == "Developer"
+
+        user = user_factory(socialaccount_set=[])
+        social_account_factory(
+            user=user,
+            extra_data={
+                "instance_url": "https://example.com",
+                "organization_details": {
+                    "Name": "Sample Org",
+                    "OrganizationType": "Production",
+                    "IsSandbox": False,
+                    "TrialExpirationDate": None,
+                },
+            },
+        )
+        assert user.full_org_type == "Production"
+
+        user = user_factory(socialaccount_set=[])
+        social_account_factory(
+            user=user,
+            extra_data={
+                "instance_url": "https://example.com",
+                "organization_details": {
+                    "Name": "Sample Org",
+                    "OrganizationType": "Something",
+                    "IsSandbox": True,
+                    "TrialExpirationDate": None,
+                },
+            },
+        )
+        assert user.full_org_type == "Sandbox"
+
+        user = user_factory(socialaccount_set=[])
+        social_account_factory(
+            user=user,
+            extra_data={
+                "instance_url": "https://example.com",
+                "organization_details": {
+                    "Name": "Sample Org",
+                    "OrganizationType": "Something",
+                    "IsSandbox": True,
+                    "TrialExpirationDate": "Some date",
+                },
+            },
+        )
+        assert user.full_org_type == "Scratch"
+
+        user = user_factory(socialaccount_set=[])
+        assert user.full_org_type is None
+
 
 @pytest.mark.django_db
 class TestUserExpiredTokens:

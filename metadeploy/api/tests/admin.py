@@ -2,12 +2,27 @@ import pytest
 from django.contrib.admin.sites import AdminSite
 from django.test import RequestFactory
 
-from ..admin import AllowedListOrgAdmin, PlanAdmin, PlanMixin
+from ..admin import (
+    AllowedListOrgAdmin,
+    ArrayFieldCheckboxSelectMultiple,
+    PlanAdmin,
+    PlanMixin,
+)
 from ..models import AllowedListOrg, Plan
 
 
 class Dummy:
     pass
+
+
+class TestArrayFieldCheckboxSelectMultiple:
+    def test_format_value(self, mocker):
+        csm = mocker.patch("metadeploy.api.admin.CheckboxSelectMultiple")
+        csm.format_value = lambda x: x
+        assert ArrayFieldCheckboxSelectMultiple().format_value("some,test") == [
+            "some",
+            "test",
+        ]
 
 
 class TestPlanMixin:

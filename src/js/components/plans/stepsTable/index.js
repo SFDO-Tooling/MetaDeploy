@@ -20,6 +20,7 @@ import type {
 } from 'store/plans/reducer';
 import type { SelectedSteps as SelectedStepsType } from 'components/plans/detail';
 import type { User as UserType } from 'store/user/reducer';
+import ToggleLogsDataColumnLabel from 'components/plans/stepsTable/toggleLogsDataColumnLabel';
 
 export type DataCellProps = {
   [string]: mixed,
@@ -60,6 +61,7 @@ const StepsTable = ({
   }
   const hasValidToken = user && user.valid_token_for !== null;
   const hasReadyPreflight = preflight && preflight.is_ready;
+  const hasJob = Boolean(job);
   return (
     <div
       className="slds-p-around_medium
@@ -69,7 +71,7 @@ const StepsTable = ({
         <DataTable items={plan.steps} id="plan-steps-table">
           <DataTableColumn
             key="name"
-            label={t('Steps')}
+            label={<ToggleLogsDataColumnLabel hasJob={hasJob} />}
             property="name"
             primaryColumn
           >

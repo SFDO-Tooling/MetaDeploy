@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.contrib.postgres.fields import ArrayField
+from django.forms.widgets import CheckboxSelectMultiple
 from parler.admin import TranslatableAdmin
 
 from .models import (
@@ -18,6 +20,13 @@ from .models import (
     User,
     Version,
 )
+
+
+class ArrayFieldCheckboxSelectMultiple(CheckboxSelectMultiple):
+    def format_value(self, value):
+        if isinstance(value, str):
+            value = value.split(",")
+        return super().format_value(value)
 
 
 class PlanMixin:
@@ -41,6 +50,11 @@ class PlanMixin:
 @admin.register(AllowedList)
 class AllowedListAdmin(admin.ModelAdmin):
     list_display = ("title", "description")
+    formfield_overrides = {
+        ArrayField: {
+            "widget": ArrayFieldCheckboxSelectMultiple(choices=AllowedList.ORG_TYPES)
+        }
+    }
 
 
 @admin.register(AllowedListOrg)

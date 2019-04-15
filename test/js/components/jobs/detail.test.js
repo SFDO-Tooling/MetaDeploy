@@ -1,9 +1,10 @@
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { StaticRouter } from 'react-router-dom';
 import { fireEvent } from 'react-testing-library';
 
 import { renderWithRedux, storeWithApi } from './../../utils';
 
+import routes from 'utils/routes';
 import { fetchJob, requestCancelJob } from 'store/jobs/actions';
 import { fetchVersion } from 'store/products/actions';
 import JobDetail from 'components/jobs/detail';
@@ -25,6 +26,7 @@ const defaultState = {
     {
       id: 'p1',
       slug: 'product-1',
+      old_slugs: ['old-product'],
       title: 'Product 1',
       category: 'salesforce',
       image: null,
@@ -35,6 +37,7 @@ const defaultState = {
         primary_plan: {
           id: 'plan-1',
           slug: 'my-plan',
+          old_slugs: ['old-plan'],
           title: 'My Plan',
           steps: [
             {
@@ -98,6 +101,7 @@ describe('<JobDetail />', () => {
     };
     const opts = { ...defaults, ...options };
     const { productSlug, versionLabel, planSlug, jobId, rerenderFn } = opts;
+    const context = {};
     const {
       getByText,
       queryByText,
@@ -105,16 +109,23 @@ describe('<JobDetail />', () => {
       container,
       rerender,
     } = renderWithRedux(
-      <MemoryRouter>
+      <StaticRouter context={context}>
         <JobDetail
           match={{ params: { productSlug, versionLabel, planSlug, jobId } }}
         />
-      </MemoryRouter>,
+      </StaticRouter>,
       opts.initialState,
       storeWithApi,
       rerenderFn,
     );
-    return { getByText, queryByText, getByAltText, container, rerender };
+    return {
+      getByText,
+      queryByText,
+      getByAltText,
+      container,
+      rerender,
+      context,
+    };
   };
 
   describe('unknown version', () => {
@@ -189,6 +200,42 @@ describe('<JobDetail />', () => {
 
       expect(getByText('starting a new installation')).toBeVisible();
       expect(getByText('Log In')).toBeVisible();
+    });
+  });
+
+  describe('product has old_slug', () => {
+    test('redirects to job_detail with new slug', () => {
+      const { context } = setup({ productSlug: 'old-product' });
+
+      expect(context.action).toEqual('REPLACE');
+      expect(context.url).toEqual(
+        routes.job_detail('product-1', '1.0.0', 'my-plan', 'job-1'),
+      );
+    });
+  });
+
+  describe('plan has old_slug', () => {
+    test('redirects to job_detail with new slug', () => {
+      const { context } = setup({ planSlug: 'old-plan' });
+
+      expect(context.action).toEqual('REPLACE');
+      expect(context.url).toEqual(
+        routes.job_detail('product-1', '1.0.0', 'my-plan', 'job-1'),
+      );
+    });
+  });
+
+  describe('product and plan have old_slugs', () => {
+    test('redirects to job_detail with new slug', () => {
+      const { context } = setup({
+        productSlug: 'old-product',
+        planSlug: 'old-plan',
+      });
+
+      expect(context.action).toEqual('REPLACE');
+      expect(context.url).toEqual(
+        routes.job_detail('product-1', '1.0.0', 'my-plan', 'job-1'),
+      );
     });
   });
 

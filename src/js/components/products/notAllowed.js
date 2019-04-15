@@ -24,7 +24,7 @@ const NotAllowed = ({
       size="large"
     />
     {message ? (
-      <div className="slds-align_absolute-center">
+      <div className="slds-align_absolute-center slds-size_2-of-3">
         <div
           className="slds-text-longform
             slds-text-body_regular

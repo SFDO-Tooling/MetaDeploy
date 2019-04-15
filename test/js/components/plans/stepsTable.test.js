@@ -6,6 +6,7 @@ import StepsTable from 'components/plans/stepsTable';
 const defaultPlan = {
   id: 'plan-1',
   slug: 'my-plan',
+  old_slugs: [],
   title: 'My Plan',
   steps: [
     {

@@ -4,8 +4,8 @@ import { StaticRouter } from 'react-router-dom';
 import { renderWithRedux } from './../../utils';
 
 import routes from 'utils/routes';
-import { ProductDetail, VersionDetail } from 'components/products/detail';
 import { fetchVersion } from 'store/products/actions';
+import { ProductDetail, VersionDetail } from 'components/products/detail';
 
 jest.mock('store/products/actions');
 
@@ -20,6 +20,7 @@ const defaultState = {
     {
       id: 'p1',
       slug: 'product-1',
+      old_slugs: ['old-slug'],
       title: 'Product 1',
       description: 'This is a test product.',
       category: 'salesforce',
@@ -32,6 +33,7 @@ const defaultState = {
         primary_plan: {
           id: 'plan-1',
           slug: 'my-plan',
+          old_slugs: [],
           title: 'My Plan',
           is_listed: true,
           is_allowed: true,
@@ -39,6 +41,7 @@ const defaultState = {
         secondary_plan: {
           id: 'plan-2',
           slug: 'my-secondary-plan',
+          old_slugs: [],
           title: 'My Secondary Plan',
           is_listed: true,
           is_allowed: true,
@@ -47,6 +50,7 @@ const defaultState = {
           {
             id: 'plan-3',
             slug: 'my-additional-plan',
+            old_slugs: [],
             title: 'My Additional Plan',
             is_listed: true,
             is_allowed: true,
@@ -80,6 +84,15 @@ describe('<ProductDetail />', () => {
     expect(context.url).toEqual(routes.version_detail('product-1', '1.0.0'));
   });
 
+  describe('product has old_slug', () => {
+    test('redirects to product_detail with new slug', () => {
+      const { context } = setup(defaultState, 'old-slug');
+
+      expect(context.action).toEqual('REPLACE');
+      expect(context.url).toEqual(routes.product_detail('product-1'));
+    });
+  });
+
   describe('no most_recent_version', () => {
     test('renders <VersionNotFound />', () => {
       const { getByText } = setup({
@@ -93,6 +106,14 @@ describe('<ProductDetail />', () => {
   describe('no product', () => {
     test('renders <ProductNotFound />', () => {
       const { getByText } = setup({ products: [] });
+
+      expect(getByText('list of all products')).toBeVisible();
+    });
+  });
+
+  describe('no productSlug', () => {
+    test('renders <ProductNotFound />', () => {
+      const { getByText } = setup(defaultState, '');
 
       expect(getByText('list of all products')).toBeVisible();
     });
@@ -132,6 +153,15 @@ describe('<VersionDetail />', () => {
       const { getByText } = setup({ initialState: { products: [] } });
 
       expect(getByText('list of all products')).toBeVisible();
+    });
+  });
+
+  describe('product has old_slug', () => {
+    test('redirects to version_detail with new slug', () => {
+      const { context } = setup({ productSlug: 'old-slug' });
+
+      expect(context.action).toEqual('REPLACE');
+      expect(context.url).toEqual(routes.version_detail('product-1', '1.0.0'));
     });
   });
 
@@ -230,6 +260,7 @@ describe('<VersionDetail />', () => {
       const product = {
         id: 'p1',
         slug: 'product-1',
+        old_slugs: [],
         title: 'Product 1',
         description: 'This is a test product.',
         category: 'salesforce',
@@ -241,6 +272,7 @@ describe('<VersionDetail />', () => {
           primary_plan: {
             id: 'plan-1',
             slug: 'my-plan',
+            old_slugs: [],
             title: 'My Plan',
             is_listed: true,
             is_allowed: true,
@@ -267,6 +299,7 @@ describe('<VersionDetail />', () => {
       const product = {
         id: 'p1',
         slug: 'product-1',
+        old_slugs: [],
         title: 'Product 1',
         description: 'This is a test product.',
         category: 'salesforce',
@@ -281,6 +314,7 @@ describe('<VersionDetail />', () => {
             {
               id: 'plan-1',
               slug: 'my-plan',
+              old_slugs: [],
               title: 'My Plan',
               is_listed: true,
               is_allowed: true,
@@ -311,6 +345,7 @@ describe('<VersionDetail />', () => {
       primary_plan: {
         id: 'plan-4',
         slug: 'my-plan-4',
+        old_slugs: [],
         title: 'My Plan 4',
         is_listed: true,
         is_allowed: true,

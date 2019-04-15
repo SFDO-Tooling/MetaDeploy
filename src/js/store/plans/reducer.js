@@ -15,6 +15,7 @@ export type Step = {|
 export type Plan = {
   +id: string,
   +slug: string,
+  +old_slugs: string[],
   +title: string,
   +preflight_message: string | null,
   +steps: Array<Step> | null,
