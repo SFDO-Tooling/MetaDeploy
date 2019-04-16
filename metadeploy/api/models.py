@@ -482,7 +482,11 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
 
     plan_template = models.ForeignKey(PlanTemplate, on_delete=models.PROTECT)
     version = models.ForeignKey(Version, on_delete=models.PROTECT)
-    preflight_flow_name = models.CharField(max_length=256, blank=True)
+    preflight_flow_name = models.CharField(
+        max_length=256,
+        blank=True,
+        help_text="If this is blank, the Plan requires no preflight.",
+    )
     tier = models.CharField(choices=Tier, default=Tier.primary, max_length=64)
     is_listed = models.BooleanField(default=True)
 

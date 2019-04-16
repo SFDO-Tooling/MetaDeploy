@@ -331,8 +331,8 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         return None
 
     @staticmethod
-    def _has_valid_preflight(most_recent_preflight):
-        if not most_recent_preflight:
+    def _has_valid_preflight(most_recent_preflight, plan):
+        if plan.preflight_flow_name and not most_recent_preflight:
             return False
 
         return not most_recent_preflight.has_any_errors()
@@ -378,7 +378,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             user=user, plan=plan
         )
         no_valid_preflight = not self.instance and not self._has_valid_preflight(
-            most_recent_preflight
+            most_recent_preflight, plan=plan
         )
         if no_valid_preflight:
             raise serializers.ValidationError(_("No valid preflight."))
