@@ -71,16 +71,18 @@ const JobCell = (props: DataCellProps): React.Node => {
   } else if (complete) {
     title = t('completed');
     contents = (
-      <Icon
-        category="action"
-        name="approval"
-        assistiveText={{
-          label: title,
-        }}
-        size="xx-small"
-        containerClassName="slds-icon-standard-approval
-          slds-m-left_xxx-small"
-      />
+      <div className="is-completed">
+        <Icon
+          category="action"
+          name="approval"
+          assistiveText={{
+            label: title,
+          }}
+          size="xx-small"
+          containerClassName="slds-icon-standard-approval
+            slds-m-left_xxx-small"
+        />
+      </div>
     );
   } else if (error) {
     title = t('error');
@@ -143,7 +145,7 @@ const JobCell = (props: DataCellProps): React.Node => {
     <DataTableCell
       title={title}
       {...props}
-      className="plan-step-item plan-step-icon-container"
+      className="plan-step-item plan-step-options"
     >
       {contents}
     </DataTableCell>
@@ -208,7 +210,6 @@ class PreflightCell extends React.Component<DataCellProps> {
         <Checkbox
           id={`step-${id}`}
           checked={selectedSteps && selectedSteps.has(id)}
-          className="slds-p-vertical_x-small"
           labels={{ label }}
           assistiveText={{
             label: title,
@@ -218,7 +219,11 @@ class PreflightCell extends React.Component<DataCellProps> {
       );
     }
     return (
-      <DataTableCell title={title} className="plan-step-item" {...this.props}>
+      <DataTableCell
+        title={title}
+        {...this.props}
+        className="plan-step-item plan-step-options"
+      >
         {content}
       </DataTableCell>
     );

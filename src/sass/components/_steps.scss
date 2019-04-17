@@ -8,7 +8,7 @@
   // set up layout
   tr {
     display: grid;
-    grid-template-columns: [step-row-start name-start] 1fr [name-end type-start] 15vw [type-end badge-start] 15vw [badge-end install-start]10vw [install-end step-row-end];
+    grid-template-columns: [step-row-start name-start] 4fr [name-end type-start] 1fr [type-end badge-start] 1fr [badge-end install-start] 1fr [install-end step-row-end];
 
     &:focus,
     &:hover {
@@ -59,13 +59,13 @@
   }
 
   .plan-step-name {
-    align-items: end;
+    align-items: flex-end;
     display: flex;
   }
 
   .plan-step-type {
     grid-column: type-start / type-end;
-    grid-row: 1 / 2;
+    grid-row: 1;
 
     // aligns the type text with other cell text
     > div {
@@ -82,7 +82,11 @@
 
   .plan-step-badge-container {
     grid-column: badge-start / badge-end;
-    grid-row: 1 / 2;
+    grid-row: 1;
+    // decreasing container padding for better vertical alignment
+    // badges have more internal padding
+    padding-bottom: 0;
+    padding-top: 0.625rem;
 
     div {
       display: flex;
@@ -93,24 +97,31 @@
     background-color: $color-background-highlight;
   }
 
-  td:nth-child(4n),
-  .plan-step-icon-container {
+  .plan-step-options {
     grid-column: install-start / install-end;
-    grid-row: 1 / 2;
-    // less padding since slds `action icons` have a large container
-    padding-bottom: $var-spacing-x-small;
-    padding-top: $var-spacing-x-small;
+    grid-row: 1;
+
+    // Completed icon is larger than others. Negative indent helps alignment
+    .is-completed {
+      margin-top: -0.3125rem;
+      margin-bottom: -0.3125rem;
+    }
   }
 
   .slds-is-open > .slds-accordion__content {
+    background: $brand-dark;
+    color: $color-text-brand-primary;
+    margin-bottom: -0.75rem;
     margin-left: -1.5rem;
     // full width of the page minus padding ===
     // full width of table so scroll goes edge to edge
-    max-width: calc(100vw - 4rem);
+    margin-top: 1.25rem;
+    width: calc(100vw - 4rem);
     overflow: auto;
   }
 
   pre {
-    padding: 0 1.5rem;
+    margin-bottom: 0;
+    padding: 1rem 1.5rem 1.5rem;
   }
 }
