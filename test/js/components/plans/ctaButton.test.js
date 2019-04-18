@@ -27,6 +27,7 @@ const defaultPlan = {
       is_recommended: true,
     },
   ],
+  requires_preflight: true,
 };
 
 const defaultPreflight = {
@@ -203,6 +204,34 @@ describe('<CtaButton />', () => {
     });
   });
 
+  describe('no preflight required', () => {
+    test('renders install btn', () => {
+      const { getByText } = setup({
+        plan: { ...defaultPlan, requires_preflight: false },
+        preflight: undefined,
+      });
+
+      expect(getByText('Install')).toBeVisible();
+    });
+
+    describe('start-install (with click-through agreement) click', () => {
+      test('opens modal', () => {
+        const { getByText, getByLabelText } = setup({
+          plan: { ...defaultPlan, requires_preflight: false },
+          preflight: undefined,
+          clickThroughAgreement: '<p>Please and thank you.</p>',
+        });
+        fireEvent.click(getByText('Install'));
+
+        expect(getByText('Product Terms of Use and Licenses')).toBeVisible();
+        expect(getByText('Please and thank you.')).toBeVisible();
+        expect(
+          getByLabelText('confirm I have read and agree to', { exact: false }),
+        ).toBeVisible();
+      });
+    });
+  });
+
   describe('no plan steps', () => {
     test('renders with empty steps', () => {
       const { getByText } = setup({
@@ -344,6 +373,20 @@ describe('<CtaButton />', () => {
 
       expect(removeUrlParam).toHaveBeenCalledWith('start_preflight');
       expect(history.push).toHaveBeenCalledWith({ search: '' });
+    });
+
+    describe('preflight not required', () => {
+      test('starts preflight', () => {
+        const doStartPreflight = jest.fn();
+        setup({
+          plan: { ...defaultPlan, requires_preflight: false },
+          preflight: undefined,
+          doStartPreflight,
+          history,
+        });
+
+        expect(doStartPreflight).not.toHaveBeenCalled();
+      });
     });
 
     describe('no preflight', () => {
