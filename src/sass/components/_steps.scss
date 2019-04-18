@@ -8,7 +8,11 @@
   // set up layout
   tr {
     display: grid;
-    grid-template-columns: [step-row-start name-start] 4fr [name-end type-start] 1fr [type-end badge-start] 1fr [badge-end install-start] 1fr [install-end step-row-end];
+    grid-template-columns: [step-row-start name-start] 4fr [name-end type-start] 2fr [type-end badge-start] 1fr [badge-end install-start] auto [install-end step-row-end];
+
+    @media (min-width: $mq-large) {
+      grid-template-columns: [step-row-start name-start] 4fr [name-end type-start] 1fr [type-end badge-start] 1fr [badge-end install-start] 1fr [install-end step-row-end];
+    }
 
     &:focus,
     &:hover {
@@ -34,18 +38,18 @@
 
   .step-name-no-icon {
     // Line up text of step names, with or without accordion icon:
-    // .slds-button__icon width (0.875rem) + margin-right (0.5rem)
+    // .slds-button__icon width (0.875rem) + margin-right ($spacing-x-small)
     margin-left: 1.375rem;
   }
 
   .has-warning {
-    border-left: 1rem solid $color-border-warning;
-    padding-left: 0.5rem;
+    border-left: $spacing-medium solid $color-border-warning;
+    padding-left: $spacing-x-small;
   }
 
   .has-error {
-    border-left: 1rem solid $color-border-error;
-    padding-left: 0.5rem;
+    border-left: $spacing-medium solid $color-border-error;
+    padding-left: $spacing-x-small;
   }
 
   .plan-step-item {
@@ -108,20 +112,24 @@
     }
   }
 
+  section:not(.slds-is-open) > .slds-accordion__content {
+    width: 0;
+  }
+
   .slds-is-open > .slds-accordion__content {
     background: $brand-dark;
     color: $color-text-brand-primary;
-    margin-bottom: -0.75rem;
-    margin-left: -1.5rem;
+    margin-bottom: $spacing-small * -1;
+    margin-left: $spacing-large * -1;
     // full width of the page minus padding ===
     // full width of table so scroll goes edge to edge
     margin-top: 1.25rem;
-    width: calc(100vw - 4rem);
     overflow: auto;
+    width: calc(100vw - 4rem);
   }
 
   pre {
     margin-bottom: 0;
-    padding: 1rem 1.5rem 1.5rem;
+    padding: $spacing-medium $spacing-large $spacing-large;
   }
 }
