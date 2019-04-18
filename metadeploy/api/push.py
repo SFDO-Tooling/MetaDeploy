@@ -20,18 +20,21 @@ Websocket notifications you can subscribe to:
 from channels.layers import get_channel_layer
 from django.utils.translation import gettext_lazy as _
 
+from ..consumer_utils import message_exists, set_message_exists
 from .constants import CHANNELS_GROUP_NAME
 from .hash_url import convert_org_url_to_key
 
 
-async def push_message_about_instance(instance, json_message):
+async def push_message_about_instance(instance, message):
     model_name = instance._meta.model_name
     id = str(instance.id)
     group_name = CHANNELS_GROUP_NAME.format(model=model_name, id=id)
     channel_layer = get_channel_layer()
-    await channel_layer.group_send(
-        group_name, {"type": "notify", "content": json_message}
-    )
+    sent_message = {"content": message}
+    if not await message_exists(channel_layer, sent_message):
+        await set_message_exists(channel_layer, sent_message)
+        sent_message["type"] = "notify"
+        await channel_layer.group_send(group_name, sent_message)
 
 
 async def push_serializable(instance, serializer, type_):
@@ -39,16 +42,16 @@ async def push_serializable(instance, serializer, type_):
     id = str(instance.id)
     group_name = CHANNELS_GROUP_NAME.format(model=model_name, id=id)
     serializer_name = f"{serializer.__module__}.{serializer.__name__}"
+    message = {
+        "instance": {"model": model_name, "id": id},
+        "serializer": serializer_name,
+        "inner_type": type_,
+    }
     channel_layer = get_channel_layer()
-    await channel_layer.group_send(
-        group_name,
-        {
-            "type": "notify",
-            "instance": {"model": model_name, "id": id},
-            "serializer": serializer_name,
-            "inner_type": type_,
-        },
-    )
+    if not await message_exists(channel_layer, message):
+        await set_message_exists(channel_layer, message)
+        message["type"] = "notify"
+        await channel_layer.group_send(group_name, message)
 
 
 async def user_token_expired(user):
@@ -133,9 +136,12 @@ async def notify_org_result_changed(result):
     serializer = OrgSerializer(
         {"current_job": current_job, "current_preflight": current_preflight}
     )
-    message = {"type": type_, "payload": serializer.data}
+    message = {"content": {"type": type_, "payload": serializer.data}}
     group_name = CHANNELS_GROUP_NAME.format(
         model="org", id=convert_org_url_to_key(org_url)
     )
     channel_layer = get_channel_layer()
-    await channel_layer.group_send(group_name, {"type": "notify", "content": message})
+    if not await message_exists(channel_layer, message):
+        await set_message_exists(channel_layer, message)
+        message["type"] = "notify"
+        await channel_layer.group_send(group_name, message)
