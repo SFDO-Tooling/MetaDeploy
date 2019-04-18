@@ -9,6 +9,31 @@ describe('<ShareModal />', () => {
     is_public: false,
     user_can_edit: true,
     status: 'complete',
+    results: {},
+  };
+  const defaultPlan = {
+    id: 'plan-1',
+    slug: 'my-plan',
+    old_slugs: [],
+    title: 'My Plan',
+    steps: [
+      {
+        id: 'step-1',
+        name: 'Step 1',
+      },
+      {
+        id: 'step-2',
+        name: 'Step 2',
+      },
+      {
+        id: 'step-3',
+        name: 'Step 3',
+      },
+      {
+        id: 'step-4',
+        name: 'Step 4',
+      },
+    ],
   };
 
   const setup = options => {
@@ -16,12 +41,14 @@ describe('<ShareModal />', () => {
       toggleModal: jest.fn(),
       updateJob: jest.fn(),
       job: defaultJob,
+      plan: defaultPlan,
     };
     const opts = { ...defaults, ...options };
     const { getByLabelText, getByText, queryByText, baseElement } = render(
       <ShareModal
         isOpen={true}
         job={opts.job}
+        plan={opts.plan}
         toggleModal={opts.toggleModal}
         updateJob={opts.updateJob}
       />,
@@ -40,7 +67,7 @@ describe('<ShareModal />', () => {
       });
 
       expect(getByText('Resolve Installation Error')).toBeVisible();
-      expect(getByText('Power of Us Hub')).toBeVisible();
+      expect(getByText('Don’t panic', { exact: false })).toBeVisible();
     });
 
     test('displays custom error message', () => {
@@ -50,6 +77,24 @@ describe('<ShareModal />', () => {
 
       expect(getByText('Resolve Installation Error')).toBeVisible();
       expect(getByText('Sorry!')).toBeVisible();
+    });
+
+    test('displays step error message', () => {
+      const { getByText } = setup({
+        job: {
+          ...defaultJob,
+          status: 'failed',
+          results: {
+            'not-a-step': [{ status: 'error', message: 'Not an error.' }],
+            'step-1': [{ status: 'ok' }],
+            'step-2': [{ status: 'error' }],
+            'step-3': [{ status: 'error', message: 'Nope.' }],
+          },
+        },
+      });
+
+      expect(getByText('Resolve Installation Error')).toBeVisible();
+      expect(getByText('Nope.')).toBeVisible();
     });
   });
 

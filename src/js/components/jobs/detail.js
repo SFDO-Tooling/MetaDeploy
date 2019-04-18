@@ -252,6 +252,7 @@ class JobDetail extends React.Component<Props, State> {
           <ShareModal
             isOpen={this.state.modalOpen}
             job={job}
+            plan={plan}
             toggleModal={this.toggleModal}
             updateJob={doUpdateJob}
           />
