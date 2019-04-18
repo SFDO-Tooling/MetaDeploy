@@ -1,3 +1,4 @@
+from cumulusci.core.tasks import BaseTask
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.utils.text import slugify
@@ -13,6 +14,10 @@ from ...models import (
     Step,
     Version,
 )
+
+
+class Fail(BaseTask):
+    name = "Fail"
 
 
 class Command(BaseCommand):
@@ -101,13 +106,18 @@ class Command(BaseCommand):
         PlanSlug.objects.create(parent=plan.plan_template, slug=slugify(title))
         return plan
 
-    def create_step(self, **kwargs):
+    def create_step(self, fail=False, **kwargs):
         path = kwargs.pop("path", "quick_task")
-        kwargs.setdefault("task_class", "cumulusci.tasks.util.Sleep")
-        kwargs.setdefault("task_config", {"options": {"seconds": 3}})
+        if fail:
+            kwargs.setdefault(
+                "task_class", "metadeploy.api.management.commands.populate_data.Fail"
+            )
+        else:
+            kwargs.setdefault("task_class", "cumulusci.tasks.util.Sleep")
+            kwargs.setdefault("task_config", {"options": {"seconds": 3}})
         return Step.objects.create(path=path, **kwargs)
 
-    def add_steps(self, plan):
+    def add_steps(self, plan, fail=False):
         self.create_step(
             plan=plan,
             name="Quick step",
@@ -163,6 +173,7 @@ class Command(BaseCommand):
             kind="managed",
             is_recommended=False,
             step_num="5",
+            fail=fail,
         )
         self.create_step(
             path="install_managed",
@@ -267,7 +278,7 @@ class Command(BaseCommand):
             tier="secondary",
             preflight_flow_name="slow_steps_preflight_good",
         )
-        self.add_steps(plan2)
+        self.add_steps(plan2, fail=True)
 
         plan3 = self.create_plan(
             version1,

@@ -7,7 +7,7 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import { t } from 'i18next';
 
 import { CONSTANTS } from 'store/plans/reducer';
-import { WarningIcon } from 'components/plans/jobResults';
+import { WarningIcon } from 'components/plans/preflightResults';
 import type {
   PreflightErrors as PreflightErrorsType,
   StepResult as StepResultType,

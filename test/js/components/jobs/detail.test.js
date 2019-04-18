@@ -274,6 +274,27 @@ describe('<JobDetail />', () => {
         });
       });
     });
+
+    describe('job fails', () => {
+      test('opens modal', () => {
+        const { getByText, queryByText, rerender } = setup();
+
+        expect(queryByText('Resolve Installation Error')).toBeNull();
+
+        setup({
+          initialState: {
+            ...defaultState,
+            jobs: {
+              ...defaultState.jobs,
+              'job-1': { ...defaultState.jobs['job-1'], status: 'failed' },
+            },
+          },
+          rerenderFn: rerender,
+        });
+
+        expect(getByText('Resolve Installation Error')).toBeVisible();
+      });
+    });
   });
 
   describe('job complete', () => {
@@ -357,10 +378,7 @@ describe('<JobDetail />', () => {
         },
       });
 
-      expect(
-        getByText('Share the link to this installation job'),
-      ).toBeVisible();
-      expect(getByText('Power of Us Hub')).toBeVisible();
+      expect(getByText('View Installation Error Details & Link')).toBeVisible();
       expect(queryByText('Congrats!')).toBeNull();
     });
   });
