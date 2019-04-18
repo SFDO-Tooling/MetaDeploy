@@ -26,7 +26,7 @@ import CtaButton from 'components/jobs/ctaButton';
 import Header from 'components/plans/header';
 import Intro from 'components/plans/intro';
 import JobMessage from 'components/jobs/jobMessage';
-import JobResults from 'components/plans/jobResults';
+import JobResults from 'components/jobs/jobResults';
 import ProductNotFound from 'components/products/product404';
 import ProgressBar from 'components/jobs/progressBar';
 import ShareModal from 'components/jobs/shareModal';
@@ -101,18 +101,33 @@ class JobDetail extends React.Component<Props, State> {
     this.fetchJobIfMissing();
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps, prevState) {
     const { product, version, versionLabel, job, jobId } = this.props;
+    const prevJob = prevProps.job;
+    const jobIdChanged = jobId !== prevProps.jobId;
     const versionChanged =
       product !== prevProps.product ||
       version !== prevProps.version ||
       versionLabel !== prevProps.versionLabel;
-    const jobChanged = job !== prevProps.job || jobId !== prevProps.jobId;
+    const jobChanged = job !== prevJob || jobIdChanged;
     if (versionChanged) {
       this.fetchVersionIfMissing();
     }
     if (jobChanged) {
       this.fetchJobIfMissing();
+    }
+    // If the job has changed status and is failed, automatically open modal
+    if (job && !jobIdChanged) {
+      const { modalOpen } = prevState;
+      const statusChanged = prevJob && prevJob.status !== job.status;
+      const hasError = job.error_count !== undefined && job.error_count > 0;
+      if (
+        !modalOpen &&
+        statusChanged &&
+        (hasError || job.status === CONSTANTS.STATUS.FAILED)
+      ) {
+        this.openModal();
+      }
     }
   }
 
@@ -237,13 +252,14 @@ class JobDetail extends React.Component<Props, State> {
           <ShareModal
             isOpen={this.state.modalOpen}
             job={job}
+            plan={plan}
             toggleModal={this.toggleModal}
             updateJob={doUpdateJob}
           />
           <BodyContainer>
             <Toasts job={job} label={t('Installation')} />
             <Intro
-              results={<JobResults job={job} label={t('Installation')} />}
+              results={<JobResults job={job} openModal={this.openModal} />}
               cta={
                 <CtaButton
                   job={job}
@@ -251,7 +267,7 @@ class JobDetail extends React.Component<Props, State> {
                   canceling={canceling}
                 />
               }
-              postMessage={<JobMessage job={job} openModal={this.openModal} />}
+              postMessage={<JobMessage job={job} />}
               backLink={
                 job.status === CONSTANTS.STATUS.STARTED ? null : (
                   <BackLink

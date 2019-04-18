@@ -26,6 +26,7 @@ export type Job = {|
   +is_public: boolean,
   +user_can_edit: boolean,
   +message: string,
+  +error_message: string | null,
 |};
 export type JobsState = {
   [string]: Job,

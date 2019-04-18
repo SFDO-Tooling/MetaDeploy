@@ -11,6 +11,7 @@ import InstallDataCell, {
 import KindDataCell from 'components/plans/stepsTable/kindDataCell';
 import NameDataCell from 'components/plans/stepsTable/nameDataCell';
 import RequiredDataCell from 'components/plans/stepsTable/requiredDataCell';
+import ToggleLogsDataColumnLabel from 'components/plans/stepsTable/toggleLogsDataColumnLabel';
 import { CONSTANTS } from 'store/plans/reducer';
 import type { Job as JobType } from 'store/jobs/reducer';
 import type {
@@ -20,7 +21,6 @@ import type {
 } from 'store/plans/reducer';
 import type { SelectedSteps as SelectedStepsType } from 'components/plans/detail';
 import type { User as UserType } from 'store/user/reducer';
-import ToggleLogsDataColumnLabel from 'components/plans/stepsTable/toggleLogsDataColumnLabel';
 
 export type DataCellProps = {
   [string]: mixed,

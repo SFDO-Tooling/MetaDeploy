@@ -6,10 +6,11 @@ import DataTableCell from '@salesforce/design-system-react/components/data-table
 import Icon from '@salesforce/design-system-react/components/icon';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
+import classNames from 'classnames';
 import { t } from 'i18next';
 
 import { CONSTANTS } from 'store/plans/reducer';
-import { ErrorIcon } from 'components/plans/jobResults';
+import { ErrorIcon } from 'components/plans/preflightResults';
 import type { DataCellProps } from 'components/plans/stepsTable';
 
 const { STATUS, RESULT_STATUS } = CONSTANTS;
@@ -42,7 +43,7 @@ export const InstallDataColumnLabel = (): React.Node => (
 );
 
 const JobCell = (props: DataCellProps): React.Node => {
-  const { item, job, activeJobStep } = props;
+  const { item, job, activeJobStep, className, ...otherProps } = props;
   /* istanbul ignore if */
   if (!item || !job) {
     return null;
@@ -144,8 +145,8 @@ const JobCell = (props: DataCellProps): React.Node => {
   return (
     <DataTableCell
       title={title}
-      {...props}
-      className="plan-step-item plan-step-options"
+      className={classNames(className, 'plan-step-item', 'plan-step-options')}
+      {...otherProps}
     >
       {contents}
     </DataTableCell>
@@ -165,7 +166,13 @@ class PreflightCell extends React.Component<DataCellProps> {
   };
 
   render(): React.Node {
-    const { preflight, item, selectedSteps } = this.props;
+    const {
+      preflight,
+      item,
+      selectedSteps,
+      className,
+      ...otherProps
+    } = this.props;
     /* istanbul ignore if */
     if (!item) {
       return null;
@@ -221,8 +228,8 @@ class PreflightCell extends React.Component<DataCellProps> {
     return (
       <DataTableCell
         title={title}
-        {...this.props}
-        className="plan-step-item plan-step-options"
+        className={classNames(className, 'plan-step-item', 'plan-step-options')}
+        {...otherProps}
       >
         {content}
       </DataTableCell>

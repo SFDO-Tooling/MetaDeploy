@@ -283,6 +283,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             "is_public",
             "user_can_edit",
             "message",
+            "error_message",
         )
         extra_kwargs = {
             "created_at": {"read_only": True},

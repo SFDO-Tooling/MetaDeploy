@@ -10,7 +10,7 @@ import classNames from 'classnames';
 import { t } from 'i18next';
 
 import { CONSTANTS } from 'store/plans/reducer';
-import { JobError } from 'components/plans/jobResults';
+import { JobError } from 'components/plans/preflightResults';
 import type { DataCellProps } from 'components/plans/stepsTable';
 
 const { RESULT_STATUS } = CONSTANTS;
@@ -54,10 +54,15 @@ class NameDataCell extends React.Component<
       display = `${name} — ${optionalMsg}`;
     }
     display = <span className="slds-p-right_x-small">{display}</span>;
-    const classes = classNames(className, {
-      'has-warning': hasWarning,
-      'has-error': hasError,
-    });
+    const classes = classNames(
+      className,
+      'plan-step-item',
+      'plan-step-item-name',
+      {
+        'has-warning': hasWarning,
+        'has-error': hasError,
+      },
+    );
     const errorList =
       result && (hasError || hasWarning) ? <JobError err={result} /> : null;
     const desc = description ? (
@@ -80,13 +85,7 @@ class NameDataCell extends React.Component<
       </Tooltip>
     ) : null;
     return (
-      <DataTableCell
-        title={name}
-        className={classNames('plan-step-item plan-step-item-name', {
-          classes,
-        })}
-        {...otherProps}
-      >
+      <DataTableCell title={name} className={classes} {...otherProps}>
         {logs ? (
           <>
             <Accordion>

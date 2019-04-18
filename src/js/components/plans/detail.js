@@ -31,11 +31,11 @@ import BodyContainer from 'components/bodyContainer';
 import CtaButton, { LoginBtn } from 'components/plans/ctaButton';
 import Header from 'components/plans/header';
 import Intro from 'components/plans/intro';
-import JobResults, {
+import PlanNotAllowed from 'components/products/notAllowed';
+import PreflightResults, {
   ErrorIcon,
   WarningIcon,
-} from 'components/plans/jobResults';
-import PlanNotAllowed from 'components/products/notAllowed';
+} from 'components/plans/preflightResults';
 import ProductNotFound from 'components/products/product404';
 import StepsTable from 'components/plans/stepsTable';
 import Toasts from 'components/plans/toasts';
@@ -309,7 +309,6 @@ class PlanDetail extends React.Component<Props, State> {
       return <ProductNotFound />;
     }
     const selectedSteps = this.getSelectedSteps();
-    const preflight_minutes = window.GLOBALS.PREFLIGHT_LIFETIME_MINUTES || 10;
     return (
       <DocumentTitle
         title={`${plan.title} | ${product.title} | ${window.SITE_NAME}`}
@@ -346,23 +345,7 @@ class PlanDetail extends React.Component<Props, State> {
                 }
                 results={
                   preflight && user ? (
-                    <JobResults
-                      preflight={preflight}
-                      label={t('Pre-install validation')}
-                      failMessage={t(
-                        'After resolving all errors, run the pre-install validation again.',
-                      )}
-                      successMessage={
-                        <Trans
-                          i18nKey="preflightValidTime"
-                          count={preflight_minutes}
-                        >
-                          Pre-install validation will expire if install is not
-                          run within {{ preflight_minutes }} minutes, and you
-                          will need to run pre-install validation again.
-                        </Trans>
-                      }
-                    />
+                    <PreflightResults preflight={preflight} />
                   ) : null
                 }
                 postMessage={this.getPostMessage()}

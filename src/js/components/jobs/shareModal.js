@@ -8,14 +8,17 @@ import Radio from '@salesforce/design-system-react/components/radio-group/radio'
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import { t } from 'i18next';
 
+import { CONSTANTS } from 'store/plans/reducer';
 import { withTransientMessage } from 'components/utils';
 import type { Job as JobType } from 'store/jobs/reducer';
+import type { Plan as PlanType } from 'store/plans/reducer';
 import type { TransientMessageProps } from 'components/utils';
 import typeof { updateJob as UpdateJobType } from 'store/jobs/actions';
 
 type Props = {|
   isOpen: boolean,
   job: JobType,
+  plan: PlanType,
   toggleModal: boolean => void,
   updateJob: UpdateJobType,
 |};
@@ -59,12 +62,79 @@ class ShareModal extends React.Component<WrappedProps> {
     this.handleFocus();
   };
 
+  getErrorMessage() {
+    const { job, plan } = this.props;
+    const hasError = job.error_count !== undefined && job.error_count > 0;
+    const isFailed = job.status === CONSTANTS.STATUS.FAILED;
+    const showError = hasError || isFailed;
+    if (showError) {
+      let stepName = null;
+      let stepError = null;
+      if (plan.steps && plan.steps.length) {
+        // Get step-specific error (and step name)
+        for (const id of Object.keys(job.results)) {
+          const result = job.results[id];
+          if (
+            result.status === CONSTANTS.RESULT_STATUS.ERROR &&
+            result.message
+          ) {
+            const step = plan.steps.find(s => s.id === id);
+            if (step) {
+              stepError = result.message;
+              stepName = step.name;
+              break;
+            }
+          }
+        }
+      }
+      return (
+        <div>
+          <p className="slds-m-bottom_small">
+            {t('Oh no! This installation encountered an error.')}
+          </p>
+          {stepName && stepError ? (
+            <p className="slds-m-bottom_small">
+              <b>{stepName}: </b>
+              {/* These messages are pre-cleaned by the API */}
+              <span
+                className="slds-text-color_error"
+                dangerouslySetInnerHTML={{ __html: stepError }}
+              />
+            </p>
+          ) : null}
+          {job.error_message ? (
+            <div
+              className="markdown"
+              dangerouslySetInnerHTML={{ __html: job.error_message }}
+            />
+          ) : (
+            <p>
+              {t(
+                'Don’t panic. If you’re not sure what to do about this error, you can share the link below.',
+              )}
+            </p>
+          )}
+        </div>
+      );
+    }
+    return null;
+  }
+
   render(): React.Node {
     const { job, transientMessageVisible } = this.props;
+    const errorMsg = this.getErrorMessage();
     return (
       <Modal
         isOpen={this.props.isOpen}
-        title={t('Share Link to Installation Job')}
+        title={
+          errorMsg ? (
+            <span className="slds-text-color_error">
+              {t('Resolve Installation Error')}
+            </span>
+          ) : (
+            t('Share Link to Installation Job')
+          )
+        }
         onRequestClose={this.handleClose}
       >
         <div
@@ -72,6 +142,12 @@ class ShareModal extends React.Component<WrappedProps> {
             slds-p-left_large
             slds-p-right_medium"
         >
+          {errorMsg ? (
+            <>
+              {errorMsg}
+              <hr />
+            </>
+          ) : null}
           <Input
             className="slds-p-bottom_small"
             id="share-job-link"
