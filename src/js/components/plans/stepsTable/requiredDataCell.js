@@ -11,7 +11,7 @@ import type { DataCellProps } from 'components/plans/stepsTable';
 const { RESULT_STATUS } = CONSTANTS;
 
 const RequiredDataCell = (props: DataCellProps): React.Node => {
-  const { preflight, item, job } = props;
+  const { preflight, item, job, className, ...otherProps } = props;
   /* istanbul ignore if */
   if (!item) {
     return null;
@@ -40,8 +40,12 @@ const RequiredDataCell = (props: DataCellProps): React.Node => {
   return (
     <DataTableCell
       title={text}
-      {...props}
-      className="plan-step-item plan-step-badge-container"
+      className={classNames(
+        className,
+        'plan-step-item',
+        'plan-step-badge-container',
+      )}
+      {...otherProps}
     >
       <span className={classes}>{text}</span>
     </DataTableCell>

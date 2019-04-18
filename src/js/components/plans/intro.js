@@ -24,13 +24,13 @@ const Intro = ({
   return (
     <div
       className="slds-p-around_medium
-      slds-size_1-of-1
-      slds-medium-size_1-of-2"
+        slds-size_1-of-1
+        slds-medium-size_1-of-2"
     >
       <div className="slds-text-longform">
         {duration ? (
           <p>
-            <strong>Average Install Time:</strong> {duration}.
+            <strong>{t('Average Install Time')}:</strong> {duration}.
           </p>
         ) : null}
         {preMessage}

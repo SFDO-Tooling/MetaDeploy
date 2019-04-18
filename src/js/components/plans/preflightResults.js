@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import Icon from '@salesforce/design-system-react/components/icon';
+import { Trans } from 'react-i18next';
 import { t } from 'i18next';
 
 import { CONSTANTS } from 'store/plans/reducer';
@@ -74,29 +75,26 @@ export const JobError = ({ err }: { err: StepResultType }): React.Node => {
   return <ul className="plan-error-list">{node}</ul>;
 };
 
-const JobResults = ({
+export const getErrorInfo = ({
   job,
   preflight,
   label,
-  failMessage,
-  successMessage,
 }: {
   job?: JobType,
   preflight?: PreflightType,
   label: string,
-  failMessage?: string,
-  successMessage?: React.Node,
-}): React.Node => {
+}): {
+  failed: boolean,
+  message: React.Node | null,
+} => {
   const currentJob = job || preflight;
-  if (
-    !currentJob ||
-    (currentJob.status !== CONSTANTS.STATUS.COMPLETE &&
-      currentJob.status !== CONSTANTS.STATUS.FAILED &&
-      currentJob.status !== CONSTANTS.STATUS.CANCELED)
-  ) {
-    return null;
+  const info = {
+    failed: false,
+    message: null,
+  };
+  if (!currentJob) {
+    return info;
   }
-
   const hasErrors =
     currentJob.error_count !== undefined && currentJob.error_count > 0;
   const hasWarnings =
@@ -130,64 +128,81 @@ const JobResults = ({
     } else if (warningCount > 0) {
       msg = warningMsg;
     }
-    const jobError = currentJob.results && currentJob.results.plan;
     const failed =
       errorCount > 0 ||
       currentJob.status === CONSTANTS.STATUS.FAILED ||
       canceledPreflight;
+    info.failed = Boolean(failed);
+    info.message =
+      preflight && !currentJob.is_valid && !failed
+        ? t(`${label} has expired; please run it again.`)
+        : `${t(`${label} encountered`)} ${msg}.`;
+  }
+  return info;
+};
+
+const PreflightResults = ({
+  preflight,
+}: {
+  preflight: PreflightType,
+}): React.Node => {
+  if (
+    preflight.status !== CONSTANTS.STATUS.COMPLETE &&
+    preflight.status !== CONSTANTS.STATUS.FAILED &&
+    preflight.status !== CONSTANTS.STATUS.CANCELED
+  ) {
+    return null;
+  }
+
+  const { failed, message } = getErrorInfo({
+    preflight,
+    label: t('Pre-install validation'),
+  });
+  const planErrors = preflight.results && preflight.results.plan;
+  if (message !== null) {
     return (
       <>
         <p className={failed ? 'slds-text-color_error' : ''}>
           {failed ? <ErrorIcon /> : <WarningIcon />}
-          {/*
-              Show "expired" message if job is not valid and has no errors.
-              We check `is_valid === false` instead of simply `!is_valid`
-              because jobs do not have `is_valid` property.
-           */}
-          {currentJob.is_valid === false && !failed ? (
-            t(`${label} has expired; please run it again.`)
-          ) : (
-            <>
-              {t(`${label} encountered`)} {msg}.
-            </>
-          )}
+          {message}
         </p>
-        {failed && failMessage ? <p>{failMessage}</p> : null}
-        {jobError ? <JobError err={jobError} /> : null}
+        {failed ? (
+          <p>
+            {t(
+              'After resolving all errors, run the pre-install validation again.',
+            )}
+          </p>
+        ) : null}
+        {planErrors ? <JobError err={planErrors} /> : null}
       </>
     );
   }
 
-  // Canceled job
-  if (currentJob.status === CONSTANTS.STATUS.CANCELED) {
-    return (
-      <p className="slds-text-color_error">
-        <ErrorIcon />
-        {t(`${label} was canceled.`)}
-      </p>
-    );
-  }
-
-  // We check `is_valid === false` instead of simply `!is_valid` because jobs do
-  // not have `is_valid` property.
-  if (currentJob.is_valid === false) {
+  if (!preflight.is_valid) {
     return (
       <p>
         <WarningIcon />
-        {t(`${label} has expired; please run it again.`)}
+        {t('Pre-install validation has expired; please run it again.')}
       </p>
     );
   }
 
-  // Successful job
+  // Successful preflight
+  const preflight_minutes = window.GLOBALS.PREFLIGHT_LIFETIME_MINUTES || 10;
   return (
     <>
       <p className="slds-text-color_success">
-        {t(`${label} completed successfully.`)}
+        {t('Pre-install validation completed successfully.')}
       </p>
-      {successMessage === undefined ? null : <p>{successMessage}</p>}
+      <p>
+        <Trans i18nKey="preflightValidTime" count={preflight_minutes}>
+          Pre-install validation will expire if install is not run within{' '}
+          {{ preflight_minutes }} minutes, and you will need to run pre-install
+          validation again.
+        </Trans>
+      </p>
     </>
   );
 };
 
-export default JobResults;
+export default PreflightResults;

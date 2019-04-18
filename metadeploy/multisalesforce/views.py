@@ -23,6 +23,7 @@ from .provider import (
 
 logger = logging.getLogger(__name__)
 ORGID_RE = re.compile(r"^00D[a-zA-Z0-9]{15}$")
+CUSTOM_DOMAIN_RE = re.compile(r"^[a-zA-Z0-9.-]+$")
 
 
 class SalesforcePermissionsError(Exception):
@@ -110,6 +111,8 @@ class SalesforceOAuth2CustomAdapter(SalesforceOAuth2Mixin, SalesforceOAuth2BaseA
         custom_domain = self.request.GET.get(
             "custom_domain", self.request.session.get("custom_domain")
         )
+        if not CUSTOM_DOMAIN_RE.match(custom_domain):
+            raise SuspiciousOperation("Invalid custom domain")
         self.request.session["custom_domain"] = custom_domain
         return "https://{}.my.salesforce.com".format(custom_domain)
 
