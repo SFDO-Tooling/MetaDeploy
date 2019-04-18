@@ -20,7 +20,7 @@ const ToggleLogsDataColumnLabel = ({ hasJob }: Props) => {
           position="overflowBoundaryElement"
         >
           <Button
-            label={t('Steps')}
+            assistiveText={{ icon: t('Steps') }}
             variant="icon"
             iconCategory="utility"
             iconName={hideLogs ? 'toggle_panel_top' : 'toggle_panel_bottom'}
