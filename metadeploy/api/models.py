@@ -308,6 +308,7 @@ class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel)
         short_description=models.TextField(blank=True),
         description=MarkdownField(property_suffix="_markdown", blank=True),
         click_through_agreement=MarkdownField(blank=True, property_suffix="_markdown"),
+        error_message=MarkdownField(blank=True, property_suffix="_markdown"),
     )
 
     @property
@@ -317,6 +318,10 @@ class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel)
     @property
     def click_through_agreement_markdown(self):
         return self.get_translation("en-us").click_through_agreement_markdown
+
+    @property
+    def error_message_markdown(self):
+        return self.get_translation("en-us").error_message_markdown
 
     category = models.ForeignKey(ProductCategory, on_delete=models.PROTECT)
     color = ColorField(blank=True)
@@ -450,6 +455,7 @@ class PlanTemplate(SlugMixin, TranslatableModel):
     translations = TranslatedFields(
         preflight_message=MarkdownField(blank=True, property_suffix="_markdown"),
         post_install_message=MarkdownField(blank=True, property_suffix="_markdown"),
+        error_message=MarkdownField(blank=True, property_suffix="_markdown"),
     )
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
 
@@ -462,6 +468,10 @@ class PlanTemplate(SlugMixin, TranslatableModel):
     @property
     def post_install_message_markdown(self):
         return self.get_translation("en-us").post_install_message_markdown
+
+    @property
+    def error_message_markdown(self):
+        return self.get_translation("en-us").error_message_markdown
 
     def __str__(self):
         return f"{self.product.title}: {self.name}"
@@ -668,6 +678,13 @@ class Job(HashIdMixin, models.Model):
             logger.warn(f"RuntimeError: {error}")
 
         return ret
+
+    @property
+    def error_message(self):
+        return (
+            self.plan.plan_template.error_message_markdown
+            or self.plan.version.product.error_message_markdown
+        )
 
     def invalidate_related_preflight(self):
         # We expect this to be a list of 1 or 0, but we want to account
