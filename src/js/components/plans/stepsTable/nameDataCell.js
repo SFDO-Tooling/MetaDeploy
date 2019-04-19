@@ -29,7 +29,14 @@ class NameDataCell extends React.Component<
   };
 
   render(): React.Node {
-    const { preflight, job, item, className, ...otherProps } = this.props;
+    const {
+      preflight,
+      job,
+      item,
+      className,
+      activeJobStep,
+      ...otherProps
+    } = this.props;
     /* istanbul ignore if */
     if (!item) {
       return null;
@@ -37,6 +44,7 @@ class NameDataCell extends React.Component<
     const currentJob = preflight || job;
     const { name, description } = item;
     const { id } = item;
+    const isActive = activeJobStep && id === activeJobStep;
     const result = currentJob && currentJob.results && currentJob.results[id];
     let hasError = false;
     let hasWarning = false;
@@ -61,6 +69,7 @@ class NameDataCell extends React.Component<
       {
         'has-warning': hasWarning,
         'has-error': hasError,
+        'is-installing': isActive,
       },
     );
     const errorList =
@@ -88,7 +97,11 @@ class NameDataCell extends React.Component<
       <DataTableCell title={name} className={classes} {...otherProps}>
         {logs ? (
           <>
-            <Accordion>
+            <Accordion
+              className={classNames({
+                'slds-p-bottom_small': errorList,
+              })}
+            >
               <AccordionPanel
                 id={id}
                 title={name}
@@ -108,9 +121,9 @@ class NameDataCell extends React.Component<
             </Accordion>
             {errorList ? (
               <div
-                className="step-name-no-icon
-                  slds-p-bottom_small
-                  slds-cell-wrap"
+                className={classNames('slds-cell-wrap', {
+                  'step-name-no-icon': job,
+                })}
               >
                 {errorList}
               </div>
@@ -118,10 +131,11 @@ class NameDataCell extends React.Component<
           </>
         ) : (
           <div
-            className="step-name-no-icon
-              slds-cell-wrap"
+            className={classNames('slds-cell-wrap', {
+              'step-name-no-icon': job,
+            })}
           >
-            <div className={errorList ? 'slds-p-bottom_small' : ''}>
+            <div className={classNames({ 'slds-p-bottom_small': errorList })}>
               {display}
               {desc}
             </div>

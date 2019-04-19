@@ -55,6 +55,10 @@
   .plan-step-item {
     padding-bottom: $var-spacing-small;
     padding-top: $var-spacing-small;
+
+    &.is-installing {
+      background-color: $color-background-row-selected;
+    }
   }
 
   .plan-step-item-name {

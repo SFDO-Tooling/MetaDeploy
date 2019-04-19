@@ -61,7 +61,6 @@ const StepsTable = ({
   }
   const hasValidToken = user && user.valid_token_for !== null;
   const hasReadyPreflight = preflight && preflight.is_ready;
-  const hasJob = Boolean(job);
   return (
     <div
       className="slds-p-around_medium
@@ -71,22 +70,30 @@ const StepsTable = ({
         <DataTable items={plan.steps} id="plan-steps-table">
           <DataTableColumn
             key="name"
-            label={<ToggleLogsDataColumnLabel hasJob={hasJob} />}
+            label={job ? <ToggleLogsDataColumnLabel /> : t('Steps')}
             property="name"
             primaryColumn
           >
-            <NameDataCell preflight={preflight} job={job} />
+            <NameDataCell
+              preflight={preflight}
+              job={job}
+              activeJobStep={activeJobStepId}
+            />
           </DataTableColumn>
           <DataTableColumn key="kind" label={t('Type')} property="kind">
-            <KindDataCell />
+            <KindDataCell activeJobStep={activeJobStepId} />
           </DataTableColumn>
           <DataTableColumn key="is_required" property="is_required">
-            <RequiredDataCell preflight={preflight} job={job} />
+            <RequiredDataCell
+              preflight={preflight}
+              job={job}
+              activeJobStep={activeJobStepId}
+            />
           </DataTableColumn>
           {job || (hasValidToken && hasReadyPreflight) ? (
             <DataTableColumn
               key="is_recommended"
-              label={<InstallDataColumnLabel />}
+              label={job ? t('Install') : <InstallDataColumnLabel />}
               property="is_recommended"
             >
               <InstallDataCell
