@@ -30,10 +30,9 @@ async def push_message_about_instance(instance, message):
     id = str(instance.id)
     group_name = CHANNELS_GROUP_NAME.format(model=model_name, id=id)
     channel_layer = get_channel_layer()
-    sent_message = {"content": message}
+    sent_message = {"type": "notify", "content": message}
     if not await message_exists(channel_layer, sent_message):
         await set_message_exists(channel_layer, sent_message)
-        sent_message["type"] = "notify"
         await channel_layer.group_send(group_name, sent_message)
 
 
@@ -43,6 +42,7 @@ async def push_serializable(instance, serializer, type_):
     group_name = CHANNELS_GROUP_NAME.format(model=model_name, id=id)
     serializer_name = f"{serializer.__module__}.{serializer.__name__}"
     message = {
+        "type:": "notify",
         "instance": {"model": model_name, "id": id},
         "serializer": serializer_name,
         "inner_type": type_,
@@ -50,7 +50,6 @@ async def push_serializable(instance, serializer, type_):
     channel_layer = get_channel_layer()
     if not await message_exists(channel_layer, message):
         await set_message_exists(channel_layer, message)
-        message["type"] = "notify"
         await channel_layer.group_send(group_name, message)
 
 
@@ -136,12 +135,11 @@ async def notify_org_result_changed(result):
     serializer = OrgSerializer(
         {"current_job": current_job, "current_preflight": current_preflight}
     )
-    message = {"content": {"type": type_, "payload": serializer.data}}
+    message = {"type": "notify", "content": {"type": type_, "payload": serializer.data}}
     group_name = CHANNELS_GROUP_NAME.format(
         model="org", id=convert_org_url_to_key(org_url)
     )
     channel_layer = get_channel_layer()
     if not await message_exists(channel_layer, message):
         await set_message_exists(channel_layer, message)
-        message["type"] = "notify"
         await channel_layer.group_send(group_name, message)
