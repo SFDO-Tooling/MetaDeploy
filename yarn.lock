@@ -938,10 +938,10 @@
     babel-preset-react "^6.23.0"
     lodash.assign "^4.0.9"
 
-"@salesforce/design-system-react@^0.9.6":
-  version "0.9.6"
-  resolved "https://registry.yarnpkg.com/@salesforce/design-system-react/-/design-system-react-0.9.6.tgz#776a35f5cfc858ae83d539ae27e6316091ec1759"
-  integrity sha512-jig4JWHBi9lDc9ALVty/tJcUbHevGR4/g983sQZl+uePB0G4tdTlucjWmJoLDRaQ8dBQxwbZtnk7wvTraraeDA==
+"@salesforce/design-system-react@^0.10.0":
+  version "0.10.0"
+  resolved "https://registry.yarnpkg.com/@salesforce/design-system-react/-/design-system-react-0.10.0.tgz#05e3f1c0cc645cb0243841d8dd5276885dd92192"
+  integrity sha512-q8lnTIIHOdKTyfFRQhmwM31FqnQxTOaZSjqFnm9dXX9lXTzMLjB5HJntKE7zjl+T9N6WhfMJVNgf9Tx+tT0K2w==
   dependencies:
     "@salesforce/babel-preset-design-system-react" "^1.0.0"
     classnames "^2.2.5"
