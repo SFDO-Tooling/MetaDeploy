@@ -42,7 +42,7 @@ async def push_serializable(instance, serializer, type_):
     group_name = CHANNELS_GROUP_NAME.format(model=model_name, id=id)
     serializer_name = f"{serializer.__module__}.{serializer.__name__}"
     message = {
-        "type:": "notify",
+        "type": "notify",
         "instance": {"model": model_name, "id": id},
         "serializer": serializer_name,
         "inner_type": type_,
