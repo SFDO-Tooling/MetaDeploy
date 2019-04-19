@@ -354,7 +354,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         """
         required_steps = set(plan.required_step_ids)
         if preflight:
-            required_steps = required_steps - set(preflight.optional_step_ids)
+            required_steps -= set(preflight.optional_step_ids)
         return not set(required_steps) - set(s.id for s in steps)
 
     def _get_from_data_or_instance(self, data, name, default=None):
