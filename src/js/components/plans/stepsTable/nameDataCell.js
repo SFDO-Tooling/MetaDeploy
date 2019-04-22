@@ -61,7 +61,9 @@ class NameDataCell extends React.Component<
     if (optionalMsg) {
       display = `${name} — ${optionalMsg}`;
     }
-    display = <span className="slds-p-right_x-small">{display}</span>;
+    display = (
+      <span className="slds-p-right_x-small step-label">{display}</span>
+    );
     const classes = classNames(
       className,
       'plan-step-item',
