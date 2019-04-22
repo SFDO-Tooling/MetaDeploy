@@ -8,13 +8,16 @@
   // set up layout
   tr {
     display: grid;
-    grid-template-columns: [step-row-start name-start] minmax(300px, 4fr) [name-end type-start] minmax(
-        160px,
-        2fr
-      ) [type-end badge-start] minmax(90px, 1fr) [badge-end install-start] minmax(
+    grid-template-columns:
+      [step-row-start name-start] minmax(
+        300px,
+        4fr
+      ) [name-end type-start] minmax(160px, 2fr)
+      [type-end badge-start] minmax(90px, 1fr) [badge-end install-start] minmax(
         100px,
         1fr
-      ) [install-end step-row-end];
+      )
+      [install-end step-row-end];
 
     @media (min-width: $mq-large) {
       grid-template-columns: [step-row-start name-start] 4fr [name-end type-start] 1fr [type-end badge-start] 1fr [badge-end install-start] 1fr [install-end step-row-end];
@@ -131,6 +134,7 @@
   }
 
   .slds-is-open > .slds-accordion__content {
+    @include z-index('logs');
     background: $brand-dark;
     color: $color-text-brand-primary;
     margin-bottom: $spacing-small * -1;
@@ -139,6 +143,9 @@
     // full width of table so scroll goes edge to edge
     margin-top: 1.25rem;
     overflow: auto;
+    // transform added to move this accordion content above table tr
+    // allows for the tr:hover bg color to not overlap the logs bg color
+    transform: scale(1);
     width: calc(100vw - 4rem);
   }
 
