@@ -33,12 +33,9 @@ const RequiredDataCell = (props: DataCellProps): React.Node => {
   }
   const required =
     item.is_required && !optional && (!job || job.steps.includes(id));
-  const classes = classNames(
-    'slds-align-middle',
-    'slds-badge',
-    'slds-m-horizontal_large',
-    { 'slds-badge_lightest': !required },
-  );
+  const classes = classNames('slds-align-middle', 'slds-badge', {
+    'slds-badge_lightest': !required,
+  });
   let text = t('Optional');
   if (skipped) {
     text = t('Skipped');

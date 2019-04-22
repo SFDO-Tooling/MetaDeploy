@@ -8,7 +8,13 @@
   // set up layout
   tr {
     display: grid;
-    grid-template-columns: [step-row-start name-start] 4fr [name-end type-start] 2fr [type-end badge-start] 1fr [badge-end install-start] auto [install-end step-row-end];
+    grid-template-columns: [step-row-start name-start] minmax(300px, 4fr) [name-end type-start] minmax(
+        160px,
+        2fr
+      ) [type-end badge-start] minmax(90px, 1fr) [badge-end install-start] minmax(
+        100px,
+        1fr
+      ) [install-end step-row-end];
 
     @media (min-width: $mq-large) {
       grid-template-columns: [step-row-start name-start] 4fr [name-end type-start] 1fr [type-end badge-start] 1fr [badge-end install-start] 1fr [install-end step-row-end];
@@ -50,6 +56,10 @@
   .has-error {
     border-left: $spacing-medium solid $color-border-error;
     padding-left: $spacing-x-small;
+
+    .slds-is-open {
+      margin-bottom: $var-spacing-small;
+    }
   }
 
   .plan-step-item {
