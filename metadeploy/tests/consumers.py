@@ -14,8 +14,12 @@ from ..consumers import PushNotificationConsumer, user_context
 
 @pytest.mark.django_db
 @pytest.mark.asyncio
-async def test_push_notification_consumer__user_token_invalid(user_factory):
+async def test_push_notification_consumer__user_token_invalid(settings, user_factory):
     user = user_factory()
+
+    settings.CHANNEL_LAYERS = {
+        "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
+    }
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
     communicator.scope["user"] = user
@@ -36,13 +40,17 @@ async def test_push_notification_consumer__user_token_invalid(user_factory):
 @pytest.mark.django_db
 @pytest.mark.asyncio
 async def test_push_notification_consumer__subscribe_preflight(
-    user_factory, preflight_result_factory, plan_factory
+    settings, user_factory, preflight_result_factory, plan_factory
 ):
     user = user_factory()
     plan = plan_factory()
     preflight = preflight_result_factory(
         user=user, status=PreflightResult.Status.complete, plan=plan
     )
+
+    settings.CHANNEL_LAYERS = {
+        "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
+    }
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
     communicator.scope["user"] = user
@@ -69,9 +77,15 @@ async def test_push_notification_consumer__subscribe_preflight(
 
 @pytest.mark.django_db
 @pytest.mark.asyncio
-async def test_push_notification_consumer__subscribe_job(user_factory, job_factory):
+async def test_push_notification_consumer__subscribe_job(
+    settings, user_factory, job_factory
+):
     user = user_factory()
     job = job_factory(user=user, status=Job.Status.complete)
+
+    settings.CHANNEL_LAYERS = {
+        "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
+    }
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
     communicator.scope["user"] = user
@@ -95,10 +109,14 @@ async def test_push_notification_consumer__subscribe_job(user_factory, job_facto
 @pytest.mark.django_db
 @pytest.mark.asyncio
 async def test_push_notification_consumer__subscribe_job__bad(
-    user_factory, job_factory
+    settings, user_factory, job_factory
 ):
     user = user_factory()
     job = job_factory(status=Job.Status.complete)
+
+    settings.CHANNEL_LAYERS = {
+        "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
+    }
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
     communicator.scope["user"] = user
@@ -118,9 +136,13 @@ async def test_push_notification_consumer__subscribe_job__bad(
 @pytest.mark.django_db
 @pytest.mark.asyncio
 async def test_push_notification_consumer__subscribe_job__missing(
-    user_factory, job_factory
+    settings, user_factory, job_factory
 ):
     user = user_factory()
+
+    settings.CHANNEL_LAYERS = {
+        "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
+    }
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
     communicator.scope["user"] = user
@@ -137,7 +159,7 @@ async def test_push_notification_consumer__subscribe_job__missing(
 @pytest.mark.django_db
 @pytest.mark.asyncio
 async def test_push_notification_consumer__subscribe_org(
-    social_account_factory, user_factory, job_factory, plan_factory
+    settings, social_account_factory, user_factory, job_factory, plan_factory
 ):
     user = user_factory(socialaccount_set=[])
     social_account_factory(
@@ -158,6 +180,10 @@ async def test_push_notification_consumer__subscribe_org(
         plan=plan,
         organization_url="https://example.com/",
     )
+
+    settings.CHANNEL_LAYERS = {
+        "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
+    }
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
     communicator.scope["user"] = user
