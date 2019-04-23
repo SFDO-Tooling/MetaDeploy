@@ -255,17 +255,17 @@ class CtaButton extends React.Component<
 
   render(): React.Node {
     const { user, clickThroughAgreement, plan, preflight } = this.props;
-    if (!user) {
-      // Require login first...
-      return (
-        <LoginBtn
-          label={t('Log In to Start Pre-Install Validation')}
-          redirectParams={{ [AUTO_START_PREFLIGHT]: true }}
-        />
-      );
-    }
-
     if (plan.requires_preflight) {
+      if (!user) {
+        // Require login first...
+        return (
+          <LoginBtn
+            label={t('Log In to Start Pre-Install Validation')}
+            redirectParams={{ [AUTO_START_PREFLIGHT]: true }}
+          />
+        );
+      }
+
       // An `undefined` preflight means we don't know whether a preflight exists
       if (preflight === undefined) {
         return (
