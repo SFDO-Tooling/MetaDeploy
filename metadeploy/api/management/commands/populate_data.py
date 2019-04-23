@@ -79,7 +79,7 @@ class Command(BaseCommand):
                 "duis ut diam. Sem fringilla ut morbi tincidunt augue "
                 "interdum velit euismod. Volutpat est velit egestas dui "
                 "id ornare arcu. Viverra tellus in hac habitasse platea "
-                "dictumst. Nulla facilisi etiam dignissim diam.\n\n"
+                "dictumst. Nulla facilisi etiam dignissim diam."
             ),
         )
         product = Product.objects.create(
@@ -180,7 +180,10 @@ class Command(BaseCommand):
         self.create_step(
             path="affiliations",
             plan=plan,
-            name="Affiliations",
+            name=(
+                "Affiliations Has A Really Really Really Long Name"
+                "To Be Sure The Table Layout Does Not Break"
+            ),
             description="This is a step description.",
             kind="managed",
             is_required=False,
@@ -189,7 +192,10 @@ class Command(BaseCommand):
         self.create_step(
             path="update_admin_profile",
             plan=plan,
-            name="Account Record Types",
+            name=(
+                "Account Record Types Also Has A Really Really Really Long Name"
+                "To Be Sure The Table Layout Does Not Break"
+            ),
             kind="managed",
             is_recommended=False,
             step_num="5",

@@ -123,8 +123,8 @@ class NameDataCell extends React.Component<
             </Accordion>
             {errorList ? (
               <div
-                className={classNames('slds-cell-wrap', {
-                  'step-name-no-icon': job,
+                className={classNames('slds-cell-wrap', 'step-name-no-icon', {
+                  'has-job': job,
                 })}
               >
                 {errorList}
@@ -133,8 +133,8 @@ class NameDataCell extends React.Component<
           </>
         ) : (
           <div
-            className={classNames('slds-cell-wrap', {
-              'step-name-no-icon': job,
+            className={classNames('slds-cell-wrap', 'step-name-no-icon', {
+              'has-job': job,
             })}
           >
             <div className={classNames({ 'slds-p-bottom_small': errorList })}>
