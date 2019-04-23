@@ -181,7 +181,7 @@ class Command(BaseCommand):
             path="affiliations",
             plan=plan,
             name=(
-                "Affiliations Has A Really Really Really Long Name"
+                "Affiliations Has A Really Really Really Long Name "
                 "To Be Sure The Table Layout Does Not Break"
             ),
             description="This is a step description.",
@@ -193,7 +193,7 @@ class Command(BaseCommand):
             path="update_admin_profile",
             plan=plan,
             name=(
-                "Account Record Types Also Has A Really Really Really Long Name"
+                "Account Record Types Also Has A Really Really Really Long Name "
                 "To Be Sure The Table Layout Does Not Break"
             ),
             kind="managed",
