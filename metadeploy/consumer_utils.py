@@ -12,19 +12,13 @@ def message_to_hash(message):
     return b"semaphore:" + message_hash
 
 
-async def message_exists(channel_layer, message):
+async def get_set_message_semaphore(channel_layer, message):
     msg_hash = message_to_hash(message)
     async with channel_layer.connection(0) as connection:
-        return await connection.exists(msg_hash)
+        return await connection.setnx(msg_hash, 1)
 
 
-async def set_message_exists(channel_layer, message):
-    msg_hash = message_to_hash(message)
-    async with channel_layer.connection(0) as connection:
-        return await connection.set(msg_hash, 1)
-
-
-async def del_message_exists(channel_layer, message):
+async def clear_message_semaphore(channel_layer, message):
     msg_hash = message_to_hash(message)
     async with channel_layer.connection(0) as connection:
         return await connection.delete(msg_hash)

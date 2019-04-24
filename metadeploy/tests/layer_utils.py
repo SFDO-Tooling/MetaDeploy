@@ -2,11 +2,8 @@ from channels.layers import InMemoryChannelLayer
 
 
 class MockedConnection:
-    async def exists(self, *args, **kwargs):
-        pass
-
-    async def set(self, *args, **kwargs):
-        pass
+    async def setnx(self, *args, **kwargs):
+        return True
 
     async def delete(self, *args, **kwargs):
         pass

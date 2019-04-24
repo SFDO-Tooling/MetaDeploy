@@ -20,7 +20,7 @@ Websocket notifications you can subscribe to:
 from channels.layers import get_channel_layer
 from django.utils.translation import gettext_lazy as _
 
-from ..consumer_utils import message_exists, set_message_exists
+from ..consumer_utils import get_set_message_semaphore
 from .constants import CHANNELS_GROUP_NAME
 from .hash_url import convert_org_url_to_key
 
@@ -31,8 +31,7 @@ async def push_message_about_instance(instance, message):
     group_name = CHANNELS_GROUP_NAME.format(model=model_name, id=id)
     channel_layer = get_channel_layer()
     sent_message = {"type": "notify", "content": message}
-    if not await message_exists(channel_layer, sent_message):
-        await set_message_exists(channel_layer, sent_message)
+    if await get_set_message_semaphore(channel_layer, sent_message):
         await channel_layer.group_send(group_name, sent_message)
 
 
@@ -48,8 +47,7 @@ async def push_serializable(instance, serializer, type_):
         "inner_type": type_,
     }
     channel_layer = get_channel_layer()
-    if not await message_exists(channel_layer, message):
-        await set_message_exists(channel_layer, message)
+    if await get_set_message_semaphore(channel_layer, message):
         await channel_layer.group_send(group_name, message)
 
 
@@ -140,6 +138,5 @@ async def notify_org_result_changed(result):
         model="org", id=convert_org_url_to_key(org_url)
     )
     channel_layer = get_channel_layer()
-    if not await message_exists(channel_layer, message):
-        await set_message_exists(channel_layer, message)
+    if await get_set_message_semaphore(channel_layer, message):
         await channel_layer.group_send(group_name, message)
