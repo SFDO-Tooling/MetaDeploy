@@ -302,7 +302,7 @@ class Command(BaseCommand):
             version1,
             title="Reports and Dashboards",
             tier="secondary",
-            preflight_flow_name="",
+            preflight_flow_name="slow_steps_preflight_good",
         )
         self.add_steps(plan2, fail=True)
 

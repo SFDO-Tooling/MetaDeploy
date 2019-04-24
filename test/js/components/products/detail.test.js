@@ -37,7 +37,6 @@ const defaultState = {
           title: 'My Plan',
           is_listed: true,
           is_allowed: true,
-          requires_preflight: true,
         },
         secondary_plan: {
           id: 'plan-2',
@@ -46,7 +45,6 @@ const defaultState = {
           title: 'My Secondary Plan',
           is_listed: true,
           is_allowed: true,
-          requires_preflight: true,
         },
         additional_plans: [
           {
@@ -56,7 +54,6 @@ const defaultState = {
             title: 'My Additional Plan',
             is_listed: true,
             is_allowed: true,
-            requires_preflight: true,
           },
         ],
         is_listed: true,
@@ -279,7 +276,6 @@ describe('<VersionDetail />', () => {
             title: 'My Plan',
             is_listed: true,
             is_allowed: true,
-            requires_preflight: true,
           },
           secondary_plan: null,
           additional_plans: [],
@@ -322,7 +318,6 @@ describe('<VersionDetail />', () => {
               title: 'My Plan',
               is_listed: true,
               is_allowed: true,
-              requires_preflight: true,
             },
           ],
           is_listed: true,
@@ -354,7 +349,6 @@ describe('<VersionDetail />', () => {
         title: 'My Plan 4',
         is_listed: true,
         is_allowed: true,
-        requires_preflight: true,
       },
       secondary_plan: null,
       additional_plans: [],

@@ -96,7 +96,7 @@ class PlanDetail extends React.Component<Props, State> {
 
   fetchPreflightIfMissing() {
     const { user, plan, preflight, doFetchPreflight } = this.props;
-    if (user && plan && preflight === undefined && plan.requires_preflight) {
+    if (user && plan && preflight === undefined) {
       // Fetch most recent preflight result (if any exists)
       doFetchPreflight(plan.id);
     }

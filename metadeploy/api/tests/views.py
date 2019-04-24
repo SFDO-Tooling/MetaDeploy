@@ -231,7 +231,6 @@ class TestBasicGetViews:
             "title": "Sample plan",
             "version": str(plan.version.id),
             "preflight_message": "",
-            "requires_preflight": True,
             "tier": "primary",
             "slug": "sample-plan",
             "old_slugs": [],
@@ -252,7 +251,6 @@ class TestBasicGetViews:
             "title": "Sample plan",
             "version": str(plan.version.id),
             "preflight_message": None,
-            "requires_preflight": True,
             "tier": "primary",
             "slug": "sample-plan",
             "old_slugs": [],
@@ -272,7 +270,7 @@ class TestBasicGetViews:
     ):
         allowed_list = allowed_list_factory(description="Sample instructions.")
         allowed_list_org = allowed_list_org_factory(allowed_list=allowed_list)
-        plan = plan_factory(visible_to=allowed_list, preflight_flow_name="")
+        plan = plan_factory(visible_to=allowed_list)
         user = user_factory()
         social_account = user.socialaccount_set.all()[0]
         social_account.extra_data[ORGANIZATION_DETAILS]["Id"] = allowed_list_org.org_id
@@ -286,7 +284,6 @@ class TestBasicGetViews:
             "title": "Sample plan",
             "version": str(plan.version.id),
             "preflight_message": "",
-            "requires_preflight": False,
             "tier": "primary",
             "slug": "sample-plan",
             "old_slugs": [],
@@ -311,7 +308,6 @@ class TestBasicGetViews:
             "title": "Sample plan",
             "version": str(plan.version.id),
             "preflight_message": "",
-            "requires_preflight": True,
             "tier": "primary",
             "slug": "sample-plan",
             "old_slugs": [],

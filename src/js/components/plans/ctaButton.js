@@ -118,13 +118,7 @@ class CtaButton extends React.Component<
   componentDidMount() {
     const startPreflight = getUrlParam(AUTO_START_PREFLIGHT);
     if (startPreflight === 'true') {
-      const { history, preflight, plan } = this.props;
-      // Remove query-string from URL
-      history.push({ search: removeUrlParam(AUTO_START_PREFLIGHT) });
-      // Bail if no preflight is required
-      if (!plan.requires_preflight) {
-        return;
-      }
+      const { history, preflight } = this.props;
       // `preflight === null`: no prior preflight exists
       // `preflight === undefined`: still fetching prior preflights
       // If we don't know about past preflights yet, wait until we do...
@@ -133,6 +127,8 @@ class CtaButton extends React.Component<
       } else {
         this.autoStartPreflight();
       }
+      // Remove query-string from URL
+      history.push({ search: removeUrlParam(AUTO_START_PREFLIGHT) });
     }
   }
 
@@ -177,19 +173,6 @@ class CtaButton extends React.Component<
 
   toggleClickThroughModal = (isOpen: boolean) => {
     this.setState({ clickThroughModal: isOpen });
-  };
-
-  openPreflightModal = () => {
-    this.togglePreflightModal(true);
-  };
-
-  openClickThroughModal = () => {
-    this.toggleClickThroughModal(true);
-  };
-
-  startPreflight = () => {
-    const { plan, doStartPreflight } = this.props;
-    doStartPreflight(plan.id);
   };
 
   startJob = () => {
@@ -240,126 +223,120 @@ class CtaButton extends React.Component<
     );
   }
 
-  getClickThroughAgreementModal(): React.Node {
-    const { clickThroughAgreement } = this.props;
-    const { clickThroughModal } = this.state;
-    return clickThroughAgreement ? (
-      <ClickThroughAgreementModal
-        isOpen={clickThroughModal}
-        text={clickThroughAgreement}
-        toggleModal={this.toggleClickThroughModal}
-        startJob={this.startJob}
-      />
-    ) : null;
-  }
-
   render(): React.Node {
-    const { user, clickThroughAgreement, plan, preflight } = this.props;
-    if (plan.requires_preflight) {
-      if (!user) {
-        // Require login first...
-        return (
-          <LoginBtn
-            label={t('Log In to Start Pre-Install Validation')}
-            redirectParams={{ [AUTO_START_PREFLIGHT]: true }}
-          />
-        );
-      }
+    const {
+      user,
+      clickThroughAgreement,
+      plan,
+      preflight,
+      doStartPreflight,
+    } = this.props;
+    if (!user) {
+      // Require login first...
+      return (
+        <LoginBtn
+          label={t('Log In to Start Pre-Install Validation')}
+          redirectParams={{ [AUTO_START_PREFLIGHT]: true }}
+        />
+      );
+    }
 
-      // An `undefined` preflight means we don't know whether a preflight exists
-      if (preflight === undefined) {
+    // An `undefined` preflight means we don't know whether a preflight exists
+    if (preflight === undefined) {
+      return (
+        <ActionBtn
+          label={<LabelWithSpinner label={t('Loading…')} />}
+          disabled
+        />
+      );
+    }
+
+    const startPreflight = () => {
+      doStartPreflight(plan.id);
+    };
+    // A `null` preflight means we already fetched and no prior preflight exists
+    if (preflight === null) {
+      // No prior preflight exists
+      return this.getLoginOrActionBtn(
+        t('Start Pre-Install Validation'),
+        startPreflight,
+        true,
+      );
+    }
+
+    switch (preflight.status) {
+      case STATUS.STARTED: {
+        // Preflight in progress...
         return (
           <ActionBtn
-            label={<LabelWithSpinner label={t('Loading…')} />}
+            label={
+              <LabelWithSpinner
+                label={t('Pre-Install Validation In Progress…')}
+              />
+            }
             disabled
           />
         );
       }
-
-      // A `null` preflight means we already fetched and no prior preflight exists
-      if (preflight === null) {
-        // No prior preflight exists
+      case STATUS.COMPLETE: {
+        if (preflight.is_ready) {
+          // Preflight is done, valid, and has no errors -- allow installation
+          const hasWarnings =
+            preflight.warning_count !== undefined &&
+            preflight.warning_count > 0;
+          // Terms must be confirmed before proceeding
+          const action = clickThroughAgreement
+            ? () => {
+                this.toggleClickThroughModal(true);
+              }
+            : this.startJob;
+          // Warnings must be confirmed before proceeding
+          const btn = hasWarnings
+            ? this.getLoginOrActionBtn(t('Install'), () => {
+                this.togglePreflightModal(true);
+              })
+            : this.getLoginOrActionBtn(t('Install'), action);
+          return (
+            <>
+              {btn}
+              {hasWarnings ? (
+                <PreflightWarningModal
+                  isOpen={this.state.preflightModalOpen}
+                  toggleModal={this.togglePreflightModal}
+                  startJob={action}
+                  results={preflight.results}
+                  steps={plan.steps || []}
+                />
+              ) : null}
+              {clickThroughAgreement ? (
+                <ClickThroughAgreementModal
+                  isOpen={this.state.clickThroughModal}
+                  text={clickThroughAgreement}
+                  toggleModal={this.toggleClickThroughModal}
+                  startJob={this.startJob}
+                />
+              ) : null}
+            </>
+          );
+        }
+        // Prior preflight exists, but is no longer valid or has errors
         return this.getLoginOrActionBtn(
-          t('Start Pre-Install Validation'),
-          this.startPreflight,
+          t('Re-Run Pre-Install Validation'),
+          startPreflight,
           true,
         );
       }
-
-      switch (preflight.status) {
-        case STATUS.STARTED: {
-          // Preflight in progress...
-          return (
-            <ActionBtn
-              label={
-                <LabelWithSpinner
-                  label={t('Pre-Install Validation In Progress…')}
-                />
-              }
-              disabled
-            />
-          );
-        }
-        case STATUS.COMPLETE: {
-          if (preflight.is_ready) {
-            // Preflight is done, valid, and has no errors -- allow installation
-            const hasWarnings =
-              preflight.warning_count !== undefined &&
-              preflight.warning_count > 0;
-            // Terms must be confirmed before proceeding
-            const action = clickThroughAgreement
-              ? this.openClickThroughModal
-              : this.startJob;
-            // Warnings must be confirmed before proceeding
-            const btn = hasWarnings
-              ? this.getLoginOrActionBtn(t('Install'), this.openPreflightModal)
-              : this.getLoginOrActionBtn(t('Install'), action);
-            return (
-              <>
-                {btn}
-                {hasWarnings ? (
-                  <PreflightWarningModal
-                    isOpen={this.state.preflightModalOpen}
-                    toggleModal={this.togglePreflightModal}
-                    startJob={action}
-                    results={preflight.results}
-                    steps={plan.steps || []}
-                  />
-                ) : null}
-                {this.getClickThroughAgreementModal()}
-              </>
-            );
-          }
-          // Prior preflight exists, but is no longer valid or has errors
-          return this.getLoginOrActionBtn(
-            t('Re-Run Pre-Install Validation'),
-            this.startPreflight,
-            true,
-          );
-        }
-        case STATUS.CANCELED:
-        case STATUS.FAILED: {
-          // Prior preflight exists, but failed or had plan-level errors
-          return this.getLoginOrActionBtn(
-            t('Re-Run Pre-Install Validation'),
-            this.startPreflight,
-            true,
-          );
-        }
+      case STATUS.CANCELED:
+      case STATUS.FAILED: {
+        // Prior preflight exists, but failed or had plan-level errors
+        return this.getLoginOrActionBtn(
+          t('Re-Run Pre-Install Validation'),
+          startPreflight,
+          true,
+        );
       }
-      return null;
     }
-
-    // Terms must be confirmed before proceeding
-    const action = clickThroughAgreement
-      ? this.openClickThroughModal
-      : this.startJob;
-    return (
-      <>
-        {this.getLoginOrActionBtn(t('Install'), action)}
-        {this.getClickThroughAgreementModal()}
-      </>
-    );
+    return null;
   }
 }
 

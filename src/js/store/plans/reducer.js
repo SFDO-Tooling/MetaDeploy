@@ -22,7 +22,6 @@ export type Plan = {
   +is_listed: boolean,
   +is_allowed: boolean,
   +not_allowed_instructions: string | null,
-  +requires_preflight: boolean,
 };
 export type Plans = Array<Plan>;
 

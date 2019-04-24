@@ -43,7 +43,6 @@ const defaultPlan = {
       is_recommended: false,
     },
   ],
-  requires_preflight: true,
 };
 
 describe('<StepsTable />', () => {
