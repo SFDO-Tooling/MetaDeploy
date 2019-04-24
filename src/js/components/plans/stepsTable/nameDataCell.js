@@ -15,17 +15,14 @@ import type { DataCellProps } from 'components/plans/stepsTable';
 
 const { RESULT_STATUS } = CONSTANTS;
 
-class NameDataCell extends React.Component<
-  DataCellProps,
-  { expanded: boolean },
-> {
-  constructor(props: DataCellProps) {
-    super(props);
-    this.state = { expanded: false };
-  }
+type Props = {
+  expanded: boolean,
+  togglePanel: (val: boolean) => void,
+} & DataCellProps;
 
-  togglePanel = () => {
-    this.setState({ expanded: !this.state.expanded });
+class NameDataCell extends React.Component<Props, {}> {
+  togglePanel = (e, data) => {
+    this.props.togglePanel(data);
   };
 
   render(): React.Node {
@@ -105,7 +102,7 @@ class NameDataCell extends React.Component<
               })}
             >
               <AccordionPanel
-                id={id}
+                id={item.id}
                 title={name}
                 summary={
                   <div className="slds-cell-wrap plan-step-name">
@@ -113,8 +110,8 @@ class NameDataCell extends React.Component<
                     {desc}
                   </div>
                 }
-                expanded={this.state.expanded}
-                onTogglePanel={this.togglePanel}
+                expanded={this.props.expanded}
+                onTogglePanel={() => this.togglePanel(event, item.id)}
               >
                 <pre>
                   <code>{logs}</code>
