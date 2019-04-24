@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock
 
 import pytest
+from channels.layers import get_channel_layer
 
 from ..push import notify_org_result_changed, report_error
 
@@ -24,12 +25,9 @@ async def test_report_error(mocker, user_factory):
 @pytest.mark.django_db
 @pytest.mark.asyncio
 async def test_notify_org_job_changed(mocker, user_factory, job_factory, plan_factory):
-    # get_channel_layer = mocker.patch("metadeploy.api.push.get_channel_layer")
-    # channel_layer = MagicMock(name="channel_layer")
-    # channel_layer.group_send = AsyncMock(name="group_send")
-    # get_channel_layer.return_value = channel_layer
+    gcl = mocker.patch("metadeploy.api.push.get_channel_layer", wraps=get_channel_layer)
     user = user_factory()
     plan = plan_factory()
     job = job_factory(user=user, plan=plan, organization_url="https://example.com/")
     await notify_org_result_changed(job)
-    # assert channel_layer.group_send.called
+    gcl.assert_called()
