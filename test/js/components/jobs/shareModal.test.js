@@ -34,6 +34,7 @@ describe('<ShareModal />', () => {
         name: 'Step 4',
       },
     ],
+    requires_preflight: true,
   };
 
   const setup = options => {

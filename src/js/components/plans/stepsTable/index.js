@@ -60,7 +60,8 @@ const StepsTable = ({
     }
   }
   const hasValidToken = user && user.valid_token_for !== null;
-  const hasReadyPreflight = preflight && preflight.is_ready;
+  const hasReadyPreflight =
+    !plan.requires_preflight || (preflight && preflight.is_ready);
   return (
     <div
       className="slds-p-around_medium
