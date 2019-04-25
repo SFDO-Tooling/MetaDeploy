@@ -68,6 +68,7 @@ const defaultState = {
         },
         secondary_plan: null,
         additional_plans: [],
+        requires_preflight: true,
       },
     },
   ],

@@ -67,6 +67,7 @@ $step-ending-columns-min: $step-type-min + $step-badge-min + $step-install-min;
     // protect overlapping steps without an accordion with long names
     > div {
       @include constrain-label;
+      display: flex;
     }
   }
 
