@@ -16,13 +16,17 @@ import type { DataCellProps } from 'components/plans/stepsTable';
 const { RESULT_STATUS } = CONSTANTS;
 
 type Props = {
-  expanded: boolean,
-  togglePanel: (val: boolean) => void,
+  expandedPanels: Set<string>,
+  togglePanel: (val: string) => void,
 } & DataCellProps;
 
-class NameDataCell extends React.Component<Props, {}> {
-  togglePanel = (e, data) => {
-    this.props.togglePanel(data);
+class NameDataCell extends React.Component<Props> {
+  togglePanel = () => {
+    const { item } = this.props;
+    if (!item) {
+      return;
+    }
+    this.props.togglePanel(item.id);
   };
 
   render(): React.Node {
@@ -32,6 +36,7 @@ class NameDataCell extends React.Component<Props, {}> {
       item,
       className,
       activeJobStep,
+      expandedPanels,
       ...otherProps
     } = this.props;
     /* istanbul ignore if */
@@ -102,7 +107,7 @@ class NameDataCell extends React.Component<Props, {}> {
               })}
             >
               <AccordionPanel
-                id={item.id}
+                id={id}
                 title={name}
                 summary={
                   <div className="slds-cell-wrap plan-step-name">
@@ -110,8 +115,8 @@ class NameDataCell extends React.Component<Props, {}> {
                     {desc}
                   </div>
                 }
-                expanded={this.props.expanded}
-                onTogglePanel={() => this.togglePanel(event, item.id)}
+                expanded={expandedPanels.has(id)}
+                onTogglePanel={this.togglePanel}
               >
                 <pre>
                   <code>{logs}</code>
