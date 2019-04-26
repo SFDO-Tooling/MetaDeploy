@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics, status, viewsets
+from rest_framework import generics, mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -36,7 +36,13 @@ class UserView(generics.RetrieveAPIView):
         return self.get_queryset().get()
 
 
-class JobViewSet(viewsets.ModelViewSet):
+class JobViewSet(
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
     serializer_class = JobSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = (
