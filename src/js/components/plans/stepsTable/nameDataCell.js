@@ -17,6 +17,7 @@ const { RESULT_STATUS } = CONSTANTS;
 
 type Props = {
   expandedPanels: Set<string>,
+  autoExpanded: boolean,
   togglePanel: (val: string) => void,
 } & DataCellProps;
 
@@ -115,7 +116,11 @@ class NameDataCell extends React.Component<Props> {
                     {desc}
                   </div>
                 }
-                expanded={expandedPanels.has(id)}
+                expanded={
+                  expandedPanels.has(id)
+                    ? expandedPanels.has(id)
+                    : this.props.autoExpanded
+                }
                 onTogglePanel={this.togglePanel}
               >
                 <pre>

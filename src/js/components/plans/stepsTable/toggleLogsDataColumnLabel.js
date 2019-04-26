@@ -8,20 +8,27 @@ import { t } from 'i18next';
 type Props = {
   showLogs: boolean,
   toggleLogs: () => void,
+  singleLog: boolean,
 };
 
-const ToggleLogsDataColumnLabel = ({ showLogs, toggleLogs }: Props) => (
+const ToggleLogsDataColumnLabel = ({
+  showLogs,
+  toggleLogs,
+  singleLog,
+}: Props) => (
   <>
     <Tooltip
       align="top left"
-      content={showLogs ? t('Hide Logs') : t('Show Logs')}
+      content={showLogs || singleLog ? t('Hide Logs') : t('Show Logs')}
       position="overflowBoundaryElement"
     >
       <Button
         assistiveText={{ icon: t('Steps') }}
         variant="icon"
         iconCategory="utility"
-        iconName={showLogs ? 'toggle_panel_bottom' : 'toggle_panel_top'}
+        iconName={
+          showLogs || singleLog ? 'toggle_panel_bottom' : 'toggle_panel_top'
+        }
         onClick={toggleLogs}
       />
     </Tooltip>
