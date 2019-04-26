@@ -38,6 +38,7 @@ class NameDataCell extends React.Component<Props> {
       className,
       activeJobStep,
       expandedPanels,
+      autoExpanded,
       ...otherProps
     } = this.props;
     /* istanbul ignore if */
@@ -116,11 +117,7 @@ class NameDataCell extends React.Component<Props> {
                     {desc}
                   </div>
                 }
-                expanded={
-                  expandedPanels.has(id)
-                    ? expandedPanels.has(id)
-                    : this.props.autoExpanded
-                }
+                expanded={expandedPanels.has(id) || autoExpanded || isActive}
                 onTogglePanel={this.togglePanel}
               >
                 <pre>
