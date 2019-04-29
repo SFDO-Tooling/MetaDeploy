@@ -14,3 +14,5 @@ coveralls==1.7.0
 vcrpy==2.0.1
 isort==4.3.17
 black==19.3b0
+# So tests that touch CumulusCI run:
+mock==2.0.0
