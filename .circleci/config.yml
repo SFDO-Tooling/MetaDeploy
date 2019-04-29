@@ -31,7 +31,7 @@ jobs:
             . venv/bin/activate
             # @@@ temp fix
             rm -rf ./venv/src/sfdo-template-helpers
-            pip install -r requirements/local.txt
+            pip install -Ur requirements/local.txt
       - run:
           name: Check that yarn.lock matches package.json
           command: |
