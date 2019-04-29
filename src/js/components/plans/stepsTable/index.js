@@ -44,16 +44,14 @@ type Props = {
 };
 
 type State = {
-  autoExpand: boolean,
-  showLogs: boolean,
   expandedPanels: Set<string>,
 };
 
 class StepsTable extends React.Component<Props, State> {
-  state = { showLogs: false, expandedPanels: new Set(), autoExpand: false };
+  state = { expandedPanels: new Set() };
 
   togglePanel = (id: string) => {
-    const { expandedPanels, showLogs } = this.state;
+    const { expandedPanels } = this.state;
     const steps = this.props.plan.steps
       ? this.props.plan.steps.map(step => step.id)
       : null;
@@ -62,11 +60,8 @@ class StepsTable extends React.Component<Props, State> {
 
     if (newPanels.has(id)) {
       newPanels.delete(id);
-    } else if (showLogs && !panelsAreOpen) {
-      if (steps) {
-        steps.forEach(step => newPanels.add(step).delete(id));
-        this.setState({ autoExpand: false });
-      }
+    } else if (!panelsAreOpen && steps) {
+      steps.forEach(step => newPanels.add(step).delete(id));
     } else {
       newPanels.add(id);
     }
@@ -74,20 +69,18 @@ class StepsTable extends React.Component<Props, State> {
   };
 
   toggleLogs = () => {
-    const { expandedPanels, showLogs } = this.state;
-
+    const { expandedPanels } = this.state;
     const panelsAreOpen = expandedPanels.size > 0;
     const panels = new Set([...expandedPanels]);
+    const steps = this.props.plan.steps
+      ? this.props.plan.steps.map(step => step.id)
+      : null;
 
-    if (panelsAreOpen && showLogs) {
-      panels.clear();
+    if (steps) {
+      panelsAreOpen ? panels.clear() : steps.forEach(step => panels.add(step));
       this.setState({ expandedPanels: panels });
-      this.setState({ showLogs: false });
     } else {
-      this.setState({
-        showLogs: !this.state.showLogs,
-        autoExpand: !this.state.autoExpand,
-      });
+      return {};
     }
   };
 
@@ -129,9 +122,8 @@ class StepsTable extends React.Component<Props, State> {
               label={
                 job ? (
                   <ToggleLogsDataColumnLabel
-                    showLogs={this.state.showLogs}
                     toggleLogs={this.toggleLogs}
-                    singleLog={openPanels}
+                    hasLogs={openPanels}
                   />
                 ) : (
                   t('Steps')
@@ -146,7 +138,6 @@ class StepsTable extends React.Component<Props, State> {
                 activeJobStep={activeJobStepId}
                 togglePanel={id => this.togglePanel(id)}
                 expandedPanels={this.state.expandedPanels}
-                autoExpanded={this.state.autoExpand} // autoexpand if showlogs is true or if the id of the current steps match
               />
             </DataTableColumn>
             <DataTableColumn key="kind" label={t('Type')} property="kind">
