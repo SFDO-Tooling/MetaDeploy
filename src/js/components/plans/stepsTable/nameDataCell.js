@@ -16,17 +16,16 @@ import type { DataCellProps } from 'components/plans/stepsTable';
 const { RESULT_STATUS } = CONSTANTS;
 
 type Props = {
-  expandedPanels: Set<string>,
   togglePanel: (val: string) => void,
+  expandedPanels: Set<string>,
 } & DataCellProps;
 
 class NameDataCell extends React.Component<Props> {
   togglePanel = () => {
-    const { item } = this.props;
-    if (!item) {
-      return;
+    const { item, togglePanel } = this.props;
+    if (item) {
+      togglePanel(item.id);
     }
-    this.props.togglePanel(item.id);
   };
 
   render(): React.Node {
@@ -46,7 +45,7 @@ class NameDataCell extends React.Component<Props> {
     const currentJob = preflight || job;
     const { name, description } = item;
     const { id } = item;
-    const isActive = activeJobStep && id === activeJobStep;
+    const isActive = Boolean(activeJobStep && id === activeJobStep);
     const result = currentJob && currentJob.results && currentJob.results[id];
     let hasError = false;
     let hasWarning = false;
@@ -115,7 +114,7 @@ class NameDataCell extends React.Component<Props> {
                     {desc}
                   </div>
                 }
-                expanded={expandedPanels.has(id) || isActive}
+                expanded={expandedPanels.has(id)}
                 onTogglePanel={this.togglePanel}
               >
                 <pre>

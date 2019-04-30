@@ -31,7 +31,7 @@ export type DataCellProps = {
   selectedSteps?: SelectedStepsType,
   handleStepsChange?: (string, boolean) => void,
   job?: JobType,
-  activeJobStep?: string,
+  activeJobStep?: string | null,
 };
 
 type Props = {
@@ -44,43 +44,105 @@ type Props = {
 };
 
 type State = {
+  showLogs: boolean,
   expandedPanels: Set<string>,
 };
 
 class StepsTable extends React.Component<Props, State> {
-  state = { expandedPanels: new Set() };
+  state = { showLogs: false, expandedPanels: new Set() };
 
-  togglePanel = (id: string) => {
+  componentDidUpdate(prevProps: Props) {
+    const { job } = this.props;
+    const { showLogs, expandedPanels } = this.state;
+    if (!job) {
+      return;
+    }
+    const jobStatusChanged =
+      !prevProps.job || job.status !== prevProps.job.status;
+    const updates = {};
+    if (jobStatusChanged && showLogs) {
+      // Remove auto-expand when job status changes
+      updates.showLogs = false;
+    }
+    const previousActiveJob = this.getActiveStep(prevProps.job);
+    const currentActiveJob = this.getActiveStep(job);
+    const activeJobChanged = previousActiveJob !== currentActiveJob;
+    if (showLogs && activeJobChanged) {
+      const newPanels = new Set([...expandedPanels]);
+      let changed = false;
+      // Auto-collapse previously-active step
+      if (previousActiveJob && newPanels.has(previousActiveJob)) {
+        changed = true;
+        newPanels.delete(previousActiveJob);
+      }
+      // Auto-expand active step
+      if (currentActiveJob) {
+        changed = true;
+        newPanels.add(currentActiveJob);
+      }
+      if (changed) {
+        updates.expandedPanels = newPanels;
+      }
+    }
+    if (Object.keys(updates).length) {
+      this.setState(updates);
+    }
+  }
+
+  getActiveStep = (job?: JobType): string | null => {
+    // Get the currently-running step
+    let activeJobStepId = null;
+    if (job && this.jobIsRunning()) {
+      for (const step of job.steps) {
+        if (!(job.results[step] && job.results[step].status)) {
+          activeJobStepId = step;
+          break;
+        }
+      }
+    }
+    return activeJobStepId;
+  };
+
+  jobIsRunning = (): boolean => {
+    const { job } = this.props;
+    return Boolean(job && job.status === CONSTANTS.STATUS.STARTED);
+  };
+
+  togglePanel = (id: string): void => {
     const { expandedPanels } = this.state;
-    const steps = this.props.plan.steps
-      ? this.props.plan.steps.map(step => step.id)
-      : null;
+    let { showLogs } = this.state;
+    const { job } = this.props;
     const newPanels = new Set([...expandedPanels]);
-    const panelsAreOpen = expandedPanels.size > 0;
-
+    const activeJobStepId = this.getActiveStep(job);
     if (newPanels.has(id)) {
       newPanels.delete(id);
-    } else if (!panelsAreOpen && steps) {
-      steps.forEach(step => newPanels.add(step).delete(id));
+      if (activeJobStepId && activeJobStepId === id) {
+        // If currently-running step was collapsed, disable auto-expand
+        showLogs = false;
+      }
     } else {
       newPanels.add(id);
     }
-    this.setState({ expandedPanels: newPanels });
+    this.setState({ showLogs, expandedPanels: newPanels });
   };
 
-  toggleLogs = () => {
-    const { expandedPanels } = this.state;
-    const panelsAreOpen = expandedPanels.size > 0;
-    const panels = new Set([...expandedPanels]);
-    const steps = this.props.plan.steps
-      ? this.props.plan.steps.map(step => step.id)
-      : null;
-
-    if (steps) {
-      panelsAreOpen ? panels.clear() : steps.forEach(step => panels.add(step));
-      this.setState({ expandedPanels: panels });
-    } else {
-      return {};
+  toggleLogs = (hide: boolean): void => {
+    const { job } = this.props;
+    if (hide) {
+      // Collapse all step-logs
+      this.setState({ showLogs: false, expandedPanels: new Set() });
+    } else if (this.jobIsRunning()) {
+      // Expand currently-running step-log
+      const { expandedPanels } = this.state;
+      const panels = new Set([...expandedPanels]);
+      const activeJobStepId = this.getActiveStep(job);
+      if (activeJobStepId) {
+        panels.add(activeJobStepId);
+      }
+      this.setState({ showLogs: true, expandedPanels: panels });
+    } else if (job) {
+      // Expand all step-logs
+      this.setState({ expandedPanels: new Set([...job.steps]) });
     }
   };
 
@@ -93,18 +155,8 @@ class StepsTable extends React.Component<Props, State> {
       job,
       handleStepsChange,
     } = this.props;
-    // Get the currently-running step
-    // true if there are open panels
     const { expandedPanels } = this.state;
-    let activeJobStepId;
-    if (job && job.status === CONSTANTS.STATUS.STARTED) {
-      for (const step of job.steps) {
-        if (!(job.results[step] && job.results[step].status)) {
-          activeJobStepId = step;
-          break;
-        }
-      }
-    }
+    const activeJobStepId = this.getActiveStep(job);
 
     const hasValidToken = user && user.valid_token_for !== null;
     const hasReadyPreflight =
@@ -122,8 +174,8 @@ class StepsTable extends React.Component<Props, State> {
               label={
                 job ? (
                   <ToggleLogsDataColumnLabel
-                    toggleLogs={this.toggleLogs}
                     hasLogs={openPanels}
+                    toggleLogs={this.toggleLogs}
                   />
                 ) : (
                   t('Steps')
@@ -136,8 +188,8 @@ class StepsTable extends React.Component<Props, State> {
                 preflight={preflight}
                 job={job}
                 activeJobStep={activeJobStepId}
-                togglePanel={id => this.togglePanel(id)}
-                expandedPanels={this.state.expandedPanels}
+                togglePanel={this.togglePanel}
+                expandedPanels={expandedPanels}
               />
             </DataTableColumn>
             <DataTableColumn key="kind" label={t('Type')} property="kind">
