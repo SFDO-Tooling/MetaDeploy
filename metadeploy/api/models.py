@@ -64,7 +64,8 @@ class AllowedList(models.Model):
     title = models.CharField(max_length=128, unique=True)
     description = MarkdownField(blank=True, property_suffix="_markdown")
     org_type = ArrayField(
-        models.CharField(max_length=64, choices=ORG_TYPES, blank=True),
+        models.CharField(max_length=64, choices=ORG_TYPES),
+        blank=True,
         size=4,
         default=list,
         help_text="All orgs of these types will be automatically allowed.",
