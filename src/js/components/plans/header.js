@@ -39,7 +39,7 @@ const Header = ({
   <>
     <PageHeader
       className="page-header
-      slds-p-around_x-large"
+        slds-p-around_x-large"
       title={plan.title}
       trail={[
         <Link

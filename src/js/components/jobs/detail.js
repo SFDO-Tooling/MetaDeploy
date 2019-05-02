@@ -175,8 +175,7 @@ class JobDetail extends React.Component<Props, State> {
       return (
         <Button
           label={t('Cancel Installation')}
-          variant="base"
-          className="slds-button_text-destructive"
+          variant="text-destructive"
           onClick={this.requestCancelJob}
         />
       );
