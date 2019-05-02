@@ -96,7 +96,7 @@ $step-ending-columns-min: $step-type-min + $step-badge-min + $step-install-min;
 
   .plan-step-item-name {
     grid-column: name-start / step-row-end;
-    grid-row: 1 / 3;
+    grid-row: 1 / span 2;
   }
 
   .plan-step-name {
@@ -158,13 +158,13 @@ $step-ending-columns-min: $step-type-min + $step-badge-min + $step-install-min;
     color: $color-text-brand-primary;
     margin-bottom: $spacing-small * -1;
     margin-left: $spacing-large * -1;
-    // full width of the page minus padding ===
-    // full width of table so scroll goes edge to edge
     margin-top: 1.25rem;
     overflow: auto;
     // transform added to move this accordion content above table tr
     // allows for the tr:hover bg color to not overlap the logs bg color
     transform: scale(1);
+    // full width of the page minus padding ===
+    // full width of table so scroll goes edge to edge
     width: calc(100vw - 4rem);
   }
 
