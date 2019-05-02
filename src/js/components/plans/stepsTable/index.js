@@ -71,6 +71,7 @@ class StepsTable extends React.Component<Props, State> {
       const newPanels = new Set([...expandedPanels]);
       let changed = false;
       // Auto-collapse previously-active step
+      /* istanbul ignore else */
       if (previousActiveJob && newPanels.has(previousActiveJob)) {
         changed = true;
         newPanels.delete(previousActiveJob);
@@ -80,6 +81,7 @@ class StepsTable extends React.Component<Props, State> {
         changed = true;
         newPanels.add(currentActiveJob);
       }
+      /* istanbul ignore else */
       if (changed) {
         updates.expandedPanels = newPanels;
       }
@@ -92,7 +94,7 @@ class StepsTable extends React.Component<Props, State> {
   getActiveStep = (job?: JobType): string | null => {
     // Get the currently-running step
     let activeJobStepId = null;
-    if (job && this.jobIsRunning()) {
+    if (job && this.jobIsRunning(job)) {
       for (const step of job.steps) {
         if (!(job.results[step] && job.results[step].status)) {
           activeJobStepId = step;
@@ -103,14 +105,13 @@ class StepsTable extends React.Component<Props, State> {
     return activeJobStepId;
   };
 
-  jobIsRunning = (): boolean => {
-    const { job } = this.props;
-    return Boolean(job && job.status === CONSTANTS.STATUS.STARTED);
-  };
+  jobIsRunning = (job?: JobType): boolean =>
+    Boolean(job && job.status === CONSTANTS.STATUS.STARTED);
 
   jobHasLogs = (): boolean => {
     const { job } = this.props;
     let hasLogs = false;
+    /* istanbul ignore if */
     if (!job) {
       return hasLogs;
     }
@@ -146,7 +147,7 @@ class StepsTable extends React.Component<Props, State> {
     if (hide) {
       // Collapse all step-logs
       this.setState({ showLogs: false, expandedPanels: new Set() });
-    } else if (this.jobIsRunning()) {
+    } else if (this.jobIsRunning(job)) {
       // Expand currently-running step-log
       const { expandedPanels } = this.state;
       const panels = new Set([...expandedPanels]);
