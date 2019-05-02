@@ -144,6 +144,10 @@ class StepsTable extends React.Component<Props, State> {
 
   toggleLogs = (hide: boolean): void => {
     const { job } = this.props;
+    /* istanbul ignore if */
+    if (!job) {
+      return;
+    }
     if (hide) {
       // Collapse all step-logs
       this.setState({ showLogs: false, expandedPanels: new Set() });
@@ -152,11 +156,12 @@ class StepsTable extends React.Component<Props, State> {
       const { expandedPanels } = this.state;
       const panels = new Set([...expandedPanels]);
       const activeJobStepId = this.getActiveStep(job);
+      /* istanbul ignore else */
       if (activeJobStepId) {
         panels.add(activeJobStepId);
       }
       this.setState({ showLogs: true, expandedPanels: panels });
-    } else if (job) {
+    } else {
       // Expand all step-logs
       this.setState({ expandedPanels: new Set([...job.steps]) });
     }

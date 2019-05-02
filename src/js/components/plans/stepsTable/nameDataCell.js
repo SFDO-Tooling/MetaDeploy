@@ -23,6 +23,7 @@ type Props = {
 class NameDataCell extends React.Component<Props> {
   togglePanel = () => {
     const { item, togglePanel } = this.props;
+    /* istanbul ignore else */
     if (item) {
       togglePanel(item.id);
     }
