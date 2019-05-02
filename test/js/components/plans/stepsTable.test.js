@@ -1,8 +1,9 @@
 import React from 'react';
-import { fireEvent, render } from 'react-testing-library';
+import { fireEvent, render, cleanup } from 'react-testing-library';
 
 import StepsTable from 'components/plans/stepsTable';
 
+afterEach(cleanup);
 const defaultPlan = {
   id: 'plan-1',
   slug: 'my-plan',
@@ -273,6 +274,47 @@ describe('<StepsTable />', () => {
         expect(log.innerHTML).toEqual('Test log 1');
       });
     });
+
+    test('click collapses accordian logs', () => {
+      const { getByText, container } = setup({
+        job: {
+          id: 'job-1',
+          plan: 'plan-1',
+          status: 'started',
+          steps: ['step-1', 'step-2', 'step-3'],
+          results: {
+            'step-1': { status: 'ok', logs: 'Test log 1' },
+            'step-2': { logs: 'Test log 2' },
+            foo: { status: 'ok', logs: 'Another test log' },
+          },
+        },
+      });
+      fireEvent.click(getByText('Step 1'));
+      const log = container.querySelector('[aria-hidden="false"] code');
+
+      expect(log).toBeInTheDocument();
+    });
+  });
+
+  describe('<ToggleLogsColumnLabel', () => {
+    const { getAllByText } = setup({
+      job: {
+        id: 'job-1',
+        plan: 'plan-1',
+        status: 'started',
+        steps: ['step-1', 'step-2', 'step-3'],
+        results: {
+          'step-1': { status: 'ok', logs: 'Test log 1' },
+          'step-2': { logs: 'Test log 2' },
+          foo: { status: 'ok', logs: 'Another test log' },
+        },
+      },
+    });
+    const toggle = getAllByText('Steps')[0];
+    const steps = new Set(['step-1', 'step-2', 'step-3']);
+    fireEvent.click(toggle);
+    steps.clear();
+    expect(steps.size).toEqual(0);
   });
 
   describe('<RequiredDataCell>', () => {
