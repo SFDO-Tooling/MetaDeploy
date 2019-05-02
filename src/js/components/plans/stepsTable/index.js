@@ -108,6 +108,21 @@ class StepsTable extends React.Component<Props, State> {
     return Boolean(job && job.status === CONSTANTS.STATUS.STARTED);
   };
 
+  jobHasLogs = (): boolean => {
+    const { job } = this.props;
+    let hasLogs = false;
+    if (!job) {
+      return hasLogs;
+    }
+    for (const step of job.steps) {
+      if (job.results[step] && job.results[step].logs) {
+        hasLogs = true;
+        break;
+      }
+    }
+    return hasLogs;
+  };
+
   togglePanel = (id: string): void => {
     const { expandedPanels } = this.state;
     let { showLogs } = this.state;
@@ -161,7 +176,7 @@ class StepsTable extends React.Component<Props, State> {
     const hasValidToken = user && user.valid_token_for !== null;
     const hasReadyPreflight =
       !plan.requires_preflight || (preflight && preflight.is_ready);
-    const openPanels = expandedPanels.size > 0;
+    const logsExpanded = expandedPanels.size > 0;
     return (
       <div
         className="slds-p-around_medium
@@ -174,7 +189,8 @@ class StepsTable extends React.Component<Props, State> {
               label={
                 job ? (
                   <ToggleLogsDataColumnLabel
-                    hasLogs={openPanels}
+                    logsExpanded={logsExpanded}
+                    hasLogs={this.jobHasLogs()}
                     toggleLogs={this.toggleLogs}
                   />
                 ) : (
