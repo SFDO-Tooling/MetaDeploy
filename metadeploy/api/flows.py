@@ -49,9 +49,9 @@ class JobFlowCallback(BasicFlowCallback):
         logger.addHandler(self.handler)
 
         self.result_handler = ResultSpoolLogger(result=self.context)
-        # TODO: This fmt needs to be defined correctly in light of the actual shape of
-        # expected logging data?
-        self.result_handler.setFormatter(coloredlogs.ColoredFormatter(fmt="%(msg)s"))
+        self.result_handler.setFormatter(
+            coloredlogs.ColoredFormatter(fmt="%(asctime)s %(message)s")
+        )
         logger.addHandler(self.result_handler)
 
         logger.setLevel(logging.DEBUG)
