@@ -1,9 +1,8 @@
 import React from 'react';
-import { fireEvent, render, cleanup } from 'react-testing-library';
+import { fireEvent, render } from 'react-testing-library';
 
 import StepsTable from 'components/plans/stepsTable';
 
-afterEach(cleanup);
 const defaultPlan = {
   id: 'plan-1',
   slug: 'my-plan',
@@ -289,32 +288,20 @@ describe('<StepsTable />', () => {
           },
         },
       });
+
+      let log = container.querySelector('[aria-hidden="false"] code');
+      // All logs are closed
+      expect(log).toBeNull();
       fireEvent.click(getByText('Step 1'));
-      const log = container.querySelector('[aria-hidden="false"] code');
 
-      expect(log).toBeInTheDocument();
-    });
-  });
+      log = container.querySelector('[aria-hidden="false"] code');
 
-  describe('<ToggleLogsColumnLabel', () => {
-    const { getAllByText } = setup({
-      job: {
-        id: 'job-1',
-        plan: 'plan-1',
-        status: 'started',
-        steps: ['step-1', 'step-2', 'step-3'],
-        results: {
-          'step-1': { status: 'ok', logs: 'Test log 1' },
-          'step-2': { logs: 'Test log 2' },
-          foo: { status: 'ok', logs: 'Another test log' },
-        },
-      },
+      expect(log.innerHTML).toEqual('Test log 1');
+      fireEvent.click(getByText('Step 1'));
+
+      log = container.querySelector('[aria-hidden="false"] code');
+      expect(log).toBeNull();
     });
-    const toggle = getAllByText('Steps')[0];
-    const steps = new Set(['step-1', 'step-2', 'step-3']);
-    fireEvent.click(toggle);
-    steps.clear();
-    expect(steps.size).toEqual(0);
   });
 
   describe('<RequiredDataCell>', () => {
