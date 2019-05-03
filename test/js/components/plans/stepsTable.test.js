@@ -229,7 +229,29 @@ describe('<StepsTable />', () => {
     expect(log).toBeNull();
   });
 
-  test('disable auto-expand if currently-running step was collapsed', () => {});
+  test('Expand all step-logs', () => {
+    const job = {
+      id: 'job-1',
+      plan: 'plan-1',
+      status: 'complete',
+      steps: ['step-1', 'step-2', 'step-3'],
+      results: {
+        'step-1': { status: 'ok', logs: 'Test log 1' },
+        'step-2': { logs: 'Test log 2' },
+        'step-3': { logs: 'Test log 3' },
+      },
+    };
+    const { getAllByText } = setup({
+      job,
+    });
+
+    /* this doesnt work, need to find all logs in job and make sure they are open */
+    let logs = getAllByText('Test log', { exact: false });
+    const toggle = getAllByText('Steps')[0];
+    fireEvent.click(toggle);
+    logs = getAllByText('Test log', { exact: false });
+    expect(logs.length).toEqual(job.steps.length);
+  });
 
   describe('<NameDataCell>', () => {
     describe('existing preflight', () => {
