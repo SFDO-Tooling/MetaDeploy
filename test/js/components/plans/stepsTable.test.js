@@ -198,6 +198,39 @@ describe('<StepsTable />', () => {
     });
   });
 
+  test('show-all and hide-all once a job is complete', () => {
+    //  this should be the same logic as the togglePanel
+    const { getAllByText, container } = setup({
+      job: {
+        id: 'job-1',
+        plan: 'plan-1',
+        status: 'started',
+        steps: ['step-1', 'step-2', 'step-4'],
+        results: {
+          'step-1': { status: 'ok', logs: 'Test log 1' },
+          'step-2': { logs: 'Test log 2' },
+          foo: { status: 'ok', logs: 'Another test log' },
+        },
+      },
+    });
+    const toggle = getAllByText('Steps')[0];
+    let log = container.querySelector('[aria-hidden="false"] code');
+    // logs are null
+    expect(log).toBeNull();
+    // click toggle
+    fireEvent.click(toggle);
+    // logs are there
+    log = container.querySelector('[aria-hidden="false"] code');
+    expect(log).toBeInTheDocument();
+    // click the toggle
+    fireEvent.click(toggle);
+    // loggs are null
+    log = container.querySelector('[aria-hidden="false"] code');
+    expect(log).toBeNull();
+  });
+
+  test('disable auto-expand if currently-running step was collapsed', () => {});
+
   describe('<NameDataCell>', () => {
     describe('existing preflight', () => {
       test('displays optional message', () => {
