@@ -3,6 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+======================================
 Welcome to MetaDeploy's documentation!
 ======================================
 
@@ -10,6 +11,12 @@ Welcome to MetaDeploy's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   jobs
+   products
+   versions
+   plans
+   orgs
+   user
 
 
 Indices and tables
