@@ -7,19 +7,23 @@ import { connect } from 'react-redux';
 
 import routes from 'utils/routes';
 import { logout } from 'store/user/actions';
+import { selectOrg } from 'store/org/selectors';
 import { selectSocketState } from 'store/socket/selectors';
 import { selectUserState } from 'store/user/selectors';
+import CurrentJobAlert from 'components/jobs/currentJobAlert';
 import Login from 'components/header/login';
 import Logout from 'components/header/logout';
 import OfflineAlert from 'components/offlineAlert';
 import type { AppState } from 'store';
+import type { Org as OrgType } from 'store/org/reducer';
 import type { Socket } from 'store/socket/reducer';
 import type { User } from 'store/user/reducer';
 
 type Props = {
   user: User,
-  doLogout: typeof logout,
   socket: Socket,
+  org: OrgType,
+  doLogout: typeof logout,
 };
 
 class Header extends React.Component<Props> {
@@ -29,10 +33,13 @@ class Header extends React.Component<Props> {
   };
 
   render() {
-    const { socket } = this.props;
+    const { socket, org } = this.props;
     return (
       <>
         {socket ? null : <OfflineAlert />}
+        {org && org.current_job ? (
+          <CurrentJobAlert currentJob={org.current_job} />
+        ) : null}
         <PageHeader
           className="global-header
             slds-p-horizontal_x-large
@@ -69,6 +76,7 @@ class Header extends React.Component<Props> {
 const select = (appState: AppState) => ({
   user: selectUserState(appState),
   socket: selectSocketState(appState),
+  org: selectOrg(appState),
 });
 
 const actions = {

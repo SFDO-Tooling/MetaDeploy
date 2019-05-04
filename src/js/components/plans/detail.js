@@ -212,9 +212,8 @@ class PlanDetail extends React.Component<Props, State> {
                     id,
                   )}
                 >
-                  View the running installation
-                </Link>{' '}
-                to cancel it.
+                  View the running installation.
+                </Link>
               </Trans>
             </span>
           </p>

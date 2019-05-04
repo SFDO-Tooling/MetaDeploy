@@ -194,7 +194,7 @@ describe('<PlanDetail />', () => {
         },
       });
 
-      expect(getByText('View the running installation')).toBeVisible();
+      expect(getByText('View the running installation.')).toBeVisible();
       expect(getAllByText('Install')[0]).toBeDisabled();
     });
   });
