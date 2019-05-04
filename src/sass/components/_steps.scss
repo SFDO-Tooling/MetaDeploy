@@ -1,6 +1,25 @@
 // Steps
 // =====
 
+// Variables used in step table only to help with controlling width/wrapping
+$step-name-min: 300px;
+$step-type-min: 170px;
+$step-badge-min: 100px;
+$step-install-min: 150px;
+$step-ending-columns-min: $step-type-min + $step-badge-min + $step-install-min;
+
+@mixin constrain-label {
+  max-width: calc(100% - #{$step-ending-columns-min});
+
+  @media (min-width: $mq-medium) {
+    max-width: calc(100% - (#{$step-ending-columns-min} + 50px));
+  }
+
+  @media (min-width: $mq-large) {
+    max-width: calc(100% - (#{$step-ending-columns-min} + 150px));
+  }
+}
+
 #plan-steps-table {
   // Borders are added by parent .slds-card
   border: none;
@@ -8,7 +27,12 @@
   // set up layout
   tr {
     display: grid;
-    grid-template-columns: [step-row-start name-start] 4fr [name-end type-start] 1fr [type-end badge-start] 1fr [badge-end install-start] 1fr [install-end step-row-end];
+    grid-template-columns:
+      [step-row-start name-start] minmax($step-name-min, 4fr)
+      [name-end type-start] minmax($step-type-min, 1.5fr)
+      [type-end badge-start] minmax($step-badge-min, 1fr)
+      [badge-end install-start] minmax($step-install-min, 1fr)
+      [install-end step-row-end];
 
     &:focus,
     &:hover {
@@ -24,6 +48,7 @@
   }
 
   .slds-accordion__summary-heading {
+    @include constrain-label;
     font-size: $font-size-medium;
   }
 
@@ -34,32 +59,47 @@
 
   .step-name-no-icon {
     // Line up text of step names, with or without accordion icon:
-    // .slds-button__icon width (0.875rem) + margin-right (0.5rem)
-    margin-left: 1.375rem;
+    // .slds-button__icon width (0.875rem) + margin-right ($spacing-x-small)
+    &.has-job {
+      margin-left: 1.375rem;
+    }
+
+    // protect overlapping steps without an accordion with long names
+    > div {
+      @include constrain-label;
+      display: flex;
+    }
   }
 
   .has-warning {
-    border-left: 1rem solid $color-border-warning;
-    padding-left: 0.5rem;
+    border-left: $spacing-medium solid $color-border-warning;
+    padding-left: $spacing-x-small;
   }
 
   .has-error {
-    border-left: 1rem solid $color-border-error;
-    padding-left: 0.5rem;
+    border-left: $spacing-medium solid $color-border-error;
+    padding-left: $spacing-x-small;
+
+    .slds-is-open {
+      margin-bottom: $var-spacing-small;
+    }
   }
 
   .plan-step-item {
     padding-bottom: $var-spacing-small;
     padding-top: $var-spacing-small;
+
+    &.is-installing {
+      background-color: $color-background-row-selected;
+    }
   }
 
   .plan-step-item-name {
     grid-column: name-start / step-row-end;
-    grid-row: 1 / 3;
+    grid-row: 1 / span 2;
   }
 
   .plan-step-name {
-    align-items: flex-end;
     display: flex;
   }
 
@@ -108,20 +148,28 @@
     }
   }
 
+  section:not(.slds-is-open) > .slds-accordion__content {
+    width: 0;
+  }
+
   .slds-is-open > .slds-accordion__content {
+    @include z-index('logs');
     background: $brand-dark;
     color: $color-text-brand-primary;
-    margin-bottom: -0.75rem;
-    margin-left: -1.5rem;
+    margin-bottom: $spacing-small * -1;
+    margin-left: $spacing-large * -1;
+    margin-top: 1.25rem;
+    overflow: auto;
+    // transform added to move this accordion content above table tr
+    // allows for the tr:hover bg color to not overlap the logs bg color
+    transform: scale(1);
     // full width of the page minus padding ===
     // full width of table so scroll goes edge to edge
-    margin-top: 1.25rem;
     width: calc(100vw - 4rem);
-    overflow: auto;
   }
 
   pre {
     margin-bottom: 0;
-    padding: 1rem 1.5rem 1.5rem;
+    padding: $spacing-medium $spacing-large $spacing-large;
   }
 }

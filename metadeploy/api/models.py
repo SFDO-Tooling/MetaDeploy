@@ -64,7 +64,8 @@ class AllowedList(models.Model):
     title = models.CharField(max_length=128, unique=True)
     description = MarkdownField(blank=True, property_suffix="_markdown")
     org_type = ArrayField(
-        models.CharField(max_length=64, choices=ORG_TYPES, blank=True),
+        models.CharField(max_length=64, choices=ORG_TYPES),
+        blank=True,
         size=4,
         default=list,
         help_text="All orgs of these types will be automatically allowed.",
@@ -492,7 +493,11 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
 
     plan_template = models.ForeignKey(PlanTemplate, on_delete=models.PROTECT)
     version = models.ForeignKey(Version, on_delete=models.PROTECT)
-    preflight_flow_name = models.CharField(max_length=256, blank=True)
+    preflight_flow_name = models.CharField(
+        max_length=256,
+        blank=True,
+        help_text="If this is blank, the Plan requires no preflight.",
+    )
     tier = models.CharField(choices=Tier, default=Tier.primary, max_length=64)
     is_listed = models.BooleanField(default=True)
 

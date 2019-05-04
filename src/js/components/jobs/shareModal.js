@@ -126,7 +126,7 @@ class ShareModal extends React.Component<WrappedProps> {
     return (
       <Modal
         isOpen={this.props.isOpen}
-        title={
+        heading={
           errorMsg ? (
             <span className="slds-text-color_error">
               {t('Resolve Installation Error')}

@@ -135,6 +135,7 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
     title = serializers.CharField()
     preflight_message = serializers.SerializerMethodField()
     not_allowed_instructions = serializers.SerializerMethodField()
+    requires_preflight = serializers.SerializerMethodField()
 
     class Meta:
         model = Plan
@@ -151,6 +152,7 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
             "is_listed",
             "not_allowed_instructions",
             "average_duration",
+            "requires_preflight",
         )
         circumspect_fields = ("steps", "preflight_message")
 
@@ -170,6 +172,9 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
         if not obj.version.product.is_visible_to(self.context["request"].user):
             return getattr(obj.version.product.visible_to, "description_markdown", None)
         return getattr(obj.visible_to, "description_markdown", None)
+
+    def get_requires_preflight(self, obj):
+        return bool(obj.preflight_flow_name)
 
 
 class VersionSerializer(serializers.ModelSerializer):
@@ -336,7 +341,10 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         return None
 
     @staticmethod
-    def _has_valid_preflight(most_recent_preflight):
+    def _has_valid_preflight(most_recent_preflight, plan):
+        if not plan.preflight_flow_name:
+            return True
+
         if not most_recent_preflight:
             return False
 
@@ -348,7 +356,9 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         Every set in this method is a set of numeric Step PKs, from the
         local database.
         """
-        required_steps = set(plan.required_step_ids) - set(preflight.optional_step_ids)
+        required_steps = set(plan.required_step_ids)
+        if preflight:
+            required_steps -= set(preflight.optional_step_ids)
         return not set(required_steps) - set(s.id for s in steps)
 
     def _get_from_data_or_instance(self, data, name, default=None):
@@ -383,7 +393,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             user=user, plan=plan
         )
         no_valid_preflight = not self.instance and not self._has_valid_preflight(
-            most_recent_preflight
+            most_recent_preflight, plan=plan
         )
         if no_valid_preflight:
             raise serializers.ValidationError(_("No valid preflight."))

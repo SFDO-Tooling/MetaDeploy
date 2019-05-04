@@ -49,6 +49,7 @@ const JobCell = (props: DataCellProps): React.Node => {
     return null;
   }
   const { id } = item;
+  const isActive = activeJobStep && id === activeJobStep;
   const result = job.results[id];
   let complete, error, contents, title;
   if (result) {
@@ -98,7 +99,7 @@ const JobCell = (props: DataCellProps): React.Node => {
       </>
     );
   } else if (job.status === STATUS.STARTED) {
-    if (activeJobStep && id === activeJobStep) {
+    if (isActive) {
       title = t('installing');
       contents = (
         <>
@@ -145,7 +146,9 @@ const JobCell = (props: DataCellProps): React.Node => {
   return (
     <DataTableCell
       title={title}
-      className={classNames(className, 'plan-step-item', 'plan-step-options')}
+      className={classNames(className, 'plan-step-item', 'plan-step-options', {
+        'is-installing': isActive,
+      })}
       {...otherProps}
     >
       {contents}

@@ -187,6 +187,24 @@ class TestJob:
 
         assert serializer.is_valid(), serializer.errors
 
+    def test_create_good_no_preflight(
+        self, rf, user_factory, plan_factory, step_factory
+    ):
+        plan = plan_factory(preflight_flow_name="")
+        user = user_factory()
+        step1 = step_factory(plan=plan)
+        step2 = step_factory(plan=plan)
+        step3 = step_factory(plan=plan)
+        request = rf.get("/")
+        request.user = user
+        data = {
+            "plan": str(plan.id),
+            "steps": [str(step1.id), str(step2.id), str(step3.id)],
+        }
+        serializer = JobSerializer(data=data, context=dict(request=request))
+
+        assert serializer.is_valid(), serializer.errors
+
     def test_create_bad_preflight(
         self, rf, user_factory, plan_factory, step_factory, preflight_result_factory
     ):

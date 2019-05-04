@@ -17,6 +17,18 @@
   border: none;
   border-radius: 0;
   box-shadow: none;
+
+  nav[role='navigation'] {
+    margin-bottom: 0;
+  }
+
+  .slds-breadcrumb__item {
+    font-weight: normal;
+  }
+
+  .slds-media__figure {
+    padding-top: 0.25rem;
+  }
 }
 
 .site-logo {

@@ -11,12 +11,20 @@ import type { DataCellProps } from 'components/plans/stepsTable';
 const { RESULT_STATUS } = CONSTANTS;
 
 const RequiredDataCell = (props: DataCellProps): React.Node => {
-  const { preflight, item, job, className, ...otherProps } = props;
+  const {
+    preflight,
+    item,
+    job,
+    className,
+    activeJobStep,
+    ...otherProps
+  } = props;
   /* istanbul ignore if */
   if (!item) {
     return null;
   }
   const { id } = item;
+  const isActive = activeJobStep && id === activeJobStep;
   const result = preflight && preflight.results && preflight.results[id];
   let skipped, optional;
   if (result) {
@@ -25,12 +33,9 @@ const RequiredDataCell = (props: DataCellProps): React.Node => {
   }
   const required =
     item.is_required && !optional && (!job || job.steps.includes(id));
-  const classes = classNames(
-    'slds-align-middle',
-    'slds-badge',
-    'slds-m-horizontal_large',
-    { 'slds-badge_lightest': !required },
-  );
+  const classes = classNames('slds-align-middle', 'slds-badge', {
+    'slds-badge_lightest': !required,
+  });
   let text = t('Optional');
   if (skipped) {
     text = t('Skipped');
@@ -44,6 +49,9 @@ const RequiredDataCell = (props: DataCellProps): React.Node => {
         className,
         'plan-step-item',
         'plan-step-badge-container',
+        {
+          'is-installing': isActive,
+        },
       )}
       {...otherProps}
     >

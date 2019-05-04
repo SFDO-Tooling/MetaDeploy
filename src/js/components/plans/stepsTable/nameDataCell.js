@@ -15,21 +15,30 @@ import type { DataCellProps } from 'components/plans/stepsTable';
 
 const { RESULT_STATUS } = CONSTANTS;
 
-class NameDataCell extends React.Component<
-  DataCellProps,
-  { expanded: boolean },
-> {
-  constructor(props: DataCellProps) {
-    super(props);
-    this.state = { expanded: false };
-  }
+type Props = {
+  togglePanel: (val: string) => void,
+  expandedPanels: Set<string>,
+} & DataCellProps;
 
+class NameDataCell extends React.Component<Props> {
   togglePanel = () => {
-    this.setState({ expanded: !this.state.expanded });
+    const { item, togglePanel } = this.props;
+    /* istanbul ignore else */
+    if (item) {
+      togglePanel(item.id);
+    }
   };
 
   render(): React.Node {
-    const { preflight, job, item, className, ...otherProps } = this.props;
+    const {
+      preflight,
+      job,
+      item,
+      className,
+      activeJobStep,
+      expandedPanels,
+      ...otherProps
+    } = this.props;
     /* istanbul ignore if */
     if (!item) {
       return null;
@@ -37,6 +46,7 @@ class NameDataCell extends React.Component<
     const currentJob = preflight || job;
     const { name, description } = item;
     const { id } = item;
+    const isActive = Boolean(activeJobStep && id === activeJobStep);
     const result = currentJob && currentJob.results && currentJob.results[id];
     let hasError = false;
     let hasWarning = false;
@@ -53,7 +63,9 @@ class NameDataCell extends React.Component<
     if (optionalMsg) {
       display = `${name} — ${optionalMsg}`;
     }
-    display = <span className="slds-p-right_x-small">{display}</span>;
+    display = (
+      <span className="slds-p-right_x-small step-label">{display}</span>
+    );
     const classes = classNames(
       className,
       'plan-step-item',
@@ -61,6 +73,7 @@ class NameDataCell extends React.Component<
       {
         'has-warning': hasWarning,
         'has-error': hasError,
+        'is-installing': isActive,
       },
     );
     const errorList =
@@ -88,7 +101,11 @@ class NameDataCell extends React.Component<
       <DataTableCell title={name} className={classes} {...otherProps}>
         {logs ? (
           <>
-            <Accordion>
+            <Accordion
+              className={classNames({
+                'slds-p-bottom_small': errorList,
+              })}
+            >
               <AccordionPanel
                 id={id}
                 title={name}
@@ -98,7 +115,7 @@ class NameDataCell extends React.Component<
                     {desc}
                   </div>
                 }
-                expanded={this.state.expanded}
+                expanded={expandedPanels.has(id)}
                 onTogglePanel={this.togglePanel}
               >
                 <pre>
@@ -108,9 +125,9 @@ class NameDataCell extends React.Component<
             </Accordion>
             {errorList ? (
               <div
-                className="step-name-no-icon
-                  slds-p-bottom_small
-                  slds-cell-wrap"
+                className={classNames('slds-cell-wrap', 'step-name-no-icon', {
+                  'has-job': job,
+                })}
               >
                 {errorList}
               </div>
@@ -118,10 +135,11 @@ class NameDataCell extends React.Component<
           </>
         ) : (
           <div
-            className="step-name-no-icon
-              slds-cell-wrap"
+            className={classNames('slds-cell-wrap', 'step-name-no-icon', {
+              'has-job': job,
+            })}
           >
-            <div className={errorList ? 'slds-p-bottom_small' : ''}>
+            <div className={classNames({ 'slds-p-bottom_small': errorList })}>
               {display}
               {desc}
             </div>
