@@ -183,6 +183,19 @@ class JobDetail extends React.Component<Props, State> {
     return null;
   }
 
+  controls = () => (
+    <>
+      {this.getCancelBtn()}
+      <Button
+        label={t('Share Installation')}
+        iconCategory="utility"
+        iconName="share"
+        iconPosition="left"
+        onClick={this.openModal}
+      />
+    </>
+  );
+
   render(): React.Node {
     const {
       user,
@@ -235,18 +248,7 @@ class JobDetail extends React.Component<Props, State> {
             version={version}
             plan={plan}
             job={job}
-            navRight={
-              <>
-                {this.getCancelBtn()}
-                <Button
-                  label={t('Share Installation')}
-                  iconCategory="utility"
-                  iconName="share"
-                  iconPosition="left"
-                  onClick={this.openModal}
-                />
-              </>
-            }
+            onRenderControls={this.controls}
           />
           <ShareModal
             isOpen={this.state.modalOpen}

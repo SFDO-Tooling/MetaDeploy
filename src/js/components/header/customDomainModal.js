@@ -59,7 +59,7 @@ class CustomDomainModal extends React.Component<Props, { url: string }> {
     return (
       <Modal
         isOpen={this.props.isOpen}
-        title={t('Use Custom Domain')}
+        heading={t('Use Custom Domain')}
         onRequestClose={this.handleClose}
         footer={footer}
       >
