@@ -199,58 +199,36 @@ describe('<StepsTable />', () => {
   });
 
   test('show-all and hide-all once a job is complete', () => {
-    //  this should be the same logic as the togglePanel
     const { getAllByText, container } = setup({
       job: {
         id: 'job-1',
         plan: 'plan-1',
-        status: 'started',
-        steps: ['step-1', 'step-2', 'step-4'],
+        status: 'complete',
+        steps: ['step-1', 'step-2', 'step-3'],
         results: {
           'step-1': { status: 'ok', logs: 'Test log 1' },
-          'step-2': { logs: 'Test log 2' },
-          foo: { status: 'ok', logs: 'Another test log' },
+          'step-2': { status: 'ok', logs: 'Test log 2' },
+          'step-3': { status: 'ok', logs: 'Test log 3' },
         },
       },
     });
     const toggle = getAllByText('Steps')[0];
     let log = container.querySelector('[aria-hidden="false"] code');
-    // logs are null
-    expect(log).toBeNull();
-    // click toggle
-    fireEvent.click(toggle);
-    // logs are there
-    log = container.querySelector('[aria-hidden="false"] code');
-    expect(log).toBeInTheDocument();
-    // click the toggle
-    fireEvent.click(toggle);
-    // loggs are null
-    log = container.querySelector('[aria-hidden="false"] code');
-    expect(log).toBeNull();
-  });
 
-  test('Expand all step-logs', () => {
-    const job = {
-      id: 'job-1',
-      plan: 'plan-1',
-      status: 'complete',
-      steps: ['step-1', 'step-2', 'step-3'],
-      results: {
-        'step-1': { status: 'ok', logs: 'Test log 1' },
-        'step-2': { logs: 'Test log 2' },
-        'step-3': { logs: 'Test log 3' },
-      },
-    };
-    const { getAllByText } = setup({
-      job,
-    });
+    // logs are collapsed
+    expect(log).toBeNull();
 
-    /* this doesnt work, need to find all logs in job and make sure they are open */
-    let logs = getAllByText('Test log', { exact: false });
-    const toggle = getAllByText('Steps')[0];
     fireEvent.click(toggle);
-    logs = getAllByText('Test log', { exact: false });
-    expect(logs.length).toEqual(job.steps.length);
+    log = container.querySelectorAll('[aria-hidden="false"] code');
+
+    // logs are expanded
+    expect(log).toHaveLength(3);
+
+    fireEvent.click(toggle);
+    log = container.querySelector('[aria-hidden="false"] code');
+
+    // loggs are collapsed
+    expect(log).toBeNull();
   });
 
   describe('<NameDataCell>', () => {
@@ -329,7 +307,7 @@ describe('<StepsTable />', () => {
       });
     });
 
-    test('click collapses accordian logs', () => {
+    test('click collapses accordion logs', () => {
       const { getByText, container } = setup({
         job: {
           id: 'job-1',
@@ -339,23 +317,75 @@ describe('<StepsTable />', () => {
           results: {
             'step-1': { status: 'ok', logs: 'Test log 1' },
             'step-2': { logs: 'Test log 2' },
-            foo: { status: 'ok', logs: 'Another test log' },
           },
         },
       });
 
       let log = container.querySelector('[aria-hidden="false"] code');
+
       // All logs are closed
       expect(log).toBeNull();
-      fireEvent.click(getByText('Step 1'));
 
+      fireEvent.click(getByText('Step 1'));
       log = container.querySelector('[aria-hidden="false"] code');
 
+      // Clicked log is expanded
       expect(log.innerHTML).toEqual('Test log 1');
-      fireEvent.click(getByText('Step 1'));
 
+      fireEvent.click(getByText('Step 1'));
       log = container.querySelector('[aria-hidden="false"] code');
+
+      // All logs are closed
       expect(log).toBeNull();
+    });
+
+    test('closing active step-log disables auto-expand/collapse', () => {
+      let job = {
+        id: 'job-1',
+        plan: 'plan-1',
+        status: 'started',
+        steps: ['step-1', 'step-2', 'step-3'],
+        results: {
+          'step-1': { status: 'ok', logs: 'Test log 1' },
+          'step-2': { logs: 'Test log 2' },
+        },
+      };
+      const { getByText, getAllByText, container, rerender } = setup({
+        job,
+      });
+      const toggle = getAllByText('Steps')[0];
+      fireEvent.click(toggle);
+      let activeLog = container.querySelector('[aria-hidden="false"] code');
+
+      // Active log is expanded
+      expect(activeLog.innerHTML).toEqual('Test log 2');
+
+      fireEvent.click(getByText('Step 2'));
+      activeLog = container.querySelector('[aria-hidden="false"] code');
+
+      // All logs are closed
+      expect(activeLog).toBeNull();
+
+      // Step completes...
+      job = {
+        ...job,
+        results: {
+          ...job.results,
+          'step-2': { status: 'ok', logs: 'Test log 2' },
+        },
+      };
+      rerender(
+        <StepsTable
+          plan={defaultPlan}
+          selectedSteps={selectedSteps}
+          job={job}
+          handleStepsChange={handleStepsChange}
+        />,
+      );
+      activeLog = container.querySelector('[aria-hidden="false"] code');
+
+      // Newly-active log is *not* auto-expanded
+      expect(activeLog).toBeNull();
     });
   });
 
