@@ -80,6 +80,14 @@ class VersionViewSet(viewsets.ModelViewSet):
     filterset_fields = ("product", "label")
     queryset = Version.objects.all()
 
+    @action(detail=True, methods=["get"])
+    def additional_plans(self, request, pk=None):
+        version = self.get_object()
+        serializer = PlanSerializer(
+            version.additional_plans, many=True, context={"request": request}
+        )
+        return Response(serializer.data)
+
 
 class PlanViewSet(viewsets.ModelViewSet):
     serializer_class = PlanSerializer

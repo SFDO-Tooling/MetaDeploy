@@ -2,7 +2,7 @@ import pytest
 from django.urls import reverse
 
 from ..constants import ORGANIZATION_DETAILS
-from ..models import Job, PreflightResult
+from ..models import Job, Plan, PreflightResult
 
 
 def format_timestamp(value):
@@ -193,7 +193,6 @@ class TestBasicGetViews:
                 "created_at": format_timestamp(version.created_at),
                 "primary_plan": None,
                 "secondary_plan": None,
-                "additional_plans": [],
                 "is_listed": True,
             },
             "slug": product.slug,
@@ -217,7 +216,6 @@ class TestBasicGetViews:
             "created_at": format_timestamp(version.created_at),
             "primary_plan": None,
             "secondary_plan": None,
-            "additional_plans": [],
             "is_listed": True,
         }
 
@@ -393,3 +391,30 @@ class TestOrgViewset:
         response = client.get(reverse("org-list"))
 
         assert response.json() == {"current_job": None, "current_preflight": None}
+
+
+@pytest.mark.django_db
+class TestVersionAdditionalPlans:
+    def test_get__good(self, client, plan_factory):
+        plan = plan_factory(tier=Plan.Tier.additional)
+        response = client.get(
+            reverse("version-additional-plans", kwargs={"pk": plan.version.id})
+        )
+
+        assert response.status_code == 200
+        assert response.json() == [
+            {
+                "id": str(plan.id),
+                "title": "Sample plan",
+                "version": str(plan.version.id),
+                "preflight_message": "",
+                "tier": "additional",
+                "slug": "sample-plan",
+                "old_slugs": [],
+                "steps": [],
+                "is_allowed": True,
+                "is_listed": True,
+                "not_allowed_instructions": None,
+                "requires_preflight": True,
+            }
+        ]
