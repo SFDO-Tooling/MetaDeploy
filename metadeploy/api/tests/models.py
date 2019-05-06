@@ -353,6 +353,36 @@ class TestPlan:
         plan = plan_factory(title="My Plan", version=version)
         assert str(plan) == "My Product, Version v0.1.0, Plan My Plan"
 
+    def test_plan_post_install_markdown(self, plan_factory):
+        msg = "This is a *sample* with some<script src='bad.js'></script> bad tags."
+        plan = plan_factory(post_install_message_additional=msg)
+        expected = (
+            "<p>This is a <em>sample</em> with some&lt;script src='bad.js'&gt;"
+            "&lt;/script&gt; bad tags.</p>"
+        )
+
+        assert plan.post_install_message_additional_markdown == expected
+
+    def test_average_duration(self, plan_factory, job_factory):
+        start = timezone.now()
+        end = start + timedelta(seconds=30)
+        plan = plan_factory()
+
+        assert plan.average_duration is None
+
+        job_factory(
+            plan=plan, status=Job.Status.complete, success_at=end, enqueued_at=start
+        )
+
+        assert plan.average_duration is None
+
+        for _ in range(4):
+            job_factory(
+                plan=plan, status=Job.Status.complete, success_at=end, enqueued_at=start
+            )
+
+        assert plan.average_duration == timedelta(seconds=30)
+
 
 @pytest.mark.django_db
 def test_step_str(step_factory):
@@ -403,18 +433,6 @@ class TestVersionNaturalKey:
         version = version_factory(label="v0.1.0", product=product)
 
         assert str(version) == "My Product, Version v0.1.0"
-
-
-@pytest.mark.django_db
-def test_plan_post_install_markdown(plan_factory):
-    msg = "This is a *sample* with some<script src='bad.js'></script> bad tags."
-    plan = plan_factory(post_install_message_additional=msg)
-    expected = (
-        "<p>This is a <em>sample</em> with some&lt;script src='bad.js'&gt;"
-        "&lt;/script&gt; bad tags.</p>"
-    )
-
-    assert plan.post_install_message_additional_markdown == expected
 
 
 @pytest.mark.django_db

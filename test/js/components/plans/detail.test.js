@@ -194,7 +194,7 @@ describe('<PlanDetail />', () => {
         },
       });
 
-      expect(getByText('View the running installation')).toBeVisible();
+      expect(getByText('View the running installation.')).toBeVisible();
       expect(getAllByText('Install')[0]).toBeDisabled();
     });
   });
@@ -294,6 +294,30 @@ describe('<PlanDetail />', () => {
     expect(getByText('My Plan')).toBeVisible();
     expect(getByText('Preflight text…')).toBeVisible();
     expect(getByText('Step 1')).toBeVisible();
+  });
+
+  test('renders average time', () => {
+    const product = defaultState.products[0];
+    const { getByText } = setup({
+      initialState: {
+        ...defaultState,
+        products: [
+          {
+            ...product,
+            most_recent_version: {
+              ...product.most_recent_version,
+              primary_plan: {
+                ...product.most_recent_version.primary_plan,
+                average_duration: '30',
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    expect(getByText('Average Install Time:')).toBeVisible();
+    expect(getByText('30 seconds.')).toBeVisible();
   });
 
   test('renders preflight expiration warning', () => {

@@ -1,8 +1,12 @@
+from datetime import timedelta
+
 import pytest
+from django.utils import timezone
 
 from ..models import Job, PreflightResult
 from ..serializers import (
     JobSerializer,
+    JobSummarySerializer,
     PlanSerializer,
     PreflightResultSerializer,
     ProductSerializer,
@@ -397,3 +401,22 @@ class TestJob:
         serializer = JobSerializer(data=data, context=dict(request=request))
 
         assert not serializer.is_valid()
+
+
+@pytest.mark.django_db
+class TestJobSummarySerializer:
+    def test_average_duration(self, plan_factory, job_factory):
+        start = timezone.now()
+        end = start + timedelta(seconds=30)
+        plan = plan_factory()
+
+        job = job_factory(
+            plan=plan, status=Job.Status.complete, success_at=end, enqueued_at=start
+        )
+        assert JobSummarySerializer(job).data["plan_average_duration"] is None
+
+        for _ in range(4):
+            job_factory(
+                plan=plan, status=Job.Status.complete, success_at=end, enqueued_at=start
+            )
+        assert JobSummarySerializer(job).data["plan_average_duration"] == "30.0"

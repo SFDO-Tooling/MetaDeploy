@@ -151,6 +151,7 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
             "is_allowed",
             "is_listed",
             "not_allowed_instructions",
+            "average_duration",
             "requires_preflight",
         )
         circumspect_fields = ("steps", "preflight_message")
@@ -464,10 +465,22 @@ class JobSummarySerializer(serializers.ModelSerializer):
     product_slug = serializers.CharField(source="plan.version.product.slug")
     version_label = serializers.CharField(source="plan.version.label")
     plan_slug = serializers.CharField(source="plan.slug")
+    plan_average_duration = serializers.SerializerMethodField()
 
     class Meta:
         model = Job
-        fields = ("id", "product_slug", "version_label", "plan_slug")
+        fields = (
+            "id",
+            "product_slug",
+            "version_label",
+            "plan_slug",
+            "plan_average_duration",
+        )
+
+    def get_plan_average_duration(self, obj):
+        if obj.plan.average_duration:
+            return str(obj.plan.average_duration.total_seconds())
+        return None
 
 
 class OrgSerializer(serializers.Serializer):
