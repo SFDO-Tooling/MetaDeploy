@@ -3,7 +3,7 @@
 -r base.txt
 
 pytest==4.4.1
-pytest-cov==2.6.1
+pytest-cov==2.7.1
 pytest-django==3.4.8
 pytest-asyncio==0.10.0
 flake8==3.7.7
