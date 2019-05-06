@@ -465,7 +465,7 @@ class JobSummarySerializer(serializers.ModelSerializer):
     product_slug = serializers.CharField(source="plan.version.product.slug")
     version_label = serializers.CharField(source="plan.version.label")
     plan_slug = serializers.CharField(source="plan.slug")
-    plan_average_duration = serializers.CharField(source="plan.average_duration")
+    plan_average_duration = serializers.SerializerMethodField()
 
     class Meta:
         model = Job
@@ -476,6 +476,11 @@ class JobSummarySerializer(serializers.ModelSerializer):
             "plan_slug",
             "plan_average_duration",
         )
+
+    def get_plan_average_duration(self, obj):
+        if obj.plan.average_duration:
+            return str(obj.plan.average_duration.total_seconds())
+        return None
 
 
 class OrgSerializer(serializers.Serializer):
