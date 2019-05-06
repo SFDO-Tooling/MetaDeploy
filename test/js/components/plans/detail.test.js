@@ -114,8 +114,8 @@ const defaultState = {
       error_count: 0,
       warning_count: 0,
       results: {
-        'step-1': [{ status: 'optional' }],
-        'step-3': [{ status: 'skip' }],
+        'step-1': { status: 'optional' },
+        'step-3': { status: 'skip' },
       },
       is_ready: true,
     },
@@ -138,6 +138,7 @@ describe('<PlanDetail />', () => {
     const context = {};
     const {
       getByText,
+      getAllByText,
       queryByText,
       getByAltText,
       container,
@@ -154,6 +155,7 @@ describe('<PlanDetail />', () => {
     );
     return {
       getByText,
+      getAllByText,
       queryByText,
       getByAltText,
       container,
@@ -177,7 +179,7 @@ describe('<PlanDetail />', () => {
 
   describe('installation is already running on org', () => {
     test('renders warning and disabled button', () => {
-      const { getByText } = setup({
+      const { getByText, getAllByText } = setup({
         initialState: {
           ...defaultState,
           org: {
@@ -193,13 +195,13 @@ describe('<PlanDetail />', () => {
       });
 
       expect(getByText('View the running installation')).toBeVisible();
-      expect(getByText('Install')).toBeDisabled();
+      expect(getAllByText('Install')[0]).toBeDisabled();
     });
   });
 
   describe('preflight is already running on org', () => {
     test('renders warning and disabled button', () => {
-      const { getByText } = setup({
+      const { getByText, getAllByText } = setup({
         initialState: {
           ...defaultState,
           org: { current_job: null, current_preflight: '1' },
@@ -209,7 +211,7 @@ describe('<PlanDetail />', () => {
       expect(
         getByText('A pre-install validation is currently running on this org.'),
       ).toBeVisible();
-      expect(getByText('Install')).toBeDisabled();
+      expect(getAllByText('Install')[0]).toBeDisabled();
     });
   });
 

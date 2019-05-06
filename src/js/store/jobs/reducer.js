@@ -16,7 +16,7 @@ export type Job = {|
   +status: 'started' | 'complete' | 'failed' | 'canceled',
   +steps: Array<string>,
   +results: {|
-    [string]: Array<StepResult>,
+    [string]: StepResult,
   |},
   +org_name: string | null,
   +org_type: string | null,

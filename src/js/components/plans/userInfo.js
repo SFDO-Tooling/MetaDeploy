@@ -44,12 +44,9 @@ const UserInfo = ({ user }: { user: UserType }): React.Node => {
     >
       <Card
         bodyClassName="slds-card__body_inner"
-        heading={hasValidToken ? t('Connected to Salesforce') : ''}
-        icon={
-          hasValidToken ? (
-            <Icon category="utility" name="connected_apps" />
-          ) : null
-        }
+        heading={t('Connected to Salesforce')}
+        hasNoHeader={!hasValidToken}
+        icon={<Icon category="utility" name="connected_apps" />}
         empty={hasValidToken ? null : <LoggedOut />}
         footer={hasValidToken ? <Footer /> : null}
       >

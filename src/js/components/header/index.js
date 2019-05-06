@@ -22,41 +22,49 @@ type Props = {
   socket: Socket,
 };
 
-const Header = ({ user, doLogout, socket }: Props) => (
-  <>
-    {socket ? null : <OfflineAlert />}
-    <PageHeader
-      className="global-header
-        slds-p-horizontal_x-large
-        slds-p-vertical_medium"
-      title={
-        <Link
-          to={routes.home()}
-          className="slds-text-heading_large
+class Header extends React.Component<Props> {
+  controls = () => {
+    const { user, doLogout } = this.props;
+    return user ? <Logout user={user} doLogout={doLogout} /> : <Login />;
+  };
+
+  render() {
+    const { socket } = this.props;
+    return (
+      <>
+        {socket ? null : <OfflineAlert />}
+        <PageHeader
+          className="global-header
+            slds-p-horizontal_x-large
+            slds-p-vertical_medium"
+          title={
+            <Link
+              to={routes.home()}
+              className="slds-text-heading_large
             slds-text-link_reset"
-        >
-          {window.GLOBALS.SITE && window.GLOBALS.SITE.product_logo ? (
-            <img
-              className="site-logo"
-              src={window.GLOBALS.SITE.product_logo}
-              alt={window.SITE_NAME}
-              title={window.SITE_NAME}
-            />
-          ) : (
-            <>
-              <span data-logo-bit="start">meta</span>
-              <span data-logo-bit="end">deploy</span>
-            </>
-          )}
-        </Link>
-      }
-      navRight={
-        <>{user ? <Logout user={user} doLogout={doLogout} /> : <Login />}</>
-      }
-      variant="objectHome"
-    />
-  </>
-);
+            >
+              {window.GLOBALS.SITE && window.GLOBALS.SITE.product_logo ? (
+                <img
+                  className="site-logo"
+                  src={window.GLOBALS.SITE.product_logo}
+                  alt={window.SITE_NAME}
+                  title={window.SITE_NAME}
+                />
+              ) : (
+                <>
+                  <span data-logo-bit="start">meta</span>
+                  <span data-logo-bit="end">deploy</span>
+                </>
+              )}
+            </Link>
+          }
+          onRenderControls={this.controls}
+          variant="object-home"
+        />
+      </>
+    );
+  }
+}
 
 const select = (appState: AppState) => ({
   user: selectUserState(appState),

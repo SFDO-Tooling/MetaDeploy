@@ -8,7 +8,7 @@
   left: 50%;
   transform: translateX(-50%);
 
-  @media (min-width: $mq-medium) {
+  @media (min-width: $mq-large) {
     max-width: 50vw;
   }
 

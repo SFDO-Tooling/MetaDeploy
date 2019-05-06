@@ -105,6 +105,7 @@ describe('<JobDetail />', () => {
     const context = {};
     const {
       getByText,
+      getAllByText,
       queryByText,
       getByAltText,
       container,
@@ -121,6 +122,7 @@ describe('<JobDetail />', () => {
     );
     return {
       getByText,
+      getAllByText,
       queryByText,
       getByAltText,
       container,
@@ -398,7 +400,7 @@ describe('<JobDetail />', () => {
       const canceled = Promise.resolve({});
       requestCancelJob.mockReturnValue(() => canceled);
       const id = 'job-1';
-      const { getByText } = setup({
+      const { getAllByText } = setup({
         initialState: {
           ...defaultState,
           user: { is_staff: true },
@@ -410,12 +412,12 @@ describe('<JobDetail />', () => {
           },
         },
       });
-      fireEvent.click(getByText('Cancel Installation'));
+      fireEvent.click(getAllByText('Cancel Installation')[0]);
 
       expect.assertions(2);
       expect(requestCancelJob).toHaveBeenCalledWith('job-1');
       return canceled.then(() => {
-        expect(getByText('Canceling Installation…')).toBeVisible();
+        expect(getAllByText('Canceling Installation…')[0]).toBeVisible();
       });
     });
   });

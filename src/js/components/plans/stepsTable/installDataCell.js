@@ -6,6 +6,7 @@ import DataTableCell from '@salesforce/design-system-react/components/data-table
 import Icon from '@salesforce/design-system-react/components/icon';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
+import classNames from 'classnames';
 import { t } from 'i18next';
 
 import { CONSTANTS } from 'store/plans/reducer';
@@ -42,19 +43,18 @@ export const InstallDataColumnLabel = (): React.Node => (
 );
 
 const JobCell = (props: DataCellProps): React.Node => {
-  const { item, job, activeJobStep } = props;
+  const { item, job, activeJobStep, className, ...otherProps } = props;
   /* istanbul ignore if */
   if (!item || !job) {
     return null;
   }
   const { id } = item;
+  const isActive = activeJobStep && id === activeJobStep;
   const result = job.results[id];
   let complete, error, contents, title;
   if (result) {
-    complete =
-      result.find(res => res.status === RESULT_STATUS.OK) !== undefined;
-    error =
-      result.find(res => res.status === RESULT_STATUS.ERROR) !== undefined;
+    complete = result.status === RESULT_STATUS.OK;
+    error = result.status === RESULT_STATUS.ERROR;
   }
   if (!job.steps.includes(id)) {
     title = t('skipped');
@@ -73,16 +73,18 @@ const JobCell = (props: DataCellProps): React.Node => {
   } else if (complete) {
     title = t('completed');
     contents = (
-      <Icon
-        category="action"
-        name="approval"
-        assistiveText={{
-          label: title,
-        }}
-        size="xx-small"
-        containerClassName="slds-icon-standard-approval
-          slds-m-left_xxx-small"
-      />
+      <div className="is-completed">
+        <Icon
+          category="action"
+          name="approval"
+          assistiveText={{
+            label: title,
+          }}
+          size="xx-small"
+          containerClassName="slds-icon-standard-approval
+            slds-m-left_xxx-small"
+        />
+      </div>
     );
   } else if (error) {
     title = t('error');
@@ -97,7 +99,7 @@ const JobCell = (props: DataCellProps): React.Node => {
       </>
     );
   } else if (job.status === STATUS.STARTED) {
-    if (activeJobStep && id === activeJobStep) {
+    if (isActive) {
       title = t('installing');
       contents = (
         <>
@@ -142,7 +144,13 @@ const JobCell = (props: DataCellProps): React.Node => {
     );
   }
   return (
-    <DataTableCell title={title} {...props}>
+    <DataTableCell
+      title={title}
+      className={classNames(className, 'plan-step-item', 'plan-step-options', {
+        'is-installing': isActive,
+      })}
+      {...otherProps}
+    >
       {contents}
     </DataTableCell>
   );
@@ -161,7 +169,13 @@ class PreflightCell extends React.Component<DataCellProps> {
   };
 
   render(): React.Node {
-    const { preflight, item, selectedSteps } = this.props;
+    const {
+      preflight,
+      item,
+      selectedSteps,
+      className,
+      ...otherProps
+    } = this.props;
     /* istanbul ignore if */
     if (!item) {
       return null;
@@ -170,8 +184,8 @@ class PreflightCell extends React.Component<DataCellProps> {
     const result = preflight && preflight.results && preflight.results[id];
     let skipped, optional, content;
     if (result) {
-      skipped = result.find(res => res.status === RESULT_STATUS.SKIP);
-      optional = result.find(res => res.status === RESULT_STATUS.OPTIONAL);
+      skipped = result.status === RESULT_STATUS.SKIP ? result : null;
+      optional = result.status === RESULT_STATUS.OPTIONAL ? result : null;
     }
     const required = item.is_required && !optional;
     const recommended = !required && item.is_recommended;
@@ -206,7 +220,6 @@ class PreflightCell extends React.Component<DataCellProps> {
         <Checkbox
           id={`step-${id}`}
           checked={selectedSteps && selectedSteps.has(id)}
-          className="slds-p-vertical_x-small"
           labels={{ label }}
           assistiveText={{
             label: title,
@@ -216,7 +229,11 @@ class PreflightCell extends React.Component<DataCellProps> {
       );
     }
     return (
-      <DataTableCell title={title} {...this.props}>
+      <DataTableCell
+        title={title}
+        className={classNames(className, 'plan-step-item', 'plan-step-options')}
+        {...otherProps}
+      >
         {content}
       </DataTableCell>
     );
