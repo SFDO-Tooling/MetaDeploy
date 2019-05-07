@@ -197,6 +197,21 @@ jobs:
             yarn pytest:check-coverage
             yarn test:check-coverage
 
+  build-docs:
+    working_directory: ~/metadeploy
+    docker:
+      - image: circleci/python:3.7
+    steps:
+      - checkout
+      - restore_cache:
+          key: v2-metadeploy-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+      - run:
+          name: Test Python
+          command: |
+            . venv/bin/activate
+            cd docs
+            make html
+
 workflows:
   version: 2
   build-and-test:
@@ -209,6 +224,9 @@ workflows:
           requires:
             - build
       - test-python:
+          requires:
+            - build
+      - build-docs:
           requires:
             - build
       - report-test-coverage:
