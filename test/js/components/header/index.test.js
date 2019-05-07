@@ -7,7 +7,7 @@ import { renderWithRedux } from './../../utils';
 import Header from 'components/header';
 
 describe('<Header />', () => {
-  const setup = (initialState = { user: null, socket: false }) => {
+  const setup = (initialState = { user: null, socket: false, org: null }) => {
     const {
       container,
       getByLabelText,
@@ -83,6 +83,30 @@ describe('<Header />', () => {
       const { queryByText } = setup(initialState);
 
       expect(queryByText('reload the page.')).toBeNull();
+    });
+  });
+
+  describe('currently running job', () => {
+    test('renders CurrentJobAlert', () => {
+      const initialState = {
+        user: { username: 'Test User' },
+        org: {
+          current_job: {
+            id: 'my-job',
+            product_slug: 'my-product',
+            version_label: 'my-version',
+            plan_slug: 'my-plan',
+            plan_average_duration: '119.999',
+          },
+        },
+      };
+      const { getByText } = setup(initialState);
+
+      expect(
+        getByText(
+          'An installation is currently running on this org. Average install time is 2 minutes.',
+        ),
+      ).toBeVisible();
     });
   });
 });

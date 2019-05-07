@@ -25,43 +25,37 @@ type State = {
   confirmed: boolean,
 };
 
-const WarningList = ({
+const Warning = ({
   id,
-  results,
+  result,
   name,
 }: {
   id: string,
-  results: Array<StepResultType>,
+  result: StepResultType,
   name?: string,
 }): React.Node => {
-  const warnings = [];
-  for (const [idx, result] of results.entries()) {
-    if (result.message && result.status === CONSTANTS.RESULT_STATUS.WARN) {
-      warnings.push(
-        <li key={`${id}-${idx}`}>
-          <WarningIcon />
-          {/* These messages are pre-cleaned by the API */}
-          <span dangerouslySetInnerHTML={{ __html: result.message }} />
-        </li>,
-      );
-    }
+  if (result.message && result.status === CONSTANTS.RESULT_STATUS.WARN) {
+    return (
+      <div className="slds-p-vertical_x-small">
+        {name && id !== 'plan' ? (
+          <h2
+            className="slds-text-heading_small
+              slds-p-bottom_x-small"
+          >
+            {name}
+          </h2>
+        ) : null}
+        <ul>
+          <li>
+            <WarningIcon />
+            {/* These messages are pre-cleaned by the API */}
+            <span dangerouslySetInnerHTML={{ __html: result.message }} />
+          </li>
+        </ul>
+      </div>
+    );
   }
-  if (!warnings.length) {
-    return null;
-  }
-  return (
-    <div className="slds-p-vertical_x-small">
-      {name && id !== 'plan' ? (
-        <h2
-          className="slds-text-heading_small
-            slds-p-bottom_x-small"
-        >
-          {name}
-        </h2>
-      ) : null}
-      <ul>{warnings}</ul>
-    </div>
-  );
+  return null;
 };
 
 class PreflightWarningModal extends React.Component<Props, State> {
@@ -98,25 +92,23 @@ class PreflightWarningModal extends React.Component<Props, State> {
     return (
       <Modal
         isOpen={isOpen}
-        title={t('Potential Issues')}
+        heading={t('Potential Issues')}
         tagline={t('(confirm to continue)')}
         onRequestClose={this.handleClose}
         footer={footer}
       >
         <div className="slds-p-horizontal_large slds-p-vertical_medium">
-          {results.plan ? (
-            <WarningList id="plan" results={results.plan} />
-          ) : null}
+          {results.plan ? <Warning id="plan" result={results.plan} /> : null}
           {steps.map(step => {
-            const stepResults = results[step.id];
-            if (!stepResults) {
+            const stepResult = results[step.id];
+            if (!stepResult) {
               return null;
             }
             return (
-              <WarningList
+              <Warning
                 key={step.id}
                 id={step.id}
-                results={stepResults}
+                result={stepResult}
                 name={step.name}
               />
             );

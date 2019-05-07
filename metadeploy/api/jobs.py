@@ -51,6 +51,7 @@ def finalize_result(result):
     try:
         yield
         result.status = success_status
+        result.success_at = timezone.now()
     except Exception as e:
         if not isinstance(
             e, (StopRequested, ShutDownImminentException, StopFlowException)

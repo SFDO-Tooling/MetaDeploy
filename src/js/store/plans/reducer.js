@@ -22,6 +22,7 @@ export type Plan = {
   +is_listed: boolean,
   +is_allowed: boolean,
   +not_allowed_instructions: string | null,
+  +average_duration: string | null,
   +requires_preflight: boolean,
 };
 export type Plans = Array<Plan>;
@@ -29,10 +30,11 @@ export type Plans = Array<Plan>;
 export type StepResult = {|
   +status: 'ok' | 'warn' | 'error' | 'skip' | 'optional',
   +message?: string,
+  +logs?: string,
 |};
 export type PreflightErrors = {|
-  +plan?: Array<StepResult>,
-  [string]: Array<StepResult>,
+  +plan?: StepResult,
+  [string]: StepResult,
 |};
 export type Preflight = {|
   +id: string,

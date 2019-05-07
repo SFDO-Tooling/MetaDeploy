@@ -70,17 +70,20 @@ class ShareModal extends React.Component<WrappedProps> {
     if (showError) {
       let stepName = null;
       let stepError = null;
-      // Get step-specific error (and step name)
-      for (const id of Object.keys(job.results)) {
-        const result = job.results[id].find(
-          res => res.status === CONSTANTS.RESULT_STATUS.ERROR && res.message,
-        );
-        stepError = result && result.message;
-        if (stepError && plan.steps && plan.steps.length) {
-          const step = plan.steps.find(s => s.id === id);
-          if (step) {
-            stepName = step.name;
-            break;
+      if (plan.steps && plan.steps.length) {
+        // Get step-specific error (and step name)
+        for (const id of Object.keys(job.results)) {
+          const result = job.results[id];
+          if (
+            result.status === CONSTANTS.RESULT_STATUS.ERROR &&
+            result.message
+          ) {
+            const step = plan.steps.find(s => s.id === id);
+            if (step) {
+              stepError = result.message;
+              stepName = step.name;
+              break;
+            }
           }
         }
       }
@@ -123,7 +126,7 @@ class ShareModal extends React.Component<WrappedProps> {
     return (
       <Modal
         isOpen={this.props.isOpen}
-        title={
+        heading={
           errorMsg ? (
             <span className="slds-text-color_error">
               {t('Resolve Installation Error')}
