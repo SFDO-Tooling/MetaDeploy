@@ -206,7 +206,7 @@ jobs:
       - restore_cache:
           key: v2-metadeploy-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
       - run:
-          name: Test Python
+          name: Build Documentation
           command: |
             . venv/bin/activate
             cd docs
