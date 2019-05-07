@@ -1,6 +1,6 @@
 // @flow
 
-import type { Plan, Plans } from 'store/plans/reducer';
+import type { Plan } from 'store/plans/reducer';
 import type { ProductsAction } from 'store/products/actions';
 
 export type Version = {
@@ -11,7 +11,8 @@ export type Version = {
   +created_at: string,
   +primary_plan: Plan | null,
   +secondary_plan: Plan | null,
-  +additional_plans: Plans,
+  +fetched_additional_plans?: boolean,
+  +additional_plans?: { [string]: Plan | null },
   +is_listed: boolean,
 };
 export type Product = {

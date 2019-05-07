@@ -81,3 +81,15 @@ export const fetchVersion = (filters: VersionFilters): ThunkAction => (
       throw err;
     });
 };
+
+export const fetchPlans = (version: string): ThunkAction => (
+  dispatch,
+  getState,
+  { apiFetch },
+) => {
+  // @@@ fetch additional_plans for given version id
+  // - Store them each as { [slug]: Plan } on `additional_plans`.
+  // - Also need to iterate through each `plan.old_slugs` and save plan under
+  //   each of those slugs as well?
+  // - Set `fetched_additional_plans: true`
+};

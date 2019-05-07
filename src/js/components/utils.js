@@ -112,6 +112,30 @@ export const shouldFetchVersion = ({
   return false;
 };
 
+export const shouldFetchPlan = ({
+  version,
+  plan,
+  planSlug,
+}: {
+  version: VersionType | null,
+  plan?: PlanType | null,
+  planSlug?: ?string,
+}): boolean => {
+  const hasVersion = version !== null;
+  const hasPlan = plan !== null;
+  if (hasVersion && !hasPlan && planSlug) {
+    const plan404 =
+      version &&
+      version.additional_plans &&
+      version.additional_plans[planSlug] === null;
+    if (!plan404) {
+      // Fetch plan from API
+      return true;
+    }
+  }
+  return false;
+};
+
 export const getLoadingOrNotFound = ({
   product,
   productSlug,
@@ -158,6 +182,13 @@ export const getLoadingOrNotFound = ({
   if (plan === null) {
     if (!version) {
       return <VersionNotFound product={product} />;
+    }
+    if (
+      !version.additional_plans ||
+      (planSlug && version.additional_plans[planSlug] === null)
+    ) {
+      // Fetching plan from API
+      return <Spinner />;
     }
     return <PlanNotFound product={product} version={version} />;
   }
