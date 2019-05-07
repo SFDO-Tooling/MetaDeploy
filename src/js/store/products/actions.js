@@ -24,13 +24,29 @@ type FetchVersionFailed = {
   type: 'FETCH_VERSION_FAILED',
   payload: VersionFilters,
 };
+type FetchPlansStarted = {
+  type: 'FETCH_PLANS_STARTED',
+  payload: [], // think this needs to be a type like Version.additional_plans ?
+};
+type FetchPlansFailed = {
+  type: 'FETCH_PLANS_FAILED',
+  payload: [],
+};
+type FetchPlansSucceeded = {
+  type: 'FETCH_PLANS_SUCCEEDED',
+  payload: [],
+};
+
 export type ProductsAction =
   | FetchProductsStarted
   | FetchProductsSucceeded
   | FetchProductsFailed
   | FetchVersionStarted
   | FetchVersionSucceeded
-  | FetchVersionFailed;
+  | FetchVersionFailed
+  | FetchPlansStarted
+  | FetchPlansFailed
+  | FetchPlansSucceeded;
 
 export const fetchProducts = (): ThunkAction => (
   dispatch,
@@ -87,7 +103,27 @@ export const fetchPlans = (version: string): ThunkAction => (
   getState,
   { apiFetch },
 ) => {
-  // @@@ fetch additional_plans for given version id
+  dispatch({ type: 'FETCH_PLANS_STARTED', payload: version });
+  const baseUrl = window.api_urls.versionList();
+  return apiFetch(`${baseUrl}${version}/additional_plans`)
+    .then(response => {
+      if (!Array.isArray(response)) {
+        const error = (new Error('Invalid response received'): {
+          [string]: mixed,
+        });
+        error.response = response;
+        throw error;
+      }
+      return dispatch({
+        type: 'FETCH_PLANS_SUCCEEDED',
+        payload: response,
+      });
+    })
+    .catch(err => {
+      dispatch({ type: 'FETCH_PLANS_FAILED', payload: [] });
+      throw err;
+    });
+
   // - Store them each as { [slug]: Plan } on `additional_plans`.
   // - Also need to iterate through each `plan.old_slugs` and save plan under
   //   each of those slugs as well?
