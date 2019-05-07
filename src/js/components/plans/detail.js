@@ -150,8 +150,8 @@ class PlanDetail extends React.Component<Props, State> {
       const result = preflight && preflight.results && preflight.results[id];
       let skipped, optional;
       if (result) {
-        skipped = result.find(res => res.status === RESULT_STATUS.SKIP);
-        optional = result.find(res => res.status === RESULT_STATUS.OPTIONAL);
+        skipped = result.status === RESULT_STATUS.SKIP ? result : null;
+        optional = result.status === RESULT_STATUS.OPTIONAL ? result : null;
       }
       if (!skipped) {
         const required = step.is_required && !optional;
@@ -212,9 +212,8 @@ class PlanDetail extends React.Component<Props, State> {
                     id,
                   )}
                 >
-                  View the running installation
-                </Link>{' '}
-                to cancel it.
+                  View the running installation.
+                </Link>
               </Trans>
             </span>
           </p>
@@ -332,6 +331,7 @@ class PlanDetail extends React.Component<Props, State> {
                 />
               ) : null}
               <Intro
+                averageDuration={plan.average_duration}
                 preMessage={
                   plan.preflight_message ? (
                     // These messages are pre-cleaned by the API

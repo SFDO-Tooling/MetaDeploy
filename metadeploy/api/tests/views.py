@@ -237,6 +237,7 @@ class TestBasicGetViews:
             "is_allowed": True,
             "is_listed": True,
             "not_allowed_instructions": None,
+            "average_duration": None,
         }
 
     def test_plan__not_visible(self, client, allowed_list_factory, plan_factory):
@@ -258,6 +259,7 @@ class TestBasicGetViews:
             "is_allowed": False,
             "is_listed": True,
             "not_allowed_instructions": "<p>Sample instructions.</p>",
+            "average_duration": None,
         }
 
     def test_plan__visible(
@@ -292,6 +294,7 @@ class TestBasicGetViews:
             "is_allowed": True,
             "is_listed": True,
             "not_allowed_instructions": "<p>Sample instructions.</p>",
+            "average_duration": None,
         }
 
     def test_plan__visible_superuser(
@@ -317,6 +320,7 @@ class TestBasicGetViews:
             "is_allowed": True,
             "is_listed": True,
             "not_allowed_instructions": "<p>Sample instructions.</p>",
+            "average_duration": None,
         }
 
 

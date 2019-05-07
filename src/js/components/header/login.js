@@ -120,8 +120,7 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
         <Dropdown
           id={id}
           label={label === undefined ? t('Log In') : label}
-          className="slds-dropdown_actions
-            slds-dropdown_medium"
+          className="slds-dropdown_actions"
           triggerClassName={triggerClassName}
           buttonClassName={buttonClassName}
           buttonVariant={buttonVariant}

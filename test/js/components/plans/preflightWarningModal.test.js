@@ -5,9 +5,9 @@ import PreflightWarningModal from 'components/plans/preflightWarningModal';
 
 describe('<PreflightWarningModal />', () => {
   const defaultResults = {
-    plan: [{ status: 'warn', message: 'This is a plan warning.' }],
-    'step-1': [{ status: 'warn', message: 'This is a step warning.' }],
-    'step-2': [{ status: 'warn' }],
+    plan: { status: 'warn', message: 'This is a plan warning.' },
+    'step-1': { status: 'warn', message: 'This is a step warning.' },
+    'step-2': { status: 'warn' },
     'step-3': undefined,
   };
   const defaultSteps = [

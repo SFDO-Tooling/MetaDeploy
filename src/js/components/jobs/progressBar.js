@@ -19,8 +19,6 @@ const DEFAULTS = {
   PROGRESS_MAX: 0.8, // progress bar stops if step is [x] complete (out of `1`)
 };
 
-// Progress Bar has not been implemented yet in design-system-react
-// https://github.com/salesforce/design-system-react/issues/1365
 class ProgressBar extends React.Component<Props, State> {
   interval: ?IntervalID;
 
@@ -88,9 +86,7 @@ class ProgressBar extends React.Component<Props, State> {
     return job.steps.filter(
       step =>
         job.results[step] &&
-        job.results[step].find(
-          res => res.status === CONSTANTS.RESULT_STATUS.OK,
-        ) !== undefined,
+        job.results[step].status === CONSTANTS.RESULT_STATUS.OK,
     ).length;
   }
 

@@ -19,7 +19,7 @@ const Header = ({
   product,
   version,
   plan,
-  navRight,
+  onRenderControls,
   job,
   userLoggedIn,
   preflightStatus,
@@ -29,7 +29,7 @@ const Header = ({
   product: ProductType,
   version: VersionType,
   plan: PlanType,
-  navRight?: React.Node,
+  onRenderControls?: () => React.Node,
   job?: JobType,
   userLoggedIn?: boolean,
   preflightStatus?: ?string,
@@ -39,7 +39,7 @@ const Header = ({
   <>
     <PageHeader
       className="page-header
-      slds-p-around_x-large"
+        slds-p-around_x-large"
       title={plan.title}
       trail={[
         <Link
@@ -49,11 +49,9 @@ const Header = ({
           {product.title}, {version.label}
         </Link>,
       ]}
-      navRight={
-        navRight !== null && navRight !== undefined ? <>{navRight}</> : ''
-      }
+      onRenderControls={onRenderControls ? onRenderControls : null}
       icon={<ProductIcon item={product} />}
-      variant="objectHome"
+      variant="object-home"
     />
     {job ? (
       <JobProgressIndicator job={job} />

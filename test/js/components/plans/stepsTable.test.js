@@ -45,24 +45,31 @@ const defaultPlan = {
   ],
   requires_preflight: true,
 };
+const selectedSteps = new Set(['step-1', 'step-2', 'step-3']);
 
 describe('<StepsTable />', () => {
   const handleStepsChange = jest.fn();
 
   const setup = options => {
-    const defaults = { plan: defaultPlan, user: null };
+    const defaults = { plan: defaultPlan, user: null, selectedSteps };
     const opts = { ...defaults, ...options };
-    const { getByText, getAllByText, queryByText, container } = render(
+    const {
+      getByText,
+      getAllByText,
+      queryByText,
+      container,
+      rerender,
+    } = render(
       <StepsTable
         plan={opts.plan}
         user={opts.user}
         preflight={opts.preflight}
-        selectedSteps={new Set(['step-1', 'step-2', 'step-3'])}
+        selectedSteps={opts.selectedSteps}
         job={opts.job}
         handleStepsChange={handleStepsChange}
       />,
     );
-    return { getByText, getAllByText, queryByText, container };
+    return { getByText, getAllByText, queryByText, container, rerender };
   };
 
   test('renders steps', () => {
@@ -74,6 +81,156 @@ describe('<StepsTable />', () => {
     expect(getByText('Step 4')).toBeVisible();
   });
 
+  describe('componentDidUpdate', () => {
+    describe('step completes', () => {
+      test('collapses previous step, expands current one', () => {
+        let job = {
+          id: 'job-1',
+          plan: 'plan-1',
+          status: 'started',
+          steps: ['step-1', 'step-2', 'step-3'],
+          results: {
+            'step-1': { logs: 'Test log 1' },
+          },
+        };
+        const { getAllByText, container, rerender } = setup({
+          job,
+        });
+        const toggle = getAllByText('Steps')[0];
+        fireEvent.click(toggle);
+        let activeLog = container.querySelector('[aria-hidden="false"] code');
+
+        // Active log is expanded
+        expect(activeLog.innerHTML).toEqual('Test log 1');
+
+        job = {
+          ...job,
+          results: {
+            ...job.results,
+            'step-1': { logs: 'Test log 1 and more' },
+          },
+        };
+        rerender(
+          <StepsTable
+            plan={defaultPlan}
+            selectedSteps={selectedSteps}
+            job={job}
+            handleStepsChange={handleStepsChange}
+          />,
+        );
+        activeLog = container.querySelector('[aria-hidden="false"] code');
+
+        // Newly-active log is expanded
+        expect(activeLog.innerHTML).toEqual('Test log 1 and more');
+
+        job = {
+          ...job,
+          results: {
+            ...job.results,
+            'step-1': { status: 'ok', logs: 'Test log 1' },
+            'step-2': { logs: 'Test log 2' },
+          },
+        };
+        rerender(
+          <StepsTable
+            plan={defaultPlan}
+            selectedSteps={selectedSteps}
+            job={job}
+            handleStepsChange={handleStepsChange}
+          />,
+        );
+        activeLog = container.querySelector('[aria-hidden="false"] code');
+
+        // Newly-active log is expanded
+        expect(activeLog.innerHTML).toEqual('Test log 2');
+      });
+    });
+
+    describe('job completes', () => {
+      test('collapses final step', () => {
+        const job = {
+          id: 'job-1',
+          plan: 'plan-1',
+          status: 'started',
+          steps: ['step-1', 'step-2', 'step-3'],
+          results: {
+            'step-1': { status: 'ok', logs: 'Test log 1' },
+            'step-2': { status: 'ok', logs: 'Test log 2' },
+            'step-3': { logs: 'Test log 3' },
+          },
+        };
+        const { getAllByText, container, rerender } = setup({
+          job,
+        });
+        let log = container.querySelector('[aria-hidden="false"] code');
+
+        // All logs are closed
+        expect(log).toBeNull();
+
+        const toggle = getAllByText('Steps')[0];
+        fireEvent.click(toggle);
+        log = container.querySelector('[aria-hidden="false"] code');
+
+        // Final log is expanded
+        expect(log.innerHTML).toEqual('Test log 3');
+
+        const changedJob = {
+          ...job,
+          status: 'complete',
+          results: {
+            ...job.results,
+            'step-3': { status: 'ok', logs: 'Test log 3' },
+          },
+        };
+        rerender(
+          <StepsTable
+            plan={defaultPlan}
+            selectedSteps={selectedSteps}
+            job={changedJob}
+            handleStepsChange={handleStepsChange}
+          />,
+        );
+        log = container.querySelector('[aria-hidden="false"] code');
+
+        // All logs are closed
+        expect(log).toBeNull();
+      });
+    });
+  });
+
+  test('show-all and hide-all once a job is complete', () => {
+    const { getAllByText, container } = setup({
+      job: {
+        id: 'job-1',
+        plan: 'plan-1',
+        status: 'complete',
+        steps: ['step-1', 'step-2', 'step-3'],
+        results: {
+          'step-1': { status: 'ok', logs: 'Test log 1' },
+          'step-2': { status: 'ok', logs: 'Test log 2' },
+          'step-3': { status: 'ok', logs: 'Test log 3' },
+        },
+      },
+    });
+    const toggle = getAllByText('Steps')[0];
+    let log = container.querySelector('[aria-hidden="false"] code');
+
+    // logs are collapsed
+    expect(log).toBeNull();
+
+    fireEvent.click(toggle);
+    log = container.querySelectorAll('[aria-hidden="false"] code');
+
+    // logs are expanded
+    expect(log).toHaveLength(3);
+
+    fireEvent.click(toggle);
+    log = container.querySelector('[aria-hidden="false"] code');
+
+    // loggs are collapsed
+    expect(log).toBeNull();
+  });
+
   describe('<NameDataCell>', () => {
     describe('existing preflight', () => {
       test('displays optional message', () => {
@@ -81,9 +238,10 @@ describe('<StepsTable />', () => {
           preflight: {
             status: 'complete',
             results: {
-              'step-1': [
-                { status: 'optional', message: 'This became optional.' },
-              ],
+              'step-1': {
+                status: 'optional',
+                message: 'This became optional.',
+              },
             },
           },
         });
@@ -96,30 +254,138 @@ describe('<StepsTable />', () => {
           preflight: {
             status: 'complete',
             results: {
-              'step-1': [
-                { status: 'error', message: 'This error.' },
-                { status: 'warn', message: 'This warning.' },
-              ],
-              'step-2': [
-                { status: 'error', message: 'This other error.' },
-                { status: 'warn', message: 'This other warning.' },
-              ],
+              'step-1': { status: 'warn', message: 'This warning.' },
+              'step-2': { status: 'error', message: 'This other error.' },
+            },
+          },
+        });
+
+        expect(getByText('This warning.')).toBeVisible();
+        expect(getByText('This other error.')).toBeVisible();
+      });
+    });
+
+    describe('existing job', () => {
+      test('displays error/warning messages', () => {
+        const { getByText } = setup({
+          job: {
+            id: 'job-1',
+            plan: 'plan-1',
+            status: 'complete',
+            steps: ['step-1', 'step-2', 'step-4'],
+            results: {
+              'step-1': {
+                status: 'error',
+                message: 'This error.',
+                logs: 'These logs.',
+              },
             },
           },
         });
 
         expect(getByText('This error.')).toBeVisible();
-        expect(getByText('This warning.')).toBeVisible();
-        expect(getByText('This other error.')).toBeVisible();
-        expect(getByText('This other warning.')).toBeVisible();
+      });
+
+      test('click expands accordion logs', () => {
+        const { getByText, container } = setup({
+          job: {
+            id: 'job-1',
+            plan: 'plan-1',
+            status: 'started',
+            steps: ['step-1', 'step-2', 'step-4'],
+            results: {
+              'step-1': { status: 'ok', logs: 'Test log 1' },
+              'step-2': { logs: 'Test log 2' },
+              foo: { status: 'ok', logs: 'Another test log' },
+            },
+          },
+        });
+        fireEvent.click(getByText('Step 1'));
+        const log = container.querySelector('[aria-hidden="false"] code');
+
+        expect(log.innerHTML).toEqual('Test log 1');
       });
     });
 
-    test('click expands accordion', () => {
-      const { getByText } = setup();
-      fireEvent.click(getByText('Step 1'));
+    test('click collapses accordion logs', () => {
+      const { getByText, container } = setup({
+        job: {
+          id: 'job-1',
+          plan: 'plan-1',
+          status: 'started',
+          steps: ['step-1', 'step-2', 'step-3'],
+          results: {
+            'step-1': { status: 'ok', logs: 'Test log 1' },
+            'step-2': { logs: 'Test log 2' },
+          },
+        },
+      });
 
-      expect(getByText('This is a step description.')).toBeVisible();
+      let log = container.querySelector('[aria-hidden="false"] code');
+
+      // All logs are closed
+      expect(log).toBeNull();
+
+      fireEvent.click(getByText('Step 1'));
+      log = container.querySelector('[aria-hidden="false"] code');
+
+      // Clicked log is expanded
+      expect(log.innerHTML).toEqual('Test log 1');
+
+      fireEvent.click(getByText('Step 1'));
+      log = container.querySelector('[aria-hidden="false"] code');
+
+      // All logs are closed
+      expect(log).toBeNull();
+    });
+
+    test('closing active step-log disables auto-expand/collapse', () => {
+      let job = {
+        id: 'job-1',
+        plan: 'plan-1',
+        status: 'started',
+        steps: ['step-1', 'step-2', 'step-3'],
+        results: {
+          'step-1': { status: 'ok', logs: 'Test log 1' },
+          'step-2': { logs: 'Test log 2' },
+        },
+      };
+      const { getByText, getAllByText, container, rerender } = setup({
+        job,
+      });
+      const toggle = getAllByText('Steps')[0];
+      fireEvent.click(toggle);
+      let activeLog = container.querySelector('[aria-hidden="false"] code');
+
+      // Active log is expanded
+      expect(activeLog.innerHTML).toEqual('Test log 2');
+
+      fireEvent.click(getByText('Step 2'));
+      activeLog = container.querySelector('[aria-hidden="false"] code');
+
+      // All logs are closed
+      expect(activeLog).toBeNull();
+
+      // Step completes...
+      job = {
+        ...job,
+        results: {
+          ...job.results,
+          'step-2': { status: 'ok', logs: 'Test log 2' },
+        },
+      };
+      rerender(
+        <StepsTable
+          plan={defaultPlan}
+          selectedSteps={selectedSteps}
+          job={job}
+          handleStepsChange={handleStepsChange}
+        />,
+      );
+      activeLog = container.querySelector('[aria-hidden="false"] code');
+
+      // Newly-active log is *not* auto-expanded
+      expect(activeLog).toBeNull();
     });
   });
 
@@ -129,8 +395,8 @@ describe('<StepsTable />', () => {
         preflight: {
           status: 'complete',
           results: {
-            'step-1': [{ status: 'optional' }],
-            'step-2': [{ status: 'optional' }],
+            'step-1': { status: 'optional' },
+            'step-2': { status: 'optional' },
           },
         },
       });
@@ -162,7 +428,11 @@ describe('<StepsTable />', () => {
             plan: 'plan-1',
             status: 'started',
             steps: ['step-1', 'step-2', 'step-4'],
-            results: { 'step-1': [{ status: 'ok' }], foo: [{ status: 'ok' }] },
+            results: {
+              'step-1': { status: 'ok', logs: 'Test log' },
+              'step-2': { logs: 'Test log' },
+              foo: { status: 'ok', logs: 'Another test log' },
+            },
           },
         });
 
@@ -181,8 +451,8 @@ describe('<StepsTable />', () => {
               status: 'failed',
               steps: ['step-1', 'step-2', 'step-4'],
               results: {
-                'step-1': [{ status: 'ok' }],
-                'step-2': [{ status: 'error', message: 'totally failed' }],
+                'step-1': { status: 'ok' },
+                'step-2': { status: 'error', message: 'totally failed' },
               },
             },
           });
@@ -236,9 +506,9 @@ describe('<StepsTable />', () => {
           error_count: 0,
           warning_count: 0,
           results: {
-            'step-1': [{ status: 'optional' }],
-            'step-3': [{ status: 'skip', message: 'This was skipped.' }],
-            'step-4': [{ status: 'skip' }],
+            'step-1': { status: 'optional' },
+            'step-3': { status: 'skip', message: 'This was skipped.' },
+            'step-4': { status: 'skip', logs: 'Test log' },
           },
           is_ready: true,
         },

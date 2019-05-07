@@ -4,29 +4,41 @@ import * as React from 'react';
 import Accordion from '@salesforce/design-system-react/components/accordion';
 import AccordionPanel from '@salesforce/design-system-react/components/accordion/panel';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
+import Icon from '@salesforce/design-system-react/components/icon';
+import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
+import { t } from 'i18next';
 
 import { CONSTANTS } from 'store/plans/reducer';
-import { ErrorsList } from 'components/plans/preflightResults';
+import { JobError } from 'components/plans/preflightResults';
 import type { DataCellProps } from 'components/plans/stepsTable';
 
 const { RESULT_STATUS } = CONSTANTS;
 
-class NameDataCell extends React.Component<
-  DataCellProps,
-  { expanded: boolean },
-> {
-  constructor(props: DataCellProps) {
-    super(props);
-    this.state = { expanded: false };
-  }
+type Props = {
+  togglePanel: (val: string) => void,
+  expandedPanels: Set<string>,
+} & DataCellProps;
 
+class NameDataCell extends React.Component<Props> {
   togglePanel = () => {
-    this.setState({ expanded: !this.state.expanded });
+    const { item, togglePanel } = this.props;
+    /* istanbul ignore else */
+    if (item) {
+      togglePanel(item.id);
+    }
   };
 
   render(): React.Node {
-    const { preflight, job, item, className, ...otherProps } = this.props;
+    const {
+      preflight,
+      job,
+      item,
+      className,
+      activeJobStep,
+      expandedPanels,
+      ...otherProps
+    } = this.props;
     /* istanbul ignore if */
     if (!item) {
       return null;
@@ -34,51 +46,88 @@ class NameDataCell extends React.Component<
     const currentJob = preflight || job;
     const { name, description } = item;
     const { id } = item;
+    const isActive = Boolean(activeJobStep && id === activeJobStep);
     const result = currentJob && currentJob.results && currentJob.results[id];
     let hasError = false;
     let hasWarning = false;
-    let optional;
     let optionalMsg = '';
+    let optional, logs;
     if (result) {
-      hasError =
-        result.find(err => err.status === RESULT_STATUS.ERROR) !== undefined;
-      hasWarning =
-        result.find(err => err.status === RESULT_STATUS.WARN) !== undefined;
-      optional = result.find(res => res.status === RESULT_STATUS.OPTIONAL);
+      hasError = result.status === RESULT_STATUS.ERROR;
+      hasWarning = result.status === RESULT_STATUS.WARN;
+      optional = result.status === RESULT_STATUS.OPTIONAL ? result : null;
       optionalMsg = optional && optional.message;
+      logs = job ? result.logs : null;
     }
     let display = name;
     if (optionalMsg) {
       display = `${name} — ${optionalMsg}`;
     }
-    const classes = classNames(className, {
-      'has-warning': hasWarning,
-      'has-error': hasError,
-    });
+    display = (
+      <span className="slds-p-right_x-small step-label">{display}</span>
+    );
+    const classes = classNames(
+      className,
+      'plan-step-item',
+      'plan-step-item-name',
+      {
+        'has-warning': hasWarning,
+        'has-error': hasError,
+        'is-installing': isActive,
+      },
+    );
     const errorList =
-      result && (hasError || hasWarning) ? (
-        <ErrorsList errorList={result} />
-      ) : null;
+      result && (hasError || hasWarning) ? <JobError err={result} /> : null;
+    const desc = description ? (
+      <Tooltip
+        content={description}
+        id={`step-${id}-description`}
+        align="top left"
+        position="overflowBoundaryElement"
+      >
+        <a>
+          <Icon
+            category="utility"
+            name="info_alt"
+            assistiveText={{
+              label: t('View Description'),
+            }}
+            size="x-small"
+          />
+        </a>
+      </Tooltip>
+    ) : null;
     return (
       <DataTableCell title={name} className={classes} {...otherProps}>
-        {description ? (
+        {logs ? (
           <>
-            <Accordion className="slds-cell-wrap">
+            <Accordion
+              className={classNames({
+                'slds-p-bottom_small': errorList,
+              })}
+            >
               <AccordionPanel
                 id={id}
                 title={name}
-                summary={<p className="slds-cell-wrap">{display}</p>}
-                expanded={this.state.expanded}
+                summary={
+                  <div className="slds-cell-wrap plan-step-name">
+                    {display}
+                    {desc}
+                  </div>
+                }
+                expanded={expandedPanels.has(id)}
                 onTogglePanel={this.togglePanel}
               >
-                {description}
+                <pre>
+                  <code>{logs}</code>
+                </pre>
               </AccordionPanel>
             </Accordion>
             {errorList ? (
               <div
-                className="step-name-no-icon
-                  slds-p-bottom_small
-                  slds-cell-wrap"
+                className={classNames('slds-cell-wrap', 'step-name-no-icon', {
+                  'has-job': job,
+                })}
               >
                 {errorList}
               </div>
@@ -86,11 +135,14 @@ class NameDataCell extends React.Component<
           </>
         ) : (
           <div
-            className="step-name-no-icon
-              slds-p-vertical_small
-              slds-cell-wrap"
+            className={classNames('slds-cell-wrap', 'step-name-no-icon', {
+              'has-job': job,
+            })}
           >
-            <p className={errorList ? 'slds-p-bottom_small' : ''}>{display}</p>
+            <div className={classNames({ 'slds-p-bottom_small': errorList })}>
+              {display}
+              {desc}
+            </div>
             {errorList}
           </div>
         )}

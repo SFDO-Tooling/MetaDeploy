@@ -24,7 +24,7 @@ const Header = ({
       </>,
     ]}
     icon={<ProductIcon item={product} />}
-    variant="objectHome"
+    variant="object-home"
   />
 );
 
