@@ -1,6 +1,7 @@
 import itertools
 import logging
 from datetime import timedelta
+from statistics import median
 from typing import Union
 
 from allauth.socialaccount.models import SocialToken
@@ -527,13 +528,13 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
     def average_duration(self):
         durations = [
             (job.success_at - job.enqueued_at)
-            for job in Job.objects.filter(
-                plan=self, status=Job.Status.complete
-            ).exclude(Q(success_at__isnull=True) | Q(enqueued_at__isnull=True))
+            for job in Job.objects.filter(plan=self, status=Job.Status.complete)
+            .exclude(Q(success_at__isnull=True) | Q(enqueued_at__isnull=True))
+            .order_by("-created_at")[: settings.AVERAGE_JOB_WINDOW]
         ]
         if len(durations) < settings.MINIMUM_JOBS_FOR_AVERAGE:
             return None
-        return sum(durations, timedelta()) / len(durations)
+        return median(durations)
 
     def natural_key(self):
         return (self.version, self.title)
