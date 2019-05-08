@@ -530,7 +530,7 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
             (job.success_at - job.enqueued_at)
             for job in Job.objects.filter(plan=self, status=Job.Status.complete)
             .exclude(Q(success_at__isnull=True) | Q(enqueued_at__isnull=True))
-            .order_by("-created_at")[:20]
+            .order_by("-created_at")[: settings.AVERAGE_JOB_WINDOW]
         ]
         if len(durations) < settings.MINIMUM_JOBS_FOR_AVERAGE:
             return None
