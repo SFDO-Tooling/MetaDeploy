@@ -100,10 +100,10 @@ class VersionDetail extends React.Component<VersionDetailProps> {
   }
 
   fetchPlansIfMissing() {
-    const { version, doFetchPlans } = this.props;
-    if (version && !version.fetched_additional_plans) {
+    const { product, version, doFetchPlans } = this.props;
+    if (product && version && !version.fetched_additional_plans) {
       // Fetch plans from API
-      doFetchPlans(version.id);
+      doFetchPlans(product.id, version.id);
     }
   }
 

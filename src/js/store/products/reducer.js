@@ -56,6 +56,27 @@ const reducer = (products: Products = [], action: ProductsAction): Products => {
         return p;
       });
     }
+    case 'FETCH_PLANS_SUCCEEDED': {
+      const { response, product, version } = action.payload;
+      const additional_plans = response.reduce((obj, item) => {
+        obj[item.id] = item;
+        return obj;
+      }, {});
+      return products.map(p => {
+        if (p.id === product && p.most_recent_version.id === version) {
+          const versions = {
+            ...p.versions,
+            additional_plans,
+            fetched_additional_plans: true,
+          };
+          return {
+            ...p,
+            versions,
+          };
+        }
+        return p;
+      });
+    }
   }
   return products;
 };
