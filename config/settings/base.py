@@ -352,6 +352,7 @@ PREFLIGHT_LIFETIME_MINUTES = env("PREFLIGHT_LIFETIME_MINUTES", type_=int, defaul
 
 # Displaying average job completion time
 MINIMUM_JOBS_FOR_AVERAGE = env("MINIMUM_JOBS_FOR_AVERAGE", type_=int, default=5)
+AVERAGE_JOB_WINDOW = env("AVERAGE_JOB_WINDOW", type_=int, default=20)
 
 
 # Raven / Sentry

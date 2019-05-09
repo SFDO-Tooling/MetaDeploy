@@ -13,6 +13,7 @@ from ...models import (
     PlanTemplate,
     Product,
     ProductCategory,
+    ProductSlug,
     Step,
     Version,
 )
@@ -273,6 +274,169 @@ class Command(BaseCommand):
             ),
         )
 
+    def create_eda(self):
+        sf_category = ProductCategory.objects.get(title="salesforce.org products")
+        product = Product.objects.create(
+            title="Education Data Architecture (EDA)",
+            description="## Welcome to the EDA installer!",
+            short_description="The Foundation for the Connected Campus",
+            click_through_agreement=(
+                "The Education Data Architecture technology (“EDA”) is an open-source "
+                "package licensed by Salesforce.org (“SFDO”) under the BSD-3 Clause "
+                "License, found at "
+                "[https://opensource.org/licenses/BSD-3-Clause]"
+                "(https://opensource.org/licenses/BSD-3-Clause). "
+                "ANY MASTER SUBSCRIPTION AGREEMENT YOU OR YOUR ENTITY MAY HAVE WITH "
+                "SFDO DOES NOT APPLY TO YOUR USE OF EDA. EDA is provided “AS IS” AND "
+                "AS AVAILABLE, AND SFDO MAKES NO WARRANTY OF ANY KIND REGARDING EDA, "
+                "WHETHER EXPRESS, IMPLIED, STATUTORY OR OTHERWISE, INCLUDING BUT NOT "
+                "LIMITED TO ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A "
+                "PARTICULAR PURPOSE, FREEDOM FROM DEFECTS OR NON-INFRINGEMENT, TO THE "
+                "MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW.\n\n"
+                "SFDO WILL HAVE NO LIABILITY ARISING OUT OF OR RELATED TO YOUR USE OF "
+                "EDA FOR ANY DIRECT DAMAGES OR FOR ANY LOST PROFITS, REVENUES, "
+                "GOODWILL OR INDIRECT, SPECIAL, INCIDENTAL, CONSEQUENTIAL, EXEMPLARY, "
+                "COVER, BUSINESS INTERRUPTION OR PUNITIVE DAMAGES, WHETHER AN ACTION "
+                "IS IN CONTRACT OR TORT AND REGARDLESS OF THE THEORY OF LIABILITY, "
+                "EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES OR IF A REMEDY "
+                "OTHERWISE FAILS OF ITS ESSENTIAL PURPOSE. THE FOREGOING DISCLAIMER "
+                "WILL NOT APPLY TO THE EXTENT PROHIBITED BY LAW. SFDO DISCLAIMS ALL "
+                "LIABILITY AND INDEMNIFICATION OBLIGATIONS FOR ANY HARM OR DAMAGES "
+                "CAUSED BY ANY THIRD-PARTY HOSTING PROVIDERS."
+            ),
+            category=sf_category,
+            color="#0088FF",
+            slds_icon_category="custom",
+            slds_icon_name="custom51",
+            image=None,
+            repo_url="https://github.com/SalesforceFoundation/EDA",
+        )
+        ProductSlug.objects.create(parent=product, slug="eda")
+        version = Version.objects.create(product=product, label="1.75")
+        plan_template = PlanTemplate.objects.create(
+            product=product, preflight_message="# Welcome to the EDA installer!"
+        )
+        plan = Plan.objects.create(
+            version=version,
+            plan_template=plan_template,
+            title="Install",
+            tier=Plan.Tier.primary,
+        )
+        PlanSlug.objects.create(parent=plan_template, slug="install")
+        steps = [
+            {
+                "name": "EDA - Account Record Types",
+                "description": "",
+                "kind": Step.Kind.metadata,
+                "path": "dependencies.deploy_pre.acc_record_types",
+                "step_num": "1.2.1",
+                "task_class": "cumulusci.tasks.salesforce.UpdateDependencies",
+                "task_config": {
+                    "options": {
+                        "dependencies": [
+                            {
+                                "repo_owner": "SalesforceFoundation",
+                                "repo_name": "EDA",
+                                "ref": "e785195d07a3ac9e395f27829866005dbdcd5bd0",
+                                "subfolder": "unpackaged/pre/acc_record_types",
+                            }
+                        ]
+                    }
+                },
+            },
+            {
+                "name": "EDA - Contact Key Affiliation Fields",
+                "description": "",
+                "kind": Step.Kind.metadata,
+                "path": "dependencies.deploy_pre.contact_key_affl_fields",
+                "step_num": "1.2.2",
+                "task_class": "cumulusci.tasks.salesforce.UpdateDependencies",
+                "task_config": {
+                    "options": {
+                        "dependencies": [
+                            {
+                                "repo_owner": "SalesforceFoundation",
+                                "repo_name": "EDA",
+                                "ref": "e785195d07a3ac9e395f27829866005dbdcd5bd0",
+                                "subfolder": "unpackaged/pre/contact_key_affl_fields",
+                            }
+                        ]
+                    }
+                },
+            },
+            {
+                "name": "Install EDA 1.75",
+                "description": "",
+                "kind": Step.Kind.managed,
+                "path": "install_managed",
+                "step_num": "2",
+                "task_class": "cumulusci.tasks.salesforce.InstallPackageVersion",
+                "task_config": {
+                    "options": {
+                        "version": "1.75",
+                        "activateRSS": True,
+                        "namespace": "hed",
+                        "retries": 5,
+                        "retry_interval": 5,
+                        "retry_interval_add": 30,
+                    }
+                },
+            },
+            {
+                "name": "Course Connection Record Types for EDA",
+                "description": "",
+                "kind": Step.Kind.metadata,
+                "path": "deploy_post.course_connection_record_types",
+                "step_num": "3.1",
+                "task_class": "cumulusci.tasks.salesforce.UpdateDependencies",
+                "task_config": {
+                    "options": {
+                        "dependencies": [
+                            {
+                                "unmanaged": False,
+                                "namespace_inject": "hed",
+                                "namespace_token": "%%%NAMESPACE%%%",
+                                "filename_token": "___NAMESPACE___",
+                                "repo_owner": "SalesforceFoundation",
+                                "repo_name": "EDA",
+                                "ref": "e785195d07a3ac9e395f27829866005dbdcd5bd0",
+                                "subfolder": (
+                                    "unpackaged/post/course_connection_record_types"
+                                ),
+                            }
+                        ]
+                    }
+                },
+            },
+            {
+                "name": "Facility Display Name Formula Field",
+                "description": "",
+                "kind": Step.Kind.metadata,
+                "path": "deploy_post.facility_display_name",
+                "step_num": "3.2",
+                "task_class": "cumulusci.tasks.salesforce.UpdateDependencies",
+                "task_config": {
+                    "options": {
+                        "dependencies": [
+                            {
+                                "unmanaged": False,
+                                "namespace_inject": "hed",
+                                "namespace_token": "%%%NAMESPACE%%%",
+                                "filename_token": "___NAMESPACE___",
+                                "repo_owner": "SalesforceFoundation",
+                                "repo_name": "EDA",
+                                "ref": "e785195d07a3ac9e395f27829866005dbdcd5bd0",
+                                "subfolder": "unpackaged/post/facility_display_name",
+                            }
+                        ]
+                    }
+                },
+            },
+        ]
+
+        for step in steps:
+            Step.objects.create(plan=plan, **step)
+
     def handle(self, *args, **options):
         self.create_enqueuer_job()
         self.create_token_expiry_job()
@@ -377,3 +541,5 @@ class Command(BaseCommand):
             )
             version = self.create_version(product)
             self.create_plan(version)
+
+        self.create_eda()
