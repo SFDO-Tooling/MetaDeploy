@@ -22,7 +22,7 @@ from django.utils.translation import gettext_lazy as _
 
 from ..consumer_utils import get_set_message_semaphore
 from .constants import CHANNELS_GROUP_NAME
-from .hash_url import convert_org_url_to_key
+from .hash_url import convert_org_id_to_key
 
 
 async def push_message_about_instance(instance, message):
@@ -122,20 +122,18 @@ async def notify_org_result_changed(result):
     from .models import Job, PreflightResult
 
     type_ = "ORG_CHANGED"
-    org_url = result.organization_url
+    org_id = result.org_id
 
-    current_job = Job.objects.filter(
-        organization_url=org_url, status=Job.Status.started
-    ).first()
+    current_job = Job.objects.filter(org_id=org_id, status=Job.Status.started).first()
     current_preflight = PreflightResult.objects.filter(
-        organization_url=org_url, status=PreflightResult.Status.started
+        org_id=org_id, status=PreflightResult.Status.started
     ).first()
     serializer = OrgSerializer(
         {"current_job": current_job, "current_preflight": current_preflight}
     )
     message = {"type": "notify", "content": {"type": type_, "payload": serializer.data}}
     group_name = CHANNELS_GROUP_NAME.format(
-        model="org", id=convert_org_url_to_key(org_url)
+        model="org", id=convert_org_id_to_key(org_id)
     )
     channel_layer = get_channel_layer()
     if await get_set_message_semaphore(channel_layer, message):

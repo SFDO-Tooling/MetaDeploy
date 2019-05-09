@@ -20,7 +20,7 @@ Retrieve
      "id": "3Lw7OwK",
      "username": "kit@oddbird.net",
      "email": "kit@oddbird.net",
-     "valid_token_for": "https://foo.salesforce.com",
+     "valid_token_for": "00Dxxxxxxxxxxxxxxx",
      "org_name": "Oddbird",
      "org_type": "Developer Edition",
      "is_staff": true

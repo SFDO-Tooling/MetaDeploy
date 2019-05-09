@@ -27,7 +27,7 @@ def test_report_error(mocker, job_factory, user_factory, plan_factory, step_fact
     user = user_factory()
     plan = plan_factory()
     steps = [step_factory(plan=plan)]
-    job = job_factory(user=user, plan=plan)
+    job = job_factory(user=user, plan=plan, org_id=user.org_id)
 
     with pytest.raises(Exception):
         run_flows(
@@ -52,7 +52,7 @@ def test_run_flows(mocker, job_factory, user_factory, plan_factory, step_factory
     user = user_factory()
     plan = plan_factory()
     steps = [step_factory(plan=plan)]
-    job = job_factory(user=user, plan=plan)
+    job = job_factory(user=user, plan=plan, org_id=user.org_id)
 
     run_flows(
         user=user,
@@ -76,7 +76,9 @@ def test_run_flows__preflight(
     user = user_factory()
     plan = plan_factory()
     steps = [step_factory(plan=plan)]
-    preflight_result = preflight_result_factory(user=user, plan=plan)
+    preflight_result = preflight_result_factory(
+        user=user, plan=plan, org_id=user.org_id
+    )
 
     run_flows(
         user=user,
@@ -97,7 +99,7 @@ def test_enqueuer(mocker, job_factory):
     delay.return_value.id = "294fc6d2-0f3c-4877-b849-54184724b6b2"
     october_first = datetime(2018, 10, 1, 12, 0, 0, 0, pytz.UTC)
     delay.return_value.enqueued_at = october_first
-    job = job_factory()
+    job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
     enqueuer()
 
     job.refresh_from_db()
@@ -131,7 +133,7 @@ def test_malicious_zip_file(
     user = user_factory()
     plan = plan_factory()
     steps = [step_factory(plan=plan)]
-    job = job_factory(user=user)
+    job = job_factory(user=user, org_id=user.org_id)
 
     run_flows(
         user=user,
@@ -157,7 +159,7 @@ def test_expire_user_tokens(user_factory):
     user1.refresh_from_db()
     user2.refresh_from_db()
 
-    assert user1.valid_token_for == "https://example.com"
+    assert user1.valid_token_for == "00Dxxxxxxxxxxxxxxx"
     assert user2.valid_token_for is None
 
 
@@ -168,7 +170,7 @@ def test_preflight(mocker, user_factory, plan_factory, preflight_result_factory)
     user = user_factory()
     plan = plan_factory()
     preflight_result = preflight_result_factory(
-        user=user, plan=plan, organization_url=user.instance_url
+        user=user, plan=plan, organization_url=user.instance_url, org_id=user.org_id
     )
     preflight(preflight_result.pk)
 
@@ -186,7 +188,7 @@ def test_preflight_failure(
     user = user_factory()
     plan = plan_factory()
     preflight_result = preflight_result_factory(
-        user=user, plan=plan, organization_url=user.instance_url
+        user=user, plan=plan, organization_url=user.instance_url, org_id=user.org_id
     )
     with pytest.raises(Exception):
         preflight(preflight_result.pk)
@@ -202,16 +204,16 @@ def test_expire_preflights(user_factory, plan_factory, preflight_result_factory)
     user = user_factory()
     plan = plan_factory()
     preflight1 = preflight_result_factory(
-        user=user, plan=plan, status=PreflightResult.Status.complete
+        user=user, plan=plan, status=PreflightResult.Status.complete, org_id=user.org_id
     )
     preflight2 = preflight_result_factory(
-        user=user, plan=plan, status=PreflightResult.Status.started
+        user=user, plan=plan, status=PreflightResult.Status.started, org_id=user.org_id
     )
     PreflightResult.objects.filter(id__in=[preflight1.id, preflight2.id]).update(
         created_at=eleven_minutes_ago
     )
     preflight3 = preflight_result_factory(
-        user=user, plan=plan, status=PreflightResult.Status.complete
+        user=user, plan=plan, status=PreflightResult.Status.complete, org_id=user.org_id
     )
 
     expire_preflights()
@@ -234,7 +236,7 @@ def test_mark_canceled(job_factory):
     and kill the tests. But we do want the context manager's except block to be
     triggered, so we can test its behavior.
     """
-    job = job_factory()
+    job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
     try:
         with mark_canceled(job):
             raise StopRequested()
@@ -247,7 +249,7 @@ def test_mark_canceled(job_factory):
 def test_mark_canceled_preflight(user_factory, plan_factory, preflight_result_factory):
     user = user_factory()
     plan = plan_factory()
-    preflight = preflight_result_factory(user=user, plan=plan)
+    preflight = preflight_result_factory(user=user, plan=plan, org_id=user.org_id)
     try:
         with mark_canceled(preflight):
             raise StopRequested()
