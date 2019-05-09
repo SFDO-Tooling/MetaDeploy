@@ -252,6 +252,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     org_name = serializers.SerializerMethodField()
     organization_url = serializers.SerializerMethodField()
+    org_id = serializers.SerializerMethodField()
 
     plan = serializers.PrimaryKeyRelatedField(
         queryset=Plan.objects.all(), pk_field=serializers.CharField()
@@ -276,6 +277,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             "plan",
             "steps",
             "organization_url",
+            "org_id",
             "results",
             "created_at",
             "edited_at",
@@ -330,6 +332,11 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             return LimitedUserSerializer(instance=obj.user).data
         return None
 
+    def get_org_id(self, obj):
+        if self.requesting_user_has_rights():
+            return obj.org_id
+        return None
+
     def get_org_name(self, obj):
         if self.requesting_user_has_rights():
             return obj.org_name
@@ -369,9 +376,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         return value
 
     def _pending_job_exists(self, *, user):
-        return Job.objects.filter(
-            status=Job.Status.started, organization_url=user.instance_url
-        ).first()
+        return Job.objects.filter(status=Job.Status.started, org_id=user.org_id).first()
 
     def validate_plan(self, value):
         if not value.is_visible_to(self.context["request"].user):
@@ -416,6 +421,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         data["org_name"] = user.org_name
         data["org_type"] = user.org_type
         data["organization_url"] = user.instance_url
+        data["org_id"] = user.org_id
         return data
 
 
@@ -439,6 +445,7 @@ class PreflightResultSerializer(ErrorWarningCountMixin, serializers.ModelSeriali
         fields = (
             "id",
             "organization_url",
+            "org_id",
             "user",
             "plan",
             "created_at",
@@ -452,6 +459,7 @@ class PreflightResultSerializer(ErrorWarningCountMixin, serializers.ModelSeriali
         )
         extra_kwargs = {
             "organization_url": {"read_only": True},
+            "org_id": {"read_only": True},
             "created_at": {"read_only": True},
             "edited_at": {"read_only": True},
             "is_valid": {"read_only": True},

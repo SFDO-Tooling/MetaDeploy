@@ -76,7 +76,7 @@ class TestUser:
 
     def test_valid_token_for(self, user_factory):
         user = user_factory()
-        assert user.valid_token_for == "https://example.com"
+        assert user.valid_token_for == "00Dxxxxxxxxxxxxxxx"
 
         user.socialaccount_set.first().socialtoken_set.all().delete()
         assert user.valid_token_for is None
@@ -155,9 +155,9 @@ class TestUserExpiredTokens:
         SocialAccount.objects.filter(id=user.socialaccount_set.first().id).update(
             last_login=then
         )
-        job_factory(user=user, status=Job.Status.complete)
-        job_factory(user=user, status=Job.Status.failed)
-        job_factory(user=user, status=Job.Status.canceled)
+        job_factory(user=user, status=Job.Status.complete, org_id=user.org_id)
+        job_factory(user=user, status=Job.Status.failed, org_id=user.org_id)
+        job_factory(user=user, status=Job.Status.canceled, org_id=user.org_id)
 
         assert user in User.objects.with_expired_tokens()
 
@@ -168,7 +168,7 @@ class TestUserExpiredTokens:
         SocialAccount.objects.filter(id=user.socialaccount_set.first().id).update(
             last_login=then
         )
-        job_factory(user=user, status=Job.Status.started)
+        job_factory(user=user, status=Job.Status.started, org_id=user.org_id)
 
         assert user not in User.objects.with_expired_tokens()
 
@@ -371,14 +371,22 @@ class TestPlan:
         assert plan.average_duration is None
 
         job_factory(
-            plan=plan, status=Job.Status.complete, success_at=end, enqueued_at=start
+            plan=plan,
+            status=Job.Status.complete,
+            success_at=end,
+            enqueued_at=start,
+            org_id="00Dxxxxxxxxxxxxxxx",
         )
 
         assert plan.average_duration is None
 
         for _ in range(4):
             job_factory(
-                plan=plan, status=Job.Status.complete, success_at=end, enqueued_at=start
+                plan=plan,
+                status=Job.Status.complete,
+                success_at=end,
+                enqueued_at=start,
+                org_id="00Dxxxxxxxxxxxxxxx",
             )
 
         assert plan.average_duration == timedelta(seconds=30)
@@ -439,7 +447,7 @@ class TestVersionNaturalKey:
 class TestJob:
     def test_job_saves_click_through_text(self, plan_factory, job_factory):
         plan = plan_factory(version__product__click_through_agreement="Test")
-        job = job_factory(plan=plan)
+        job = job_factory(plan=plan, org_id="00Dxxxxxxxxxxxxxxx")
 
         job.refresh_from_db()
 
@@ -450,13 +458,15 @@ class TestJob:
         step1 = step_factory(plan=plan, path="task1")
         step2 = step_factory(plan=plan, path="task2")
         step3 = step_factory(plan=plan, path="task3")
-        job = job_factory(plan=plan, steps=[step1, step3])
+        job = job_factory(plan=plan, steps=[step1, step3], org_id="00Dxxxxxxxxxxxxxxx")
 
         assert job.skip_tasks() == [step2.path]
 
     def test_invalidate_related_preflight(self, job_factory, preflight_result_factory):
-        job = job_factory()
-        preflight = preflight_result_factory(plan=job.plan, user=job.user)
+        job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
+        preflight = preflight_result_factory(
+            plan=job.plan, user=job.user, org_id="00Dxxxxxxxxxxxxxxx"
+        )
         assert preflight.is_valid
         job.invalidate_related_preflight()
 

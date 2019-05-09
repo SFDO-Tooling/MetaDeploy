@@ -30,7 +30,7 @@ describe('reducer', () => {
   test('handles USER_TOKEN_INVALIDATED action', () => {
     const initial = {
       username: 'Test User',
-      valid_token_for: 'http://example.com',
+      valid_token_for: '00Dxxxxxxxxxxxxxxx',
     };
     const expected = { username: 'Test User', valid_token_for: null };
     const actual = reducer(initial, { type: 'USER_TOKEN_INVALIDATED' });
