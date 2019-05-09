@@ -154,7 +154,7 @@ describe('startJob', () => {
     test('dispatches JOB_REJECTED action', () => {
       const store = storeWithApi({});
       const data = { plan: 'plan-1', steps: ['step-1'] };
-      fetchMock.postOnce(window.api_urls.job_list(), 500);
+      fetchMock.postOnce(window.api_urls.job_list(), 401);
       const started = {
         type: 'JOB_REQUESTED',
         payload: data,
@@ -164,10 +164,9 @@ describe('startJob', () => {
         payload: data,
       };
 
-      expect.assertions(2);
+      expect.assertions(1);
       return store.dispatch(actions.startJob(data)).catch(() => {
         expect(store.getActions()).toEqual([started, failed]);
-        expect(window.console.error).toHaveBeenCalled();
       });
     });
   });

@@ -114,8 +114,11 @@ export const startJob = (data: JobData): ThunkAction => (
     },
   })
     .then(response => {
+      if (!response) {
+        throw new Error('Invalid response received');
+      }
       /* istanbul ignore else */
-      if (response && window.socket) {
+      if (window.socket) {
         window.socket.subscribe({
           model: 'job',
           id: response.id,
