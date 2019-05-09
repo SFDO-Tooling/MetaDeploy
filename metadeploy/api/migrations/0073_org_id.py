@@ -9,7 +9,10 @@ def forwards(apps, schema_editor):
     SocialAccount = apps.get_model("socialaccount", "SocialAccount")
     user_id_to_org_id = {}
     for sa in SocialAccount.objects.all():
-        user_id_to_org_id[str(sa.user_id)] = sa.extra_data["organization_details"]["Id"]
+        org_details = sa.extra_data.get("organization_details") or {}
+        org_id = org_details.get("Id")
+        if org_id:
+            user_id_to_org_id[str(sa.user_id)] = org_id
 
     Job = apps.get_model("api", "Job")
     for job in Job.objects.all():
