@@ -115,7 +115,7 @@ export const startJob = (data: JobData): ThunkAction => (
   })
     .then(response => {
       /* istanbul ignore else */
-      if (window.socket) {
+      if (response && window.socket) {
         window.socket.subscribe({
           model: 'job',
           id: response.id,
