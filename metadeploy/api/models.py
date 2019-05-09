@@ -71,6 +71,14 @@ class AllowedList(models.Model):
         default=list,
         help_text="All orgs of these types will be automatically allowed.",
     )
+    list_for_allowed_by_orgs = models.BooleanField(
+        default=True,
+        help_text=(
+            "If a user is allowed only because they have the right Org Type, should "
+            "this be listed for them? If not, they can still find it if they happen to "
+            "know the address."
+        ),
+    )
 
     def __str__(self):
         return self.title
@@ -111,6 +119,11 @@ class AllowedListAccessMixin(models.Model):
                 or user.full_org_type in self.visible_to.org_type
                 or self.visible_to.orgs.filter(org_id=user.org_id).exists()
             )
+        )
+
+    def is_visible_to_by_org(self, user):
+        return not self.visible_to or (
+            user.is_authenticated and user.full_org_type in self.visible_to.org_type
         )
 
 

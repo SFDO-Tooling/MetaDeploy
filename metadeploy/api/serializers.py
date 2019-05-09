@@ -131,6 +131,7 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
         read_only=True, pk_field=serializers.CharField()
     )
     is_allowed = serializers.SerializerMethodField()
+    is_allowed_by_org = serializers.SerializerMethodField()
     steps = StepSerializer(many=True)
     title = serializers.CharField()
     preflight_message = serializers.SerializerMethodField()
@@ -149,6 +150,7 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
             "old_slugs",
             "steps",
             "is_allowed",
+            "is_allowed_by_org",
             "is_listed",
             "not_allowed_instructions",
             "average_duration",
@@ -167,6 +169,9 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
 
     def get_is_allowed(self, obj):
         return obj.is_visible_to(self.context["request"].user)
+
+    def get_is_allowed_by_org(self, obj):
+        return obj.is_visible_to_by_org(self.context["request"].user)
 
     def get_not_allowed_instructions(self, obj):
         if not obj.version.product.is_visible_to(self.context["request"].user):
@@ -207,6 +212,7 @@ class ProductSerializer(CircumspectSerializerMixin, serializers.ModelSerializer)
     category = serializers.CharField(source="category.title")
     most_recent_version = VersionSerializer()
     is_allowed = serializers.SerializerMethodField()
+    is_allowed_by_org = serializers.SerializerMethodField()
     description = serializers.CharField(source="description_markdown")
     click_through_agreement = serializers.CharField(
         source="click_through_agreement_markdown"
@@ -231,6 +237,7 @@ class ProductSerializer(CircumspectSerializerMixin, serializers.ModelSerializer)
             "slug",
             "old_slugs",
             "is_allowed",
+            "is_allowed_by_org",
             "is_listed",
             "order_key",
             "not_allowed_instructions",
@@ -242,6 +249,9 @@ class ProductSerializer(CircumspectSerializerMixin, serializers.ModelSerializer)
 
     def get_is_allowed(self, obj):
         return obj.is_visible_to(self.context["request"].user)
+
+    def get_is_allowed_by_org(self, obj):
+        return obj.is_visible_to_by_org(self.context["request"].user)
 
     def get_not_allowed_instructions(self, obj):
         return getattr(obj.visible_to, "description_markdown", None)
