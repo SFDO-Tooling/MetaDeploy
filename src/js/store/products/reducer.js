@@ -57,24 +57,45 @@ const reducer = (products: Products = [], action: ProductsAction): Products => {
       });
     }
     case 'FETCH_PLANS_SUCCEEDED': {
-      const { response, product, version } = action.payload;
+      const { product, version, response } = action.payload;
+      // const additional_plans = arrToObject(response);
       const additional_plans = response.reduce((obj, item) => {
-        obj[item.id] = item;
+        obj[item.slug] = item;
+        for (const oldSlug of item.old_slugs) {
+          obj[oldSlug] = item;
+        }
         return obj;
       }, {});
       return products.map(p => {
-        if (p.id === product && p.most_recent_version.id === version) {
-          const versions = {
-            ...p.versions,
-            additional_plans,
-            fetched_additional_plans: true,
-          };
-          return {
-            ...p,
-            versions,
-          };
+        if (p.id === product) {
+          if (p.most_recent_version && p.most_recent_version.id === version) {
+            return {
+              ...p,
+              most_recent_version: {
+                ...p.most_recent_version,
+                fetched_additional_plans: true,
+                additional_plans,
+              },
+            };
+          } else if (p.versions) {
+            const thisVersion: ?Version = (Object.values(p.versions): any).find(
+              (v: Version | null) => v !== null && v.id === version,
+            );
+            if (thisVersion) {
+              return {
+                ...p,
+                versions: {
+                  ...p.versions,
+                  [thisVersion.label]: {
+                    ...thisVersion,
+                    fetched_additional_plans: true,
+                    additional_plans,
+                  },
+                },
+              };
+            }
+          }
         }
-        return p;
       });
     }
   }

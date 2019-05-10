@@ -3,7 +3,8 @@
 import type { ThunkAction } from 'redux-thunk';
 
 import { addUrlParams } from 'utils/api';
-import type { Product, Products, Version } from 'store/products/reducer';
+import type { Products, Version } from 'store/products/reducer';
+import type { Plan } from 'store/plans/reducer';
 
 type VersionFilters = {| product: string, label: string |};
 type FetchProductsStarted = { type: 'FETCH_PRODUCTS_STARTED' };
@@ -26,7 +27,7 @@ type FetchVersionFailed = {
 };
 type FetchPlansStarted = {
   type: 'FETCH_PLANS_STARTED',
-  payload: string,
+  payload: { product: string, version: string },
 };
 type FetchPlansFailed = {
   type: 'FETCH_PLANS_FAILED',
@@ -34,7 +35,7 @@ type FetchPlansFailed = {
 };
 type FetchPlansSucceeded = {
   type: 'FETCH_PLANS_SUCCEEDED',
-  payload: [],
+  payload: { product: string, version: string, response: Array<Plan> },
 };
 
 export type ProductsAction =
@@ -103,7 +104,7 @@ export const fetchPlans = (product: string, version: string): ThunkAction => (
   getState,
   { apiFetch },
 ) => {
-  dispatch({ type: 'FETCH_PLANS_STARTED', payload: version });
+  dispatch({ type: 'FETCH_PLANS_STARTED', payload: { product, version } });
   const baseUrl = window.api_urls.versionList();
   return apiFetch(`${baseUrl}${version}/additional_plans`)
     .then(response => {
