@@ -179,11 +179,13 @@ export const getLoadingOrNotFound = ({
     // Fetching version from API
     return <Spinner />;
   }
+  if (version && version.additional_plans === undefined) {
+    return <Spinner />;
+  }
   if (plan === null) {
     if (!version) {
       return <VersionNotFound product={product} />;
     }
-    // @@@ I'm not sure this is the right condition we are looking for
     if (
       !version.additional_plans ||
       (planSlug && version.additional_plans[planSlug] === null)
