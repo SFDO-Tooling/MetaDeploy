@@ -121,9 +121,14 @@ class AllowedListAccessMixin(models.Model):
             )
         )
 
-    def is_visible_to_by_org(self, user):
-        return not self.visible_to or (
-            user.is_authenticated and user.full_org_type in self.visible_to.org_type
+    def is_listed_by_org_only(self, user):
+        """
+        Are we only seeing this because we're in an allowed org type?
+        """
+        return self.visible_to and (
+            user.is_authenticated
+            and user.full_org_type in self.visible_to.org_type
+            and not self.visible_to.list_for_allowed_by_orgs
         )
 
 

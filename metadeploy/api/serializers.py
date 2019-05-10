@@ -131,12 +131,12 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
         read_only=True, pk_field=serializers.CharField()
     )
     is_allowed = serializers.SerializerMethodField()
-    is_allowed_by_org = serializers.SerializerMethodField()
     steps = StepSerializer(many=True)
     title = serializers.CharField()
     preflight_message = serializers.SerializerMethodField()
     not_allowed_instructions = serializers.SerializerMethodField()
     requires_preflight = serializers.SerializerMethodField()
+    is_listed = serializers.SerializerMethodField()
 
     class Meta:
         model = Plan
@@ -150,7 +150,6 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
             "old_slugs",
             "steps",
             "is_allowed",
-            "is_allowed_by_org",
             "is_listed",
             "not_allowed_instructions",
             "average_duration",
@@ -170,8 +169,10 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
     def get_is_allowed(self, obj):
         return obj.is_visible_to(self.context["request"].user)
 
-    def get_is_allowed_by_org(self, obj):
-        return obj.is_visible_to_by_org(self.context["request"].user)
+    def get_is_listed(self, obj):
+        return obj.is_listed and not obj.is_listed_by_org_only(
+            self.context["request"].user
+        )
 
     def get_not_allowed_instructions(self, obj):
         if not obj.version.product.is_visible_to(self.context["request"].user):
@@ -212,7 +213,6 @@ class ProductSerializer(CircumspectSerializerMixin, serializers.ModelSerializer)
     category = serializers.CharField(source="category.title")
     most_recent_version = VersionSerializer()
     is_allowed = serializers.SerializerMethodField()
-    is_allowed_by_org = serializers.SerializerMethodField()
     description = serializers.CharField(source="description_markdown")
     click_through_agreement = serializers.CharField(
         source="click_through_agreement_markdown"
@@ -220,6 +220,7 @@ class ProductSerializer(CircumspectSerializerMixin, serializers.ModelSerializer)
     title = serializers.CharField
     short_description = serializers.CharField()
     not_allowed_instructions = serializers.SerializerMethodField()
+    is_listed = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -237,7 +238,6 @@ class ProductSerializer(CircumspectSerializerMixin, serializers.ModelSerializer)
             "slug",
             "old_slugs",
             "is_allowed",
-            "is_allowed_by_org",
             "is_listed",
             "order_key",
             "not_allowed_instructions",
@@ -250,8 +250,10 @@ class ProductSerializer(CircumspectSerializerMixin, serializers.ModelSerializer)
     def get_is_allowed(self, obj):
         return obj.is_visible_to(self.context["request"].user)
 
-    def get_is_allowed_by_org(self, obj):
-        return obj.is_visible_to_by_org(self.context["request"].user)
+    def get_is_listed(self, obj):
+        return obj.is_listed and not obj.is_listed_by_org_only(
+            self.context["request"].user
+        )
 
     def get_not_allowed_instructions(self, obj):
         return getattr(obj.visible_to, "description_markdown", None)

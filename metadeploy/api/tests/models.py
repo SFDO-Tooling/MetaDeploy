@@ -35,6 +35,76 @@ class TestAllowedListOrg:
         )
         assert allowed_list_org.org_id == expected_org_id
 
+    def test_is_listed_by_org_only__list_true(
+        self, allowed_list_factory, plan_factory, user_factory
+    ):
+        allowed_list = allowed_list_factory(
+            org_type=["Scratch"], list_for_allowed_by_orgs=True
+        )
+        plan = plan_factory(visible_to=allowed_list)
+        scratch_user = user_factory(
+            socialaccount_set__extra_data={
+                "instance_url": "https://example.com",
+                "organization_details": {
+                    "Name": "Sample Org",
+                    "OrganizationType": "Scratch",
+                    "IsSandbox": True,
+                    "TrialExpirationDate": 1,
+                },
+            }
+        )
+        devorg_user = user_factory()
+        assert scratch_user.full_org_type == "Scratch"
+        assert devorg_user.full_org_type == "Developer"
+
+        assert not plan.is_listed_by_org_only(scratch_user)
+        assert not plan.is_listed_by_org_only(devorg_user)
+
+    def test_is_listed_by_org_only__list_false(
+        self, allowed_list_factory, plan_factory, user_factory
+    ):
+        allowed_list = allowed_list_factory(
+            org_type=["Scratch"], list_for_allowed_by_orgs=False
+        )
+        plan = plan_factory(visible_to=allowed_list)
+        scratch_user = user_factory(
+            socialaccount_set__extra_data={
+                "instance_url": "https://example.com",
+                "organization_details": {
+                    "Name": "Sample Org",
+                    "OrganizationType": "Scratch",
+                    "IsSandbox": True,
+                    "TrialExpirationDate": 1,
+                },
+            }
+        )
+        devorg_user = user_factory()
+        assert scratch_user.full_org_type == "Scratch"
+        assert devorg_user.full_org_type == "Developer"
+
+        assert plan.is_listed_by_org_only(scratch_user)
+        assert not plan.is_listed_by_org_only(devorg_user)
+
+    def test_is_listed_by_org_only__no_allowed_list(self, plan_factory, user_factory):
+        plan = plan_factory()
+        scratch_user = user_factory(
+            socialaccount_set__extra_data={
+                "instance_url": "https://example.com",
+                "organization_details": {
+                    "Name": "Sample Org",
+                    "OrganizationType": "Scratch",
+                    "IsSandbox": True,
+                    "TrialExpirationDate": 1,
+                },
+            }
+        )
+        devorg_user = user_factory()
+        assert scratch_user.full_org_type == "Scratch"
+        assert devorg_user.full_org_type == "Developer"
+
+        assert not plan.is_listed_by_org_only(scratch_user)
+        assert not plan.is_listed_by_org_only(devorg_user)
+
 
 @pytest.mark.django_db
 class TestUser:
