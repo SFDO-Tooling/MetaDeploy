@@ -118,11 +118,9 @@ const selectVersionLabelOrPlanSlug: (
       if (version.secondary_plan) {
         slugs.push(version.secondary_plan.slug);
       }
-      // @@@ This isn't quite right... we'll need to fetch the list of
-      // additional_plans for this version if we haven't yet.
       if (version.additional_plans) {
         slugs.push(
-          Object.entries(version.additional_plans).forEach(
+          (Object.entries(version.additional_plans): any).forEach(
             ([key, value]) => value.slug,
           ),
         );
