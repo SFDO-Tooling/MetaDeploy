@@ -48,7 +48,7 @@ describe('login', () => {
       id: 'user-id',
       username: 'Test User',
       email: 'test@foo.bar',
-      valid_token_for: 'org-url',
+      valid_token_for: 'org-id',
     };
     const userSubscription = {
       model: 'user',
@@ -56,7 +56,7 @@ describe('login', () => {
     };
     const orgSubscription = {
       model: 'org',
-      id: 'org-url',
+      id: 'org-id',
     };
 
     expect.assertions(2);
