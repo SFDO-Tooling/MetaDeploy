@@ -60,6 +60,7 @@ class SocialAccountFactory(factory.django.DjangoModelFactory):
             "Id": "00Dxxxxxxxxxxxxxxx",
             "Name": "Sample Org",
             "OrganizationType": "Developer Edition",
+            "IsSandbox": False,
         },
     }
 
