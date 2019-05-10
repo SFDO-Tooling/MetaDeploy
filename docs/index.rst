@@ -11,12 +11,8 @@ Welcome to MetaDeploy's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   jobs
-   products
-   versions
-   plans
-   orgs
-   user
+   tutorial
+   api/index
 
 
 Indices and tables
