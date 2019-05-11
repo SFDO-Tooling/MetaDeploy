@@ -85,7 +85,7 @@ export const startPreflight = (planId: string): ThunkAction => (
   return apiFetch(url, { method: 'POST' })
     .then(response => {
       /* istanbul ignore else */
-      if (window.socket) {
+      if (response && window.socket) {
         window.socket.subscribe({
           model: 'preflightresult',
           id: response.id,

@@ -114,7 +114,10 @@ class PlanViewSet(viewsets.ModelViewSet):
         # until we sort out how it is modeled
         if plan.preflight_flow_name:
             preflight_result = PreflightResult.objects.create(
-                user=request.user, plan=plan, organization_url=request.user.instance_url
+                user=request.user,
+                plan=plan,
+                organization_url=request.user.instance_url,
+                org_id=request.user.org_id,
             )
             preflight_job.delay(preflight_result.pk)
         else:  # pragma: no cover
@@ -122,6 +125,7 @@ class PlanViewSet(viewsets.ModelViewSet):
                 user=request.user,
                 plan=plan,
                 organization_url=request.user.instance_url,
+                org_id=request.user.org_id,
                 status=PreflightResult.Status.complete,
             )
         serializer = PreflightResultSerializer(instance=preflight_result)
@@ -143,11 +147,10 @@ class OrgViewSet(viewsets.ViewSet):
         it this way.
         """
         current_job = Job.objects.filter(
-            organization_url=request.user.instance_url, status=Job.Status.started
+            org_id=request.user.org_id, status=Job.Status.started
         ).first()
         current_preflight = PreflightResult.objects.filter(
-            organization_url=request.user.instance_url,
-            status=PreflightResult.Status.started,
+            org_id=request.user.org_id, status=PreflightResult.Status.started
         ).first()
         serializer = OrgSerializer(
             {"current_job": current_job, "current_preflight": current_preflight}

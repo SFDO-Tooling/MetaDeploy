@@ -71,6 +71,14 @@ class AllowedList(models.Model):
         default=list,
         help_text="All orgs of these types will be automatically allowed.",
     )
+    list_for_allowed_by_orgs = models.BooleanField(
+        default=True,
+        help_text=(
+            "If a user is allowed only because they have the right Org Type, should "
+            "this be listed for them? If not, they can still find it if they happen to "
+            "know the address."
+        ),
+    )
 
     def __str__(self):
         return self.title
@@ -111,6 +119,16 @@ class AllowedListAccessMixin(models.Model):
                 or user.full_org_type in self.visible_to.org_type
                 or self.visible_to.orgs.filter(org_id=user.org_id).exists()
             )
+        )
+
+    def is_listed_by_org_only(self, user):
+        """
+        Are we only seeing this because we're in an allowed org type?
+        """
+        return self.visible_to and (
+            user.is_authenticated
+            and user.full_org_type in self.visible_to.org_type
+            and not self.visible_to.list_for_allowed_by_orgs
         )
 
 
@@ -190,8 +208,8 @@ class User(HashIdMixin, AbstractUser):
 
     @property
     def valid_token_for(self):
-        if all(self.token) and self.instance_url:
-            return self.instance_url
+        if all(self.token) and self.org_id:
+            return self.org_id
         return None
 
     def expire_token(self):
@@ -630,6 +648,7 @@ class Job(HashIdMixin, models.Model):
     enqueued_at = models.DateTimeField(null=True)
     job_id = models.UUIDField(null=True)
     status = models.CharField(choices=Status, max_length=64, default=Status.started)
+    org_id = models.CharField(null=True, blank=True, max_length=18)
     org_name = models.CharField(blank=True, max_length=256)
     org_type = models.CharField(blank=True, max_length=256)
     is_public = models.BooleanField(default=False)
@@ -710,10 +729,7 @@ class Job(HashIdMixin, models.Model):
         # because we want to trigger the logic in the preflight's save
         # method.
         preflights = PreflightResult.objects.filter(
-            organization_url=self.organization_url,
-            user=self.user,
-            plan=self.plan,
-            is_valid=True,
+            org_id=self.org_id, user=self.user, plan=self.plan, is_valid=True
         )
         for preflight in preflights:
             preflight.is_valid = False
@@ -736,6 +752,7 @@ class PreflightResult(models.Model):
     objects = PreflightResultQuerySet.as_manager()
 
     organization_url = models.URLField()
+    org_id = models.CharField(null=True, blank=True, max_length=18)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -28,6 +28,6 @@ async def test_notify_org_job_changed(mocker, user_factory, job_factory, plan_fa
     gcl = mocker.patch("metadeploy.api.push.get_channel_layer", wraps=get_channel_layer)
     user = user_factory()
     plan = plan_factory()
-    job = job_factory(user=user, plan=plan, organization_url="https://example.com/")
+    job = job_factory(user=user, plan=plan, org_id=user.org_id)
     await notify_org_result_changed(job)
     gcl.assert_called()

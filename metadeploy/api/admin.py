@@ -85,7 +85,7 @@ class JobAdmin(admin.ModelAdmin, PlanMixin):
         "enqueued_at",
     )
     list_select_related = ("user", "plan", "plan__version", "plan__version__product")
-    search_fields = ("user", "plan", "org_name")
+    search_fields = ("user", "plan", "org_name", "org_id")
 
 
 @admin.register(PlanTemplate)

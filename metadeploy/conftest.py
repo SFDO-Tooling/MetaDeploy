@@ -57,8 +57,10 @@ class SocialAccountFactory(factory.django.DjangoModelFactory):
     extra_data = {
         "instance_url": "https://example.com",
         "organization_details": {
+            "Id": "00Dxxxxxxxxxxxxxxx",
             "Name": "Sample Org",
             "OrganizationType": "Developer Edition",
+            "IsSandbox": False,
         },
     }
 
