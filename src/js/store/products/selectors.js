@@ -120,8 +120,8 @@ const selectVersionLabelOrPlanSlug: (
       }
       if (version.additional_plans) {
         slugs.push(
-          (Object.entries(version.additional_plans): any).forEach(
-            ([key, value]) => value.slug,
+          (Object.values(version.additional_plans): any).forEach(
+            plan => plan.slug,
           ),
         );
       }

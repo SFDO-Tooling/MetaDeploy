@@ -31,7 +31,7 @@ type FetchPlansStarted = {
 };
 type FetchPlansFailed = {
   type: 'FETCH_PLANS_FAILED',
-  payload: [],
+  payload: { product: string, version: string },
 };
 type FetchPlansSucceeded = {
   type: 'FETCH_PLANS_SUCCEEDED',
@@ -121,12 +121,7 @@ export const fetchPlans = (product: string, version: string): ThunkAction => (
       });
     })
     .catch(err => {
-      dispatch({ type: 'FETCH_PLANS_FAILED', payload: [] });
+      dispatch({ type: 'FETCH_PLANS_FAILED', payload: { product, version } });
       throw err;
     });
-
-  // - Store them each as { [slug]: Plan } on `additional_plans`.
-  // - Also need to iterate through each `plan.old_slugs` and save plan under
-  //   each of those slugs as well?
-  // - Set `fetched_additional_plans: true`
 };
