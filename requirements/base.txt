@@ -8,7 +8,7 @@ service_identity==18.1.0
 django-allauth==0.39.1
 werkzeug==0.15.2
 pyopenssl==19.0.0
-django-js-reverse==0.9.0
+django-js-reverse==0.9.1
 djangorestframework==3.9.3
 django-colorfield==0.1.15
 django-filter==2.1.0
