@@ -20,7 +20,7 @@ flake8==3.7.7
 isort==4.3.19
 
 # So tests that touch CumulusCI run:
-mock==3.0.4
+mock==3.0.5
 
 # Docs:
 Sphinx==2.0.1
