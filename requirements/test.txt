@@ -17,7 +17,7 @@ vcrpy==2.0.1
 # Linting:
 black==19.3b0
 flake8==3.7.7
-isort==4.3.18
+isort==4.3.19
 
 # So tests that touch CumulusCI run:
 mock==3.0.4
