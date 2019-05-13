@@ -72,7 +72,7 @@ class AllowedList(models.Model):
         help_text="All orgs of these types will be automatically allowed.",
     )
     list_for_allowed_by_orgs = models.BooleanField(
-        default=True,
+        default=False,
         help_text=(
             "If a user is allowed only because they have the right Org Type, should "
             "this be listed for them? If not, they can still find it if they happen to "
