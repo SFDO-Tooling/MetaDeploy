@@ -443,5 +443,6 @@ class TestVersionAdditionalPlans:
                 "is_listed": True,
                 "not_allowed_instructions": None,
                 "requires_preflight": True,
+                "average_duration": None,
             }
         ]

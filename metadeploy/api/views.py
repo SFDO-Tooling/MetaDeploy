@@ -8,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .constants import REDIS_JOB_CANCEL_KEY
+from .filters import PlanFilter
 from .jobs import preflight_job
 from .models import Job, Plan, PreflightResult, Product, Version
 from .permissions import OnlyOwnerOrSuperuserCanDelete
@@ -91,6 +92,8 @@ class VersionViewSet(viewsets.ModelViewSet):
 
 class PlanViewSet(viewsets.ModelViewSet):
     serializer_class = PlanSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = PlanFilter
     queryset = Plan.objects.all()
 
     def preflight_get(self, request):
