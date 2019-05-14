@@ -61,7 +61,7 @@ Add a ``plans`` section to your cumulusci.yml file like this:
                 1:
                     flow: install_prod
 
-This sets us up to publish the ``install_prod`` flow to a Plan that will be the primary (default) Plan for the Product and available with /install in the URL (from the slug).
+This sets us up to publish the ``install_prod`` flow to a Plan that will be the primary (default) Plan for the Product and available with ``/install`` in the URL (from the slug).
 
 4. Connect CumulusCI to MetaDeploy
 ==================================
