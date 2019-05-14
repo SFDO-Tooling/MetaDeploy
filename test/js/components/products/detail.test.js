@@ -4,12 +4,13 @@ import { StaticRouter } from 'react-router-dom';
 import { renderWithRedux } from './../../utils';
 
 import routes from 'utils/routes';
-import { fetchVersion } from 'store/products/actions';
+import { fetchVersion, fetchPlans } from 'store/products/actions';
 import { ProductDetail, VersionDetail } from 'components/products/detail';
 
 jest.mock('store/products/actions');
 
 fetchVersion.mockReturnValue({ type: 'TEST' });
+fetchPlans.mockReturnValue({ type: 'TEST' });
 
 afterEach(() => {
   fetchVersion.mockClear();
@@ -232,7 +233,6 @@ describe('<VersionDetail />', () => {
         'http://foo.bar',
       );
     });
-
     test('handles missing primary plan', () => {
       const product = defaultState.products[0];
       const { getByText, queryByText } = setup({
@@ -298,7 +298,6 @@ describe('<VersionDetail />', () => {
       expect(queryByText('View Plan: My Secondary Plan')).toBeNull();
       expect(queryByText('My Additional Plan')).toBeNull();
     });
-
     test('handles missing primary/secondary plans', () => {
       const product = {
         id: 'p1',
@@ -362,7 +361,6 @@ describe('<VersionDetail />', () => {
     };
     const product = Object.assign({}, defaultState.products[0]);
     product.versions = { [version.label]: version };
-
     test('renders version detail', () => {
       const { getByText } = setup({
         initialState: { products: [product] },
@@ -402,7 +400,6 @@ describe('<VersionDetail />', () => {
       expect(getByText('list of all products')).toBeVisible();
     });
   });
-
   describe('product is restricted', () => {
     test('renders <ProductNotAllowed />', () => {
       const { getByText } = setup({

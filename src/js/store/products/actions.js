@@ -105,7 +105,7 @@ export const fetchPlans = (product: string, version: string): ThunkAction => (
   { apiFetch },
 ) => {
   dispatch({ type: 'FETCH_PLANS_STARTED', payload: { product, version } });
-  const baseUrl = window.api_urls.versionList();
+  const baseUrl = window.api_urls.version_list();
   return apiFetch(`${baseUrl}${version}/additional_plans`)
     .then(response => {
       if (!Array.isArray(response)) {
