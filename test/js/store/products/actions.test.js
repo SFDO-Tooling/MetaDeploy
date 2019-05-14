@@ -81,7 +81,7 @@ describe('fetchVersion', () => {
       };
 
       expect.assertions(1);
-      return store.dispatch(actions.fetchVersion(filters)).then(() => {
+      return store.dispatch(actions.fetchVersion(filters)).then(response => {
         expect(store.getActions()).toEqual([started, succeeded]);
       });
     });
@@ -136,6 +136,55 @@ describe('fetchVersion', () => {
         expect(store.getActions()).toEqual([started, failed]);
         expect(window.console.error).toHaveBeenCalled();
       });
+    });
+  });
+});
+
+describe('fetchPlans', () => {
+  describe('success', () => {
+    test('GETs additional_plans from api', () => {
+      const store = storeWithApi({});
+      const product = 'p1';
+      const version = 'v1';
+      const response = [{}]; // should this match actual response?
+      const baseUrl = window.api_urls.version_list();
+      fetchMock.getOnce(`${baseUrl}${version}/additional_plans`, [
+        response,
+        product,
+        version,
+      ]);
+      const started = {
+        type: 'FETCH_PLANS_STARTED',
+        payload: { product, version },
+      };
+      const succeeded = {
+        type: 'FETCH_PLANS_SUCCEEDED',
+        payload: { response, product, version },
+      };
+
+      expect.assertions(1);
+      return store.dispatch(actions.fetchPlans(product, version)).then(() => {
+        // this almost works buts adds [] to response ?
+        expect(store.getActions()).toEqual([started, succeeded]);
+      });
+    });
+  });
+  describe('error', () => {
+    test('throws Error', () => {
+      const store = storeWithApi({});
+      const product = {
+        id: 'p1',
+        title: 'Product 1',
+        description: 'This is a test product.',
+      };
+      const version = { id: 'v1', label: 'v1' };
+      let response = [{}];
+      const baseUrl = window.api_urls.version_list();
+      fetchMock.getOnce(`${baseUrl}${version.id}/additional_plans`, 'string');
+      expect.assertions(1);
+      return expect(
+        store.dispatch(actions.fetchPlans(product.id, version.id)),
+      ).rejects.toThrow();
     });
   });
 });
