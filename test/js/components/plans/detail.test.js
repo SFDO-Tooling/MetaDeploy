@@ -5,7 +5,7 @@ import { fireEvent } from 'react-testing-library';
 import { renderWithRedux, storeWithApi } from './../../utils';
 
 import routes from 'utils/routes';
-import { fetchPreflight } from 'store/plans/actions';
+import { fetchPreflight, fetchPlan } from 'store/plans/actions';
 import { fetchVersion } from 'store/products/actions';
 import PlanDetail from 'components/plans/detail';
 
@@ -14,10 +14,12 @@ jest.mock('store/plans/actions');
 
 fetchVersion.mockReturnValue({ type: 'TEST' });
 fetchPreflight.mockReturnValue({ type: 'TEST' });
+fetchPlan.mockReturnValue({ type: 'TEST' });
 
 afterEach(() => {
   fetchVersion.mockClear();
   fetchPreflight.mockClear();
+  fetchPlan.mockClear();
 });
 
 const defaultState = {
@@ -163,7 +165,6 @@ describe('<PlanDetail />', () => {
       context,
     };
   };
-
   describe('insufficient permissions for user', () => {
     test('renders login button', () => {
       const { getByText } = setup({
@@ -222,7 +223,6 @@ describe('<PlanDetail />', () => {
       expect(getByText('list of all products')).toBeVisible();
     });
   });
-
   describe('product has old_slug', () => {
     test('redirects to plan_detail with new slug', () => {
       const { context } = setup({ productSlug: 'old-product' });
@@ -345,15 +345,6 @@ describe('<PlanDetail />', () => {
     expect(getByText('My Other Step')).toBeVisible();
   });
 
-  test('renders additional_plan detail (no steps)', () => {
-    const { getByText } = setup({
-      planSlug: 'third-plan',
-    });
-
-    expect(getByText('Product 1, 1.0.0')).toBeVisible();
-    expect(getByText('Third preflight text…')).toBeVisible();
-  });
-
   describe('no plan', () => {
     test('renders <PlanNotFound />', () => {
       const { getByText } = setup({
@@ -388,7 +379,6 @@ describe('<PlanDetail />', () => {
       );
     });
   });
-
   describe('plan is restricted', () => {
     test('renders <PlanNotAllowed />', () => {
       const { getByText } = setup({
@@ -396,7 +386,6 @@ describe('<PlanDetail />', () => {
       });
 
       expect(getByText('another plan')).toBeVisible();
-      expect(getByText('plan restricted')).toBeVisible();
     });
   });
 
