@@ -1,5 +1,17 @@
 from django.db import DatabaseError, InterfaceError, connections
+from newrelic import agent
+from rq.job import Job
 from rq.worker import HerokuWorker, Worker
+
+_perform = Job.perform
+
+
+def perform(self):
+    with agent.BackgroundTask(agent.application(), self.func_name):
+        return _perform(self)
+
+
+Job.perform = perform
 
 
 class ConnectionClosingWorkerMixin(object):
@@ -18,9 +30,11 @@ class ConnectionClosingWorkerMixin(object):
 
     def perform_job(self, *args, **kwargs):
         self.close_database()
+        agent.register_application(timeout=10.0)
         try:
             return super().perform_job(*args, **kwargs)
         finally:
+            agent.shutdown_agent(timeout=10.0)
             self.close_database()
 
     def work(self, *args, **kwargs):
