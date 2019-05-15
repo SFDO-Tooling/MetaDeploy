@@ -13,7 +13,7 @@
   },
   "scripts": {
     "webpack:serve": "webpack-dev-server --config webpack.dev.js",
-    "django:serve": "daphne metadeploy.asgi:application",
+    "django:serve": "python manage.py runserver",
     "redis:clear": "redis-cli FLUSHALL",
     "worker:serve": "python manage.py rqworker default short",
     "scheduler:serve": "python manage.py rqscheduler default short",
