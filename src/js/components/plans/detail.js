@@ -9,7 +9,7 @@ import { t } from 'i18next';
 
 import routes from 'utils/routes';
 import { CONSTANTS } from 'store/plans/reducer';
-import { fetchPreflight, startPreflight } from 'store/plans/actions';
+import { fetchPreflight, startPreflight, fetchPlan } from 'store/plans/actions';
 import { fetchVersion } from 'store/products/actions';
 import { selectOrg } from 'store/org/selectors';
 import {
@@ -69,6 +69,7 @@ type Props = {
   doFetchPreflight: typeof fetchPreflight,
   doStartPreflight: typeof startPreflight,
   doStartJob: typeof startJob,
+  doFetchPlan: typeof fetchPlan,
 };
 type State = {
   changedSteps: Map<string, boolean>,
@@ -94,6 +95,28 @@ class PlanDetail extends React.Component<Props, State> {
     }
   }
 
+  fetchPlanIfMissing() {
+    const {
+      product,
+      plan,
+      doFetchPlan,
+      versionLabel,
+      productSlug,
+      version,
+      planSlug,
+    } = this.props;
+    const { primary_plan, secondary_plan } = product.most_recent_version;
+    // const additionalPlans = the additional plans localtion
+    if (!plan) {
+      if (
+        product.id !== primary_plan.id ||
+        (secondary_plan.id && version.additional_plans === undefined)
+      ) {
+        doFetchPlan(versionLabel, productSlug, planSlug);
+      }
+    }
+  }
+
   fetchPreflightIfMissing() {
     const { user, plan, preflight, doFetchPreflight } = this.props;
     if (user && plan && preflight === undefined && plan.requires_preflight) {
@@ -105,6 +128,7 @@ class PlanDetail extends React.Component<Props, State> {
   componentDidMount() {
     this.fetchVersionIfMissing();
     this.fetchPreflightIfMissing();
+    this.fetchPlanIfMissing();
   }
 
   componentDidUpdate(prevProps) {
@@ -407,6 +431,7 @@ const actions = {
   doFetchPreflight: fetchPreflight,
   doStartPreflight: startPreflight,
   doStartJob: startJob,
+  doFetchPlan: fetchPlan,
 };
 
 const WrappedPlanDetail: React.ComponentType<InitialProps> = connect(

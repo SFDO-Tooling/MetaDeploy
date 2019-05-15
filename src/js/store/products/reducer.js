@@ -98,6 +98,30 @@ const reducer = (products: Products = [], action: ProductsAction): Products => {
         return p;
       });
     }
+    case 'FETCH_PLAN_SUCCEEDED': {
+      // @todo fix flow errors
+      const additional_plans = action.payload.reduce((obj, item) => {
+        obj[item.slug] = item;
+        for (const oldSlug of item.old_slugs) {
+          obj[oldSlug] = item;
+        }
+        return obj;
+      }, {});
+      return products.map(p => {
+        if (
+          p.most_recent_version &&
+          p.most_recent_version.id === action.payload[0].version
+        )
+          return {
+            ...p,
+            most_recent_version: {
+              ...p.most_recent_version,
+              fetched_additional_plans: true,
+              additional_plans,
+            },
+          };
+      });
+    }
   }
   return products;
 };

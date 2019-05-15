@@ -37,6 +37,18 @@ type FetchPlansSucceeded = {
   type: 'FETCH_PLANS_SUCCEEDED',
   payload: { product: string, version: string, response: Array<Plan> },
 };
+export type FetchPlanStarted = {
+  type: 'FETCH_PLAN_STARTED',
+  payload: Plan,
+};
+export type FetchPlanSucceeded = {
+  type: 'FETCH_PLAN_SUCCEEDED',
+  payload: Plan,
+};
+export type FetchPlanFailed = {
+  type: 'FETCH_PLAN_FAILED',
+  payload: Plan,
+};
 
 export type ProductsAction =
   | FetchProductsStarted
@@ -47,7 +59,10 @@ export type ProductsAction =
   | FetchVersionFailed
   | FetchPlansStarted
   | FetchPlansFailed
-  | FetchPlansSucceeded;
+  | FetchPlansSucceeded
+  | FetchPlanStarted
+  | FetchPlanSucceeded
+  | FetchPlanFailed;
 
 export const fetchProducts = (): ThunkAction => (
   dispatch,

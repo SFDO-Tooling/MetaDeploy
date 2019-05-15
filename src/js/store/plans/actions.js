@@ -2,8 +2,8 @@
 
 import type { ThunkAction } from 'redux-thunk';
 
-import type { Preflight } from 'store/plans/reducer';
-
+import type { Preflight, Plan } from 'store/plans/reducer';
+import { addUrlParams } from '../../utils/api';
 type FetchPreflightStarted = {
   type: 'FETCH_PREFLIGHT_STARTED',
   payload: string,
@@ -38,6 +38,7 @@ export type PreflightInvalid = {
   type: 'PREFLIGHT_INVALIDATED',
   payload: Preflight,
 };
+
 export type PlansAction =
   | FetchPreflightStarted
   | FetchPreflightSucceeded
@@ -50,6 +51,35 @@ export type PlansAction =
   | PreflightCanceled
   | PreflightInvalid;
 
+export const fetchPlan = (
+  versionLabel: string,
+  productSlug: string,
+  planSlug: string,
+): ThunkAction => (dispatch, getState, { apiFetch }) => {
+  dispatch({ type: 'FETCH_PLAN_STARTED', payload: {} });
+  const baseUrl = window.api_urls.plan_list();
+  return apiFetch(
+    // @todo pass into fn
+    `${baseUrl}/?version_label=${versionLabel}&product_slug=${productSlug}&slug=${planSlug}`,
+  )
+    .then(response => {
+      if (!Array.isArray(response)) {
+        const error = (new Error('Invalid response received'): {
+          [string]: mixed,
+        });
+        error.response = response;
+        throw error;
+      }
+      return dispatch({
+        type: 'FETCH_PLAN_SUCCEEDED',
+        payload: response,
+      });
+    })
+    .catch(err => {
+      dispatch({ type: 'FETCH_PLAN_FAILED' });
+      throw err;
+    });
+};
 export const fetchPreflight = (planId: string): ThunkAction => (
   dispatch,
   getState,
