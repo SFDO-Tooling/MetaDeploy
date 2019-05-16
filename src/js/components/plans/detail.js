@@ -105,12 +105,14 @@ class PlanDetail extends React.Component<Props, State> {
       version,
       planSlug,
     } = this.props;
+    if (!product) return;
     const { primary_plan, secondary_plan } = product.most_recent_version;
-    // const additionalPlans = the additional plans localtion
+    // const additionalPlans = the additional plans collection
     if (!plan) {
       if (
         product.id !== primary_plan.id ||
-        (secondary_plan.id && version.additional_plans === undefined)
+        (secondary_plan.id &&
+          (!version || version.additional_plans === undefined))
       ) {
         doFetchPlan(versionLabel, productSlug, planSlug);
       }
