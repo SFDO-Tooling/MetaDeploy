@@ -43,7 +43,7 @@ export type FetchPlanStarted = {
 };
 export type FetchPlanSucceeded = {
   type: 'FETCH_PLAN_SUCCEEDED',
-  payload: Plan,
+  payload: Array<Plan>,
 };
 export type FetchPlanFailed = {
   type: 'FETCH_PLAN_FAILED',

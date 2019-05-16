@@ -107,13 +107,15 @@ class PlanDetail extends React.Component<Props, State> {
     } = this.props;
     if (!product) return;
     const { primary_plan, secondary_plan } = product.most_recent_version;
-    // const additionalPlans = the additional plans collection
     if (!plan) {
       if (
+        //$FlowFixMe
         product.id !== primary_plan.id ||
+        //$FlowFixMe
         (secondary_plan.id &&
           (!version || version.additional_plans === undefined))
       ) {
+        //$FlowFixMe
         doFetchPlan(versionLabel, productSlug, planSlug);
       }
     }

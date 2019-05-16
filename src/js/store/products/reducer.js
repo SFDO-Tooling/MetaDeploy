@@ -31,7 +31,7 @@ export type Product = {
     +url?: string,
   } | null,
   +image: string | null,
-  +most_recent_version: Version | null,
+  +most_recent_version: Version,
   +versions?: { [string]: Version | null },
   +is_listed: boolean,
   +is_allowed: boolean,
@@ -99,8 +99,8 @@ const reducer = (products: Products = [], action: ProductsAction): Products => {
       });
     }
     case 'FETCH_PLAN_SUCCEEDED': {
-      // @todo fix flow errors
-      const additional_plans = action.payload.reduce((obj, item) => {
+      const plan = action.payload;
+      const additional_plans = plan.reduce((obj, item) => {
         obj[item.slug] = item;
         for (const oldSlug of item.old_slugs) {
           obj[oldSlug] = item;
@@ -110,7 +110,7 @@ const reducer = (products: Products = [], action: ProductsAction): Products => {
       return products.map(p => {
         if (
           p.most_recent_version &&
-          p.most_recent_version.id === action.payload[0].version
+          p.most_recent_version.id === plan[0].version
         )
           return {
             ...p,
@@ -120,6 +120,7 @@ const reducer = (products: Products = [], action: ProductsAction): Products => {
               additional_plans,
             },
           };
+        return p;
       });
     }
   }
