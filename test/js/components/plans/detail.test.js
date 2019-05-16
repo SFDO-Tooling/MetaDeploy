@@ -138,6 +138,7 @@ describe('<PlanDetail />', () => {
     const context = {};
     const {
       getByText,
+      getAllByText,
       queryByText,
       getByAltText,
       container,
@@ -154,6 +155,7 @@ describe('<PlanDetail />', () => {
     );
     return {
       getByText,
+      getAllByText,
       queryByText,
       getByAltText,
       container,
@@ -177,7 +179,7 @@ describe('<PlanDetail />', () => {
 
   describe('installation is already running on org', () => {
     test('renders warning and disabled button', () => {
-      const { getByText } = setup({
+      const { getByText, getAllByText } = setup({
         initialState: {
           ...defaultState,
           org: {
@@ -192,14 +194,14 @@ describe('<PlanDetail />', () => {
         },
       });
 
-      expect(getByText('View the running installation')).toBeVisible();
-      expect(getByText('Install')).toBeDisabled();
+      expect(getByText('View the running installation.')).toBeVisible();
+      expect(getAllByText('Install')[0]).toBeDisabled();
     });
   });
 
   describe('preflight is already running on org', () => {
     test('renders warning and disabled button', () => {
-      const { getByText } = setup({
+      const { getByText, getAllByText } = setup({
         initialState: {
           ...defaultState,
           org: { current_job: null, current_preflight: '1' },
@@ -209,7 +211,7 @@ describe('<PlanDetail />', () => {
       expect(
         getByText('A pre-install validation is currently running on this org.'),
       ).toBeVisible();
-      expect(getByText('Install')).toBeDisabled();
+      expect(getAllByText('Install')[0]).toBeDisabled();
     });
   });
 
@@ -292,6 +294,30 @@ describe('<PlanDetail />', () => {
     expect(getByText('My Plan')).toBeVisible();
     expect(getByText('Preflight text…')).toBeVisible();
     expect(getByText('Step 1')).toBeVisible();
+  });
+
+  test('renders average time', () => {
+    const product = defaultState.products[0];
+    const { getByText } = setup({
+      initialState: {
+        ...defaultState,
+        products: [
+          {
+            ...product,
+            most_recent_version: {
+              ...product.most_recent_version,
+              primary_plan: {
+                ...product.most_recent_version.primary_plan,
+                average_duration: '30',
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    expect(getByText('Average Install Time:')).toBeVisible();
+    expect(getByText('30 seconds.')).toBeVisible();
   });
 
   test('renders preflight expiration warning', () => {

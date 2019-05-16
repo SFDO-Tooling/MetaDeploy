@@ -175,14 +175,26 @@ class JobDetail extends React.Component<Props, State> {
       return (
         <Button
           label={t('Cancel Installation')}
-          variant="base"
-          className="slds-button_text-destructive"
+          variant="text-destructive"
           onClick={this.requestCancelJob}
         />
       );
     }
     return null;
   }
+
+  controls = () => (
+    <>
+      {this.getCancelBtn()}
+      <Button
+        label={t('Share Installation')}
+        iconCategory="utility"
+        iconName="share"
+        iconPosition="left"
+        onClick={this.openModal}
+      />
+    </>
+  );
 
   render(): React.Node {
     const {
@@ -236,18 +248,7 @@ class JobDetail extends React.Component<Props, State> {
             version={version}
             plan={plan}
             job={job}
-            navRight={
-              <>
-                {this.getCancelBtn()}
-                <Button
-                  label={t('Share Installation')}
-                  iconCategory="utility"
-                  iconName="share"
-                  iconPosition="left"
-                  onClick={this.openModal}
-                />
-              </>
-            }
+            onRenderControls={this.controls}
           />
           <ShareModal
             isOpen={this.state.modalOpen}
@@ -259,6 +260,7 @@ class JobDetail extends React.Component<Props, State> {
           <BodyContainer>
             <Toasts job={job} label={t('Installation')} />
             <Intro
+              averageDuration={plan.average_duration}
               results={<JobResults job={job} openModal={this.openModal} />}
               cta={
                 <CtaButton

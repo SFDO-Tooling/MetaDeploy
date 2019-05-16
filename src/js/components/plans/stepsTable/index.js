@@ -71,6 +71,7 @@ class StepsTable extends React.Component<Props, State> {
       const newPanels = new Set([...expandedPanels]);
       let changed = false;
       // Auto-collapse previously-active step
+      /* istanbul ignore else */
       if (previousActiveJob && newPanels.has(previousActiveJob)) {
         changed = true;
         newPanels.delete(previousActiveJob);
@@ -80,6 +81,7 @@ class StepsTable extends React.Component<Props, State> {
         changed = true;
         newPanels.add(currentActiveJob);
       }
+      /* istanbul ignore else */
       if (changed) {
         updates.expandedPanels = newPanels;
       }
@@ -92,7 +94,7 @@ class StepsTable extends React.Component<Props, State> {
   getActiveStep = (job?: JobType): string | null => {
     // Get the currently-running step
     let activeJobStepId = null;
-    if (job && this.jobIsRunning()) {
+    if (job && this.jobIsRunning(job)) {
       for (const step of job.steps) {
         if (!(job.results[step] && job.results[step].status)) {
           activeJobStepId = step;
@@ -103,9 +105,23 @@ class StepsTable extends React.Component<Props, State> {
     return activeJobStepId;
   };
 
-  jobIsRunning = (): boolean => {
+  jobIsRunning = (job?: JobType): boolean =>
+    Boolean(job && job.status === CONSTANTS.STATUS.STARTED);
+
+  jobHasLogs = (): boolean => {
     const { job } = this.props;
-    return Boolean(job && job.status === CONSTANTS.STATUS.STARTED);
+    let hasLogs = false;
+    /* istanbul ignore if */
+    if (!job) {
+      return hasLogs;
+    }
+    for (const step of job.steps) {
+      if (job.results[step] && job.results[step].logs) {
+        hasLogs = true;
+        break;
+      }
+    }
+    return hasLogs;
   };
 
   togglePanel = (id: string): void => {
@@ -128,19 +144,24 @@ class StepsTable extends React.Component<Props, State> {
 
   toggleLogs = (hide: boolean): void => {
     const { job } = this.props;
+    /* istanbul ignore if */
+    if (!job) {
+      return;
+    }
     if (hide) {
       // Collapse all step-logs
       this.setState({ showLogs: false, expandedPanels: new Set() });
-    } else if (this.jobIsRunning()) {
+    } else if (this.jobIsRunning(job)) {
       // Expand currently-running step-log
       const { expandedPanels } = this.state;
       const panels = new Set([...expandedPanels]);
       const activeJobStepId = this.getActiveStep(job);
+      /* istanbul ignore else */
       if (activeJobStepId) {
         panels.add(activeJobStepId);
       }
       this.setState({ showLogs: true, expandedPanels: panels });
-    } else if (job) {
+    } else {
       // Expand all step-logs
       this.setState({ expandedPanels: new Set([...job.steps]) });
     }
@@ -161,7 +182,7 @@ class StepsTable extends React.Component<Props, State> {
     const hasValidToken = user && user.valid_token_for !== null;
     const hasReadyPreflight =
       !plan.requires_preflight || (preflight && preflight.is_ready);
-    const openPanels = expandedPanels.size > 0;
+    const logsExpanded = expandedPanels.size > 0;
     return (
       <div
         className="slds-p-around_medium
@@ -174,7 +195,8 @@ class StepsTable extends React.Component<Props, State> {
               label={
                 job ? (
                   <ToggleLogsDataColumnLabel
-                    hasLogs={openPanels}
+                    logsExpanded={logsExpanded}
+                    hasLogs={this.jobHasLogs()}
                     toggleLogs={this.toggleLogs}
                   />
                 ) : (

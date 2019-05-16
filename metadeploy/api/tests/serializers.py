@@ -1,8 +1,12 @@
+from datetime import timedelta
+
 import pytest
+from django.utils import timezone
 
 from ..models import Job, PreflightResult
 from ..serializers import (
     JobSerializer,
+    JobSummarySerializer,
     PlanSerializer,
     PreflightResultSerializer,
     ProductSerializer,
@@ -96,6 +100,7 @@ class TestPreflightSerializer:
         preflight = preflight_result_factory(
             user=user,
             organization_url=user.instance_url,
+            org_id=user.org_id,
             plan=plan,
             results={0: [{"status": "error"}]},
             status=PreflightResult.Status.complete,
@@ -112,6 +117,7 @@ class TestPreflightSerializer:
         preflight = preflight_result_factory(
             user=user,
             organization_url=user.instance_url,
+            org_id=user.org_id,
             plan=plan,
             results={0: [{"status": "warn"}]},
             status=PreflightResult.Status.complete,
@@ -128,6 +134,7 @@ class TestPreflightSerializer:
         preflight = preflight_result_factory(
             user=user,
             organization_url=user.instance_url,
+            org_id=user.org_id,
             plan=plan,
             results={0: [{"status": "warn"}]},
             status=PreflightResult.Status.complete,
@@ -143,6 +150,7 @@ class TestPreflightSerializer:
         preflight = preflight_result_factory(
             user=user,
             organization_url=user.instance_url,
+            org_id=user.org_id,
             plan=plan,
             results={0: [{"status": "error"}]},
             status=PreflightResult.Status.complete,
@@ -168,6 +176,7 @@ class TestJob:
             user=user,
             status=PreflightResult.Status.complete,
             results={str(step2.id): [{"status": "error", "message": ""}]},
+            org_id=user.org_id,
         )
         preflight_result_factory(
             plan=plan,
@@ -178,6 +187,7 @@ class TestJob:
                 str(step2.id): [{"status": "skip", "message": ""}],
                 str(step3.id): [{"status": "optional", "message": ""}],
             },
+            org_id=user.org_id,
         )
         data = {
             "plan": str(plan.id),
@@ -220,6 +230,7 @@ class TestJob:
             user=user,
             status=PreflightResult.Status.complete,
             results={str(step2.id): [{"status": "error", "message": ""}]},
+            org_id=user.org_id,
         )
         data = {
             "plan": str(plan.id),
@@ -250,7 +261,11 @@ class TestJob:
         request = rf.get("/")
         request.user = user
         preflight_result_factory(
-            plan=plan, user=user, status=PreflightResult.Status.complete, results={}
+            plan=plan,
+            user=user,
+            status=PreflightResult.Status.complete,
+            results={},
+            org_id=user.org_id,
         )
         data = {"plan": str(plan.id), "steps": [str(step2.id)]}
         serializer = JobSerializer(data=data, context=dict(request=request))
@@ -272,6 +287,7 @@ class TestJob:
             user=user,
             status=PreflightResult.Status.complete,
             results={str(step1.id): [{"status": "optional", "message": ""}]},
+            org_id=user.org_id,
         )
         data = {"plan": str(plan.id), "steps": [str(step2.id)]}
         serializer = JobSerializer(data=data, context=dict(request=request))
@@ -279,7 +295,11 @@ class TestJob:
         assert serializer.is_valid(), serializer.errors
 
     def test_no_context(self, job_factory):
-        job = job_factory(status=Job.Status.complete, results={"logs": "===="})
+        job = job_factory(
+            status=Job.Status.complete,
+            results={"logs": "===="},
+            org_id="00Dxxxxxxxxxxxxxxx",
+        )
         serializer = JobSerializer(instance=job)
 
         assert serializer.data["error_count"] == 0
@@ -291,7 +311,7 @@ class TestJob:
         user = user_factory()
         request = rf.get("/")
         request.user = user
-        job = job_factory(user=user, plan=plan)
+        job = job_factory(user=user, plan=plan, org_id=user.org_id)
         serializer = JobSerializer(
             job, data={"is_public": False}, partial=True, context=dict(request=request)
         )
@@ -319,6 +339,7 @@ class TestJob:
             user=user,
             status=PreflightResult.Status.complete,
             results={str(step2.id): [{"status": "error", "message": ""}]},
+            org_id=user.org_id,
         )
         preflight_result_factory(
             plan=plan,
@@ -329,12 +350,13 @@ class TestJob:
                 str(step2.id): [{"status": "skip", "message": ""}],
                 str(step3.id): [{"status": "optional", "message": ""}],
             },
+            org_id=user.org_id,
         )
         data = {
             "plan": str(plan.id),
             "steps": [str(step1.id), str(step2.id), str(step3.id)],
         }
-        job = job_factory(organization_url=user.instance_url)
+        job = job_factory(organization_url=user.instance_url, org_id=user.org_id)
         serializer = JobSerializer(data=data, context=dict(request=request))
 
         assert not serializer.is_valid()
@@ -360,10 +382,18 @@ class TestJob:
         allowed_list = allowed_list_factory()
         plan = plan_factory(visible_to=allowed_list)
         preflight_result_factory(
-            plan=plan, user=user, status=PreflightResult.Status.complete, results={}
+            plan=plan,
+            user=user,
+            status=PreflightResult.Status.complete,
+            results={},
+            org_id=user.org_id,
         )
         preflight_result_factory(
-            plan=plan, user=user, status=PreflightResult.Status.complete, results={}
+            plan=plan,
+            user=user,
+            status=PreflightResult.Status.complete,
+            results={},
+            org_id=user.org_id,
         )
         data = {"plan": str(plan.id), "steps": []}
 
@@ -387,13 +417,48 @@ class TestJob:
         product = product_factory(visible_to=allowed_list)
         plan = plan_factory(version__product=product)
         preflight_result_factory(
-            plan=plan, user=user, status=PreflightResult.Status.complete, results={}
+            plan=plan,
+            user=user,
+            status=PreflightResult.Status.complete,
+            results={},
+            org_id=user.org_id,
         )
         preflight_result_factory(
-            plan=plan, user=user, status=PreflightResult.Status.complete, results={}
+            plan=plan,
+            user=user,
+            status=PreflightResult.Status.complete,
+            results={},
+            org_id=user.org_id,
         )
         data = {"plan": str(plan.id), "steps": []}
 
         serializer = JobSerializer(data=data, context=dict(request=request))
 
         assert not serializer.is_valid()
+
+
+@pytest.mark.django_db
+class TestJobSummarySerializer:
+    def test_average_duration(self, plan_factory, job_factory):
+        start = timezone.now()
+        end = start + timedelta(seconds=30)
+        plan = plan_factory()
+
+        job = job_factory(
+            plan=plan,
+            status=Job.Status.complete,
+            success_at=end,
+            enqueued_at=start,
+            org_id="00Dxxxxxxxxxxxxxxx",
+        )
+        assert JobSummarySerializer(job).data["plan_average_duration"] is None
+
+        for _ in range(4):
+            job_factory(
+                plan=plan,
+                status=Job.Status.complete,
+                success_at=end,
+                enqueued_at=start,
+                org_id="00Dxxxxxxxxxxxxxxx",
+            )
+        assert JobSummarySerializer(job).data["plan_average_duration"] == "30.0"

@@ -20,18 +20,19 @@ Websocket notifications you can subscribe to:
 from channels.layers import get_channel_layer
 from django.utils.translation import gettext_lazy as _
 
+from ..consumer_utils import get_set_message_semaphore
 from .constants import CHANNELS_GROUP_NAME
-from .hash_url import convert_org_url_to_key
+from .hash_url import convert_org_id_to_key
 
 
-async def push_message_about_instance(instance, json_message):
+async def push_message_about_instance(instance, message):
     model_name = instance._meta.model_name
     id = str(instance.id)
     group_name = CHANNELS_GROUP_NAME.format(model=model_name, id=id)
     channel_layer = get_channel_layer()
-    await channel_layer.group_send(
-        group_name, {"type": "notify", "content": json_message}
-    )
+    sent_message = {"type": "notify", "content": message}
+    if await get_set_message_semaphore(channel_layer, sent_message):
+        await channel_layer.group_send(group_name, sent_message)
 
 
 async def push_serializable(instance, serializer, type_):
@@ -39,16 +40,15 @@ async def push_serializable(instance, serializer, type_):
     id = str(instance.id)
     group_name = CHANNELS_GROUP_NAME.format(model=model_name, id=id)
     serializer_name = f"{serializer.__module__}.{serializer.__name__}"
+    message = {
+        "type": "notify",
+        "instance": {"model": model_name, "id": id},
+        "serializer": serializer_name,
+        "inner_type": type_,
+    }
     channel_layer = get_channel_layer()
-    await channel_layer.group_send(
-        group_name,
-        {
-            "type": "notify",
-            "instance": {"model": model_name, "id": id},
-            "serializer": serializer_name,
-            "inner_type": type_,
-        },
-    )
+    if await get_set_message_semaphore(channel_layer, message):
+        await channel_layer.group_send(group_name, message)
 
 
 async def user_token_expired(user):
@@ -122,20 +122,19 @@ async def notify_org_result_changed(result):
     from .models import Job, PreflightResult
 
     type_ = "ORG_CHANGED"
-    org_url = result.organization_url
+    org_id = result.org_id
 
-    current_job = Job.objects.filter(
-        organization_url=org_url, status=Job.Status.started
-    ).first()
+    current_job = Job.objects.filter(org_id=org_id, status=Job.Status.started).first()
     current_preflight = PreflightResult.objects.filter(
-        organization_url=org_url, status=PreflightResult.Status.started
+        org_id=org_id, status=PreflightResult.Status.started
     ).first()
     serializer = OrgSerializer(
         {"current_job": current_job, "current_preflight": current_preflight}
     )
-    message = {"type": type_, "payload": serializer.data}
+    message = {"type": "notify", "content": {"type": type_, "payload": serializer.data}}
     group_name = CHANNELS_GROUP_NAME.format(
-        model="org", id=convert_org_url_to_key(org_url)
+        model="org", id=convert_org_id_to_key(org_id)
     )
     channel_layer = get_channel_layer()
-    await channel_layer.group_send(group_name, {"type": "notify", "content": message})
+    if await get_set_message_semaphore(channel_layer, message):
+        await channel_layer.group_send(group_name, message)

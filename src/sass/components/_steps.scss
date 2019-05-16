@@ -4,7 +4,7 @@
 // Variables used in step table only to help with controlling width/wrapping
 $step-name-min: 300px;
 $step-type-min: 170px;
-$step-badge-min: 100px;
+$step-badge-min: 120px;
 $step-install-min: 150px;
 $step-ending-columns-min: $step-type-min + $step-badge-min + $step-install-min;
 
@@ -27,12 +27,13 @@ $step-ending-columns-min: $step-type-min + $step-badge-min + $step-install-min;
   // set up layout
   tr {
     display: grid;
-    grid-template-columns:
-      [step-row-start name-start] minmax($step-name-min, 4fr)
-      [name-end type-start] minmax($step-type-min, 1.5fr)
-      [type-end badge-start] minmax($step-badge-min, 1fr)
-      [badge-end install-start] minmax($step-install-min, 1fr)
-      [install-end step-row-end];
+    grid-template:
+      'name type badge options'
+      'logs logs logs  logs' auto / minmax($step-name-min, 4fr) minmax(
+        $step-type-min,
+        1.5fr
+      )
+      minmax($step-badge-min, 1fr) minmax($step-install-min, 1fr);
 
     &:focus,
     &:hover {
@@ -95,8 +96,9 @@ $step-ending-columns-min: $step-type-min + $step-badge-min + $step-install-min;
   }
 
   .plan-step-item-name {
-    grid-column: name-start / step-row-end;
-    grid-row: 1 / 3;
+    // this one spans all columns and rows
+    // for the opened accordion content to extend full width
+    grid-area: 1 / 1 / -1 / -1;
   }
 
   .plan-step-name {
@@ -104,8 +106,7 @@ $step-ending-columns-min: $step-type-min + $step-badge-min + $step-install-min;
   }
 
   .plan-step-type {
-    grid-column: type-start / type-end;
-    grid-row: 1;
+    grid-area: type;
 
     // aligns the type text with other cell text
     > div {
@@ -121,8 +122,7 @@ $step-ending-columns-min: $step-type-min + $step-badge-min + $step-install-min;
   }
 
   .plan-step-badge-container {
-    grid-column: badge-start / badge-end;
-    grid-row: 1;
+    grid-area: badge;
     // decreasing container padding for better vertical alignment
     // badges have more internal padding
     padding-bottom: 0;
@@ -138,8 +138,7 @@ $step-ending-columns-min: $step-type-min + $step-badge-min + $step-install-min;
   }
 
   .plan-step-options {
-    grid-column: install-start / install-end;
-    grid-row: 1;
+    grid-area: options;
 
     // Completed icon is larger than others. Negative indent helps alignment
     .is-completed {
@@ -158,13 +157,13 @@ $step-ending-columns-min: $step-type-min + $step-badge-min + $step-install-min;
     color: $color-text-brand-primary;
     margin-bottom: $spacing-small * -1;
     margin-left: $spacing-large * -1;
-    // full width of the page minus padding ===
-    // full width of table so scroll goes edge to edge
     margin-top: 1.25rem;
     overflow: auto;
     // transform added to move this accordion content above table tr
     // allows for the tr:hover bg color to not overlap the logs bg color
     transform: scale(1);
+    // full width of the page minus padding ===
+    // full width of table so scroll goes edge to edge
     width: calc(100vw - 4rem);
   }
 

@@ -105,6 +105,7 @@ describe('<JobDetail />', () => {
     const context = {};
     const {
       getByText,
+      getAllByText,
       queryByText,
       getByAltText,
       container,
@@ -121,6 +122,7 @@ describe('<JobDetail />', () => {
     );
     return {
       getByText,
+      getAllByText,
       queryByText,
       getByAltText,
       container,
@@ -299,6 +301,30 @@ describe('<JobDetail />', () => {
   });
 
   describe('job complete', () => {
+    test('renders average time', () => {
+      const product = defaultState.products[0];
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          products: [
+            {
+              ...product,
+              most_recent_version: {
+                ...product.most_recent_version,
+                primary_plan: {
+                  ...product.most_recent_version.primary_plan,
+                  average_duration: '119.999',
+                },
+              },
+            },
+          ],
+        },
+      });
+
+      expect(getByText('Average Install Time:')).toBeVisible();
+      expect(getByText('2 minutes.')).toBeVisible();
+    });
+
     test('renders job detail', () => {
       const { getByText, queryByText } = setup();
 
@@ -398,7 +424,7 @@ describe('<JobDetail />', () => {
       const canceled = Promise.resolve({});
       requestCancelJob.mockReturnValue(() => canceled);
       const id = 'job-1';
-      const { getByText } = setup({
+      const { getAllByText } = setup({
         initialState: {
           ...defaultState,
           user: { is_staff: true },
@@ -410,12 +436,12 @@ describe('<JobDetail />', () => {
           },
         },
       });
-      fireEvent.click(getByText('Cancel Installation'));
+      fireEvent.click(getAllByText('Cancel Installation')[0]);
 
       expect.assertions(2);
       expect(requestCancelJob).toHaveBeenCalledWith('job-1');
       return canceled.then(() => {
-        expect(getByText('Canceling Installation…')).toBeVisible();
+        expect(getAllByText('Canceling Installation…')[0]).toBeVisible();
       });
     });
   });

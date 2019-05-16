@@ -7,7 +7,8 @@ from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.utils.translation import gettext as _
 
 from .api.constants import CHANNELS_GROUP_NAME
-from .api.hash_url import convert_org_url_to_key
+from .api.hash_url import convert_org_id_to_key
+from .consumer_utils import clear_message_semaphore
 
 Request = namedtuple("Request", "user")
 
@@ -32,6 +33,8 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
                 'content': json_message,
             })
         """
+        # Take lock out of redis for this message:
+        await clear_message_semaphore(self.channel_layer, event)
         if "content" in event:
             await self.send_json(event["content"])
             return
@@ -103,6 +106,6 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
 
     def handle_org_special_case(self, content):
         if content["model"] == "org":
-            content["id"] = convert_org_url_to_key(self.scope["user"].instance_url)
+            content["id"] = convert_org_id_to_key(self.scope["user"].org_id)
             return True
         return False

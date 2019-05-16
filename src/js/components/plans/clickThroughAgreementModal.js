@@ -50,7 +50,7 @@ class ClickThroughAgreementModal extends React.Component<Props, State> {
     return (
       <Modal
         isOpen={isOpen}
-        title={t('Product Terms of Use and Licenses')}
+        heading={t('Product Terms of Use and Licenses')}
         onRequestClose={this.handleClose}
         footer={footer}
       >

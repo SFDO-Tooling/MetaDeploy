@@ -6,30 +6,32 @@ import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import { t } from 'i18next';
 
 type Props = {
+  logsExpanded: boolean,
   hasLogs: boolean,
   toggleLogs: (hide: boolean) => void,
 };
 
 class ToggleLogsDataColumnLabel extends React.Component<Props> {
   toggleClicked = () => {
-    const { hasLogs, toggleLogs } = this.props;
-    toggleLogs(hasLogs);
+    const { logsExpanded, toggleLogs } = this.props;
+    toggleLogs(logsExpanded);
   };
 
   render() {
-    const { hasLogs } = this.props;
+    const { logsExpanded, hasLogs } = this.props;
     return (
       <>
         <Tooltip
           align="top left"
-          content={hasLogs ? t('Hide Logs') : t('Show Logs')}
+          content={logsExpanded ? t('Hide Logs') : t('Show Logs')}
           position="overflowBoundaryElement"
         >
           <Button
             assistiveText={{ icon: t('Steps') }}
             variant="icon"
             iconCategory="utility"
-            iconName={hasLogs ? 'toggle_panel_bottom' : 'toggle_panel_top'}
+            iconName={logsExpanded ? 'toggle_panel_bottom' : 'toggle_panel_top'}
+            disabled={!hasLogs}
             onClick={this.toggleClicked}
           />
         </Tooltip>

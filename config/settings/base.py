@@ -350,6 +350,10 @@ GITHUB_TOKEN = env("GITHUB_TOKEN")
 TOKEN_LIFETIME_MINUTES = env("TOKEN_LIFETIME_MINUTES", type_=int, default=10)
 PREFLIGHT_LIFETIME_MINUTES = env("PREFLIGHT_LIFETIME_MINUTES", type_=int, default=10)
 
+# Displaying average job completion time
+MINIMUM_JOBS_FOR_AVERAGE = env("MINIMUM_JOBS_FOR_AVERAGE", type_=int, default=5)
+AVERAGE_JOB_WINDOW = env("AVERAGE_JOB_WINDOW", type_=int, default=20)
+
 
 # Raven / Sentry
 SENTRY_DSN = env("SENTRY_DSN", default="")

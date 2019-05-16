@@ -28,7 +28,7 @@ class TestJobFlow:
         assert callbacks.context == sentinel.job
 
     def test_cancel_job(self, mocker, job_factory):
-        job = job_factory()
+        job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
         callbacks = JobFlowCallback(job)
         cache.set(REDIS_JOB_CANCEL_KEY.format(id=job.id), True)
         with pytest.raises(StopFlowException):
@@ -41,7 +41,7 @@ class TestJobFlow:
         plan = plan_factory()
         steps = [step_factory(plan=plan, path=f"task_{i}") for i in range(3)]
 
-        job = job_factory(plan=plan, steps=steps)
+        job = job_factory(plan=plan, steps=steps, org_id="00Dxxxxxxxxxxxxxxx")
 
         callbacks = JobFlowCallback(job)
 
@@ -62,7 +62,7 @@ class TestJobFlow:
         plan = plan_factory()
         steps = [step_factory(plan=plan, path=f"task_{i}") for i in range(3)]
 
-        job = job_factory(plan=plan, steps=steps)
+        job = job_factory(plan=plan, steps=steps, org_id="00Dxxxxxxxxxxxxxxx")
 
         callbacks = JobFlowCallback(job)
 
@@ -85,7 +85,7 @@ class TestJobFlow:
         plan = plan_factory()
         steps = [step_factory(plan=plan, path=f"task_{i}") for i in range(3)]
 
-        job = job_factory(user=user, plan=plan, steps=steps)
+        job = job_factory(user=user, plan=plan, steps=steps, org_id=user.org_id)
 
         callbacks = JobFlowCallback(job)
 
@@ -116,7 +116,7 @@ class TestPreflightFlow:
         step3 = step_factory(plan=plan, path="name_3")
         step4 = step_factory(plan=plan, path="name_4")
         step5 = step_factory(plan=plan, path="name_5")
-        pfr = preflight_result_factory(user=user, plan=plan)
+        pfr = preflight_result_factory(user=user, plan=plan, org_id=user.org_id)
         results = [
             MagicMock(
                 return_values={
@@ -160,7 +160,7 @@ class TestPreflightFlow:
     ):
         user = user_factory()
         plan = plan_factory()
-        pfr = preflight_result_factory(user=user, plan=plan)
+        pfr = preflight_result_factory(user=user, plan=plan, org_id=user.org_id)
         callbacks = PreflightFlowCallback(pfr)
 
         step = MagicMock()

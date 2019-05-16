@@ -41,7 +41,7 @@ async def test_push_notification_consumer__subscribe_preflight(
     user = user_factory()
     plan = plan_factory()
     preflight = preflight_result_factory(
-        user=user, status=PreflightResult.Status.complete, plan=plan
+        user=user, status=PreflightResult.Status.complete, plan=plan, org_id=user.org_id
     )
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
@@ -71,7 +71,7 @@ async def test_push_notification_consumer__subscribe_preflight(
 @pytest.mark.asyncio
 async def test_push_notification_consumer__subscribe_job(user_factory, job_factory):
     user = user_factory()
-    job = job_factory(user=user, status=Job.Status.complete)
+    job = job_factory(user=user, status=Job.Status.complete, org_id=user.org_id)
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
     communicator.scope["user"] = user
@@ -98,7 +98,7 @@ async def test_push_notification_consumer__subscribe_job__bad(
     user_factory, job_factory
 ):
     user = user_factory()
-    job = job_factory(status=Job.Status.complete)
+    job = job_factory(status=Job.Status.complete, org_id="00Dxxxxxxxxxxxxxxx")
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
     communicator.scope["user"] = user
@@ -117,9 +117,7 @@ async def test_push_notification_consumer__subscribe_job__bad(
 
 @pytest.mark.django_db
 @pytest.mark.asyncio
-async def test_push_notification_consumer__subscribe_job__missing(
-    user_factory, job_factory
-):
+async def test_push_notification_consumer__subscribe_job__missing(user_factory):
     user = user_factory()
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
@@ -146,6 +144,7 @@ async def test_push_notification_consumer__subscribe_org(
             # instance_url is the important part here:
             "instance_url": "https://example.com/",
             "organization_details": {
+                "Id": "00Dxxxxxxxxxxxxxxx",
                 "Name": "Sample Org",
                 "OrganizationType": "Developer Edition",
             },
@@ -157,6 +156,7 @@ async def test_push_notification_consumer__subscribe_org(
         user=user,
         plan=plan,
         organization_url="https://example.com/",
+        org_id=user.org_id,
     )
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
@@ -164,7 +164,7 @@ async def test_push_notification_consumer__subscribe_org(
     connected, _ = await communicator.connect()
     assert connected
 
-    await communicator.send_json_to({"model": "org", "id": "https://example.com/"})
+    await communicator.send_json_to({"model": "org", "id": "00Dxxxxxxxxxxxxxxx"})
     response = await communicator.receive_json_from()
     assert "ok" in response
 
