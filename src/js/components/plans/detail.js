@@ -24,7 +24,11 @@ import {
   selectVersionLabel,
 } from 'store/products/selectors';
 import { selectUserState } from 'store/user/selectors';
-import { getLoadingOrNotFound, shouldFetchVersion } from 'components/utils';
+import {
+  getLoadingOrNotFound,
+  shouldFetchVersion,
+  shouldFetchPlan,
+} from 'components/utils';
 import { startJob } from 'store/jobs/actions';
 import BackLink from 'components/backLink';
 import BodyContainer from 'components/bodyContainer';
@@ -97,27 +101,23 @@ class PlanDetail extends React.Component<Props, State> {
 
   fetchPlanIfMissing() {
     const {
-      product,
       plan,
-      doFetchPlan,
-      versionLabel,
-      productSlug,
       version,
+      productSlug,
+      versionLabel,
       planSlug,
+      doFetchPlan,
     } = this.props;
-    if (!product) return;
-    const { primary_plan, secondary_plan } = product.most_recent_version;
-    if (!plan) {
-      if (
-        //$FlowFixMe
-        product.id !== primary_plan.id ||
-        //$FlowFixMe
-        (secondary_plan.id &&
-          (!version || version.additional_plans === undefined))
-      ) {
-        //$FlowFixMe
-        doFetchPlan(versionLabel, productSlug, planSlug);
-      }
+    if (
+      !plan &&
+      version &&
+      productSlug &&
+      versionLabel &&
+      planSlug &&
+      shouldFetchPlan({ version, plan, planSlug })
+    ) {
+      // Fetch plan from API
+      doFetchPlan(versionLabel, productSlug, planSlug);
     }
   }
 
