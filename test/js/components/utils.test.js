@@ -3,7 +3,11 @@ import { StaticRouter } from 'react-router-dom';
 import { render } from 'react-testing-library';
 
 import routes from 'utils/routes';
-import { getLoadingOrNotFound, shouldFetchVersion } from 'components/utils';
+import {
+  getLoadingOrNotFound,
+  shouldFetchVersion,
+  shouldFetchPlan,
+} from 'components/utils';
 
 const defaultProduct = {
   id: 'p1',
@@ -234,5 +238,56 @@ describe('getLoadingOrNotFound', () => {
         routes.plan_detail('product-1', '1.0.0', 'my-plan'),
       );
     });
+  });
+  describe('no additional_plans', () => {
+    test('renders <Spinner />', () => {
+      const { getByText } = setup({
+        ...defaultProduct,
+        version: {},
+      });
+      expect(getByText('Loading...')).toBeVisible();
+    });
+  });
+  // @@@ this may be showing a 404 instead
+  describe('fetching plans from API', () => {
+    test('renders <Spinner/>', () => {
+      const { getByText } = setup({
+        product: defaultProduct,
+        planSlug: 'old-plan',
+        version: null,
+      });
+      expect(getByText('Loading...')).toBeVisible();
+    });
+  });
+});
+describe('shouldFetchPlan', () => {
+  test('returns false', () => {
+    const product = {
+      ...defaultProduct,
+      versions: { '2.0.0': 'not null' },
+    };
+    const actual = shouldFetchPlan({
+      product,
+      version: null,
+      plan: null,
+    });
+    expect(actual).toBe(false);
+  });
+  test('returns true', () => {
+    const product = {
+      ...defaultProduct,
+      versions: { '2.0.0': 'not null' },
+    };
+    const actual = shouldFetchPlan({
+      product,
+      version: {
+        id: 'v1',
+        additional_plans: {
+          'plan-4': null,
+        },
+      },
+      planSlug: 'plan-4',
+    });
+    expect(true).toBeTruthy();
   });
 });

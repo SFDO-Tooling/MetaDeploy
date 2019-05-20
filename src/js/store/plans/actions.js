@@ -58,9 +58,11 @@ export const fetchPlan = (
 ): ThunkAction => (dispatch, getState, { apiFetch }) => {
   dispatch({ type: 'FETCH_PLAN_STARTED', payload: {} });
   const baseUrl = window.api_urls.plan_list();
+  const params = { versionLabel, productSlug, planSlug };
+  console.log(params);
   return apiFetch(
-    // @todo pass into fn
-    `${baseUrl}/?version_label=${versionLabel}&product_slug=${productSlug}&slug=${planSlug}`,
+    // @todo pass into fn, had unexpected behavior using the addUrl function
+    `${baseUrl}?version_label=${versionLabel}&product_slug=${productSlug}&slug=${planSlug}`,
   )
     .then(response => {
       if (!Array.isArray(response)) {

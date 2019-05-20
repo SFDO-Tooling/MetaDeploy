@@ -146,10 +146,9 @@ describe('fetchPlans', () => {
       const store = storeWithApi({});
       const product = 'p1';
       const version = 'v1';
-      const response = [{}]; // should this match actual response?
+      const response = [{ id: 'v1', version: 'v1' }];
       const baseUrl = window.api_urls.version_list();
       fetchMock.getOnce(`${baseUrl}${version}/additional_plans`, [
-        response,
         product,
         version,
       ]);
@@ -159,12 +158,15 @@ describe('fetchPlans', () => {
       };
       const succeeded = {
         type: 'FETCH_PLANS_SUCCEEDED',
-        payload: { response, product, version },
+        payload: {
+          response,
+          product,
+          version,
+        },
       };
 
       expect.assertions(1);
       return store.dispatch(actions.fetchPlans(product, version)).then(() => {
-        // this almost works buts adds [] to response ?
         expect(store.getActions()).toEqual([started, succeeded]);
       });
     });

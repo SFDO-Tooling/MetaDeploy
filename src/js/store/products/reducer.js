@@ -119,9 +119,7 @@ const reducer = (products: Products = [], action: ProductsAction): Products => {
               additional_plans,
             },
           };
-        else {
-          return p;
-        }
+        return p;
       });
     }
   }

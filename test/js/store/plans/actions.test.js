@@ -164,3 +164,24 @@ describe('startPreflight', () => {
     expect(actions[action](payload)).toEqual(expected);
   });
 });
+
+describe('fetchPlan', () => {
+  describe('error', () => {
+    test('dispatches FETCH_PLAN_FAILED action', () => {
+      const store = storeWithApi({});
+
+      const planSlug = 'account-record-types';
+      const productSlug = 'product-with-useful-data';
+      const versionLabel = '0.3.1';
+      const baseUrl = window.api_urls.plan_list();
+      fetchMock.getOnce(
+        `${baseUrl}?version_label=${versionLabel}&product_slug=${productSlug}&slug=${planSlug}`,
+        'string',
+      );
+      expect.assertions(1);
+      return expect(
+        store.dispatch(actions.fetchPlan(planSlug, productSlug, versionLabel)),
+      ).rejects.toThrow();
+    });
+  });
+});
