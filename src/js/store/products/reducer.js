@@ -116,11 +116,12 @@ const reducer = (products: Products = [], action: ProductsAction): Products => {
             ...p,
             most_recent_version: {
               ...p.most_recent_version,
-              fetched_additional_plans: true,
               additional_plans,
             },
           };
-        return p;
+        else {
+          return p;
+        }
       });
     }
   }
