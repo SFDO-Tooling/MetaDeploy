@@ -6,7 +6,7 @@ channels==2.2.0
 channels_redis==2.4.0
 service_identity==18.1.0
 django-allauth==0.39.1
-werkzeug==0.15.2
+werkzeug==0.15.4
 pyopenssl==19.0.0
 django-js-reverse==0.9.1
 djangorestframework==3.9.4
