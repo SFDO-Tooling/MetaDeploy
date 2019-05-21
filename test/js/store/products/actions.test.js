@@ -81,7 +81,7 @@ describe('fetchVersion', () => {
       };
 
       expect.assertions(1);
-      return store.dispatch(actions.fetchVersion(filters)).then(response => {
+      return store.dispatch(actions.fetchVersion(filters)).then(() => {
         expect(store.getActions()).toEqual([started, succeeded]);
       });
     });
@@ -143,6 +143,7 @@ describe('fetchVersion', () => {
 describe('fetchPlans', () => {
   describe('success', () => {
     test('GETs additional_plans from api', () => {
+      // this test is failing, looks like it is adding extra strings to the response
       const store = storeWithApi({});
       const product = 'p1';
       const version = 'v1';
@@ -180,7 +181,6 @@ describe('fetchPlans', () => {
         description: 'This is a test product.',
       };
       const version = { id: 'v1', label: 'v1' };
-      let response = [{}];
       const baseUrl = window.api_urls.version_list();
       fetchMock.getOnce(`${baseUrl}${version.id}/additional_plans`, 'string');
       expect.assertions(1);

@@ -239,6 +239,7 @@ describe('getLoadingOrNotFound', () => {
       );
     });
   });
+
   describe('no additional_plans', () => {
     test('renders <Spinner />', () => {
       const { getByText } = setup({
@@ -248,13 +249,19 @@ describe('getLoadingOrNotFound', () => {
       expect(getByText('Loading...')).toBeVisible();
     });
   });
-  // @@@ this may be showing a 404 instead
+
+  // seems like this renders a spinner but still failing //
   describe('fetching plans from API', () => {
     test('renders <Spinner/>', () => {
       const { getByText } = setup({
         product: defaultProduct,
         planSlug: 'old-plan',
-        version: null,
+        version: {
+          id: 'v1',
+          additional_plans: {
+            'old-plan': null,
+          },
+        },
       });
       expect(getByText('Loading...')).toBeVisible();
     });
@@ -276,18 +283,17 @@ describe('shouldFetchPlan', () => {
   test('returns true', () => {
     const product = {
       ...defaultProduct,
-      versions: { '2.0.0': 'not null' },
     };
     const actual = shouldFetchPlan({
       product,
+      plan: null,
       version: {
-        id: 'v1',
         additional_plans: {
-          'plan-4': null,
+          'plan-4': 'not-null',
         },
       },
       planSlug: 'plan-4',
     });
-    expect(true).toBeTruthy();
+    expect(actual).toBe(true);
   });
 });

@@ -165,6 +165,7 @@ describe('startPreflight', () => {
   });
 });
 
+// both of these are failing, think something is going wrong on fetch call //
 describe('fetchPlan', () => {
   describe('error', () => {
     test('dispatches FETCH_PLAN_FAILED action', () => {
@@ -182,6 +183,31 @@ describe('fetchPlan', () => {
       return expect(
         store.dispatch(actions.fetchPlan(planSlug, productSlug, versionLabel)),
       ).rejects.toThrow();
+    });
+  });
+  describe('success', () => {
+    // seems like for this block window.api_urls is undefined //
+    const store = storeWithApi({});
+    const planSlug = 'account-record-types';
+    const productSlug = 'product-with-useful-data';
+    const versionLabel = '0.3.1';
+    const response = [{ id: 'v1', version: 'v1' }];
+    const baseUrl = window.api_urls.plan_list();
+    fetchMock.getOnce(
+      `${baseUrl}?version_label=${versionLabel}&product_slug=${productSlug}&slug=${planSlug}`,
+      { planSlug, productSlug, versionLabel },
+    );
+    const started = {
+      type: 'FETCH_PLAN_STARTED',
+      payload: {},
+    };
+    const succeeded = {
+      type: 'FETCH_PLAN_SUCCEEDED',
+      payload: response,
+    };
+    expect.assertions(1);
+    return store.dispatch(actions.fetchPlans(product, version)).then(() => {
+      expect(store.getActions()).toEqual([started, succeeded]);
     });
   });
 });
