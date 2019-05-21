@@ -253,6 +253,14 @@ class CtaButton extends React.Component<
     ) : null;
   }
 
+  warningsInSelectedSteps(): boolean {
+    const { selectedSteps, preflight } = this.props;
+    return [...selectedSteps].some(
+      id =>
+        Object.keys((preflight && preflight.results) || {}).indexOf(id) !== -1,
+    );
+  }
+
   render(): React.Node {
     const { user, clickThroughAgreement, plan, preflight } = this.props;
     if (plan.requires_preflight) {
@@ -305,7 +313,8 @@ class CtaButton extends React.Component<
             // Preflight is done, valid, and has no errors -- allow installation
             const hasWarnings =
               preflight.warning_count !== undefined &&
-              preflight.warning_count > 0;
+              preflight.warning_count > 0 &&
+              this.warningsInSelectedSteps();
             // Terms must be confirmed before proceeding
             const action = clickThroughAgreement
               ? this.openClickThroughModal
