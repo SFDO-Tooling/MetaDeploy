@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import { t } from 'i18next';
 
 import routes from 'utils/routes';
-import { fetchVersion, fetchPlans } from 'store/products/actions';
+import { fetchPlan, fetchPlans, fetchVersion } from 'store/products/actions';
 import {
   selectProduct,
   selectProductSlug,
@@ -40,8 +40,9 @@ type VersionDetailProps = {
   productSlug: ?string,
   version: VersionType | null,
   versionLabelAndPlanSlug: VersionPlanType,
-  doFetchVersion: typeof fetchVersion,
+  doFetchPlan: typeof fetchPlan,
   doFetchPlans: typeof fetchPlans,
+  doFetchVersion: typeof fetchVersion,
 };
 
 const ProductDetail = ({ product, productSlug }: ProductDetailProps) => {
@@ -107,22 +108,39 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     }
   }
 
+  fetchPlanIfMissing() {
+    const { product, versionLabelAndPlanSlug, doFetchPlan } = this.props;
+    const { maybeVersion, maybeSlug } = versionLabelAndPlanSlug;
+    if (product && maybeVersion && maybeSlug) {
+      // Fetch plan from API
+      doFetchPlan({
+        product: product.id,
+        version: maybeVersion,
+        slug: maybeSlug,
+      });
+    }
+  }
+
   componentDidMount() {
     this.fetchVersionIfMissing();
     this.fetchPlansIfMissing();
+    this.fetchPlanIfMissing();
   }
 
   componentDidUpdate(prevProps) {
     const { product, version, versionLabelAndPlanSlug } = this.props;
-    const { label, slug } = versionLabelAndPlanSlug;
+    const { label, slug, maybeVersion, maybeSlug } = versionLabelAndPlanSlug;
     const versionChanged =
       product !== prevProps.product ||
       version !== prevProps.version ||
       label !== prevProps.versionLabelAndPlanSlug.label ||
-      slug !== prevProps.versionLabelAndPlanSlug.slug;
+      slug !== prevProps.versionLabelAndPlanSlug.slug ||
+      maybeVersion !== prevProps.versionLabelAndPlanSlug.maybeVersion ||
+      maybeSlug !== prevProps.versionLabelAndPlanSlug.maybeSlug;
     if (versionChanged) {
       this.fetchVersionIfMissing();
       this.fetchPlansIfMissing();
+      this.fetchPlanIfMissing();
     }
   }
 
@@ -134,7 +152,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
       version,
       versionLabelAndPlanSlug,
     } = this.props;
-    const { label, slug } = versionLabelAndPlanSlug;
+    const { label, slug, maybeVersion, maybeSlug } = versionLabelAndPlanSlug;
     const loadingOrNotFound = getLoadingOrNotFound({
       product,
       productSlug,
@@ -142,6 +160,8 @@ class VersionDetail extends React.Component<VersionDetailProps> {
       versionLabel: label,
       planSlug: slug,
       route: 'version_detail',
+      maybeVersion,
+      maybeSlug,
     });
     if (loadingOrNotFound !== false) {
       return loadingOrNotFound;
@@ -289,6 +309,7 @@ const selectVersionDetail = (appState: AppState, props: InitialProps) => ({
 const actions = {
   doFetchVersion: fetchVersion,
   doFetchPlans: fetchPlans,
+  doFetchPlan: fetchPlan,
 };
 
 const WrappedProductDetail: React.ComponentType<InitialProps> = connect(

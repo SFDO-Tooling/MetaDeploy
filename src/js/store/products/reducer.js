@@ -31,7 +31,7 @@ export type Product = {
     +url?: string,
   } | null,
   +image: string | null,
-  +most_recent_version: Version,
+  +most_recent_version: Version | null,
   +versions?: { [string]: Version | null },
   +is_listed: boolean,
   +is_allowed: boolean,

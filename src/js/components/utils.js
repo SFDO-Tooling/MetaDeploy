@@ -147,6 +147,8 @@ export const getLoadingOrNotFound = ({
   jobId,
   isLoggedIn,
   route,
+  maybeVersion,
+  maybeSlug,
 }: {
   product: ProductType | null,
   productSlug: ?string,
@@ -158,9 +160,16 @@ export const getLoadingOrNotFound = ({
   jobId?: ?string,
   isLoggedIn?: boolean,
   route: string,
+  maybeVersion?: string,
+  maybeSlug?: string,
 }): React.Node | false => {
   if (product === null) {
     return <ProductNotFound />;
+  }
+  // If we have what we think might be a version label and plan slug,
+  // return a spinner while checking if plan exists on that version.
+  if (maybeVersion && maybeSlug) {
+    return <Spinner />;
   }
   // If we have a plan slug but no plan, redirect to that plan detail page
   if (planSlug && versionLabel && plan === undefined) {
