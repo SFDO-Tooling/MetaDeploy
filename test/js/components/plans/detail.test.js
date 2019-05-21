@@ -5,8 +5,8 @@ import { fireEvent } from 'react-testing-library';
 import { renderWithRedux, storeWithApi } from './../../utils';
 
 import routes from 'utils/routes';
-import { fetchPreflight, fetchPlan } from 'store/plans/actions';
-import { fetchVersion } from 'store/products/actions';
+import { fetchPreflight } from 'store/plans/actions';
+import { fetchPlan, fetchVersion } from 'store/products/actions';
 import PlanDetail from 'components/plans/detail';
 
 jest.mock('store/products/actions');
@@ -82,8 +82,8 @@ const defaultState = {
           requires_preflight: true,
           is_allowed: true,
         },
-        additional_plans: [
-          {
+        additional_plans: {
+          'third-plan': {
             id: 'plan-3',
             slug: 'third-plan',
             old_slugs: [],
@@ -93,7 +93,7 @@ const defaultState = {
             is_allowed: true,
             requires_preflight: true,
           },
-          {
+          'fourth-plan': {
             id: 'plan-4',
             slug: 'fourth-plan',
             old_slugs: [],
@@ -104,7 +104,7 @@ const defaultState = {
             requires_preflight: true,
             not_allowed_instructions: 'plan restricted',
           },
-        ],
+        },
       },
       is_allowed: true,
     },
@@ -165,6 +165,7 @@ describe('<PlanDetail />', () => {
       context,
     };
   };
+
   describe('insufficient permissions for user', () => {
     test('renders login button', () => {
       const { getByText } = setup({
@@ -223,6 +224,7 @@ describe('<PlanDetail />', () => {
       expect(getByText('list of all products')).toBeVisible();
     });
   });
+
   describe('product has old_slug', () => {
     test('redirects to plan_detail with new slug', () => {
       const { context } = setup({ productSlug: 'old-product' });
@@ -345,10 +347,47 @@ describe('<PlanDetail />', () => {
     expect(getByText('My Other Step')).toBeVisible();
   });
 
+  test('renders additional_plan detail (no steps)', () => {
+    const { getByText } = setup({
+      planSlug: 'third-plan',
+    });
+
+    expect(getByText('Product 1, 1.0.0')).toBeVisible();
+    expect(getByText('Third preflight text…')).toBeVisible();
+  });
+
+  describe('unknown plan', () => {
+    test('fetches plan', () => {
+      setup({ planSlug: 'possibly' });
+
+      expect(fetchPlan).toHaveBeenCalledWith({
+        product: 'p1',
+        version: 'v1',
+        slug: 'possibly',
+      });
+    });
+  });
+
   describe('no plan', () => {
     test('renders <PlanNotFound />', () => {
+      const product = defaultState.products[0];
       const { getByText } = setup({
         planSlug: 'nope',
+        initialState: {
+          ...defaultState,
+          products: [
+            {
+              ...product,
+              most_recent_version: {
+                ...product.most_recent_version,
+                additional_plans: {
+                  ...product.most_recent_version.additional_plans,
+                  nope: null,
+                },
+              },
+            },
+          ],
+        },
       });
 
       expect(getByText('another plan')).toBeVisible();
@@ -379,6 +418,7 @@ describe('<PlanDetail />', () => {
       );
     });
   });
+
   describe('plan is restricted', () => {
     test('renders <PlanNotAllowed />', () => {
       const { getByText } = setup({
@@ -386,6 +426,7 @@ describe('<PlanDetail />', () => {
       });
 
       expect(getByText('another plan')).toBeVisible();
+      expect(getByText('plan restricted')).toBeVisible();
     });
   });
 

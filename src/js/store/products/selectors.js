@@ -116,12 +116,15 @@ const selectVersionLabelOrPlanSlug: (
     const { most_recent_version } = product;
     if (!version && most_recent_version) {
       const slugs = [];
+      /* istanbul ignore else */
       if (most_recent_version.primary_plan) {
         slugs.push(most_recent_version.primary_plan.slug);
       }
+      /* istanbul ignore else */
       if (most_recent_version.secondary_plan) {
         slugs.push(most_recent_version.secondary_plan.slug);
       }
+      /* istanbul ignore else */
       if (most_recent_version.additional_plans) {
         // Add all slugs (current and old) from all known plans
         slugs.push(

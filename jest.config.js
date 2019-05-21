@@ -41,7 +41,7 @@ module.exports = {
   // ],
 
   // A list of reporter names that Jest uses when writing coverage reports
-  coverageReporters: ['text-summary', 'html', 'lcovonly', 'json'],
+  coverageReporters: ['json', 'text-summary', 'lcovonly', 'html'],
 
   // An object that configures minimum threshold enforcement for coverage results
   // coverageThreshold: null,
@@ -50,7 +50,12 @@ module.exports = {
   // errorOnDeprecated: false,
 
   // Force coverage collection from ignored files usin a array of glob patterns
-  // forceCoverageMatch: [],
+  forceCoverageMatch: [
+    'src/js/**/*.{js,jsx}',
+    '!src/js/index.js',
+    '!src/js/raven.js',
+    '!src/js/i18n.js',
+  ],
 
   // A path to a module which exports an async function that is triggered once before all test suites
   // globalSetup: null,
