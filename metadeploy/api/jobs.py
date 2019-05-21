@@ -123,9 +123,9 @@ def run_flows(*, user, plan, skip_tasks, organization_url, result_class, result_
             task_name values for steps in this flow.
         organization_url (str): The URL of the organization, required by
             the OrgConfig.
-        result_class (Union[Type[Job], Type[PreflightResult]]): The
-            instance onto which to record the results of running steps
-            in the flow. Either a PreflightResult or a Job, as
+        result_class (Union[Type[Job], Type[PreflightResult]]): The type
+            of the instance onto which to record the results of running
+            steps in the flow. Either a PreflightResult or a Job, as
             appropriate.
         result_id (int): the PK of the result instance to get.
     """
