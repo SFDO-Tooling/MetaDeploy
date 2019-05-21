@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
             model_name="allowedlist",
             name="list_for_allowed_by_orgs",
             field=models.BooleanField(
-                default=True,
+                default=False,
                 help_text=(
                     "If a user is allowed only because they have the right Org Type, "
                     "should this be listed for them? If not, they can still find it if "
