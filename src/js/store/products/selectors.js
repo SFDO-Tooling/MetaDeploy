@@ -4,6 +4,7 @@ import { createSelector } from 'reselect';
 
 import type { AppState } from 'store';
 import type { InitialProps } from 'components/utils';
+import type { Plan as PlanType } from 'store/plans/reducer';
 import type {
   Product as ProductType,
   Products as ProductsType,
@@ -119,10 +120,11 @@ const selectVersionLabelOrPlanSlug: (
         slugs.push(version.secondary_plan.slug);
       }
       if (version.additional_plans) {
+        // Add all slugs (current and old) from all known plans
         slugs.push(
-          (Object.values(version.additional_plans): any).forEach(
-            plan => plan.slug,
-          ),
+          ...(Object.entries(version.additional_plans): any)
+            .filter((item: Array<[string, PlanType | null]>) => item[1])
+            .map((item: Array<[string, PlanType]>) => item[0]),
         );
       }
       if (slugs.includes(maybeVersionLabel)) {

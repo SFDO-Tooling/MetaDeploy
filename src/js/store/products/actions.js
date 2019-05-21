@@ -37,17 +37,22 @@ type FetchPlansSucceeded = {
   type: 'FETCH_PLANS_SUCCEEDED',
   payload: { product: string, version: string, response: Array<Plan> },
 };
-export type FetchPlanStarted = {
+type PlanFilters = {|
+  product: string,
+  version: string,
+  slug: string,
+|};
+type FetchPlanStarted = {
   type: 'FETCH_PLAN_STARTED',
-  payload: Plan,
+  payload: PlanFilters,
 };
-export type FetchPlanSucceeded = {
+type FetchPlanSucceeded = {
   type: 'FETCH_PLAN_SUCCEEDED',
-  payload: Array<Plan>,
+  payload: { ...PlanFilters, plans: Array<Plan> },
 };
-export type FetchPlanFailed = {
+type FetchPlanFailed = {
   type: 'FETCH_PLAN_FAILED',
-  payload: Plan,
+  payload: PlanFilters,
 };
 
 export type ProductsAction =
@@ -120,8 +125,8 @@ export const fetchPlans = (product: string, version: string): ThunkAction => (
   { apiFetch },
 ) => {
   dispatch({ type: 'FETCH_PLANS_STARTED', payload: { product, version } });
-  const baseUrl = window.api_urls.version_list();
-  return apiFetch(`${baseUrl}${version}/additional_plans`)
+  const baseUrl = window.api_urls.version_additional_plans(version);
+  return apiFetch(baseUrl)
     .then(response => {
       if (!Array.isArray(response)) {
         const error = (new Error('Invalid response received'): {
@@ -137,6 +142,33 @@ export const fetchPlans = (product: string, version: string): ThunkAction => (
     })
     .catch(err => {
       dispatch({ type: 'FETCH_PLANS_FAILED', payload: { product, version } });
+      throw err;
+    });
+};
+
+export const fetchPlan = (filters: PlanFilters): ThunkAction => (
+  dispatch,
+  getState,
+  { apiFetch },
+) => {
+  dispatch({ type: 'FETCH_PLAN_STARTED', payload: filters });
+  const baseUrl = window.api_urls.plan_list();
+  return apiFetch(addUrlParams(baseUrl, { ...filters }))
+    .then(response => {
+      if (!Array.isArray(response)) {
+        const error = (new Error('Invalid response received'): {
+          [string]: mixed,
+        });
+        error.response = response;
+        throw error;
+      }
+      return dispatch({
+        type: 'FETCH_PLAN_SUCCEEDED',
+        payload: { ...filters, plans: response },
+      });
+    })
+    .catch(err => {
+      dispatch({ type: 'FETCH_PLAN_FAILED', payload: filters });
       throw err;
     });
 };

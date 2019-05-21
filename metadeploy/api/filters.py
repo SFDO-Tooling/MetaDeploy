@@ -5,9 +5,8 @@ from .models import Plan
 
 class PlanFilter(filters.FilterSet):
     slug = filters.CharFilter(field_name="plan_template__planslug__slug")
-    version_label = filters.CharFilter(field_name="version__label")
-    product_slug = filters.CharFilter(field_name="version__product__productslug__slug")
+    product = filters.CharFilter(field_name="version__product")
 
     class Meta:
         model = Plan
-        fields = ("slug", "version_label", "product_slug")
+        fields = ("slug", "version", "product")

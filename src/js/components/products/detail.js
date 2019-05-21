@@ -152,10 +152,13 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     if (!product || !version) {
       return <ProductNotFound />;
     }
-    const listedAdditionalPlans = version.additional_plans
-      ? (Object.values(version.additional_plans): any).filter(
-          (plan: PlanType) => plan.is_listed && plan.is_allowed,
-        )
+    const listedAdditionalPlans: Array<PlanType> = version.additional_plans
+      ? (Object.entries(version.additional_plans): any)
+          .filter(
+            ([key, plan]: [string, PlanType | null]) =>
+              plan && plan.is_listed && plan.is_allowed && key === plan.slug,
+          )
+          .map((item: Array<[string, PlanType]>) => item[1])
       : [];
     const { primary_plan, secondary_plan } = version;
     const visiblePrimaryPlan =

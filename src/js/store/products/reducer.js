@@ -99,26 +99,51 @@ const reducer = (products: Products = [], action: ProductsAction): Products => {
       });
     }
     case 'FETCH_PLAN_SUCCEEDED': {
-      const plan = action.payload;
-      const additional_plans = plan.reduce((obj, item) => {
-        obj[item.slug] = item;
-        for (const oldSlug of item.old_slugs) {
-          obj[oldSlug] = item;
-        }
-        return obj;
-      }, {});
+      const { product, version, slug, plans } = action.payload;
+      const additional_plans = plans.reduce(
+        (obj, item) => {
+          obj[item.slug] = item;
+          for (const oldSlug of item.old_slugs) {
+            obj[oldSlug] = item;
+          }
+          return obj;
+        },
+        { [slug]: null },
+      );
       return products.map(p => {
-        if (
-          p.most_recent_version &&
-          p.most_recent_version.id === plan[0].version
-        )
-          return {
-            ...p,
-            most_recent_version: {
-              ...p.most_recent_version,
-              additional_plans,
-            },
-          };
+        if (p.id === product) {
+          if (p.most_recent_version && p.most_recent_version.id === version) {
+            return {
+              ...p,
+              most_recent_version: {
+                ...p.most_recent_version,
+                additional_plans: {
+                  ...p.most_recent_version.additional_plans,
+                  ...additional_plans,
+                },
+              },
+            };
+          } else if (p.versions) {
+            const thisVersion: ?Version = (Object.values(p.versions): any).find(
+              (v: Version | null) => v !== null && v.id === version,
+            );
+            if (thisVersion) {
+              return {
+                ...p,
+                versions: {
+                  ...p.versions,
+                  [thisVersion.label]: {
+                    ...thisVersion,
+                    additional_plans: {
+                      ...thisVersion.additional_plans,
+                      ...additional_plans,
+                    },
+                  },
+                },
+              };
+            }
+          }
+        }
         return p;
       });
     }

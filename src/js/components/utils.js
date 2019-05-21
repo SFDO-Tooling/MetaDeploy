@@ -179,21 +179,18 @@ export const getLoadingOrNotFound = ({
     // Fetching version from API
     return <Spinner />;
   }
-  if (version && version.additional_plans === undefined) {
-    return <Spinner />;
-  }
   if (plan === null) {
     if (!version) {
       return <VersionNotFound product={product} />;
     }
     if (
-      !version.additional_plans ||
-      (planSlug && version.additional_plans[planSlug] === null)
+      !planSlug ||
+      (version.additional_plans && version.additional_plans[planSlug] === null)
     ) {
-      // Fetching plan from API
-      return <Spinner />;
+      return <PlanNotFound product={product} version={version} />;
     }
-    return <PlanNotFound product={product} version={version} />;
+    // Fetching plan from API
+    return <Spinner />;
   }
   if (version && plan && jobId && !job) {
     if (job === null) {

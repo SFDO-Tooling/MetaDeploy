@@ -51,36 +51,6 @@ export type PlansAction =
   | PreflightCanceled
   | PreflightInvalid;
 
-export const fetchPlan = (
-  versionLabel: string,
-  productSlug: string,
-  planSlug: string,
-): ThunkAction => (dispatch, getState, { apiFetch }) => {
-  dispatch({ type: 'FETCH_PLAN_STARTED', payload: {} });
-  const baseUrl = window.api_urls.plan_list();
-  const params = { versionLabel, productSlug, planSlug };
-  return apiFetch(
-    // @todo pass into fn, had unexpected behavior using the addUrl function
-    `${baseUrl}?version_label=${versionLabel}&product_slug=${productSlug}&slug=${planSlug}`,
-  )
-    .then(response => {
-      if (!Array.isArray(response)) {
-        const error = (new Error('Invalid response received'): {
-          [string]: mixed,
-        });
-        error.response = response;
-        throw error;
-      }
-      return dispatch({
-        type: 'FETCH_PLAN_SUCCEEDED',
-        payload: response,
-      });
-    })
-    .catch(err => {
-      dispatch({ type: 'FETCH_PLAN_FAILED' });
-      throw err;
-    });
-};
 export const fetchPreflight = (planId: string): ThunkAction => (
   dispatch,
   getState,

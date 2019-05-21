@@ -24,7 +24,6 @@ export type Plan = {
   +not_allowed_instructions: string | null,
   +average_duration: string | null,
   +requires_preflight: boolean,
-  +version?: string,
 };
 
 export type StepResult = {|
