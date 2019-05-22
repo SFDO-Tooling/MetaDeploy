@@ -781,11 +781,7 @@ class PreflightResult(models.Model):
 
     def has_any_errors(self):
         return any(
-            (
-                val
-                for val in itertools.chain(*self.results.values())
-                if val.get("status", None) == ERROR
-            )
+            (val for val in self.results.values() if val.get("status", None) == ERROR)
         )
 
     @property
@@ -800,11 +796,7 @@ class PreflightResult(models.Model):
 
         So this will return a list of step PKs, for now.
         """
-        return [
-            str(k)
-            for k, v in self.results.items()
-            if any([status["status"] == OPTIONAL for status in v])
-        ]
+        return [str(k) for k, v in self.results.items() if v["status"] == OPTIONAL]
 
     def _push_if_condition(self, condition, fn):
         if condition:

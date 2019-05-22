@@ -9,12 +9,14 @@ describe('<PreflightWarningModal />', () => {
     'step-1': { status: 'warn', message: 'This is a step warning.' },
     'step-2': { status: 'warn' },
     'step-3': undefined,
+    'step-4': { status: 'warn', message: 'This is another step warning.' },
   };
   const defaultSteps = [
     { id: 'step-1', name: 'Step 1' },
     { id: 'step-2', name: 'Step 2' },
     { id: 'step-3', name: 'Step 3' },
   ];
+  const selectedSteps = new Set(['step-1', 'step-2', 'step-3']);
 
   const setup = options => {
     const defaults = {
@@ -22,6 +24,7 @@ describe('<PreflightWarningModal />', () => {
       startJob: jest.fn(),
       results: defaultResults,
       steps: defaultSteps,
+      selectedSteps,
     };
     const opts = { ...defaults, ...options };
     const { getByLabelText, getByText } = render(
@@ -31,6 +34,7 @@ describe('<PreflightWarningModal />', () => {
         startJob={opts.startJob}
         results={opts.results}
         steps={opts.steps}
+        selectedSteps={opts.selectedSteps}
       />,
     );
     return { getByLabelText, getByText };

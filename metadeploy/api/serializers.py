@@ -21,13 +21,12 @@ class ErrorWarningCountMixin:
     @staticmethod
     def _count_status_in_results(results, status_name):
         count = 0
-        for val in results.values():
-            for status in val:
-                try:
-                    if status["status"] == status_name:
-                        count += 1
-                except TypeError:
-                    pass
+        for status in results.values():
+            try:
+                if status["status"] == status_name:
+                    count += 1
+            except TypeError:
+                pass
         return count
 
     def get_error_count(self, obj):
