@@ -310,31 +310,4 @@ describe('getLoadingOrNotFound', () => {
       );
     });
   });
-
-  // describe('no additional_plans', () => {
-  //   test('renders <Spinner />', () => {
-  //     const { getByText } = setup({
-  //       ...defaultProduct,
-  //       version: {},
-  //     });
-  //     expect(getByText('Loading...')).toBeVisible();
-  //   });
-  // });
-
-  // // seems like this renders a spinner but still failing //
-  // describe('fetching plans from API', () => {
-  //   test('renders <Spinner/>', () => {
-  //     const { getByText } = setup({
-  //       product: defaultProduct,
-  //       planSlug: 'old-plan',
-  //       version: {
-  //         id: 'v1',
-  //         additional_plans: {
-  //           'old-plan': null,
-  //         },
-  //       },
-  //     });
-  //     expect(getByText('Loading...')).toBeVisible();
-  //   });
-  // });
 });
