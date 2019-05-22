@@ -13,6 +13,7 @@ import type {
   StepResult as StepResultType,
   Step as StepType,
 } from 'store/plans/reducer';
+import type { SelectedSteps as SelectedStepsType } from 'components/plans/detail';
 
 type Props = {
   isOpen: boolean,
@@ -20,6 +21,7 @@ type Props = {
   startJob: () => void,
   results: PreflightErrorsType,
   steps: Array<StepType>,
+  selectedSteps: SelectedStepsType,
 };
 type State = {
   confirmed: boolean,
@@ -77,7 +79,7 @@ class PreflightWarningModal extends React.Component<Props, State> {
   };
 
   render(): React.Node {
-    const { isOpen, startJob, results, steps } = this.props;
+    const { isOpen, startJob, results, steps, selectedSteps } = this.props;
     const { confirmed } = this.state;
     const footer = [
       <Button key="cancel" label={t('Cancel')} onClick={this.handleClose} />,
@@ -99,18 +101,14 @@ class PreflightWarningModal extends React.Component<Props, State> {
       >
         <div className="slds-p-horizontal_large slds-p-vertical_medium">
           {results.plan ? <Warning id="plan" result={results.plan} /> : null}
-          {steps.map(step => {
-            const stepResult = results[step.id];
-            if (!stepResult) {
+          {[...selectedSteps].map(id => {
+            const step = steps.find(s => s.id === id);
+            const stepResult = results[id];
+            if (!step || !stepResult) {
               return null;
             }
             return (
-              <Warning
-                key={step.id}
-                id={step.id}
-                result={stepResult}
-                name={step.name}
-              />
+              <Warning key={id} id={id} result={stepResult} name={step.name} />
             );
           })}
           <Checkbox

@@ -36,7 +36,7 @@ type Props = {
   doStartJob: StartJobType,
 };
 
-const { STATUS, AUTO_START_PREFLIGHT } = CONSTANTS;
+const { AUTO_START_PREFLIGHT, RESULT_STATUS, STATUS } = CONSTANTS;
 const btnClasses = 'slds-size_full slds-p-vertical_xx-small';
 
 // For use as a "loading" button label
@@ -255,14 +255,25 @@ class CtaButton extends React.Component<
 
   warningsInSelectedSteps(): boolean {
     const { selectedSteps, preflight } = this.props;
+    if (!(preflight && preflight.results)) {
+      return false;
+    }
     return [...selectedSteps].some(
       id =>
-        Object.keys((preflight && preflight.results) || {}).indexOf(id) !== -1,
+        preflight.results[id] &&
+        preflight.results[id].message &&
+        preflight.results[id].status === RESULT_STATUS.WARN,
     );
   }
 
   render(): React.Node {
-    const { user, clickThroughAgreement, plan, preflight } = this.props;
+    const {
+      user,
+      clickThroughAgreement,
+      plan,
+      preflight,
+      selectedSteps,
+    } = this.props;
     if (plan.requires_preflight) {
       if (!user) {
         // Require login first...
@@ -309,12 +320,9 @@ class CtaButton extends React.Component<
           );
         }
         case STATUS.COMPLETE: {
+          // Preflight is done, valid, and has no errors -- allow installation
           if (preflight.is_ready) {
-            // Preflight is done, valid, and has no errors -- allow installation
-            const hasWarnings =
-              preflight.warning_count !== undefined &&
-              preflight.warning_count > 0 &&
-              this.warningsInSelectedSteps();
+            const hasWarnings = this.warningsInSelectedSteps();
             // Terms must be confirmed before proceeding
             const action = clickThroughAgreement
               ? this.openClickThroughModal
@@ -333,6 +341,7 @@ class CtaButton extends React.Component<
                     startJob={action}
                     results={preflight.results}
                     steps={plan.steps || []}
+                    selectedSteps={selectedSteps}
                   />
                 ) : null}
                 {this.getClickThroughAgreementModal()}
