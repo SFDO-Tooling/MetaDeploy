@@ -1,8 +1,7 @@
 from django.db import DatabaseError, InterfaceError, connections
+from newrelic import agent
 from rq.job import Job
 from rq.worker import HerokuWorker, Worker
-
-from newrelic import agent
 
 
 def wrap_job_as_background_task(Job):
