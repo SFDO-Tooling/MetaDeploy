@@ -255,6 +255,7 @@ class CtaButton extends React.Component<
 
   warningsInSelectedSteps(): boolean {
     const { selectedSteps, preflight } = this.props;
+    /* istanbul ignore if */
     if (!(preflight && preflight.results)) {
       return false;
     }
