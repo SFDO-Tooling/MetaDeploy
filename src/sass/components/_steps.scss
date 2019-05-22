@@ -32,7 +32,8 @@ $step-ending-columns-min: $step-type-min + $step-badge-min + $step-install-min;
       'logs logs logs  logs' auto / minmax($step-name-min, 4fr) minmax(
         $step-type-min,
         1.5fr
-      ) minmax($step-badge-min, 1fr) minmax($step-install-min, 1fr);
+      )
+      minmax($step-badge-min, 1fr) minmax($step-install-min, 1fr);
 
     &:focus,
     &:hover {
