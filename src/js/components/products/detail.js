@@ -8,7 +8,11 @@ import { connect } from 'react-redux';
 import { t } from 'i18next';
 
 import routes from 'utils/routes';
-import { fetchPlan, fetchPlans, fetchVersion } from 'store/products/actions';
+import {
+  fetchAdditionalPlans,
+  fetchPlan,
+  fetchVersion,
+} from 'store/products/actions';
 import {
   selectProduct,
   selectProductSlug,
@@ -40,8 +44,8 @@ type VersionDetailProps = {
   productSlug: ?string,
   version: VersionType | null,
   versionLabelAndPlanSlug: VersionPlanType,
+  doFetchAdditionalPlans: typeof fetchAdditionalPlans,
   doFetchPlan: typeof fetchPlan,
-  doFetchPlans: typeof fetchPlans,
   doFetchVersion: typeof fetchVersion,
 };
 
@@ -100,11 +104,11 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     }
   }
 
-  fetchPlansIfMissing() {
-    const { product, version, doFetchPlans } = this.props;
+  fetchAdditionalPlansIfMissing() {
+    const { product, version, doFetchAdditionalPlans } = this.props;
     if (product && version && !version.fetched_additional_plans) {
       // Fetch plans from API
-      doFetchPlans({ product: product.id, version: version.id });
+      doFetchAdditionalPlans({ product: product.id, version: version.id });
     }
   }
 
@@ -123,7 +127,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
 
   componentDidMount() {
     this.fetchVersionIfMissing();
-    this.fetchPlansIfMissing();
+    this.fetchAdditionalPlansIfMissing();
     this.fetchPlanIfMissing();
   }
 
@@ -139,7 +143,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
       maybeSlug !== prevProps.versionLabelAndPlanSlug.maybeSlug;
     if (versionChanged) {
       this.fetchVersionIfMissing();
-      this.fetchPlansIfMissing();
+      this.fetchAdditionalPlansIfMissing();
       this.fetchPlanIfMissing();
     }
   }
@@ -308,7 +312,7 @@ const selectVersionDetail = (appState: AppState, props: InitialProps) => ({
 
 const actions = {
   doFetchVersion: fetchVersion,
-  doFetchPlans: fetchPlans,
+  doFetchAdditionalPlans: fetchAdditionalPlans,
   doFetchPlan: fetchPlan,
 };
 

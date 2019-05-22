@@ -140,7 +140,7 @@ describe('fetchVersion', () => {
   });
 });
 
-describe('fetchPlans', () => {
+describe('fetchAdditionalPlans', () => {
   let baseUrl, filters;
 
   beforeAll(() => {
@@ -158,16 +158,16 @@ describe('fetchPlans', () => {
       };
       fetchMock.getOnce(baseUrl, [plan]);
       const started = {
-        type: 'FETCH_PLANS_STARTED',
+        type: 'FETCH_ADDITIONAL_PLANS_STARTED',
         payload: filters,
       };
       const succeeded = {
-        type: 'FETCH_PLANS_SUCCEEDED',
+        type: 'FETCH_ADDITIONAL_PLANS_SUCCEEDED',
         payload: { ...filters, plans: [plan] },
       };
 
       expect.assertions(1);
-      return store.dispatch(actions.fetchPlans(filters)).then(() => {
+      return store.dispatch(actions.fetchAdditionalPlans(filters)).then(() => {
         expect(store.getActions()).toEqual([started, succeeded]);
       });
     });
@@ -180,24 +180,24 @@ describe('fetchPlans', () => {
 
       expect.assertions(1);
       return expect(
-        store.dispatch(actions.fetchPlans(filters)),
+        store.dispatch(actions.fetchAdditionalPlans(filters)),
       ).rejects.toThrow();
     });
 
-    test('dispatches FETCH_PLANS_FAILED action', () => {
+    test('dispatches FETCH_ADDITIONAL_PLANS_FAILED action', () => {
       const store = storeWithApi({});
       fetchMock.getOnce(baseUrl, 500);
       const started = {
-        type: 'FETCH_PLANS_STARTED',
+        type: 'FETCH_ADDITIONAL_PLANS_STARTED',
         payload: filters,
       };
       const failed = {
-        type: 'FETCH_PLANS_FAILED',
+        type: 'FETCH_ADDITIONAL_PLANS_FAILED',
         payload: filters,
       };
 
       expect.assertions(2);
-      return store.dispatch(actions.fetchPlans(filters)).catch(() => {
+      return store.dispatch(actions.fetchAdditionalPlans(filters)).catch(() => {
         expect(store.getActions()).toEqual([started, failed]);
         expect(window.console.error).toHaveBeenCalled();
       });

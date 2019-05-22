@@ -56,7 +56,7 @@ const reducer = (products: Products = [], action: ProductsAction): Products => {
         return p;
       });
     }
-    case 'FETCH_PLANS_SUCCEEDED': {
+    case 'FETCH_ADDITIONAL_PLANS_SUCCEEDED': {
       const { product, version, plans } = action.payload;
       const additional_plans = plans.reduce((obj, item) => {
         obj[item.slug] = item;

@@ -4,18 +4,22 @@ import { StaticRouter } from 'react-router-dom';
 import { renderWithRedux } from './../../utils';
 
 import routes from 'utils/routes';
-import { fetchVersion, fetchPlan, fetchPlans } from 'store/products/actions';
+import {
+  fetchAdditionalPlans,
+  fetchPlan,
+  fetchVersion,
+} from 'store/products/actions';
 import { ProductDetail, VersionDetail } from 'components/products/detail';
 
 jest.mock('store/products/actions');
 
 fetchPlan.mockReturnValue({ type: 'TEST' });
-fetchPlans.mockReturnValue({ type: 'TEST' });
+fetchAdditionalPlans.mockReturnValue({ type: 'TEST' });
 fetchVersion.mockReturnValue({ type: 'TEST' });
 
 afterEach(() => {
   fetchPlan.mockClear();
-  fetchPlans.mockClear();
+  fetchAdditionalPlans.mockClear();
   fetchVersion.mockClear();
 });
 
@@ -175,7 +179,7 @@ describe('<VersionDetail />', () => {
   test('fetches plans', () => {
     setup();
 
-    expect(fetchPlans).toHaveBeenCalledTimes(1);
+    expect(fetchAdditionalPlans).toHaveBeenCalledTimes(1);
   });
 
   describe('unknown version-or-plan', () => {

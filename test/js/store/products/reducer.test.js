@@ -71,7 +71,7 @@ describe('reducer', () => {
     expect(actual).toEqual(expected);
   });
 
-  describe('FETCH_PLANS_SUCCEEDED', () => {
+  describe('FETCH_ADDITIONAL_PLANS_SUCCEEDED', () => {
     test('saves plans on most_recent_version', () => {
       const version = 'v1';
       const product = 'p1';
@@ -96,7 +96,7 @@ describe('reducer', () => {
       };
       const expected = [afterProduct];
       const actual = reducer([beforeProduct], {
-        type: 'FETCH_PLANS_SUCCEEDED',
+        type: 'FETCH_ADDITIONAL_PLANS_SUCCEEDED',
         payload: { product, version, plans },
       });
 
@@ -132,7 +132,7 @@ describe('reducer', () => {
       };
       const expected = [afterProduct];
       const actual = reducer([beforeProduct], {
-        type: 'FETCH_PLANS_SUCCEEDED',
+        type: 'FETCH_ADDITIONAL_PLANS_SUCCEEDED',
         payload: { product, version, plans },
       });
 
@@ -151,7 +151,7 @@ describe('reducer', () => {
       };
       const expected = [beforeProduct];
       const actual = reducer([beforeProduct], {
-        type: 'FETCH_PLANS_SUCCEEDED',
+        type: 'FETCH_ADDITIONAL_PLANS_SUCCEEDED',
         payload: { product, version, plans },
       });
 
@@ -170,7 +170,7 @@ describe('reducer', () => {
       };
       const expected = [beforeProduct];
       const actual = reducer([beforeProduct], {
-        type: 'FETCH_PLANS_SUCCEEDED',
+        type: 'FETCH_ADDITIONAL_PLANS_SUCCEEDED',
         payload: { product, version, plans },
       });
 
@@ -192,7 +192,7 @@ describe('reducer', () => {
       };
       const expected = [beforeProduct];
       const actual = reducer([beforeProduct], {
-        type: 'FETCH_PLANS_SUCCEEDED',
+        type: 'FETCH_ADDITIONAL_PLANS_SUCCEEDED',
         payload: { product, version, plans },
       });
 

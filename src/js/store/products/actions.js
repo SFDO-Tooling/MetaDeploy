@@ -25,16 +25,16 @@ type FetchVersionFailed = {
   type: 'FETCH_VERSION_FAILED',
   payload: VersionFilters,
 };
-type FetchPlansStarted = {
-  type: 'FETCH_PLANS_STARTED',
+type FetchAdditionalPlansStarted = {
+  type: 'FETCH_ADDITIONAL_PLANS_STARTED',
   payload: { product: string, version: string },
 };
-type FetchPlansFailed = {
-  type: 'FETCH_PLANS_FAILED',
+type FetchAdditionalPlansFailed = {
+  type: 'FETCH_ADDITIONAL_PLANS_FAILED',
   payload: { product: string, version: string },
 };
-type FetchPlansSucceeded = {
-  type: 'FETCH_PLANS_SUCCEEDED',
+type FetchAdditionalPlansSucceeded = {
+  type: 'FETCH_ADDITIONAL_PLANS_SUCCEEDED',
   payload: { product: string, version: string, plans: Array<Plan> },
 };
 type PlanFilters = {|
@@ -62,9 +62,9 @@ export type ProductsAction =
   | FetchVersionStarted
   | FetchVersionSucceeded
   | FetchVersionFailed
-  | FetchPlansStarted
-  | FetchPlansFailed
-  | FetchPlansSucceeded
+  | FetchAdditionalPlansStarted
+  | FetchAdditionalPlansFailed
+  | FetchAdditionalPlansSucceeded
   | FetchPlanStarted
   | FetchPlanSucceeded
   | FetchPlanFailed;
@@ -119,11 +119,11 @@ export const fetchVersion = (filters: VersionFilters): ThunkAction => (
     });
 };
 
-export const fetchPlans = (filters: {
+export const fetchAdditionalPlans = (filters: {
   product: string,
   version: string,
 }): ThunkAction => (dispatch, getState, { apiFetch }) => {
-  dispatch({ type: 'FETCH_PLANS_STARTED', payload: filters });
+  dispatch({ type: 'FETCH_ADDITIONAL_PLANS_STARTED', payload: filters });
   const baseUrl = window.api_urls.version_additional_plans(filters.version);
   return apiFetch(baseUrl)
     .then(response => {
@@ -135,12 +135,12 @@ export const fetchPlans = (filters: {
         throw error;
       }
       return dispatch({
-        type: 'FETCH_PLANS_SUCCEEDED',
+        type: 'FETCH_ADDITIONAL_PLANS_SUCCEEDED',
         payload: { ...filters, plans: response },
       });
     })
     .catch(err => {
-      dispatch({ type: 'FETCH_PLANS_FAILED', payload: filters });
+      dispatch({ type: 'FETCH_ADDITIONAL_PLANS_FAILED', payload: filters });
       throw err;
     });
 };
