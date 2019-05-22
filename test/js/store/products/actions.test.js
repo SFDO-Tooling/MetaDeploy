@@ -141,52 +141,127 @@ describe('fetchVersion', () => {
 });
 
 describe('fetchPlans', () => {
+  let baseUrl, filters;
+
+  beforeAll(() => {
+    baseUrl = window.api_urls.version_additional_plans('v1');
+    filters = { product: 'p1', version: 'v1' };
+  });
+
   describe('success', () => {
     test('GETs additional_plans from api', () => {
-      // this test is failing, looks like it is adding extra strings to the response
       const store = storeWithApi({});
-      const product = 'p1';
-      const version = 'v1';
-      const response = [{ id: 'v1', version: 'v1' }];
-      const baseUrl = window.api_urls.version_list();
-      fetchMock.getOnce(`${baseUrl}${version}/additional_plans`, [
-        product,
-        version,
-      ]);
+      const plan = {
+        id: 'plan-1',
+        title: 'Plan 1',
+        description: 'This is a test plan.',
+      };
+      fetchMock.getOnce(baseUrl, [plan]);
       const started = {
         type: 'FETCH_PLANS_STARTED',
-        payload: { product, version },
+        payload: filters,
       };
       const succeeded = {
         type: 'FETCH_PLANS_SUCCEEDED',
-        payload: {
-          response,
-          product,
-          version,
-        },
+        payload: { ...filters, plans: [plan] },
       };
 
       expect.assertions(1);
-      return store.dispatch(actions.fetchPlans(product, version)).then(() => {
+      return store.dispatch(actions.fetchPlans(filters)).then(() => {
         expect(store.getActions()).toEqual([started, succeeded]);
       });
     });
   });
+
   describe('error', () => {
     test('throws Error', () => {
       const store = storeWithApi({});
-      const product = {
-        id: 'p1',
-        title: 'Product 1',
-        description: 'This is a test product.',
-      };
-      const version = { id: 'v1', label: 'v1' };
-      const baseUrl = window.api_urls.version_list();
-      fetchMock.getOnce(`${baseUrl}${version.id}/additional_plans`, 'string');
+      fetchMock.getOnce(baseUrl, 'string');
+
       expect.assertions(1);
       return expect(
-        store.dispatch(actions.fetchPlans(product.id, version.id)),
+        store.dispatch(actions.fetchPlans(filters)),
       ).rejects.toThrow();
+    });
+
+    test('dispatches FETCH_PLANS_FAILED action', () => {
+      const store = storeWithApi({});
+      fetchMock.getOnce(baseUrl, 500);
+      const started = {
+        type: 'FETCH_PLANS_STARTED',
+        payload: filters,
+      };
+      const failed = {
+        type: 'FETCH_PLANS_FAILED',
+        payload: filters,
+      };
+
+      expect.assertions(2);
+      return store.dispatch(actions.fetchPlans(filters)).catch(() => {
+        expect(store.getActions()).toEqual([started, failed]);
+        expect(window.console.error).toHaveBeenCalled();
+      });
+    });
+  });
+});
+
+describe('fetchPlan', () => {
+  let baseUrl, filters;
+
+  beforeAll(() => {
+    baseUrl = window.api_urls.plan_list();
+    filters = { product: 'p1', version: 'v1', slug: 'plan-1' };
+  });
+
+  describe('success', () => {
+    test('GETs plan from api', () => {
+      const store = storeWithApi({});
+      const plan = { id: 'plan-id', slug: 'plan-1' };
+      fetchMock.getOnce(addUrlParams(baseUrl, filters), [plan]);
+      const started = {
+        type: 'FETCH_PLAN_STARTED',
+        payload: filters,
+      };
+      const succeeded = {
+        type: 'FETCH_PLAN_SUCCEEDED',
+        payload: { ...filters, plans: [plan] },
+      };
+
+      expect.assertions(1);
+      return store.dispatch(actions.fetchPlan(filters)).then(() => {
+        expect(store.getActions()).toEqual([started, succeeded]);
+      });
+    });
+  });
+
+  describe('error', () => {
+    test('throws Error', () => {
+      const store = storeWithApi({});
+      fetchMock.getOnce(addUrlParams(baseUrl, filters), 'string');
+
+      expect.assertions(1);
+      return expect(
+        store.dispatch(actions.fetchPlan(filters)),
+      ).rejects.toThrow();
+    });
+
+    test('dispatches FETCH_PLAN_FAILED action', () => {
+      const store = storeWithApi({});
+      fetchMock.getOnce(addUrlParams(baseUrl, filters), 500);
+      const started = {
+        type: 'FETCH_PLAN_STARTED',
+        payload: filters,
+      };
+      const failed = {
+        type: 'FETCH_PLAN_FAILED',
+        payload: filters,
+      };
+
+      expect.assertions(2);
+      return store.dispatch(actions.fetchPlan(filters)).catch(() => {
+        expect(store.getActions()).toEqual([started, failed]);
+        expect(window.console.error).toHaveBeenCalled();
+      });
     });
   });
 });

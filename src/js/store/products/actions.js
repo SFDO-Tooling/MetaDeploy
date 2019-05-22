@@ -35,7 +35,7 @@ type FetchPlansFailed = {
 };
 type FetchPlansSucceeded = {
   type: 'FETCH_PLANS_SUCCEEDED',
-  payload: { product: string, version: string, response: Array<Plan> },
+  payload: { product: string, version: string, plans: Array<Plan> },
 };
 type PlanFilters = {|
   product: string,
@@ -119,13 +119,12 @@ export const fetchVersion = (filters: VersionFilters): ThunkAction => (
     });
 };
 
-export const fetchPlans = (product: string, version: string): ThunkAction => (
-  dispatch,
-  getState,
-  { apiFetch },
-) => {
-  dispatch({ type: 'FETCH_PLANS_STARTED', payload: { product, version } });
-  const baseUrl = window.api_urls.version_additional_plans(version);
+export const fetchPlans = (filters: {
+  product: string,
+  version: string,
+}): ThunkAction => (dispatch, getState, { apiFetch }) => {
+  dispatch({ type: 'FETCH_PLANS_STARTED', payload: filters });
+  const baseUrl = window.api_urls.version_additional_plans(filters.version);
   return apiFetch(baseUrl)
     .then(response => {
       if (!Array.isArray(response)) {
@@ -137,11 +136,11 @@ export const fetchPlans = (product: string, version: string): ThunkAction => (
       }
       return dispatch({
         type: 'FETCH_PLANS_SUCCEEDED',
-        payload: { response, product, version },
+        payload: { ...filters, plans: response },
       });
     })
     .catch(err => {
-      dispatch({ type: 'FETCH_PLANS_FAILED', payload: { product, version } });
+      dispatch({ type: 'FETCH_PLANS_FAILED', payload: filters });
       throw err;
     });
 };

@@ -50,12 +50,14 @@ module.exports = {
   // errorOnDeprecated: false,
 
   // Force coverage collection from ignored files usin a array of glob patterns
-  forceCoverageMatch: [
-    'src/js/**/*.{js,jsx}',
-    '!src/js/index.js',
-    '!src/js/raven.js',
-    '!src/js/i18n.js',
-  ],
+  // forceCoverageMatch: [
+  //   'src/js/**/*.{js,jsx}',
+  //   '!__mocks__',
+  //   '!test',
+  //   '!src/js/index.js',
+  //   '!src/js/raven.js',
+  //   '!src/js/i18n.js',
+  // ],
 
   // A path to a module which exports an async function that is triggered once before all test suites
   // globalSetup: null,
