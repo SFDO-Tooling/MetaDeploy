@@ -85,6 +85,16 @@ describe('<CtaButton />', () => {
     });
   });
 
+  describe('warningsInSelectedSteps', () => {
+    test('handles missing preflight', () => {
+      const { queryByText } = setup({
+        preflight: { status: 'complete', results: undefined },
+      });
+
+      expect(queryByText('Potential Issues')).toBeNull();
+    });
+  });
+
   describe('unknown preflight', () => {
     test('renders loading btn', () => {
       const { getByText } = setup({ preflight: undefined });
