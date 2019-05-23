@@ -6,7 +6,9 @@ import Illustration from '@salesforce/design-system-react/components/illustratio
 import { Link } from 'react-router-dom';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
+import type { RouterHistory } from 'react-router-dom';
 
+import Header from 'components/header';
 import routes from 'utils/routes';
 import svgPath from 'images/desert.svg';
 
@@ -20,20 +22,29 @@ export const EmptyIllustration = ({ message }: { message: React.Node }) => (
   />
 );
 
-const FourOhFour = ({ message }: { message?: React.Node }) => (
+const FourOhFour = ({
+  message,
+  history,
+}: {
+  message?: React.Node,
+  history?: RouterHistory,
+}) => (
   <DocumentTitle title={`${t('404')} | ${window.SITE_NAME}`}>
-    <EmptyIllustration
-      message={
-        message === undefined ? (
-          <Trans i18nKey="pageCannotBeFound">
-            That page cannot be found. Try the{' '}
-            <Link to={routes.home()}>home page</Link>?
-          </Trans>
-        ) : (
-          message
-        )
-      }
-    />
+    <>
+      <Header history={history} />
+      <EmptyIllustration
+        message={
+          message === undefined ? (
+            <Trans i18nKey="pageCannotBeFound">
+              That page cannot be found. Try the{' '}
+              <Link to={routes.home()}>home page</Link>?
+            </Trans>
+          ) : (
+            message
+          )
+        }
+      />
+    </>
   </DocumentTitle>
 );
 

@@ -168,13 +168,13 @@ describe('<JobDetail />', () => {
 
   describe('no job', () => {
     test('renders <JobNotFound />', () => {
-      const { getByText } = setup({
+      const { getByText, getAllByText } = setup({
         initialState: { ...defaultState, jobs: { nope: null } },
         jobId: 'nope',
       });
 
       expect(getByText('starting a new installation')).toBeVisible();
-      expect(getByText('Log In')).toBeVisible();
+      expect(getAllByText('Log In')[1]).toBeVisible();
     });
 
     test('renders "Log In With a Different Org" dropdown', () => {
@@ -190,7 +190,7 @@ describe('<JobDetail />', () => {
 
   describe('job does not match plan', () => {
     test('renders <JobNotFound />', () => {
-      const { getByText } = setup({
+      const { getByText, getAllByText } = setup({
         initialState: {
           ...defaultState,
           jobs: {
@@ -201,7 +201,7 @@ describe('<JobDetail />', () => {
       });
 
       expect(getByText('starting a new installation')).toBeVisible();
-      expect(getByText('Log In')).toBeVisible();
+      expect(getAllByText('Log In')[1]).toBeVisible();
     });
   });
 

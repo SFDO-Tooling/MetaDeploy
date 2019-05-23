@@ -33,8 +33,9 @@ import { startJob } from 'store/jobs/actions';
 import BackLink from 'components/backLink';
 import BodyContainer from 'components/bodyContainer';
 import CtaButton, { LoginBtn } from 'components/plans/ctaButton';
-import Header from 'components/plans/header';
+import Header from 'components/header';
 import Intro from 'components/plans/intro';
+import PageHeader from 'components/plans/header';
 import PlanNotAllowed from 'components/products/notAllowed';
 import PreflightResults, {
   ErrorIcon,
@@ -316,6 +317,7 @@ class PlanDetail extends React.Component<Props, State> {
       plan,
       planSlug,
       preflight,
+      history,
     } = this.props;
     const loadingOrNotFound = getLoadingOrNotFound({
       product,
@@ -341,7 +343,8 @@ class PlanDetail extends React.Component<Props, State> {
         title={`${plan.title} | ${product.title} | ${window.SITE_NAME}`}
       >
         <>
-          <Header
+          <Header history={history} />
+          <PageHeader
             product={product}
             version={version}
             plan={plan}

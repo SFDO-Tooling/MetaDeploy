@@ -4,6 +4,7 @@ import * as React from 'react';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
+import type { RouterHistory } from 'react-router-dom';
 
 import routes from 'utils/routes';
 import { logout } from 'store/user/actions';
@@ -23,6 +24,8 @@ type Props = {
   user: User,
   socket: Socket,
   org: OrgType,
+  history?: RouterHistory,
+  jobId?: string,
   doLogout: typeof logout,
 };
 
@@ -33,12 +36,12 @@ class Header extends React.Component<Props> {
   };
 
   render() {
-    const { socket, org } = this.props;
+    const { socket, org, history, jobId } = this.props;
     return (
       <>
         {socket ? null : <OfflineAlert />}
-        {org && org.current_job ? (
-          <CurrentJobAlert currentJob={org.current_job} />
+        {org && org.current_job && jobId !== org.current_job.id ? (
+          <CurrentJobAlert currentJob={org.current_job} history={history} />
         ) : null}
         <PageHeader
           className="global-header
@@ -48,7 +51,7 @@ class Header extends React.Component<Props> {
             <Link
               to={routes.home()}
               className="slds-text-heading_large
-            slds-text-link_reset"
+                slds-text-link_reset"
             >
               {window.GLOBALS.SITE && window.GLOBALS.SITE.product_logo ? (
                 <img
