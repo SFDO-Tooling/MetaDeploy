@@ -60,6 +60,7 @@ class JobFlowCallback(BasicFlowCallback):
 
     def post_flow(self, coordinator):
         self.logger.removeHandler(self.handler)
+        self.logger.removeHandler(self.result_handler)
 
     def pre_task(self, step):
         super().pre_task(step)
