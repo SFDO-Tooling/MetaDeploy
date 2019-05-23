@@ -37,7 +37,6 @@ List
          "requires_preflight": true
        },
        "secondary_plan": null,
-       "additional_plans": [],
        "is_listed": true
      },
     ...
@@ -47,7 +46,7 @@ Retrieve
 --------
 
 .. sourcecode:: http
-   
+
    GET /api/versions/XG4pVvD/ HTTP/1.1
 
 .. sourcecode:: http
@@ -75,7 +74,6 @@ Retrieve
        "requires_preflight": true
      },
      "secondary_plan": null,
-     "additional_plans": [],
      "is_listed": true
    }
 
@@ -83,7 +81,7 @@ Create
 ------
 
 .. sourcecode:: http
-   
+
    POST /api/versions/ HTTP/1.1
 
    {
@@ -92,7 +90,6 @@ Create
      "description": "This is a description of the product version.",
      "primary_plan": "g45z7wA",
      "secondary_plan": null,
-     "additional_plans": [],
      "is_listed": true
    }
 
@@ -104,7 +101,7 @@ Update
 ------
 
 .. sourcecode:: http
-   
+
    PATCH /api/versions/XG4pVvD/ HTTP/1.1
 
    {
@@ -136,7 +133,6 @@ Update
        "requires_preflight": true
      },
      "secondary_plan": null,
-     "additional_plans": [],
      "is_listed": true
    }
 
@@ -144,7 +140,7 @@ Destroy
 -------
 
 .. sourcecode:: http
-   
+
    DELETE /api/versions/XG4pVvD/ HTTP/1.1
 
 .. sourcecode:: http

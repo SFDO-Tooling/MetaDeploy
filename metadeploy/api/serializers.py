@@ -189,7 +189,6 @@ class VersionSerializer(serializers.ModelSerializer):
     )
     primary_plan = PlanSerializer()
     secondary_plan = PlanSerializer()
-    additional_plans = PlanSerializer(many=True)
     description = serializers.CharField()
 
     class Meta:
@@ -202,7 +201,6 @@ class VersionSerializer(serializers.ModelSerializer):
             "created_at",
             "primary_plan",
             "secondary_plan",
-            "additional_plans",
             "is_listed",
         )
 

@@ -3,7 +3,11 @@ import { StaticRouter } from 'react-router-dom';
 import { render } from 'react-testing-library';
 
 import routes from 'utils/routes';
-import { getLoadingOrNotFound, shouldFetchVersion } from 'components/utils';
+import {
+  getLoadingOrNotFound,
+  shouldFetchPlan,
+  shouldFetchVersion,
+} from 'components/utils';
 
 const defaultProduct = {
   id: 'p1',
@@ -25,7 +29,6 @@ const defaultProduct = {
       title: 'My Plan',
     },
     secondary_plan: null,
-    additional_plans: [],
   },
 };
 
@@ -71,6 +74,48 @@ describe('shouldFetchVersion', () => {
   });
 });
 
+describe('shouldFetchPlan', () => {
+  describe('no version', () => {
+    test('return false', () => {
+      const actual = shouldFetchPlan({ version: null });
+
+      expect(actual).toBe(false);
+    });
+  });
+
+  describe('no plan, already fetched', () => {
+    test('returns false', () => {
+      const version = {
+        ...defaultProduct.most_recent_version,
+        additional_plans: { 'my-plan': null },
+      };
+      const actual = shouldFetchPlan({
+        version,
+        plan: null,
+        planSlug: 'my-plan',
+      });
+
+      expect(actual).toBe(false);
+    });
+  });
+
+  describe('version not yet fetched', () => {
+    test('returns true', () => {
+      const version = {
+        ...defaultProduct.most_recent_version,
+        additional_plans: { 'my-plan': {} },
+      };
+      const actual = shouldFetchPlan({
+        version,
+        plan: null,
+        planSlug: 'my-plan',
+      });
+
+      expect(actual).toBe(true);
+    });
+  });
+});
+
 describe('getLoadingOrNotFound', () => {
   const setup = opts => {
     const context = {};
@@ -87,6 +132,18 @@ describe('getLoadingOrNotFound', () => {
       const { getByText } = setup({ product: null });
 
       expect(getByText('list of all products')).toBeVisible();
+    });
+  });
+
+  describe('maybeVersion and maybeSlug', () => {
+    test('renders spinner', () => {
+      const { getByText } = setup({
+        product: defaultProduct,
+        maybeVersion: '1.0.0',
+        maybeSlug: 'another-plan',
+      });
+
+      expect(getByText('Loading...')).toBeVisible();
     });
   });
 
@@ -138,14 +195,32 @@ describe('getLoadingOrNotFound', () => {
   });
 
   describe('no plan', () => {
-    test('renders <PlanNotFound />', () => {
+    test('renders <Spinner />', () => {
       const { getByText } = setup({
         product: defaultProduct,
         version: defaultProduct.most_recent_version,
         plan: null,
+        planSlug: 'my-plan',
       });
 
-      expect(getByText('another plan')).toBeVisible();
+      expect(getByText('Loading...')).toBeVisible();
+    });
+
+    describe('already fetched', () => {
+      test('renders <PlanNotFound />', () => {
+        const version = {
+          ...defaultProduct.most_recent_version,
+          additional_plans: { 'my-plan': null },
+        };
+        const { getByText } = setup({
+          product: defaultProduct,
+          version,
+          plan: null,
+          planSlug: 'my-plan',
+        });
+
+        expect(getByText('another plan')).toBeVisible();
+      });
     });
 
     describe('no version', () => {

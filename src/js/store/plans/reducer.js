@@ -25,7 +25,6 @@ export type Plan = {
   +average_duration: string | null,
   +requires_preflight: boolean,
 };
-export type Plans = Array<Plan>;
 
 export type StepResult = {|
   +status: 'ok' | 'warn' | 'error' | 'skip' | 'optional',

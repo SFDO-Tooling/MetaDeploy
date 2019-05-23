@@ -83,34 +83,6 @@ List
            "not_allowed_instructions": null,
            "requires_preflight": true
          },
-         "additional_plans": [
-           {
-             "id": "plYx3vX",
-             "title": "Account Record Types",
-             "version": "m9vAdwZ",
-             "preflight_message": "<p>Preflight message</p>",
-             "tier": "additional",
-             "slug": "account-record-types",
-             "old_slugs": [],
-             "steps": [
-               {
-                 "id": "Av8AMlD",
-                 "name": "Quick step",
-                 "description": "This is a description of the step.",
-                 "is_required": true,
-                 "is_recommended": false,
-                 "kind": "Metadata",
-                 "kind_icon": "package"
-               },
-               ...
-             ],
-             "is_allowed": true,
-             "is_listed": true,
-             "not_allowed_instructions": null,
-             "requires_preflight": true
-           },
-           ...
-         ],
          "is_listed": true
        },
        "slug": "product-with-useful-data",
@@ -127,7 +99,7 @@ Retrieve
 --------
 
 .. sourcecode:: http
-   
+
    GET /api/products/ZPweolo/ HTTP/1.1
 
 .. sourcecode:: http
@@ -200,34 +172,6 @@ Retrieve
          "not_allowed_instructions": null,
          "requires_preflight": true
        },
-       "additional_plans": [
-         {
-           "id": "plYx3vX",
-           "title": "Account Record Types",
-           "version": "m9vAdwZ",
-           "preflight_message": "<p>Preflight message</p>",
-           "tier": "additional",
-           "slug": "account-record-types",
-           "old_slugs": [],
-           "steps": [
-             {
-               "id": "Av8AMlD",
-               "name": "Quick step",
-               "description": "This is a description of the step.",
-               "is_required": true,
-               "is_recommended": false,
-               "kind": "Metadata",
-               "kind_icon": "package"
-             },
-             ...
-           ],
-           "is_allowed": true,
-           "is_listed": true,
-           "not_allowed_instructions": null,
-           "requires_preflight": true
-         },
-         ...
-       ],
        "is_listed": true
      },
      "slug": "product-with-useful-data",
@@ -242,7 +186,7 @@ Create
 ------
 
 .. sourcecode:: http
-   
+
    POST /api/products/ HTTP/1.1
 
    {
@@ -268,7 +212,7 @@ Update
 ------
 
 .. sourcecode:: http
-   
+
    PATCH /api/products/ZPweolo/ HTTP/1.1
 
    {
@@ -345,34 +289,6 @@ Update
          "not_allowed_instructions": null,
          "requires_preflight": true
        },
-       "additional_plans": [
-         {
-           "id": "plYx3vX",
-           "title": "Account Record Types",
-           "version": "m9vAdwZ",
-           "preflight_message": "<p>Preflight message</p>",
-           "tier": "additional",
-           "slug": "account-record-types",
-           "old_slugs": [],
-           "steps": [
-             {
-               "id": "Av8AMlD",
-               "name": "Quick step",
-               "description": "This is a description of the step.",
-               "is_required": true,
-               "is_recommended": false,
-               "kind": "Metadata",
-               "kind_icon": "package"
-             },
-             ...
-           ],
-           "is_allowed": true,
-           "is_listed": true,
-           "not_allowed_instructions": null,
-           "requires_preflight": true
-         },
-         ...
-       ],
        "is_listed": true
      },
      "slug": "product-with-useful-data",
@@ -387,7 +303,7 @@ Destroy
 -------
 
 .. sourcecode:: http
-   
+
    DELETE /api/products/ZPweolo/ HTTP/1.1
 
 .. sourcecode:: http

@@ -8,7 +8,11 @@ import { connect } from 'react-redux';
 import { t } from 'i18next';
 
 import routes from 'utils/routes';
-import { fetchVersion } from 'store/products/actions';
+import {
+  fetchAdditionalPlans,
+  fetchPlan,
+  fetchVersion,
+} from 'store/products/actions';
 import {
   selectProduct,
   selectProductSlug,
@@ -31,6 +35,7 @@ import type {
 } from 'store/products/reducer';
 import type { User as UserType } from 'store/user/reducer';
 import type { VersionPlanType } from 'store/products/selectors';
+import type { Plan as PlanType } from 'store/plans/reducer';
 
 type ProductDetailProps = { product: ProductType | null, productSlug: ?string };
 type VersionDetailProps = {
@@ -39,6 +44,8 @@ type VersionDetailProps = {
   productSlug: ?string,
   version: VersionType | null,
   versionLabelAndPlanSlug: VersionPlanType,
+  doFetchAdditionalPlans: typeof fetchAdditionalPlans,
+  doFetchPlan: typeof fetchPlan,
   doFetchVersion: typeof fetchVersion,
 };
 
@@ -97,20 +104,47 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     }
   }
 
+  fetchAdditionalPlansIfMissing() {
+    const { product, version, doFetchAdditionalPlans } = this.props;
+    if (product && version && !version.fetched_additional_plans) {
+      // Fetch plans from API
+      doFetchAdditionalPlans({ product: product.id, version: version.id });
+    }
+  }
+
+  fetchPlanIfMissing() {
+    const { product, versionLabelAndPlanSlug, doFetchPlan } = this.props;
+    const { maybeVersion, maybeSlug } = versionLabelAndPlanSlug;
+    if (product && maybeVersion && maybeSlug) {
+      // Fetch plan from API
+      doFetchPlan({
+        product: product.id,
+        version: maybeVersion,
+        slug: maybeSlug,
+      });
+    }
+  }
+
   componentDidMount() {
     this.fetchVersionIfMissing();
+    this.fetchAdditionalPlansIfMissing();
+    this.fetchPlanIfMissing();
   }
 
   componentDidUpdate(prevProps) {
     const { product, version, versionLabelAndPlanSlug } = this.props;
-    const { label, slug } = versionLabelAndPlanSlug;
+    const { label, slug, maybeVersion, maybeSlug } = versionLabelAndPlanSlug;
     const versionChanged =
       product !== prevProps.product ||
       version !== prevProps.version ||
       label !== prevProps.versionLabelAndPlanSlug.label ||
-      slug !== prevProps.versionLabelAndPlanSlug.slug;
+      slug !== prevProps.versionLabelAndPlanSlug.slug ||
+      maybeVersion !== prevProps.versionLabelAndPlanSlug.maybeVersion ||
+      maybeSlug !== prevProps.versionLabelAndPlanSlug.maybeSlug;
     if (versionChanged) {
       this.fetchVersionIfMissing();
+      this.fetchAdditionalPlansIfMissing();
+      this.fetchPlanIfMissing();
     }
   }
 
@@ -122,7 +156,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
       version,
       versionLabelAndPlanSlug,
     } = this.props;
-    const { label, slug } = versionLabelAndPlanSlug;
+    const { label, slug, maybeVersion, maybeSlug } = versionLabelAndPlanSlug;
     const loadingOrNotFound = getLoadingOrNotFound({
       product,
       productSlug,
@@ -130,6 +164,8 @@ class VersionDetail extends React.Component<VersionDetailProps> {
       versionLabel: label,
       planSlug: slug,
       route: 'version_detail',
+      maybeVersion,
+      maybeSlug,
     });
     if (loadingOrNotFound !== false) {
       return loadingOrNotFound;
@@ -140,9 +176,14 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     if (!product || !version) {
       return <ProductNotFound />;
     }
-    const listedAdditionalPlans = version.additional_plans.filter(
-      plan => plan.is_listed && plan.is_allowed,
-    );
+    const listedAdditionalPlans: Array<PlanType> = version.additional_plans
+      ? (Object.entries(version.additional_plans): any)
+          .filter(
+            ([key, plan]: [string, PlanType | null]) =>
+              plan && plan.is_listed && plan.is_allowed && key === plan.slug,
+          )
+          .map((item: Array<[string, PlanType]>) => item[1])
+      : [];
     const { primary_plan, secondary_plan } = version;
     const visiblePrimaryPlan =
       primary_plan && primary_plan.is_listed && primary_plan.is_allowed;
@@ -271,6 +312,8 @@ const selectVersionDetail = (appState: AppState, props: InitialProps) => ({
 
 const actions = {
   doFetchVersion: fetchVersion,
+  doFetchAdditionalPlans: fetchAdditionalPlans,
+  doFetchPlan: fetchPlan,
 };
 
 const WrappedProductDetail: React.ComponentType<InitialProps> = connect(
