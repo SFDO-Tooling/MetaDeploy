@@ -12,7 +12,7 @@ class ResultSpoolLogger(Handler):
     def emit(self, record):
         if self.current_key is None:
             return
-        msg = record.getMessage()
+        msg = self.format(record)
         conv = Ansi2HTMLConverter(scheme="solarized")
         msg = conv.convert(msg, full=False)
         try:

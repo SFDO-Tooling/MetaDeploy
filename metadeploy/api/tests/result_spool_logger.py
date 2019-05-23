@@ -6,6 +6,9 @@ from ..result_spool_logger import ResultSpoolLogger
 class MockRecord:
     def __init__(self, msg):
         self.msg = msg
+        self.exc_info = None
+        self.exc_text = None
+        self.stack_info = None
 
     def getMessage(self):
         return self.msg
