@@ -23,7 +23,8 @@ import { selectUserState } from 'store/user/selectors';
 import { getLoadingOrNotFound, shouldFetchVersion } from 'components/utils';
 import BackLink from 'components/backLink';
 import BodyContainer from 'components/bodyContainer';
-import Header from 'components/products/header';
+import Header from 'components/header';
+import PageHeader from 'components/products/header';
 import ProductNotAllowed from 'components/products/notAllowed';
 import ProductNotFound from 'components/products/product404';
 import VersionNotFound from 'components/products/version404';
@@ -39,6 +40,7 @@ import type { Plan as PlanType } from 'store/plans/reducer';
 
 type ProductDetailProps = { product: ProductType | null, productSlug: ?string };
 type VersionDetailProps = {
+  ...InitialProps,
   user: UserType,
   product: ProductType | null,
   productSlug: ?string,
@@ -155,6 +157,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
       productSlug,
       version,
       versionLabelAndPlanSlug,
+      history,
     } = this.props;
     const { label, slug, maybeVersion, maybeSlug } = versionLabelAndPlanSlug;
     const loadingOrNotFound = getLoadingOrNotFound({
@@ -195,7 +198,8 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     return (
       <DocumentTitle title={`${product.title} | ${window.SITE_NAME}`}>
         <>
-          <Header product={product} versionLabel={version.label} />
+          <Header history={history} />
+          <PageHeader product={product} versionLabel={version.label} />
           {product.is_allowed ? (
             <BodyContainer>
               <BodySection>

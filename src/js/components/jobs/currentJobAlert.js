@@ -4,6 +4,7 @@ import * as React from 'react';
 import Alert from '@salesforce/design-system-react/components/alert';
 import AlertContainer from '@salesforce/design-system-react/components/alert/container';
 import { t } from 'i18next';
+import type { RouterHistory } from 'react-router-dom';
 
 import routes from 'utils/routes';
 import { getDuration } from 'utils/dates';
@@ -11,14 +12,19 @@ import type { CurrentJob } from 'store/org/reducer';
 
 type Props = {
   currentJob: CurrentJob,
+  history?: RouterHistory,
 };
 
 class CurrentJobAlert extends React.Component<Props> {
   redirectToJob = () => {
-    const { currentJob } = this.props;
+    const { currentJob, history } = this.props;
     const { product_slug, version_label, plan_slug, id } = currentJob;
     const url = routes.job_detail(product_slug, version_label, plan_slug, id);
-    window.location.assign(url);
+    if (history) {
+      history.push(url);
+    } else {
+      window.location.assign(url);
+    }
   };
 
   render(): React.Node {

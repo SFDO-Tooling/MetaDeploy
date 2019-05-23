@@ -11,14 +11,17 @@ import {
   selectProductCategories,
   selectProductsByCategory,
 } from 'store/products/selectors';
-import Header from 'components/products/listHeader';
+import Header from 'components/header';
+import PageHeader from 'components/products/listHeader';
 import ProductItem from 'components/products/listItem';
 import { EmptyIllustration } from 'components/404';
 import type { AppState } from 'store';
+import type { InitialProps } from 'components/utils';
 import type { ProductsMapType } from 'store/products/selectors';
 import type { Products as ProductsType } from 'store/products/reducer';
 
 type Props = {
+  ...InitialProps,
   productsByCategory: ProductsMapType,
   productCategories: Array<string>,
 };
@@ -109,7 +112,8 @@ class ProductsList extends React.Component<Props, State> {
     return (
       <DocumentTitle title={`${t('Products')} | ${window.SITE_NAME}`}>
         <>
-          <Header />
+          <Header history={this.props.history} />
+          <PageHeader />
           <div className="slds-p-around_x-large">
             {window.GLOBALS.SITE && window.GLOBALS.SITE.welcome_text ? (
               // These messages are pre-cleaned by the API
@@ -132,12 +136,12 @@ class ProductsList extends React.Component<Props, State> {
   }
 }
 
-const select = (appState: AppState): Props => ({
+const select = (appState: AppState) => ({
   productCategories: selectProductCategories(appState),
   productsByCategory: selectProductsByCategory(appState),
 });
 
-const WrappedProductsList: React.ComponentType<{}> = connect(select)(
+const WrappedProductsList: React.ComponentType<InitialProps> = connect(select)(
   ProductsList,
 );
 

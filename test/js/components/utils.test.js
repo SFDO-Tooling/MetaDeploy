@@ -1,6 +1,7 @@
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
-import { render } from 'react-testing-library';
+
+import { renderWithRedux } from './../utils';
 
 import routes from 'utils/routes';
 import {
@@ -119,7 +120,7 @@ describe('shouldFetchPlan', () => {
 describe('getLoadingOrNotFound', () => {
   const setup = opts => {
     const context = {};
-    const { getByText } = render(
+    const { getByText } = renderWithRedux(
       <StaticRouter context={context}>
         {getLoadingOrNotFound(opts)}
       </StaticRouter>,
