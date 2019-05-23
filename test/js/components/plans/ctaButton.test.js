@@ -261,7 +261,7 @@ describe('<CtaButton />', () => {
         },
       });
 
-      expect(getByText('Install')).toBeVisible();
+      expect(getByText('View Warnings to Continue Installation')).toBeVisible();
     });
   });
 
@@ -318,7 +318,7 @@ describe('<CtaButton />', () => {
           is_ready: true,
         },
       });
-      fireEvent.click(getByText('Install'));
+      fireEvent.click(getByText('View Warnings to Continue Installation'));
 
       expect(getByText('Potential Issues')).toBeVisible();
       expect(getByText('This is a warning.')).toBeVisible();

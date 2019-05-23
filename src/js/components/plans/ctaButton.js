@@ -330,7 +330,10 @@ class CtaButton extends React.Component<
               : this.startJob;
             // Warnings must be confirmed before proceeding
             const btn = hasWarnings
-              ? this.getLoginOrActionBtn(t('Install'), this.openPreflightModal)
+              ? this.getLoginOrActionBtn(
+                  t('View Warnings to Continue Installation'),
+                  this.openPreflightModal,
+                )
               : this.getLoginOrActionBtn(t('Install'), action);
             return (
               <>
