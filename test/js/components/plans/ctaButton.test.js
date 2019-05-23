@@ -26,9 +26,20 @@ const defaultPlan = {
       is_required: true,
       is_recommended: true,
     },
+    {
+      id: 'step-2',
+      name: 'Step 2',
+      description: 'This is another step description.',
+      kind: 'Metadata',
+      kind_icon: 'package',
+      is_required: false,
+      is_recommended: false,
+    },
   ],
   requires_preflight: true,
 };
+
+const selectedSteps = new Set(['step-1']);
 
 const defaultPreflight = {
   plan: 'plan-1',
@@ -48,6 +59,7 @@ describe('<CtaButton />', () => {
       preflight: defaultPreflight,
       preventAction: false,
       clickThroughAgreement: null,
+      selectedSteps,
     };
     const opts = { ...defaults, ...options };
     const renderFn = opts.rerenderFn || render;
@@ -60,7 +72,7 @@ describe('<CtaButton />', () => {
         versionLabel="version"
         plan={opts.plan}
         preflight={opts.preflight}
-        selectedSteps={new Set(['step-1'])}
+        selectedSteps={opts.selectedSteps}
         preventAction={opts.preventAction}
         doStartPreflight={opts.doStartPreflight}
         doStartJob={opts.doStartJob}
@@ -313,6 +325,28 @@ describe('<CtaButton />', () => {
       expect(
         getByLabelText('I understand these warnings', { exact: false }),
       ).toBeVisible();
+    });
+
+    test('skips modal if no selected steps have warnings', () => {
+      const doStartJob = jest.fn(() => Promise.resolve({}));
+      const { getByText, queryByText } = setup({
+        preflight: {
+          plan: 'plan-1',
+          status: 'complete',
+          results: {
+            'step-2': { status: 'warn', message: 'This is a warning.' },
+          },
+          is_valid: true,
+          error_count: 0,
+          warning_count: 1,
+          is_ready: true,
+        },
+        doStartJob,
+      });
+      fireEvent.click(getByText('Install'));
+
+      expect(queryByText('Potential Issues')).toBeNull();
+      expect(doStartJob).toHaveBeenCalledTimes(1);
     });
   });
 

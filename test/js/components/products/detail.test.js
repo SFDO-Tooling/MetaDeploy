@@ -4,14 +4,22 @@ import { StaticRouter } from 'react-router-dom';
 import { renderWithRedux } from './../../utils';
 
 import routes from 'utils/routes';
-import { fetchVersion } from 'store/products/actions';
+import {
+  fetchAdditionalPlans,
+  fetchPlan,
+  fetchVersion,
+} from 'store/products/actions';
 import { ProductDetail, VersionDetail } from 'components/products/detail';
 
 jest.mock('store/products/actions');
 
+fetchPlan.mockReturnValue({ type: 'TEST' });
+fetchAdditionalPlans.mockReturnValue({ type: 'TEST' });
 fetchVersion.mockReturnValue({ type: 'TEST' });
 
 afterEach(() => {
+  fetchPlan.mockClear();
+  fetchAdditionalPlans.mockClear();
   fetchVersion.mockClear();
 });
 
@@ -48,8 +56,8 @@ const defaultState = {
           is_allowed: true,
           requires_preflight: true,
         },
-        additional_plans: [
-          {
+        additional_plans: {
+          'my-additional-plan': {
             id: 'plan-3',
             slug: 'my-additional-plan',
             old_slugs: [],
@@ -58,7 +66,7 @@ const defaultState = {
             is_allowed: true,
             requires_preflight: true,
           },
-        ],
+        },
         is_listed: true,
       },
       is_listed: true,
@@ -168,15 +176,62 @@ describe('<VersionDetail />', () => {
     });
   });
 
-  describe('unknown version', () => {
-    test('fetches version', () => {
-      setup({
-        versionLabel: '2.0.0',
-      });
+  test('fetches plans', () => {
+    setup();
 
-      expect(fetchVersion).toHaveBeenCalledWith({
-        product: 'p1',
-        label: '2.0.0',
+    expect(fetchAdditionalPlans).toHaveBeenCalledTimes(1);
+  });
+
+  describe('unknown version-or-plan', () => {
+    describe('matches known plan', () => {
+      test('redirects to plan_detail', () => {
+        const { context } = setup({
+          versionLabel: 'my-secondary-plan',
+        });
+
+        expect(context.action).toEqual('REPLACE');
+        expect(context.url).toEqual(
+          routes.plan_detail('product-1', '1.0.0', 'my-secondary-plan'),
+        );
+      });
+    });
+
+    describe('matches known not-plan', () => {
+      test('fetches version', () => {
+        const product = defaultState.products[0];
+        setup({
+          versionLabel: '2.0.0',
+          initialState: {
+            products: [
+              {
+                ...product,
+                most_recent_version: {
+                  ...product.most_recent_version,
+                  additional_plans: {
+                    '2.0.0': null,
+                  },
+                },
+              },
+            ],
+          },
+        });
+
+        expect(fetchVersion).toHaveBeenCalledWith({
+          product: 'p1',
+          label: '2.0.0',
+        });
+      });
+    });
+
+    describe('does not match known plan', () => {
+      test('fetches plan', () => {
+        setup({ versionLabel: 'possible-plan' });
+
+        expect(fetchPlan).toHaveBeenCalledWith({
+          product: 'p1',
+          version: 'v1',
+          slug: 'possible-plan',
+        });
       });
     });
   });
@@ -194,25 +249,53 @@ describe('<VersionDetail />', () => {
       });
     });
 
-    describe('version is removed', () => {
-      test('fetches version', () => {
-        const { rerender } = setup({
-          versionLabel: '2.0.0',
-        });
+    describe('version is changed', () => {
+      test('fetches plan', () => {
+        const { rerender } = setup({ versionLabel: '1.0.0' });
 
-        expect(fetchVersion).toHaveBeenCalledWith({
-          product: 'p1',
-          label: '2.0.0',
-        });
+        expect(fetchPlan).not.toHaveBeenCalled();
 
         setup({
-          versionLabel: '3.0.0',
+          versionLabel: '2.0.0',
+          rerenderFn: rerender,
+        });
+
+        expect(fetchPlan).toHaveBeenCalledWith({
+          product: 'p1',
+          version: 'v1',
+          slug: '2.0.0',
+        });
+      });
+
+      test('fetches version', () => {
+        const product = defaultState.products[0];
+        const { rerender } = setup({
+          versionLabel: '1.0.0',
+          initialState: {
+            products: [
+              {
+                ...product,
+                most_recent_version: {
+                  ...product.most_recent_version,
+                  additional_plans: {
+                    '2.0.0': null,
+                  },
+                },
+              },
+            ],
+          },
+        });
+
+        expect(fetchVersion).not.toHaveBeenCalled();
+
+        setup({
+          versionLabel: '2.0.0',
           rerenderFn: rerender,
         });
 
         expect(fetchVersion).toHaveBeenCalledWith({
           product: 'p1',
-          label: '3.0.0',
+          label: '2.0.0',
         });
       });
     });
@@ -282,7 +365,6 @@ describe('<VersionDetail />', () => {
             requires_preflight: true,
           },
           secondary_plan: null,
-          additional_plans: [],
           is_listed: true,
         },
         is_listed: true,
@@ -314,8 +396,8 @@ describe('<VersionDetail />', () => {
           description: 'This is a test product version.',
           primary_plan: null,
           secondary_plan: null,
-          additional_plans: [
-            {
+          additional_plans: {
+            'my-plan': {
               id: 'plan-1',
               slug: 'my-plan',
               old_slugs: [],
@@ -324,7 +406,7 @@ describe('<VersionDetail />', () => {
               is_allowed: true,
               requires_preflight: true,
             },
-          ],
+          },
           is_listed: true,
         },
         is_listed: true,
@@ -357,12 +439,10 @@ describe('<VersionDetail />', () => {
         requires_preflight: true,
       },
       secondary_plan: null,
-      additional_plans: [],
       is_listed: true,
     };
     const product = Object.assign({}, defaultState.products[0]);
     product.versions = { [version.label]: version };
-
     test('renders version detail', () => {
       const { getByText } = setup({
         initialState: { products: [product] },
@@ -379,6 +459,7 @@ describe('<VersionDetail />', () => {
     test('renders <VersionNotFound />', () => {
       const product = Object.assign({}, defaultState.products[0]);
       product.versions = { '2.0.0': null };
+      product.most_recent_version.additional_plans['2.0.0'] = null;
       const { getByText } = setup({
         initialState: { products: [product] },
         versionLabel: '2.0.0',
@@ -439,19 +520,6 @@ describe('<VersionDetail />', () => {
 
       expect(getByText('list of all products')).toBeVisible();
       expect(getByText('log in')).toBeVisible();
-    });
-  });
-
-  describe('version label is a plan slug', () => {
-    test('redirects to plan_detail', () => {
-      const { context } = setup({
-        versionLabel: 'my-secondary-plan',
-      });
-
-      expect(context.action).toEqual('REPLACE');
-      expect(context.url).toEqual(
-        routes.plan_detail('product-1', '1.0.0', 'my-secondary-plan'),
-      );
     });
   });
 });

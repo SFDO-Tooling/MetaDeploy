@@ -6,7 +6,7 @@ import { renderWithRedux, storeWithApi } from './../../utils';
 
 import routes from 'utils/routes';
 import { fetchPreflight } from 'store/plans/actions';
-import { fetchVersion } from 'store/products/actions';
+import { fetchPlan, fetchVersion } from 'store/products/actions';
 import PlanDetail from 'components/plans/detail';
 
 jest.mock('store/products/actions');
@@ -14,10 +14,12 @@ jest.mock('store/plans/actions');
 
 fetchVersion.mockReturnValue({ type: 'TEST' });
 fetchPreflight.mockReturnValue({ type: 'TEST' });
+fetchPlan.mockReturnValue({ type: 'TEST' });
 
 afterEach(() => {
   fetchVersion.mockClear();
   fetchPreflight.mockClear();
+  fetchPlan.mockClear();
 });
 
 const defaultState = {
@@ -80,8 +82,8 @@ const defaultState = {
           requires_preflight: true,
           is_allowed: true,
         },
-        additional_plans: [
-          {
+        additional_plans: {
+          'third-plan': {
             id: 'plan-3',
             slug: 'third-plan',
             old_slugs: [],
@@ -91,7 +93,7 @@ const defaultState = {
             is_allowed: true,
             requires_preflight: true,
           },
-          {
+          'fourth-plan': {
             id: 'plan-4',
             slug: 'fourth-plan',
             old_slugs: [],
@@ -102,7 +104,7 @@ const defaultState = {
             requires_preflight: true,
             not_allowed_instructions: 'plan restricted',
           },
-        ],
+        },
       },
       is_allowed: true,
     },
@@ -354,10 +356,38 @@ describe('<PlanDetail />', () => {
     expect(getByText('Third preflight text…')).toBeVisible();
   });
 
+  describe('unknown plan', () => {
+    test('fetches plan', () => {
+      setup({ planSlug: 'possibly' });
+
+      expect(fetchPlan).toHaveBeenCalledWith({
+        product: 'p1',
+        version: 'v1',
+        slug: 'possibly',
+      });
+    });
+  });
+
   describe('no plan', () => {
     test('renders <PlanNotFound />', () => {
+      const product = defaultState.products[0];
       const { getByText } = setup({
         planSlug: 'nope',
+        initialState: {
+          ...defaultState,
+          products: [
+            {
+              ...product,
+              most_recent_version: {
+                ...product.most_recent_version,
+                additional_plans: {
+                  ...product.most_recent_version.additional_plans,
+                  nope: null,
+                },
+              },
+            },
+          ],
+        },
       });
 
       expect(getByText('another plan')).toBeVisible();

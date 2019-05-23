@@ -54,7 +54,7 @@ class NameDataCell extends React.Component<Props> {
     let optional, logs;
     if (result) {
       hasError = result.status === RESULT_STATUS.ERROR;
-      hasWarning = result.status === RESULT_STATUS.WARN;
+      hasWarning = result.message && result.status === RESULT_STATUS.WARN;
       optional = result.status === RESULT_STATUS.OPTIONAL ? result : null;
       optionalMsg = optional && optional.message;
       logs = job ? result.logs : null;

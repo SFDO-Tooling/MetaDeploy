@@ -45,7 +45,7 @@
   },
   "dependencies": {
     "@salesforce-ux/design-system": "2.8.3",
-    "@salesforce/design-system-react": "^0.10.3",
+    "@salesforce/design-system-react": "^0.10.4",
     "classnames": "^2.2.6",
     "i18next": "^15.1.2",
     "i18next-browser-languagedetector": "^3.0.1",
@@ -67,11 +67,11 @@
     "whatwg-fetch": "^3.0.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.4.4",
+    "@babel/core": "^7.4.5",
     "@babel/plugin-proposal-class-properties": "^7.4.4",
     "@babel/plugin-proposal-object-rest-spread": "^7.4.4",
     "@babel/polyfill": "^7.4.4",
-    "@babel/preset-env": "^7.4.4",
+    "@babel/preset-env": "^7.4.5",
     "@babel/preset-flow": "^7.0.0",
     "@babel/preset-react": "^7.0.0",
     "autoprefixer": "^9.5.1",
@@ -116,7 +116,7 @@
     "stylelint-config-recommended-scss": "^3.3.0",
     "stylelint-scss": "^3.6.1",
     "url-loader": "^1.1.2",
-    "webpack": "^4.32.0",
+    "webpack": "^4.32.1",
     "webpack-cli": "^3.3.2",
     "webpack-dev-server": "^3.4.1",
     "webpack-merge": "^4.2.1"

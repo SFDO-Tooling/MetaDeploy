@@ -112,6 +112,30 @@ export const shouldFetchVersion = ({
   return false;
 };
 
+export const shouldFetchPlan = ({
+  version,
+  plan,
+  planSlug,
+}: {
+  version: VersionType | null,
+  plan?: PlanType | null,
+  planSlug?: ?string,
+}): boolean => {
+  const hasVersion = version !== null;
+  const hasPlan = plan !== null;
+  if (hasVersion && !hasPlan && planSlug) {
+    const plan404 =
+      version &&
+      version.additional_plans &&
+      version.additional_plans[planSlug] === null;
+    if (!plan404) {
+      // Fetch plan from API
+      return true;
+    }
+  }
+  return false;
+};
+
 export const getLoadingOrNotFound = ({
   product,
   productSlug,
@@ -123,6 +147,8 @@ export const getLoadingOrNotFound = ({
   jobId,
   isLoggedIn,
   route,
+  maybeVersion,
+  maybeSlug,
 }: {
   product: ProductType | null,
   productSlug: ?string,
@@ -134,9 +160,16 @@ export const getLoadingOrNotFound = ({
   jobId?: ?string,
   isLoggedIn?: boolean,
   route: string,
+  maybeVersion?: string,
+  maybeSlug?: string,
 }): React.Node | false => {
   if (product === null) {
     return <ProductNotFound />;
+  }
+  // If we have what we think might be a version label and plan slug,
+  // return a spinner while checking if plan exists on that version.
+  if (maybeVersion && maybeSlug) {
+    return <Spinner />;
   }
   // If we have a plan slug but no plan, redirect to that plan detail page
   if (planSlug && versionLabel && plan === undefined) {
@@ -159,7 +192,14 @@ export const getLoadingOrNotFound = ({
     if (!version) {
       return <VersionNotFound product={product} />;
     }
-    return <PlanNotFound product={product} version={version} />;
+    if (
+      !planSlug ||
+      (version.additional_plans && version.additional_plans[planSlug] === null)
+    ) {
+      return <PlanNotFound product={product} version={version} />;
+    }
+    // Fetching plan from API
+    return <Spinner />;
   }
   if (version && plan && jobId && !job) {
     if (job === null) {
