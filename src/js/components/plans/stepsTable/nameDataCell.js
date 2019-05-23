@@ -49,7 +49,7 @@ class NameDataCell extends React.Component<Props> {
     const { id } = item;
     const isActive = Boolean(activeJobStep && id === activeJobStep);
     const result = currentJob && currentJob.results && currentJob.results[id];
-    const isSelected = !selectedSteps || selectedSteps.has(id);
+    const showErrorColors = !selectedSteps || selectedSteps.has(id);
     let hasError = false;
     let hasWarning = false;
     let optionalMsg = '';
@@ -73,8 +73,8 @@ class NameDataCell extends React.Component<Props> {
       'plan-step-item',
       'plan-step-item-name',
       {
-        'has-warning': hasWarning && isSelected,
-        'has-error': hasError && isSelected,
+        'has-warning': hasWarning && showErrorColors,
+        'has-error': hasError && showErrorColors,
         'is-installing': isActive,
       },
     );
