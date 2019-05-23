@@ -13,7 +13,7 @@ class ResultSpoolLogger(Handler):
         if self.current_key is None:
             return
         msg = self.format(record)
-        conv = Ansi2HTMLConverter(scheme="solarized")
+        conv = Ansi2HTMLConverter(scheme="solarized", inline=True)
         msg = conv.convert(msg, full=False)
         try:
             content = f"\n{msg}"
