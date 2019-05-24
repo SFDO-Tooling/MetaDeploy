@@ -5,14 +5,10 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('api', '0019_job_is_public'),
-    ]
+    dependencies = [("api", "0019_job_is_public")]
 
     operations = [
         migrations.AddField(
-            model_name='job',
-            name='organization_url',
-            field=models.URLField(blank=True),
-        ),
+            model_name="job", name="organization_url", field=models.URLField(blank=True)
+        )
     ]

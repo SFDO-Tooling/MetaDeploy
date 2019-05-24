@@ -6,7 +6,7 @@ import ProductItem from 'components/products/listItem';
 
 describe('<ProductItem />', () => {
   const setup = initialState => {
-    const { getByText } = render(
+    const { getByText, queryByText } = render(
       <MemoryRouter>
         <>
           {initialState.products.map(item => (
@@ -15,7 +15,7 @@ describe('<ProductItem />', () => {
         </>
       </MemoryRouter>,
     );
-    return { getByText };
+    return { getByText, queryByText };
   };
 
   test('renders product', () => {
@@ -25,6 +25,7 @@ describe('<ProductItem />', () => {
           id: 'p1',
           title: 'Product 1',
           description: 'This is a test product.',
+          short_description: 'I am short.',
           category: 'salesforce',
           icon: {
             type: 'url',
@@ -39,13 +40,22 @@ describe('<ProductItem />', () => {
               id: 'plan-1',
               title: 'My Plan',
             },
-            additional_plans: [],
           },
+        },
+        {
+          id: 'p2',
+          title: 'Product 2',
+          description: 'This is a test product.',
+          category: 'salesforce',
+          most_recent_version: null,
         },
       ],
     };
-    const { getByText } = setup(initialState);
+    const { getByText, queryByText } = setup(initialState);
 
     expect(getByText('Product 1')).toBeVisible();
+    expect(getByText('I am short.')).toBeVisible();
+    expect(queryByText('Product 2')).toBeNull();
+    expect(queryByText('This is a test product')).toBeNull();
   });
 });

@@ -2,13 +2,13 @@ import pytest
 from django.core.management import call_command
 
 from ....models import (
+    Plan,
+    PlanSlug,
+    Product,
     ProductCategory,
     ProductSlug,
-    Product,
-    Version,
-    PlanSlug,
-    Plan,
     Step,
+    Version,
 )
 
 
@@ -30,6 +30,6 @@ def test_truncate_data(product_factory, step_factory):
     assert Plan.objects.count() == 3
     assert Step.objects.count() == 3
 
-    call_command('truncate_data')
+    call_command("truncate_data")
 
     assert Product.objects.count() == 0

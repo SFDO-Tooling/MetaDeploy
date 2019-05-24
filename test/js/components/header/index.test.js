@@ -7,15 +7,41 @@ import { renderWithRedux } from './../../utils';
 import Header from 'components/header';
 
 describe('<Header />', () => {
-  const setup = (initialState = { user: null }) => {
-    const { container, getByLabelText, getByText } = renderWithRedux(
+  const setup = (initialState = { user: null, socket: false, org: null }) => {
+    const {
+      container,
+      getByLabelText,
+      getByText,
+      getByAltText,
+      queryByText,
+    } = renderWithRedux(
       <MemoryRouter>
         <Header />
       </MemoryRouter>,
       initialState,
     );
-    return { container, getByLabelText, getByText };
+    return { container, getByLabelText, getByText, getByAltText, queryByText };
   };
+
+  describe('site logo', () => {
+    beforeAll(() => {
+      window.SITE_NAME = 'My Site';
+      window.GLOBALS.SITE = {
+        product_logo: 'my/logo.png',
+      };
+    });
+
+    afterAll(() => {
+      window.SITE_NAME = 'MetaDeploy';
+      window.GLOBALS = {};
+    });
+
+    test('renders logo', () => {
+      const { getByAltText } = setup();
+
+      expect(getByAltText('My Site')).toBeVisible();
+    });
+  });
 
   describe('logged out', () => {
     test('renders login dropdown', () => {
@@ -42,6 +68,45 @@ describe('<Header />', () => {
       fireEvent.click(btn);
 
       expect(getByText('Log Out')).toBeVisible();
+    });
+  });
+
+  describe('offline', () => {
+    test('renders OfflineAlert if websocket disconnected', () => {
+      const { getByText } = setup();
+
+      expect(getByText('reload the page.')).toBeVisible();
+    });
+
+    test('does not render OfflineAlert if websocket connected', () => {
+      const initialState = { user: null, socket: true };
+      const { queryByText } = setup(initialState);
+
+      expect(queryByText('reload the page.')).toBeNull();
+    });
+  });
+
+  describe('currently running job', () => {
+    test('renders CurrentJobAlert', () => {
+      const initialState = {
+        user: { username: 'Test User' },
+        org: {
+          current_job: {
+            id: 'my-job',
+            product_slug: 'my-product',
+            version_label: 'my-version',
+            plan_slug: 'my-plan',
+            plan_average_duration: '119.999',
+          },
+        },
+      };
+      const { getByText } = setup(initialState);
+
+      expect(
+        getByText(
+          'An installation is currently running on this org. Average install time is 2 minutes.',
+        ),
+      ).toBeVisible();
     });
   });
 });

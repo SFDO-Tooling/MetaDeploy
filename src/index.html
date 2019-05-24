@@ -7,12 +7,14 @@
     <meta charset="utf-8" />
     <meta http-equiv="x-ua-compatible" content="ie=edge" />
     {% block robots %}<meta name="robots" content="index, follow" />{% endblock %}
-    <meta name="author" content="Salesforce.org" />
+    {% if GLOBALS.SITE and GLOBALS.SITE.company_name %}<meta name="author" content="{{ GLOBALS.SITE.company_name }}" />{% endif %}
     <meta name="keywords" content="{% block keywords %}{% endblock keywords %}" />
     <meta name="language" content="en-us" />
+    {% if GLOBALS.SITE and GLOBALS.SITE.favicon %}<link rel="shortcut icon" href="{{ GLOBALS.SITE.favicon }}" />{% endif %}
+
 
     <!-- Page Info -->
-    <title>{% block title %}MetaDeploy{% endblock %}</title>
+    <title>{% block title %}{% if GLOBALS.SITE and GLOBALS.SITE.name %}{{ GLOBALS.SITE.name }}{% else %}MetaDeploy{% endif %}{% endblock %}</title>
     <meta name="description" content="{% block description %}{% endblock description %}" />
 
     <!-- Styles -->
@@ -20,9 +22,9 @@
     <link rel="stylesheet" href="<%= htmlWebpackPlugin.files.chunks.app.css[0] %>" type="text/css">
   </head>
   <body>
-    <main id="app" class="slds-grid slds-grid_vertical"{% if user.is_authenticated %} data-user="{{ user|serialize }}"{% endif %}>
+    <main id="app" class="slds-grid slds-grid_vertical slds-theme_default"{% if user.is_authenticated %} data-user="{{ user|serialize }}"{% endif %}>
       <div role="status" class="slds-spinner slds-spinner_large">
-        <span class="slds-assistive-text">Loading...</span>
+        <span class="slds-assistive-text">Loading…</span>
         <div class="slds-spinner__dot-a"></div>
         <div class="slds-spinner__dot-b"></div>
       </div>
@@ -31,15 +33,16 @@
     <!-- JavaScript -->
     <script type="text/javascript" src="<%= htmlWebpackPlugin.files.chunks.runtime.entry %>"></script>
     <script type="text/javascript" src="<%= htmlWebpackPlugin.files.chunks.vendors.entry %>"></script>
-    {% if SENTRY_DSN_PUBLIC %}
+    {% if GLOBALS.SENTRY_DSN_PUBLIC %}
       <!-- Insert Raven JS -->
       <script id="js-raven-setup" type="application/json">
         {
-          "dsn": "{{ SENTRY_DSN_PUBLIC }}"
+          "dsn": "{{ GLOBALS.SENTRY_DSN_PUBLIC }}"
         }
       </script>
       <script type="text/javascript" src="<%= htmlWebpackPlugin.files.chunks.raven.entry %>"></script>
     {% endif %}
+    {{ GLOBALS|json_script:"js-globals" }}
     <script type="text/javascript" charset="utf-8">
       {% js_reverse_inline %}
     </script>

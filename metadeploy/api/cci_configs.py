@@ -1,35 +1,63 @@
-from cumulusci.core.config import YamlProjectConfig
+from typing import List
+from urllib.parse import urlparse
+
+from cumulusci.core.config import BaseProjectConfig
+from cumulusci.core.flowrunner import FlowCoordinator
+from cumulusci.core.runtime import BaseCumulusCI
+
+from metadeploy.api.flows import JobFlowCallback, PreflightFlowCallback
+from metadeploy.api.models import Job, Plan, PreflightResult, WorkableModel
 
 
-class MetadeployProjectConfig(YamlProjectConfig):
-    def __init__(self, *args, repo_root=None, **kwargs):  # pragma: nocover
-        self._repo_root = repo_root
-        super().__init__(*args, **kwargs)
+def extract_user_and_repo(gh_url):
+    path = urlparse(gh_url).path
+    _, user, repo, *_ = path.split("/")
+    return user, repo
 
-    @property
-    def repo_root(self):  # pragma: nocover
-        return self._repo_root
 
-    @property
-    def config_project_local_path(self):  # pragma: nocover
-        return
+class MetadeployProjectConfig(BaseProjectConfig):
+    def __init__(self, *args, repo_root=None, plan=None, **kwargs):  # pragma: nocover
 
-    @property
-    def repo_name(self):  # pragma: nocover
-        return
+        self.plan = plan
+        repo_url = plan.version.product.repo_url
+        user, repo_name = extract_user_and_repo(repo_url)
 
-    @property
-    def repo_url(self):  # pragma: nocover
-        return
+        repo_info = {
+            "root": repo_root,
+            "url": repo_url,
+            "name": repo_name,
+            "owner": user,
+            "commit": plan.version.commit_ish,
+        }
 
-    @property
-    def repo_owner(self):  # pragma: nocover
-        return
+        super().__init__(*args, repo_info=repo_info, **kwargs)
 
-    @property
-    def repo_branch(self):  # pragma: nocover
-        return
 
-    @property
-    def repo_commit(self):  # pragma: nocover
-        return
+class MetaDeployCCI(BaseCumulusCI):
+    project_config_class = MetadeployProjectConfig
+
+    def get_flow_from_plan(
+        self, plan: Plan, ctx: WorkableModel, skip: List[str] = None
+    ):
+        steps = [step.to_spec(skip=step.path in skip) for step in plan.steps.all()]
+
+        if isinstance(ctx, PreflightResult):
+            flow_config = self.project_config.get_flow(plan.preflight_flow_name)
+            return FlowCoordinator(
+                self.project_config,
+                flow_config,
+                name=plan.preflight_flow_name,
+                callbacks=PreflightFlowCallback(ctx),
+            )
+        elif isinstance(ctx, Job):
+            return FlowCoordinator.from_steps(
+                self.project_config,
+                steps,
+                name="default",
+                callbacks=JobFlowCallback(ctx),
+            )
+        else:  # pragma: no cover
+            raise AttributeError(
+                f"ctx must be either a PreflightResult "
+                f"or Job, but was passed {type(ctx)}."
+            )

@@ -2,6 +2,7 @@ TAGS
 *.DS_Store
 *~
 .vscode
+.idea/
 .livereload
 node_modules/
 node/
@@ -17,6 +18,7 @@ npm-debug.log
 yarn-error.log
 staticfiles/
 dump.rdb
+/env
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -108,3 +110,7 @@ ENV/
 # Database things
 *.sql
 *.dump
+
+# Node and Yarn packages:
+requirements/*.tar.gz
+requirements/*.tar.xz

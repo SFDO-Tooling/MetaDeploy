@@ -16,29 +16,32 @@ Including another URLconf
 from urllib.parse import urljoin
 
 from django.conf import settings
-from django.urls import path, re_path, include
 from django.contrib import admin
+from django.urls import include, path, re_path
 from django.views.generic import TemplateView
 
 from .routing import websockets
-
 
 PREFIX = settings.ADMIN_AREA_PREFIX
 
 
 urlpatterns = [
-    path(urljoin(PREFIX, r'django-rq/'), include('django_rq.urls')),
+    path(urljoin(PREFIX, r"django-rq/"), include("django_rq.urls")),
+    path(
+        urljoin(PREFIX, r"rest/"),
+        include("metadeploy.adminapi.urls", namespace="admin_rest"),
+    ),
     # Put this after all other things using `PREFIX`:
     path(PREFIX, admin.site.urls),
-    path('accounts/', include('allauth.urls')),
-    path('api/', include('metadeploy.api.urls')),
+    path("accounts/", include("allauth.urls")),
+    path("api/", include("metadeploy.api.urls")),
     # Catchall for the rest. Right now, it just trusts that PREFIX ==
     # 'admin/', because we don't want to do string munging to get just
     # the part without the regex and path cruft on it.
     re_path(
-        r'^(?!admin|accounts|api)',
-        TemplateView.as_view(template_name='index.html'),
-        name='frontend',
+        r"^(?!{admin}|accounts|api|static)".format(admin=PREFIX),
+        TemplateView.as_view(template_name="index.html"),
+        name="frontend",
     ),
     # Add WebSocket routes so that non-HTTP paths can be accessible by
     # `reverse` in Python and `window.api_urls` in JavaScript. These will

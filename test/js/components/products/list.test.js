@@ -7,21 +7,41 @@ import { renderWithRedux } from './../../utils';
 import ProductsList from 'components/products/list';
 
 describe('<Products />', () => {
-  const setup = (initialState, props = {}) => {
-    const { getByText, queryByText } = renderWithRedux(
+  const setup = (
+    initialState = {
+      products: [],
+    },
+    props = {},
+  ) => {
+    const { getByText, getAllByText, queryByText } = renderWithRedux(
       <MemoryRouter>
         <ProductsList {...props} />
       </MemoryRouter>,
       initialState,
     );
-    return { getByText, queryByText };
+    return { getByText, getAllByText, queryByText };
   };
 
+  describe('site welcome_text', () => {
+    beforeAll(() => {
+      window.GLOBALS.SITE = {
+        welcome_text: 'Hi there!',
+      };
+    });
+
+    afterAll(() => {
+      window.GLOBALS = {};
+    });
+
+    test('renders welcome text', () => {
+      const { getByText } = setup();
+
+      expect(getByText('Hi there!')).toBeVisible();
+    });
+  });
+
   test('renders products list (empty)', () => {
-    const initialState = {
-      products: [],
-    };
-    const { getByText } = setup(initialState);
+    const { getByText } = setup();
 
     expect(getByText('¯\\_(ツ)_/¯')).toBeVisible();
   });
@@ -42,9 +62,14 @@ describe('<Products />', () => {
             primary_plan: {
               id: 'plan-1',
               title: 'My Plan',
+              is_listed: true,
+              is_allowed: true,
+              requires_preflight: true,
             },
-            additional_plans: [],
+            is_listed: true,
           },
+          is_listed: true,
+          is_allowed: true,
         },
       ],
     };
@@ -75,9 +100,14 @@ describe('<Products />', () => {
             primary_plan: {
               id: 'plan-1',
               title: 'My Plan',
+              is_listed: true,
+              is_allowed: true,
+              requires_preflight: true,
             },
-            additional_plans: [],
+            is_listed: true,
           },
+          is_listed: true,
+          is_allowed: true,
         },
         {
           id: 'p2',
@@ -93,9 +123,35 @@ describe('<Products />', () => {
             primary_plan: {
               id: 'plan-2',
               title: 'My Plan',
+              is_listed: true,
+              is_allowed: true,
+              requires_preflight: true,
             },
-            additional_plans: [],
+            is_listed: true,
           },
+          is_listed: true,
+          is_allowed: true,
+        },
+        {
+          id: 'p3',
+          title: 'Product 3',
+          description: 'This is an unlisted product.',
+          category: 'community',
+          most_recent_version: {
+            id: 'v3',
+            product: 'p3',
+            label: '1.0.0',
+            description: 'This is a product version.',
+            primary_plan: {
+              id: 'plan-3',
+              title: 'My Plan',
+              is_listed: true,
+              is_allowed: true,
+              requires_preflight: true,
+            },
+            is_listed: true,
+          },
+          is_listed: false,
         },
       ],
     };
@@ -105,11 +161,12 @@ describe('<Products />', () => {
     });
 
     test('renders products list', () => {
-      const { getByText } = setup(initialState);
+      const { getByText, getAllByText, queryByText } = setup(initialState);
       const activeTab = getByText('salesforce');
 
-      expect(getByText('Product 1')).toBeVisible();
+      expect(getAllByText('Product 1')[0]).toBeVisible();
       expect(getByText('Product 2')).toBeInTheDocument();
+      expect(queryByText('Product 3')).toBeNull();
       expect(activeTab).toBeVisible();
       expect(getByText('community')).toBeVisible();
       expect(activeTab).toHaveClass('slds-active');
@@ -117,10 +174,10 @@ describe('<Products />', () => {
 
     test('uses saved active tab', () => {
       window.sessionStorage.setItem('activeProductsTab', 'community');
-      const { getByText } = setup(initialState);
+      const { getByText, getAllByText } = setup(initialState);
       const activeTab = getByText('community');
 
-      expect(getByText('Product 1')).toBeVisible();
+      expect(getAllByText('Product 1')[0]).toBeVisible();
       expect(getByText('Product 2')).toBeInTheDocument();
       expect(getByText('salesforce')).toBeVisible();
       expect(activeTab).toBeVisible();

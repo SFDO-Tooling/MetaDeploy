@@ -1,11 +1,20 @@
 import React from 'react';
-import { render, fireEvent } from 'react-testing-library';
+import { fireEvent, render } from 'react-testing-library';
 
+import { getUrlParam, removeUrlParam } from 'utils/api';
 import CtaButton from 'components/plans/ctaButton';
+
+jest.mock('utils/api');
+
+afterEach(() => {
+  getUrlParam.mockClear();
+  removeUrlParam.mockClear();
+});
 
 const defaultPlan = {
   id: 'plan-1',
   slug: 'my-plan',
+  old_slugs: [],
   title: 'My Plan',
   steps: [
     {
@@ -17,8 +26,20 @@ const defaultPlan = {
       is_required: true,
       is_recommended: true,
     },
+    {
+      id: 'step-2',
+      name: 'Step 2',
+      description: 'This is another step description.',
+      kind: 'Metadata',
+      kind_icon: 'package',
+      is_required: false,
+      is_recommended: false,
+    },
   ],
+  requires_preflight: true,
 };
+
+const selectedSteps = new Set(['step-1']);
 
 const defaultPreflight = {
   plan: 'plan-1',
@@ -36,22 +57,27 @@ describe('<CtaButton />', () => {
       plan: defaultPlan,
       user: { valid_token_for: 'foo' },
       preflight: defaultPreflight,
+      preventAction: false,
+      clickThroughAgreement: null,
+      selectedSteps,
     };
     const opts = { ...defaults, ...options };
-    const { getByText, container } = render(
+    const renderFn = opts.rerenderFn || render;
+    return renderFn(
       <CtaButton
         history={opts.history}
         user={opts.user}
         productSlug="product"
+        clickThroughAgreement={opts.clickThroughAgreement}
         versionLabel="version"
         plan={opts.plan}
         preflight={opts.preflight}
-        selectedSteps={new Set(['step-1'])}
+        selectedSteps={opts.selectedSteps}
+        preventAction={opts.preventAction}
         doStartPreflight={opts.doStartPreflight}
         doStartJob={opts.doStartJob}
       />,
     );
-    return { getByText, container };
   };
 
   describe('no user', () => {
@@ -62,11 +88,20 @@ describe('<CtaButton />', () => {
     });
   });
 
+  describe('preventAction', () => {
+    test('renders disabled btn', () => {
+      const { getByText } = setup({ preventAction: true });
+
+      expect(getByText('Install')).toBeVisible();
+      expect(getByText('Install')).toBeDisabled();
+    });
+  });
+
   describe('unknown preflight', () => {
     test('renders loading btn', () => {
       const { getByText } = setup({ preflight: undefined });
 
-      expect(getByText('Loading...')).toBeVisible();
+      expect(getByText('Loading…')).toBeVisible();
     });
   });
 
@@ -95,7 +130,7 @@ describe('<CtaButton />', () => {
     test('renders progress btn', () => {
       const { getByText } = setup({ preflight: { status: 'started' } });
 
-      expect(getByText('Pre-Install Validation In Progress...')).toBeVisible();
+      expect(getByText('Pre-Install Validation In Progress…')).toBeVisible();
     });
   });
 
@@ -140,6 +175,16 @@ describe('<CtaButton />', () => {
     });
   });
 
+  describe('canceled preflight', () => {
+    test('renders re-run-preflight btn', () => {
+      const { getByText } = setup({
+        preflight: { status: 'canceled', is_valid: true, error_count: 0 },
+      });
+
+      expect(getByText('Re-Run Pre-Install Validation')).toBeVisible();
+    });
+  });
+
   describe('failed preflight', () => {
     test('renders re-run-preflight btn', () => {
       const { getByText } = setup({
@@ -171,6 +216,55 @@ describe('<CtaButton />', () => {
     });
   });
 
+  describe('no preflight required', () => {
+    test('renders install btn', () => {
+      const { getByText } = setup({
+        plan: { ...defaultPlan, requires_preflight: false },
+        preflight: undefined,
+      });
+
+      expect(getByText('Install')).toBeVisible();
+    });
+
+    describe('start-install (with click-through agreement) click', () => {
+      test('opens modal', () => {
+        const { getByText, getByLabelText } = setup({
+          plan: { ...defaultPlan, requires_preflight: false },
+          preflight: undefined,
+          clickThroughAgreement: '<p>Please and thank you.</p>',
+        });
+        fireEvent.click(getByText('Install'));
+
+        expect(getByText('Product Terms of Use and Licenses')).toBeVisible();
+        expect(getByText('Please and thank you.')).toBeVisible();
+        expect(
+          getByLabelText('confirm I have read and agree to', { exact: false }),
+        ).toBeVisible();
+      });
+    });
+  });
+
+  describe('no plan steps', () => {
+    test('renders with empty steps', () => {
+      const { getByText } = setup({
+        plan: { ...defaultPlan, steps: null },
+        preflight: {
+          plan: 'plan-1',
+          status: 'complete',
+          results: {
+            'step-1': { status: 'warn', message: 'This is a warning.' },
+          },
+          is_valid: true,
+          error_count: 0,
+          warning_count: 1,
+          is_ready: true,
+        },
+      });
+
+      expect(getByText('Install')).toBeVisible();
+    });
+  });
+
   describe('start-preflight click', () => {
     test('calls doStartPreflight with plan id', () => {
       const doStartPreflight = jest.fn();
@@ -191,6 +285,68 @@ describe('<CtaButton />', () => {
       fireEvent.click(getByText('Re-Run Pre-Install Validation'));
 
       expect(doStartPreflight).toHaveBeenCalledWith('plan-1');
+    });
+  });
+
+  describe('start-install (with click-through agreement) click', () => {
+    test('opens modal', () => {
+      const { getByText, getByLabelText } = setup({
+        clickThroughAgreement: '<p>Please and thank you.</p>',
+      });
+      fireEvent.click(getByText('Install'));
+
+      expect(getByText('Product Terms of Use and Licenses')).toBeVisible();
+      expect(getByText('Please and thank you.')).toBeVisible();
+      expect(
+        getByLabelText('confirm I have read and agree to', { exact: false }),
+      ).toBeVisible();
+    });
+  });
+
+  describe('start-install (with warnings) click', () => {
+    test('opens modal', () => {
+      const { getByText, getByLabelText } = setup({
+        preflight: {
+          plan: 'plan-1',
+          status: 'complete',
+          results: {
+            'step-1': { status: 'warn', message: 'This is a warning.' },
+          },
+          is_valid: true,
+          error_count: 0,
+          warning_count: 1,
+          is_ready: true,
+        },
+      });
+      fireEvent.click(getByText('Install'));
+
+      expect(getByText('Potential Issues')).toBeVisible();
+      expect(getByText('This is a warning.')).toBeVisible();
+      expect(
+        getByLabelText('I understand these warnings', { exact: false }),
+      ).toBeVisible();
+    });
+
+    test('skips modal if no selected steps have warnings', () => {
+      const doStartJob = jest.fn(() => Promise.resolve({}));
+      const { getByText, queryByText } = setup({
+        preflight: {
+          plan: 'plan-1',
+          status: 'complete',
+          results: {
+            'step-2': { status: 'warn', message: 'This is a warning.' },
+          },
+          is_valid: true,
+          error_count: 0,
+          warning_count: 1,
+          is_ready: true,
+        },
+        doStartJob,
+      });
+      fireEvent.click(getByText('Install'));
+
+      expect(queryByText('Potential Issues')).toBeNull();
+      expect(doStartJob).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -233,6 +389,99 @@ describe('<CtaButton />', () => {
             '/products/product/version/my-plan/jobs/job-1',
           );
         });
+      });
+    });
+  });
+
+  describe('auto-start preflight after login', () => {
+    const history = { push: jest.fn() };
+
+    beforeEach(() => {
+      history.push.mockClear();
+      removeUrlParam.mockReturnValue('');
+      getUrlParam.mockReturnValue('true');
+    });
+
+    test('removes param from search string', () => {
+      setup({ preflight: undefined, history });
+
+      expect(removeUrlParam).toHaveBeenCalledWith('start_preflight');
+      expect(history.push).toHaveBeenCalledWith({ search: '' });
+    });
+
+    describe('preflight not required', () => {
+      test('starts preflight', () => {
+        const doStartPreflight = jest.fn();
+        setup({
+          plan: { ...defaultPlan, requires_preflight: false },
+          preflight: undefined,
+          doStartPreflight,
+          history,
+        });
+
+        expect(doStartPreflight).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('no preflight', () => {
+      test('starts preflight', () => {
+        const doStartPreflight = jest.fn();
+        setup({ preflight: null, doStartPreflight, history });
+
+        expect(doStartPreflight).toHaveBeenCalledWith('plan-1');
+      });
+    });
+
+    describe('no user', () => {
+      test('does not start preflight', () => {
+        const doStartPreflight = jest.fn();
+        setup({ user: null, doStartPreflight, history });
+
+        expect(doStartPreflight).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('running preflight', () => {
+      test('does not start preflight', () => {
+        const doStartPreflight = jest.fn();
+        setup({
+          preflight: { ...defaultPreflight, status: 'started' },
+          doStartPreflight,
+          history,
+        });
+
+        expect(doStartPreflight).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('successful preflight', () => {
+      test('does not start preflight', () => {
+        const doStartPreflight = jest.fn();
+        setup({ doStartPreflight, history });
+
+        expect(doStartPreflight).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('fetching preflight', () => {
+      test('starts preflight after fetched', () => {
+        const doStartPreflight = jest.fn();
+        const { rerender } = setup({
+          preflight: undefined,
+          doStartPreflight,
+          history,
+        });
+
+        expect(doStartPreflight).not.toHaveBeenCalled();
+
+        setup({
+          rerenderFn: rerender,
+          preflight: null,
+          doStartPreflight,
+          history,
+        });
+
+        expect(doStartPreflight).toHaveBeenCalledWith('plan-1');
       });
     });
   });

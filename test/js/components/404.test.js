@@ -1,12 +1,13 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { render } from 'react-testing-library';
+
+import { renderWithRedux } from './../utils';
 
 import FourOhFour from 'components/404';
 
 describe('<404 />', () => {
   test('renders default msg with link', () => {
-    const { getByText } = render(
+    const { getByText } = renderWithRedux(
       <MemoryRouter>
         <FourOhFour />
       </MemoryRouter>,
@@ -16,7 +17,11 @@ describe('<404 />', () => {
   });
 
   test('renders with custom message', () => {
-    const { getByText } = render(<FourOhFour message="This is custom" />);
+    const { getByText } = renderWithRedux(
+      <MemoryRouter>
+        <FourOhFour message="This is custom" />
+      </MemoryRouter>,
+    );
 
     expect(getByText('This is custom')).toBeVisible();
   });

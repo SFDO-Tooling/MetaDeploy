@@ -1,11 +1,18 @@
 from .base import *  # NOQA
-from .base import env
-
+from .base import LOGGING, env
 
 # Default token expiration to 1 hr
-TOKEN_LIFETIME_MINUTES = env('TOKEN_LIFETIME_MINUTES', type_=int, default=60)
-PREFLIGHT_LIFETIME_MINUTES = env(
-    'PREFLIGHT_LIFETIME_MINUTES',
-    type_=int,
-    default=60,
-)
+TOKEN_LIFETIME_MINUTES = env("TOKEN_LIFETIME_MINUTES", type_=int, default=60)
+PREFLIGHT_LIFETIME_MINUTES = env("PREFLIGHT_LIFETIME_MINUTES", type_=int, default=60)
+
+INSTALLED_APPS = INSTALLED_APPS + ["django_extensions"]  # NOQA
+
+# DEFAULT_FILE_STORAGE = "metadeploy.redis_storage.RedisStorage"
+
+# REDIS_STORAGE_CONFIG = {"USE_REDIS_CACHE": "default"}
+
+LOGGING["loggers"]["werkzeug"] = {
+    "handlers": ["console"],
+    "level": "DEBUG",
+    "propagate": True,
+}

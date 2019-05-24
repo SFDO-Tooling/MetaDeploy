@@ -1,0 +1,42 @@
+// Progress Bars
+// =============
+
+.progress-bar-failed {
+  background-color: $color-background-error;
+}
+
+// I know it seems random, but -7em seems to be a good number here
+@keyframes horizontal-loading {
+  100% {
+    background-position: -7em 0;
+  }
+}
+
+// need a small amount of contrast from progress bar background
+$progress-bar-color-background-fill-bar-light: rgba(37%, 71%, 100%, 0.5);
+$progress-bar-color-background-fill-bar-dark: rgba(37%, 71%, 100%, 0.7);
+$progress-bar-loading-stripe-width: 10px;
+
+[role='progressbar'] {
+  &.is-running {
+    .slds-progress-bar__value {
+      background: linear-gradient(
+          to top,
+          $brand-background-primary-transparent 45%,
+          $brand-background-dark-transparent 95%
+        ),
+        linear-gradient(transparent 85%, rgba(0, 0, 0, 0.1) 95%),
+        repeating-linear-gradient(
+          -45deg,
+          $progress-bar-color-background-fill,
+          $progress-bar-color-background-fill $progress-bar-loading-stripe-width,
+          $progress-bar-color-background-fill-bar-light
+            $progress-bar-loading-stripe-width + 1,
+          $progress-bar-color-background-fill-bar-dark
+            $progress-bar-loading-stripe-width * 2
+        );
+      background-size: auto, auto, 300% 100%;
+      animation: horizontal-loading 15s infinite linear reverse;
+    }
+  }
+}

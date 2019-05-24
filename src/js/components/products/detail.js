@@ -2,36 +2,61 @@
 
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
-import PageHeader from '@salesforce/design-system-react/components/page-header';
-import { Redirect, Link } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
+import { Trans } from 'react-i18next';
 import { connect } from 'react-redux';
-import { createSelector } from 'reselect';
+import { t } from 'i18next';
 
 import routes from 'utils/routes';
-import { fetchVersion } from 'products/actions';
-import { shouldFetchVersion, getLoadingOrNotFound } from 'products/utils';
-
+import {
+  fetchAdditionalPlans,
+  fetchPlan,
+  fetchVersion,
+} from 'store/products/actions';
+import {
+  selectProduct,
+  selectProductSlug,
+  selectVersion,
+  selectVersionLabelOrPlanSlug,
+} from 'store/products/selectors';
+import { selectUserState } from 'store/user/selectors';
+import { getLoadingOrNotFound, shouldFetchVersion } from 'components/utils';
+import BackLink from 'components/backLink';
 import BodyContainer from 'components/bodyContainer';
-import ProductIcon from 'components/products/icon';
+import Header from 'components/header';
+import PageHeader from 'components/products/header';
+import ProductNotAllowed from 'components/products/notAllowed';
 import ProductNotFound from 'components/products/product404';
-
-import type { AppState } from 'app/reducer';
+import VersionNotFound from 'components/products/version404';
+import type { AppState } from 'store';
 import type { InitialProps } from 'components/utils';
 import type {
   Product as ProductType,
   Version as VersionType,
-} from 'products/reducer';
+} from 'store/products/reducer';
+import type { User as UserType } from 'store/user/reducer';
+import type { VersionPlanType } from 'store/products/selectors';
+import type { Plan as PlanType } from 'store/plans/reducer';
 
-type ProductDetailProps = { product: ProductType | null };
+type ProductDetailProps = { product: ProductType | null, productSlug: ?string };
 type VersionDetailProps = {
+  ...InitialProps,
+  user: UserType,
   product: ProductType | null,
+  productSlug: ?string,
   version: VersionType | null,
-  versionLabel: ?string,
+  versionLabelAndPlanSlug: VersionPlanType,
+  doFetchAdditionalPlans: typeof fetchAdditionalPlans,
+  doFetchPlan: typeof fetchPlan,
   doFetchVersion: typeof fetchVersion,
 };
 
-const ProductDetail = ({ product }: ProductDetailProps) => {
-  const loadingOrNotFound = getLoadingOrNotFound({ product });
+const ProductDetail = ({ product, productSlug }: ProductDetailProps) => {
+  const loadingOrNotFound = getLoadingOrNotFound({
+    product,
+    productSlug,
+    route: 'product_detail',
+  });
   if (loadingOrNotFound !== false) {
     return loadingOrNotFound;
   }
@@ -41,11 +66,14 @@ const ProductDetail = ({ product }: ProductDetailProps) => {
   if (!product) {
     return <ProductNotFound />;
   }
+  if (!product.most_recent_version) {
+    return <VersionNotFound product={product} />;
+  }
   const version = product.most_recent_version;
   return <Redirect to={routes.version_detail(product.slug, version.label)} />;
 };
 
-const BodySection = ({ children }: { children: React.Node }) => (
+const BodySection = ({ children }: { children: ?React.Node }) => (
   <div
     className="slds-text-longform
       slds-p-around_medium
@@ -58,38 +86,89 @@ const BodySection = ({ children }: { children: React.Node }) => (
 
 class VersionDetail extends React.Component<VersionDetailProps> {
   fetchVersionIfMissing() {
-    const { product, version, versionLabel, doFetchVersion } = this.props;
+    const {
+      product,
+      version,
+      versionLabelAndPlanSlug,
+      doFetchVersion,
+    } = this.props;
+    const { label, slug } = versionLabelAndPlanSlug;
+    // If we have a plan slug, do not try to fetch version
+    // (redirect to plan-detail instead)
     if (
       product &&
-      versionLabel &&
-      shouldFetchVersion({ product, version, versionLabel })
+      label &&
+      !slug &&
+      shouldFetchVersion({ product, version, versionLabel: label })
     ) {
       // Fetch version from API
-      doFetchVersion({ product: product.id, label: versionLabel });
+      doFetchVersion({ product: product.id, label });
+    }
+  }
+
+  fetchAdditionalPlansIfMissing() {
+    const { product, version, doFetchAdditionalPlans } = this.props;
+    if (product && version && !version.fetched_additional_plans) {
+      // Fetch plans from API
+      doFetchAdditionalPlans({ product: product.id, version: version.id });
+    }
+  }
+
+  fetchPlanIfMissing() {
+    const { product, versionLabelAndPlanSlug, doFetchPlan } = this.props;
+    const { maybeVersion, maybeSlug } = versionLabelAndPlanSlug;
+    if (product && maybeVersion && maybeSlug) {
+      // Fetch plan from API
+      doFetchPlan({
+        product: product.id,
+        version: maybeVersion,
+        slug: maybeSlug,
+      });
     }
   }
 
   componentDidMount() {
     this.fetchVersionIfMissing();
+    this.fetchAdditionalPlansIfMissing();
+    this.fetchPlanIfMissing();
   }
 
   componentDidUpdate(prevProps) {
-    const { product, version, versionLabel } = this.props;
+    const { product, version, versionLabelAndPlanSlug } = this.props;
+    const { label, slug, maybeVersion, maybeSlug } = versionLabelAndPlanSlug;
     const versionChanged =
       product !== prevProps.product ||
       version !== prevProps.version ||
-      versionLabel !== prevProps.versionLabel;
+      label !== prevProps.versionLabelAndPlanSlug.label ||
+      slug !== prevProps.versionLabelAndPlanSlug.slug ||
+      maybeVersion !== prevProps.versionLabelAndPlanSlug.maybeVersion ||
+      maybeSlug !== prevProps.versionLabelAndPlanSlug.maybeSlug;
     if (versionChanged) {
       this.fetchVersionIfMissing();
+      this.fetchAdditionalPlansIfMissing();
+      this.fetchPlanIfMissing();
     }
   }
 
   render(): React.Node {
-    const { product, version, versionLabel } = this.props;
+    const {
+      user,
+      product,
+      productSlug,
+      version,
+      versionLabelAndPlanSlug,
+      history,
+    } = this.props;
+    const { label, slug, maybeVersion, maybeSlug } = versionLabelAndPlanSlug;
     const loadingOrNotFound = getLoadingOrNotFound({
       product,
+      productSlug,
       version,
-      versionLabel,
+      versionLabel: label,
+      planSlug: slug,
+      route: 'version_detail',
+      maybeVersion,
+      maybeSlug,
     });
     if (loadingOrNotFound !== false) {
       return loadingOrNotFound;
@@ -100,133 +179,145 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     if (!product || !version) {
       return <ProductNotFound />;
     }
+    const listedAdditionalPlans: Array<PlanType> = version.additional_plans
+      ? (Object.entries(version.additional_plans): any)
+          .filter(
+            ([key, plan]: [string, PlanType | null]) =>
+              plan && plan.is_listed && plan.is_allowed && key === plan.slug,
+          )
+          .map((item: Array<[string, PlanType]>) => item[1])
+      : [];
+    const { primary_plan, secondary_plan } = version;
+    const visiblePrimaryPlan =
+      primary_plan && primary_plan.is_listed && primary_plan.is_allowed;
+    const visibleSecondaryPlan =
+      secondary_plan && secondary_plan.is_listed && secondary_plan.is_allowed;
+    const productDescriptionHasTitle =
+      (product.description && product.description.startsWith('<h1>')) ||
+      (product.description && product.description.startsWith('<h2>'));
     return (
-      <DocumentTitle title={`${product.title} | MetaDeploy`}>
+      <DocumentTitle title={`${product.title} | ${window.SITE_NAME}`}>
         <>
-          <PageHeader
-            className="page-header
-              slds-p-around_x-large"
-            title={product.title}
-            info={version.label}
-            icon={<ProductIcon item={product} />}
-          />
-          <BodyContainer>
-            <BodySection>
-              <h3 className="slds-text-heading_small">
-                Select a Plan to Install
-              </h3>
-              <p>{version.description}</p>
-              <p>
-                <Link
-                  to={routes.plan_detail(
-                    product.slug,
-                    version.label,
-                    version.primary_plan.slug,
-                  )}
-                  className="slds-button
-                    slds-button_brand
-                    slds-size_full"
-                >
-                  {version.primary_plan.title}
-                </Link>
-              </p>
-              {version.secondary_plan ? (
-                <p>
-                  <Link
-                    to={routes.plan_detail(
-                      product.slug,
-                      version.label,
-                      version.secondary_plan.slug,
-                    )}
-                    className="slds-button
-                      slds-button_outline-brand
-                      slds-size_full"
-                  >
-                    {version.secondary_plan.title}
-                  </Link>
-                </p>
-              ) : null}
-              {version.additional_plans.length ? (
-                <div className="slds-p-top_x-large">
-                  <h3 className="slds-text-heading_small">Additional Plans</h3>
-                  {version.additional_plans.map(plan => (
-                    <p key={plan.id}>
-                      <Link
-                        to={routes.plan_detail(
-                          product.slug,
-                          version.label,
-                          plan.slug,
-                        )}
-                      >
-                        {plan.title}
-                      </Link>
-                    </p>
-                  ))}
-                </div>
-              ) : null}
-            </BodySection>
-            <BodySection>
-              <h3 className="slds-text-heading_small">About {product.title}</h3>
-              {product.image ? (
-                <img
-                  className="slds-size_full"
-                  src={product.image}
-                  alt={product.title}
+          <Header history={history} />
+          <PageHeader product={product} versionLabel={version.label} />
+          {product.is_allowed ? (
+            <BodyContainer>
+              <BodySection>
+                <p>{version.description}</p>
+                {primary_plan && visiblePrimaryPlan ? (
+                  <p>
+                    <Link
+                      to={routes.plan_detail(
+                        product.slug,
+                        version.label,
+                        primary_plan.slug,
+                      )}
+                      className="slds-button
+                        slds-button_brand
+                        slds-size_full"
+                    >
+                      {t('View Plan')}: {primary_plan.title}
+                    </Link>
+                  </p>
+                ) : null}
+                {secondary_plan && visibleSecondaryPlan ? (
+                  <p>
+                    <Link
+                      to={routes.plan_detail(
+                        product.slug,
+                        version.label,
+                        secondary_plan.slug,
+                      )}
+                      className="slds-button
+                        slds-button_outline-brand
+                        slds-size_full"
+                    >
+                      {t('View Plan')}: {secondary_plan.title}
+                    </Link>
+                  </p>
+                ) : null}
+                <BackLink
+                  label={t('Select a different product')}
+                  url={routes.product_list()}
                 />
-              ) : null}
-              <p>{product.description}</p>
-            </BodySection>
-          </BodyContainer>
+                {listedAdditionalPlans.length ? (
+                  <div className="slds-p-top_x-large">
+                    {visiblePrimaryPlan || visibleSecondaryPlan ? (
+                      <h2 className="slds-text-heading_small">
+                        {t('Additional Plans')}
+                      </h2>
+                    ) : null}
+                    {listedAdditionalPlans.map(plan => (
+                      <p key={plan.id}>
+                        <Link
+                          to={routes.plan_detail(
+                            product.slug,
+                            version.label,
+                            plan.slug,
+                          )}
+                        >
+                          {plan.title}
+                        </Link>
+                      </p>
+                    ))}
+                  </div>
+                ) : null}
+              </BodySection>
+              <BodySection>
+                {!productDescriptionHasTitle && (
+                  <h2 className="slds-text-heading_small">
+                    {t('About')} {product.title}
+                  </h2>
+                )}
+                {product.image ? (
+                  <img
+                    className="slds-size_full"
+                    src={product.image}
+                    alt={product.title}
+                  />
+                ) : null}
+                {/* This description is pre-cleaned by the API */}
+                <div
+                  className="markdown"
+                  dangerouslySetInnerHTML={{ __html: product.description }}
+                />
+              </BodySection>
+            </BodyContainer>
+          ) : (
+            <ProductNotAllowed
+              isLoggedIn={user !== null}
+              message={product.not_allowed_instructions}
+              link={
+                <Trans i18nKey="productNotAllowed">
+                  Try the{' '}
+                  <Link to={routes.product_list()}>list of all products</Link>
+                </Trans>
+              }
+            />
+          )}
         </>
       </DocumentTitle>
     );
   }
 }
 
-export const selectProduct = (
-  appState: AppState,
-  { match: { params } }: InitialProps,
-): ProductType | null => {
-  const product = appState.products.find(p => p.slug === params.productSlug);
-  return product || null;
-};
-
-export const selectVersionLabel = (
-  appState: AppState,
-  { match: { params } }: InitialProps,
-): ?string => params.versionLabel;
-
-export const selectVersion: (
-  AppState,
-  InitialProps,
-) => VersionType | null = createSelector(
-  [selectProduct, selectVersionLabel],
-  (product: ProductType | null, versionLabel: ?string): VersionType | null => {
-    if (!product || !versionLabel) {
-      return null;
-    }
-    if (product.most_recent_version.label === versionLabel) {
-      return product.most_recent_version;
-    }
-    if (product.versions && product.versions[versionLabel]) {
-      return product.versions[versionLabel];
-    }
-    return null;
-  },
-);
-
 const selectProductDetail = (appState: AppState, props: InitialProps) => ({
   product: selectProduct(appState, props),
+  productSlug: selectProductSlug(appState, props),
 });
 
 const selectVersionDetail = (appState: AppState, props: InitialProps) => ({
+  user: selectUserState(appState),
   product: selectProduct(appState, props),
+  productSlug: selectProductSlug(appState, props),
   version: selectVersion(appState, props),
-  versionLabel: selectVersionLabel(appState, props),
+  versionLabelAndPlanSlug: selectVersionLabelOrPlanSlug(appState, props),
 });
 
 const actions = {
   doFetchVersion: fetchVersion,
+  doFetchAdditionalPlans: fetchAdditionalPlans,
+  doFetchPlan: fetchPlan,
 };
 
 const WrappedProductDetail: React.ComponentType<InitialProps> = connect(

@@ -1,16 +1,23 @@
 import React from 'react';
-import { render, fireEvent } from 'react-testing-library';
+import { fireEvent, render } from 'react-testing-library';
 
 import { addUrlParams } from 'utils/api';
-
 import CustomDomainModal from 'components/header/customDomainModal';
 
 describe('<CustomDomainModal />', () => {
   const toggleModal = jest.fn();
 
-  const setup = () => {
+  const setup = options => {
+    const defaults = {
+      isOpen: true,
+    };
+    const opts = { ...defaults, ...options };
     const { getByLabelText, getByText, getByTestId } = render(
-      <CustomDomainModal isOpen={true} toggleModal={toggleModal} />,
+      <CustomDomainModal
+        isOpen={opts.isOpen}
+        toggleModal={toggleModal}
+        redirectParams={opts.redirectParams}
+      />,
     );
     return { getByLabelText, getByText, getByTestId };
   };
@@ -47,6 +54,24 @@ describe('<CustomDomainModal />', () => {
     const expected = addUrlParams(baseUrl, {
       custom_domain: 'foobar',
       next: window.location.pathname,
+    });
+
+    expect(window.location.assign).toHaveBeenCalledWith(expected);
+  });
+
+  test('adds redirectParams, if exist', () => {
+    const { getByLabelText, getByText } = setup({
+      redirectParams: { foo: 'bar' },
+    });
+
+    jest.spyOn(window.location, 'assign');
+    const input = getByLabelText('Custom Domain');
+    fireEvent.change(input, { target: { value: 'foobar' } });
+    fireEvent.click(getByText('Continue'));
+    const baseUrl = window.api_urls.salesforce_custom_login();
+    const expected = addUrlParams(baseUrl, {
+      custom_domain: 'foobar',
+      next: addUrlParams(window.location.pathname, { foo: 'bar' }),
     });
 
     expect(window.location.assign).toHaveBeenCalledWith(expected);

@@ -1,16 +1,15 @@
 version: 2
 jobs:
-
   build:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.6.6
+      - image: circleci/python:3.7
     steps:
       - checkout
       - restore_cache:
           keys:
-            - v1-metadeploy-py-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
-            - v1-metadeploy-py-
+            - v2-metadeploy-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+            - v2-metadeploy-py-3.7-
       - restore_cache:
           keys:
             - v1-metadeploy-npm-{{ checksum "yarn.lock" }}
@@ -30,7 +29,9 @@ jobs:
             yarn
             python3 -m venv venv
             . venv/bin/activate
-            pip install -r requirements/local.txt
+            # @@@ temp fix
+            rm -rf ./venv/src/sfdo-template-helpers
+            pip install -Ur requirements/local.txt
       - run:
           name: Check that yarn.lock matches package.json
           command: |
@@ -44,30 +45,30 @@ jobs:
           name: Compile Front-End Assets
           command: yarn prod
       - save_cache:
-          key: v1-metadeploy-node-{{ checksum "bin/unpack-node" }}
+          key: v1-metadeploy-node-{{ checksum "package.json" }}
           paths:
-            - "~/metadeploy/node"
+            - '~/metadeploy/node'
       - save_cache:
-          key: v1-metadeploy-py-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+          key: v2-metadeploy-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
           paths:
-            - "~/.cache/pip"
+            - '~/.cache/pip'
             - ./venv
       - save_cache:
           key: v1-metadeploy-npm-{{ checksum "yarn.lock" }}
           paths:
-            - "~/.cache/yarn"
-            - "~/metadeploy/node_modules"
+            - '~/.cache/yarn'
+            - '~/metadeploy/node_modules'
 
   lint:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.6.6
+      - image: circleci/python:3.7
     steps:
       - checkout
       - restore_cache:
-          key: v1-metadeploy-node-{{ checksum "bin/unpack-node" }}
+          key: v1-metadeploy-node-{{ checksum "package.json" }}
       - restore_cache:
-          key: v1-metadeploy-py-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+          key: v2-metadeploy-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
       - restore_cache:
           keys:
             - v1-metadeploy-npm-{{ checksum "yarn.lock" }}
@@ -87,11 +88,11 @@ jobs:
   test-client:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.6.6
+      - image: circleci/python:3.7
     steps:
       - checkout
       - restore_cache:
-          key: v1-metadeploy-node-{{ checksum "bin/unpack-node" }}
+          key: v1-metadeploy-node-{{ checksum "package.json" }}
       - restore_cache:
           keys:
             - v1-metadeploy-npm-{{ checksum "yarn.lock" }}
@@ -118,17 +119,20 @@ jobs:
   test-python:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.6.6
+      - image: circleci/python:3.7
       - image: circleci/redis:latest
       - image: circleci/postgres:latest
         environment:
           POSTGRES_USER: ubuntu
           POSTGRES_DB: circle_test
           POSTGRES_PASSWORD: circle_test
+          AWS_BUCKET_NAME: None
+          AWS_SECRET_ACCESS_KEY: None
+          AWS_ACCESS_KEY_ID: None
     steps:
       - checkout
       - restore_cache:
-          key: v1-metadeploy-py-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+          key: v2-metadeploy-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
       - run:
           name: Install Dockerize
           command: wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && sudo tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
@@ -160,19 +164,19 @@ jobs:
   report-test-coverage:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.6.6
+      - image: circleci/python:3.7
     steps:
       - checkout
       - attach_workspace:
           at: .
       - restore_cache:
-          key: v1-metadeploy-node-{{ checksum "bin/unpack-node" }}
+          key: v1-metadeploy-node-{{ checksum "package.json" }}
       - restore_cache:
           keys:
             - v1-metadeploy-npm-{{ checksum "yarn.lock" }}
             - v1-metadeploy-npm-
       - restore_cache:
-          key: v1-metadeploy-py-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+          key: v2-metadeploy-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
       - run:
           name: Set $PATH
           command: |
@@ -193,6 +197,21 @@ jobs:
             yarn pytest:check-coverage
             yarn test:check-coverage
 
+  build-docs:
+    working_directory: ~/metadeploy
+    docker:
+      - image: circleci/python:3.7
+    steps:
+      - checkout
+      - restore_cache:
+          key: v2-metadeploy-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+      - run:
+          name: Build Documentation
+          command: |
+            . venv/bin/activate
+            cd docs
+            make html
+
 workflows:
   version: 2
   build-and-test:
@@ -205,6 +224,9 @@ workflows:
           requires:
             - build
       - test-python:
+          requires:
+            - build
+      - build-docs:
           requires:
             - build
       - report-test-coverage:

@@ -1,44 +1,87 @@
 import logging
+from io import StringIO
+
 import bleach
-from cumulusci.core import flows
+from cumulusci.core.flowrunner import FlowCallback
+from django.core.cache import cache
 
-from .constants import WARN, ERROR, SKIP, OPTIONAL
-
+from .belvedere_utils import obscure_salesforce_log
+from .constants import ERROR, OK, OPTIONAL, REDIS_JOB_CANCEL_KEY, SKIP, WARN
+from .result_spool_logger import ResultSpoolLogger
 
 logger = logging.getLogger(__name__)
 
 
-class BasicFlow(flows.BaseFlow):
-    # TODO:
-    # We'll want to subclass BaseFlow and add logic in the progress
-    # callbacks to record and possibly push progress:
-    # pre_flow, post_flow, pre_task, post_task, pre_subflow,
-    # post_subflow
-    def __init__(self, *args, result=None, **kwargs):
-        self.result = result
-        return super().__init__(*args, **kwargs)
+class StopFlowException(Exception):
+    pass
 
-    def _get_step_id(self, task_name):
+
+class BasicFlowCallback(FlowCallback):
+    def __init__(self, ctx):
+        self.context = ctx  # will be either a preflight or a job...
+
+    def _get_step_id(self, path):
         try:
-            return str(self.result.plan.step_set.filter(
-                task_name=task_name,
-            ).first().id)
+            return str(self.context.plan.steps.filter(path=path).first().id)
         except AttributeError:
-            logger.error(f"Unknown task name {task_name} for {self.result}")
+            logger.error(f"Unknown task name {path} for {self.context}")
             return None
 
+    def pre_task(self, step):
+        """
+        Before each task, we should check if we've been told to abandon this job.
+        """
+        if self._flow_canceled():
+            raise StopFlowException("Job canceled.")
 
-class JobFlow(BasicFlow):
-    def _post_task(self, task):
-        step_id = self._get_step_id(task.name)
+    def _flow_canceled(self):
+        return cache.get(REDIS_JOB_CANCEL_KEY.format(id=self.context.id))
+
+
+class JobFlowCallback(BasicFlowCallback):
+    def pre_flow(self, coordinator):
+        logger = logging.getLogger("cumulusci")
+        self.string_buffer = StringIO()
+        self.handler = logging.StreamHandler(stream=self.string_buffer)
+        self.result_handler = ResultSpoolLogger(result=self.context)
+        self.handler.setFormatter(logging.Formatter())
+        logger.addHandler(self.handler)
+        logger.addHandler(self.result_handler)
+        logger.setLevel(logging.DEBUG)
+        self.logger = logger
+        return self.logger
+
+    def post_flow(self, coordinator):
+        self.logger.removeHandler(self.handler)
+
+    def pre_task(self, step):
+        super().pre_task(step)
+        self.set_current_key_by_step(step)
+
+    def post_task(self, step, result):
+        step_id = self._get_step_id(step.path)
         if step_id:
-            self.result.completed_steps.append(step_id)
-            self.result.save()
-        return super()._post_task(task)
+            if step_id not in self.context.results:
+                self.context.results[step_id] = {}
+            if result.exception:
+                self.context.results[step_id].update(
+                    {"status": ERROR, "message": bleach.clean(str(result.exception))}
+                )
+            else:
+                self.context.results[step_id].update({"status": OK})
+            self.context.log = obscure_salesforce_log(self.string_buffer.getvalue())
+            self.context.save()
+        self.set_current_key_by_step(None)
+
+    def set_current_key_by_step(self, step):
+        if step is not None:
+            self.result_handler.current_key = self._get_step_id(step.path)
+        else:
+            self.result_handler.current_key = None
 
 
-class PreflightFlow(BasicFlow):
-    def _post_flow(self):
+class PreflightFlowCallback(BasicFlowCallback):
+    def post_flow(self, coordinator):
         """
         Turn the step_return_values into a merged error dict.
 
@@ -46,12 +89,11 @@ class PreflightFlow(BasicFlow):
         [error_dict]) pair. This is then turned into a dict, merging any
         identical keys by combining their lists of error dicts.
 
-        Finally, this is attached to the result object, which the caller
-        must then save.
+        Finally, this is attached to the result object, and saved.
         """
         results = {}
-        for status in self.step_return_values:
-            kv = self._emit_k_v_for_status_dict(status)
+        for result in coordinator.results:
+            kv = self._emit_k_v_for_status_dict(result.return_values)
             if kv is None:
                 continue
             k, v = kv
@@ -59,69 +101,48 @@ class PreflightFlow(BasicFlow):
                 results[k].extend(v)
             except KeyError:
                 results[k] = v
-        self.result.results.update(results)
+        self.context.results.update(results)
+        self.context.save()
 
-    def _post_task_exception(self, task, e):
-        error_result = {
-            'plan': [{'status': ERROR, 'message': str(e)}],
-        }
-        self.result.results.update(error_result)
+    def post_task(self, step, result):
+        if result.exception:
+            error_result = {
+                "plan": {
+                    "status": ERROR,
+                    "message": bleach.clean(str(result.exception)),
+                }
+            }
+            self.context.results.update(error_result)
+            self.context.save()
 
     def _emit_k_v_for_status_dict(self, status):
-        if status['status_code'] == 'ok':
+        if status["status_code"] == OK:
             return None
 
-        if status['status_code'] == ERROR:
-            step_id = self._get_step_id(status['task_name'])
+        if status["status_code"] == ERROR:
+            step_id = self._get_step_id(status["task_name"])
             return (
                 step_id,
-                [{
-                    'status': ERROR,
-                    'message': bleach.clean(status.get('msg', '')),
-                }],
+                {"status": ERROR, "message": bleach.clean(status.get("msg", ""))},
             )
 
-        if status['status_code'] == WARN:
-            step_id = self._get_step_id(status['task_name'])
+        if status["status_code"] == WARN:
+            step_id = self._get_step_id(status["task_name"])
             return (
                 step_id,
-                [{
-                    'status': WARN,
-                    'message': bleach.clean(status.get('msg', '')),
-                }],
+                {"status": WARN, "message": bleach.clean(status.get("msg", ""))},
             )
 
-        if status['status_code'] == SKIP:
-            step_id = self._get_step_id(status['task_name'])
+        if status["status_code"] == SKIP:
+            step_id = self._get_step_id(status["task_name"])
             return (
                 step_id,
-                [{
-                    'status': SKIP,
-                    'message': bleach.clean(status.get('msg', '')),
-                }],
+                {"status": SKIP, "message": bleach.clean(status.get("msg", ""))},
             )
 
-        if status['status_code'] == OPTIONAL:
-            step_id = self._get_step_id(status['task_name'])
+        if status["status_code"] == OPTIONAL:
+            step_id = self._get_step_id(status["task_name"])
             return (
                 step_id,
-                [{
-                    'status': OPTIONAL,
-                    'message': bleach.clean(status.get('msg', '')),
-                }],
+                {"status": OPTIONAL, "message": bleach.clean(status.get("msg", ""))},
             )
-
-    # def _pre_flow(self, *args, **kwargs):
-    #     pass
-
-    # def _pre_task(self, *args, **kwargs):
-    #     pass
-
-    # def _post_task(self, *args, **kwargs):
-    #     pass
-
-    # def _pre_subflow(self, *args, **kwargs):
-    #     pass
-
-    # def _post_subflow(self, *args, **kwargs):
-    #     pass

@@ -3,14 +3,15 @@
 import * as React from 'react';
 import Toast from '@salesforce/design-system-react/components/toast';
 import ToastContainer from '@salesforce/design-system-react/components/toast/container';
+import { t } from 'i18next';
 
-import { CONSTANTS } from 'plans/reducer';
-
-import type { Job as JobType } from 'jobs/reducer';
-import type { Preflight as PreflightType } from 'plans/reducer';
+import { CONSTANTS } from 'store/plans/reducer';
+import type { Job as JobType } from 'store/jobs/reducer';
+import type { Preflight as PreflightType } from 'store/plans/reducer';
 
 type Props = {
-  model: PreflightType | JobType,
+  job?: JobType,
+  preflight?: PreflightType,
   label: string,
 };
 
@@ -34,19 +35,29 @@ class Toasts extends React.Component<Props, State> {
     return (
       <Toast
         labels={{
-          heading: [label],
+          heading: [t(label)],
         }}
         variant={variant}
-        duration={20 * 1000}
         onRequestClose={this.handleClose}
       />
     );
   }
 
   getToast(): React.Node | null {
-    const { model, label } = this.props;
-    if (model.status === STATUS.FAILED) {
+    const { job, preflight, label } = this.props;
+    const model = job || preflight;
+    /* istanbul ignore if */
+    if (!model) {
+      return null;
+    }
+    if (
+      model.status === STATUS.FAILED ||
+      (preflight && model.status === STATUS.CANCELED)
+    ) {
       return this.getToastComponent(`${label} has failed.`);
+    }
+    if (model.status === STATUS.CANCELED) {
+      return this.getToastComponent(`${label} has been canceled.`);
     }
     if (model.status !== STATUS.COMPLETE) {
       return null;
@@ -74,7 +85,12 @@ class Toasts extends React.Component<Props, State> {
   // use this to show the Toast only once we've seen the status is `started`.
   // https://reactjs.org/docs/react-component.html#static-getderivedstatefromprops
   static getDerivedStateFromProps(props: Props, state: State) {
-    const { model } = props;
+    const { job, preflight } = props;
+    const model = job || preflight;
+    /* istanbul ignore if */
+    if (!model) {
+      return null;
+    }
     // Only show toasts if the status was `started` at some point.
     if (model.status === STATUS.STARTED && !state.isOpen) {
       return { isOpen: true };
@@ -84,7 +100,11 @@ class Toasts extends React.Component<Props, State> {
 
   render(): React.Node {
     const { isOpen } = this.state;
-    return <ToastContainer>{isOpen ? this.getToast() : null}</ToastContainer>;
+    return (
+      <ToastContainer className="half-container">
+        {isOpen ? this.getToast() : null}
+      </ToastContainer>
+    );
   }
 }
 

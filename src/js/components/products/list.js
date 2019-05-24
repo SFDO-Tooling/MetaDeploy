@@ -5,19 +5,23 @@ import DocumentTitle from 'react-document-title';
 import Tabs from '@salesforce/design-system-react/components/tabs';
 import TabsPanel from '@salesforce/design-system-react/components/tabs/panel';
 import { connect } from 'react-redux';
-import { createSelector } from 'reselect';
+import { t } from 'i18next';
 
+import {
+  selectProductCategories,
+  selectProductsByCategory,
+} from 'store/products/selectors';
+import Header from 'components/header';
+import PageHeader from 'components/products/listHeader';
 import ProductItem from 'components/products/listItem';
 import { EmptyIllustration } from 'components/404';
+import type { AppState } from 'store';
+import type { InitialProps } from 'components/utils';
+import type { ProductsMapType } from 'store/products/selectors';
+import type { Products as ProductsType } from 'store/products/reducer';
 
-import type { AppState } from 'app/reducer';
-import type {
-  Products as ProductsType,
-  Product as ProductType,
-} from 'products/reducer';
-
-type ProductsMapType = Map<string, Array<ProductType>>;
 type Props = {
+  ...InitialProps,
   productsByCategory: ProductsMapType,
   productCategories: Array<string>,
 };
@@ -69,7 +73,7 @@ class ProductsList extends React.Component<Props, State> {
     switch (this.props.productsByCategory.size) {
       case 0: {
         // No products; show empty message
-        const msg = 'We couldn’t find any products. Try again later?';
+        const msg = t('We couldn’t find any products. Try again later?');
         contents = <EmptyIllustration message={msg} />;
         break;
       }
@@ -106,43 +110,38 @@ class ProductsList extends React.Component<Props, State> {
       }
     }
     return (
-      <DocumentTitle title="Products | MetaDeploy">
-        <div className="slds-p-around_x-large">{contents}</div>
+      <DocumentTitle title={`${t('Products')} | ${window.SITE_NAME}`}>
+        <>
+          <Header history={this.props.history} />
+          <PageHeader />
+          <div className="slds-p-around_x-large">
+            {window.GLOBALS.SITE && window.GLOBALS.SITE.welcome_text ? (
+              // These messages are pre-cleaned by the API
+              <div
+                className="markdown
+                  slds-p-bottom_medium
+                  slds-text-longform
+                  slds-size_1-of-1
+                  slds-medium-size_1-of-2"
+                dangerouslySetInnerHTML={{
+                  __html: window.GLOBALS.SITE.welcome_text,
+                }}
+              />
+            ) : null}
+            {contents}
+          </div>
+        </>
       </DocumentTitle>
     );
   }
 }
 
-const selectProductsState = (appState: AppState): ProductsType =>
-  appState.products;
-
-const selectProductsByCategory = createSelector(
-  selectProductsState,
-  (products: ProductsType): ProductsMapType => {
-    const productsByCategory = new Map();
-    for (const product of products) {
-      const category = product.category;
-      const existing = productsByCategory.get(category) || [];
-      existing.push(product);
-      productsByCategory.set(category, existing);
-    }
-    return productsByCategory;
-  },
-);
-
-const selectProductCategories = createSelector(
-  selectProductsByCategory,
-  (productsByCategory: ProductsMapType): Array<string> => [
-    ...productsByCategory.keys(),
-  ],
-);
-
-const select = (appState: AppState): Props => ({
+const select = (appState: AppState) => ({
   productCategories: selectProductCategories(appState),
   productsByCategory: selectProductsByCategory(appState),
 });
 
-const WrappedProductsList: React.ComponentType<{}> = connect(select)(
+const WrappedProductsList: React.ComponentType<InitialProps> = connect(select)(
   ProductsList,
 );
 

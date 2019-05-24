@@ -22,7 +22,7 @@ describe('routePatterns', () => {
     { name: 'home', expected: '/' },
     {
       name: 'auth_error',
-      expected: '/accounts/salesforce-(custom|production|test)/login/callback',
+      expected: '/accounts/*',
     },
     { name: 'product_list', expected: '/products' },
     { name: 'product_detail', expected: '/products/:productSlug' },

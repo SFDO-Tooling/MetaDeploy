@@ -7,50 +7,43 @@ import IconSettings from '@salesforce/design-system-react/components/icon-settin
 import logger from 'redux-logger';
 import settings from '@salesforce/design-system-react/components/settings';
 import thunk from 'redux-thunk';
-import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
+import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
-import { createStore, applyMiddleware } from 'redux';
-
+import { applyMiddleware, createStore } from 'redux';
+import { t } from 'i18next';
 import actionSprite from '@salesforce-ux/design-system/assets/icons/action-sprite/svg/symbols.svg';
 import customSprite from '@salesforce-ux/design-system/assets/icons/custom-sprite/svg/symbols.svg';
 import doctypeSprite from '@salesforce-ux/design-system/assets/icons/doctype-sprite/svg/symbols.svg';
 import standardSprite from '@salesforce-ux/design-system/assets/icons/standard-sprite/svg/symbols.svg';
 import utilitySprite from '@salesforce-ux/design-system/assets/icons/utility-sprite/svg/symbols.svg';
 
+import init_i18n from './i18n';
+
 import getApiFetch from 'utils/api';
-import { cache, persistMiddleware } from 'utils/caching';
 import { createSocket } from 'utils/websockets';
-import { logError } from 'utils/logging';
+import { log, logError } from 'utils/logging';
 import { routePatterns } from 'utils/routes';
-
-import reducer from 'app/reducer';
-
-import { login, doLocalLogout } from 'accounts/actions';
-
-import { fetchProducts } from 'products/actions';
-
+import reducer from 'store';
+import { login, refetchAllData } from 'store/user/actions';
+import { fetchProducts } from 'store/products/actions';
 import AuthError from 'components/authError';
 import ErrorBoundary from 'components/error';
 import Footer from 'components/footer';
 import FourOhFour from 'components/404';
-import Header from 'components/header';
 import JobDetail from 'components/jobs/detail';
 import PlanDetail from 'components/plans/detail';
 import ProductsList from 'components/products/list';
 import { ProductDetail, VersionDetail } from 'components/products/detail';
 
-const SF_logo = require('images/salesforce-logo.png');
-
 const App = () => (
-  <DocumentTitle title="MetaDeploy">
+  <DocumentTitle title={window.SITE_NAME}>
     <div
       className="slds-grid
         slds-grid_frame
         slds-grid_vertical"
     >
       <ErrorBoundary>
-        <Header />
         <div
           className="slds-grow
             slds-shrink-none"
@@ -92,83 +85,102 @@ const App = () => (
             </Switch>
           </ErrorBoundary>
         </div>
-        <Footer logoSrc={SF_logo} />
+        <Footer
+          logoSrc={
+            window.GLOBALS.SITE && window.GLOBALS.SITE.company_logo
+              ? window.GLOBALS.SITE.company_logo
+              : undefined
+          }
+        />
       </ErrorBoundary>
     </div>
   </DocumentTitle>
 );
 
-cache
-  .getAll()
-  .then(data => {
-    const el = document.getElementById('app');
-    if (el) {
-      // Create store
-      const appStore = createStore(
-        reducer,
-        data,
-        composeWithDevTools(
-          applyMiddleware(
-            thunk.withExtraArgument({
-              apiFetch: getApiFetch(() => {
-                appStore.dispatch(doLocalLogout());
-              }),
-            }),
-            persistMiddleware,
-            logger,
-          ),
+init_i18n(i18nError => {
+  if (i18nError) {
+    log(i18nError);
+  }
+  const el = document.getElementById('app');
+  if (el) {
+    // Create store
+    const appStore = createStore(
+      reducer,
+      {},
+      composeWithDevTools(
+        applyMiddleware(
+          thunk.withExtraArgument({
+            apiFetch: getApiFetch(),
+          }),
+          logger,
         ),
-      );
+      ),
+    );
 
-      // Get logged-in/out status
-      const userString = el.getAttribute('data-user');
-      if (userString) {
-        let user;
-        try {
-          user = JSON.parse(userString);
-        } catch (err) {
-          // swallow error
-        }
-        if (user) {
-          // Login
-          appStore.dispatch(login(user));
-          // Connect to WebSocket server
-          const protocol =
-            window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-          const host = window.location.host;
-          window.socket = createSocket({
-            url: `${protocol}//${host}${window.api_urls.ws_notifications()}`,
-            dispatch: appStore.dispatch,
-          });
-        }
+    // Connect to WebSocket server
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = window.location.host;
+    window.socket = createSocket({
+      url: `${protocol}//${host}${window.api_urls.ws_notifications()}`,
+      dispatch: appStore.dispatch,
+      options: {
+        onreconnect: () => {
+          appStore.dispatch(refetchAllData());
+        },
+      },
+    });
+
+    // Get JS globals
+    let GLOBALS = {};
+    try {
+      const globalsEl = document.getElementById('js-globals');
+      if (globalsEl) {
+        GLOBALS = JSON.parse(globalsEl.textContent);
       }
-      el.removeAttribute('data-user');
-
-      // Set App element (used for react-SLDS modals)
-      settings.setAppElement(el);
-
-      // Fetch products before rendering App
-      appStore.dispatch(fetchProducts()).finally(() => {
-        ReactDOM.render(
-          <Provider store={appStore}>
-            <BrowserRouter>
-              <IconSettings
-                actionSprite={actionSprite}
-                customSprite={customSprite}
-                doctypeSprite={doctypeSprite}
-                standardSprite={standardSprite}
-                utilitySprite={utilitySprite}
-              >
-                <App />
-              </IconSettings>
-            </BrowserRouter>
-          </Provider>,
-          el,
-        );
-      });
+    } catch (err) {
+      logError(err);
     }
-  })
-  .catch(err => {
-    logError(err);
-    throw err;
-  });
+    window.GLOBALS = GLOBALS;
+    window.SITE_NAME =
+      (window.GLOBALS.SITE && window.GLOBALS.SITE.name) || t('MetaDeploy');
+
+    // Get logged-in/out status
+    const userString = el.getAttribute('data-user');
+    if (userString) {
+      let user;
+      try {
+        user = JSON.parse(userString);
+      } catch (err) {
+        // swallow error
+      }
+      if (user) {
+        // Login
+        appStore.dispatch(login(user));
+      }
+    }
+    el.removeAttribute('data-user');
+
+    // Set App element (used for react-SLDS modals)
+    settings.setAppElement(el);
+
+    // Fetch products before rendering App
+    appStore.dispatch(fetchProducts()).finally(() => {
+      ReactDOM.render(
+        <Provider store={appStore}>
+          <BrowserRouter>
+            <IconSettings
+              actionSprite={actionSprite}
+              customSprite={customSprite}
+              doctypeSprite={doctypeSprite}
+              standardSprite={standardSprite}
+              utilitySprite={utilitySprite}
+            >
+              <App />
+            </IconSettings>
+          </BrowserRouter>
+        </Provider>,
+        el,
+      );
+    });
+  }
+});

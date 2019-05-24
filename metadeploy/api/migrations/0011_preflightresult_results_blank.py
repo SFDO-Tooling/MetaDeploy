@@ -6,17 +6,14 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('api', '0010_preflight_plan_not_null'),
-    ]
+    dependencies = [("api", "0010_preflight_plan_not_null")]
 
     operations = [
         migrations.AlterField(
-            model_name='preflightresult',
-            name='results',
+            model_name="preflightresult",
+            name="results",
             field=django.contrib.postgres.fields.jsonb.JSONField(
-                blank=True,
-                default=dict,
+                blank=True, default=dict
             ),
-        ),
+        )
     ]

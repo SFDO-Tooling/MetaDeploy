@@ -1,15 +1,16 @@
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
-
-import { fetchJob } from 'jobs/actions';
-import { fetchVersion } from 'products/actions';
+import { StaticRouter } from 'react-router-dom';
+import { fireEvent } from 'react-testing-library';
 
 import { renderWithRedux, storeWithApi } from './../../utils';
 
+import routes from 'utils/routes';
+import { fetchJob, requestCancelJob } from 'store/jobs/actions';
+import { fetchVersion } from 'store/products/actions';
 import JobDetail from 'components/jobs/detail';
 
-jest.mock('jobs/actions');
-jest.mock('products/actions');
+jest.mock('store/jobs/actions');
+jest.mock('store/products/actions');
 
 fetchVersion.mockReturnValue({ type: 'TEST' });
 fetchJob.mockReturnValue({ type: 'TEST' });
@@ -17,6 +18,7 @@ fetchJob.mockReturnValue({ type: 'TEST' });
 afterEach(() => {
   fetchVersion.mockClear();
   fetchJob.mockClear();
+  requestCancelJob.mockClear();
 });
 
 const defaultState = {
@@ -24,6 +26,7 @@ const defaultState = {
     {
       id: 'p1',
       slug: 'product-1',
+      old_slugs: ['old-product'],
       title: 'Product 1',
       category: 'salesforce',
       image: null,
@@ -34,6 +37,7 @@ const defaultState = {
         primary_plan: {
           id: 'plan-1',
           slug: 'my-plan',
+          old_slugs: ['old-plan'],
           title: 'My Plan',
           steps: [
             {
@@ -63,7 +67,7 @@ const defaultState = {
           ],
         },
         secondary_plan: null,
-        additional_plans: [],
+        requires_preflight: true,
       },
     },
   ],
@@ -76,9 +80,11 @@ const defaultState = {
       plan: 'plan-1',
       status: 'complete',
       steps: ['step-1', 'step-2', 'step-4'],
-      completed_steps: ['step-1'],
+      results: { 'step-1': [{ status: 'ok' }] },
       org_name: 'Test Org',
       org_type: null,
+      message: 'Congrats!',
+      error_count: 0,
     },
   },
   user: null,
@@ -95,23 +101,33 @@ describe('<JobDetail />', () => {
     };
     const opts = { ...defaults, ...options };
     const { productSlug, versionLabel, planSlug, jobId, rerenderFn } = opts;
+    const context = {};
     const {
       getByText,
+      getAllByText,
       queryByText,
       getByAltText,
       container,
       rerender,
     } = renderWithRedux(
-      <MemoryRouter>
+      <StaticRouter context={context}>
         <JobDetail
           match={{ params: { productSlug, versionLabel, planSlug, jobId } }}
         />
-      </MemoryRouter>,
+      </StaticRouter>,
       opts.initialState,
       storeWithApi,
       rerenderFn,
     );
-    return { getByText, queryByText, getByAltText, container, rerender };
+    return {
+      getByText,
+      getAllByText,
+      queryByText,
+      getByAltText,
+      container,
+      rerender,
+      context,
+    };
   };
 
   describe('unknown version', () => {
@@ -131,7 +147,12 @@ describe('<JobDetail />', () => {
         initialState: { ...defaultState, jobs: {} },
       });
 
-      expect(fetchJob).toHaveBeenCalledWith('job-1');
+      expect(fetchJob).toHaveBeenCalledWith({
+        jobId: 'job-1',
+        productSlug: 'product-1',
+        versionLabel: '1.0.0',
+        planSlug: 'my-plan',
+      });
     });
   });
 
@@ -147,13 +168,13 @@ describe('<JobDetail />', () => {
 
   describe('no job', () => {
     test('renders <JobNotFound />', () => {
-      const { getByText } = setup({
+      const { getByText, getAllByText } = setup({
         initialState: { ...defaultState, jobs: { nope: null } },
         jobId: 'nope',
       });
 
       expect(getByText('starting a new installation')).toBeVisible();
-      expect(getByText('Log In')).toBeVisible();
+      expect(getAllByText('Log In')[1]).toBeVisible();
     });
 
     test('renders "Log In With a Different Org" dropdown', () => {
@@ -164,6 +185,59 @@ describe('<JobDetail />', () => {
 
       expect(getByText('starting a new installation')).toBeVisible();
       expect(getByText('Log In With a Different Org')).toBeVisible();
+    });
+  });
+
+  describe('job does not match plan', () => {
+    test('renders <JobNotFound />', () => {
+      const { getByText, getAllByText } = setup({
+        initialState: {
+          ...defaultState,
+          jobs: {
+            ...defaultState.jobs,
+            'job-1': { ...defaultState.jobs['job-1'], plan: 'other-plan' },
+          },
+        },
+      });
+
+      expect(getByText('starting a new installation')).toBeVisible();
+      expect(getAllByText('Log In')[1]).toBeVisible();
+    });
+  });
+
+  describe('product has old_slug', () => {
+    test('redirects to job_detail with new slug', () => {
+      const { context } = setup({ productSlug: 'old-product' });
+
+      expect(context.action).toEqual('REPLACE');
+      expect(context.url).toEqual(
+        routes.job_detail('product-1', '1.0.0', 'my-plan', 'job-1'),
+      );
+    });
+  });
+
+  describe('plan has old_slug', () => {
+    test('redirects to job_detail with new slug', () => {
+      const { context } = setup({ planSlug: 'old-plan' });
+
+      expect(context.action).toEqual('REPLACE');
+      expect(context.url).toEqual(
+        routes.job_detail('product-1', '1.0.0', 'my-plan', 'job-1'),
+      );
+    });
+  });
+
+  describe('product and plan have old_slugs', () => {
+    test('redirects to job_detail with new slug', () => {
+      const { context } = setup({
+        productSlug: 'old-product',
+        planSlug: 'old-plan',
+      });
+
+      expect(context.action).toEqual('REPLACE');
+      expect(context.url).toEqual(
+        routes.job_detail('product-1', '1.0.0', 'my-plan', 'job-1'),
+      );
     });
   });
 
@@ -194,71 +268,180 @@ describe('<JobDetail />', () => {
           rerenderFn: rerender,
         });
 
-        expect(fetchJob).toHaveBeenCalledWith('other-job');
+        expect(fetchJob).toHaveBeenCalledWith({
+          jobId: 'other-job',
+          productSlug: 'product-1',
+          versionLabel: '1.0.0',
+          planSlug: 'my-plan',
+        });
+      });
+    });
+
+    describe('job fails', () => {
+      test('opens modal', () => {
+        const { getByText, queryByText, rerender } = setup();
+
+        expect(queryByText('Resolve Installation Error')).toBeNull();
+
+        setup({
+          initialState: {
+            ...defaultState,
+            jobs: {
+              ...defaultState.jobs,
+              'job-1': { ...defaultState.jobs['job-1'], status: 'failed' },
+            },
+          },
+          rerenderFn: rerender,
+        });
+
+        expect(getByText('Resolve Installation Error')).toBeVisible();
       });
     });
   });
 
-  test('renders job detail', () => {
-    const { getByText, queryByText } = setup();
-
-    expect(getByText('Product 1, 1.0.0')).toBeVisible();
-    expect(getByText('My Plan')).toBeVisible();
-    expect(getByText('Installation Progress')).toBeVisible();
-    expect(getByText('test-user')).toBeVisible();
-    expect(getByText('Test Org')).toBeVisible();
-    expect(queryByText('Type:')).toBeNull();
-  });
-
-  test('renders job detail (no user, no steps)', () => {
-    const { queryByText } = setup({
-      initialState: {
-        ...defaultState,
-        products: [
-          {
-            ...defaultState.products[0],
-            most_recent_version: {
-              ...defaultState.products[0].most_recent_version,
-              primary_plan: {
-                ...defaultState.products[0].most_recent_version.primary_plan,
-                steps: [],
+  describe('job complete', () => {
+    test('renders average time', () => {
+      const product = defaultState.products[0];
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          products: [
+            {
+              ...product,
+              most_recent_version: {
+                ...product.most_recent_version,
+                primary_plan: {
+                  ...product.most_recent_version.primary_plan,
+                  average_duration: '119.999',
+                },
               },
             },
-          },
-        ],
-        jobs: {
-          'job-1': {
-            ...defaultState.jobs['job-1'],
-            creator: null,
-            org_name: null,
-            org_type: null,
-          },
+          ],
         },
-      },
+      });
+
+      expect(getByText('Average Install Time:')).toBeVisible();
+      expect(getByText('2 minutes.')).toBeVisible();
     });
 
-    expect(queryByText('test-user')).toBeNull();
-    expect(queryByText('Test Org')).toBeNull();
-    expect(queryByText('Type:')).toBeNull();
+    test('renders job detail', () => {
+      const { getByText, queryByText } = setup();
+
+      expect(getByText('Product 1, 1.0.0')).toBeVisible();
+      expect(getByText('My Plan')).toBeVisible();
+      expect(getByText('Installation Progress')).toBeVisible();
+      expect(getByText('Congrats!')).toBeVisible();
+      expect(getByText('test-user')).toBeVisible();
+      expect(getByText('Test Org')).toBeVisible();
+      expect(queryByText('Type:')).toBeNull();
+    });
+
+    test('renders job detail (no user, no steps)', () => {
+      const { queryByText } = setup({
+        initialState: {
+          ...defaultState,
+          products: [
+            {
+              ...defaultState.products[0],
+              most_recent_version: {
+                ...defaultState.products[0].most_recent_version,
+                primary_plan: {
+                  ...defaultState.products[0].most_recent_version.primary_plan,
+                  steps: [],
+                },
+              },
+            },
+          ],
+          jobs: {
+            'job-1': {
+              ...defaultState.jobs['job-1'],
+              creator: null,
+              org_name: null,
+              org_type: null,
+              error_count: 1,
+            },
+          },
+        },
+      });
+
+      expect(queryByText('test-user')).toBeNull();
+      expect(queryByText('Test Org')).toBeNull();
+      expect(queryByText('Type:')).toBeNull();
+    });
+
+    test('renders job detail (no username, no org_name)', () => {
+      const { getByText, queryByText } = setup({
+        initialState: {
+          ...defaultState,
+          jobs: {
+            'job-1': {
+              ...defaultState.jobs['job-1'],
+              creator: null,
+              org_name: null,
+              org_type: 'Org Type',
+            },
+          },
+        },
+      });
+
+      expect(queryByText('test-user')).toBeNull();
+      expect(queryByText('Test Org')).toBeNull();
+      expect(getByText('Org Type')).toBeVisible();
+    });
   });
 
-  test('renders job detail (no username, no org_name)', () => {
-    const { getByText, queryByText } = setup({
-      initialState: {
-        ...defaultState,
-        jobs: {
-          'job-1': {
-            ...defaultState.jobs['job-1'],
-            creator: null,
-            org_name: null,
-            org_type: 'Org Type',
+  describe('job failed', () => {
+    test('renders job failed msg', () => {
+      const { getByText, queryByText } = setup({
+        initialState: {
+          ...defaultState,
+          jobs: {
+            'job-1': {
+              ...defaultState.jobs['job-1'],
+              status: 'failed',
+            },
           },
         },
-      },
-    });
+      });
 
-    expect(queryByText('test-user')).toBeNull();
-    expect(queryByText('Test Org')).toBeNull();
-    expect(getByText('Org Type')).toBeVisible();
+      expect(getByText('View Installation Error Details & Link')).toBeVisible();
+      expect(queryByText('Congrats!')).toBeNull();
+    });
+  });
+
+  describe('share button click', () => {
+    test('opens modal', () => {
+      const { getByText } = setup();
+      fireEvent.click(getByText('Share Installation'));
+
+      expect(getByText('Share Link to Installation Job')).toBeVisible();
+    });
+  });
+
+  describe('cancel btn click', () => {
+    test('calls requestCancelJob', () => {
+      const canceled = Promise.resolve({});
+      requestCancelJob.mockReturnValue(() => canceled);
+      const id = 'job-1';
+      const { getAllByText } = setup({
+        initialState: {
+          ...defaultState,
+          user: { is_staff: true },
+          jobs: {
+            [id]: {
+              ...defaultState.jobs[id],
+              status: 'started',
+            },
+          },
+        },
+      });
+      fireEvent.click(getAllByText('Cancel Installation')[0]);
+
+      expect.assertions(2);
+      expect(requestCancelJob).toHaveBeenCalledWith('job-1');
+      return canceled.then(() => {
+        expect(getAllByText('Canceling Installation…')[0]).toBeVisible();
+      });
+    });
   });
 });

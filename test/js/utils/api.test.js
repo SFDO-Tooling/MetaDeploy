@@ -1,6 +1,10 @@
 import fetchMock from 'fetch-mock';
 
-import getApiFetch, { addUrlParams } from 'utils/api';
+import getApiFetch, {
+  addUrlParams,
+  getUrlParam,
+  removeUrlParam,
+} from 'utils/api';
 
 describe('apiFetch', () => {
   const apiFetch = getApiFetch();
@@ -10,24 +14,6 @@ describe('apiFetch', () => {
     fetchMock.getOnce('/test/url/', expected);
 
     return expect(apiFetch('/test/url/')).resolves.toEqual(expected);
-  });
-
-  test('401: calls onAuthFailure', () => {
-    const onAuthFailure = jest.fn();
-    const apiFetchWithFailure = getApiFetch(onAuthFailure);
-
-    fetchMock.getOnce('/test/url/', { status: 401, body: 'Unauthorized' });
-
-    return apiFetchWithFailure('/test/url/').then(resp => {
-      expect(resp).toEqual('Unauthorized');
-      expect(onAuthFailure).toHaveBeenCalled();
-    });
-  });
-
-  test('403: returns null', () => {
-    fetchMock.getOnce('/test/url/', 403);
-
-    return expect(apiFetch('/test/url/')).resolves.toBeNull();
   });
 
   test('404: returns null', () => {
@@ -49,20 +35,67 @@ describe('apiFetch', () => {
     expect.assertions(1);
     return expect(apiFetch('/test/url/')).rejects.toThrow('not cool');
   });
+
+  test('string response: returns response', () => {
+    const expected = 'foobar';
+    fetchMock.getOnce('/test/url/', expected);
+
+    return expect(apiFetch('/test/url/')).resolves.toEqual(expected);
+  });
 });
 
 describe('addUrlParams', () => {
   test('adds params to url string', () => {
-    const baseUrl = `${window.location.origin}/foobar`;
-    const expected = `${baseUrl}?this=that`;
-    const actual = addUrlParams(baseUrl, { this: 'that' });
+    const baseUrl = '/foobar?this=that';
+    const expected = `${baseUrl}&this=other`;
+    const actual = addUrlParams(baseUrl, { this: 'other' });
 
     return expect(actual).toBe(expected);
   });
 
   test('handles empty params', () => {
-    const expected = `${window.location.origin}/foobar`;
+    const expected = '/foobar';
     const actual = addUrlParams('/foobar');
+
+    return expect(actual).toBe(expected);
+  });
+
+  test('does not duplicate existing param', () => {
+    const expected = '/foobar?this=that';
+    const actual = addUrlParams(expected, { this: 'that' });
+
+    return expect(actual).toBe(expected);
+  });
+});
+
+describe('getUrlParam', () => {
+  test('gets param from search string', () => {
+    const input = '?foo=bar';
+    const expected = 'bar';
+    const actual = getUrlParam('foo', input);
+
+    return expect(actual).toBe(expected);
+  });
+
+  test('handles missing param', () => {
+    const actual = getUrlParam('foo');
+
+    return expect(actual).toBeNull();
+  });
+});
+
+describe('removeUrlParam', () => {
+  test('removes param from search string', () => {
+    const input = 'foo=bar&foo=buz&this=that';
+    const expected = 'this=that';
+    const actual = removeUrlParam('foo', input);
+
+    return expect(actual).toBe(expected);
+  });
+
+  test('handles missing param', () => {
+    const actual = removeUrlParam('foo');
+    const expected = window.location.search;
 
     return expect(actual).toBe(expected);
   });

@@ -1,16 +1,55 @@
 // Steps
 // =====
 
+// Variables used in step table only to help with controlling width/wrapping
+$step-name-min: 300px;
+$step-type-min: 170px;
+$step-badge-min: 120px;
+$step-install-min: 150px;
+$step-ending-columns-min: $step-type-min + $step-badge-min + $step-install-min;
+
+@mixin constrain-label {
+  max-width: calc(100% - #{$step-ending-columns-min});
+
+  @media (min-width: $mq-medium) {
+    max-width: calc(100% - (#{$step-ending-columns-min} + 50px));
+  }
+
+  @media (min-width: $mq-large) {
+    max-width: calc(100% - (#{$step-ending-columns-min} + 150px));
+  }
+}
+
 #plan-steps-table {
   // Borders are added by parent .slds-card
   border: none;
 
+  // set up layout
+  tr {
+    display: grid;
+    grid-template:
+      'name type badge options'
+      'logs logs logs  logs' auto / minmax($step-name-min, 4fr) minmax(
+        $step-type-min,
+        1.5fr
+      )
+      minmax($step-badge-min, 1fr) minmax($step-install-min, 1fr);
+
+    &:focus,
+    &:hover {
+      > td:not(.slds-is-selected),
+      > th:not(.slds-is-selected) {
+        box-shadow: none;
+      }
+    }
+  }
+
   .slds-accordion__section {
-    padding-left: 0;
-    padding-right: 0;
+    padding: 0;
   }
 
   .slds-accordion__summary-heading {
+    @include constrain-label;
     font-size: $font-size-medium;
   }
 
@@ -21,17 +60,115 @@
 
   .step-name-no-icon {
     // Line up text of step names, with or without accordion icon:
-    // .slds-button__icon width (0.875rem) + margin-right (0.5rem)
-    margin-left: 1.375rem;
+    // .slds-button__icon width (0.875rem) + margin-right ($spacing-x-small)
+    &.has-job {
+      margin-left: 1.375rem;
+    }
+
+    // protect overlapping steps without an accordion with long names
+    > div {
+      @include constrain-label;
+      display: flex;
+    }
   }
 
   .has-warning {
-    border-left: 1rem solid $color-border-warning;
-    padding-left: 0.5rem;
+    border-left: $spacing-medium solid $color-border-warning;
+    padding-left: $spacing-x-small;
   }
 
   .has-error {
-    border-left: 1rem solid $color-border-error;
-    padding-left: 0.5rem;
+    border-left: $spacing-medium solid $color-border-error;
+    padding-left: $spacing-x-small;
+
+    .slds-is-open {
+      margin-bottom: $var-spacing-small;
+    }
+  }
+
+  .plan-step-item {
+    padding-bottom: $var-spacing-small;
+    padding-top: $var-spacing-small;
+
+    &.is-installing {
+      background-color: $color-background-row-selected;
+    }
+  }
+
+  .plan-step-item-name {
+    // this one spans all columns and rows
+    // for the opened accordion content to extend full width
+    grid-area: 1 / 1 / -1 / -1;
+  }
+
+  .plan-step-name {
+    display: flex;
+  }
+
+  .plan-step-type {
+    grid-area: type;
+
+    // aligns the type text with other cell text
+    > div {
+      align-items: baseline;
+      display: flex;
+
+      // center the type icon to the label only
+      span:first-child {
+        align-self: center;
+        display: flex;
+      }
+    }
+  }
+
+  .plan-step-badge-container {
+    grid-area: badge;
+    // decreasing container padding for better vertical alignment
+    // badges have more internal padding
+    padding-bottom: 0;
+    padding-top: 0.625rem;
+
+    div {
+      display: flex;
+    }
+  }
+
+  .slds-badge_lightest {
+    background-color: $color-background-highlight;
+  }
+
+  .plan-step-options {
+    grid-area: options;
+
+    // Completed icon is larger than others. Negative indent helps alignment
+    .is-completed {
+      margin-top: -0.3125rem;
+      margin-bottom: -0.3125rem;
+    }
+  }
+
+  section:not(.slds-is-open) > .slds-accordion__content {
+    width: 0;
+  }
+
+  .slds-is-open > .slds-accordion__content {
+    @include z-index('logs');
+    background: $brand-dark;
+    color: $color-text-brand-primary;
+    margin-bottom: $spacing-small * -1;
+    margin-left: $spacing-large * -1;
+    margin-top: 1.25rem;
+    overflow: auto;
+    // transform added to move this accordion content above table tr
+    // allows for the tr:hover bg color to not overlap the logs bg color
+    transform: scale(1);
+    // full width of the page minus padding ===
+    // full width of table so scroll goes edge to edge
+    width: calc(100vw - 4rem);
+  }
+
+  pre {
+    margin-bottom: 0;
+    padding: $spacing-medium $spacing-large $spacing-large;
   }
 }

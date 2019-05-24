@@ -2,21 +2,37 @@
 
 import * as React from 'react';
 import Icon from '@salesforce/design-system-react/components/icon';
+import { Link } from 'react-router-dom';
+import { t } from 'i18next';
 
-import { CONSTANTS } from 'plans/reducer';
-
+import { CONSTANTS } from 'store/plans/reducer';
 import { ActionBtn, LabelWithSpinner } from 'components/plans/ctaButton';
-
-import type { Job as JobType } from 'jobs/reducer';
+import type { Job as JobType } from 'store/jobs/reducer';
 
 const { STATUS } = CONSTANTS;
 
-const CtaButton = ({ job }: { job: JobType }): React.Node => {
+const CtaButton = ({
+  job,
+  linkToPlan,
+  canceling,
+}: {
+  job: JobType,
+  linkToPlan: string,
+  canceling: boolean,
+}): React.Node => {
   switch (job.status) {
     case STATUS.STARTED:
       return (
         <ActionBtn
-          label={<LabelWithSpinner label="Installation In Progress..." />}
+          label={
+            <LabelWithSpinner
+              label={
+                canceling
+                  ? t('Canceling Installation…')
+                  : t('Installation In Progress…')
+              }
+            />
+          }
           disabled
         />
       );
@@ -25,6 +41,8 @@ const CtaButton = ({ job }: { job: JobType }): React.Node => {
         return (
           <a
             href={job.organization_url}
+            target="_blank"
+            rel="noreferrer noopener"
             className="slds-button
               slds-button_brand
               slds-size_full
@@ -37,11 +55,25 @@ const CtaButton = ({ job }: { job: JobType }): React.Node => {
               size="x-small"
               inverse
             />
-            View Org
+            {t('View Org')}
           </a>
         );
       }
       return null;
+    }
+    case STATUS.CANCELED:
+    case STATUS.FAILED: {
+      return (
+        <Link
+          to={linkToPlan}
+          className="slds-button
+            slds-button_brand
+            slds-size_full
+            slds-p-vertical_xx-small"
+        >
+          {t('Return to Pre-Install Validation')}
+        </Link>
+      );
     }
   }
   return null;

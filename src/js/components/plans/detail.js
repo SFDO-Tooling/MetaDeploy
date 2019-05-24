@@ -2,56 +2,79 @@
 
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
+import { Link } from 'react-router-dom';
+import { Trans } from 'react-i18next';
 import { connect } from 'react-redux';
-import { createSelector } from 'reselect';
+import { t } from 'i18next';
 
-import { CONSTANTS } from 'plans/reducer';
-import { fetchPreflight, startPreflight } from 'plans/actions';
-import { fetchVersion } from 'products/actions';
+import routes from 'utils/routes';
+import { CONSTANTS } from 'store/plans/reducer';
+import { fetchPreflight, startPreflight } from 'store/plans/actions';
+import { fetchPlan, fetchVersion } from 'store/products/actions';
+import { selectOrg } from 'store/org/selectors';
+import {
+  selectPlan,
+  selectPlanSlug,
+  selectPreflight,
+} from 'store/plans/selectors';
 import {
   selectProduct,
+  selectProductSlug,
   selectVersion,
   selectVersionLabel,
-} from 'components/products/detail';
-import { selectUserState } from 'components/header';
-import { shouldFetchVersion, getLoadingOrNotFound } from 'products/utils';
-import { startJob } from 'jobs/actions';
-
+} from 'store/products/selectors';
+import { selectUserState } from 'store/user/selectors';
+import {
+  getLoadingOrNotFound,
+  shouldFetchPlan,
+  shouldFetchVersion,
+} from 'components/utils';
+import { startJob } from 'store/jobs/actions';
+import BackLink from 'components/backLink';
 import BodyContainer from 'components/bodyContainer';
-import CtaButton from 'components/plans/ctaButton';
-import Header from 'components/plans/header';
-import JobResults from 'components/plans/jobResults';
+import CtaButton, { LoginBtn } from 'components/plans/ctaButton';
+import Header from 'components/header';
+import Intro from 'components/plans/intro';
+import PageHeader from 'components/plans/header';
+import PlanNotAllowed from 'components/products/notAllowed';
+import PreflightResults, {
+  ErrorIcon,
+  WarningIcon,
+} from 'components/plans/preflightResults';
 import ProductNotFound from 'components/products/product404';
 import StepsTable from 'components/plans/stepsTable';
 import Toasts from 'components/plans/toasts';
 import UserInfo from 'components/plans/userInfo';
-
-import type { AppState } from 'app/reducer';
+import type { AppState } from 'store';
 import type { InitialProps } from 'components/utils';
+import type { Org as OrgType } from 'store/org/reducer';
 import type {
   Plan as PlanType,
   Preflight as PreflightType,
-  PreflightsState,
-} from 'plans/reducer';
+} from 'store/plans/reducer';
 import type {
   Product as ProductType,
   Version as VersionType,
-} from 'products/reducer';
-import type { User as UserType } from 'accounts/reducer';
+} from 'store/products/reducer';
+import type { User as UserType } from 'store/user/reducer';
 
 export type SelectedSteps = Set<string>;
 type Props = {
   ...InitialProps,
   user: UserType,
   product: ProductType | null,
+  productSlug: ?string,
   version: VersionType | null,
   versionLabel: ?string,
   plan: PlanType | null,
+  planSlug: ?string,
   preflight: ?PreflightType,
-  doFetchVersion: typeof fetchVersion,
+  org: OrgType,
+  doFetchPlan: typeof fetchPlan,
   doFetchPreflight: typeof fetchPreflight,
-  doStartPreflight: typeof startPreflight,
+  doFetchVersion: typeof fetchVersion,
   doStartJob: typeof startJob,
+  doStartPreflight: typeof startPreflight,
 };
 type State = {
   changedSteps: Map<string, boolean>,
@@ -77,9 +100,26 @@ class PlanDetail extends React.Component<Props, State> {
     }
   }
 
+  fetchPlanIfMissing() {
+    const { product, version, plan, planSlug, doFetchPlan } = this.props;
+    if (
+      product &&
+      version &&
+      planSlug &&
+      shouldFetchPlan({ version, plan, planSlug })
+    ) {
+      // Fetch plan from API
+      doFetchPlan({
+        product: product.id,
+        version: version.id,
+        slug: planSlug,
+      });
+    }
+  }
+
   fetchPreflightIfMissing() {
     const { user, plan, preflight, doFetchPreflight } = this.props;
-    if (user && plan && preflight === undefined) {
+    if (user && plan && preflight === undefined && plan.requires_preflight) {
       // Fetch most recent preflight result (if any exists)
       doFetchPreflight(plan.id);
     }
@@ -88,6 +128,7 @@ class PlanDetail extends React.Component<Props, State> {
   componentDidMount() {
     this.fetchVersionIfMissing();
     this.fetchPreflightIfMissing();
+    this.fetchPlanIfMissing();
   }
 
   componentDidUpdate(prevProps) {
@@ -97,21 +138,25 @@ class PlanDetail extends React.Component<Props, State> {
       versionLabel,
       user,
       plan,
+      planSlug,
       preflight,
     } = this.props;
     const versionChanged =
       product !== prevProps.product ||
       version !== prevProps.version ||
       versionLabel !== prevProps.versionLabel;
-    const preflightChanged =
-      user !== prevProps.user ||
-      plan !== prevProps.plan ||
-      preflight !== prevProps.preflight;
+    const userChanged = user !== prevProps.user;
+    const planChanged =
+      plan !== prevProps.plan || planSlug !== prevProps.planSlug;
+    const preflightChanged = preflight !== prevProps.preflight;
     if (versionChanged) {
       this.fetchVersionIfMissing();
     }
-    if (preflightChanged) {
+    if (userChanged || planChanged || preflightChanged) {
       this.fetchPreflightIfMissing();
+    }
+    if (versionChanged || planChanged) {
+      this.fetchPlanIfMissing();
     }
   }
 
@@ -125,7 +170,7 @@ class PlanDetail extends React.Component<Props, State> {
     const { plan, preflight } = this.props;
     const selectedSteps = new Set();
     /* istanbul ignore if */
-    if (!plan) {
+    if (!plan || !plan.steps) {
       return selectedSteps;
     }
     const { changedSteps } = this.state;
@@ -134,8 +179,8 @@ class PlanDetail extends React.Component<Props, State> {
       const result = preflight && preflight.results && preflight.results[id];
       let skipped, optional;
       if (result) {
-        skipped = result.find(res => res.status === RESULT_STATUS.SKIP);
-        optional = result.find(res => res.status === RESULT_STATUS.OPTIONAL);
+        skipped = result.status === RESULT_STATUS.SKIP ? result : null;
+        optional = result.status === RESULT_STATUS.OPTIONAL ? result : null;
       }
       if (!skipped) {
         const required = step.is_required && !optional;
@@ -154,23 +199,134 @@ class PlanDetail extends React.Component<Props, State> {
     return selectedSteps;
   }
 
-  render(): React.Node {
+  getPostMessage(): React.Node {
+    const { user, product, version, plan, org } = this.props;
+    /* istanbul ignore if */
+    if (!product || !version || !plan) {
+      return null;
+    }
+    if (user && !user.org_type) {
+      return (
+        <>
+          <div className="slds-p-bottom_xx-small">
+            <ErrorIcon />
+            <span className="slds-text-color_error">
+              {t(
+                'Oops! It looks like you don’t have permissions to run an installation on this org.',
+              )}
+            </span>
+          </div>
+          <p>
+            {t(
+              'Please contact an Admin within your org or use the button below to log in with a different org.',
+            )}
+          </p>
+        </>
+      );
+    }
+    if (org) {
+      if (org.current_job) {
+        const { product_slug, version_label, plan_slug, id } = org.current_job;
+        return (
+          <p>
+            <WarningIcon />
+            <span>
+              <Trans i18nKey="installationCurrentlyRunning">
+                An installation is currently running on this org.{' '}
+                <Link
+                  to={routes.job_detail(
+                    product_slug,
+                    version_label,
+                    plan_slug,
+                    id,
+                  )}
+                >
+                  View the running installation.
+                </Link>
+              </Trans>
+            </span>
+          </p>
+        );
+      }
+      if (org.current_preflight) {
+        return (
+          <p>
+            <WarningIcon />
+            <span>
+              {t('A pre-install validation is currently running on this org.')}
+            </span>
+          </p>
+        );
+      }
+    }
+    return null;
+  }
+
+  getCTA(selectedSteps: SelectedSteps): React.Node {
     const {
       history,
       user,
       product,
       version,
-      versionLabel,
       plan,
       preflight,
+      org,
       doStartPreflight,
       doStartJob,
     } = this.props;
-    const loadingOrNotFound = getLoadingOrNotFound({
+    /* istanbul ignore if */
+    if (!product || !version || !plan) {
+      return null;
+    }
+    if (user && !user.org_type) {
+      return (
+        <LoginBtn
+          id="org-not-allowed-login"
+          label={t('Log in with a different org')}
+        />
+      );
+    } else if (plan.steps && plan.steps.length) {
+      return (
+        <CtaButton
+          history={history}
+          user={user}
+          productSlug={product.slug}
+          clickThroughAgreement={product.click_through_agreement}
+          versionLabel={version.label}
+          plan={plan}
+          preflight={preflight}
+          selectedSteps={selectedSteps}
+          preventAction={Boolean(
+            org && (org.current_job || org.current_preflight),
+          )}
+          doStartPreflight={doStartPreflight}
+          doStartJob={doStartJob}
+        />
+      );
+    }
+    return null;
+  }
+
+  render(): React.Node {
+    const {
+      user,
       product,
+      productSlug,
       version,
       versionLabel,
       plan,
+      planSlug,
+      preflight,
+      history,
+    } = this.props;
+    const loadingOrNotFound = getLoadingOrNotFound({
+      product,
+      productSlug,
+      version,
+      versionLabel,
+      plan,
+      planSlug,
+      route: 'plan_detail',
     });
     if (loadingOrNotFound !== false) {
       return loadingOrNotFound;
@@ -183,60 +339,58 @@ class PlanDetail extends React.Component<Props, State> {
     }
     const selectedSteps = this.getSelectedSteps();
     return (
-      <DocumentTitle title={`${plan.title} | ${product.title} | MetaDeploy`}>
+      <DocumentTitle
+        title={`${plan.title} | ${product.title} | ${window.SITE_NAME}`}
+      >
         <>
-          <Header product={product} version={version} plan={plan} />
-          <BodyContainer>
-            {preflight && user ? (
-              <Toasts model={preflight} label="Pre-install validation" />
-            ) : null}
-            <div
-              className="slds-p-around_medium
-                slds-size_1-of-1
-                slds-medium-size_1-of-2"
-            >
-              <div className="slds-text-longform">
-                <h3 className="slds-text-heading_small">{plan.title}</h3>
-                {plan.preflight_message ? (
-                  <p>{plan.preflight_message}</p>
-                ) : null}
-                {preflight && user ? (
-                  <JobResults
-                    job={preflight}
-                    label="Pre-install validation"
-                    failMessage={
-                      'After resolving all errors, ' +
-                      'run the pre-install validation again.'
-                    }
-                  />
-                ) : null}
-              </div>
-              {plan.steps.length ? (
-                <CtaButton
-                  history={history}
-                  user={user}
-                  productSlug={product.slug}
-                  versionLabel={version.label}
-                  plan={plan}
+          <Header history={history} />
+          <PageHeader
+            product={product}
+            version={version}
+            plan={plan}
+            userLoggedIn={Boolean(user && user.valid_token_for)}
+            preflightStatus={preflight && preflight.status}
+            preflightIsValid={Boolean(preflight && preflight.is_valid)}
+            preflightIsReady={Boolean(preflight && preflight.is_ready)}
+          />
+          {product.is_allowed && plan.is_allowed ? (
+            <BodyContainer>
+              {preflight && user ? (
+                <Toasts
                   preflight={preflight}
-                  selectedSteps={selectedSteps}
-                  doStartPreflight={doStartPreflight}
-                  doStartJob={doStartJob}
+                  label={t('Pre-install validation')}
                 />
               ) : null}
-            </div>
-            <div
-              className="slds-p-around_medium
-                slds-size_1-of-1
-                slds-medium-size_1-of-2"
-            >
+              <Intro
+                averageDuration={plan.average_duration}
+                preMessage={
+                  plan.preflight_message ? (
+                    // These messages are pre-cleaned by the API
+                    <div
+                      className="markdown"
+                      dangerouslySetInnerHTML={{
+                        __html: plan.preflight_message,
+                      }}
+                    />
+                  ) : null
+                }
+                results={
+                  preflight && user ? (
+                    <PreflightResults preflight={preflight} />
+                  ) : null
+                }
+                postMessage={this.getPostMessage()}
+                cta={this.getCTA(selectedSteps)}
+                backLink={
+                  <BackLink
+                    label={t('Select a different plan')}
+                    url={routes.version_detail(product.slug, version.label)}
+                    className="slds-p-top_small"
+                  />
+                }
+              />
               <UserInfo user={user} />
-            </div>
-            {plan.steps.length ? (
-              <div
-                className="slds-p-around_medium
-                  slds-size_1-of-1"
-              >
+              {plan.steps && plan.steps.length ? (
                 <StepsTable
                   user={user}
                   plan={plan}
@@ -244,66 +398,39 @@ class PlanDetail extends React.Component<Props, State> {
                   selectedSteps={selectedSteps}
                   handleStepsChange={this.handleStepsChange}
                 />
-              </div>
-            ) : null}
-          </BodyContainer>
+              ) : null}
+            </BodyContainer>
+          ) : (
+            <PlanNotAllowed
+              isLoggedIn={user !== null}
+              message={plan.not_allowed_instructions}
+              link={
+                <Trans i18nKey="planNotAllowed">
+                  Try{' '}
+                  <Link to={routes.version_detail(product.slug, version.label)}>
+                    another plan
+                  </Link>{' '}
+                  from that product version
+                </Trans>
+              }
+            />
+          )}
         </>
       </DocumentTitle>
     );
   }
 }
 
-const selectPlanSlug = (
-  appState: AppState,
-  { match: { params } }: InitialProps,
-): ?string => params.planSlug;
-
-export const selectPlan: (
-  AppState,
-  InitialProps,
-) => PlanType | null = createSelector(
-  [selectProduct, selectVersion, selectPlanSlug],
-  (
-    product: ProductType | null,
-    version: VersionType | null,
-    planSlug: ?string,
-  ): PlanType | null => {
-    if (!product || !version || !planSlug) {
-      return null;
-    }
-    if (version.primary_plan.slug === planSlug) {
-      return version.primary_plan;
-    }
-    if (version.secondary_plan && version.secondary_plan.slug === planSlug) {
-      return version.secondary_plan;
-    }
-    const plan = version.additional_plans.find(p => p.slug === planSlug);
-    return plan || null;
-  },
-);
-
-const selectPreflightsState = (appState: AppState): PreflightsState =>
-  appState.preflights;
-
-const selectPreflight = createSelector(
-  [selectPreflightsState, selectPlan],
-  (preflights: PreflightsState, plan: PlanType | null): ?PreflightType => {
-    if (!plan) {
-      return null;
-    }
-    // A `null` preflight means we already fetched and no prior preflight exists
-    // An `undefined` preflight means we don't know whether a preflight exists
-    return preflights[plan.id];
-  },
-);
-
 const select = (appState: AppState, props: InitialProps) => ({
   user: selectUserState(appState),
   product: selectProduct(appState, props),
+  productSlug: selectProductSlug(appState, props),
   version: selectVersion(appState, props),
   versionLabel: selectVersionLabel(appState, props),
   plan: selectPlan(appState, props),
+  planSlug: selectPlanSlug(appState, props),
   preflight: selectPreflight(appState, props),
+  org: selectOrg(appState),
 });
 
 const actions = {
@@ -311,6 +438,7 @@ const actions = {
   doFetchPreflight: fetchPreflight,
   doStartPreflight: startPreflight,
   doStartJob: startJob,
+  doFetchPlan: fetchPlan,
 };
 
 const WrappedPlanDetail: React.ComponentType<InitialProps> = connect(

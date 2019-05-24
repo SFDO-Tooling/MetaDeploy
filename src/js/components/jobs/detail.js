@@ -1,55 +1,77 @@
 // @flow
 
 import * as React from 'react';
+import Button from '@salesforce/design-system-react/components/button';
 import DocumentTitle from 'react-document-title';
 import { connect } from 'react-redux';
-import { createSelector } from 'reselect';
+import { t } from 'i18next';
 
-import { fetchJob } from 'jobs/actions';
-import { fetchVersion } from 'products/actions';
-import { selectPlan } from 'components/plans/detail';
+import routes from 'utils/routes';
+import { CONSTANTS } from 'store/plans/reducer';
+import { fetchJob, requestCancelJob, updateJob } from 'store/jobs/actions';
+import { fetchVersion } from 'store/products/actions';
+import { selectJob, selectJobId } from 'store/jobs/selectors';
+import { selectPlan, selectPlanSlug } from 'store/plans/selectors';
 import {
   selectProduct,
+  selectProductSlug,
   selectVersion,
   selectVersionLabel,
-} from 'components/products/detail';
-import { selectUserState } from 'components/header';
-import { shouldFetchVersion, getLoadingOrNotFound } from 'products/utils';
-
+} from 'store/products/selectors';
+import { selectUserState } from 'store/user/selectors';
+import { getLoadingOrNotFound, shouldFetchVersion } from 'components/utils';
+import BackLink from 'components/backLink';
 import BodyContainer from 'components/bodyContainer';
 import CtaButton from 'components/jobs/ctaButton';
-import Header from 'components/plans/header';
-import JobResults from 'components/plans/jobResults';
+import Header from 'components/header';
+import Intro from 'components/plans/intro';
+import JobMessage from 'components/jobs/jobMessage';
+import JobResults from 'components/jobs/jobResults';
+import PageHeader from 'components/plans/header';
 import ProductNotFound from 'components/products/product404';
 import ProgressBar from 'components/jobs/progressBar';
+import ShareModal from 'components/jobs/shareModal';
 import StepsTable from 'components/plans/stepsTable';
 import Toasts from 'components/plans/toasts';
 import UserInfo from 'components/jobs/userInfo';
-
-import type { AppState } from 'app/reducer';
+import { LabelWithSpinner } from 'components/plans/ctaButton';
+import type { AppState } from 'store';
 import type { InitialProps } from 'components/utils';
-import type { JobsState, Job as JobType } from 'jobs/reducer';
-import type { Plan as PlanType } from 'plans/reducer';
+import type { Job as JobType } from 'store/jobs/reducer';
+import type { Plan as PlanType } from 'store/plans/reducer';
 import type {
   Product as ProductType,
   Version as VersionType,
-} from 'products/reducer';
-import type { User as UserType } from 'accounts/reducer';
+} from 'store/products/reducer';
+import type { User as UserType } from 'store/user/reducer';
 
 type Props = {
   ...InitialProps,
   user: UserType,
   product: ProductType | null,
+  productSlug: ?string,
   version: VersionType | null,
   versionLabel: ?string,
   plan: PlanType | null,
+  planSlug: ?string,
   job: ?JobType,
   jobId: ?string,
   doFetchVersion: typeof fetchVersion,
   doFetchJob: typeof fetchJob,
+  doUpdateJob: typeof updateJob,
+  doRequestCancelJob: typeof requestCancelJob,
+};
+type State = {
+  modalOpen: boolean,
+  canceling: boolean,
 };
 
-class JobDetail extends React.Component<Props> {
+class JobDetail extends React.Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = { modalOpen: false, canceling: false };
+  }
+
   fetchVersionIfMissing() {
     const { product, version, versionLabel, doFetchVersion } = this.props;
     if (
@@ -63,10 +85,15 @@ class JobDetail extends React.Component<Props> {
   }
 
   fetchJobIfMissing() {
-    const { job, jobId, doFetchJob } = this.props;
-    if (job === undefined && jobId) {
+    const { job, jobId, doFetchJob, product, versionLabel, plan } = this.props;
+    if (product && versionLabel && plan && jobId && job === undefined) {
       // Fetch job from API
-      doFetchJob(jobId);
+      doFetchJob({
+        jobId,
+        productSlug: product.slug,
+        versionLabel,
+        planSlug: plan.slug,
+      });
     }
   }
 
@@ -75,39 +102,126 @@ class JobDetail extends React.Component<Props> {
     this.fetchJobIfMissing();
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps, prevState) {
     const { product, version, versionLabel, job, jobId } = this.props;
+    const prevJob = prevProps.job;
+    const jobIdChanged = jobId !== prevProps.jobId;
     const versionChanged =
       product !== prevProps.product ||
       version !== prevProps.version ||
       versionLabel !== prevProps.versionLabel;
-    const jobChanged = job !== prevProps.job || jobId !== prevProps.jobId;
+    const jobChanged = job !== prevJob || jobIdChanged;
     if (versionChanged) {
       this.fetchVersionIfMissing();
     }
     if (jobChanged) {
       this.fetchJobIfMissing();
     }
+    // If the job has changed status and is failed, automatically open modal
+    if (job && !jobIdChanged) {
+      const { modalOpen } = prevState;
+      const statusChanged = prevJob && prevJob.status !== job.status;
+      const hasError = job.error_count !== undefined && job.error_count > 0;
+      if (
+        !modalOpen &&
+        statusChanged &&
+        (hasError || job.status === CONSTANTS.STATUS.FAILED)
+      ) {
+        this.openModal();
+      }
+    }
   }
+
+  toggleModal = (isOpen: boolean) => {
+    this.setState({ modalOpen: isOpen });
+  };
+
+  openModal = () => {
+    this.toggleModal(true);
+  };
+
+  requestCancelJob = () => {
+    const { job, doRequestCancelJob } = this.props;
+    /* istanbul ignore if */
+    if (!job) {
+      return;
+    }
+    doRequestCancelJob(job.id).then(() => {
+      this.setState({ canceling: true });
+    });
+  };
+
+  getCancelBtn(): React.Node {
+    const { user, job } = this.props;
+    /* istanbul ignore if */
+    if (!job) {
+      return null;
+    }
+    if (job.status === CONSTANTS.STATUS.STARTED && user && user.is_staff) {
+      const { canceling } = this.state;
+      if (canceling) {
+        return (
+          <Button
+            label={
+              <LabelWithSpinner
+                label={t('Canceling Installation…')}
+                variant="base"
+                size="x-small"
+              />
+            }
+            disabled
+          />
+        );
+      }
+      return (
+        <Button
+          label={t('Cancel Installation')}
+          variant="text-destructive"
+          onClick={this.requestCancelJob}
+        />
+      );
+    }
+    return null;
+  }
+
+  controls = () => (
+    <>
+      {this.getCancelBtn()}
+      <Button
+        label={t('Share Installation')}
+        iconCategory="utility"
+        iconName="share"
+        iconPosition="left"
+        onClick={this.openModal}
+      />
+    </>
+  );
 
   render(): React.Node {
     const {
       user,
       product,
+      productSlug,
       version,
       versionLabel,
       plan,
+      planSlug,
       job,
       jobId,
+      history,
+      doUpdateJob,
     } = this.props;
     const loadingOrNotFound = getLoadingOrNotFound({
       product,
+      productSlug,
       version,
       versionLabel,
       plan,
+      planSlug,
       job,
       jobId,
-      user,
+      isLoggedIn: user !== null,
+      route: 'job_detail',
     });
     if (loadingOrNotFound !== false) {
       return loadingOrNotFound;
@@ -118,45 +232,61 @@ class JobDetail extends React.Component<Props> {
     if (!product || !version || !plan || !job) {
       return <ProductNotFound />;
     }
+    const linkToPlan = routes.plan_detail(
+      product.slug,
+      version.label,
+      plan.slug,
+    );
+    const { canceling } = this.state;
     return (
       <DocumentTitle
-        title={`Installation | ${plan.title} | ${product.title} | MetaDeploy`}
+        title={`${t('Installation')} | ${plan.title} | ${product.title} | ${
+          window.SITE_NAME
+        }`}
       >
         <>
-          <Header product={product} version={version} plan={plan} />
+          <Header history={history} jobId={jobId} />
+          <PageHeader
+            product={product}
+            version={version}
+            plan={plan}
+            job={job}
+            onRenderControls={this.controls}
+          />
+          <ShareModal
+            isOpen={this.state.modalOpen}
+            job={job}
+            plan={plan}
+            toggleModal={this.toggleModal}
+            updateJob={doUpdateJob}
+          />
           <BodyContainer>
-            <Toasts model={job} label="Installation" />
-            <div
-              className="slds-p-around_medium
-                slds-size_1-of-1
-                slds-medium-size_1-of-2"
-            >
-              <div className="slds-text-longform">
-                <h3 className="slds-text-heading_small">{plan.title}</h3>
-                <JobResults job={job} label="Installation" />
-              </div>
-              <CtaButton job={job} />
-            </div>
-            <div
-              className="slds-p-around_medium
-                slds-size_1-of-1
-                slds-medium-size_1-of-2"
-            >
-              <UserInfo job={job} />
-            </div>
-            <div
-              className="slds-p-around_medium
-                  slds-size_1-of-1"
-            >
-              <ProgressBar job={job} />
-            </div>
-            {plan.steps.length ? (
-              <div
-                className="slds-p-around_medium
-                  slds-size_1-of-1"
-              >
-                <StepsTable plan={plan} job={job} />
-              </div>
+            <Toasts job={job} label={t('Installation')} />
+            <Intro
+              averageDuration={plan.average_duration}
+              results={<JobResults job={job} openModal={this.openModal} />}
+              cta={
+                <CtaButton
+                  job={job}
+                  linkToPlan={linkToPlan}
+                  canceling={canceling}
+                />
+              }
+              postMessage={<JobMessage job={job} />}
+              backLink={
+                job.status === CONSTANTS.STATUS.STARTED ? null : (
+                  <BackLink
+                    label={t('Install another product')}
+                    url={routes.product_list()}
+                    className="slds-p-top_small"
+                  />
+                )
+              }
+            />
+            <UserInfo job={job} />
+            <ProgressBar job={job} />
+            {plan.steps && plan.steps.length ? (
+              <StepsTable plan={plan} job={job} />
             ) : null}
           </BodyContainer>
         </>
@@ -165,31 +295,14 @@ class JobDetail extends React.Component<Props> {
   }
 }
 
-const selectJobsState = (appState: AppState): JobsState => appState.jobs;
-
-const selectJobId = (
-  appState: AppState,
-  { match: { params } }: InitialProps,
-): ?string => params.jobId;
-
-const selectJob = createSelector(
-  [selectJobsState, selectJobId],
-  (jobs: JobsState, jobId: ?string): ?JobType => {
-    if (!jobId) {
-      return undefined;
-    }
-    // A `null` job means we already fetched and no prior job exists
-    // An `undefined` job means we don't know whether a job exists
-    return jobs[jobId];
-  },
-);
-
 const select = (appState: AppState, props: InitialProps) => ({
   user: selectUserState(appState),
   product: selectProduct(appState, props),
+  productSlug: selectProductSlug(appState, props),
   version: selectVersion(appState, props),
   versionLabel: selectVersionLabel(appState, props),
   plan: selectPlan(appState, props),
+  planSlug: selectPlanSlug(appState, props),
   job: selectJob(appState, props),
   jobId: selectJobId(appState, props),
 });
@@ -197,6 +310,8 @@ const select = (appState: AppState, props: InitialProps) => ({
 const actions = {
   doFetchVersion: fetchVersion,
   doFetchJob: fetchJob,
+  doUpdateJob: updateJob,
+  doRequestCancelJob: requestCancelJob,
 };
 
 const WrappedJobDetail: React.ComponentType<InitialProps> = connect(

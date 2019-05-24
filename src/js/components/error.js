@@ -1,10 +1,10 @@
 // @flow
 
 import * as React from 'react';
+import { Trans } from 'react-i18next';
 
 import routes from 'utils/routes';
 import { logError } from 'utils/logging';
-
 import { EmptyIllustration } from 'components/404';
 
 type Props = { children: React.Node };
@@ -26,9 +26,9 @@ class ErrorBoundary extends React.Component<Props, { hasError: boolean }> {
       return (
         <EmptyIllustration
           message={
-            <>
-              An error occured. Try the <a href={routes.home()}>home page</a>?
-            </>
+            <Trans i18nKey="anErrorOccurred">
+              An error occurred. Try the <a href={routes.home()}>home page</a>?
+            </Trans>
           }
         />
       );

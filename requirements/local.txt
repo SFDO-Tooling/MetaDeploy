@@ -2,4 +2,5 @@
 
 -r test.txt
 
-Sphinx==1.8.2
+django-extensions==2.1.7
+ipython==7.5.0

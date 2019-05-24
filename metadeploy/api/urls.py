@@ -1,16 +1,19 @@
+from django.urls import path
 from rest_framework import routers
 
 from .views import (
     JobViewSet,
-    ProductViewSet,
-    VersionViewSet,
+    OrgViewSet,
     PlanViewSet,
+    ProductViewSet,
+    UserView,
+    VersionViewSet,
 )
 
-
 router = routers.DefaultRouter()
-router.register(r'jobs', JobViewSet, basename='job')
-router.register(r'products', ProductViewSet)
-router.register(r'versions', VersionViewSet)
-router.register(r'plans', PlanViewSet)
-urlpatterns = router.urls
+router.register("jobs", JobViewSet, basename="job")
+router.register("products", ProductViewSet)
+router.register("versions", VersionViewSet)
+router.register("plans", PlanViewSet)
+router.register("orgs", OrgViewSet, basename="org")
+urlpatterns = router.urls + [path("user/", UserView.as_view(), name="user")]

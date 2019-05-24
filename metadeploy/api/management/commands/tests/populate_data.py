@@ -8,6 +8,6 @@ from ....models import Product
 def test_populate_data():
     assert Product.objects.count() == 0
 
-    call_command('populate_data')
+    call_command("populate_data")
 
-    assert Product.objects.count() == 8
+    assert Product.objects.count() == 9

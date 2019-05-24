@@ -1,23 +1,25 @@
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { StaticRouter } from 'react-router-dom';
 import { fireEvent } from 'react-testing-library';
-
-import { fetchVersion } from 'products/actions';
-import { fetchPreflight } from 'plans/actions';
 
 import { renderWithRedux, storeWithApi } from './../../utils';
 
+import routes from 'utils/routes';
+import { fetchPreflight } from 'store/plans/actions';
+import { fetchPlan, fetchVersion } from 'store/products/actions';
 import PlanDetail from 'components/plans/detail';
 
-jest.mock('products/actions');
-jest.mock('plans/actions');
+jest.mock('store/products/actions');
+jest.mock('store/plans/actions');
 
 fetchVersion.mockReturnValue({ type: 'TEST' });
 fetchPreflight.mockReturnValue({ type: 'TEST' });
+fetchPlan.mockReturnValue({ type: 'TEST' });
 
 afterEach(() => {
   fetchVersion.mockClear();
   fetchPreflight.mockClear();
+  fetchPlan.mockClear();
 });
 
 const defaultState = {
@@ -25,6 +27,7 @@ const defaultState = {
     {
       id: 'p1',
       slug: 'product-1',
+      old_slugs: ['old-product'],
       title: 'Product 1',
       description: 'This is a test product.',
       category: 'salesforce',
@@ -37,8 +40,9 @@ const defaultState = {
         primary_plan: {
           id: 'plan-1',
           slug: 'my-plan',
+          old_slugs: ['old-plan'],
           title: 'My Plan',
-          preflight_message: 'Preflight text...',
+          preflight_message: 'Preflight text…',
           steps: [
             {
               id: 'step-1',
@@ -65,24 +69,44 @@ const defaultState = {
               is_recommended: false,
             },
           ],
+          is_allowed: true,
+          requires_preflight: true,
         },
         secondary_plan: {
           id: 'plan-2',
           slug: 'other-plan',
+          old_slugs: [],
           title: 'My Other Plan',
           preflight_message: '',
           steps: [{ id: 'step-5', name: 'My Other Step' }],
+          requires_preflight: true,
+          is_allowed: true,
         },
-        additional_plans: [
-          {
+        additional_plans: {
+          'third-plan': {
             id: 'plan-3',
             slug: 'third-plan',
+            old_slugs: [],
             title: 'My Third Plan',
-            preflight_message: 'Third preflight text...',
+            preflight_message: 'Third preflight text…',
             steps: [],
+            is_allowed: true,
+            requires_preflight: true,
           },
-        ],
+          'fourth-plan': {
+            id: 'plan-4',
+            slug: 'fourth-plan',
+            old_slugs: [],
+            title: 'My Restricted Plan',
+            preflight_message: null,
+            steps: null,
+            is_allowed: false,
+            requires_preflight: true,
+            not_allowed_instructions: 'plan restricted',
+          },
+        },
       },
+      is_allowed: true,
     },
   ],
   preflights: {
@@ -92,14 +116,15 @@ const defaultState = {
       error_count: 0,
       warning_count: 0,
       results: {
-        'step-1': [{ status: 'optional' }],
-        'step-3': [{ status: 'skip' }],
+        'step-1': { status: 'optional' },
+        'step-3': { status: 'skip' },
       },
       is_ready: true,
     },
   },
-  user: { valid_token_for: 'foo' },
+  user: { valid_token_for: 'foo', org_type: 'an org' },
   jobs: {},
+  org: null,
 };
 
 describe('<PlanDetail />', () => {
@@ -112,30 +137,102 @@ describe('<PlanDetail />', () => {
     };
     const opts = { ...defaults, ...options };
     const { productSlug, versionLabel, planSlug, rerenderFn } = opts;
+    const context = {};
     const {
       getByText,
+      getAllByText,
       queryByText,
       getByAltText,
       container,
       rerender,
     } = renderWithRedux(
-      <MemoryRouter>
+      <StaticRouter context={context}>
         <PlanDetail
           match={{ params: { productSlug, versionLabel, planSlug } }}
         />
-      </MemoryRouter>,
+      </StaticRouter>,
       opts.initialState,
       storeWithApi,
       rerenderFn,
     );
-    return { getByText, queryByText, getByAltText, container, rerender };
+    return {
+      getByText,
+      getAllByText,
+      queryByText,
+      getByAltText,
+      container,
+      rerender,
+      context,
+    };
   };
+
+  describe('insufficient permissions for user', () => {
+    test('renders login button', () => {
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          user: { valid_token_for: 'foo', org_type: null },
+        },
+      });
+
+      expect(getByText('Log in with a different org')).toBeVisible();
+    });
+  });
+
+  describe('installation is already running on org', () => {
+    test('renders warning and disabled button', () => {
+      const { getByText, getAllByText } = setup({
+        initialState: {
+          ...defaultState,
+          org: {
+            current_job: {
+              id: '1',
+              product_slug: 'product-1',
+              version_label: '1.0.0',
+              plan_slug: 'my-plan',
+            },
+            current_preflight: null,
+          },
+        },
+      });
+
+      expect(getByText('View the running installation.')).toBeVisible();
+      expect(getAllByText('Install')[0]).toBeDisabled();
+    });
+  });
+
+  describe('preflight is already running on org', () => {
+    test('renders warning and disabled button', () => {
+      const { getByText, getAllByText } = setup({
+        initialState: {
+          ...defaultState,
+          org: { current_job: null, current_preflight: '1' },
+        },
+      });
+
+      expect(
+        getByText('A pre-install validation is currently running on this org.'),
+      ).toBeVisible();
+      expect(getAllByText('Install')[0]).toBeDisabled();
+    });
+  });
 
   describe('no product', () => {
     test('renders <ProductNotFound />', () => {
       const { getByText } = setup({ initialState: { products: [] } });
 
       expect(getByText('list of all products')).toBeVisible();
+    });
+  });
+
+  describe('product has old_slug', () => {
+    test('redirects to plan_detail with new slug', () => {
+      const { context } = setup({ productSlug: 'old-product' });
+
+      expect(context.action).toEqual('REPLACE');
+      expect(context.url).toEqual(
+        routes.plan_detail('product-1', '1.0.0', 'my-plan'),
+      );
     });
   });
 
@@ -197,8 +294,47 @@ describe('<PlanDetail />', () => {
 
     expect(getByText('Product 1, 1.0.0')).toBeVisible();
     expect(getByText('My Plan')).toBeVisible();
-    expect(getByText('Preflight text...')).toBeVisible();
+    expect(getByText('Preflight text…')).toBeVisible();
     expect(getByText('Step 1')).toBeVisible();
+  });
+
+  test('renders average time', () => {
+    const product = defaultState.products[0];
+    const { getByText } = setup({
+      initialState: {
+        ...defaultState,
+        products: [
+          {
+            ...product,
+            most_recent_version: {
+              ...product.most_recent_version,
+              primary_plan: {
+                ...product.most_recent_version.primary_plan,
+                average_duration: '30',
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    expect(getByText('Average Install Time:')).toBeVisible();
+    expect(getByText('30 seconds.')).toBeVisible();
+  });
+
+  test('renders preflight expiration warning', () => {
+    const { getByText } = setup({
+      initialState: {
+        ...defaultState,
+        org: { current_job: null, current_preflight: null },
+      },
+    });
+
+    expect(
+      getByText('not run within 10 minutes', {
+        exact: false,
+      }),
+    ).toBeVisible();
   });
 
   test('renders secondary_plan detail (no preflight)', () => {
@@ -217,16 +353,80 @@ describe('<PlanDetail />', () => {
     });
 
     expect(getByText('Product 1, 1.0.0')).toBeVisible();
-    expect(getByText('Third preflight text...')).toBeVisible();
+    expect(getByText('Third preflight text…')).toBeVisible();
+  });
+
+  describe('unknown plan', () => {
+    test('fetches plan', () => {
+      setup({ planSlug: 'possibly' });
+
+      expect(fetchPlan).toHaveBeenCalledWith({
+        product: 'p1',
+        version: 'v1',
+        slug: 'possibly',
+      });
+    });
   });
 
   describe('no plan', () => {
     test('renders <PlanNotFound />', () => {
+      const product = defaultState.products[0];
       const { getByText } = setup({
         planSlug: 'nope',
+        initialState: {
+          ...defaultState,
+          products: [
+            {
+              ...product,
+              most_recent_version: {
+                ...product.most_recent_version,
+                additional_plans: {
+                  ...product.most_recent_version.additional_plans,
+                  nope: null,
+                },
+              },
+            },
+          ],
+        },
       });
 
       expect(getByText('another plan')).toBeVisible();
+    });
+  });
+
+  describe('plan has old_slug', () => {
+    test('redirects to plan_detail with new slug', () => {
+      const { context } = setup({ planSlug: 'old-plan' });
+
+      expect(context.action).toEqual('REPLACE');
+      expect(context.url).toEqual(
+        routes.plan_detail('product-1', '1.0.0', 'my-plan'),
+      );
+    });
+  });
+
+  describe('product and plan have old_slugs', () => {
+    test('redirects to plan_detail with new slug', () => {
+      const { context } = setup({
+        productSlug: 'old-product',
+        planSlug: 'old-plan',
+      });
+
+      expect(context.action).toEqual('REPLACE');
+      expect(context.url).toEqual(
+        routes.plan_detail('product-1', '1.0.0', 'my-plan'),
+      );
+    });
+  });
+
+  describe('plan is restricted', () => {
+    test('renders <PlanNotAllowed />', () => {
+      const { getByText } = setup({
+        planSlug: 'fourth-plan',
+      });
+
+      expect(getByText('another plan')).toBeVisible();
+      expect(getByText('plan restricted')).toBeVisible();
     });
   });
 
@@ -234,13 +434,9 @@ describe('<PlanDetail />', () => {
     test('updates checkbox', () => {
       const { container } = setup();
       const checkbox1 = container.querySelector('#step-step-1');
-      const checkbox2 = container.querySelector('#step-step-2');
-      const checkbox3 = container.querySelector('#step-step-3');
       const checkbox4 = container.querySelector('#step-step-4');
 
       expect(checkbox1.checked).toBe(true);
-      expect(checkbox2.checked).toBe(true);
-      expect(checkbox3.checked).toBe(false);
       expect(checkbox4.checked).toBe(false);
 
       fireEvent.click(checkbox4);
