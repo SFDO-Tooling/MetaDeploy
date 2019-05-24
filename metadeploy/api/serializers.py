@@ -7,7 +7,16 @@ from rest_framework.fields import SkipField
 from rest_framework.relations import PKOnlyObject
 
 from .constants import ERROR, WARN
-from .models import Job, Plan, PreflightResult, Product, SiteProfile, Step, Version
+from .models import (
+    ORG_TYPES,
+    Job,
+    Plan,
+    PreflightResult,
+    Product,
+    SiteProfile,
+    Step,
+    Version,
+)
 
 User = get_user_model()
 
@@ -101,7 +110,7 @@ class FullUserSerializer(serializers.ModelSerializer):
         )
 
     def get_is_production_org(self, obj):
-        return obj.full_org_type == "Production"
+        return obj.full_org_type == ORG_TYPES.Production
 
 
 class LimitedUserSerializer(serializers.ModelSerializer):
@@ -364,7 +373,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         return None
 
     def get_is_production_org(self, obj):
-        return obj.full_org_type == "Production"
+        return obj.full_org_type == ORG_TYPES.Production
 
     @staticmethod
     def _has_valid_preflight(most_recent_preflight, plan):
