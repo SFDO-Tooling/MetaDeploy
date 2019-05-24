@@ -264,6 +264,7 @@ class JobDetail extends React.Component<Props, State> {
             <Toasts job={job} label={t('Installation')} />
             <Intro
               averageDuration={plan.average_duration}
+              isProductionOrg={job.is_production_org}
               results={<JobResults job={job} openModal={this.openModal} />}
               cta={
                 <CtaButton

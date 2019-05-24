@@ -4,6 +4,7 @@ from django.forms.widgets import CheckboxSelectMultiple
 from parler.admin import TranslatableAdmin
 
 from .models import (
+    ORG_TYPES,
     AllowedList,
     AllowedListOrg,
     ClickThroughAgreement,
@@ -51,9 +52,7 @@ class PlanMixin:
 class AllowedListAdmin(admin.ModelAdmin):
     list_display = ("title", "description")
     formfield_overrides = {
-        ArrayField: {
-            "widget": ArrayFieldCheckboxSelectMultiple(choices=AllowedList.ORG_TYPES)
-        }
+        ArrayField: {"widget": ArrayFieldCheckboxSelectMultiple(choices=ORG_TYPES)}
     }
 
 
