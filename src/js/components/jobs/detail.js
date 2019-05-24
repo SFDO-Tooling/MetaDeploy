@@ -23,10 +23,11 @@ import { getLoadingOrNotFound, shouldFetchVersion } from 'components/utils';
 import BackLink from 'components/backLink';
 import BodyContainer from 'components/bodyContainer';
 import CtaButton from 'components/jobs/ctaButton';
-import Header from 'components/plans/header';
+import Header from 'components/header';
 import Intro from 'components/plans/intro';
 import JobMessage from 'components/jobs/jobMessage';
 import JobResults from 'components/jobs/jobResults';
+import PageHeader from 'components/plans/header';
 import ProductNotFound from 'components/products/product404';
 import ProgressBar from 'components/jobs/progressBar';
 import ShareModal from 'components/jobs/shareModal';
@@ -207,6 +208,7 @@ class JobDetail extends React.Component<Props, State> {
       planSlug,
       job,
       jobId,
+      history,
       doUpdateJob,
     } = this.props;
     const loadingOrNotFound = getLoadingOrNotFound({
@@ -243,7 +245,8 @@ class JobDetail extends React.Component<Props, State> {
         }`}
       >
         <>
-          <Header
+          <Header history={history} jobId={jobId} />
+          <PageHeader
             product={product}
             version={version}
             plan={plan}

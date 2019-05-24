@@ -6,32 +6,35 @@ import Tabs from '@salesforce/design-system-react/components/tabs';
 import TabsPanel from '@salesforce/design-system-react/components/tabs/panel';
 import { connect } from 'react-redux';
 import { t } from 'i18next';
-import { prettyHashUrl } from 'utils/helpers';
 
+import { prettyHashUrl } from 'utils/helpers';
 import {
   selectProductCategories,
   selectProductsByCategory,
 } from 'store/products/selectors';
-import Header from 'components/products/listHeader';
+import Header from 'components/header';
+import PageHeader from 'components/products/listHeader';
 import ProductItem from 'components/products/listItem';
 import { EmptyIllustration } from 'components/404';
 import type { AppState } from 'store';
+import type { InitialProps } from 'components/utils';
 import type { ProductsMapType } from 'store/products/selectors';
 import type { Products as ProductsType } from 'store/products/reducer';
 
 type Props = {
+  ...InitialProps,
   productsByCategory: ProductsMapType,
   productCategories: Array<string>,
 };
 type State = {
   activeProductsTab: string | null,
-  hash: '',
+  hash: string,
 };
 
 class ProductsList extends React.Component<Props, State> {
   constructor(props) {
     super(props);
-    let activeProductsTab;
+    let activeProductsTab = null;
     try {
       activeProductsTab = window.sessionStorage.getItem('activeProductsTab');
     } catch (e) {
@@ -70,9 +73,9 @@ class ProductsList extends React.Component<Props, State> {
   };
 
   componentDidMount() {
-    const { activeProductsTab, hash } = this.state;
+    const { activeProductsTab } = this.state;
     const { history, productCategories, productsByCategory } = this.props;
-    const hasCategories = !!productsByCategory.size;
+    const hasCategories = Boolean(productsByCategory.size);
     let urlHash;
     if (hasCategories && !activeProductsTab) {
       // make the first category the hash url
@@ -90,7 +93,7 @@ class ProductsList extends React.Component<Props, State> {
     history.push(location);
   }
 
-  componentDidUpdate() {}
+  // componentDidUpdate() {}
 
   render(): React.Node {
     let contents;
@@ -136,8 +139,9 @@ class ProductsList extends React.Component<Props, State> {
 
     return (
       <DocumentTitle title={`${t('Products')} | ${window.SITE_NAME}`}>
-        <React.Fragment>
-          <Header />
+        <>
+          <Header history={this.props.history} />
+          <PageHeader />
           <div className="slds-p-around_x-large">
             {window.GLOBALS.SITE && window.GLOBALS.SITE.welcome_text ? (
               // These messages are pre-cleaned by the API
@@ -154,18 +158,18 @@ class ProductsList extends React.Component<Props, State> {
             ) : null}
             {contents}
           </div>
-        </React.Fragment>
+        </>
       </DocumentTitle>
     );
   }
 }
 
-const select = (appState: AppState): Props => ({
+const select = (appState: AppState) => ({
   productCategories: selectProductCategories(appState),
   productsByCategory: selectProductsByCategory(appState),
 });
 
-const WrappedProductsList: React.ComponentType<{}> = connect(select)(
+const WrappedProductsList: React.ComponentType<InitialProps> = connect(select)(
   ProductsList,
 );
 

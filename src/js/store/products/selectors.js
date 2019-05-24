@@ -4,6 +4,7 @@ import { createSelector } from 'reselect';
 
 import type { AppState } from 'store';
 import type { InitialProps } from 'components/utils';
+import type { Plan as PlanType } from 'store/plans/reducer';
 import type {
   Product as ProductType,
   Products as ProductsType,
@@ -13,8 +14,10 @@ import type {
 export type ProductsMapType = Map<string, Array<ProductType>>;
 
 export type VersionPlanType = {
-  +label: string | null,
-  +slug: string | null,
+  +label?: string | null,
+  +slug?: string | null,
+  +maybeVersion?: string,
+  +maybeSlug?: string,
 };
 
 const selectProductsState = (appState: AppState): ProductsType =>
@@ -99,29 +102,53 @@ const selectVersionLabelOrPlanSlug: (
   AppState,
   InitialProps,
 ) => VersionPlanType = createSelector(
-  [selectProduct, selectVersionLabel],
+  [selectProduct, selectVersion, selectVersionLabel],
   (
     product: ProductType | null,
+    version: VersionType | null,
     maybeVersionLabel: ?string,
   ): VersionPlanType => {
     // There's a chance that the versionLabel is really a planSlug.
-    // In that case, check the most recent version in the product and see.
+    // Check the most recent version in the product and see.
     if (!product || !maybeVersionLabel) {
       return { label: null, slug: null };
     }
-    const version = product.most_recent_version;
-    if (version) {
-      const slugs = version.additional_plans.map(plan => plan.slug);
-      if (version.primary_plan) {
-        slugs.push(version.primary_plan.slug);
+    const { most_recent_version } = product;
+    if (!version && most_recent_version) {
+      const slugs = [];
+      /* istanbul ignore else */
+      if (most_recent_version.primary_plan) {
+        slugs.push(most_recent_version.primary_plan.slug);
       }
-      if (version.secondary_plan) {
-        slugs.push(version.secondary_plan.slug);
+      /* istanbul ignore else */
+      if (most_recent_version.secondary_plan) {
+        slugs.push(most_recent_version.secondary_plan.slug);
+      }
+      /* istanbul ignore else */
+      if (most_recent_version.additional_plans) {
+        // Add all slugs (current and old) from all known plans
+        slugs.push(
+          ...(Object.entries(most_recent_version.additional_plans): any)
+            .filter((item: Array<[string, PlanType | null]>) => item[1])
+            .map((item: Array<[string, PlanType]>) => item[0]),
+        );
       }
       if (slugs.includes(maybeVersionLabel)) {
         return {
-          label: version.label,
+          label: most_recent_version.label,
           slug: maybeVersionLabel,
+        };
+      }
+      if (
+        !(
+          most_recent_version.additional_plans &&
+          most_recent_version.additional_plans[maybeVersionLabel] === null
+        )
+      ) {
+        // Check to see if plan exists on version...
+        return {
+          maybeVersion: most_recent_version.id,
+          maybeSlug: maybeVersionLabel,
         };
       }
     }

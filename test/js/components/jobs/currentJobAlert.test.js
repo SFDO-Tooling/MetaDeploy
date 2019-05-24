@@ -16,7 +16,7 @@ describe('<CurrentJobAlert />', () => {
       ...options,
     };
     const { getByText } = render(
-      <CurrentJobAlert currentJob={opts.currentJob} />,
+      <CurrentJobAlert currentJob={opts.currentJob} history={opts.history} />,
     );
     return { getByText };
   };
@@ -54,5 +54,14 @@ describe('<CurrentJobAlert />', () => {
     fireEvent.click(getByText('View installation.'));
 
     expect(window.location.assign).toHaveBeenCalledTimes(1);
+  });
+
+  test('calls history.push on click if available', () => {
+    const history = { push: jest.fn() };
+    const { getByText } = setup({ history });
+
+    fireEvent.click(getByText('View installation.'));
+
+    expect(history.push).toHaveBeenCalledTimes(1);
   });
 });

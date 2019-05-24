@@ -48,9 +48,7 @@ export const selectPlan: (
     ) {
       return secondary_plan;
     }
-    const plan = additional_plans.find(
-      p => p.slug === planSlug || p.old_slugs.includes(planSlug),
-    );
+    const plan = additional_plans && additional_plans[planSlug];
     return plan || null;
   },
 );

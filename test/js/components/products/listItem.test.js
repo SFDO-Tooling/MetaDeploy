@@ -40,7 +40,6 @@ describe('<ProductItem />', () => {
               id: 'plan-1',
               title: 'My Plan',
             },
-            additional_plans: [],
           },
         },
         {

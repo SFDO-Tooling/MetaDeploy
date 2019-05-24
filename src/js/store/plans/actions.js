@@ -38,6 +38,7 @@ export type PreflightInvalid = {
   type: 'PREFLIGHT_INVALIDATED',
   payload: Preflight,
 };
+
 export type PlansAction =
   | FetchPreflightStarted
   | FetchPreflightSucceeded

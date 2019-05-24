@@ -31,7 +31,6 @@ import AuthError from 'components/authError';
 import ErrorBoundary from 'components/error';
 import Footer from 'components/footer';
 import FourOhFour from 'components/404';
-import Header from 'components/header';
 import JobDetail from 'components/jobs/detail';
 import PlanDetail from 'components/plans/detail';
 import ProductsList from 'components/products/list';
@@ -45,7 +44,6 @@ const App = () => (
         slds-grid_vertical"
     >
       <ErrorBoundary>
-        <Header />
         <div
           className="slds-grow
             slds-shrink-none"

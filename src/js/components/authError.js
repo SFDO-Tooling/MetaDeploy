@@ -7,17 +7,19 @@ import { Trans } from 'react-i18next';
 import { connect } from 'react-redux';
 import { t } from 'i18next';
 
-import routes from 'utils/routes';
-import { selectUserState } from 'store/user/selectors';
+import Header from 'components/header';
 import Login from 'components/header/login';
+import routes from 'utils/routes';
 import { EmptyIllustration } from 'components/404';
+import { selectUserState } from 'store/user/selectors';
 import type { AppState } from 'store';
 import type { InitialProps } from 'components/utils';
 import type { User as UserType } from 'store/user/reducer';
 
-const AuthError = ({ user }: { user: UserType }) => (
+const AuthError = ({ user, history }: { ...InitialProps, user: UserType }) => (
   <DocumentTitle title={`${t('Authentication Error')} | ${window.SITE_NAME}`}>
     <>
+      <Header history={history} />
       <EmptyIllustration
         message={
           <Trans i18nKey="errorWithAccount">
