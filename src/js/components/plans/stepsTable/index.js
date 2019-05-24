@@ -209,6 +209,9 @@ class StepsTable extends React.Component<Props, State> {
               <NameDataCell
                 preflight={preflight}
                 job={job}
+                selectedSteps={
+                  hasValidToken && hasReadyPreflight ? selectedSteps : undefined
+                }
                 activeJobStep={activeJobStepId}
                 togglePanel={this.togglePanel}
                 expandedPanels={expandedPanels}

@@ -363,6 +363,7 @@ class PlanDetail extends React.Component<Props, State> {
               ) : null}
               <Intro
                 averageDuration={plan.average_duration}
+                isProductionOrg={Boolean(user && user.is_production_org)}
                 preMessage={
                   plan.preflight_message ? (
                     // These messages are pre-cleaned by the API

@@ -83,6 +83,7 @@ const defaultState = {
       results: { 'step-1': [{ status: 'ok' }] },
       org_name: 'Test Org',
       org_type: null,
+      is_production_org: true,
       message: 'Congrats!',
       error_count: 0,
     },
