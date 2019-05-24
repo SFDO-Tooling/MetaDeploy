@@ -74,6 +74,29 @@ class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     queryset = Product.objects.published()
 
+    def list(self, request, *args, **kwargs):
+        """
+        Inlined from rest_framework.mixins.ListModelMixin.list, to
+        override particular bits of logic.
+
+        We can't use filter_queryset, because that applies to individual
+        retrieves, too, and would make any unlisted Product entirely
+        unfindable.
+        """
+        queryset = self.filter_queryset(self.get_queryset())
+
+        queryset = queryset.exclude(is_listed=False)
+
+        page = self.paginate_queryset(queryset)
+        # XXX: Until we use paginators, this branch will never execute.
+        # Leaving it in per the original method for now, though.
+        if page is not None:  # pragma: nocover
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
 
 class VersionViewSet(viewsets.ModelViewSet):
     serializer_class = VersionSerializer

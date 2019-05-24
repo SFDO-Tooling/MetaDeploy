@@ -446,3 +446,17 @@ class TestVersionAdditionalPlans:
                 "average_duration": None,
             }
         ]
+
+
+@pytest.mark.django_db
+class TestProductViewset:
+    def test_unlisted(self, client, product_factory, version_factory):
+        product1 = product_factory()
+        version_factory(product=product1)
+        product2 = product_factory(is_listed=False)
+        version_factory(product=product2)
+
+        response = client.get(reverse("product-list"))
+
+        assert response.status_code == 200
+        assert len(response.json()) == 1, response.json()
