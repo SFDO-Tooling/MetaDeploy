@@ -12,13 +12,13 @@ import user from 'store/user/reducer';
 import type { JobsState } from 'store/jobs/reducer';
 import type { Org } from 'store/org/reducer';
 import type { PreflightsState } from 'store/plans/reducer';
-import type { Products } from 'store/products/reducer';
+import type { ProductsState } from 'store/products/reducer';
 import type { Socket } from 'store/socket/reducer';
 import type { User } from 'store/user/reducer';
 
 export type AppState = {
   +user: User,
-  +products: Products,
+  +products: ProductsState,
   +preflights: PreflightsState,
   +jobs: JobsState,
   +org: Org,

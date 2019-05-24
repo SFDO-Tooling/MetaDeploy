@@ -95,13 +95,12 @@ export const shouldFetchVersion = ({
   version,
   versionLabel,
 }: {
-  product: ProductType | null,
+  product: ProductType | null | void,
   version?: VersionType | null,
   versionLabel?: ?string,
 }): boolean => {
-  const hasProduct = product !== null;
   const hasVersion = version !== null;
-  if (hasProduct && !hasVersion && versionLabel) {
+  if (product && !hasVersion && versionLabel) {
     const version404 =
       product && product.versions && product.versions[versionLabel] === null;
     if (!version404) {
@@ -150,7 +149,7 @@ export const getLoadingOrNotFound = ({
   maybeVersion,
   maybeSlug,
 }: {
-  product: ProductType | null,
+  product: ProductType | null | void,
   productSlug: ?string,
   version?: VersionType | null,
   versionLabel?: ?string,
@@ -163,8 +162,12 @@ export const getLoadingOrNotFound = ({
   maybeVersion?: string,
   maybeSlug?: string,
 }): React.Node | false => {
-  if (product === null) {
-    return <ProductNotFound />;
+  if (!product) {
+    if (product === null) {
+      return <ProductNotFound />;
+    }
+    // Fetching product from API
+    return <Spinner />;
   }
   // If we have what we think might be a version label and plan slug,
   // return a spinner while checking if plan exists on that version.

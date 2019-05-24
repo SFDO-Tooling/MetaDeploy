@@ -3,16 +3,31 @@
 import type { ThunkAction } from 'redux-thunk';
 
 import { addUrlParams } from 'utils/api';
-import type { Products, Version } from 'store/products/reducer';
+import type { Product, Version } from 'store/products/reducer';
 import type { Plan } from 'store/plans/reducer';
 
-type VersionFilters = {| product: string, label: string |};
 type FetchProductsStarted = { type: 'FETCH_PRODUCTS_STARTED' };
 type FetchProductsSucceeded = {
   type: 'FETCH_PRODUCTS_SUCCEEDED',
-  payload: Products,
+  payload: Array<Product>,
 };
 type FetchProductsFailed = { type: 'FETCH_PRODUCTS_FAILED' };
+type ProductFilters = {|
+  slug: string,
+|};
+type FetchProductStarted = {
+  type: 'FETCH_PRODUCT_STARTED',
+  payload: ProductFilters,
+};
+type FetchProductSucceeded = {
+  type: 'FETCH_PRODUCT_SUCCEEDED',
+  payload: { ...ProductFilters, product: Product | null },
+};
+type FetchProductFailed = {
+  type: 'FETCH_PRODUCT_FAILED',
+  payload: ProductFilters,
+};
+type VersionFilters = {| product: string, label: string |};
 type FetchVersionStarted = {
   type: 'FETCH_VERSION_STARTED',
   payload: VersionFilters,
@@ -59,6 +74,9 @@ export type ProductsAction =
   | FetchProductsStarted
   | FetchProductsSucceeded
   | FetchProductsFailed
+  | FetchProductStarted
+  | FetchProductSucceeded
+  | FetchProductFailed
   | FetchVersionStarted
   | FetchVersionSucceeded
   | FetchVersionFailed
@@ -88,6 +106,33 @@ export const fetchProducts = (): ThunkAction => (
     })
     .catch(err => {
       dispatch({ type: 'FETCH_PRODUCTS_FAILED' });
+      throw err;
+    });
+};
+
+export const fetchProduct = (filters: ProductFilters): ThunkAction => (
+  dispatch,
+  getState,
+  { apiFetch },
+) => {
+  dispatch({ type: 'FETCH_PRODUCT_STARTED', payload: filters });
+  const baseUrl = window.api_urls.product_list();
+  return apiFetch(addUrlParams(baseUrl, { ...filters }))
+    .then(response => {
+      if (!Array.isArray(response)) {
+        const error = (new Error('Invalid response received'): {
+          [string]: mixed,
+        });
+        error.response = response;
+        throw error;
+      }
+      return dispatch({
+        type: 'FETCH_PRODUCT_SUCCEEDED',
+        payload: { ...filters, product: response[0] || null },
+      });
+    })
+    .catch(err => {
+      dispatch({ type: 'FETCH_PRODUCT_FAILED', payload: filters });
       throw err;
     });
 };

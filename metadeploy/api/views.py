@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .constants import REDIS_JOB_CANCEL_KEY
-from .filters import PlanFilter
+from .filters import PlanFilter, ProductFilter
 from .jobs import preflight_job
 from .models import Job, Plan, PreflightResult, Product, Version
 from .permissions import OnlyOwnerOrSuperuserCanDelete
@@ -72,6 +72,8 @@ class JobViewSet(
 
 class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = ProductFilter
     queryset = Product.objects.published()
 
     def list(self, request, *args, **kwargs):

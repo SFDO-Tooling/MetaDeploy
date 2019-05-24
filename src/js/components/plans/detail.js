@@ -10,7 +10,7 @@ import { t } from 'i18next';
 import routes from 'utils/routes';
 import { CONSTANTS } from 'store/plans/reducer';
 import { fetchPreflight, startPreflight } from 'store/plans/actions';
-import { fetchPlan, fetchVersion } from 'store/products/actions';
+import { fetchPlan, fetchProduct, fetchVersion } from 'store/products/actions';
 import { selectOrg } from 'store/org/selectors';
 import {
   selectPlan,
@@ -62,7 +62,7 @@ export type SelectedSteps = Set<string>;
 type Props = {
   ...InitialProps,
   user: UserType,
-  product: ProductType | null,
+  product: ProductType | null | void,
   productSlug: ?string,
   version: VersionType | null,
   versionLabel: ?string,
@@ -70,9 +70,10 @@ type Props = {
   planSlug: ?string,
   preflight: ?PreflightType,
   org: OrgType,
+  doFetchProduct: typeof fetchProduct,
+  doFetchVersion: typeof fetchVersion,
   doFetchPlan: typeof fetchPlan,
   doFetchPreflight: typeof fetchPreflight,
-  doFetchVersion: typeof fetchVersion,
   doStartJob: typeof startJob,
   doStartPreflight: typeof startPreflight,
 };
@@ -86,6 +87,14 @@ class PlanDetail extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = { changedSteps: new Map() };
+  }
+
+  fetchProductIfMissing() {
+    const { product, productSlug, doFetchProduct } = this.props;
+    if (product === undefined && productSlug) {
+      // Fetch product from API
+      doFetchProduct({ slug: productSlug });
+    }
   }
 
   fetchVersionIfMissing() {
@@ -126,14 +135,16 @@ class PlanDetail extends React.Component<Props, State> {
   }
 
   componentDidMount() {
+    this.fetchProductIfMissing();
     this.fetchVersionIfMissing();
-    this.fetchPreflightIfMissing();
     this.fetchPlanIfMissing();
+    this.fetchPreflightIfMissing();
   }
 
   componentDidUpdate(prevProps) {
     const {
       product,
+      productSlug,
       version,
       versionLabel,
       user,
@@ -141,21 +152,28 @@ class PlanDetail extends React.Component<Props, State> {
       planSlug,
       preflight,
     } = this.props;
+    const productChanged =
+      product !== prevProps.product || productSlug !== prevProps.productSlug;
     const versionChanged =
-      product !== prevProps.product ||
+      productChanged ||
       version !== prevProps.version ||
       versionLabel !== prevProps.versionLabel;
     const userChanged = user !== prevProps.user;
     const planChanged =
-      plan !== prevProps.plan || planSlug !== prevProps.planSlug;
+      versionChanged ||
+      plan !== prevProps.plan ||
+      planSlug !== prevProps.planSlug;
     const preflightChanged = preflight !== prevProps.preflight;
+    if (productChanged) {
+      this.fetchProductIfMissing();
+    }
     if (versionChanged) {
       this.fetchVersionIfMissing();
     }
     if (userChanged || planChanged || preflightChanged) {
       this.fetchPreflightIfMissing();
     }
-    if (versionChanged || planChanged) {
+    if (planChanged) {
       this.fetchPlanIfMissing();
     }
   }
@@ -435,11 +453,12 @@ const select = (appState: AppState, props: InitialProps) => ({
 });
 
 const actions = {
+  doFetchProduct: fetchProduct,
   doFetchVersion: fetchVersion,
+  doFetchPlan: fetchPlan,
   doFetchPreflight: fetchPreflight,
   doStartPreflight: startPreflight,
   doStartJob: startJob,
-  doFetchPlan: fetchPlan,
 };
 
 const WrappedPlanDetail: React.ComponentType<InitialProps> = connect(

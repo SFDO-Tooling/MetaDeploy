@@ -11,6 +11,7 @@ import routes from 'utils/routes';
 import {
   fetchAdditionalPlans,
   fetchPlan,
+  fetchProduct,
   fetchVersion,
 } from 'store/products/actions';
 import {
@@ -38,40 +39,69 @@ import type { User as UserType } from 'store/user/reducer';
 import type { VersionPlanType } from 'store/products/selectors';
 import type { Plan as PlanType } from 'store/plans/reducer';
 
-type ProductDetailProps = { product: ProductType | null, productSlug: ?string };
+type ProductDetailProps = {
+  product: ProductType | null | void,
+  productSlug: ?string,
+  doFetchProduct: typeof fetchProduct,
+};
 type VersionDetailProps = {
   ...InitialProps,
   user: UserType,
-  product: ProductType | null,
+  product: ProductType | null | void,
   productSlug: ?string,
   version: VersionType | null,
   versionLabelAndPlanSlug: VersionPlanType,
+  doFetchProduct: typeof fetchProduct,
+  doFetchVersion: typeof fetchVersion,
   doFetchAdditionalPlans: typeof fetchAdditionalPlans,
   doFetchPlan: typeof fetchPlan,
-  doFetchVersion: typeof fetchVersion,
 };
 
-const ProductDetail = ({ product, productSlug }: ProductDetailProps) => {
-  const loadingOrNotFound = getLoadingOrNotFound({
-    product,
-    productSlug,
-    route: 'product_detail',
-  });
-  if (loadingOrNotFound !== false) {
-    return loadingOrNotFound;
+class ProductDetail extends React.Component<ProductDetailProps> {
+  fetchProductIfMissing() {
+    const { product, productSlug, doFetchProduct } = this.props;
+    if (product === undefined && productSlug) {
+      // Fetch product from API
+      doFetchProduct({ slug: productSlug });
+    }
   }
-  // This redundant check is required to satisfy Flow:
-  // https://flow.org/en/docs/lang/refinements/#toc-refinement-invalidations
-  /* istanbul ignore if */
-  if (!product) {
-    return <ProductNotFound />;
+
+  componentDidMount() {
+    this.fetchProductIfMissing();
   }
-  if (!product.most_recent_version) {
-    return <VersionNotFound product={product} />;
+
+  componentDidUpdate(prevProps) {
+    const { product, productSlug } = this.props;
+    const productChanged =
+      product !== prevProps.product || productSlug !== prevProps.productSlug;
+    if (productChanged) {
+      this.fetchProductIfMissing();
+    }
   }
-  const version = product.most_recent_version;
-  return <Redirect to={routes.version_detail(product.slug, version.label)} />;
-};
+
+  render(): React.Node {
+    const { product, productSlug } = this.props;
+    const loadingOrNotFound = getLoadingOrNotFound({
+      product,
+      productSlug,
+      route: 'product_detail',
+    });
+    if (loadingOrNotFound !== false) {
+      return loadingOrNotFound;
+    }
+    // This redundant check is required to satisfy Flow:
+    // https://flow.org/en/docs/lang/refinements/#toc-refinement-invalidations
+    /* istanbul ignore if */
+    if (!product) {
+      return <ProductNotFound />;
+    }
+    if (!product.most_recent_version) {
+      return <VersionNotFound product={product} />;
+    }
+    const version = product.most_recent_version;
+    return <Redirect to={routes.version_detail(product.slug, version.label)} />;
+  }
+}
 
 const BodySection = ({ children }: { children: ?React.Node }) => (
   <div
@@ -85,6 +115,14 @@ const BodySection = ({ children }: { children: ?React.Node }) => (
 );
 
 class VersionDetail extends React.Component<VersionDetailProps> {
+  fetchProductIfMissing() {
+    const { product, productSlug, doFetchProduct } = this.props;
+    if (product === undefined && productSlug) {
+      // Fetch product from API
+      doFetchProduct({ slug: productSlug });
+    }
+  }
+
   fetchVersionIfMissing() {
     const {
       product,
@@ -128,21 +166,32 @@ class VersionDetail extends React.Component<VersionDetailProps> {
   }
 
   componentDidMount() {
+    this.fetchProductIfMissing();
     this.fetchVersionIfMissing();
     this.fetchAdditionalPlansIfMissing();
     this.fetchPlanIfMissing();
   }
 
   componentDidUpdate(prevProps) {
-    const { product, version, versionLabelAndPlanSlug } = this.props;
+    const {
+      product,
+      productSlug,
+      version,
+      versionLabelAndPlanSlug,
+    } = this.props;
     const { label, slug, maybeVersion, maybeSlug } = versionLabelAndPlanSlug;
+    const productChanged =
+      product !== prevProps.product || productSlug !== prevProps.productSlug;
     const versionChanged =
-      product !== prevProps.product ||
+      productChanged ||
       version !== prevProps.version ||
       label !== prevProps.versionLabelAndPlanSlug.label ||
       slug !== prevProps.versionLabelAndPlanSlug.slug ||
       maybeVersion !== prevProps.versionLabelAndPlanSlug.maybeVersion ||
       maybeSlug !== prevProps.versionLabelAndPlanSlug.maybeSlug;
+    if (productChanged) {
+      this.fetchProductIfMissing();
+    }
     if (versionChanged) {
       this.fetchVersionIfMissing();
       this.fetchAdditionalPlansIfMissing();
@@ -314,7 +363,12 @@ const selectVersionDetail = (appState: AppState, props: InitialProps) => ({
   versionLabelAndPlanSlug: selectVersionLabelOrPlanSlug(appState, props),
 });
 
-const actions = {
+const productActions = {
+  doFetchProduct: fetchProduct,
+};
+
+const versionActions = {
+  doFetchProduct: fetchProduct,
   doFetchVersion: fetchVersion,
   doFetchAdditionalPlans: fetchAdditionalPlans,
   doFetchPlan: fetchPlan,
@@ -322,10 +376,11 @@ const actions = {
 
 const WrappedProductDetail: React.ComponentType<InitialProps> = connect(
   selectProductDetail,
+  productActions,
 )(ProductDetail);
 const WrappedVersionDetail: React.ComponentType<InitialProps> = connect(
   selectVersionDetail,
-  actions,
+  versionActions,
 )(VersionDetail);
 
 export {
