@@ -7,7 +7,7 @@ import TabsPanel from '@salesforce/design-system-react/components/tabs/panel';
 import { connect } from 'react-redux';
 import { t } from 'i18next';
 
-import { prettyHashUrl } from 'utils/helpers';
+import { prettyUrlHash } from 'utils/helpers';
 import {
   selectProductCategories,
   selectProductsByCategory,
@@ -28,19 +28,29 @@ type Props = {
 };
 type State = {
   activeProductsTab: string | null,
-  hash: string,
 };
 
 class ProductsList extends React.Component<Props, State> {
   constructor(props) {
     super(props);
     let activeProductsTab = null;
+    let hashTab;
     try {
-      activeProductsTab = window.sessionStorage.getItem('activeProductsTab');
+      if (window.location.hash) {
+        hashTab = props.productCategories.find(
+          category =>
+            window.location.hash.substring(1) === prettyUrlHash(category),
+        );
+      }
+      if (hashTab) {
+        activeProductsTab = hashTab;
+      } else {
+        activeProductsTab = window.sessionStorage.getItem('activeProductsTab');
+      }
     } catch (e) {
       // swallow error
     }
-    this.state = { activeProductsTab, hash: '' };
+    this.state = { activeProductsTab };
   }
 
   static getProductsList(products: ProductsType): React.Node {
@@ -57,43 +67,21 @@ class ProductsList extends React.Component<Props, State> {
   }
 
   handleSelect = (index: number) => {
-    // need to call handleSelect if the component loads witn a different url than what matches active tab
+    const { history } = this.props;
     try {
       const category = this.props.productCategories[index];
       /* istanbul ignore else */
       if (category) {
         window.sessionStorage.setItem('activeProductsTab', category);
+        history.replace({ hash: prettyUrlHash(category) });
       } else {
         window.sessionStorage.removeItem('activeProductsTab');
+        history.replace({ hash: '' });
       }
-      this.setState({ hash: prettyHashUrl(category) });
     } catch (e) {
       // swallor error
     }
   };
-
-  componentDidMount() {
-    const { activeProductsTab } = this.state;
-    const { history, productCategories, productsByCategory } = this.props;
-    const hasCategories = Boolean(productsByCategory.size);
-    let urlHash;
-    if (hasCategories && !activeProductsTab) {
-      // make the first category the hash url
-      urlHash = prettyHashUrl(productCategories[0]);
-    } else {
-      // make saved item  in storage
-      urlHash = prettyHashUrl(activeProductsTab);
-    }
-    // what if we load the page and the hash is different than the
-    const location = {
-      pathname: '/products',
-      hash: urlHash,
-    };
-    this.setState({ hash: urlHash });
-    history.push(location);
-  }
-
-  // componentDidUpdate() {}
 
   render(): React.Node {
     let contents;

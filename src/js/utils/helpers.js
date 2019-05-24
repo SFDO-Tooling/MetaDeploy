@@ -1,2 +1,4 @@
 // @flow
-export const prettyHashUrl = str => str.replace(/\s+/g, '-').toLowerCase();
+
+export const prettyUrlHash = (str: string) =>
+  str.replace(/\s+/g, '-').toLowerCase();
