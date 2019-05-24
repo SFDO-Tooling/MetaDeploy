@@ -45,6 +45,7 @@ from .push import (
 logger = logging.getLogger(__name__)
 VERSION_STRING = r"^[a-zA-Z0-9._+-]+$"
 WorkableModel = Union["Job", "PreflightResult"]
+ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
 
 
 class HashIdMixin(models.Model):
@@ -55,13 +56,6 @@ class HashIdMixin(models.Model):
 
 
 class AllowedList(models.Model):
-    ORG_TYPES = (
-        ("Production", "Production"),
-        ("Scratch", "Scratch"),
-        ("Sandbox", "Sandbox"),
-        ("Developer", "Developer"),
-    )
-
     title = models.CharField(max_length=128, unique=True)
     description = MarkdownField(blank=True, property_suffix="_markdown")
     org_type = ArrayField(
@@ -179,13 +173,13 @@ class User(HashIdMixin, AbstractUser):
         if org_type is None or is_sandbox is None:
             return None
         if org_type == "Developer Edition" and not is_sandbox:
-            return "Developer"
+            return ORG_TYPES.Developer
         if org_type != "Developer Edition" and not is_sandbox:
-            return "Production"
+            return ORG_TYPES.Production
         if is_sandbox and not has_expiration:
-            return "Sandbox"
+            return ORG_TYPES.Sandbox
         if is_sandbox and has_expiration:
-            return "Scratch"
+            return ORG_TYPES.Scratch
 
     @property
     def instance_url(self):
@@ -651,6 +645,7 @@ class Job(HashIdMixin, models.Model):
     org_id = models.CharField(null=True, blank=True, max_length=18)
     org_name = models.CharField(blank=True, max_length=256)
     org_type = models.CharField(blank=True, max_length=256)
+    full_org_type = models.CharField(null=True, blank=True, max_length=256)
     is_public = models.BooleanField(default=False)
     success_at = models.DateTimeField(
         null=True,
