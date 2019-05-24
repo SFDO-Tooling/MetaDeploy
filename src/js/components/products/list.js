@@ -6,6 +6,7 @@ import Tabs from '@salesforce/design-system-react/components/tabs';
 import TabsPanel from '@salesforce/design-system-react/components/tabs/panel';
 import { connect } from 'react-redux';
 import { t } from 'i18next';
+import { prettyHashUrl } from 'utils/helpers';
 
 import {
   selectProductCategories,
@@ -24,18 +25,19 @@ type Props = {
 };
 type State = {
   activeProductsTab: string | null,
+  hash: '',
 };
 
 class ProductsList extends React.Component<Props, State> {
   constructor(props) {
     super(props);
-    let activeProductsTab = null;
+    let activeProductsTab;
     try {
       activeProductsTab = window.sessionStorage.getItem('activeProductsTab');
     } catch (e) {
       // swallow error
     }
-    this.state = { activeProductsTab };
+    this.state = { activeProductsTab, hash: '' };
   }
 
   static getProductsList(products: ProductsType): React.Node {
@@ -52,6 +54,7 @@ class ProductsList extends React.Component<Props, State> {
   }
 
   handleSelect = (index: number) => {
+    // need to call handleSelect if the component loads witn a different url than what matches active tab
     try {
       const category = this.props.productCategories[index];
       /* istanbul ignore else */
@@ -60,10 +63,34 @@ class ProductsList extends React.Component<Props, State> {
       } else {
         window.sessionStorage.removeItem('activeProductsTab');
       }
+      this.setState({ hash: prettyHashUrl(category) });
     } catch (e) {
       // swallor error
     }
   };
+
+  componentDidMount() {
+    const { activeProductsTab, hash } = this.state;
+    const { history, productCategories, productsByCategory } = this.props;
+    const hasCategories = !!productsByCategory.size;
+    let urlHash;
+    if (hasCategories && !activeProductsTab) {
+      // make the first category the hash url
+      urlHash = prettyHashUrl(productCategories[0]);
+    } else {
+      // make saved item  in storage
+      urlHash = prettyHashUrl(activeProductsTab);
+    }
+    // what if we load the page and the hash is different than the
+    const location = {
+      pathname: '/products',
+      hash: urlHash,
+    };
+    this.setState({ hash: urlHash });
+    history.push(location);
+  }
+
+  componentDidUpdate() {}
 
   render(): React.Node {
     let contents;
@@ -106,9 +133,10 @@ class ProductsList extends React.Component<Props, State> {
         break;
       }
     }
+
     return (
       <DocumentTitle title={`${t('Products')} | ${window.SITE_NAME}`}>
-        <>
+        <React.Fragment>
           <Header />
           <div className="slds-p-around_x-large">
             {window.GLOBALS.SITE && window.GLOBALS.SITE.welcome_text ? (
@@ -126,7 +154,7 @@ class ProductsList extends React.Component<Props, State> {
             ) : null}
             {contents}
           </div>
-        </>
+        </React.Fragment>
       </DocumentTitle>
     );
   }
