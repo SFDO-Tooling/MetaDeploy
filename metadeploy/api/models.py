@@ -651,6 +651,7 @@ class Job(HashIdMixin, models.Model):
     org_id = models.CharField(null=True, blank=True, max_length=18)
     org_name = models.CharField(blank=True, max_length=256)
     org_type = models.CharField(blank=True, max_length=256)
+    full_org_type = models.CharField(null=True, blank=True, max_length=256)
     is_public = models.BooleanField(default=False)
     success_at = models.DateTimeField(
         null=True,
