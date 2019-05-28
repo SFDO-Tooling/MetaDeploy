@@ -17,23 +17,28 @@ List
 
    HTTP/1.1 200 OK
 
-   [
-     {
-       "id": "g45z7wA",
-       "title": "Full Install",
-       "version": "XG4pVvD",
-       "preflight_message": "<p>Preflight message</p>",
-       "tier": "primary",
-       "slug": "full-install",
-       "old_slugs": [],
-       "steps": [],
-       "is_allowed": true,
-       "is_listed": true,
-       "not_allowed_instructions": null,
-       "requires_preflight": true
-     },
-     ...
-   ]
+   {
+     "count": 150,
+     "next": "https://.../api/plans/?page=2",
+     "previous": null,
+     "results": [
+       {
+         "id": "g45z7wA",
+         "title": "Full Install",
+         "version": "XG4pVvD",
+         "preflight_message": "<p>Preflight message</p>",
+         "tier": "primary",
+         "slug": "full-install",
+         "old_slugs": [],
+         "steps": [],
+         "is_allowed": true,
+         "is_listed": true,
+         "not_allowed_instructions": null,
+         "requires_preflight": true
+       },
+       ...
+     ]
+   }
 
 Retrieve
 --------
