@@ -355,10 +355,8 @@ MINIMUM_JOBS_FOR_AVERAGE = env("MINIMUM_JOBS_FOR_AVERAGE", type_=int, default=5)
 AVERAGE_JOB_WINDOW = env("AVERAGE_JOB_WINDOW", type_=int, default=20)
 
 REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': (
-        'rest_framework.pagination.LimitOffsetPagination'
-    ),
-    'PAGE_SIZE': 100,
+    "DEFAULT_PAGINATION_CLASS": ("rest_framework.pagination.LimitOffsetPagination"),
+    "PAGE_SIZE": env("API_PAGE_SIZE", type_=int, default=5),
 }
 
 
