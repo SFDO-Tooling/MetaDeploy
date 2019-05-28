@@ -58,6 +58,88 @@ describe('fetchProducts', () => {
   });
 });
 
+describe('fetchProduct', () => {
+  let baseUrl;
+
+  beforeAll(() => {
+    baseUrl = window.api_urls.product_list();
+  });
+
+  describe('success', () => {
+    test('GETs product from api', () => {
+      const store = storeWithApi({});
+      const filters = { slug: 'product-1' };
+      const product = { id: 'p1', slug: 'product-1' };
+      fetchMock.getOnce(addUrlParams(baseUrl, filters), [product]);
+      const started = {
+        type: 'FETCH_PRODUCT_STARTED',
+        payload: filters,
+      };
+      const succeeded = {
+        type: 'FETCH_PRODUCT_SUCCEEDED',
+        payload: { ...filters, product },
+      };
+
+      expect.assertions(1);
+      return store.dispatch(actions.fetchProduct(filters)).then(() => {
+        expect(store.getActions()).toEqual([started, succeeded]);
+      });
+    });
+
+    test('stores null if no product returned from api', () => {
+      const store = storeWithApi({});
+      const filters = { slug: 'product-1' };
+      fetchMock.getOnce(addUrlParams(baseUrl, filters), []);
+      const started = {
+        type: 'FETCH_PRODUCT_STARTED',
+        payload: filters,
+      };
+      const succeeded = {
+        type: 'FETCH_PRODUCT_SUCCEEDED',
+        payload: { ...filters, product: null },
+      };
+
+      expect.assertions(1);
+      return store.dispatch(actions.fetchProduct(filters)).then(() => {
+        expect(store.getActions()).toEqual([started, succeeded]);
+      });
+    });
+  });
+
+  describe('error', () => {
+    test('throws Error', () => {
+      const store = storeWithApi({});
+      const filters = { slug: 'product-1' };
+      fetchMock.getOnce(addUrlParams(baseUrl, filters), 'string');
+
+      expect.assertions(1);
+      return expect(
+        store.dispatch(actions.fetchProduct(filters)),
+      ).rejects.toThrow();
+    });
+
+    test('dispatches FETCH_PRODUCT_FAILED action', () => {
+      const store = storeWithApi({});
+      const filters = { slug: 'product-1' };
+      fetchMock.getOnce(addUrlParams(baseUrl, filters), 500);
+      const started = {
+        type: 'FETCH_PRODUCT_STARTED',
+        payload: filters,
+      };
+      const failed = {
+        type: 'FETCH_PRODUCT_FAILED',
+        payload: filters,
+      };
+
+      expect.assertions(2);
+      return store.dispatch(actions.fetchProduct(filters)).catch(() => {
+        expect(store.getActions()).toEqual([started, failed]);
+        expect(window.console.error).toHaveBeenCalled();
+      });
+    });
+  });
+});
+
 describe('fetchVersion', () => {
   let baseUrl;
 

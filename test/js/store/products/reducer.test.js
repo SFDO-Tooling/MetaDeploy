@@ -2,7 +2,7 @@ import reducer from 'store/products/reducer';
 
 describe('reducer', () => {
   test('returns initial state', () => {
-    const expected = [];
+    const expected = { products: [], notFound: [] };
     const actual = reducer(undefined, {});
 
     expect(actual).toEqual(expected);
@@ -21,28 +21,59 @@ describe('reducer', () => {
       description: 'This is another test product.',
       category: 'salesforce',
     };
-    const expected = [product2];
-    const actual = reducer([product1], {
-      type: 'FETCH_PRODUCTS_SUCCEEDED',
-      payload: expected,
-    });
+    const expected = { products: [product2] };
+    const actual = reducer(
+      { products: [product1] },
+      {
+        type: 'FETCH_PRODUCTS_SUCCEEDED',
+        payload: [product2],
+      },
+    );
 
     expect(actual).toEqual(expected);
   });
 
-  test('handles FETCH_PRODUCTS_FAILED action', () => {
-    const product = {
-      id: 'p1',
-      title: 'Product 1',
-      description: 'This is a test product.',
-      category: 'salesforce',
-    };
-    const expected = [];
-    const actual = reducer([product], {
-      type: 'FETCH_PRODUCTS_FAILED',
+  describe('FETCH_PRODUCT_SUCCEEDED', () => {
+    test('adds product', () => {
+      const product1 = {
+        id: 'p1',
+        title: 'Product 1',
+      };
+      const product2 = {
+        id: 'p2',
+        title: 'Product 2',
+      };
+      const expected = { products: [product1, product2] };
+      const actual = reducer(
+        { products: [product1] },
+        {
+          type: 'FETCH_PRODUCT_SUCCEEDED',
+          payload: { product: product2 },
+        },
+      );
+
+      expect(actual).toEqual(expected);
     });
 
-    expect(actual).toEqual(expected);
+    test('stores slug of missing product', () => {
+      const product1 = {
+        id: 'p1',
+        title: 'Product 1',
+      };
+      const expected = {
+        products: [product1],
+        notFound: ['product-2', 'product-3'],
+      };
+      const actual = reducer(
+        { products: [product1], notFound: ['product-2'] },
+        {
+          type: 'FETCH_PRODUCT_SUCCEEDED',
+          payload: { product: null, slug: 'product-3' },
+        },
+      );
+
+      expect(actual).toEqual(expected);
+    });
   });
 
   test('handles FETCH_VERSION_SUCCEEDED action', () => {
@@ -62,11 +93,14 @@ describe('reducer', () => {
       ...product2,
       versions: { [version.label]: version },
     };
-    const expected = [product1, modifiedProduct2];
-    const actual = reducer([product1, product2], {
-      type: 'FETCH_VERSION_SUCCEEDED',
-      payload: { product: 'p2', label: version.label, version },
-    });
+    const expected = { products: [product1, modifiedProduct2] };
+    const actual = reducer(
+      { products: [product1, product2] },
+      {
+        type: 'FETCH_VERSION_SUCCEEDED',
+        payload: { product: 'p2', label: version.label, version },
+      },
+    );
 
     expect(actual).toEqual(expected);
   });
@@ -94,11 +128,14 @@ describe('reducer', () => {
           fetched_additional_plans: true,
         },
       };
-      const expected = [afterProduct];
-      const actual = reducer([beforeProduct], {
-        type: 'FETCH_ADDITIONAL_PLANS_SUCCEEDED',
-        payload: { product, version, plans },
-      });
+      const expected = { products: [afterProduct] };
+      const actual = reducer(
+        { products: [beforeProduct] },
+        {
+          type: 'FETCH_ADDITIONAL_PLANS_SUCCEEDED',
+          payload: { product, version, plans },
+        },
+      );
 
       expect(actual).toEqual(expected);
     });
@@ -130,11 +167,14 @@ describe('reducer', () => {
           },
         },
       };
-      const expected = [afterProduct];
-      const actual = reducer([beforeProduct], {
-        type: 'FETCH_ADDITIONAL_PLANS_SUCCEEDED',
-        payload: { product, version, plans },
-      });
+      const expected = { products: [afterProduct] };
+      const actual = reducer(
+        { products: [beforeProduct] },
+        {
+          type: 'FETCH_ADDITIONAL_PLANS_SUCCEEDED',
+          payload: { product, version, plans },
+        },
+      );
 
       expect(actual).toEqual(expected);
     });
@@ -149,11 +189,14 @@ describe('reducer', () => {
         id: 'p1',
         most_recent_version: { id: 'v1' },
       };
-      const expected = [beforeProduct];
-      const actual = reducer([beforeProduct], {
-        type: 'FETCH_ADDITIONAL_PLANS_SUCCEEDED',
-        payload: { product, version, plans },
-      });
+      const expected = { products: [beforeProduct] };
+      const actual = reducer(
+        { products: [beforeProduct] },
+        {
+          type: 'FETCH_ADDITIONAL_PLANS_SUCCEEDED',
+          payload: { product, version, plans },
+        },
+      );
 
       expect(actual).toEqual(expected);
     });
@@ -168,11 +211,14 @@ describe('reducer', () => {
         id: 'p1',
         most_recent_version: { id: 'v1' },
       };
-      const expected = [beforeProduct];
-      const actual = reducer([beforeProduct], {
-        type: 'FETCH_ADDITIONAL_PLANS_SUCCEEDED',
-        payload: { product, version, plans },
-      });
+      const expected = { products: [beforeProduct] };
+      const actual = reducer(
+        { products: [beforeProduct] },
+        {
+          type: 'FETCH_ADDITIONAL_PLANS_SUCCEEDED',
+          payload: { product, version, plans },
+        },
+      );
 
       expect(actual).toEqual(expected);
     });
@@ -190,11 +236,14 @@ describe('reducer', () => {
           'version-1': { id: 'v1', label: 'version-1' },
         },
       };
-      const expected = [beforeProduct];
-      const actual = reducer([beforeProduct], {
-        type: 'FETCH_ADDITIONAL_PLANS_SUCCEEDED',
-        payload: { product, version, plans },
-      });
+      const expected = { products: [beforeProduct] };
+      const actual = reducer(
+        { products: [beforeProduct] },
+        {
+          type: 'FETCH_ADDITIONAL_PLANS_SUCCEEDED',
+          payload: { product, version, plans },
+        },
+      );
 
       expect(actual).toEqual(expected);
     });
@@ -223,11 +272,14 @@ describe('reducer', () => {
           additional_plans,
         },
       };
-      const expected = [afterProduct];
-      const actual = reducer([beforeProduct], {
-        type: 'FETCH_PLAN_SUCCEEDED',
-        payload: { product, version, slug, plans },
-      });
+      const expected = { products: [afterProduct] };
+      const actual = reducer(
+        { products: [beforeProduct] },
+        {
+          type: 'FETCH_PLAN_SUCCEEDED',
+          payload: { product, version, slug, plans },
+        },
+      );
 
       expect(actual).toEqual(expected);
     });
@@ -265,11 +317,14 @@ describe('reducer', () => {
           },
         },
       };
-      const expected = [afterProduct];
-      const actual = reducer([beforeProduct], {
-        type: 'FETCH_PLAN_SUCCEEDED',
-        payload: { product, version, slug, plans },
-      });
+      const expected = { products: [afterProduct] };
+      const actual = reducer(
+        { products: [beforeProduct] },
+        {
+          type: 'FETCH_PLAN_SUCCEEDED',
+          payload: { product, version, slug, plans },
+        },
+      );
 
       expect(actual).toEqual(expected);
     });
@@ -293,11 +348,14 @@ describe('reducer', () => {
           additional_plans,
         },
       };
-      const expected = [afterProduct];
-      const actual = reducer([beforeProduct], {
-        type: 'FETCH_PLAN_SUCCEEDED',
-        payload: { product, version, slug, plans },
-      });
+      const expected = { products: [afterProduct] };
+      const actual = reducer(
+        { products: [beforeProduct] },
+        {
+          type: 'FETCH_PLAN_SUCCEEDED',
+          payload: { product, version, slug, plans },
+        },
+      );
 
       expect(actual).toEqual(expected);
     });
@@ -313,11 +371,14 @@ describe('reducer', () => {
         id: 'p1',
         most_recent_version: { id: 'v1' },
       };
-      const expected = [beforeProduct];
-      const actual = reducer([beforeProduct], {
-        type: 'FETCH_PLAN_SUCCEEDED',
-        payload: { product, version, slug, plans },
-      });
+      const expected = { products: [beforeProduct] };
+      const actual = reducer(
+        { products: [beforeProduct] },
+        {
+          type: 'FETCH_PLAN_SUCCEEDED',
+          payload: { product, version, slug, plans },
+        },
+      );
 
       expect(actual).toEqual(expected);
     });
@@ -333,11 +394,14 @@ describe('reducer', () => {
         id: 'p1',
         most_recent_version: { id: 'v1' },
       };
-      const expected = [beforeProduct];
-      const actual = reducer([beforeProduct], {
-        type: 'FETCH_PLAN_SUCCEEDED',
-        payload: { product, version, slug, plans },
-      });
+      const expected = { products: [beforeProduct] };
+      const actual = reducer(
+        { products: [beforeProduct] },
+        {
+          type: 'FETCH_PLAN_SUCCEEDED',
+          payload: { product, version, slug, plans },
+        },
+      );
 
       expect(actual).toEqual(expected);
     });
@@ -356,11 +420,14 @@ describe('reducer', () => {
           'version-1': { id: 'v1', label: 'version-1' },
         },
       };
-      const expected = [beforeProduct];
-      const actual = reducer([beforeProduct], {
-        type: 'FETCH_PLAN_SUCCEEDED',
-        payload: { product, version, slug, plans },
-      });
+      const expected = { products: [beforeProduct] };
+      const actual = reducer(
+        { products: [beforeProduct] },
+        {
+          type: 'FETCH_PLAN_SUCCEEDED',
+          payload: { product, version, slug, plans },
+        },
+      );
 
       expect(actual).toEqual(expected);
     });

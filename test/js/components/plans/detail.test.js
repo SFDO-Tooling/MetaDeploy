@@ -6,109 +6,114 @@ import { renderWithRedux, storeWithApi } from './../../utils';
 
 import routes from 'utils/routes';
 import { fetchPreflight } from 'store/plans/actions';
-import { fetchPlan, fetchVersion } from 'store/products/actions';
+import { fetchPlan, fetchProduct, fetchVersion } from 'store/products/actions';
 import PlanDetail from 'components/plans/detail';
 
 jest.mock('store/products/actions');
 jest.mock('store/plans/actions');
 
-fetchVersion.mockReturnValue({ type: 'TEST' });
-fetchPreflight.mockReturnValue({ type: 'TEST' });
 fetchPlan.mockReturnValue({ type: 'TEST' });
+fetchPreflight.mockReturnValue({ type: 'TEST' });
+fetchProduct.mockReturnValue({ type: 'TEST' });
+fetchVersion.mockReturnValue({ type: 'TEST' });
 
 afterEach(() => {
-  fetchVersion.mockClear();
-  fetchPreflight.mockClear();
   fetchPlan.mockClear();
+  fetchPreflight.mockClear();
+  fetchProduct.mockClear();
+  fetchVersion.mockClear();
 });
 
 const defaultState = {
-  products: [
-    {
-      id: 'p1',
-      slug: 'product-1',
-      old_slugs: ['old-product'],
-      title: 'Product 1',
-      description: 'This is a test product.',
-      category: 'salesforce',
-      image: null,
-      most_recent_version: {
-        id: 'v1',
-        product: 'p1',
-        label: '1.0.0',
-        description: 'This is a test product version.',
-        primary_plan: {
-          id: 'plan-1',
-          slug: 'my-plan',
-          old_slugs: ['old-plan'],
-          title: 'My Plan',
-          preflight_message: 'Preflight text…',
-          steps: [
-            {
-              id: 'step-1',
-              name: 'Step 1',
-              is_required: true,
-              is_recommended: true,
-            },
-            {
-              id: 'step-2',
-              name: 'Step 2',
-              is_required: true,
-              is_recommended: false,
-            },
-            {
-              id: 'step-3',
-              name: 'Step 3',
-              is_required: false,
-              is_recommended: true,
-            },
-            {
-              id: 'step-4',
-              name: 'Step 4',
-              is_required: false,
-              is_recommended: false,
-            },
-          ],
-          is_allowed: true,
-          requires_preflight: true,
-        },
-        secondary_plan: {
-          id: 'plan-2',
-          slug: 'other-plan',
-          old_slugs: [],
-          title: 'My Other Plan',
-          preflight_message: '',
-          steps: [{ id: 'step-5', name: 'My Other Step' }],
-          requires_preflight: true,
-          is_allowed: true,
-        },
-        additional_plans: {
-          'third-plan': {
-            id: 'plan-3',
-            slug: 'third-plan',
-            old_slugs: [],
-            title: 'My Third Plan',
-            preflight_message: 'Third preflight text…',
-            steps: [],
+  products: {
+    products: [
+      {
+        id: 'p1',
+        slug: 'product-1',
+        old_slugs: ['old-product'],
+        title: 'Product 1',
+        description: 'This is a test product.',
+        category: 'salesforce',
+        image: null,
+        most_recent_version: {
+          id: 'v1',
+          product: 'p1',
+          label: '1.0.0',
+          description: 'This is a test product version.',
+          primary_plan: {
+            id: 'plan-1',
+            slug: 'my-plan',
+            old_slugs: ['old-plan'],
+            title: 'My Plan',
+            preflight_message: 'Preflight text…',
+            steps: [
+              {
+                id: 'step-1',
+                name: 'Step 1',
+                is_required: true,
+                is_recommended: true,
+              },
+              {
+                id: 'step-2',
+                name: 'Step 2',
+                is_required: true,
+                is_recommended: false,
+              },
+              {
+                id: 'step-3',
+                name: 'Step 3',
+                is_required: false,
+                is_recommended: true,
+              },
+              {
+                id: 'step-4',
+                name: 'Step 4',
+                is_required: false,
+                is_recommended: false,
+              },
+            ],
             is_allowed: true,
             requires_preflight: true,
           },
-          'fourth-plan': {
-            id: 'plan-4',
-            slug: 'fourth-plan',
+          secondary_plan: {
+            id: 'plan-2',
+            slug: 'other-plan',
             old_slugs: [],
-            title: 'My Restricted Plan',
-            preflight_message: null,
-            steps: null,
-            is_allowed: false,
+            title: 'My Other Plan',
+            preflight_message: '',
+            steps: [{ id: 'step-5', name: 'My Other Step' }],
             requires_preflight: true,
-            not_allowed_instructions: 'plan restricted',
+            is_allowed: true,
+          },
+          additional_plans: {
+            'third-plan': {
+              id: 'plan-3',
+              slug: 'third-plan',
+              old_slugs: [],
+              title: 'My Third Plan',
+              preflight_message: 'Third preflight text…',
+              steps: [],
+              is_allowed: true,
+              requires_preflight: true,
+            },
+            'fourth-plan': {
+              id: 'plan-4',
+              slug: 'fourth-plan',
+              old_slugs: [],
+              title: 'My Restricted Plan',
+              preflight_message: null,
+              steps: null,
+              is_allowed: false,
+              requires_preflight: true,
+              not_allowed_instructions: 'plan restricted',
+            },
           },
         },
+        is_allowed: true,
       },
-      is_allowed: true,
-    },
-  ],
+    ],
+    notFound: [],
+  },
   preflights: {
     'plan-1': {
       status: 'complete',
@@ -219,9 +224,21 @@ describe('<PlanDetail />', () => {
 
   describe('no product', () => {
     test('renders <ProductNotFound />', () => {
-      const { getByText } = setup({ initialState: { products: [] } });
+      const { getByText } = setup({
+        initialState: { products: { products: [], notFound: ['product-1'] } },
+      });
 
       expect(getByText('list of all products')).toBeVisible();
+    });
+  });
+
+  describe('unknown product', () => {
+    test('fetches product', () => {
+      setup({ productSlug: 'other-product' });
+
+      expect(fetchProduct).toHaveBeenCalledWith({
+        slug: 'other-product',
+      });
     });
   });
 
@@ -258,7 +275,21 @@ describe('<PlanDetail />', () => {
   });
 
   describe('componentDidUpdate', () => {
-    describe('version is removed', () => {
+    describe('product is changed', () => {
+      test('fetches product', () => {
+        const { rerender } = setup();
+
+        expect(fetchProduct).not.toHaveBeenCalled();
+
+        setup({ productSlug: 'other-product', rerenderFn: rerender });
+
+        expect(fetchProduct).toHaveBeenCalledWith({
+          slug: 'other-product',
+        });
+      });
+    });
+
+    describe('version is changed', () => {
       test('fetches version', () => {
         const { rerender } = setup();
 
@@ -299,22 +330,25 @@ describe('<PlanDetail />', () => {
   });
 
   test('renders average time', () => {
-    const product = defaultState.products[0];
+    const product = defaultState.products.products[0];
     const { getByText } = setup({
       initialState: {
         ...defaultState,
-        products: [
-          {
-            ...product,
-            most_recent_version: {
-              ...product.most_recent_version,
-              primary_plan: {
-                ...product.most_recent_version.primary_plan,
-                average_duration: '30',
+        products: {
+          ...defaultState.products,
+          products: [
+            {
+              ...product,
+              most_recent_version: {
+                ...product.most_recent_version,
+                primary_plan: {
+                  ...product.most_recent_version.primary_plan,
+                  average_duration: '30',
+                },
               },
             },
-          },
-        ],
+          ],
+        },
       },
     });
 
@@ -370,23 +404,26 @@ describe('<PlanDetail />', () => {
 
   describe('no plan', () => {
     test('renders <PlanNotFound />', () => {
-      const product = defaultState.products[0];
+      const product = defaultState.products.products[0];
       const { getByText } = setup({
         planSlug: 'nope',
         initialState: {
           ...defaultState,
-          products: [
-            {
-              ...product,
-              most_recent_version: {
-                ...product.most_recent_version,
-                additional_plans: {
-                  ...product.most_recent_version.additional_plans,
-                  nope: null,
+          products: {
+            ...defaultState.products,
+            products: [
+              {
+                ...product,
+                most_recent_version: {
+                  ...product.most_recent_version,
+                  additional_plans: {
+                    ...product.most_recent_version.additional_plans,
+                    nope: null,
+                  },
                 },
               },
-            },
-          ],
+            ],
+          },
         },
       });
 

@@ -6,71 +6,78 @@ import { renderWithRedux, storeWithApi } from './../../utils';
 
 import routes from 'utils/routes';
 import { fetchJob, requestCancelJob } from 'store/jobs/actions';
-import { fetchVersion } from 'store/products/actions';
+import { fetchPlan, fetchProduct, fetchVersion } from 'store/products/actions';
 import JobDetail from 'components/jobs/detail';
 
 jest.mock('store/jobs/actions');
 jest.mock('store/products/actions');
 
-fetchVersion.mockReturnValue({ type: 'TEST' });
 fetchJob.mockReturnValue({ type: 'TEST' });
+fetchPlan.mockReturnValue({ type: 'TEST' });
+fetchProduct.mockReturnValue({ type: 'TEST' });
+fetchVersion.mockReturnValue({ type: 'TEST' });
 
 afterEach(() => {
-  fetchVersion.mockClear();
   fetchJob.mockClear();
+  fetchPlan.mockClear();
+  fetchProduct.mockClear();
+  fetchVersion.mockClear();
   requestCancelJob.mockClear();
 });
 
 const defaultState = {
-  products: [
-    {
-      id: 'p1',
-      slug: 'product-1',
-      old_slugs: ['old-product'],
-      title: 'Product 1',
-      category: 'salesforce',
-      image: null,
-      most_recent_version: {
-        id: 'v1',
-        product: 'p1',
-        label: '1.0.0',
-        primary_plan: {
-          id: 'plan-1',
-          slug: 'my-plan',
-          old_slugs: ['old-plan'],
-          title: 'My Plan',
-          steps: [
-            {
-              id: 'step-1',
-              name: 'Step 1',
-              is_required: true,
-              is_recommended: true,
-            },
-            {
-              id: 'step-2',
-              name: 'Step 2',
-              is_required: true,
-              is_recommended: false,
-            },
-            {
-              id: 'step-3',
-              name: 'Step 3',
-              is_required: false,
-              is_recommended: true,
-            },
-            {
-              id: 'step-4',
-              name: 'Step 4',
-              is_required: false,
-              is_recommended: false,
-            },
-          ],
+  products: {
+    products: [
+      {
+        id: 'p1',
+        slug: 'product-1',
+        old_slugs: ['old-product'],
+        title: 'Product 1',
+        category: 'salesforce',
+        image: null,
+        most_recent_version: {
+          id: 'v1',
+          product: 'p1',
+          label: '1.0.0',
+          primary_plan: {
+            id: 'plan-1',
+            slug: 'my-plan',
+            old_slugs: ['old-plan'],
+            title: 'My Plan',
+            steps: [
+              {
+                id: 'step-1',
+                name: 'Step 1',
+                is_required: true,
+                is_recommended: true,
+              },
+              {
+                id: 'step-2',
+                name: 'Step 2',
+                is_required: true,
+                is_recommended: false,
+              },
+              {
+                id: 'step-3',
+                name: 'Step 3',
+                is_required: false,
+                is_recommended: true,
+              },
+              {
+                id: 'step-4',
+                name: 'Step 4',
+                is_required: false,
+                is_recommended: false,
+              },
+            ],
+          },
+          secondary_plan: null,
+          requires_preflight: true,
         },
-        secondary_plan: null,
-        requires_preflight: true,
       },
-    },
-  ],
+    ],
+    notFound: [],
+  },
   jobs: {
     'job-1': {
       id: 'job-1',
@@ -131,6 +138,16 @@ describe('<JobDetail />', () => {
     };
   };
 
+  describe('unknown product', () => {
+    test('fetches product', () => {
+      setup({ productSlug: 'product-2' });
+
+      expect(fetchProduct).toHaveBeenCalledWith({
+        slug: 'product-2',
+      });
+    });
+  });
+
   describe('unknown version', () => {
     test('fetches version', () => {
       setup({ versionLabel: '2.0.0' });
@@ -138,6 +155,18 @@ describe('<JobDetail />', () => {
       expect(fetchVersion).toHaveBeenCalledWith({
         product: 'p1',
         label: '2.0.0',
+      });
+    });
+  });
+
+  describe('unknown plan', () => {
+    test('fetches plan', () => {
+      setup({ planSlug: 'other-plan' });
+
+      expect(fetchPlan).toHaveBeenCalledWith({
+        product: 'p1',
+        version: 'v1',
+        slug: 'other-plan',
       });
     });
   });
@@ -243,7 +272,21 @@ describe('<JobDetail />', () => {
   });
 
   describe('componentDidUpdate', () => {
-    describe('version is removed', () => {
+    describe('product is changed', () => {
+      test('fetches product', () => {
+        const { rerender } = setup();
+
+        expect(fetchProduct).not.toHaveBeenCalled();
+
+        setup({ productSlug: 'product-2', rerenderFn: rerender });
+
+        expect(fetchProduct).toHaveBeenCalledWith({
+          slug: 'product-2',
+        });
+      });
+    });
+
+    describe('version is changed', () => {
       test('fetches version', () => {
         const { rerender } = setup();
 
@@ -254,6 +297,22 @@ describe('<JobDetail />', () => {
         expect(fetchVersion).toHaveBeenCalledWith({
           product: 'p1',
           label: '2.0.0',
+        });
+      });
+    });
+
+    describe('plan is changed', () => {
+      test('fetches plan', () => {
+        const { rerender } = setup();
+
+        expect(fetchPlan).not.toHaveBeenCalled();
+
+        setup({ planSlug: 'other-plan', rerenderFn: rerender });
+
+        expect(fetchPlan).toHaveBeenCalledWith({
+          product: 'p1',
+          version: 'v1',
+          slug: 'other-plan',
         });
       });
     });
@@ -302,22 +361,25 @@ describe('<JobDetail />', () => {
 
   describe('job complete', () => {
     test('renders average time', () => {
-      const product = defaultState.products[0];
+      const product = defaultState.products.products[0];
       const { getByText } = setup({
         initialState: {
           ...defaultState,
-          products: [
-            {
-              ...product,
-              most_recent_version: {
-                ...product.most_recent_version,
-                primary_plan: {
-                  ...product.most_recent_version.primary_plan,
-                  average_duration: '119.999',
+          products: {
+            ...defaultState.products,
+            products: [
+              {
+                ...product,
+                most_recent_version: {
+                  ...product.most_recent_version,
+                  primary_plan: {
+                    ...product.most_recent_version.primary_plan,
+                    average_duration: '119.999',
+                  },
                 },
               },
-            },
-          ],
+            ],
+          },
         },
       });
 
@@ -341,18 +403,22 @@ describe('<JobDetail />', () => {
       const { queryByText } = setup({
         initialState: {
           ...defaultState,
-          products: [
-            {
-              ...defaultState.products[0],
-              most_recent_version: {
-                ...defaultState.products[0].most_recent_version,
-                primary_plan: {
-                  ...defaultState.products[0].most_recent_version.primary_plan,
-                  steps: [],
+          products: {
+            ...defaultState.products,
+            products: [
+              {
+                ...defaultState.products.products[0],
+                most_recent_version: {
+                  ...defaultState.products.products[0].most_recent_version,
+                  primary_plan: {
+                    ...defaultState.products.products[0].most_recent_version
+                      .primary_plan,
+                    steps: [],
+                  },
                 },
               },
-            },
-          ],
+            ],
+          },
           jobs: {
             'job-1': {
               ...defaultState.jobs['job-1'],

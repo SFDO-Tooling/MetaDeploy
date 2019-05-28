@@ -163,7 +163,7 @@ export const getLoadingOrNotFound = ({
   maybeSlug?: string,
 }): React.Node | false => {
   if (!product) {
-    if (product === null) {
+    if (!productSlug || product === null) {
       return <ProductNotFound />;
     }
     // Fetching product from API
