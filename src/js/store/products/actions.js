@@ -77,14 +77,15 @@ export const fetchProducts = (): ThunkAction => (
   dispatch({ type: 'FETCH_PRODUCTS_STARTED' });
   return apiFetch(window.api_urls.product_list())
     .then(response => {
-      if (!Array.isArray(response)) {
+      const products = response.results;
+      if (!Array.isArray(products)) {
         const error = (new Error('Invalid response received'): {
           [string]: mixed,
         });
         error.response = response;
         throw error;
       }
-      return dispatch({ type: 'FETCH_PRODUCTS_SUCCEEDED', payload: response });
+      return dispatch({ type: 'FETCH_PRODUCTS_SUCCEEDED', payload: products });
     })
     .catch(err => {
       dispatch({ type: 'FETCH_PRODUCTS_FAILED' });
