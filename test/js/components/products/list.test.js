@@ -184,6 +184,21 @@ describe('<Products />', () => {
       expect(activeTab).toHaveClass('slds-active');
     });
 
+    test('uses saved tab from url hash', () => {
+      window.sessionStorage.setItem('activeProductsTab', 'salesforce');
+      window.location.hash = 'community';
+      const { getByText, getAllByText } = setup(initialState);
+      const activeTab = getByText('community');
+
+      expect(getAllByText('Product 1')[0]).toBeVisible();
+      expect(getByText('Product 2')).toBeInTheDocument();
+      expect(getByText('salesforce')).toBeVisible();
+      expect(activeTab).toBeVisible();
+      expect(activeTab).toHaveClass('slds-active');
+
+      window.location.hash = '';
+    });
+
     describe('tab onSelect', () => {
       test('saves new activeProductsTab', () => {
         const { getByText } = setup(initialState);
