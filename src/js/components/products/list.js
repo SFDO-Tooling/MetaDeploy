@@ -27,6 +27,7 @@ type Props = {
 };
 type State = {
   activeProductsTab: string | null,
+  fetchMoreProducts: false,
 };
 
 class ProductsList extends React.Component<Props, State> {
@@ -67,6 +68,24 @@ class ProductsList extends React.Component<Props, State> {
       // swallor error
     }
   };
+
+  isBottom = el => el.getBoundingClientRect().bottom <= window.innerHeight;
+
+  trackScrolling = () => {
+    const wrappedElement = document.getElementById('app');
+
+    if (wrappedElement && this.isBottom(wrappedElement)) {
+      this.setState({ fetchMoreProducts: true });
+    }
+  };
+
+  componentDidMount() {
+    document.addEventListener('scroll', this.trackScrolling);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('scroll', this.trackScrolling);
+  }
 
   render(): React.Node {
     let contents;
@@ -109,6 +128,7 @@ class ProductsList extends React.Component<Props, State> {
         break;
       }
     }
+    const { fetchMoreProducts } = this.state;
     return (
       <DocumentTitle title={`${t('Products')} | ${window.SITE_NAME}`}>
         <>
@@ -129,6 +149,14 @@ class ProductsList extends React.Component<Props, State> {
               />
             ) : null}
             {contents}
+            {fetchMoreProducts && (
+              <div
+                className="slds-align_absolute-center"
+                style={{ height: '2.5rem' }}
+              >
+                <span>Loading ...</span>
+              </div>
+            )}
           </div>
         </>
       </DocumentTitle>
