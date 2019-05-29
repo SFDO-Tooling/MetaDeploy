@@ -497,7 +497,7 @@ class TestUnlisted:
 
         response = client.get(
             reverse("plan-get-one"),
-            {"slug": plan.slug, "version": version.label, "product": product.slug},
+            {"slug": plan.slug, "version": str(version.id), "product": str(product.id)},
         )
 
         assert response.status_code == 200
@@ -521,7 +521,7 @@ class TestUnlisted:
         )
 
         response = client.get(
-            reverse("plan-get-one"), {"slug": plan.slug, "product": product.slug}
+            reverse("plan-get-one"), {"slug": plan.slug, "product": str(product.id)}
         )
 
         assert response.status_code == 404
