@@ -63,7 +63,7 @@ class TestPlanViewSet:
                     "post_install_message_additional": "",
                     "steps": [],
                     "tier": "primary",
-                    "title": "Sample plan",
+                    "title": str(plan.title),
                     "url": f"http://testserver/admin/rest/plans/{plan.id}",
                     "version": version_url,
                     "visible_to": None,
@@ -103,7 +103,7 @@ class TestPlanViewSet:
                 }
             ],
             "tier": "primary",
-            "title": "Sample plan",
+            "title": str(plan.title),
             "url": url,
             "version": f"http://testserver/admin/rest/versions/{plan.version.id}",
             "visible_to": None,
@@ -144,7 +144,7 @@ class TestPlanViewSet:
         assert response.status_code == 201, response.json()
         json = response.json()
         plan_id = json["id"]
-        assert response.json() == {
+        expected = {
             "id": plan_id,
             "is_listed": True,
             "preflight_flow_name": "",
@@ -183,6 +183,7 @@ class TestPlanViewSet:
             "version": f"http://testserver/admin/rest/versions/{version.id}",
             "visible_to": None,
         }
+        assert response.json() == expected
 
     def test_update(self, admin_api_client, plan_factory):
         plan = plan_factory()

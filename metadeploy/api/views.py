@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core import exceptions
 from django.core.cache import cache
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
@@ -8,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .constants import REDIS_JOB_CANCEL_KEY
-from .filters import PlanFilter, ProductFilter
+from .filters import PlanFilter, ProductFilter, VersionFilter
 from .jobs import preflight_job
 from .models import Job, Plan, PreflightResult, Product, Version
 from .permissions import OnlyOwnerOrSuperuserCanDelete
@@ -23,6 +24,34 @@ from .serializers import (
 )
 
 User = get_user_model()
+
+
+class InvalidFields(Exception):
+    pass
+
+
+class GetOneMixin:
+    @action(detail=False, methods=["get"])
+    def get_one(self, request, *args, **kwargs):
+        """
+        This takes a set of filters and returns a single entry if
+        there's one entry that results from their application, and a 404
+        otherwise.
+        """
+        not_one_result = (
+            exceptions.MultipleObjectsReturned,
+            exceptions.ObjectDoesNotExist,
+            InvalidFields,
+        )
+        filter = self.filterset_class(request.GET, queryset=self.queryset)
+        try:
+            if filter.filters.keys() != request.GET.keys():
+                raise InvalidFields
+            result = filter.qs.get()
+            serializer = self.get_serializer(result)
+            return Response(serializer.data)
+        except not_one_result:
+            return Response("", status=status.HTTP_404_NOT_FOUND)
 
 
 class UserView(generics.RetrieveAPIView):
@@ -70,40 +99,17 @@ class JobViewSet(
         cache.set(REDIS_JOB_CANCEL_KEY.format(id=instance.id), True)
 
 
-class ProductViewSet(viewsets.ModelViewSet):
+class ProductViewSet(GetOneMixin, viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ProductFilter
     queryset = Product.objects.published()
 
-    def list(self, request, *args, **kwargs):
-        """
-        Inlined from rest_framework.mixins.ListModelMixin.list, to
-        override particular bits of logic.
 
-        We can't use filter_queryset, because that applies to individual
-        retrieves, too, and would make any unlisted Product entirely
-        unfindable.
-        """
-        queryset = self.filter_queryset(self.get_queryset())
-
-        queryset = queryset.exclude(is_listed=False)
-
-        page = self.paginate_queryset(queryset)
-        # XXX: Until we use paginators, this branch will never execute.
-        # Leaving it in per the original method for now, though.
-        if page is not None:  # pragma: nocover
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
-
-
-class VersionViewSet(viewsets.ModelViewSet):
+class VersionViewSet(GetOneMixin, viewsets.ModelViewSet):
     serializer_class = VersionSerializer
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ("product", "label")
+    filterset_class = VersionFilter
     queryset = Version.objects.all()
 
     @action(detail=True, methods=["get"])
@@ -115,7 +121,7 @@ class VersionViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class PlanViewSet(viewsets.ModelViewSet):
+class PlanViewSet(GetOneMixin, viewsets.ModelViewSet):
     serializer_class = PlanSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = PlanFilter

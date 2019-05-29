@@ -1,15 +1,24 @@
 from django_filters import rest_framework as filters
 
-from .models import Plan, Product
+from .models import Plan, Product, Version
 
 
 class PlanFilter(filters.FilterSet):
     slug = filters.CharFilter(field_name="plan_template__planslug__slug")
-    product = filters.CharFilter(field_name="version__product")
+    version = filters.CharFilter(field_name="version__label")
+    product = filters.CharFilter(field_name="version__product__productslug__slug")
 
     class Meta:
         model = Plan
         fields = ("slug", "version", "product")
+
+
+class VersionFilter(filters.FilterSet):
+    product = filters.CharFilter(field_name="product__productslug__slug")
+
+    class Meta:
+        model = Version
+        fields = ("label", "product")
 
 
 class ProductFilter(filters.FilterSet):
