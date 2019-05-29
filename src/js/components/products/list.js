@@ -39,7 +39,7 @@ class ProductsList extends React.Component<Props, State> {
     } catch (e) {
       // swallow error
     }
-    this.state = { activeProductsTab };
+    this.state = { activeProductsTab, fetchMoreProducts: false };
   }
 
   static getProductsList(products: ProductsType): React.Node {
@@ -72,7 +72,7 @@ class ProductsList extends React.Component<Props, State> {
   isBottom = el => el.getBoundingClientRect().bottom <= window.innerHeight;
 
   trackScrolling = () => {
-    const wrappedElement = document.getElementById('app');
+    const wrappedElement = document.querySelector('.slds-grid.slds-wrap');
 
     if (wrappedElement && this.isBottom(wrappedElement)) {
       this.setState({ fetchMoreProducts: true });
@@ -154,6 +154,14 @@ class ProductsList extends React.Component<Props, State> {
                 className="slds-align_absolute-center"
                 style={{ height: '2.5rem' }}
               >
+                <div
+                  role="status"
+                  className="slds-spinner slds-spinner_small slds-spinner_brand spinner-container"
+                >
+                  <span className="slds-assistive-text">Loading</span>
+                  <div className="slds-spinner__dot-a" />
+                  <div className="slds-spinner__dot-b" />
+                </div>
                 <span>Loading ...</span>
               </div>
             )}
