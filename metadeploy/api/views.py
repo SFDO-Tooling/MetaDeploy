@@ -4,6 +4,7 @@ from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, mixins, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -23,6 +24,10 @@ from .serializers import (
 )
 
 User = get_user_model()
+
+
+class ProductPaginator(PageNumberPagination):
+    page_size = 25
 
 
 class UserView(generics.RetrieveAPIView):
@@ -73,6 +78,7 @@ class JobViewSet(
 class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     queryset = Product.objects.published()
+    pagination_class = ProductPaginator
 
 
 class VersionViewSet(viewsets.ModelViewSet):
