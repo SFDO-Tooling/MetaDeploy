@@ -43,7 +43,10 @@ class GetOneMixin:
             exceptions.ObjectDoesNotExist,
             InvalidFields,
         )
-        filter = self.filterset_class(request.GET, queryset=self.queryset)
+        # We want to include more items than the list view includes:
+        filter = self.filterset_class(
+            request.GET, queryset=self.queryset.model.objects.all()
+        )
         try:
             if filter.filters.keys() != request.GET.keys():
                 raise InvalidFields
@@ -103,14 +106,14 @@ class ProductViewSet(GetOneMixin, viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ProductFilter
-    queryset = Product.objects.published()
+    queryset = Product.objects.published().exclude(is_listed=False)
 
 
 class VersionViewSet(GetOneMixin, viewsets.ModelViewSet):
     serializer_class = VersionSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = VersionFilter
-    queryset = Version.objects.all()
+    queryset = Version.objects.exclude(is_listed=False)
 
     @action(detail=True, methods=["get"])
     def additional_plans(self, request, pk=None):
@@ -125,7 +128,7 @@ class PlanViewSet(GetOneMixin, viewsets.ModelViewSet):
     serializer_class = PlanSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = PlanFilter
-    queryset = Plan.objects.all()
+    queryset = Plan.objects.exclude(is_listed=False)
 
     def preflight_get(self, request):
         plan = self.get_object()
