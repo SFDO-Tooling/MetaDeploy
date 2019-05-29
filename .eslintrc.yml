@@ -23,7 +23,7 @@ settings:
             - node_modules
   react:
     version: 'detect'
-    flowVersion: '0.98.1'
+    flowVersion: '0.99.0'
 plugins:
   - react
   - prettier
