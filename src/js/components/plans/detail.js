@@ -47,6 +47,7 @@ import Toasts from 'components/plans/toasts';
 import UserInfo from 'components/plans/userInfo';
 import type { AppState } from 'store';
 import type { InitialProps } from 'components/utils';
+import type { JobData } from 'store/jobs/actions';
 import type { Org as OrgType } from 'store/org/reducer';
 import type {
   Plan as PlanType,
@@ -74,7 +75,7 @@ type Props = {
   doFetchVersion: typeof fetchVersion,
   doFetchPlan: typeof fetchPlan,
   doFetchPreflight: typeof fetchPreflight,
-  doStartJob: typeof startJob,
+  doStartJob: (data: JobData) => Promise<any>,
   doStartPreflight: typeof startPreflight,
 };
 type State = {

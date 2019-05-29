@@ -12,6 +12,7 @@ import { getUrlParam, removeUrlParam } from 'utils/api';
 import ClickThroughAgreementModal from 'components/plans/clickThroughAgreementModal';
 import Login from 'components/header/login';
 import PreflightWarningModal from 'components/plans/preflightWarningModal';
+import type { JobData } from 'store/jobs/actions';
 import type {
   Plan as PlanType,
   Preflight as PreflightType,
@@ -19,7 +20,6 @@ import type {
 import type { SelectedSteps as SelectedStepsType } from 'components/plans/detail';
 import type { UrlParams } from 'utils/api';
 import type { User as UserType } from 'store/user/reducer';
-import typeof { startJob as StartJobType } from 'store/jobs/actions';
 import typeof { startPreflight as StartPreflightType } from 'store/plans/actions';
 
 type Props = {
@@ -33,7 +33,7 @@ type Props = {
   selectedSteps: SelectedStepsType,
   preventAction: boolean,
   doStartPreflight: StartPreflightType,
-  doStartJob: StartJobType,
+  doStartJob: (data: JobData) => Promise<any>,
 };
 
 const { AUTO_START_PREFLIGHT, RESULT_STATUS, STATUS } = CONSTANTS;

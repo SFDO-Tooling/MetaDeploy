@@ -65,7 +65,7 @@ type Props = {
   doFetchPlan: typeof fetchPlan,
   doFetchJob: typeof fetchJob,
   doUpdateJob: typeof updateJob,
-  doRequestCancelJob: typeof requestCancelJob,
+  doRequestCancelJob: (id: string) => Promise<any>,
 };
 type State = {
   modalOpen: boolean,

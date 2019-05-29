@@ -16,5 +16,6 @@ declare module 'redux-thunk' {
     opts: any,
   ) => any;
 
-  declare export default function thunk(): any;
+  declare export type thunk = { withExtraArgument(opts: any): any };
+  declare export default thunk;
 }
