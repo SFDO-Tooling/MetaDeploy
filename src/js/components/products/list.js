@@ -162,7 +162,7 @@ class ProductsList extends React.Component<Props, State> {
                   <div className="slds-spinner__dot-a" />
                   <div className="slds-spinner__dot-b" />
                 </div>
-                <span>Loading ...</span>
+                <span>{t('Loading…')}</span>
               </div>
             )}
           </div>
