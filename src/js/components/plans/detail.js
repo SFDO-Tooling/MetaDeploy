@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
-import { Link } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 import { Trans } from 'react-i18next';
 import { connect } from 'react-redux';
 import { t } from 'i18next';
@@ -45,6 +45,7 @@ import ProductNotFound from 'components/products/product404';
 import StepsTable from 'components/plans/stepsTable';
 import Toasts from 'components/plans/toasts';
 import UserInfo from 'components/plans/userInfo';
+import InfoToast from 'components/infoToast';
 import type { AppState } from 'store';
 import type { InitialProps } from 'components/utils';
 import type { Org as OrgType } from 'store/org/reducer';
@@ -78,6 +79,7 @@ type Props = {
 };
 type State = {
   changedSteps: Map<string, boolean>,
+  toMostRecentVersion: boolean,
 };
 
 const { RESULT_STATUS } = CONSTANTS;
@@ -85,7 +87,7 @@ const { RESULT_STATUS } = CONSTANTS;
 class PlanDetail extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { changedSteps: new Map() };
+    this.state = { changedSteps: new Map(), toMostRecentVersion: false };
   }
 
   fetchVersionIfMissing() {
@@ -307,6 +309,10 @@ class PlanDetail extends React.Component<Props, State> {
     return null;
   }
 
+  getMostRecentVersion = () => {
+    this.setState({ toMostRecentVersion: true });
+  };
+
   render(): React.Node {
     const {
       user,
@@ -337,7 +343,24 @@ class PlanDetail extends React.Component<Props, State> {
     if (!product || !version || !plan) {
       return <ProductNotFound />;
     }
+
     const selectedSteps = this.getSelectedSteps();
+
+    const isMostRecent =
+      product.most_recent_version &&
+      version.id === product.most_recent_version.id;
+
+    if (product.most_recent_version && this.state.toMostRecentVersion) {
+      return (
+        <Redirect
+          to={routes.version_detail(
+            product.slug,
+            product.most_recent_version.label,
+          )}
+        />
+      );
+    }
+
     return (
       <DocumentTitle
         title={`${plan.title} | ${product.title} | ${window.SITE_NAME}`}
@@ -355,6 +378,9 @@ class PlanDetail extends React.Component<Props, State> {
           />
           {product.is_allowed && plan.is_allowed ? (
             <BodyContainer>
+              {product.most_recent_version && !isMostRecent ? (
+                <InfoToast handleHeadingClick={this.getMostRecentVersion} />
+              ) : null}
               {preflight && user ? (
                 <Toasts
                   preflight={preflight}
