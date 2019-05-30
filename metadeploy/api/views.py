@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from .constants import REDIS_JOB_CANCEL_KEY
 from .filters import PlanFilter
 from .jobs import preflight_job
-from .models import Job, Plan, PreflightResult, Product, Version
+from .models import Job, Plan, PreflightResult, Product, ProductCategory, Version
 from .permissions import OnlyOwnerOrSuperuserCanDelete
 from .serializers import (
     FullUserSerializer,
@@ -19,6 +19,7 @@ from .serializers import (
     OrgSerializer,
     PlanSerializer,
     PreflightResultSerializer,
+    ProductCategorySerializer,
     ProductSerializer,
     VersionSerializer,
 )
@@ -75,8 +76,15 @@ class JobViewSet(
         cache.set(REDIS_JOB_CANCEL_KEY.format(id=instance.id), True)
 
 
+class ProductCategoryViewSet(viewsets.ModelViewSet):
+    serializer_class = ProductCategorySerializer
+    queryset = ProductCategory.objects.all()
+
+
 class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ("category",)
     queryset = Product.objects.published()
     pagination_class = ProductPaginator
 

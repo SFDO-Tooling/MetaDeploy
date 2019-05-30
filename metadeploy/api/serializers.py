@@ -7,7 +7,16 @@ from rest_framework.fields import SkipField
 from rest_framework.relations import PKOnlyObject
 
 from .constants import ERROR, WARN
-from .models import Job, Plan, PreflightResult, Product, SiteProfile, Step, Version
+from .models import (
+    Job,
+    Plan,
+    PreflightResult,
+    Product,
+    ProductCategory,
+    SiteProfile,
+    Step,
+    Version,
+)
 
 User = get_user_model()
 
@@ -203,6 +212,12 @@ class VersionSerializer(serializers.ModelSerializer):
             "secondary_plan",
             "is_listed",
         )
+
+
+class ProductCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductCategory
+        fields = ("id", "title")
 
 
 class ProductSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
