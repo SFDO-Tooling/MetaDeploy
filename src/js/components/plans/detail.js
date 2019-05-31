@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
-import { Link, Redirect } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Trans } from 'react-i18next';
 import { connect } from 'react-redux';
 import { t } from 'i18next';
@@ -79,7 +79,6 @@ type Props = {
 };
 type State = {
   changedSteps: Map<string, boolean>,
-  toMostRecentVersion: boolean,
 };
 
 const { RESULT_STATUS } = CONSTANTS;
@@ -87,7 +86,7 @@ const { RESULT_STATUS } = CONSTANTS;
 class PlanDetail extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { changedSteps: new Map(), toMostRecentVersion: false };
+    this.state = { changedSteps: new Map() };
   }
 
   fetchVersionIfMissing() {
@@ -309,10 +308,6 @@ class PlanDetail extends React.Component<Props, State> {
     return null;
   }
 
-  getMostRecentVersion = () => {
-    this.setState({ toMostRecentVersion: true });
-  };
-
   render(): React.Node {
     const {
       user,
@@ -350,17 +345,6 @@ class PlanDetail extends React.Component<Props, State> {
       product.most_recent_version &&
       version.id === product.most_recent_version.id;
 
-    if (product.most_recent_version && this.state.toMostRecentVersion) {
-      return (
-        <Redirect
-          to={routes.version_detail(
-            product.slug,
-            product.most_recent_version.label,
-          )}
-        />
-      );
-    }
-
     return (
       <DocumentTitle
         title={`${plan.title} | ${product.title} | ${window.SITE_NAME}`}
@@ -379,7 +363,13 @@ class PlanDetail extends React.Component<Props, State> {
           {product.is_allowed && plan.is_allowed ? (
             <BodyContainer>
               {product.most_recent_version && !isMostRecent ? (
-                <InfoToast handleHeadingClick={this.getMostRecentVersion} />
+                <InfoToast
+                  link={routes.plan_detail(
+                    product.slug,
+                    product.most_recent_version.label,
+                    plan.slug,
+                  )}
+                />
               ) : null}
               {preflight && user ? (
                 <Toasts

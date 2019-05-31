@@ -28,6 +28,7 @@ import PageHeader from 'components/products/header';
 import ProductNotAllowed from 'components/products/notAllowed';
 import ProductNotFound from 'components/products/product404';
 import VersionNotFound from 'components/products/version404';
+import InfoToast from 'components/infoToast';
 import type { AppState } from 'store';
 import type { InitialProps } from 'components/utils';
 import type {
@@ -179,6 +180,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     if (!product || !version) {
       return <ProductNotFound />;
     }
+
     const listedAdditionalPlans: Array<PlanType> = version.additional_plans
       ? (Object.entries(version.additional_plans): any)
           .filter(
@@ -195,6 +197,10 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     const productDescriptionHasTitle =
       (product.description && product.description.startsWith('<h1>')) ||
       (product.description && product.description.startsWith('<h2>'));
+    const isMostRecent =
+      product.most_recent_version &&
+      version.id === product.most_recent_version.id;
+
     return (
       <DocumentTitle title={`${product.title} | ${window.SITE_NAME}`}>
         <>
@@ -202,6 +208,14 @@ class VersionDetail extends React.Component<VersionDetailProps> {
           <PageHeader product={product} versionLabel={version.label} />
           {product.is_allowed ? (
             <BodyContainer>
+              {product.most_recent_version && !isMostRecent ? (
+                <InfoToast
+                  link={routes.version_detail(
+                    product.slug,
+                    product.most_recent_version.label,
+                  )}
+                />
+              ) : null}
               <BodySection>
                 <p>{version.description}</p>
                 {primary_plan && visiblePrimaryPlan ? (

@@ -1,11 +1,12 @@
 // @flow
 
 import * as React from 'react';
+import { Link, withRouter } from 'react-router-dom';
 import Toast from '@salesforce/design-system-react/components/toast';
 import ToastContainer from '@salesforce/design-system-react/components/toast/container';
 
 type Props = {
-  handleHeadingClick: () => void,
+  link: string,
 };
 
 type State = {
@@ -18,16 +19,21 @@ class InfoToast extends React.Component<Props, State> {
   }
 
   render() {
+    const { link } = this.props;
+    const { isOpen } = this.state;
     return (
       <>
-        {this.state.isOpen ? (
+        {isOpen ? (
           <ToastContainer>
             <Toast
               labels={{
-                heading: 'This is not the most recent version of this product.',
-                headingLink: 'Switch to the most recent version.',
+                heading: [
+                  'This is not the most recent version of this product. ',
+                  <Link key="version-link " to={link}>
+                    Switch to the most recent version.
+                  </Link>,
+                ],
               }}
-              onClickHeadingLink={this.props.handleHeadingClick}
               onRequestClose={() => this.setState({ isOpen: false })}
             />
           </ToastContainer>
@@ -37,4 +43,4 @@ class InfoToast extends React.Component<Props, State> {
   }
 }
 
-export default InfoToast;
+export default withRouter(InfoToast);
