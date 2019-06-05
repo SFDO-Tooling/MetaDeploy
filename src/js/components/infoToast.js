@@ -2,6 +2,8 @@
 
 import * as React from 'react';
 import { Link, withRouter } from 'react-router-dom';
+import { t } from 'i18next';
+
 import Toast from '@salesforce/design-system-react/components/toast';
 import ToastContainer from '@salesforce/design-system-react/components/toast/container';
 
@@ -28,9 +30,9 @@ class InfoToast extends React.Component<Props, State> {
             <Toast
               labels={{
                 heading: [
-                  'This is not the most recent version of this product. ',
+                  t('This is not the most recent version of this product.'),
                   <Link key="version-link " to={link}>
-                    Switch to the most recent version.
+                    {t('Switch to the most recent version.')}
                   </Link>,
                 ],
               }}
