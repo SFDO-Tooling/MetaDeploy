@@ -157,7 +157,6 @@ class PlanFactory(factory.django.DjangoModelFactory):
 
     title = "Sample plan"
     _ensure_slug = factory.PostGenerationMethodCall("ensure_slug")
-    preflight_flow_name = "slow_steps_preflight_good"
 
     visible_to = None
 

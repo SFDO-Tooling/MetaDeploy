@@ -117,32 +117,13 @@ class TestPreflightFlow:
         step4 = step_factory(plan=plan, path="name_4")
         step5 = step_factory(plan=plan, path="name_5")
         pfr = preflight_result_factory(user=user, plan=plan, org_id=user.org_id)
-        results = [
-            MagicMock(
-                return_values={
-                    "task_name": "name_1",
-                    "status_code": "error",
-                    "msg": "error 1",
-                }
-            ),
-            MagicMock(return_values={"task_name": "name_2", "status_code": "ok"}),
-            MagicMock(
-                return_values={
-                    "task_name": "name_3",
-                    "status_code": "warn",
-                    "msg": "warn 1",
-                }
-            ),
-            MagicMock(return_values={"task_name": "name_4", "status_code": "optional"}),
-            MagicMock(
-                return_values={
-                    "task_name": "name_5",
-                    "status_code": "skip",
-                    "msg": "skip 1",
-                }
-            ),
-        ]
-        flow_coordinator = MagicMock(results=results)
+        results = {
+            "name_1": [{"status": "error", "message": "error 1"}],
+            "name_3": [{"status": "warn", "message": "warn 1"}],
+            "name_4": [{"status": "optional", "message": ""}],
+            "name_5": [{"status": "skip", "message": "skip 1"}],
+        }
+        flow_coordinator = MagicMock(preflight_results=results)
 
         callbacks = PreflightFlowCallback(pfr)
         callbacks.post_flow(flow_coordinator)

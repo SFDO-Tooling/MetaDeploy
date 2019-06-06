@@ -193,7 +193,7 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
         return getattr(obj.visible_to, "description_markdown", None)
 
     def get_requires_preflight(self, obj):
-        return bool(obj.preflight_flow_name)
+        return obj.requires_preflight
 
 
 class VersionSerializer(serializers.ModelSerializer):
@@ -377,7 +377,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
 
     @staticmethod
     def _has_valid_preflight(most_recent_preflight, plan):
-        if not plan.preflight_flow_name:
+        if not plan.requires_preflight:
             return True
 
         if not most_recent_preflight:

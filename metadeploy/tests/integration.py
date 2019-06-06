@@ -57,9 +57,7 @@ def test_can_reach_salesforce(
 
     product = product_factory(repo_url="https://github.com/SFDO-Tooling/CumulusCI-Test")
     version = version_factory(commit_ish="feature/preflight", product=product)
-    plan = plan_factory(
-        preflight_flow_name="slow_steps_preflight_good", version=version
-    )
+    plan = plan_factory(version=version)
     steps = [step_factory(plan=plan)]
     job = job_factory(user=user)
 

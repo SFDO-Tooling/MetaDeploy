@@ -1,12 +1,7 @@
-from typing import List
 from urllib.parse import urlparse
 
 from cumulusci.core.config import BaseProjectConfig
-from cumulusci.core.flowrunner import FlowCoordinator
 from cumulusci.core.runtime import BaseCumulusCI
-
-from metadeploy.api.flows import JobFlowCallback, PreflightFlowCallback
-from metadeploy.api.models import Job, Plan, PreflightResult, WorkableModel
 
 
 def extract_user_and_repo(gh_url):
@@ -35,29 +30,3 @@ class MetadeployProjectConfig(BaseProjectConfig):
 
 class MetaDeployCCI(BaseCumulusCI):
     project_config_class = MetadeployProjectConfig
-
-    def get_flow_from_plan(
-        self, plan: Plan, ctx: WorkableModel, skip: List[str] = None
-    ):
-        steps = [step.to_spec(skip=step.path in skip) for step in plan.steps.all()]
-
-        if isinstance(ctx, PreflightResult):
-            flow_config = self.project_config.get_flow(plan.preflight_flow_name)
-            return FlowCoordinator(
-                self.project_config,
-                flow_config,
-                name=plan.preflight_flow_name,
-                callbacks=PreflightFlowCallback(ctx),
-            )
-        elif isinstance(ctx, Job):
-            return FlowCoordinator.from_steps(
-                self.project_config,
-                steps,
-                name="default",
-                callbacks=JobFlowCallback(ctx),
-            )
-        else:  # pragma: no cover
-            raise AttributeError(
-                f"ctx must be either a PreflightResult "
-                f"or Job, but was passed {type(ctx)}."
-            )

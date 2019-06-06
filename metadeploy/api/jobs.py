@@ -12,6 +12,7 @@ instances of the Job model and triggers the run_flows_job.
 """
 
 import contextlib
+import itertools
 import logging
 import os
 import shutil
@@ -20,7 +21,6 @@ import traceback
 import zipfile
 from datetime import timedelta
 from glob import glob
-from itertools import chain
 
 import github3
 from asgiref.sync import async_to_sync
@@ -169,7 +169,7 @@ def run_flows(*, user, plan, skip_tasks, organization_url, result_class, result_
         # with the same name, so we pre-emptively rename it to probably
         # avoid collisions:
         shutil.move(zipball_root, "zipball_root")
-        for path in chain(glob("zipball_root/*"), glob("zipball_root/.*")):
+        for path in itertools.chain(glob("zipball_root/*"), glob("zipball_root/.*")):
             shutil.move(path, ".")
         shutil.rmtree("zipball_root")
 
@@ -214,8 +214,11 @@ def run_flows(*, user, plan, skip_tasks, organization_url, result_class, result_
         )
         ctx.keychain.set_service("github", github_app, True)
 
-        flow_coordinator = ctx.get_flow_from_plan(plan, result, skip=skip_tasks)
-        flow_coordinator.run(ctx.keychain.get_org(current_org))
+        steps = [
+            step.to_spec(skip=step.path in skip_tasks) for step in plan.steps.all()
+        ]
+        org = ctx.keychain.get_org(current_org)
+        result.run(ctx, plan, steps, org)
 
 
 run_flows_job = job(run_flows)

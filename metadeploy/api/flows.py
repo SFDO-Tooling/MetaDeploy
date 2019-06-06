@@ -7,7 +7,7 @@ from cumulusci.core.flowrunner import FlowCallback
 from django.core.cache import cache
 
 from .belvedere_utils import obscure_salesforce_log
-from .constants import ERROR, OK, OPTIONAL, REDIS_JOB_CANCEL_KEY, SKIP, WARN
+from .constants import ERROR, OK, REDIS_JOB_CANCEL_KEY
 from .result_spool_logger import ResultSpoolLogger
 
 logger = logging.getLogger(__name__)
@@ -91,28 +91,23 @@ class JobFlowCallback(BasicFlowCallback):
 class PreflightFlowCallback(BasicFlowCallback):
     def post_flow(self, coordinator):
         """
-        Turn the step_return_values into a merged error dict.
+        Save check results to the result object in the database.
 
-        Each value in step_return_values gets turned into a (key,
-        [error_dict]) pair. This is then turned into a dict, merging any
-        identical keys by combining their lists of error dicts.
-
-        Finally, this is attached to the result object, and saved.
+        Also sanitize them for display on the frontend.
         """
-        results = {}
-        for result in coordinator.results:
-            kv = self._emit_k_v_for_status_dict(result.return_values)
-            if kv is None:
-                continue
-            k, v = kv
-            try:
-                results[k].extend(v)
-            except KeyError:
-                results[k] = v
-        self.context.results.update(results)
+        results = coordinator.preflight_results
+        sanitized_results = {}
+        for path, step_results in results.items():
+            step_id = self._get_step_id(path) if path else "plan"
+            step_result = step_results[0]
+            if step_result["message"]:
+                step_result["message"] = bleach.clean(step_result["message"])
+            sanitized_results[step_id] = step_result
+        self.context.results = sanitized_results
         self.context.save()
 
     def post_task(self, step, result):
+        """Report exception evaluating a preflight task."""
         if result.exception:
             error_result = {
                 "plan": {
@@ -122,35 +117,3 @@ class PreflightFlowCallback(BasicFlowCallback):
             }
             self.context.results.update(error_result)
             self.context.save()
-
-    def _emit_k_v_for_status_dict(self, status):
-        if status["status_code"] == OK:
-            return None
-
-        if status["status_code"] == ERROR:
-            step_id = self._get_step_id(status["task_name"])
-            return (
-                step_id,
-                {"status": ERROR, "message": bleach.clean(status.get("msg", ""))},
-            )
-
-        if status["status_code"] == WARN:
-            step_id = self._get_step_id(status["task_name"])
-            return (
-                step_id,
-                {"status": WARN, "message": bleach.clean(status.get("msg", ""))},
-            )
-
-        if status["status_code"] == SKIP:
-            step_id = self._get_step_id(status["task_name"])
-            return (
-                step_id,
-                {"status": SKIP, "message": bleach.clean(status.get("msg", ""))},
-            )
-
-        if status["status_code"] == OPTIONAL:
-            step_id = self._get_step_id(status["task_name"])
-            return (
-                step_id,
-                {"status": OPTIONAL, "message": bleach.clean(status.get("msg", ""))},
-            )

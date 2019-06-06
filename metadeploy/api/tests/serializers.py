@@ -200,7 +200,7 @@ class TestJob:
     def test_create_good_no_preflight(
         self, rf, user_factory, plan_factory, step_factory
     ):
-        plan = plan_factory(preflight_flow_name="")
+        plan = plan_factory()
         user = user_factory()
         step1 = step_factory(plan=plan)
         step2 = step_factory(plan=plan)
@@ -221,7 +221,9 @@ class TestJob:
         plan = plan_factory()
         user = user_factory()
         step1 = step_factory(plan=plan)
-        step2 = step_factory(plan=plan)
+        step2 = step_factory(
+            plan=plan, task_config={"checks": [{"when": "True", "action": "error"}]}
+        )
         step3 = step_factory(plan=plan)
         request = rf.get("/")
         request.user = user
@@ -241,7 +243,7 @@ class TestJob:
         assert not serializer.is_valid(), serializer.errors
 
     def test_create_bad_no_preflight(self, rf, user_factory, plan_factory):
-        plan = plan_factory()
+        plan = plan_factory(preflight_checks=[{"when": "True", "action": "error"}])
         user = user_factory()
         request = rf.get("/")
         request.user = user
