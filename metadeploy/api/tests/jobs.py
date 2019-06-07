@@ -164,6 +164,16 @@ def test_expire_user_tokens(user_factory):
 
 
 @pytest.mark.django_db
+def test_expire_user_tokens_with_started_job(job_factory):
+    job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
+    job.user.socialaccount_set.update(last_login=timezone.now() - timedelta(minutes=30))
+
+    expire_user_tokens()
+
+    assert job.user.valid_token_for is not None
+
+
+@pytest.mark.django_db
 def test_preflight(mocker, user_factory, plan_factory, preflight_result_factory):
     run_flows = mocker.patch("metadeploy.api.jobs.run_flows")
 
