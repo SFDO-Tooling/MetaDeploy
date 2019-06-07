@@ -1,10 +1,8 @@
 import itertools
 import logging
-from datetime import timedelta
 from statistics import median
 from typing import Union
 
-from allauth.socialaccount.models import SocialToken
 from asgiref.sync import async_to_sync
 from colorfield.fields import ColorField
 from cumulusci.core.flowrunner import StepSpec
@@ -19,7 +17,6 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import Count, F, Func, Q
-from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from hashid_field import HashidAutoField
@@ -39,7 +36,6 @@ from .push import (
     preflight_completed,
     preflight_failed,
     preflight_invalidated,
-    user_token_expired,
 )
 
 logger = logging.getLogger(__name__)
@@ -126,18 +122,7 @@ class AllowedListAccessMixin(models.Model):
         )
 
 
-class UserQuerySet(models.QuerySet):
-    def with_expired_tokens(self):
-        token_lifetime_ago = timezone.now() - timedelta(
-            minutes=settings.TOKEN_LIFETIME_MINUTES
-        )
-        return self.filter(socialaccount__last_login__lte=token_lifetime_ago).exclude(
-            Q(job__status=Job.Status.started)
-            | Q(preflightresult__status=PreflightResult.Status.started)
-        )
-
-
-class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
+class UserManager(BaseUserManager):
     pass
 
 
@@ -205,11 +190,6 @@ class User(HashIdMixin, AbstractUser):
         if all(self.token) and self.org_id:
             return self.org_id
         return None
-
-    def expire_token(self):
-        count, _ = SocialToken.objects.filter(account__user=self).delete()
-        if count:
-            async_to_sync(user_token_expired)(self)
 
 
 class SlugMixin:

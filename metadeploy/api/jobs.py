@@ -23,6 +23,7 @@ from glob import glob
 from itertools import chain
 
 import github3
+from allauth.socialaccount.models import SocialToken
 from asgiref.sync import async_to_sync
 from cumulusci.core.config import OrgConfig, ServiceConfig
 from cumulusci.utils import temporary_dir
@@ -36,7 +37,7 @@ from rq.worker import StopRequested
 from .cci_configs import MetaDeployCCI, extract_user_and_repo
 from .flows import StopFlowException
 from .models import Job, PreflightResult
-from .push import report_error
+from .push import report_error, user_token_expired
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -242,8 +243,22 @@ enqueuer_job = job(enqueuer)
 
 
 def expire_user_tokens():
-    for user in User.objects.with_expired_tokens():
-        user.expire_token()
+    token_lifetime_ago = timezone.now() - timedelta(
+        minutes=settings.TOKEN_LIFETIME_MINUTES
+    )
+    for token in SocialToken.objects.filter(
+        account__last_login__lte=token_lifetime_ago
+    ):
+        user = token.account.user
+        has_running_jobs = (
+            user.job_set.filter(status=Job.Status.started).exists()
+            or user.preflightresult_set.filter(
+                status=PreflightResult.Status.started
+            ).exists()
+        )
+        if not has_running_jobs:
+            token.delete()
+            async_to_sync(user_token_expired)(user)
 
 
 expire_user_tokens_job = job(expire_user_tokens)
