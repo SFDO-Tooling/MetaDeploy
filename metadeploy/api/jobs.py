@@ -46,18 +46,34 @@ sync_report_error = async_to_sync(report_error)
 
 @contextlib.contextmanager
 def finalize_result(result):
-    error_status = result.Status.failed
-    success_status = result.Status.complete
-
     try:
         yield
-        result.status = success_status
+        result.status = result.Status.complete
         result.success_at = timezone.now()
+    except (StopRequested, ShutDownImminentException):
+        # When an RQ worker gets a SIGTERM, it will initiate a warm shutdown,
+        # trying to wrap up existing tasks and then raising a
+        # ShutDownImminentException or StopRequested exception.
+        # So we want to mark any job that's not done by then as canceled
+        # by catching that exception as it propagates back up.
+        result.status = result.Status.canceled
+        result.canceled_at = timezone.now()
+        result.exception = (
+            "The installation job was interrupted. Please retry the installation."
+        )
+        logger.error(
+            f"{result._meta.model_name} {result.id} canceled due to dyno restart."
+        )
+        raise
+    except StopFlowException as e:
+        # User requested cancellation of job
+        result.status = result.Status.canceled
+        result.canceled_at = timezone.now()
+        result.exception = str(e)
+        logger.info(f"{result._meta.model_name} {result.id} canceled.")
     except Exception as e:
-        if not isinstance(
-            e, (StopRequested, ShutDownImminentException, StopFlowException)
-        ):
-            result.status = error_status
+        # Other failures
+        result.status = result.Status.failed
         result.exception = str(e)
         logger.error(f"{result._meta.model_name} {result.id} failed.")
         raise
@@ -84,23 +100,6 @@ def prepend_python_path(path):
         yield
     finally:
         sys.path = prev_path
-
-
-@contextlib.contextmanager
-def mark_canceled(result):
-    """
-    When an RQ worker gets a SIGTERM, it will initiate a warm shutdown, trying to wrap
-    up existing tasks and then raising a ShutDownImminentException or StopRequested
-    exception. So we want to mark any job that's not done by then as canceled
-    by catching that exception as it propagates back up.
-    """
-    try:
-        yield
-    except (StopRequested, ShutDownImminentException, StopFlowException):
-        result.status = result.Status.canceled
-        result.canceled_at = timezone.now()
-        result.save()
-        raise
 
 
 def is_safe_path(path):
@@ -137,7 +136,6 @@ def run_flows(*, user, plan, skip_tasks, organization_url, result_class, result_
 
     with contextlib.ExitStack() as stack:
         stack.enter_context(finalize_result(result))
-        stack.enter_context(mark_canceled(result))
         stack.enter_context(report_errors_to(user))
         tmpdirname = stack.enter_context(temporary_dir())
 
