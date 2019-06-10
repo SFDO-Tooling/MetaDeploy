@@ -4,8 +4,8 @@ import * as React from 'react';
 import Card from '@salesforce/design-system-react/components/card';
 import Icon from '@salesforce/design-system-react/components/icon';
 import Illustration from '@salesforce/design-system-react/components/illustration';
+import i18n from 'i18next';
 import { Trans } from 'react-i18next';
-import { t } from 'i18next';
 
 import Login from 'components/header/login';
 import svgPath from 'images/no-connection.svg';
@@ -13,7 +13,7 @@ import type { User as UserType } from 'store/user/reducer';
 
 const LoggedOut = (): React.Node => (
   <Illustration
-    heading={t('Not Connected to Salesforce')}
+    heading={i18n.t('Not Connected to Salesforce')}
     name="No Connection"
     path={`${svgPath}#no-connection`}
     style={{ height: '200px' }}
@@ -22,10 +22,10 @@ const LoggedOut = (): React.Node => (
 
 const Footer = (): React.Node => (
   <>
-    {t('Is this the correct org? If not, please')}{' '}
+    {i18n.t('Is this the correct org? If not, please')}{' '}
     <Login
       id="user-info-login"
-      label={t('log in with a different org')}
+      label={i18n.t('log in with a different org')}
       buttonClassName="slds-p-horizontal_xxx-small"
       buttonVariant="base"
     />
@@ -44,7 +44,7 @@ const UserInfo = ({ user }: { user: UserType }): React.Node => {
     >
       <Card
         bodyClassName="slds-card__body_inner"
-        heading={t('Connected to Salesforce')}
+        heading={i18n.t('Connected to Salesforce')}
         hasNoHeader={!hasValidToken}
         icon={<Icon category="utility" name="connected_apps" />}
         empty={hasValidToken ? null : <LoggedOut />}
@@ -53,17 +53,17 @@ const UserInfo = ({ user }: { user: UserType }): React.Node => {
         <ul>
           {username ? (
             <li>
-              <strong>{t('User')}:</strong> {username}
+              <strong>{i18n.t('User')}:</strong> {username}
             </li>
           ) : null}
           {org_name ? (
             <li>
-              <strong>{t('Org')}:</strong> {org_name}
+              <strong>{i18n.t('Org')}:</strong> {org_name}
             </li>
           ) : null}
           {org_type ? (
             <li>
-              <strong>{t('Type')}:</strong> {org_type}
+              <strong>{i18n.t('Type')}:</strong> {org_type}
             </li>
           ) : null}
         </ul>

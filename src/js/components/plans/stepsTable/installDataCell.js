@@ -7,7 +7,7 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
-import { t } from 'i18next';
+import i18n from 'i18next';
 
 import { CONSTANTS } from 'store/plans/reducer';
 import { ErrorIcon } from 'components/plans/preflightResults';
@@ -17,12 +17,12 @@ const { STATUS, RESULT_STATUS } = CONSTANTS;
 
 export const InstallDataColumnLabel = (): React.Node => (
   <>
-    <span title={t('Install')}>{t('Install')}</span>
+    <span title={i18n.t('Install')}>{i18n.t('Install')}</span>
     <Tooltip
       align="top right"
       content={
         <span className="step-column-tooltip">
-          {t('Select steps to install.')}
+          {i18n.t('Select steps to install.')}
         </span>
       }
       triggerClassName="slds-p-left_x-small"
@@ -33,7 +33,7 @@ export const InstallDataColumnLabel = (): React.Node => (
           category="utility"
           name="info"
           assistiveText={{
-            label: t('Learn More'),
+            label: i18n.t('Learn More'),
           }}
           size="xx-small"
         />
@@ -57,7 +57,7 @@ const JobCell = (props: DataCellProps): React.Node => {
     error = result.status === RESULT_STATUS.ERROR;
   }
   if (!job.steps.includes(id)) {
-    title = t('skipped');
+    title = i18n.t('skipped');
     contents = (
       <Icon
         category="utility"
@@ -71,7 +71,7 @@ const JobCell = (props: DataCellProps): React.Node => {
       />
     );
   } else if (complete) {
-    title = t('completed');
+    title = i18n.t('completed');
     contents = (
       <div className="is-completed">
         <Icon
@@ -87,7 +87,7 @@ const JobCell = (props: DataCellProps): React.Node => {
       </div>
     );
   } else if (error) {
-    title = t('error');
+    title = i18n.t('error');
     contents = (
       <>
         <ErrorIcon
@@ -100,7 +100,7 @@ const JobCell = (props: DataCellProps): React.Node => {
     );
   } else if (job.status === STATUS.STARTED) {
     if (isActive) {
-      title = t('installing');
+      title = i18n.t('installing');
       contents = (
         <>
           <span
@@ -110,11 +110,11 @@ const JobCell = (props: DataCellProps): React.Node => {
           >
             <Spinner size="small" />
           </span>
-          {t('Installing…')}
+          {i18n.t('Installing…')}
         </>
       );
     } else {
-      title = t('waiting to install');
+      title = i18n.t('waiting to install');
       contents = (
         <Icon
           category="utility"
@@ -129,7 +129,7 @@ const JobCell = (props: DataCellProps): React.Node => {
       );
     }
   } else {
-    title = t('not installed');
+    title = i18n.t('not installed');
     contents = (
       <Icon
         category="utility"
@@ -189,19 +189,19 @@ class PreflightCell extends React.Component<DataCellProps> {
     }
     const required = item.is_required && !optional;
     const recommended = !required && item.is_recommended;
-    let title = t('optional');
+    let title = i18n.t('optional');
     if (skipped) {
-      title = skipped.message || t('skipped');
+      title = skipped.message || i18n.t('skipped');
     } else if (required) {
-      title = t('required');
+      title = i18n.t('required');
     } else if (recommended) {
-      title = t('recommended');
+      title = i18n.t('recommended');
     }
     let label = '';
     if (skipped && skipped.message) {
       label = skipped.message;
     } else if (recommended) {
-      label = t('recommended');
+      label = i18n.t('recommended');
     }
     if (skipped || required) {
       content = (

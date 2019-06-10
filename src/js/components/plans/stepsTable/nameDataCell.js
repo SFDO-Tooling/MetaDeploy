@@ -7,7 +7,7 @@ import DataTableCell from '@salesforce/design-system-react/components/data-table
 import Icon from '@salesforce/design-system-react/components/icon';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
-import { t } from 'i18next';
+import i18n from 'i18next';
 
 import { CONSTANTS } from 'store/plans/reducer';
 import { JobError } from 'components/plans/preflightResults';
@@ -92,7 +92,7 @@ class NameDataCell extends React.Component<Props> {
             category="utility"
             name="info_alt"
             assistiveText={{
-              label: t('View Description'),
+              label: i18n.t('View Description'),
             }}
             size="x-small"
           />

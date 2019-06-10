@@ -2,10 +2,10 @@
 
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
+import i18n from 'i18next';
 import { Link } from 'react-router-dom';
 import { Trans } from 'react-i18next';
 import { connect } from 'react-redux';
-import { t } from 'i18next';
 
 import routes from 'utils/routes';
 import { CONSTANTS } from 'store/plans/reducer';
@@ -35,6 +35,7 @@ import BodyContainer from 'components/bodyContainer';
 import CtaButton, { LoginBtn } from 'components/plans/ctaButton';
 import Header from 'components/header';
 import Intro from 'components/plans/intro';
+import OldVersionWarning from 'components/products/oldVersionWarning';
 import PageHeader from 'components/plans/header';
 import PlanNotAllowed from 'components/products/notAllowed';
 import PreflightResults, {
@@ -230,13 +231,13 @@ class PlanDetail extends React.Component<Props, State> {
           <div className="slds-p-bottom_xx-small">
             <ErrorIcon />
             <span className="slds-text-color_error">
-              {t(
+              {i18n.t(
                 'Oops! It looks like you don’t have permissions to run an installation on this org.',
               )}
             </span>
           </div>
           <p>
-            {t(
+            {i18n.t(
               'Please contact an Admin within your org or use the button below to log in with a different org.',
             )}
           </p>
@@ -272,7 +273,9 @@ class PlanDetail extends React.Component<Props, State> {
           <p>
             <WarningIcon />
             <span>
-              {t('A pre-install validation is currently running on this org.')}
+              {i18n.t(
+                'A pre-install validation is currently running on this org.',
+              )}
             </span>
           </p>
         );
@@ -301,7 +304,7 @@ class PlanDetail extends React.Component<Props, State> {
       return (
         <LoginBtn
           id="org-not-allowed-login"
-          label={t('Log in with a different org')}
+          label={i18n.t('Log in with a different org')}
         />
       );
     } else if (plan.steps && plan.steps.length) {
@@ -356,7 +359,13 @@ class PlanDetail extends React.Component<Props, State> {
     if (!product || !version || !plan) {
       return <ProductNotFound />;
     }
+
     const selectedSteps = this.getSelectedSteps();
+
+    const isMostRecent =
+      product.most_recent_version &&
+      version.id === product.most_recent_version.id;
+
     return (
       <DocumentTitle
         title={`${plan.title} | ${product.title} | ${window.SITE_NAME}`}
@@ -374,10 +383,18 @@ class PlanDetail extends React.Component<Props, State> {
           />
           {product.is_allowed && plan.is_allowed ? (
             <BodyContainer>
+              {product.most_recent_version && !isMostRecent ? (
+                <OldVersionWarning
+                  link={routes.version_detail(
+                    product.slug,
+                    product.most_recent_version.label,
+                  )}
+                />
+              ) : null}
               {preflight && user ? (
                 <Toasts
                   preflight={preflight}
-                  label={t('Pre-install validation')}
+                  label={i18n.t('Pre-install validation')}
                 />
               ) : null}
               <Intro
@@ -403,7 +420,7 @@ class PlanDetail extends React.Component<Props, State> {
                 cta={this.getCTA(selectedSteps)}
                 backLink={
                   <BackLink
-                    label={t('Select a different plan')}
+                    label={i18n.t('Select a different plan')}
                     url={routes.version_detail(product.slug, version.label)}
                     className="slds-p-top_small"
                   />

@@ -1,6 +1,6 @@
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
-import { fireEvent } from 'react-testing-library';
+import { fireEvent } from '@testing-library/react';
 
 import { renderWithRedux, storeWithApi } from './../../utils';
 
@@ -261,6 +261,46 @@ describe('<PlanDetail />', () => {
         product: 'p1',
         label: '2.0.0',
       });
+    });
+  });
+
+  describe('not most_recent_version', () => {
+    test('renders warning', () => {
+      const product = defaultState.products.products[0];
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          products: {
+            ...defaultState.products,
+            products: [
+              {
+                ...product,
+                versions: {
+                  '2.0.0': {
+                    id: 'v2',
+                    product: 'p1',
+                    label: '2.0.0',
+                    primary_plan: {
+                      id: 'plan-2',
+                      slug: 'my-other-plan',
+                      old_slugs: [],
+                      title: 'My Other Plan',
+                      steps: [],
+                      is_allowed: true,
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+        versionLabel: '2.0.0',
+        planSlug: 'my-other-plan',
+      });
+
+      expect(
+        getByText('This is not the most recent version of this product.'),
+      ).toBeVisible();
     });
   });
 
