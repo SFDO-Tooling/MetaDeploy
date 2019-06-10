@@ -2,10 +2,10 @@
 
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
+import i18n from 'i18next';
 import { Link } from 'react-router-dom';
 import { Trans } from 'react-i18next';
 import { connect } from 'react-redux';
-import { t } from 'i18next';
 
 import Header from 'components/header';
 import Login from 'components/header/login';
@@ -17,7 +17,9 @@ import type { InitialProps } from 'components/utils';
 import type { User as UserType } from 'store/user/reducer';
 
 const AuthError = ({ user, history }: { ...InitialProps, user: UserType }) => (
-  <DocumentTitle title={`${t('Authentication Error')} | ${window.SITE_NAME}`}>
+  <DocumentTitle
+    title={`${i18n.t('Authentication Error')} | ${window.SITE_NAME}`}
+  >
     <>
       <Header history={history} />
       <EmptyIllustration
@@ -31,7 +33,9 @@ const AuthError = ({ user, history }: { ...InitialProps, user: UserType }) => (
       <div className="slds-align_absolute-center">
         <Login
           id="auth-error-login"
-          label={user ? t('Log In With a Different Org') : t('Log In')}
+          label={
+            user ? i18n.t('Log In With a Different Org') : i18n.t('Log In')
+          }
           buttonClassName="slds-p-horizontal_xxx-small"
           buttonVariant="base"
         />

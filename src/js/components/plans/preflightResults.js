@@ -2,8 +2,8 @@
 
 import * as React from 'react';
 import Icon from '@salesforce/design-system-react/components/icon';
+import i18n from 'i18next';
 import { Trans } from 'react-i18next';
-import { t } from 'i18next';
 
 import { CONSTANTS } from 'store/plans/reducer';
 import type { Job as JobType } from 'store/jobs/reducer';
@@ -20,7 +20,7 @@ export const ErrorIcon = ({
   containerClassName?: string,
 }): React.Node => (
   <Icon
-    assistiveText={{ label: t('Error') }}
+    assistiveText={{ label: i18n.t('Error') }}
     category="utility"
     name="error"
     colorVariant="error"
@@ -32,7 +32,7 @@ export const ErrorIcon = ({
 
 export const WarningIcon = (): React.Node => (
   <Icon
-    assistiveText={{ label: t('Warning') }}
+    assistiveText={{ label: i18n.t('Warning') }}
     category="utility"
     name="warning"
     colorVariant="warning"
@@ -110,19 +110,19 @@ export const getErrorInfo = ({
     // Show errors/warnings
     const errorCount = currentJob.error_count || 0;
     const warningCount = currentJob.warning_count || 0;
-    let msg = t('errors');
+    let msg = i18n.t('errors');
     const errorDefault = `${errorCount} error${errorCount === 1 ? '' : 's'}`;
     const warningDefault = `${warningCount} warning${
       warningCount === 1 ? '' : 's'
     }`;
-    const errorMsg = t('errorMsg', errorDefault, {
+    const errorMsg = i18n.t('errorMsg', errorDefault, {
       count: errorCount,
     });
-    const warningMsg = t('warningMsg', warningDefault, {
+    const warningMsg = i18n.t('warningMsg', warningDefault, {
       count: warningCount,
     });
     if (errorCount > 0 && warningCount > 0) {
-      msg = `${errorMsg} ${t('and')} ${warningMsg}`;
+      msg = `${errorMsg} ${i18n.t('and')} ${warningMsg}`;
     } else if (errorCount > 0) {
       msg = errorMsg;
     } else if (warningCount > 0) {
@@ -135,8 +135,8 @@ export const getErrorInfo = ({
     info.failed = Boolean(failed);
     info.message =
       preflight && !currentJob.is_valid && !failed
-        ? t(`${label} has expired; please run it again.`)
-        : `${t(`${label} encountered`)} ${msg}.`;
+        ? i18n.t(`${label} has expired; please run it again.`)
+        : `${i18n.t(`${label} encountered`)} ${msg}.`;
   }
   return info;
 };
@@ -156,7 +156,7 @@ const PreflightResults = ({
 
   const { failed, message } = getErrorInfo({
     preflight,
-    label: t('Pre-install validation'),
+    label: i18n.t('Pre-install validation'),
   });
   const planErrors = preflight.results && preflight.results.plan;
   if (message !== null) {
@@ -168,7 +168,7 @@ const PreflightResults = ({
         </p>
         {failed ? (
           <p>
-            {t(
+            {i18n.t(
               'After resolving all errors, run the pre-install validation again.',
             )}
           </p>
@@ -182,7 +182,7 @@ const PreflightResults = ({
     return (
       <p>
         <WarningIcon />
-        {t('Pre-install validation has expired; please run it again.')}
+        {i18n.t('Pre-install validation has expired; please run it again.')}
       </p>
     );
   }
@@ -192,7 +192,7 @@ const PreflightResults = ({
   return (
     <>
       <p className="slds-text-color_success">
-        {t('Pre-install validation completed successfully.')}
+        {i18n.t('Pre-install validation completed successfully.')}
       </p>
       <p>
         <Trans i18nKey="preflightValidTime" count={preflight_minutes}>

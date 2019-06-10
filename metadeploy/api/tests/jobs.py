@@ -4,14 +4,16 @@ from unittest.mock import MagicMock
 import pytest
 import pytz
 import vcr
+from cumulusci.salesforce_api.exceptions import MetadataParseError
 from django.utils import timezone
 from rq.worker import StopRequested
 
+from ..flows import StopFlowException
 from ..jobs import (
     enqueuer,
     expire_preflights,
     expire_user_tokens,
-    mark_canceled,
+    finalize_result,
     preflight,
     run_flows,
 )
@@ -164,6 +166,16 @@ def test_expire_user_tokens(user_factory):
 
 
 @pytest.mark.django_db
+def test_expire_user_tokens_with_started_job(job_factory):
+    job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
+    job.user.socialaccount_set.update(last_login=timezone.now() - timedelta(minutes=30))
+
+    expire_user_tokens()
+
+    assert job.user.valid_token_for is not None
+
+
+@pytest.mark.django_db
 def test_preflight(mocker, user_factory, plan_factory, preflight_result_factory):
     run_flows = mocker.patch("metadeploy.api.jobs.run_flows")
 
@@ -228,7 +240,7 @@ def test_expire_preflights(user_factory, plan_factory, preflight_result_factory)
 
 
 @pytest.mark.django_db
-def test_mark_canceled(job_factory):
+def test_finalize_result_worker_died(job_factory):
     """
     Why do we raise and then catch a StopRequested you might ask? Well, because it's
     what RQ will internally raise on a SIGTERM, so we're essentially faking the "I got a
@@ -238,7 +250,7 @@ def test_mark_canceled(job_factory):
     """
     job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
     try:
-        with mark_canceled(job):
+        with finalize_result(job):
             raise StopRequested()
     except StopRequested:
         pass
@@ -246,13 +258,39 @@ def test_mark_canceled(job_factory):
 
 
 @pytest.mark.django_db
-def test_mark_canceled_preflight(user_factory, plan_factory, preflight_result_factory):
+def test_finalize_result_canceled_job(job_factory):
+    # User-requested job cancellation.
+    # Unlike cancelation due to the worker restarting,
+    # this kind doesn't propagate the exception.
+    job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
+    with finalize_result(job):
+        raise StopFlowException()
+    assert job.status == job.Status.canceled
+
+
+@pytest.mark.django_db
+def test_finalize_result_preflight_worker_died(
+    user_factory, plan_factory, preflight_result_factory
+):
     user = user_factory()
     plan = plan_factory()
     preflight = preflight_result_factory(user=user, plan=plan, org_id=user.org_id)
     try:
-        with mark_canceled(preflight):
+        with finalize_result(preflight):
             raise StopRequested()
     except StopRequested:
         pass
     assert preflight.status == preflight.Status.canceled
+
+
+@pytest.mark.django_db
+def test_finalize_result_mdapi_error(job_factory):
+    job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
+    response = MagicMock(text="text")
+    try:
+        with finalize_result(job):
+            raise MetadataParseError("MDAPI error", response=response)
+    except MetadataParseError:
+        pass
+    assert job.status == job.Status.failed
+    assert job.exception == "MDAPI error\ntext"

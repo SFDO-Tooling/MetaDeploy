@@ -446,6 +446,12 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
                 )
             )
 
+        user_has_valid_token = all(user.token)
+        if not user_has_valid_token:
+            raise serializers.ValidationError(
+                _(f"The connection to your org has been lost. Please log in again.")
+            )
+
         data["org_name"] = user.org_name
         data["org_type"] = user.org_type
         data["full_org_type"] = user.full_org_type
