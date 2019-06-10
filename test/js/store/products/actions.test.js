@@ -62,7 +62,7 @@ describe('fetchProduct', () => {
   let baseUrl;
 
   beforeAll(() => {
-    baseUrl = window.api_urls.product_list();
+    baseUrl = window.api_urls.product_get_one();
   });
 
   describe('success', () => {
@@ -70,7 +70,7 @@ describe('fetchProduct', () => {
       const store = storeWithApi({});
       const filters = { slug: 'product-1' };
       const product = { id: 'p1', slug: 'product-1' };
-      fetchMock.getOnce(addUrlParams(baseUrl, filters), [product]);
+      fetchMock.getOnce(addUrlParams(baseUrl, filters), product);
       const started = {
         type: 'FETCH_PRODUCT_STARTED',
         payload: filters,
@@ -89,7 +89,7 @@ describe('fetchProduct', () => {
     test('stores null if no product returned from api', () => {
       const store = storeWithApi({});
       const filters = { slug: 'product-1' };
-      fetchMock.getOnce(addUrlParams(baseUrl, filters), []);
+      fetchMock.getOnce(addUrlParams(baseUrl, filters), 404);
       const started = {
         type: 'FETCH_PRODUCT_STARTED',
         payload: filters,
@@ -107,17 +107,6 @@ describe('fetchProduct', () => {
   });
 
   describe('error', () => {
-    test('throws Error', () => {
-      const store = storeWithApi({});
-      const filters = { slug: 'product-1' };
-      fetchMock.getOnce(addUrlParams(baseUrl, filters), 'string');
-
-      expect.assertions(1);
-      return expect(
-        store.dispatch(actions.fetchProduct(filters)),
-      ).rejects.toThrow();
-    });
-
     test('dispatches FETCH_PRODUCT_FAILED action', () => {
       const store = storeWithApi({});
       const filters = { slug: 'product-1' };
@@ -144,7 +133,7 @@ describe('fetchVersion', () => {
   let baseUrl;
 
   beforeAll(() => {
-    baseUrl = window.api_urls.version_list();
+    baseUrl = window.api_urls.version_get_one();
   });
 
   describe('success', () => {
@@ -152,7 +141,7 @@ describe('fetchVersion', () => {
       const store = storeWithApi({});
       const filters = { product: 'p1', label: 'v1' };
       const version = { id: 'v1', label: 'v1' };
-      fetchMock.getOnce(addUrlParams(baseUrl, filters), [version]);
+      fetchMock.getOnce(addUrlParams(baseUrl, filters), version);
       const started = {
         type: 'FETCH_VERSION_STARTED',
         payload: filters,
@@ -171,7 +160,7 @@ describe('fetchVersion', () => {
     test('stores null if no version returned from api', () => {
       const store = storeWithApi({});
       const filters = { product: 'p1', label: 'v1' };
-      fetchMock.getOnce(addUrlParams(baseUrl, filters), []);
+      fetchMock.getOnce(addUrlParams(baseUrl, filters), 404);
       const started = {
         type: 'FETCH_VERSION_STARTED',
         payload: filters,
@@ -189,17 +178,6 @@ describe('fetchVersion', () => {
   });
 
   describe('error', () => {
-    test('throws Error', () => {
-      const store = storeWithApi({});
-      const filters = { product: 'p1', label: 'v1' };
-      fetchMock.getOnce(addUrlParams(baseUrl, filters), 'string');
-
-      expect.assertions(1);
-      return expect(
-        store.dispatch(actions.fetchVersion(filters)),
-      ).rejects.toThrow();
-    });
-
     test('dispatches FETCH_VERSION_FAILED action', () => {
       const store = storeWithApi({});
       const filters = { product: 'p1', label: 'v1' };
@@ -291,7 +269,7 @@ describe('fetchPlan', () => {
   let baseUrl, filters;
 
   beforeAll(() => {
-    baseUrl = window.api_urls.plan_list();
+    baseUrl = window.api_urls.plan_get_one();
     filters = { product: 'p1', version: 'v1', slug: 'plan-1' };
   });
 
@@ -299,14 +277,32 @@ describe('fetchPlan', () => {
     test('GETs plan from api', () => {
       const store = storeWithApi({});
       const plan = { id: 'plan-id', slug: 'plan-1' };
-      fetchMock.getOnce(addUrlParams(baseUrl, filters), [plan]);
+      fetchMock.getOnce(addUrlParams(baseUrl, filters), plan);
       const started = {
         type: 'FETCH_PLAN_STARTED',
         payload: filters,
       };
       const succeeded = {
         type: 'FETCH_PLAN_SUCCEEDED',
-        payload: { ...filters, plans: [plan] },
+        payload: { ...filters, plan },
+      };
+
+      expect.assertions(1);
+      return store.dispatch(actions.fetchPlan(filters)).then(() => {
+        expect(store.getActions()).toEqual([started, succeeded]);
+      });
+    });
+
+    test('stores null if no plan returned from api', () => {
+      const store = storeWithApi({});
+      fetchMock.getOnce(addUrlParams(baseUrl, filters), 404);
+      const started = {
+        type: 'FETCH_PLAN_STARTED',
+        payload: filters,
+      };
+      const succeeded = {
+        type: 'FETCH_PLAN_SUCCEEDED',
+        payload: { ...filters, plan: null },
       };
 
       expect.assertions(1);
@@ -317,16 +313,6 @@ describe('fetchPlan', () => {
   });
 
   describe('error', () => {
-    test('throws Error', () => {
-      const store = storeWithApi({});
-      fetchMock.getOnce(addUrlParams(baseUrl, filters), 'string');
-
-      expect.assertions(1);
-      return expect(
-        store.dispatch(actions.fetchPlan(filters)),
-      ).rejects.toThrow();
-    });
-
     test('dispatches FETCH_PLAN_FAILED action', () => {
       const store = storeWithApi({});
       fetchMock.getOnce(addUrlParams(baseUrl, filters), 500);

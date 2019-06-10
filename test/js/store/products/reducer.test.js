@@ -254,12 +254,10 @@ describe('reducer', () => {
       const version = 'v1';
       const product = 'p1';
       const slug = 'my-plan';
-      const plans = [
-        { id: 'plan-1', slug: 'my-plan', old_slugs: ['old-slug'] },
-      ];
+      const plan = { id: 'plan-1', slug: 'my-plan', old_slugs: ['old-slug'] };
       const additional_plans = {
-        'my-plan': plans[0],
-        'old-slug': plans[0],
+        'my-plan': plan,
+        'old-slug': plan,
       };
       const beforeProduct = {
         id: 'p1',
@@ -277,7 +275,7 @@ describe('reducer', () => {
         { products: [beforeProduct] },
         {
           type: 'FETCH_PLAN_SUCCEEDED',
-          payload: { product, version, slug, plans },
+          payload: { product, version, slug, plan },
         },
       );
 
@@ -288,14 +286,12 @@ describe('reducer', () => {
       const version = 'v1';
       const product = 'p1';
       const slug = 'my-plan';
-      const plans = [
-        { id: 'plan-1', slug: 'my-plan', old_slugs: ['old-slug'] },
-      ];
+      const plan = { id: 'plan-1', slug: 'my-plan', old_slugs: ['old-slug'] };
       const existingPlan = { id: 'plan-2', slug: 'other-plan' };
       const additional_plans = {
         'other-plan': existingPlan,
-        'my-plan': plans[0],
-        'old-slug': plans[0],
+        'my-plan': plan,
+        'old-slug': plan,
       };
       const beforeProduct = {
         id: 'p1',
@@ -322,7 +318,7 @@ describe('reducer', () => {
         { products: [beforeProduct] },
         {
           type: 'FETCH_PLAN_SUCCEEDED',
-          payload: { product, version, slug, plans },
+          payload: { product, version, slug, plan },
         },
       );
 
@@ -333,7 +329,6 @@ describe('reducer', () => {
       const version = 'v1';
       const product = 'p1';
       const slug = 'my-plan';
-      const plans = [];
       const additional_plans = {
         'my-plan': null,
       };
@@ -353,7 +348,7 @@ describe('reducer', () => {
         { products: [beforeProduct] },
         {
           type: 'FETCH_PLAN_SUCCEEDED',
-          payload: { product, version, slug, plans },
+          payload: { product, version, slug, plan: null },
         },
       );
 
@@ -364,9 +359,7 @@ describe('reducer', () => {
       const version = 'v1';
       const product = 'other-product';
       const slug = 'my-plan';
-      const plans = [
-        { id: 'plan-1', slug: 'my-plan', old_slugs: ['old-slug'] },
-      ];
+      const plan = { id: 'plan-1', slug: 'my-plan', old_slugs: ['old-slug'] };
       const beforeProduct = {
         id: 'p1',
         most_recent_version: { id: 'v1' },
@@ -376,7 +369,7 @@ describe('reducer', () => {
         { products: [beforeProduct] },
         {
           type: 'FETCH_PLAN_SUCCEEDED',
-          payload: { product, version, slug, plans },
+          payload: { product, version, slug, plan },
         },
       );
 
@@ -387,9 +380,7 @@ describe('reducer', () => {
       const version = 'other-version';
       const product = 'p1';
       const slug = 'my-plan';
-      const plans = [
-        { id: 'plan-1', slug: 'my-plan', old_slugs: ['old-slug'] },
-      ];
+      const plan = { id: 'plan-1', slug: 'my-plan', old_slugs: ['old-slug'] };
       const beforeProduct = {
         id: 'p1',
         most_recent_version: { id: 'v1' },
@@ -399,7 +390,7 @@ describe('reducer', () => {
         { products: [beforeProduct] },
         {
           type: 'FETCH_PLAN_SUCCEEDED',
-          payload: { product, version, slug, plans },
+          payload: { product, version, slug, plan },
         },
       );
 
@@ -410,9 +401,7 @@ describe('reducer', () => {
       const version = 'other-version';
       const product = 'p1';
       const slug = 'my-plan';
-      const plans = [
-        { id: 'plan-1', slug: 'my-plan', old_slugs: ['old-slug'] },
-      ];
+      const plan = { id: 'plan-1', slug: 'my-plan', old_slugs: ['old-slug'] };
       const beforeProduct = {
         id: 'p1',
         most_recent_version: null,
@@ -425,7 +414,7 @@ describe('reducer', () => {
         { products: [beforeProduct] },
         {
           type: 'FETCH_PLAN_SUCCEEDED',
-          payload: { product, version, slug, plans },
+          payload: { product, version, slug, plan },
         },
       );
 

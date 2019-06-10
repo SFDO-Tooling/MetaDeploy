@@ -118,17 +118,13 @@ const reducer = (
       };
     }
     case 'FETCH_PLAN_SUCCEEDED': {
-      const { product, version, slug, plans } = action.payload;
-      const additional_plans = plans.reduce(
-        (obj, item) => {
-          obj[item.slug] = item;
-          for (const oldSlug of item.old_slugs) {
-            obj[oldSlug] = item;
-          }
-          return obj;
-        },
-        { [slug]: null },
-      );
+      const { product, version, slug, plan } = action.payload;
+      const additional_plans = { [slug]: plan };
+      if (plan && plan.old_slugs) {
+        for (const oldSlug of plan.old_slugs) {
+          additional_plans[oldSlug] = plan;
+        }
+      }
       return {
         ...products,
         products: products.products.map(p => {

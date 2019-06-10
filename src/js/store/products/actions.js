@@ -63,7 +63,7 @@ type FetchPlanStarted = {
 };
 type FetchPlanSucceeded = {
   type: 'FETCH_PLAN_SUCCEEDED',
-  payload: { ...PlanFilters, plans: Array<Plan> },
+  payload: { ...PlanFilters, plan: Plan | null },
 };
 type FetchPlanFailed = {
   type: 'FETCH_PLAN_FAILED',
@@ -116,21 +116,14 @@ export const fetchProduct = (filters: ProductFilters): ThunkAction => (
   { apiFetch },
 ) => {
   dispatch({ type: 'FETCH_PRODUCT_STARTED', payload: filters });
-  const baseUrl = window.api_urls.product_list();
+  const baseUrl = window.api_urls.product_get_one();
   return apiFetch(addUrlParams(baseUrl, { ...filters }))
-    .then(response => {
-      if (!Array.isArray(response)) {
-        const error = (new Error('Invalid response received'): {
-          [string]: mixed,
-        });
-        error.response = response;
-        throw error;
-      }
-      return dispatch({
+    .then(response =>
+      dispatch({
         type: 'FETCH_PRODUCT_SUCCEEDED',
-        payload: { ...filters, product: response[0] || null },
-      });
-    })
+        payload: { ...filters, product: response || null },
+      }),
+    )
     .catch(err => {
       dispatch({ type: 'FETCH_PRODUCT_FAILED', payload: filters });
       throw err;
@@ -143,21 +136,14 @@ export const fetchVersion = (filters: VersionFilters): ThunkAction => (
   { apiFetch },
 ) => {
   dispatch({ type: 'FETCH_VERSION_STARTED', payload: filters });
-  const baseUrl = window.api_urls.version_list();
+  const baseUrl = window.api_urls.version_get_one();
   return apiFetch(addUrlParams(baseUrl, { ...filters }))
-    .then(response => {
-      if (!Array.isArray(response)) {
-        const error = (new Error('Invalid response received'): {
-          [string]: mixed,
-        });
-        error.response = response;
-        throw error;
-      }
-      return dispatch({
+    .then(response =>
+      dispatch({
         type: 'FETCH_VERSION_SUCCEEDED',
-        payload: { ...filters, version: response[0] || null },
-      });
-    })
+        payload: { ...filters, version: response || null },
+      }),
+    )
     .catch(err => {
       dispatch({ type: 'FETCH_VERSION_FAILED', payload: filters });
       throw err;
@@ -196,21 +182,14 @@ export const fetchPlan = (filters: PlanFilters): ThunkAction => (
   { apiFetch },
 ) => {
   dispatch({ type: 'FETCH_PLAN_STARTED', payload: filters });
-  const baseUrl = window.api_urls.plan_list();
+  const baseUrl = window.api_urls.plan_get_one();
   return apiFetch(addUrlParams(baseUrl, { ...filters }))
-    .then(response => {
-      if (!Array.isArray(response)) {
-        const error = (new Error('Invalid response received'): {
-          [string]: mixed,
-        });
-        error.response = response;
-        throw error;
-      }
-      return dispatch({
+    .then(response =>
+      dispatch({
         type: 'FETCH_PLAN_SUCCEEDED',
-        payload: { ...filters, plans: response },
-      });
-    })
+        payload: { ...filters, plan: response || null },
+      }),
+    )
     .catch(err => {
       dispatch({ type: 'FETCH_PLAN_FAILED', payload: filters });
       throw err;
