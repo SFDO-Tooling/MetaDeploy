@@ -186,39 +186,16 @@ class TestJobViewset:
 
 @pytest.mark.django_db
 class TestBasicGetViews:
-    def test_product(self, client, product_factory, version_factory):
-        product = product_factory()
-        version = version_factory(product=product)
-        response = client.get(reverse("product-detail", kwargs={"pk": product.id}))
+    def test_product(
+        self, client, allowed_list_factory, product_factory, version_factory
+    ):
+        allowed_list = allowed_list_factory(org_type=["Developer"])
+        product = product_factory(visible_to=allowed_list)
+        version_factory(product=product)
+        response = client.get(reverse("product-list"))
 
         assert response.status_code == 200
-        assert response.json() == {
-            "id": str(product.id),
-            "title": product.title,
-            "description": "<p>This is a sample product.</p>",
-            "short_description": "",
-            "click_through_agreement": "",
-            "category": "salesforce",
-            "color": "#FFFFFF",
-            "icon": None,
-            "image": None,
-            "most_recent_version": {
-                "id": str(version.id),
-                "product": str(product.id),
-                "label": version.label,
-                "description": "A sample version.",
-                "created_at": format_timestamp(version.created_at),
-                "primary_plan": None,
-                "secondary_plan": None,
-                "is_listed": True,
-            },
-            "slug": product.slug,
-            "old_slugs": [],
-            "is_allowed": True,
-            "is_listed": True,
-            "order_key": 0,
-            "not_allowed_instructions": None,
-        }
+        assert response.json() == []
 
     def test_version(self, client, version_factory):
         version = version_factory()

@@ -30,6 +30,17 @@ class InvalidFields(Exception):
     pass
 
 
+class FilterAllowedByOrgMixin:
+    def omit_allowed_by_org(self, qs):
+        if self.request.user.is_authenticated:
+            qs = qs.exclude(
+                visible_to__isnull=False,
+                visible_to__org_type__contains=[self.request.user.full_org_type],
+                visible_to__list_for_allowed_by_orgs=False,
+            )
+        return qs
+
+
 class GetOneMixin:
     @action(detail=False, methods=["get"])
     def get_one(self, request, *args, **kwargs):
@@ -44,9 +55,7 @@ class GetOneMixin:
             InvalidFields,
         )
         # We want to include more items than the list view includes:
-        filter = self.filterset_class(
-            request.GET, queryset=self.queryset.model.objects.all()
-        )
+        filter = self.filterset_class(request.GET, queryset=self.model.objects.all())
         try:
             if filter.filters.keys() != request.GET.keys():
                 raise InvalidFields
@@ -102,18 +111,26 @@ class JobViewSet(
         cache.set(REDIS_JOB_CANCEL_KEY.format(id=instance.id), True)
 
 
-class ProductViewSet(GetOneMixin, viewsets.ModelViewSet):
+class ProductViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ProductFilter
-    queryset = Product.objects.published().exclude(is_listed=False)
+    model = Product
+
+    def get_queryset(self):
+        return self.omit_allowed_by_org(
+            Product.objects.published().exclude(is_listed=False)
+        )
 
 
 class VersionViewSet(GetOneMixin, viewsets.ModelViewSet):
     serializer_class = VersionSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = VersionFilter
-    queryset = Version.objects.exclude(is_listed=False)
+    model = Version
+
+    def get_queryset(self):
+        return Version.objects.exclude(is_listed=False)
 
     @action(detail=True, methods=["get"])
     def additional_plans(self, request, pk=None):
@@ -124,11 +141,14 @@ class VersionViewSet(GetOneMixin, viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class PlanViewSet(GetOneMixin, viewsets.ModelViewSet):
+class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ModelViewSet):
     serializer_class = PlanSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = PlanFilter
-    queryset = Plan.objects.exclude(is_listed=False)
+    model = Plan
+
+    def get_queryset(self):
+        return self.omit_allowed_by_org(Plan.objects.exclude(is_listed=False))
 
     def preflight_get(self, request):
         plan = self.get_object()
