@@ -7,6 +7,7 @@ import TabsPanel from '@salesforce/design-system-react/components/tabs/panel';
 import { connect } from 'react-redux';
 import { t } from 'i18next';
 
+import { prettyUrlHash } from 'utils/helpers';
 import {
   selectProductCategories,
   selectProductsByCategory,
@@ -33,8 +34,19 @@ class ProductsList extends React.Component<Props, State> {
   constructor(props) {
     super(props);
     let activeProductsTab = null;
+    let hashTab;
     try {
-      activeProductsTab = window.sessionStorage.getItem('activeProductsTab');
+      if (window.location.hash) {
+        hashTab = props.productCategories.find(
+          category =>
+            window.location.hash.substring(1) === prettyUrlHash(category),
+        );
+      }
+      if (hashTab) {
+        activeProductsTab = hashTab;
+      } else {
+        activeProductsTab = window.sessionStorage.getItem('activeProductsTab');
+      }
     } catch (e) {
       // swallow error
     }
@@ -55,13 +67,16 @@ class ProductsList extends React.Component<Props, State> {
   }
 
   handleSelect = (index: number) => {
+    const { history } = this.props;
     try {
       const category = this.props.productCategories[index];
       /* istanbul ignore else */
       if (category) {
         window.sessionStorage.setItem('activeProductsTab', category);
+        history.replace({ hash: prettyUrlHash(category) });
       } else {
         window.sessionStorage.removeItem('activeProductsTab');
+        history.replace({ hash: '' });
       }
     } catch (e) {
       // swallor error
@@ -109,6 +124,7 @@ class ProductsList extends React.Component<Props, State> {
         break;
       }
     }
+
     return (
       <DocumentTitle title={`${t('Products')} | ${window.SITE_NAME}`}>
         <>
