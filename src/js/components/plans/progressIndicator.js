@@ -2,22 +2,22 @@
 
 import * as React from 'react';
 import SLDSProgressIndicator from '@salesforce/design-system-react/components/progress-indicator';
-import { t } from 'i18next';
+import i18n from 'i18next';
 
 import { CONSTANTS } from 'store/plans/reducer';
 
-export const getSteps = (translate: string => string) => [
+export const getSteps = () => [
   {
     id: 0,
-    label: translate('Log in'),
+    label: i18n.t('Log in'),
   },
   {
     id: 1,
-    label: translate('Run pre-install validation'),
+    label: i18n.t('Run pre-install validation'),
   },
   {
     id: 2,
-    label: translate('Install'),
+    label: i18n.t('Install'),
   },
 ];
 
@@ -39,7 +39,7 @@ const ProgressIndicator = ({
       activeStep = 2;
     }
   }
-  const steps = getSteps(t);
+  const steps = getSteps();
   const completedSteps = steps.slice(0, activeStep);
   const errorSteps =
     userLoggedIn &&

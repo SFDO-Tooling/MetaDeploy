@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
-import { t } from 'i18next';
+import i18n from 'i18next';
 
 import { addUrlParams } from 'utils/api';
 import { logError } from 'utils/logging';
@@ -76,14 +76,14 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
   static getMenuOpts(): Array<MenuOption> {
     return [
       {
-        label: t('Production or Developer Org'),
+        label: i18n.t('Production or Developer Org'),
         href:
           window.api_urls.salesforce_production_login &&
           window.api_urls.salesforce_production_login(),
         disabled: !window.api_urls.salesforce_production_login,
       },
       {
-        label: t('Sandbox or Scratch Org'),
+        label: i18n.t('Sandbox or Scratch Org'),
         href:
           window.api_urls.salesforce_test_login &&
           window.api_urls.salesforce_test_login(),
@@ -93,7 +93,7 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
         type: 'divider',
       },
       {
-        label: t('Use Custom Domain'),
+        label: i18n.t('Use Custom Domain'),
         modal: Boolean(window.api_urls.salesforce_custom_login),
         disabled: !window.api_urls.salesforce_custom_login,
       },
@@ -119,7 +119,7 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
       <>
         <Dropdown
           id={id}
-          label={label === undefined ? t('Log In') : label}
+          label={label === undefined ? i18n.t('Log In') : label}
           className="slds-dropdown_actions"
           triggerClassName={triggerClassName}
           buttonClassName={buttonClassName}

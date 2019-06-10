@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import classNames from 'classnames';
-import { t } from 'i18next';
+import i18n from 'i18next';
 
 import { CONSTANTS } from 'store/plans/reducer';
 import type { Job as JobType } from 'store/jobs/reducer';
@@ -126,14 +126,14 @@ class ProgressBar extends React.Component<Props, State> {
         >
           <span>
             <strong>
-              {t('Installation Progress')}
+              {i18n.t('Installation Progress')}
               {isFailed ? (
                 <>
                   :{' '}
                   <span className="slds-text-color_error">
                     {job.status === CONSTANTS.STATUS.CANCELED
-                      ? t('Canceled')
-                      : t('Failed')}
+                      ? i18n.t('Canceled')
+                      : i18n.t('Failed')}
                   </span>
                 </>
               ) : null}
@@ -142,7 +142,7 @@ class ProgressBar extends React.Component<Props, State> {
           {isFailed ? null : (
             <span aria-hidden="true">
               <strong>
-                {progressRounded}% {t('Complete')}
+                {progressRounded}% {i18n.t('Complete')}
               </strong>
             </span>
           )}
@@ -168,7 +168,7 @@ class ProgressBar extends React.Component<Props, State> {
             style={{ width: `${progress}%` }}
           >
             <span className="slds-assistive-text">
-              {t('Progress')}: {progressRounded}%
+              {i18n.t('Progress')}: {progressRounded}%
             </span>
           </span>
         </div>

@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Toast from '@salesforce/design-system-react/components/toast';
 import ToastContainer from '@salesforce/design-system-react/components/toast/container';
-import { t } from 'i18next';
+import i18n from 'i18next';
 
 import { CONSTANTS } from 'store/plans/reducer';
 import type { Job as JobType } from 'store/jobs/reducer';
@@ -35,7 +35,7 @@ class Toasts extends React.Component<Props, State> {
     return (
       <Toast
         labels={{
-          heading: [t(label)],
+          heading: [i18n.t(label)],
         }}
         variant={variant}
         onRequestClose={this.handleClose}

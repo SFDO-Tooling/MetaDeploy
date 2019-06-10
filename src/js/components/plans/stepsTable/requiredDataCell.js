@@ -3,7 +3,7 @@
 import * as React from 'react';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import classNames from 'classnames';
-import { t } from 'i18next';
+import i18n from 'i18next';
 
 import { CONSTANTS } from 'store/plans/reducer';
 import type { DataCellProps } from 'components/plans/stepsTable';
@@ -36,11 +36,11 @@ const RequiredDataCell = (props: DataCellProps): React.Node => {
   const classes = classNames('slds-align-middle', 'slds-badge', {
     'slds-badge_lightest': !required,
   });
-  let text = t('Optional');
+  let text = i18n.t('Optional');
   if (skipped) {
-    text = t('Skipped');
+    text = i18n.t('Skipped');
   } else if (required) {
-    text = t('Required');
+    text = i18n.t('Required');
   }
   return (
     <DataTableCell
