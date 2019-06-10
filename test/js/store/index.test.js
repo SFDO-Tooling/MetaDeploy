@@ -11,6 +11,7 @@ describe('reducer', () => {
       'jobs',
       'org',
       'socket',
+      'errors',
     ]);
   });
 });

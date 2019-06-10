@@ -20,7 +20,6 @@ import utilitySprite from '@salesforce-ux/design-system/assets/icons/utility-spr
 
 import init_i18n from './i18n';
 
-import getApiFetch from 'utils/api';
 import { createSocket } from 'utils/websockets';
 import { log, logError } from 'utils/logging';
 import { routePatterns } from 'utils/routes';
@@ -107,14 +106,7 @@ init_i18n(i18nError => {
     const appStore = createStore(
       reducer,
       {},
-      composeWithDevTools(
-        applyMiddleware(
-          thunk.withExtraArgument({
-            apiFetch: getApiFetch(),
-          }),
-          logger,
-        ),
-      ),
+      composeWithDevTools(applyMiddleware(thunk, logger)),
     );
 
     // Connect to WebSocket server

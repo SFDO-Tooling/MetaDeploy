@@ -64,6 +64,7 @@
     "redux-thunk": "^2.3.0",
     "reselect": "^4.0.0",
     "sockette": "^2.0.5",
+    "uuid": "^3.3.2",
     "whatwg-fetch": "^3.0.0"
   },
   "devDependencies": {
