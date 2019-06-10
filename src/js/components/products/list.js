@@ -4,9 +4,10 @@ import * as React from 'react';
 import DocumentTitle from 'react-document-title';
 import Tabs from '@salesforce/design-system-react/components/tabs';
 import TabsPanel from '@salesforce/design-system-react/components/tabs/panel';
+import i18n from 'i18next';
 import { connect } from 'react-redux';
-import { t } from 'i18next';
 
+import { prettyUrlHash } from 'utils/helpers';
 import {
   selectProductCategories,
   selectProductsByCategory,
@@ -27,15 +28,26 @@ type Props = {
 };
 type State = {
   activeProductsTab: string | null,
-  fetchMoreProducts: false,
+  fetchMoreProducts: boolean,
 };
 
 class ProductsList extends React.Component<Props, State> {
   constructor(props) {
     super(props);
     let activeProductsTab = null;
+    let hashTab;
     try {
-      activeProductsTab = window.sessionStorage.getItem('activeProductsTab');
+      if (window.location.hash) {
+        hashTab = props.productCategories.find(
+          category =>
+            window.location.hash.substring(1) === prettyUrlHash(category),
+        );
+      }
+      if (hashTab) {
+        activeProductsTab = hashTab;
+      } else {
+        activeProductsTab = window.sessionStorage.getItem('activeProductsTab');
+      }
     } catch (e) {
       // swallow error
     }
@@ -55,26 +67,31 @@ class ProductsList extends React.Component<Props, State> {
     );
   }
 
+  static isBottom(el) {
+    return el.getBoundingClientRect().bottom <= window.innerHeight;
+  }
+
   handleSelect = (index: number) => {
+    const { history } = this.props;
     try {
       const category = this.props.productCategories[index];
       /* istanbul ignore else */
       if (category) {
         window.sessionStorage.setItem('activeProductsTab', category);
+        history.replace({ hash: prettyUrlHash(category) });
       } else {
         window.sessionStorage.removeItem('activeProductsTab');
+        history.replace({ hash: '' });
       }
     } catch (e) {
       // swallor error
     }
   };
 
-  isBottom = el => el.getBoundingClientRect().bottom <= window.innerHeight;
-
   trackScrolling = () => {
     const wrappedElement = document.querySelector('.slds-grid.slds-wrap');
 
-    if (wrappedElement && this.isBottom(wrappedElement)) {
+    if (wrappedElement && ProductsList.isBottom(wrappedElement)) {
       this.setState({ fetchMoreProducts: true });
     }
   };
@@ -92,7 +109,7 @@ class ProductsList extends React.Component<Props, State> {
     switch (this.props.productsByCategory.size) {
       case 0: {
         // No products; show empty message
-        const msg = t('We couldn’t find any products. Try again later?');
+        const msg = i18n.t('We couldn’t find any products. Try again later?');
         contents = <EmptyIllustration message={msg} />;
         break;
       }
@@ -130,7 +147,7 @@ class ProductsList extends React.Component<Props, State> {
     }
     const { fetchMoreProducts } = this.state;
     return (
-      <DocumentTitle title={`${t('Products')} | ${window.SITE_NAME}`}>
+      <DocumentTitle title={`${i18n.t('Products')} | ${window.SITE_NAME}`}>
         <>
           <Header history={this.props.history} />
           <PageHeader />
@@ -162,7 +179,7 @@ class ProductsList extends React.Component<Props, State> {
                   <div className="slds-spinner__dot-a" />
                   <div className="slds-spinner__dot-b" />
                 </div>
-                <span>{t('Loading…')}</span>
+                <span>{i18n.t('Loading…')}</span>
               </div>
             )}
           </div>

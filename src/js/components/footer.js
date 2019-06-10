@@ -1,10 +1,10 @@
 // @flow
 
 import * as React from 'react';
-import { t } from 'i18next';
+import i18n from 'i18next';
 
 const Footer = (props: { logoSrc?: string }) => {
-  let copyright = `${t('Copyright')} ${window.GLOBALS.YEAR}`;
+  let copyright = `${i18n.t('Copyright')} ${window.GLOBALS.YEAR}`;
   if (window.GLOBALS.SITE && window.GLOBALS.SITE.company_name) {
     copyright = `${copyright} ${window.GLOBALS.SITE.company_name}`;
   }

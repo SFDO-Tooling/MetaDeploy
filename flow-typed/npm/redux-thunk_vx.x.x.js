@@ -1,5 +1,5 @@
 // flow-typed signature: c23c95a12acfb8035253190639fc973f
-// flow-typed version: <<STUB>>/redux-thunk_v^2.3.0/flow_v0.98.1
+// flow-typed version: <<STUB>>/redux-thunk_v^2.3.0/flow_v0.100.0
 
 declare module 'redux-thunk' {
   import type { DispatchAPI } from 'redux';
@@ -16,5 +16,6 @@ declare module 'redux-thunk' {
     opts: any,
   ) => any;
 
-  declare export default function thunk(): any;
+  declare export type thunk = { withExtraArgument(opts: any): any };
+  declare export default thunk;
 }

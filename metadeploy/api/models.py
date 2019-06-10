@@ -1,10 +1,8 @@
 import itertools
 import logging
-from datetime import timedelta
 from statistics import median
 from typing import Union
 
-from allauth.socialaccount.models import SocialToken
 from asgiref.sync import async_to_sync
 from colorfield.fields import ColorField
 from cumulusci.core.flowrunner import StepSpec
@@ -19,7 +17,6 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import Count, F, Func, Q
-from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from hashid_field import HashidAutoField
@@ -39,12 +36,12 @@ from .push import (
     preflight_completed,
     preflight_failed,
     preflight_invalidated,
-    user_token_expired,
 )
 
 logger = logging.getLogger(__name__)
 VERSION_STRING = r"^[a-zA-Z0-9._+-]+$"
 WorkableModel = Union["Job", "PreflightResult"]
+ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
 
 
 class HashIdMixin(models.Model):
@@ -55,13 +52,6 @@ class HashIdMixin(models.Model):
 
 
 class AllowedList(models.Model):
-    ORG_TYPES = (
-        ("Production", "Production"),
-        ("Scratch", "Scratch"),
-        ("Sandbox", "Sandbox"),
-        ("Developer", "Developer"),
-    )
-
     title = models.CharField(max_length=128, unique=True)
     description = MarkdownField(blank=True, property_suffix="_markdown")
     org_type = ArrayField(
@@ -132,18 +122,7 @@ class AllowedListAccessMixin(models.Model):
         )
 
 
-class UserQuerySet(models.QuerySet):
-    def with_expired_tokens(self):
-        token_lifetime_ago = timezone.now() - timedelta(
-            minutes=settings.TOKEN_LIFETIME_MINUTES
-        )
-        return self.filter(socialaccount__last_login__lte=token_lifetime_ago).exclude(
-            Q(job__status=Job.Status.started)
-            | Q(preflightresult__status=PreflightResult.Status.started)
-        )
-
-
-class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
+class UserManager(BaseUserManager):
     pass
 
 
@@ -179,13 +158,13 @@ class User(HashIdMixin, AbstractUser):
         if org_type is None or is_sandbox is None:
             return None
         if org_type == "Developer Edition" and not is_sandbox:
-            return "Developer"
+            return ORG_TYPES.Developer
         if org_type != "Developer Edition" and not is_sandbox:
-            return "Production"
+            return ORG_TYPES.Production
         if is_sandbox and not has_expiration:
-            return "Sandbox"
+            return ORG_TYPES.Sandbox
         if is_sandbox and has_expiration:
-            return "Scratch"
+            return ORG_TYPES.Scratch
 
     @property
     def instance_url(self):
@@ -211,11 +190,6 @@ class User(HashIdMixin, AbstractUser):
         if all(self.token) and self.org_id:
             return self.org_id
         return None
-
-    def expire_token(self):
-        count, _ = SocialToken.objects.filter(account__user=self).delete()
-        if count:
-            async_to_sync(user_token_expired)(self)
 
 
 class SlugMixin:
@@ -651,6 +625,7 @@ class Job(HashIdMixin, models.Model):
     org_id = models.CharField(null=True, blank=True, max_length=18)
     org_name = models.CharField(blank=True, max_length=256)
     org_type = models.CharField(blank=True, max_length=256)
+    full_org_type = models.CharField(null=True, blank=True, max_length=256)
     is_public = models.BooleanField(default=False)
     success_at = models.DateTimeField(
         null=True,

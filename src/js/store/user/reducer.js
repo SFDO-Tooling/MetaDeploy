@@ -10,6 +10,7 @@ export type User = {
   +valid_token_for: string | null,
   +org_name: string | null,
   +org_type: string | null,
+  +is_production_org: boolean,
 } | null;
 
 const reducer = (user: User = null, action: UserAction): User => {

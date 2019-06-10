@@ -1,6 +1,6 @@
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
-import { fireEvent } from 'react-testing-library';
+import { fireEvent } from '@testing-library/react';
 
 import { renderWithRedux, storeWithApi } from './../../utils';
 
@@ -83,6 +83,7 @@ const defaultState = {
       results: { 'step-1': [{ status: 'ok' }] },
       org_name: 'Test Org',
       org_type: null,
+      is_production_org: true,
       message: 'Congrats!',
       error_count: 0,
     },

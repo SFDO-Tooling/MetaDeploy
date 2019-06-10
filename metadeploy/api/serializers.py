@@ -8,6 +8,7 @@ from rest_framework.relations import PKOnlyObject
 
 from .constants import ERROR, WARN
 from .models import (
+    ORG_TYPES,
     Job,
     Plan,
     PreflightResult,
@@ -94,6 +95,7 @@ class CircumspectSerializerMixin:
 
 class FullUserSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
+    is_production_org = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -104,8 +106,12 @@ class FullUserSerializer(serializers.ModelSerializer):
             "valid_token_for",
             "org_name",
             "org_type",
+            "is_production_org",
             "is_staff",
         )
+
+    def get_is_production_org(self, obj):
+        return obj.full_org_type == ORG_TYPES.Production
 
 
 class LimitedUserSerializer(serializers.ModelSerializer):
@@ -277,6 +283,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
     org_name = serializers.SerializerMethodField()
     organization_url = serializers.SerializerMethodField()
     org_id = serializers.SerializerMethodField()
+    is_production_org = serializers.SerializerMethodField()
 
     plan = serializers.PrimaryKeyRelatedField(
         queryset=Plan.objects.all(), pk_field=serializers.CharField()
@@ -310,6 +317,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             "status",
             "org_name",
             "org_type",
+            "is_production_org",
             "error_count",
             "warning_count",
             "is_public",
@@ -370,6 +378,9 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         if self.requesting_user_has_rights():
             return obj.organization_url
         return None
+
+    def get_is_production_org(self, obj):
+        return obj.full_org_type == ORG_TYPES.Production
 
     @staticmethod
     def _has_valid_preflight(most_recent_preflight, plan):
@@ -442,8 +453,15 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
                 )
             )
 
+        user_has_valid_token = all(user.token)
+        if not user_has_valid_token:
+            raise serializers.ValidationError(
+                _(f"The connection to your org has been lost. Please log in again.")
+            )
+
         data["org_name"] = user.org_name
         data["org_type"] = user.org_type
+        data["full_org_type"] = user.full_org_type
         data["organization_url"] = user.instance_url
         data["org_id"] = user.org_id
         return data

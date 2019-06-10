@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Button from '@salesforce/design-system-react/components/button';
 import Spinner from '@salesforce/design-system-react/components/spinner';
-import { t } from 'i18next';
+import i18n from 'i18next';
 import type { RouterHistory } from 'react-router-dom';
 
 import routes from 'utils/routes';
@@ -12,6 +12,7 @@ import { getUrlParam, removeUrlParam } from 'utils/api';
 import ClickThroughAgreementModal from 'components/plans/clickThroughAgreementModal';
 import Login from 'components/header/login';
 import PreflightWarningModal from 'components/plans/preflightWarningModal';
+import type { JobData } from 'store/jobs/actions';
 import type {
   Plan as PlanType,
   Preflight as PreflightType,
@@ -19,7 +20,6 @@ import type {
 import type { SelectedSteps as SelectedStepsType } from 'components/plans/detail';
 import type { UrlParams } from 'utils/api';
 import type { User as UserType } from 'store/user/reducer';
-import typeof { startJob as StartJobType } from 'store/jobs/actions';
 import typeof { startPreflight as StartPreflightType } from 'store/plans/actions';
 
 type Props = {
@@ -33,7 +33,7 @@ type Props = {
   selectedSteps: SelectedStepsType,
   preventAction: boolean,
   doStartPreflight: StartPreflightType,
-  doStartJob: StartJobType,
+  doStartJob: (data: JobData) => Promise<any>,
 };
 
 const { AUTO_START_PREFLIGHT, RESULT_STATUS, STATUS } = CONSTANTS;
@@ -232,7 +232,7 @@ class CtaButton extends React.Component<
     // Require login first...
     return (
       <LoginBtn
-        label={t(`Log In to ${label}`)}
+        label={i18n.t(`Log In to ${label}`)}
         redirectParams={
           startPreflightAfterLogin ? { [AUTO_START_PREFLIGHT]: true } : {}
         }
@@ -280,7 +280,7 @@ class CtaButton extends React.Component<
         // Require login first...
         return (
           <LoginBtn
-            label={t('Log In to Start Pre-Install Validation')}
+            label={i18n.t('Log In to Start Pre-Install Validation')}
             redirectParams={{ [AUTO_START_PREFLIGHT]: true }}
           />
         );
@@ -290,7 +290,7 @@ class CtaButton extends React.Component<
       if (preflight === undefined) {
         return (
           <ActionBtn
-            label={<LabelWithSpinner label={t('Loading…')} />}
+            label={<LabelWithSpinner label={i18n.t('Loading…')} />}
             disabled
           />
         );
@@ -300,7 +300,7 @@ class CtaButton extends React.Component<
       if (preflight === null) {
         // No prior preflight exists
         return this.getLoginOrActionBtn(
-          t('Start Pre-Install Validation'),
+          i18n.t('Start Pre-Install Validation'),
           this.startPreflight,
           true,
         );
@@ -313,7 +313,7 @@ class CtaButton extends React.Component<
             <ActionBtn
               label={
                 <LabelWithSpinner
-                  label={t('Pre-Install Validation In Progress…')}
+                  label={i18n.t('Pre-Install Validation In Progress…')}
                 />
               }
               disabled
@@ -330,8 +330,11 @@ class CtaButton extends React.Component<
               : this.startJob;
             // Warnings must be confirmed before proceeding
             const btn = hasWarnings
-              ? this.getLoginOrActionBtn(t('Install'), this.openPreflightModal)
-              : this.getLoginOrActionBtn(t('Install'), action);
+              ? this.getLoginOrActionBtn(
+                  i18n.t('View Warnings to Continue Installation'),
+                  this.openPreflightModal,
+                )
+              : this.getLoginOrActionBtn(i18n.t('Install'), action);
             return (
               <>
                 {btn}
@@ -351,7 +354,7 @@ class CtaButton extends React.Component<
           }
           // Prior preflight exists, but is no longer valid or has errors
           return this.getLoginOrActionBtn(
-            t('Re-Run Pre-Install Validation'),
+            i18n.t('Re-Run Pre-Install Validation'),
             this.startPreflight,
             true,
           );
@@ -360,7 +363,7 @@ class CtaButton extends React.Component<
         case STATUS.FAILED: {
           // Prior preflight exists, but failed or had plan-level errors
           return this.getLoginOrActionBtn(
-            t('Re-Run Pre-Install Validation'),
+            i18n.t('Re-Run Pre-Install Validation'),
             this.startPreflight,
             true,
           );
@@ -375,7 +378,7 @@ class CtaButton extends React.Component<
       : this.startJob;
     return (
       <>
-        {this.getLoginOrActionBtn(t('Install'), action)}
+        {this.getLoginOrActionBtn(i18n.t('Install'), action)}
         {this.getClickThroughAgreementModal()}
       </>
     );

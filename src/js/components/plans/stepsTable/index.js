@@ -3,7 +3,7 @@
 import * as React from 'react';
 import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
-import { t } from 'i18next';
+import i18n from 'i18next';
 
 import InstallDataCell, {
   InstallDataColumnLabel,
@@ -200,7 +200,7 @@ class StepsTable extends React.Component<Props, State> {
                     toggleLogs={this.toggleLogs}
                   />
                 ) : (
-                  t('Steps')
+                  i18n.t('Steps')
                 )
               }
               property="name"
@@ -209,12 +209,15 @@ class StepsTable extends React.Component<Props, State> {
               <NameDataCell
                 preflight={preflight}
                 job={job}
+                selectedSteps={
+                  hasValidToken && hasReadyPreflight ? selectedSteps : undefined
+                }
                 activeJobStep={activeJobStepId}
                 togglePanel={this.togglePanel}
                 expandedPanels={expandedPanels}
               />
             </DataTableColumn>
-            <DataTableColumn key="kind" label={t('Type')} property="kind">
+            <DataTableColumn key="kind" label={i18n.t('Type')} property="kind">
               <KindDataCell activeJobStep={activeJobStepId} />
             </DataTableColumn>
             <DataTableColumn key="is_required" property="is_required">
@@ -227,7 +230,7 @@ class StepsTable extends React.Component<Props, State> {
             {job || (hasValidToken && hasReadyPreflight) ? (
               <DataTableColumn
                 key="is_recommended"
-                label={job ? t('Install') : <InstallDataColumnLabel />}
+                label={job ? i18n.t('Install') : <InstallDataColumnLabel />}
                 property="is_recommended"
               >
                 <InstallDataCell

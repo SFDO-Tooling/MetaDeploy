@@ -2,10 +2,10 @@
 
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
+import i18n from 'i18next';
 import { Link, Redirect } from 'react-router-dom';
 import { Trans } from 'react-i18next';
 import { connect } from 'react-redux';
-import { t } from 'i18next';
 
 import routes from 'utils/routes';
 import {
@@ -24,6 +24,7 @@ import { getLoadingOrNotFound, shouldFetchVersion } from 'components/utils';
 import BackLink from 'components/backLink';
 import BodyContainer from 'components/bodyContainer';
 import Header from 'components/header';
+import OldVersionWarning from 'components/products/oldVersionWarning';
 import PageHeader from 'components/products/header';
 import ProductNotAllowed from 'components/products/notAllowed';
 import ProductNotFound from 'components/products/product404';
@@ -179,6 +180,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     if (!product || !version) {
       return <ProductNotFound />;
     }
+
     const listedAdditionalPlans: Array<PlanType> = version.additional_plans
       ? (Object.entries(version.additional_plans): any)
           .filter(
@@ -195,6 +197,10 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     const productDescriptionHasTitle =
       (product.description && product.description.startsWith('<h1>')) ||
       (product.description && product.description.startsWith('<h2>'));
+    const isMostRecent =
+      product.most_recent_version &&
+      version.id === product.most_recent_version.id;
+
     return (
       <DocumentTitle title={`${product.title} | ${window.SITE_NAME}`}>
         <>
@@ -202,6 +208,14 @@ class VersionDetail extends React.Component<VersionDetailProps> {
           <PageHeader product={product} versionLabel={version.label} />
           {product.is_allowed ? (
             <BodyContainer>
+              {product.most_recent_version && !isMostRecent ? (
+                <OldVersionWarning
+                  link={routes.version_detail(
+                    product.slug,
+                    product.most_recent_version.label,
+                  )}
+                />
+              ) : null}
               <BodySection>
                 <p>{version.description}</p>
                 {primary_plan && visiblePrimaryPlan ? (
@@ -216,7 +230,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                         slds-button_brand
                         slds-size_full"
                     >
-                      {t('View Plan')}: {primary_plan.title}
+                      {i18n.t('View Plan')}: {primary_plan.title}
                     </Link>
                   </p>
                 ) : null}
@@ -232,19 +246,19 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                         slds-button_outline-brand
                         slds-size_full"
                     >
-                      {t('View Plan')}: {secondary_plan.title}
+                      {i18n.t('View Plan')}: {secondary_plan.title}
                     </Link>
                   </p>
                 ) : null}
                 <BackLink
-                  label={t('Select a different product')}
+                  label={i18n.t('Select a different product')}
                   url={routes.product_list()}
                 />
                 {listedAdditionalPlans.length ? (
                   <div className="slds-p-top_x-large">
                     {visiblePrimaryPlan || visibleSecondaryPlan ? (
                       <h2 className="slds-text-heading_small">
-                        {t('Additional Plans')}
+                        {i18n.t('Additional Plans')}
                       </h2>
                     ) : null}
                     {listedAdditionalPlans.map(plan => (
@@ -266,7 +280,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
               <BodySection>
                 {!productDescriptionHasTitle && (
                   <h2 className="slds-text-heading_small">
-                    {t('About')} {product.title}
+                    {i18n.t('About')} {product.title}
                   </h2>
                 )}
                 {product.image ? (

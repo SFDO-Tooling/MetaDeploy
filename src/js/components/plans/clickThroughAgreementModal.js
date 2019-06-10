@@ -4,7 +4,7 @@ import * as React from 'react';
 import Button from '@salesforce/design-system-react/components/button';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Modal from '@salesforce/design-system-react/components/modal';
-import { t } from 'i18next';
+import i18n from 'i18next';
 
 type Props = {
   isOpen: boolean,
@@ -38,10 +38,14 @@ class ClickThroughAgreementModal extends React.Component<Props, State> {
     const { isOpen, text, startJob } = this.props;
     const { confirmed } = this.state;
     const footer = [
-      <Button key="cancel" label={t('Cancel')} onClick={this.handleClose} />,
+      <Button
+        key="cancel"
+        label={i18n.t('Cancel')}
+        onClick={this.handleClose}
+      />,
       <Button
         key="submit"
-        label={t('Confirm')}
+        label={i18n.t('Confirm')}
         variant="brand"
         onClick={startJob}
         disabled={!confirmed}
@@ -50,7 +54,7 @@ class ClickThroughAgreementModal extends React.Component<Props, State> {
     return (
       <Modal
         isOpen={isOpen}
-        heading={t('Product Terms of Use and Licenses')}
+        heading={i18n.t('Product Terms of Use and Licenses')}
         onRequestClose={this.handleClose}
         footer={footer}
       >
@@ -71,7 +75,7 @@ class ClickThroughAgreementModal extends React.Component<Props, State> {
             className="slds-p-top_medium"
             checked={this.state.confirmed}
             labels={{
-              label: t(
+              label: i18n.t(
                 'I confirm I have read and agree to these product terms of use and licenses.',
               ),
             }}

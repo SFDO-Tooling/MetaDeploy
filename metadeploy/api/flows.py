@@ -2,6 +2,7 @@ import logging
 from io import StringIO
 
 import bleach
+import coloredlogs
 from cumulusci.core.flowrunner import FlowCallback
 from django.core.cache import cache
 
@@ -42,17 +43,24 @@ class JobFlowCallback(BasicFlowCallback):
     def pre_flow(self, coordinator):
         logger = logging.getLogger("cumulusci")
         self.string_buffer = StringIO()
+
         self.handler = logging.StreamHandler(stream=self.string_buffer)
-        self.result_handler = ResultSpoolLogger(result=self.context)
         self.handler.setFormatter(logging.Formatter())
         logger.addHandler(self.handler)
+
+        self.result_handler = ResultSpoolLogger(result=self.context)
+        self.result_handler.setFormatter(
+            coloredlogs.ColoredFormatter(fmt="%(asctime)s %(message)s")
+        )
         logger.addHandler(self.result_handler)
+
         logger.setLevel(logging.DEBUG)
         self.logger = logger
         return self.logger
 
     def post_flow(self, coordinator):
         self.logger.removeHandler(self.handler)
+        self.logger.removeHandler(self.result_handler)
 
     def pre_task(self, step):
         super().pre_task(step)

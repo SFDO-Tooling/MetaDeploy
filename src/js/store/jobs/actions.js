@@ -5,7 +5,7 @@ import type { ThunkAction } from 'redux-thunk';
 import { addUrlParams } from 'utils/api';
 import type { Job } from 'store/jobs/reducer';
 
-type JobData = { plan: string, steps: Array<string> };
+export type JobData = { plan: string, steps: Array<string> };
 
 type FetchJobStarted = {
   type: 'FETCH_JOB_STARTED',

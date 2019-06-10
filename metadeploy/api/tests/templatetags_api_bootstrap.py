@@ -21,6 +21,7 @@ def test_serialize(user_factory):
                 "valid_token_for": "00Dxxxxxxxxxxxxxxx",
                 "org_name": "Sample Org",
                 "org_type": "Developer Edition",
+                "is_production_org": False,
                 "is_staff": False,
             }
         )
