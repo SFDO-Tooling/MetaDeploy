@@ -128,6 +128,17 @@ describe('getLoadingOrNotFound', () => {
     return { getByText, context };
   };
 
+  describe('unknown product', () => {
+    test('renders spinner', () => {
+      const { getByText } = setup({
+        product: undefined,
+        productSlug: 'other-product',
+      });
+
+      expect(getByText('Loading...')).toBeVisible();
+    });
+  });
+
   describe('no product', () => {
     test('renders <ProductNotFound />', () => {
       const { getByText } = setup({ product: null });

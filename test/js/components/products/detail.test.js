@@ -7,85 +7,99 @@ import routes from 'utils/routes';
 import {
   fetchAdditionalPlans,
   fetchPlan,
+  fetchProduct,
   fetchVersion,
 } from 'store/products/actions';
 import { ProductDetail, VersionDetail } from 'components/products/detail';
 
 jest.mock('store/products/actions');
 
-fetchPlan.mockReturnValue({ type: 'TEST' });
 fetchAdditionalPlans.mockReturnValue({ type: 'TEST' });
+fetchPlan.mockReturnValue({ type: 'TEST' });
+fetchProduct.mockReturnValue({ type: 'TEST' });
 fetchVersion.mockReturnValue({ type: 'TEST' });
 
 afterEach(() => {
-  fetchPlan.mockClear();
   fetchAdditionalPlans.mockClear();
+  fetchPlan.mockClear();
+  fetchProduct.mockClear();
   fetchVersion.mockClear();
 });
 
 const defaultState = {
-  products: [
-    {
-      id: 'p1',
-      slug: 'product-1',
-      old_slugs: ['old-slug'],
-      title: 'Product 1',
-      description: 'This is a test product.',
-      category: 'salesforce',
-      image: 'http://foo.bar',
-      most_recent_version: {
-        id: 'v1',
-        product: 'p1',
-        label: '1.0.0',
-        description: 'This is a test product version.',
-        primary_plan: {
-          id: 'plan-1',
-          slug: 'my-plan',
-          old_slugs: [],
-          title: 'My Plan',
-          is_listed: true,
-          is_allowed: true,
-          requires_preflight: true,
-        },
-        secondary_plan: {
-          id: 'plan-2',
-          slug: 'my-secondary-plan',
-          old_slugs: [],
-          title: 'My Secondary Plan',
-          is_listed: true,
-          is_allowed: true,
-          requires_preflight: true,
-        },
-        additional_plans: {
-          'my-additional-plan': {
-            id: 'plan-3',
-            slug: 'my-additional-plan',
+  products: {
+    products: [
+      {
+        id: 'p1',
+        slug: 'product-1',
+        old_slugs: ['old-slug'],
+        title: 'Product 1',
+        description: 'This is a test product.',
+        category: 'salesforce',
+        image: 'http://foo.bar',
+        most_recent_version: {
+          id: 'v1',
+          product: 'p1',
+          label: '1.0.0',
+          description: 'This is a test product version.',
+          primary_plan: {
+            id: 'plan-1',
+            slug: 'my-plan',
             old_slugs: [],
-            title: 'My Additional Plan',
+            title: 'My Plan',
             is_listed: true,
             is_allowed: true,
             requires_preflight: true,
           },
+          secondary_plan: {
+            id: 'plan-2',
+            slug: 'my-secondary-plan',
+            old_slugs: [],
+            title: 'My Secondary Plan',
+            is_listed: true,
+            is_allowed: true,
+            requires_preflight: true,
+          },
+          additional_plans: {
+            'my-additional-plan': {
+              id: 'plan-3',
+              slug: 'my-additional-plan',
+              old_slugs: [],
+              title: 'My Additional Plan',
+              is_listed: true,
+              is_allowed: true,
+              requires_preflight: true,
+            },
+          },
+          is_listed: true,
         },
         is_listed: true,
+        is_allowed: true,
       },
-      is_listed: true,
-      is_allowed: true,
-    },
-  ],
+    ],
+    notFound: [],
+  },
   user: {},
 };
 
 describe('<ProductDetail />', () => {
-  const setup = (initialState = defaultState, productSlug = 'product-1') => {
+  const setup = options => {
+    const defaults = {
+      initialState: defaultState,
+      productSlug: 'product-1',
+    };
+    const opts = Object.assign({}, defaults, options);
+    const { initialState, productSlug, rerenderFn } = opts;
     const context = {};
-    const { getByText } = renderWithRedux(
+    const { getByText, rerender } = renderWithRedux(
       <StaticRouter context={context}>
         <ProductDetail match={{ params: { productSlug } }} />
       </StaticRouter>,
       initialState,
+      opts.customStore,
+      rerenderFn,
     );
-    return { getByText, context };
+    return { getByText, context, rerender };
   };
 
   test('redirects to version_detail', () => {
@@ -97,7 +111,7 @@ describe('<ProductDetail />', () => {
 
   describe('product has old_slug', () => {
     test('redirects to product_detail with new slug', () => {
-      const { context } = setup(defaultState, 'old-slug');
+      const { context } = setup({ productSlug: 'old-slug' });
 
       expect(context.action).toEqual('REPLACE');
       expect(context.url).toEqual(routes.product_detail('product-1'));
@@ -107,7 +121,17 @@ describe('<ProductDetail />', () => {
   describe('no most_recent_version', () => {
     test('renders <VersionNotFound />', () => {
       const { getByText } = setup({
-        products: [{ ...defaultState.products[0], most_recent_version: null }],
+        initialState: {
+          products: {
+            ...defaultState.products,
+            products: [
+              {
+                ...defaultState.products.products[0],
+                most_recent_version: null,
+              },
+            ],
+          },
+        },
       });
 
       expect(getByText('list of all products')).toBeVisible();
@@ -116,7 +140,11 @@ describe('<ProductDetail />', () => {
 
   describe('no product', () => {
     test('renders <ProductNotFound />', () => {
-      const { getByText } = setup({ products: [] });
+      const { getByText } = setup({
+        initialState: {
+          products: { products: [], notFound: ['product-1'] },
+        },
+      });
 
       expect(getByText('list of all products')).toBeVisible();
     });
@@ -124,9 +152,35 @@ describe('<ProductDetail />', () => {
 
   describe('no productSlug', () => {
     test('renders <ProductNotFound />', () => {
-      const { getByText } = setup(defaultState, '');
+      const { getByText } = setup({ productSlug: '' });
 
       expect(getByText('list of all products')).toBeVisible();
+    });
+  });
+
+  describe('unknown product', () => {
+    test('fetches product', () => {
+      setup({ productSlug: 'other-product' });
+
+      expect(fetchProduct).toHaveBeenCalledWith({
+        slug: 'other-product',
+      });
+    });
+  });
+
+  describe('componentDidUpdate', () => {
+    describe('product is changed', () => {
+      test('fetches product', () => {
+        const { rerender } = setup();
+
+        expect(fetchProduct).not.toHaveBeenCalled();
+
+        setup({ productSlug: 'other-product', rerenderFn: rerender });
+
+        expect(fetchProduct).toHaveBeenCalledWith({
+          slug: 'other-product',
+        });
+      });
     });
   });
 });
@@ -161,9 +215,21 @@ describe('<VersionDetail />', () => {
 
   describe('no product', () => {
     test('renders <ProductNotFound />', () => {
-      const { getByText } = setup({ initialState: { products: [] } });
+      const { getByText } = setup({
+        initialState: { products: { products: [], notFound: ['product-1'] } },
+      });
 
       expect(getByText('list of all products')).toBeVisible();
+    });
+  });
+
+  describe('unknown product', () => {
+    test('fetches product', () => {
+      setup({ productSlug: 'other-product' });
+
+      expect(fetchProduct).toHaveBeenCalledWith({
+        slug: 'other-product',
+      });
     });
   });
 
@@ -198,21 +264,24 @@ describe('<VersionDetail />', () => {
 
     describe('matches known not-plan', () => {
       test('fetches version', () => {
-        const product = defaultState.products[0];
+        const product = defaultState.products.products[0];
         setup({
           versionLabel: '2.0.0',
           initialState: {
-            products: [
-              {
-                ...product,
-                most_recent_version: {
-                  ...product.most_recent_version,
-                  additional_plans: {
-                    '2.0.0': null,
+            products: {
+              ...defaultState.products,
+              products: [
+                {
+                  ...product,
+                  most_recent_version: {
+                    ...product.most_recent_version,
+                    additional_plans: {
+                      '2.0.0': null,
+                    },
                   },
                 },
-              },
-            ],
+              ],
+            },
           },
         });
 
@@ -237,17 +306,31 @@ describe('<VersionDetail />', () => {
   });
 
   describe('componentDidUpdate', () => {
-    describe('version is unchanged', () => {
-      test('does not fetch version', () => {
+    describe('product is changed', () => {
+      test('fetches product', () => {
         const { rerender } = setup();
 
-        expect(fetchVersion).not.toHaveBeenCalled();
+        expect(fetchProduct).not.toHaveBeenCalled();
 
-        setup({ rerenderFn: rerender });
+        setup({ productSlug: 'other-product', rerenderFn: rerender });
 
-        expect(fetchVersion).not.toHaveBeenCalled();
+        expect(fetchProduct).toHaveBeenCalledWith({
+          slug: 'other-product',
+        });
       });
     });
+
+    // describe('version is unchanged', () => {
+    //   test('does not fetch version', () => {
+    //     const { rerender } = setup();
+
+    //     expect(fetchVersion).not.toHaveBeenCalled();
+
+    //     setup({ rerenderFn: rerender });
+
+    //     expect(fetchVersion).not.toHaveBeenCalled();
+    //   });
+    // });
 
     describe('version is changed', () => {
       test('fetches plan', () => {
@@ -268,21 +351,24 @@ describe('<VersionDetail />', () => {
       });
 
       test('fetches version', () => {
-        const product = defaultState.products[0];
+        const product = defaultState.products.products[0];
         const { rerender } = setup({
           versionLabel: '1.0.0',
           initialState: {
-            products: [
-              {
-                ...product,
-                most_recent_version: {
-                  ...product.most_recent_version,
-                  additional_plans: {
-                    '2.0.0': null,
+            products: {
+              ...defaultState.products,
+              products: [
+                {
+                  ...product,
+                  most_recent_version: {
+                    ...product.most_recent_version,
+                    additional_plans: {
+                      '2.0.0': null,
+                    },
                   },
                 },
-              },
-            ],
+              ],
+            },
           },
         });
 
@@ -317,21 +403,24 @@ describe('<VersionDetail />', () => {
     });
 
     test('handles missing primary plan', () => {
-      const product = defaultState.products[0];
+      const product = defaultState.products.products[0];
       const { getByText, queryByText } = setup({
         initialState: {
-          products: [
-            {
-              ...product,
-              most_recent_version: {
-                ...product.most_recent_version,
-                primary_plan: {
-                  ...product.most_recent_version.primary_plan,
-                  is_listed: false,
+          products: {
+            ...defaultState.products,
+            products: [
+              {
+                ...product,
+                most_recent_version: {
+                  ...product.most_recent_version,
+                  primary_plan: {
+                    ...product.most_recent_version.primary_plan,
+                    is_listed: false,
+                  },
                 },
               },
-            },
-          ],
+            ],
+          },
         },
       });
 
@@ -371,7 +460,7 @@ describe('<VersionDetail />', () => {
         is_allowed: true,
       };
       const { getByText, queryByText } = setup({
-        initialState: { products: [product] },
+        initialState: { products: { products: [product], notFound: [] } },
       });
 
       expect(getByText('Product 1, 1.0.0')).toBeVisible();
@@ -413,7 +502,7 @@ describe('<VersionDetail />', () => {
         is_allowed: true,
       };
       const { getByText, queryByText } = setup({
-        initialState: { products: [product] },
+        initialState: { products: { products: [product], notFound: [] } },
       });
 
       expect(getByText('Product 1, 1.0.0')).toBeVisible();
@@ -441,11 +530,11 @@ describe('<VersionDetail />', () => {
       secondary_plan: null,
       is_listed: true,
     };
-    const product = Object.assign({}, defaultState.products[0]);
+    const product = Object.assign({}, defaultState.products.products[0]);
     product.versions = { [version.label]: version };
     test('renders version detail', () => {
       const { getByText } = setup({
-        initialState: { products: [product] },
+        initialState: { products: { products: [product], notFound: [] } },
         versionLabel: '2.0.0',
       });
 
@@ -457,11 +546,11 @@ describe('<VersionDetail />', () => {
 
   describe('no version', () => {
     test('renders <VersionNotFound />', () => {
-      const product = Object.assign({}, defaultState.products[0]);
+      const product = Object.assign({}, defaultState.products.products[0]);
       product.versions = { '2.0.0': null };
       product.most_recent_version.additional_plans['2.0.0'] = null;
       const { getByText } = setup({
-        initialState: { products: [product] },
+        initialState: { products: { products: [product], notFound: [] } },
         versionLabel: '2.0.0',
       });
 
@@ -471,12 +560,12 @@ describe('<VersionDetail />', () => {
 
   describe('no version and no most_recent_version', () => {
     test('renders <VersionNotFound />', () => {
-      const product = Object.assign({}, defaultState.products[0], {
+      const product = Object.assign({}, defaultState.products.products[0], {
         versions: { '2.0.0': null },
         most_recent_version: null,
       });
       const { getByText } = setup({
-        initialState: { products: [product] },
+        initialState: { products: { products: [product], notFound: [] } },
         versionLabel: '2.0.0',
       });
 
@@ -488,14 +577,17 @@ describe('<VersionDetail />', () => {
     test('renders <ProductNotAllowed />', () => {
       const { getByText } = setup({
         initialState: {
-          products: [
-            {
-              ...defaultState.products[0],
-              is_allowed: false,
-              not_allowed_instructions: 'foobar',
-              description: null,
-            },
-          ],
+          products: {
+            ...defaultState.products,
+            products: [
+              {
+                ...defaultState.products.products[0],
+                is_allowed: false,
+                not_allowed_instructions: 'foobar',
+                description: null,
+              },
+            ],
+          },
         },
       });
 
@@ -506,14 +598,17 @@ describe('<VersionDetail />', () => {
     test('renders <ProductNotAllowed /> without custom message', () => {
       const { getByText } = setup({
         initialState: {
-          products: [
-            {
-              ...defaultState.products[0],
-              is_allowed: false,
-              not_allowed_instructions: null,
-              description: null,
-            },
-          ],
+          products: {
+            ...defaultState.products,
+            products: [
+              {
+                ...defaultState.products.products[0],
+                is_allowed: false,
+                not_allowed_instructions: null,
+                description: null,
+              },
+            ],
+          },
           user: null,
         },
       });

@@ -26,7 +26,7 @@ export const selectPlan: (
 ) => PlanType | null = createSelector(
   [selectProduct, selectVersion, selectPlanSlug],
   (
-    product: ProductType | null,
+    product: ProductType | null | void,
     version: VersionType | null,
     planSlug: ?string,
   ): PlanType | null => {

@@ -186,39 +186,16 @@ class TestJobViewset:
 
 @pytest.mark.django_db
 class TestBasicGetViews:
-    def test_product(self, client, product_factory, version_factory):
-        product = product_factory()
-        version = version_factory(product=product)
-        response = client.get(reverse("product-detail", kwargs={"pk": product.id}))
+    def test_product(
+        self, client, allowed_list_factory, product_factory, version_factory
+    ):
+        allowed_list = allowed_list_factory(org_type=["Developer"])
+        product = product_factory(visible_to=allowed_list)
+        version_factory(product=product)
+        response = client.get(reverse("product-list"))
 
         assert response.status_code == 200
-        assert response.json() == {
-            "id": str(product.id),
-            "title": product.title,
-            "description": "<p>This is a sample product.</p>",
-            "short_description": "",
-            "click_through_agreement": "",
-            "category": "salesforce",
-            "color": "#FFFFFF",
-            "icon": None,
-            "image": None,
-            "most_recent_version": {
-                "id": str(version.id),
-                "product": str(product.id),
-                "label": "v0.1.0",
-                "description": "A sample version.",
-                "created_at": format_timestamp(version.created_at),
-                "primary_plan": None,
-                "secondary_plan": None,
-                "is_listed": True,
-            },
-            "slug": product.slug,
-            "old_slugs": [],
-            "is_allowed": True,
-            "is_listed": True,
-            "order_key": 0,
-            "not_allowed_instructions": None,
-        }
+        assert response.json() == []
 
     def test_version(self, client, version_factory):
         version = version_factory()
@@ -228,7 +205,7 @@ class TestBasicGetViews:
         assert response.json() == {
             "id": str(version.id),
             "product": str(version.product.id),
-            "label": "v0.1.0",
+            "label": version.label,
             "description": "A sample version.",
             "created_at": format_timestamp(version.created_at),
             "primary_plan": None,
@@ -243,12 +220,12 @@ class TestBasicGetViews:
         assert response.status_code == 200
         assert response.json() == {
             "id": str(plan.id),
-            "title": "Sample plan",
+            "title": str(plan.title),
             "version": str(plan.version.id),
             "preflight_message": "",
             "requires_preflight": True,
             "tier": "primary",
-            "slug": "sample-plan",
+            "slug": str(plan.slug),
             "old_slugs": [],
             "steps": [],
             "is_allowed": True,
@@ -265,12 +242,12 @@ class TestBasicGetViews:
         assert response.status_code == 200
         assert response.json() == {
             "id": str(plan.id),
-            "title": "Sample plan",
+            "title": str(plan.title),
             "version": str(plan.version.id),
             "preflight_message": None,
             "requires_preflight": True,
             "tier": "primary",
-            "slug": "sample-plan",
+            "slug": str(plan.slug),
             "old_slugs": [],
             "steps": None,
             "is_allowed": False,
@@ -300,12 +277,12 @@ class TestBasicGetViews:
         assert response.status_code == 200
         assert response.json() == {
             "id": str(plan.id),
-            "title": "Sample plan",
+            "title": str(plan.title),
             "version": str(plan.version.id),
             "preflight_message": "",
             "requires_preflight": False,
             "tier": "primary",
-            "slug": "sample-plan",
+            "slug": str(plan.slug),
             "old_slugs": [],
             "steps": [],
             "is_allowed": True,
@@ -326,12 +303,12 @@ class TestBasicGetViews:
         assert response.status_code == 200
         assert response.json() == {
             "id": str(plan.id),
-            "title": "Sample plan",
+            "title": str(plan.title),
             "version": str(plan.version.id),
             "preflight_message": "",
             "requires_preflight": True,
             "tier": "primary",
-            "slug": "sample-plan",
+            "slug": str(plan.slug),
             "old_slugs": [],
             "steps": [],
             "is_allowed": True,
@@ -436,11 +413,11 @@ class TestVersionAdditionalPlans:
         assert response.json() == [
             {
                 "id": str(plan.id),
-                "title": "Sample plan",
+                "title": str(plan.title),
                 "version": str(plan.version.id),
                 "preflight_message": "",
                 "tier": "additional",
-                "slug": "sample-plan",
+                "slug": str(plan.slug),
                 "old_slugs": [],
                 "steps": [],
                 "is_allowed": True,
@@ -450,3 +427,78 @@ class TestVersionAdditionalPlans:
                 "average_duration": None,
             }
         ]
+
+
+@pytest.mark.django_db
+class TestUnlisted:
+    def test_product(self, client, product_factory, version_factory):
+        product1 = product_factory()
+        version_factory(product=product1)
+        product2 = product_factory(is_listed=False)
+        version_factory(product=product2)
+
+        response = client.get(reverse("product-get-one"), {"slug": product2.slug})
+
+        assert response.status_code == 200
+        assert response.json()["id"] == product2.id
+
+    def test_version(self, client, product_factory, version_factory):
+        product = product_factory()
+        version_factory(product=product)
+        version = version_factory(product=product, is_listed=False)
+
+        response = client.get(
+            reverse("version-get-one"),
+            {"label": version.label, "product": product.slug},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["id"] == version.id
+
+    def test_plan(
+        self,
+        client,
+        product_factory,
+        version_factory,
+        plan_template_factory,
+        plan_factory,
+    ):
+        product = product_factory()
+        version = version_factory(product=product)
+        plan_template1 = plan_template_factory(product=product)
+        plan_template2 = plan_template_factory(product=product)
+        plan_factory(version=version, plan_template=plan_template1)
+        plan = plan_factory(
+            version=version, plan_template=plan_template2, is_listed=False
+        )
+
+        response = client.get(
+            reverse("plan-get-one"),
+            {"slug": plan.slug, "version": str(version.id), "product": str(product.id)},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["id"] == plan.id
+
+    def test_plan__missing_param(
+        self,
+        client,
+        product_factory,
+        version_factory,
+        plan_template_factory,
+        plan_factory,
+    ):
+        product = product_factory()
+        version = version_factory(product=product)
+        plan_template1 = plan_template_factory(product=product)
+        plan_template2 = plan_template_factory(product=product)
+        plan_factory(version=version, plan_template=plan_template1)
+        plan = plan_factory(
+            version=version, plan_template=plan_template2, is_listed=False
+        )
+
+        response = client.get(
+            reverse("plan-get-one"), {"slug": plan.slug, "product": str(product.id)}
+        )
+
+        assert response.status_code == 404
