@@ -14,7 +14,7 @@ describe('fetchProducts', () => {
         title: 'Product 1',
         description: 'This is a test product.',
       };
-      fetchMock.getOnce(window.api_urls.product_list(), [product]);
+      fetchMock.getOnce(window.api_urls.product_list(), { results: [product] });
       const started = {
         type: 'FETCH_PRODUCTS_STARTED',
       };
