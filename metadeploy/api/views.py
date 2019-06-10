@@ -63,7 +63,7 @@ class GetOneMixin:
         # We want to include more items than the list view includes:
         filter = self.filterset_class(request.GET, queryset=self.model.objects.all())
         try:
-            if filter.filters.keys() != request.GET.keys():
+            if filter.required_fields != request.GET.keys():
                 raise InvalidFields
             result = filter.qs.get()
             serializer = self.get_serializer(result)
