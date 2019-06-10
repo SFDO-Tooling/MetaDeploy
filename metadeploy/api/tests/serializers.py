@@ -439,7 +439,7 @@ class TestJob:
         assert not serializer.is_valid()
 
     def test_expired_token(self, rf, user_factory, plan_factory, step_factory):
-        plan = plan_factory(preflight_flow_name="")
+        plan = plan_factory()
         user = user_factory()
         for token in user.socialaccount_set.get().socialtoken_set.all():
             token.delete()
