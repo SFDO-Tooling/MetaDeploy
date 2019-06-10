@@ -1,12 +1,11 @@
 from datetime import timedelta
 
 import pytest
-from allauth.socialaccount.models import SocialAccount
 from django.contrib.sites.models import Site
 from django.core.exceptions import MultipleObjectsReturned, ValidationError
 from django.utils import timezone
 
-from ..models import Job, SiteProfile, User, Version
+from ..models import Job, SiteProfile, Version
 
 
 @pytest.mark.django_db
@@ -214,33 +213,6 @@ class TestUser:
 
         user = user_factory(socialaccount_set=[])
         assert user.full_org_type is None
-
-
-@pytest.mark.django_db
-class TestUserExpiredTokens:
-    def test_with_completed_job(self, user_factory, job_factory):
-        now = timezone.now()
-        then = now - timedelta(minutes=20)
-        user = user_factory()
-        SocialAccount.objects.filter(id=user.socialaccount_set.first().id).update(
-            last_login=then
-        )
-        job_factory(user=user, status=Job.Status.complete, org_id=user.org_id)
-        job_factory(user=user, status=Job.Status.failed, org_id=user.org_id)
-        job_factory(user=user, status=Job.Status.canceled, org_id=user.org_id)
-
-        assert user in User.objects.with_expired_tokens()
-
-    def test_with_in_progress_job(self, user_factory, job_factory):
-        now = timezone.now()
-        then = now - timedelta(minutes=20)
-        user = user_factory()
-        SocialAccount.objects.filter(id=user.socialaccount_set.first().id).update(
-            last_login=then
-        )
-        job_factory(user=user, status=Job.Status.started, org_id=user.org_id)
-
-        assert user not in User.objects.with_expired_tokens()
 
 
 @pytest.mark.django_db

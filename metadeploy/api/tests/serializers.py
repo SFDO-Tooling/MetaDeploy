@@ -436,6 +436,26 @@ class TestJob:
 
         assert not serializer.is_valid()
 
+    def test_expired_token(self, rf, user_factory, plan_factory, step_factory):
+        plan = plan_factory(preflight_flow_name="")
+        user = user_factory()
+        for token in user.socialaccount_set.get().socialtoken_set.all():
+            token.delete()
+        step1 = step_factory(plan=plan)
+        request = rf.get("/")
+        request.user = user
+        data = {"plan": str(plan.id), "steps": [str(step1.id)]}
+        serializer = JobSerializer(data=data, context=dict(request=request))
+
+        assert not serializer.is_valid()
+        non_field_errors = [
+            str(error) for error in serializer.errors["non_field_errors"]
+        ]
+        assert (
+            f"The connection to your org has been lost. Please log in again."
+            in non_field_errors
+        )
+
 
 @pytest.mark.django_db
 class TestJobSummarySerializer:
