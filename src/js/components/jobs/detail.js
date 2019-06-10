@@ -3,8 +3,8 @@
 import * as React from 'react';
 import Button from '@salesforce/design-system-react/components/button';
 import DocumentTitle from 'react-document-title';
+import i18n from 'i18next';
 import { connect } from 'react-redux';
-import { t } from 'i18next';
 
 import routes from 'utils/routes';
 import { CONSTANTS } from 'store/plans/reducer';
@@ -59,7 +59,7 @@ type Props = {
   doFetchVersion: typeof fetchVersion,
   doFetchJob: typeof fetchJob,
   doUpdateJob: typeof updateJob,
-  doRequestCancelJob: typeof requestCancelJob,
+  doRequestCancelJob: (id: string) => Promise<any>,
 };
 type State = {
   modalOpen: boolean,
@@ -164,7 +164,7 @@ class JobDetail extends React.Component<Props, State> {
           <Button
             label={
               <LabelWithSpinner
-                label={t('Canceling Installation…')}
+                label={i18n.t('Canceling Installation…')}
                 variant="base"
                 size="x-small"
               />
@@ -175,7 +175,7 @@ class JobDetail extends React.Component<Props, State> {
       }
       return (
         <Button
-          label={t('Cancel Installation')}
+          label={i18n.t('Cancel Installation')}
           variant="text-destructive"
           onClick={this.requestCancelJob}
         />
@@ -188,7 +188,7 @@ class JobDetail extends React.Component<Props, State> {
     <>
       {this.getCancelBtn()}
       <Button
-        label={t('Share Installation')}
+        label={i18n.t('Share Installation')}
         iconCategory="utility"
         iconName="share"
         iconPosition="left"
@@ -240,9 +240,9 @@ class JobDetail extends React.Component<Props, State> {
     const { canceling } = this.state;
     return (
       <DocumentTitle
-        title={`${t('Installation')} | ${plan.title} | ${product.title} | ${
-          window.SITE_NAME
-        }`}
+        title={`${i18n.t('Installation')} | ${plan.title} | ${
+          product.title
+        } | ${window.SITE_NAME}`}
       >
         <>
           <Header history={history} jobId={jobId} />
@@ -261,7 +261,7 @@ class JobDetail extends React.Component<Props, State> {
             updateJob={doUpdateJob}
           />
           <BodyContainer>
-            <Toasts job={job} label={t('Installation')} />
+            <Toasts job={job} label={i18n.t('Installation')} />
             <Intro
               averageDuration={plan.average_duration}
               isProductionOrg={job.is_production_org}
@@ -277,7 +277,7 @@ class JobDetail extends React.Component<Props, State> {
               backLink={
                 job.status === CONSTANTS.STATUS.STARTED ? null : (
                   <BackLink
-                    label={t('Install another product')}
+                    label={i18n.t('Install another product')}
                     url={routes.product_list()}
                     className="slds-p-top_small"
                   />

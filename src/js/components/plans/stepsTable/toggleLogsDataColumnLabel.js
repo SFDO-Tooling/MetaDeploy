@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Button from '@salesforce/design-system-react/components/button';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
-import { t } from 'i18next';
+import i18n from 'i18next';
 
 type Props = {
   logsExpanded: boolean,
@@ -23,11 +23,11 @@ class ToggleLogsDataColumnLabel extends React.Component<Props> {
       <>
         <Tooltip
           align="top left"
-          content={logsExpanded ? t('Hide Logs') : t('Show Logs')}
+          content={logsExpanded ? i18n.t('Hide Logs') : i18n.t('Show Logs')}
           position="overflowBoundaryElement"
         >
           <Button
-            assistiveText={{ icon: t('Steps') }}
+            assistiveText={{ icon: i18n.t('Steps') }}
             variant="icon"
             iconCategory="utility"
             iconName={logsExpanded ? 'toggle_panel_bottom' : 'toggle_panel_top'}
@@ -35,8 +35,8 @@ class ToggleLogsDataColumnLabel extends React.Component<Props> {
             onClick={this.toggleClicked}
           />
         </Tooltip>
-        <span title={t('Steps')} className="slds-p-left_x-small">
-          {t('Steps')}
+        <span title={i18n.t('Steps')} className="slds-p-left_x-small">
+          {i18n.t('Steps')}
         </span>
       </>
     );

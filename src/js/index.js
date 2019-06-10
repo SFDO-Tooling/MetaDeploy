@@ -4,14 +4,14 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import DocumentTitle from 'react-document-title';
 import IconSettings from '@salesforce/design-system-react/components/icon-settings';
+import i18n from 'i18next';
 import logger from 'redux-logger';
 import settings from '@salesforce/design-system-react/components/settings';
 import thunk from 'redux-thunk';
 import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import { composeWithDevTools } from 'redux-devtools-extension';
 import { applyMiddleware, createStore } from 'redux';
-import { t } from 'i18next';
+import { composeWithDevTools } from 'redux-devtools-extension';
 import actionSprite from '@salesforce-ux/design-system/assets/icons/action-sprite/svg/symbols.svg';
 import customSprite from '@salesforce-ux/design-system/assets/icons/custom-sprite/svg/symbols.svg';
 import doctypeSprite from '@salesforce-ux/design-system/assets/icons/doctype-sprite/svg/symbols.svg';
@@ -142,7 +142,7 @@ init_i18n(i18nError => {
     }
     window.GLOBALS = GLOBALS;
     window.SITE_NAME =
-      (window.GLOBALS.SITE && window.GLOBALS.SITE.name) || t('MetaDeploy');
+      (window.GLOBALS.SITE && window.GLOBALS.SITE.name) || i18n.t('MetaDeploy');
 
     // Get logged-in/out status
     const userString = el.getAttribute('data-user');

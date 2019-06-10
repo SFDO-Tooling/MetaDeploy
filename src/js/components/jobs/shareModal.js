@@ -6,7 +6,7 @@ import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Radio from '@salesforce/design-system-react/components/radio-group/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
-import { t } from 'i18next';
+import i18n from 'i18next';
 
 import { CONSTANTS } from 'store/plans/reducer';
 import { withTransientMessage } from 'components/utils';
@@ -90,7 +90,7 @@ class ShareModal extends React.Component<WrappedProps> {
       return (
         <div>
           <p className="slds-m-bottom_small">
-            {t('Oh no! This installation encountered an error.')}
+            {i18n.t('Oh no! This installation encountered an error.')}
           </p>
           {stepName && stepError ? (
             <p className="slds-m-bottom_small">
@@ -109,7 +109,7 @@ class ShareModal extends React.Component<WrappedProps> {
             />
           ) : (
             <p>
-              {t(
+              {i18n.t(
                 'Don’t panic. If you’re not sure what to do about this error, you can share the link below.',
               )}
             </p>
@@ -129,10 +129,10 @@ class ShareModal extends React.Component<WrappedProps> {
         heading={
           errorMsg ? (
             <span className="slds-text-color_error">
-              {t('Resolve Installation Error')}
+              {i18n.t('Resolve Installation Error')}
             </span>
           ) : (
-            t('Share Link to Installation Job')
+            i18n.t('Share Link to Installation Job')
           )
         }
         onRequestClose={this.handleClose}
@@ -156,7 +156,7 @@ class ShareModal extends React.Component<WrappedProps> {
             readOnly
             fixedTextRight={
               <Button
-                label={t('Copy Link')}
+                label={i18n.t('Copy Link')}
                 variant="brand"
                 onClick={this.handleCopy}
                 style={{ whiteSpace: 'nowrap' }}
@@ -169,7 +169,7 @@ class ShareModal extends React.Component<WrappedProps> {
               className="slds-form-element__help
                 slds-text-color_success"
             >
-              {transientMessageVisible ? t('Copied to clipboard') : ''}
+              {transientMessageVisible ? i18n.t('Copied to clipboard') : ''}
               {/* Space added to preserve height even when empty. */}
               &nbsp;
             </div>
@@ -178,13 +178,13 @@ class ShareModal extends React.Component<WrappedProps> {
           {job.user_can_edit ? (
             <>
               <RadioGroup
-                labels={{ label: t('Who can access this shared link?') }}
+                labels={{ label: i18n.t('Who can access this shared link?') }}
                 name="is_public"
                 onChange={this.handleChange}
               >
                 <Radio
                   id="is_public-false"
-                  label={t(
+                  label={i18n.t(
                     'Only I and Salesforce staff can view this installation job.',
                   )}
                   value="false"
@@ -192,7 +192,7 @@ class ShareModal extends React.Component<WrappedProps> {
                 />
                 <Radio
                   id="is_public-true"
-                  label={t(
+                  label={i18n.t(
                     'Anyone with the link can view this installation job.',
                   )}
                   value="true"
@@ -203,7 +203,7 @@ class ShareModal extends React.Component<WrappedProps> {
                 className="slds-text-body_small
                   slds-p-top_small"
               >
-                {t(
+                {i18n.t(
                   'Access to view the installation job does not provide access to your Salesforce org.',
                 )}
               </p>

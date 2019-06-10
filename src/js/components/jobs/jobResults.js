@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Icon from '@salesforce/design-system-react/components/icon';
-import { t } from 'i18next';
+import i18n from 'i18next';
 
 import { CONSTANTS } from 'store/plans/reducer';
 import { ErrorIcon, getErrorInfo } from 'components/plans/preflightResults';
@@ -25,10 +25,10 @@ const JobResults = ({
 
   const { message } = getErrorInfo({
     job,
-    label: t('Installation'),
+    label: i18n.t('Installation'),
   });
   if (message !== null) {
-    const title = t('View Installation Error Details & Link');
+    const title = i18n.t('View Installation Error Details & Link');
     return (
       <div
         className="slds-box
@@ -45,7 +45,7 @@ const JobResults = ({
             slds-m-left_xx-small"
         >
           <Icon
-            assistiveText={{ label: t('Error') }}
+            assistiveText={{ label: i18n.t('Error') }}
             category="utility"
             name="error"
             colorVariant="error"
@@ -65,7 +65,7 @@ const JobResults = ({
             {title}
           </h2>
           <div className="slds-m-top_small">
-            {message} {t('View steps to resolve and share link.')}
+            {message} {i18n.t('View steps to resolve and share link.')}
           </div>
         </div>
       </div>
@@ -77,7 +77,7 @@ const JobResults = ({
     return (
       <p className="slds-text-color_error">
         <ErrorIcon />
-        {t('Installation was canceled.')}
+        {i18n.t('Installation was canceled.')}
       </p>
     );
   }
@@ -85,7 +85,7 @@ const JobResults = ({
   // Successful job
   return (
     <p className="slds-text-color_success">
-      {t('Installation completed successfully.')}
+      {i18n.t('Installation completed successfully.')}
     </p>
   );
 };

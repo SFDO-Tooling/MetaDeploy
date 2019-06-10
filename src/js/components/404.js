@@ -3,9 +3,9 @@
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
 import Illustration from '@salesforce/design-system-react/components/illustration';
+import i18n from 'i18next';
 import { Link } from 'react-router-dom';
 import { Trans } from 'react-i18next';
-import { t } from 'i18next';
 import type { RouterHistory } from 'react-router-dom';
 
 import Header from 'components/header';
@@ -29,7 +29,7 @@ const FourOhFour = ({
   message?: React.Node,
   history?: RouterHistory,
 }) => (
-  <DocumentTitle title={`${t('404')} | ${window.SITE_NAME}`}>
+  <DocumentTitle title={`${i18n.t('404')} | ${window.SITE_NAME}`}>
     <>
       <Header history={history} />
       <EmptyIllustration
