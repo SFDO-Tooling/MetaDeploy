@@ -9,6 +9,7 @@ from ..serializers import (
     JobSummarySerializer,
     PlanSerializer,
     PreflightResultSerializer,
+    ProductCategorySerializer,
     ProductSerializer,
 )
 
@@ -482,3 +483,39 @@ class TestJobSummarySerializer:
                 org_id="00Dxxxxxxxxxxxxxxx",
             )
         assert JobSummarySerializer(job).data["plan_average_duration"] == "30.0"
+
+
+@pytest.mark.django_db
+class TestProductCategorySerializer:
+    def test_get_first_page(self, rf, product_factory, user_factory):
+        request = rf.get("")
+        request.query_params = {}
+        request.user = user_factory()
+        product = product_factory()
+        category = product.category
+        serializer = ProductCategorySerializer(category, context={"request": request})
+        assert serializer.data["first_page"] == {
+            "count": 1,
+            "previous": None,
+            "next": None,
+            "results": [
+                {
+                    "id": str(product.id),
+                    "title": product.title,
+                    "description": "<p>This is a sample product.</p>",
+                    "short_description": "",
+                    "click_through_agreement": "",
+                    "category": "salesforce",
+                    "color": "#FFFFFF",
+                    "icon": None,
+                    "image": None,
+                    "most_recent_version": None,
+                    "slug": product.slug,
+                    "old_slugs": [],
+                    "is_allowed": True,
+                    "is_listed": True,
+                    "order_key": 0,
+                    "not_allowed_instructions": None,
+                }
+            ],
+        }

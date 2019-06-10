@@ -195,7 +195,12 @@ class TestBasicGetViews:
         response = client.get(reverse("product-list"))
 
         assert response.status_code == 200
-        assert response.json() == []
+        assert response.json() == {
+            "count": 0,
+            "results": [],
+            "previous": None,
+            "next": None,
+        }
 
     def test_version(self, client, version_factory):
         version = version_factory()

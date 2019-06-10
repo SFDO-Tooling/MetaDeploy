@@ -18,6 +18,7 @@ from .models import (
     Step,
     Version,
 )
+from .paginators import ProductPaginator
 
 User = get_user_model()
 
@@ -221,9 +222,23 @@ class VersionSerializer(serializers.ModelSerializer):
 
 
 class ProductCategorySerializer(serializers.ModelSerializer):
+    first_page = serializers.SerializerMethodField()
+
     class Meta:
         model = ProductCategory
-        fields = ("id", "title")
+        fields = ("id", "title", "first_page")
+
+    def get_first_page(self, obj):
+        paginator = ProductPaginator()
+        page = paginator.paginate_queryset(
+            obj.product_set.all(), self.context["request"]
+        )
+        return {
+            "count": paginator.page.paginator.count,
+            "next": paginator.get_next_link(),
+            "previous": paginator.get_previous_link(),
+            "results": ProductSerializer(page, many=True, context=self.context).data,
+        }
 
 
 class ProductSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):

@@ -5,7 +5,6 @@ from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, mixins, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -13,6 +12,7 @@ from .constants import REDIS_JOB_CANCEL_KEY
 from .filters import PlanFilter, ProductFilter, VersionFilter
 from .jobs import preflight_job
 from .models import Job, Plan, PreflightResult, Product, ProductCategory, Version
+from .paginators import ProductPaginator
 from .permissions import OnlyOwnerOrSuperuserCanDelete
 from .serializers import (
     FullUserSerializer,
@@ -30,10 +30,6 @@ User = get_user_model()
 
 class InvalidFields(Exception):
     pass
-
-
-class ProductPaginator(PageNumberPagination):
-    page_size = 25
 
 
 class FilterAllowedByOrgMixin:
