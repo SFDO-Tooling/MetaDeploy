@@ -1,28 +1,17 @@
-version: 2
+version: 2.1
 jobs:
   build:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.7
+      - image: circleci/python:3.7.3-node
     steps:
       - checkout
       - restore_cache:
           keys:
-            - v2-metadeploy-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
-            - v2-metadeploy-py-3.7-
+            - metadeploy-py-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
       - restore_cache:
           keys:
-            - v1-metadeploy-npm-{{ checksum "yarn.lock" }}
-            - v1-metadeploy-npm-
-      - run:
-          name: Install Node & Yarn
-          command: ./bin/unpack-node
-      - run:
-          name: Set $PATH
-          command: |
-            echo 'export PATH=~/metadeploy/node_modules/.bin:$PATH' >> $BASH_ENV
-            echo 'export PATH=~/metadeploy/node/bin:$PATH' >> $BASH_ENV
-            source $BASH_ENV
+            - metadeploy-npm-{{ checksum "yarn.lock" }}
       - run:
           name: Install Dependencies
           command: |
@@ -42,41 +31,28 @@ jobs:
       - run:
           name: Compile Front-End Assets
           command: yarn prod
-      - save_cache:
-          key: v1-metadeploy-node-{{ checksum "package.json" }}
+      - persist_to_workspace:
+          root: .
           paths:
-            - '~/metadeploy/node'
+            - ./venv
+            - ./node_modules
       - save_cache:
-          key: v2-metadeploy-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+          key: metadeploy-py-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
           paths:
-            - '~/.cache/pip'
             - ./venv
       - save_cache:
-          key: v1-metadeploy-npm-{{ checksum "yarn.lock" }}
+          key: metadeploy-npm-{{ checksum "yarn.lock" }}
           paths:
-            - '~/.cache/yarn'
-            - '~/metadeploy/node_modules'
+            - ./node_modules
 
   lint:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.7
+      - image: circleci/python:3.7.3-node
     steps:
       - checkout
-      - restore_cache:
-          key: v1-metadeploy-node-{{ checksum "package.json" }}
-      - restore_cache:
-          key: v2-metadeploy-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
-      - restore_cache:
-          keys:
-            - v1-metadeploy-npm-{{ checksum "yarn.lock" }}
-            - v1-metadeploy-npm-
-      - run:
-          name: Set $PATH
-          command: |
-            echo 'export PATH=~/metadeploy/node_modules/.bin:$PATH' >> $BASH_ENV
-            echo 'export PATH=~/metadeploy/node/bin:$PATH' >> $BASH_ENV
-            source $BASH_ENV
+      - attach_workspace:
+          at: .
       - run:
           name: Lint
           command: |
@@ -86,21 +62,11 @@ jobs:
   test-client:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.7
+      - image: circleci/python:3.7.3-node
     steps:
       - checkout
-      - restore_cache:
-          key: v1-metadeploy-node-{{ checksum "package.json" }}
-      - restore_cache:
-          keys:
-            - v1-metadeploy-npm-{{ checksum "yarn.lock" }}
-            - v1-metadeploy-npm-
-      - run:
-          name: Set $PATH
-          command: |
-            echo 'export PATH=~/metadeploy/node_modules/.bin:$PATH' >> $BASH_ENV
-            echo 'export PATH=~/metadeploy/node/bin:$PATH' >> $BASH_ENV
-            source $BASH_ENV
+      - attach_workspace:
+          at: .
       - run:
           name: Test JS
           command: yarn test:coverage
@@ -117,7 +83,7 @@ jobs:
   test-python:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.7
+      - image: circleci/python:3.7.3-node
       - image: circleci/redis:latest
       - image: circleci/postgres:latest
         environment:
@@ -129,8 +95,8 @@ jobs:
           AWS_ACCESS_KEY_ID: None
     steps:
       - checkout
-      - restore_cache:
-          key: v2-metadeploy-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+      - attach_workspace:
+          at: .
       - run:
           name: Install Dockerize
           command: wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && sudo tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
@@ -162,25 +128,11 @@ jobs:
   report-test-coverage:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.7
+      - image: circleci/python:3.7.3-node
     steps:
       - checkout
       - attach_workspace:
           at: .
-      - restore_cache:
-          key: v1-metadeploy-node-{{ checksum "package.json" }}
-      - restore_cache:
-          keys:
-            - v1-metadeploy-npm-{{ checksum "yarn.lock" }}
-            - v1-metadeploy-npm-
-      - restore_cache:
-          key: v2-metadeploy-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
-      - run:
-          name: Set $PATH
-          command: |
-            echo 'export PATH=~/metadeploy/node_modules/.bin:$PATH' >> $BASH_ENV
-            echo 'export PATH=~/metadeploy/node/bin:$PATH' >> $BASH_ENV
-            source $BASH_ENV
       - run:
           name: Report Test Coverage
           command: |
@@ -198,11 +150,11 @@ jobs:
   build-docs:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.7
+      - image: circleci/python:3.7.3-node
     steps:
       - checkout
-      - restore_cache:
-          key: v2-metadeploy-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+      - attach_workspace:
+          at: .
       - run:
           name: Build Documentation
           command: |
