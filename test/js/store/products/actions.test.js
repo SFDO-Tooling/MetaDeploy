@@ -49,9 +49,14 @@ describe('fetchProducts', () => {
         type: 'FETCH_PRODUCTS_FAILED',
       };
 
-      expect.assertions(2);
+      expect.assertions(5);
       return store.dispatch(actions.fetchProducts()).catch(() => {
-        expect(store.getActions()).toEqual([started, failed]);
+        const allActions = store.getActions();
+
+        expect(allActions[0]).toEqual(started);
+        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].payload.message).toEqual('Internal Server Error');
+        expect(allActions[2]).toEqual(failed);
         expect(window.console.error).toHaveBeenCalled();
       });
     });
@@ -120,9 +125,14 @@ describe('fetchProduct', () => {
         payload: filters,
       };
 
-      expect.assertions(2);
+      expect.assertions(5);
       return store.dispatch(actions.fetchProduct(filters)).catch(() => {
-        expect(store.getActions()).toEqual([started, failed]);
+        const allActions = store.getActions();
+
+        expect(allActions[0]).toEqual(started);
+        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].payload.message).toEqual('Internal Server Error');
+        expect(allActions[2]).toEqual(failed);
         expect(window.console.error).toHaveBeenCalled();
       });
     });
@@ -191,9 +201,14 @@ describe('fetchVersion', () => {
         payload: filters,
       };
 
-      expect.assertions(2);
+      expect.assertions(5);
       return store.dispatch(actions.fetchVersion(filters)).catch(() => {
-        expect(store.getActions()).toEqual([started, failed]);
+        const allActions = store.getActions();
+
+        expect(allActions[0]).toEqual(started);
+        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].payload.message).toEqual('Internal Server Error');
+        expect(allActions[2]).toEqual(failed);
         expect(window.console.error).toHaveBeenCalled();
       });
     });
@@ -246,7 +261,10 @@ describe('fetchAdditionalPlans', () => {
 
     test('dispatches FETCH_ADDITIONAL_PLANS_FAILED action', () => {
       const store = storeWithApi({});
-      fetchMock.getOnce(baseUrl, 500);
+      fetchMock.getOnce(baseUrl, {
+        status: 500,
+        body: { non_field_errors: ['Foobar'] },
+      });
       const started = {
         type: 'FETCH_ADDITIONAL_PLANS_STARTED',
         payload: filters,
@@ -256,9 +274,14 @@ describe('fetchAdditionalPlans', () => {
         payload: filters,
       };
 
-      expect.assertions(2);
+      expect.assertions(5);
       return store.dispatch(actions.fetchAdditionalPlans(filters)).catch(() => {
-        expect(store.getActions()).toEqual([started, failed]);
+        const allActions = store.getActions();
+
+        expect(allActions[0]).toEqual(started);
+        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].payload.message).toEqual('Foobar');
+        expect(allActions[2]).toEqual(failed);
         expect(window.console.error).toHaveBeenCalled();
       });
     });
@@ -325,9 +348,14 @@ describe('fetchPlan', () => {
         payload: filters,
       };
 
-      expect.assertions(2);
+      expect.assertions(5);
       return store.dispatch(actions.fetchPlan(filters)).catch(() => {
-        expect(store.getActions()).toEqual([started, failed]);
+        const allActions = store.getActions();
+
+        expect(allActions[0]).toEqual(started);
+        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].payload.message).toEqual('Internal Server Error');
+        expect(allActions[2]).toEqual(failed);
         expect(window.console.error).toHaveBeenCalled();
       });
     });

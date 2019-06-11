@@ -4,8 +4,6 @@ import thunk from 'redux-thunk';
 import { Provider } from 'react-redux';
 import { render } from '@testing-library/react';
 
-import getApiFetch from 'utils/api';
-
 const mockStore = configureStore([]);
 
 export const renderWithRedux = (
@@ -25,8 +23,4 @@ export const renderWithRedux = (
   };
 };
 
-export const storeWithApi = configureStore([
-  thunk.withExtraArgument({
-    apiFetch: getApiFetch(),
-  }),
-]);
+export const storeWithApi = configureStore([thunk]);

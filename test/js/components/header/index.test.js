@@ -7,7 +7,9 @@ import { renderWithRedux } from './../../utils';
 import Header from 'components/header';
 
 describe('<Header />', () => {
-  const setup = (initialState = { user: null, socket: false, org: null }) => {
+  const setup = (
+    initialState = { user: null, socket: false, org: null, errors: [] },
+  ) => {
     const {
       container,
       getByLabelText,

@@ -2,6 +2,7 @@
 
 import type { ThunkAction } from 'redux-thunk';
 
+import apiFetch from 'utils/api';
 import type { Org } from 'store/org/reducer';
 
 type FetchOrgJobsStarted = {
@@ -24,13 +25,9 @@ export type OrgAction =
   | FetchOrgJobsFailed
   | OrgChanged;
 
-export const fetchOrgJobs = (): ThunkAction => (
-  dispatch,
-  getState,
-  { apiFetch },
-) => {
+export const fetchOrgJobs = (): ThunkAction => dispatch => {
   dispatch({ type: 'FETCH_ORG_JOBS_STARTED' });
-  return apiFetch(window.api_urls.org_list())
+  return apiFetch(window.api_urls.org_list(), dispatch)
     .then(response =>
       dispatch({
         type: 'FETCH_ORG_JOBS_SUCCEEDED',

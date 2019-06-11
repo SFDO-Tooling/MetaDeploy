@@ -1,7 +1,9 @@
 // @flow
 
 import cookies from 'js-cookie';
+import type { Dispatch } from 'redux-thunk';
 
+import { addError } from 'store/errors/actions';
 import { logError } from 'utils/logging';
 
 export type UrlParams = { [string]: string | number | boolean };
@@ -14,11 +16,11 @@ const getResponse = resp =>
     .text()
     .then(text => {
       try {
-        return JSON.parse(text);
+        return { response: resp, body: JSON.parse(text) };
       } catch (err) {
         // swallow error
       }
-      return text;
+      return { response: resp, body: text };
     })
     .catch(
       /* istanbul ignore next */
@@ -28,7 +30,12 @@ const getResponse = resp =>
       },
     );
 
-const getApiFetch = () => (url: string, opts: { [string]: mixed } = {}) => {
+const apiFetch = (
+  url: string,
+  dispatch: Dispatch,
+  opts: { [string]: mixed } = {},
+  suppressErrorsOn: Array<number> = [404],
+): Promise<any> => {
   const options = Object.assign({}, { headers: {} }, opts);
   const method = options.method || 'GET';
   if (!csrfSafeMethod(method)) {
@@ -36,15 +43,26 @@ const getApiFetch = () => (url: string, opts: { [string]: mixed } = {}) => {
   }
 
   return fetch(url, options)
+    .then(getResponse)
     .then(
-      response => {
+      ({ response, body }) => {
         if (response.ok) {
-          return getResponse(response);
+          return body;
         }
-        if (response.status >= 400 && response.status < 500) {
+        if (suppressErrorsOn.includes(response.status)) {
           return null;
         }
-        const error = (new Error(response.statusText): { [string]: mixed });
+        let msg = response.statusText;
+        if (body) {
+          if (typeof body === 'string') {
+            msg = body;
+          } else if (body.detail) {
+            msg = body.detail;
+          } else if (body.non_field_errors) {
+            msg = body.non_field_errors;
+          }
+        }
+        const error = (new Error(msg): { [string]: mixed });
         error.response = response;
         throw error;
       },
@@ -55,6 +73,7 @@ const getApiFetch = () => (url: string, opts: { [string]: mixed } = {}) => {
     )
     .catch(err => {
       logError(err);
+      dispatch(addError(err.message));
       throw err;
     });
 };
@@ -85,4 +104,4 @@ export const removeUrlParam = (key: string, search?: string): string => {
   return params.toString();
 };
 
-export default getApiFetch;
+export default apiFetch;

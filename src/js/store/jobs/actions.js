@@ -2,7 +2,7 @@
 
 import type { ThunkAction } from 'redux-thunk';
 
-import { addUrlParams } from 'utils/api';
+import apiFetch, { addUrlParams } from 'utils/api';
 import type { Job } from 'store/jobs/reducer';
 
 export type JobData = { plan: string, steps: Array<string> };
@@ -72,7 +72,7 @@ export const fetchJob = ({
   productSlug: string,
   versionLabel: string,
   planSlug: string,
-}): ThunkAction => (dispatch, getState, { apiFetch }) => {
+}): ThunkAction => dispatch => {
   dispatch({ type: 'FETCH_JOB_STARTED', payload: jobId });
   const url = window.api_urls.job_detail(jobId);
   const params = {
@@ -80,7 +80,7 @@ export const fetchJob = ({
     plan__version__label: versionLabel,
     plan__version__product__productslug__slug: productSlug,
   };
-  return apiFetch(addUrlParams(url, params))
+  return apiFetch(addUrlParams(url, params), dispatch)
     .then(response => {
       if (response && window.socket) {
         window.socket.subscribe({
@@ -99,14 +99,10 @@ export const fetchJob = ({
     });
 };
 
-export const startJob = (data: JobData): ThunkAction => (
-  dispatch,
-  getState,
-  { apiFetch },
-) => {
+export const startJob = (data: JobData): ThunkAction => dispatch => {
   dispatch({ type: 'JOB_REQUESTED', payload: data });
   const url = window.api_urls.job_list();
-  return apiFetch(url, {
+  return apiFetch(url, dispatch, {
     method: 'POST',
     body: JSON.stringify(data),
     headers: {
@@ -150,11 +146,11 @@ export const failJob = (payload: Job): JobFailed => ({
 export const updateJob = (payload: {
   +id: string,
   [string]: mixed,
-}): ThunkAction => (dispatch, getState, { apiFetch }) => {
+}): ThunkAction => dispatch => {
   const { id } = payload;
   dispatch({ type: 'JOB_UPDATE_REQUESTED', payload });
   const url = window.api_urls.job_detail(id);
-  return apiFetch(url, {
+  return apiFetch(url, dispatch, {
     method: 'PATCH',
     body: JSON.stringify(payload),
     headers: {
@@ -168,14 +164,10 @@ export const updateJob = (payload: {
     });
 };
 
-export const requestCancelJob = (id: string): ThunkAction => (
-  dispatch,
-  getState,
-  { apiFetch },
-) => {
+export const requestCancelJob = (id: string): ThunkAction => dispatch => {
   dispatch({ type: 'JOB_CANCEL_REQUESTED', payload: id });
   const url = window.api_urls.job_detail(id);
-  return apiFetch(url, {
+  return apiFetch(url, dispatch, {
     method: 'DELETE',
   })
     .then(() => dispatch({ type: 'JOB_CANCEL_ACCEPTED', payload: id }))
