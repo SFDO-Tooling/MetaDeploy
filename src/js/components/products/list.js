@@ -26,7 +26,7 @@ type Props = {
   ...InitialProps,
   productsByCategory: ProductsMapType,
   productCategories: Array<string>,
-  doFetchMoreProducts: typeof fetchMoreProducts,
+  doFetchProducts: typeof fetchProducts,
 };
 type State = {
   activeProductsTab: string | null,
@@ -93,7 +93,7 @@ class ProductsList extends React.Component<Props, State> {
   handleOnScroll = () => {
     const scrollTop =
       (document.documentElement && document.documentElement.scrollTop) ||
-      document.body.scrollTop;
+      document.body && document.body.scrollTop;
     const scrollHeight =
       (document.documentElement && document.documentElement.scrollHeight) ||
       document.body.scrollHeight;
@@ -104,9 +104,8 @@ class ProductsList extends React.Component<Props, State> {
 
     if (scrolledToBottom) {
       this.setState({ fetchingProducts: true });
-      this.props.dofetchProducts().then(() => {
-        this.setState({ fetchingProducts: false });
-      });
+      const { doFetchProducts } = this.props;
+      doFetchProducts();
     }
   };
 
@@ -209,7 +208,7 @@ const select = (appState: AppState) => ({
 });
 
 const actions = () => ({
-  doFetchProducts: fetchProducts,
+   doFetchProducts: fetchProducts
 });
 const WrappedProductsList: React.ComponentType<InitialProps> = connect(
   select,
