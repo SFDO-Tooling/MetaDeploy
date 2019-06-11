@@ -21,8 +21,8 @@ const ErrorToast = ({
 }) => (
   <Toast
     labels={{
-      heading: i18n.t("Uh oh. We've encountered an error. You might try "),
-      headingLink: i18n.t('reloading the page.'),
+      heading: i18n.t("Uh oh, we've encountered an error. You may need to "),
+      headingLink: i18n.t('reload the page.'),
       details: error.message,
     }}
     variant="error"

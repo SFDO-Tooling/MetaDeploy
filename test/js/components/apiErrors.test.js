@@ -18,7 +18,7 @@ describe('<Errors />', () => {
     const { getByText } = setup();
 
     jest.spyOn(window.location, 'reload');
-    fireEvent.click(getByText('reloading the page.'));
+    fireEvent.click(getByText('reload the page.'));
 
     expect(window.location.reload).toHaveBeenCalledTimes(1);
   });
