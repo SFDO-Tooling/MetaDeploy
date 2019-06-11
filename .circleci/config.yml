@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.7.3-node
+      - image: circleci/python:3.7.3
     steps:
       - checkout
       - restore_cache:
@@ -12,6 +12,15 @@ jobs:
       - restore_cache:
           keys:
             - metadeploy-npm-{{ checksum "yarn.lock" }}
+      - run:
+          name: Install Node & Yarn
+          command: ./bin/unpack-node
+      - run:
+          name: Set $PATH
+          command: |
+            echo 'export PATH=~/metadeploy/node_modules/.bin:$PATH' >> $BASH_ENV
+            echo 'export PATH=~/metadeploy/node/bin:$PATH' >> $BASH_ENV
+            source $BASH_ENV
       - run:
           name: Install Dependencies
           command: |
@@ -36,6 +45,7 @@ jobs:
           paths:
             - ./venv
             - ./node_modules
+            - ./node
       - save_cache:
           key: metadeploy-py-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
           paths:
@@ -48,11 +58,17 @@ jobs:
   lint:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.7.3-node
+      - image: circleci/python:3.7.3
     steps:
       - checkout
       - attach_workspace:
           at: .
+      - run:
+          name: Set $PATH
+          command: |
+            echo 'export PATH=~/metadeploy/node_modules/.bin:$PATH' >> $BASH_ENV
+            echo 'export PATH=~/metadeploy/node/bin:$PATH' >> $BASH_ENV
+            source $BASH_ENV
       - run:
           name: Lint
           command: |
@@ -62,11 +78,17 @@ jobs:
   test-client:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.7.3-node
+      - image: circleci/python:3.7.3
     steps:
       - checkout
       - attach_workspace:
           at: .
+      - run:
+          name: Set $PATH
+          command: |
+            echo 'export PATH=~/metadeploy/node_modules/.bin:$PATH' >> $BASH_ENV
+            echo 'export PATH=~/metadeploy/node/bin:$PATH' >> $BASH_ENV
+            source $BASH_ENV
       - run:
           name: Test JS
           command: yarn test:coverage
@@ -83,7 +105,7 @@ jobs:
   test-python:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.7.3-node
+      - image: circleci/python:3.7.3
       - image: circleci/redis:latest
       - image: circleci/postgres:latest
         environment:
@@ -128,11 +150,17 @@ jobs:
   report-test-coverage:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.7.3-node
+      - image: circleci/python:3.7.3
     steps:
       - checkout
       - attach_workspace:
           at: .
+      - run:
+          name: Set $PATH
+          command: |
+            echo 'export PATH=~/metadeploy/node_modules/.bin:$PATH' >> $BASH_ENV
+            echo 'export PATH=~/metadeploy/node/bin:$PATH' >> $BASH_ENV
+            source $BASH_ENV
       - run:
           name: Report Test Coverage
           command: |
@@ -150,7 +178,7 @@ jobs:
   build-docs:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.7.3-node
+      - image: circleci/python:3.7.3
     steps:
       - checkout
       - attach_workspace:
