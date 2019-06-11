@@ -12,8 +12,8 @@ from .views import (
 
 router = routers.DefaultRouter()
 router.register("jobs", JobViewSet, basename="job")
-router.register("products", ProductViewSet)
-router.register("versions", VersionViewSet)
-router.register("plans", PlanViewSet)
+router.register("products", ProductViewSet, basename="product")
+router.register("versions", VersionViewSet, basename="version")
+router.register("plans", PlanViewSet, basename="plan")
 router.register("orgs", OrgViewSet, basename="org")
 urlpatterns = router.urls + [path("user/", UserView.as_view(), name="user")]

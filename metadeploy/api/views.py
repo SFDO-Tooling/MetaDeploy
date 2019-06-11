@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core import exceptions
 from django.core.cache import cache
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
@@ -8,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .constants import REDIS_JOB_CANCEL_KEY
-from .filters import PlanFilter
+from .filters import PlanFilter, ProductFilter, VersionFilter
 from .jobs import preflight_job
 from .models import Job, Plan, PreflightResult, Product, Version
 from .permissions import OnlyOwnerOrSuperuserCanDelete
@@ -23,6 +24,46 @@ from .serializers import (
 )
 
 User = get_user_model()
+
+
+class InvalidFields(Exception):
+    pass
+
+
+class FilterAllowedByOrgMixin:
+    def omit_allowed_by_org(self, qs):
+        if self.request.user.is_authenticated:
+            qs = qs.exclude(
+                visible_to__isnull=False,
+                visible_to__org_type__contains=[self.request.user.full_org_type],
+                visible_to__list_for_allowed_by_orgs=False,
+            )
+        return qs
+
+
+class GetOneMixin:
+    @action(detail=False, methods=["get"])
+    def get_one(self, request, *args, **kwargs):
+        """
+        This takes a set of filters and returns a single entry if
+        there's one entry that results from their application, and a 404
+        otherwise.
+        """
+        not_one_result = (
+            exceptions.MultipleObjectsReturned,
+            exceptions.ObjectDoesNotExist,
+            InvalidFields,
+        )
+        # We want to include more items than the list view includes:
+        filter = self.filterset_class(request.GET, queryset=self.model.objects.all())
+        try:
+            if filter.filters.keys() != request.GET.keys():
+                raise InvalidFields
+            result = filter.qs.get()
+            serializer = self.get_serializer(result)
+            return Response(serializer.data)
+        except not_one_result:
+            return Response("", status=status.HTTP_404_NOT_FOUND)
 
 
 class UserView(generics.RetrieveAPIView):
@@ -70,16 +111,26 @@ class JobViewSet(
         cache.set(REDIS_JOB_CANCEL_KEY.format(id=instance.id), True)
 
 
-class ProductViewSet(viewsets.ModelViewSet):
+class ProductViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ModelViewSet):
     serializer_class = ProductSerializer
-    queryset = Product.objects.published()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = ProductFilter
+    model = Product
+
+    def get_queryset(self):
+        return self.omit_allowed_by_org(
+            Product.objects.published().exclude(is_listed=False)
+        )
 
 
-class VersionViewSet(viewsets.ModelViewSet):
+class VersionViewSet(GetOneMixin, viewsets.ModelViewSet):
     serializer_class = VersionSerializer
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ("product", "label")
-    queryset = Version.objects.all()
+    filterset_class = VersionFilter
+    model = Version
+
+    def get_queryset(self):
+        return Version.objects.exclude(is_listed=False)
 
     @action(detail=True, methods=["get"])
     def additional_plans(self, request, pk=None):
@@ -90,11 +141,14 @@ class VersionViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class PlanViewSet(viewsets.ModelViewSet):
+class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ModelViewSet):
     serializer_class = PlanSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = PlanFilter
-    queryset = Plan.objects.all()
+    model = Plan
+
+    def get_queryset(self):
+        return self.omit_allowed_by_org(Plan.objects.exclude(is_listed=False))
 
     def preflight_get(self, request):
         plan = self.get_object()
