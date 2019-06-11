@@ -75,6 +75,8 @@ def finalize_result(result):
         # Other failures
         result.status = result.Status.failed
         result.exception = str(e)
+        if hasattr(e, "response"):
+            result.exception += "\n" + e.response.text
         logger.error(f"{result._meta.model_name} {result.id} failed.")
         raise
     finally:

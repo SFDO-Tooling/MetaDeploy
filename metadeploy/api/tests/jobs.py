@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 import pytest
 import pytz
 import vcr
+from cumulusci.salesforce_api.exceptions import MetadataParseError
 from django.utils import timezone
 from rq.worker import StopRequested
 
@@ -280,3 +281,16 @@ def test_finalize_result_preflight_worker_died(
     except StopRequested:
         pass
     assert preflight.status == preflight.Status.canceled
+
+
+@pytest.mark.django_db
+def test_finalize_result_mdapi_error(job_factory):
+    job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
+    response = MagicMock(text="text")
+    try:
+        with finalize_result(job):
+            raise MetadataParseError("MDAPI error", response=response)
+    except MetadataParseError:
+        pass
+    assert job.status == job.Status.failed
+    assert job.exception == "MDAPI error\ntext"
