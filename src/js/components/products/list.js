@@ -8,6 +8,7 @@ import i18n from 'i18next';
 import { connect } from 'react-redux';
 
 import { prettyUrlHash } from 'utils/helpers';
+import { fetchProducts } from 'store/products/actions';
 import {
   selectProductCategories,
   selectProductsByCategory,
@@ -25,10 +26,11 @@ type Props = {
   ...InitialProps,
   productsByCategory: ProductsMapType,
   productCategories: Array<string>,
+  doFetchMoreProducts: typeof fetchMoreProducts,
 };
 type State = {
   activeProductsTab: string | null,
-  fetchMoreProducts: boolean,
+  fetchingProducts: boolean,
 };
 
 class ProductsList extends React.Component<Props, State> {
@@ -51,7 +53,7 @@ class ProductsList extends React.Component<Props, State> {
     } catch (e) {
       // swallow error
     }
-    this.state = { activeProductsTab, fetchMoreProducts: false };
+    this.state = { activeProductsTab, fetchingProducts: false };
   }
 
   static getProductsList(products: Array<Product>): React.Node {
@@ -88,20 +90,32 @@ class ProductsList extends React.Component<Props, State> {
     }
   };
 
-  trackScrolling = () => {
-    const wrappedElement = document.querySelector('.slds-grid.slds-wrap');
+  handleOnScroll = () => {
+    const scrollTop =
+      (document.documentElement && document.documentElement.scrollTop) ||
+      document.body.scrollTop;
+    const scrollHeight =
+      (document.documentElement && document.documentElement.scrollHeight) ||
+      document.body.scrollHeight;
+    const clientHeight =
+      document.documentElement.clientHeight || window.innerHeight;
+    const scrolledToBottom =
+      Math.ceil(scrollTop + clientHeight) >= scrollHeight;
 
-    if (wrappedElement && ProductsList.isBottom(wrappedElement)) {
-      this.setState({ fetchMoreProducts: true });
+    if (scrolledToBottom) {
+      this.setState({ fetchingProducts: true });
+      this.props.dofetchProducts().then(() => {
+        this.setState({ fetchingProducts: false });
+      });
     }
   };
 
   componentDidMount() {
-    document.addEventListener('scroll', this.trackScrolling);
+    document.addEventListener('scroll', this.handleOnScroll);
   }
 
   componentWillUnmount() {
-    document.removeEventListener('scroll', this.trackScrolling);
+    document.removeEventListener('scroll', this.handleOnScroll);
   }
 
   render(): React.Node {
@@ -145,7 +159,7 @@ class ProductsList extends React.Component<Props, State> {
         break;
       }
     }
-    const { fetchMoreProducts } = this.state;
+    const { fetchingProducts } = this.state;
     return (
       <DocumentTitle title={`${i18n.t('Products')} | ${window.SITE_NAME}`}>
         <>
@@ -166,7 +180,7 @@ class ProductsList extends React.Component<Props, State> {
               />
             ) : null}
             {contents}
-            {fetchMoreProducts && (
+            {fetchingProducts && (
               <div
                 className="slds-align_absolute-center"
                 style={{ height: '2.5rem' }}
@@ -194,8 +208,12 @@ const select = (appState: AppState) => ({
   productsByCategory: selectProductsByCategory(appState),
 });
 
-const WrappedProductsList: React.ComponentType<InitialProps> = connect(select)(
-  ProductsList,
-);
+const actions = () => ({
+  doFetchProducts: fetchProducts,
+});
+const WrappedProductsList: React.ComponentType<InitialProps> = connect(
+  select,
+  actions,
+)(ProductsList);
 
 export default WrappedProductsList;
