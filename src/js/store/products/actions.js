@@ -2,7 +2,7 @@
 
 import type { ThunkAction } from 'redux-thunk';
 
-import { addUrlParams } from 'utils/api';
+import apiFetch, { addUrlParams } from 'utils/api';
 import type { Product, Version } from 'store/products/reducer';
 import type { Plan } from 'store/plans/reducer';
 
@@ -87,13 +87,9 @@ export type ProductsAction =
   | FetchPlanSucceeded
   | FetchPlanFailed;
 
-export const fetchProducts = (): ThunkAction => (
-  dispatch,
-  getState,
-  { apiFetch },
-) => {
+export const fetchProducts = (): ThunkAction => dispatch => {
   dispatch({ type: 'FETCH_PRODUCTS_STARTED' });
-  return apiFetch(window.api_urls.product_list())
+  return apiFetch(window.api_urls.product_list(), dispatch)
     .then(response => {
       const products = response.results;
       if (!Array.isArray(products)) {
@@ -111,14 +107,12 @@ export const fetchProducts = (): ThunkAction => (
     });
 };
 
-export const fetchProduct = (filters: ProductFilters): ThunkAction => (
-  dispatch,
-  getState,
-  { apiFetch },
-) => {
+export const fetchProduct = (
+  filters: ProductFilters,
+): ThunkAction => dispatch => {
   dispatch({ type: 'FETCH_PRODUCT_STARTED', payload: filters });
   const baseUrl = window.api_urls.product_get_one();
-  return apiFetch(addUrlParams(baseUrl, { ...filters }))
+  return apiFetch(addUrlParams(baseUrl, { ...filters }), dispatch)
     .then(response =>
       dispatch({
         type: 'FETCH_PRODUCT_SUCCEEDED',
@@ -131,14 +125,12 @@ export const fetchProduct = (filters: ProductFilters): ThunkAction => (
     });
 };
 
-export const fetchVersion = (filters: VersionFilters): ThunkAction => (
-  dispatch,
-  getState,
-  { apiFetch },
-) => {
+export const fetchVersion = (
+  filters: VersionFilters,
+): ThunkAction => dispatch => {
   dispatch({ type: 'FETCH_VERSION_STARTED', payload: filters });
   const baseUrl = window.api_urls.version_get_one();
-  return apiFetch(addUrlParams(baseUrl, { ...filters }))
+  return apiFetch(addUrlParams(baseUrl, { ...filters }), dispatch)
     .then(response =>
       dispatch({
         type: 'FETCH_VERSION_SUCCEEDED',
@@ -154,10 +146,10 @@ export const fetchVersion = (filters: VersionFilters): ThunkAction => (
 export const fetchAdditionalPlans = (filters: {
   product: string,
   version: string,
-}): ThunkAction => (dispatch, getState, { apiFetch }) => {
+}): ThunkAction => dispatch => {
   dispatch({ type: 'FETCH_ADDITIONAL_PLANS_STARTED', payload: filters });
   const baseUrl = window.api_urls.version_additional_plans(filters.version);
-  return apiFetch(baseUrl)
+  return apiFetch(baseUrl, dispatch)
     .then(response => {
       if (!Array.isArray(response)) {
         const error = (new Error('Invalid response received'): {
@@ -177,14 +169,10 @@ export const fetchAdditionalPlans = (filters: {
     });
 };
 
-export const fetchPlan = (filters: PlanFilters): ThunkAction => (
-  dispatch,
-  getState,
-  { apiFetch },
-) => {
+export const fetchPlan = (filters: PlanFilters): ThunkAction => dispatch => {
   dispatch({ type: 'FETCH_PLAN_STARTED', payload: filters });
   const baseUrl = window.api_urls.plan_get_one();
-  return apiFetch(addUrlParams(baseUrl, { ...filters }))
+  return apiFetch(addUrlParams(baseUrl, { ...filters }), dispatch)
     .then(response =>
       dispatch({
         type: 'FETCH_PLAN_SUCCEEDED',

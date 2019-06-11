@@ -151,7 +151,6 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
     preflight_message = serializers.SerializerMethodField()
     not_allowed_instructions = serializers.SerializerMethodField()
     requires_preflight = serializers.SerializerMethodField()
-    is_listed = serializers.SerializerMethodField()
 
     class Meta:
         model = Plan
@@ -183,11 +182,6 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
 
     def get_is_allowed(self, obj):
         return obj.is_visible_to(self.context["request"].user)
-
-    def get_is_listed(self, obj):
-        return obj.is_listed and not obj.is_listed_by_org_only(
-            self.context["request"].user
-        )
 
     def get_not_allowed_instructions(self, obj):
         if not obj.version.product.is_visible_to(self.context["request"].user):

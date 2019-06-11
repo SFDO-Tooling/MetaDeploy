@@ -2,6 +2,7 @@
 
 import type { ThunkAction } from 'redux-thunk';
 
+import apiFetch from 'utils/api';
 import type { Preflight } from 'store/plans/reducer';
 
 type FetchPreflightStarted = {
@@ -51,13 +52,9 @@ export type PlansAction =
   | PreflightCanceled
   | PreflightInvalid;
 
-export const fetchPreflight = (planId: string): ThunkAction => (
-  dispatch,
-  getState,
-  { apiFetch },
-) => {
+export const fetchPreflight = (planId: string): ThunkAction => dispatch => {
   dispatch({ type: 'FETCH_PREFLIGHT_STARTED', payload: planId });
-  return apiFetch(window.api_urls.plan_preflight(planId))
+  return apiFetch(window.api_urls.plan_preflight(planId), dispatch)
     .then(response => {
       if (response && window.socket) {
         window.socket.subscribe({
@@ -76,14 +73,10 @@ export const fetchPreflight = (planId: string): ThunkAction => (
     });
 };
 
-export const startPreflight = (planId: string): ThunkAction => (
-  dispatch,
-  getState,
-  { apiFetch },
-) => {
+export const startPreflight = (planId: string): ThunkAction => dispatch => {
   dispatch({ type: 'PREFLIGHT_REQUESTED', payload: planId });
   const url = window.api_urls.plan_preflight(planId);
-  return apiFetch(url, { method: 'POST' })
+  return apiFetch(url, dispatch, { method: 'POST' })
     .then(response => {
       /* istanbul ignore else */
       if (response && window.socket) {
