@@ -93,12 +93,15 @@ class ProductsList extends React.Component<Props, State> {
   handleOnScroll = () => {
     const scrollTop =
       (document.documentElement && document.documentElement.scrollTop) ||
-      document.body && document.body.scrollTop;
+      (document.body && document.body.scrollTop) ||
+      0;
     const scrollHeight =
       (document.documentElement && document.documentElement.scrollHeight) ||
-      document.body.scrollHeight;
+      (document.body && document.body.scrollHeight) ||
+      Infinity;
     const clientHeight =
-      document.documentElement.clientHeight || window.innerHeight;
+      (document.documentElement && document.documentElement.clientHeight) ||
+      window.innerHeight;
     const scrolledToBottom =
       Math.ceil(scrollTop + clientHeight) >= scrollHeight;
 
@@ -207,9 +210,9 @@ const select = (appState: AppState) => ({
   productsByCategory: selectProductsByCategory(appState),
 });
 
-const actions = () => ({
-   doFetchProducts: fetchProducts
-});
+const actions = {
+  doFetchProducts: fetchProducts,
+};
 const WrappedProductsList: React.ComponentType<InitialProps> = connect(
   select,
   actions,
