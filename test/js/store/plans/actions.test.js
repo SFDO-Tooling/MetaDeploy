@@ -79,9 +79,14 @@ describe('fetchPreflight', () => {
         payload: 'plan-1',
       };
 
-      expect.assertions(2);
+      expect.assertions(5);
       return store.dispatch(actions.fetchPreflight('plan-1')).catch(() => {
-        expect(store.getActions()).toEqual([started, failed]);
+        const allActions = store.getActions();
+
+        expect(allActions[0]).toEqual(started);
+        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].payload.message).toEqual('Internal Server Error');
+        expect(allActions[2]).toEqual(failed);
         expect(window.console.error).toHaveBeenCalled();
       });
     });
@@ -142,9 +147,14 @@ describe('startPreflight', () => {
         payload: 'plan-1',
       };
 
-      expect.assertions(2);
+      expect.assertions(5);
       return store.dispatch(actions.startPreflight('plan-1')).catch(() => {
-        expect(store.getActions()).toEqual([started, failed]);
+        const allActions = store.getActions();
+
+        expect(allActions[0]).toEqual(started);
+        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].payload.message).toEqual('Internal Server Error');
+        expect(allActions[2]).toEqual(failed);
         expect(window.console.error).toHaveBeenCalled();
       });
     });

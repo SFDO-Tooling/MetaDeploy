@@ -88,7 +88,7 @@ describe('fetchJob', () => {
   describe('error', () => {
     test('dispatches FETCH_JOB_FAILED action', () => {
       const store = storeWithApi({});
-      fetchMock.getOnce(url, 500);
+      fetchMock.getOnce(url, { status: 500, body: {} });
       const started = {
         type: 'FETCH_JOB_STARTED',
         payload: 'job-1',
@@ -98,9 +98,14 @@ describe('fetchJob', () => {
         payload: 'job-1',
       };
 
-      expect.assertions(2);
+      expect.assertions(5);
       return store.dispatch(actions.fetchJob(args)).catch(() => {
-        expect(store.getActions()).toEqual([started, failed]);
+        const allActions = store.getActions();
+
+        expect(allActions[0]).toEqual(started);
+        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].payload.message).toEqual('Internal Server Error');
+        expect(allActions[2]).toEqual(failed);
         expect(window.console.error).toHaveBeenCalled();
       });
     });
@@ -154,7 +159,7 @@ describe('startJob', () => {
     test('dispatches JOB_REJECTED action', () => {
       const store = storeWithApi({});
       const data = { plan: 'plan-1', steps: ['step-1'] };
-      fetchMock.postOnce(window.api_urls.job_list(), 401);
+      fetchMock.postOnce(window.api_urls.job_list(), 404);
       const started = {
         type: 'JOB_REQUESTED',
         payload: data,
@@ -219,7 +224,10 @@ describe('updateJob', () => {
     test('dispatches JOB_UPDATE_REJECTED action', () => {
       const store = storeWithApi({});
       const data = { id: 'job-1', is_public: 'true' };
-      fetchMock.patchOnce(window.api_urls.job_detail('job-1'), 500);
+      fetchMock.patchOnce(window.api_urls.job_detail('job-1'), {
+        status: 500,
+        body: { detail: 'Nope.' },
+      });
       const started = {
         type: 'JOB_UPDATE_REQUESTED',
         payload: data,
@@ -229,9 +237,14 @@ describe('updateJob', () => {
         payload: data,
       };
 
-      expect.assertions(2);
+      expect.assertions(5);
       return store.dispatch(actions.updateJob(data)).catch(() => {
-        expect(store.getActions()).toEqual([started, failed]);
+        const allActions = store.getActions();
+
+        expect(allActions[0]).toEqual(started);
+        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].payload.message).toEqual('Nope.');
+        expect(allActions[2]).toEqual(failed);
         expect(window.console.error).toHaveBeenCalled();
       });
     });
@@ -264,7 +277,10 @@ describe('requestCancelJob', () => {
     test('dispatches JOB_CANCEL_REJECTED action', () => {
       const store = storeWithApi({});
       const id = 'job-1';
-      fetchMock.deleteOnce(window.api_urls.job_detail(id), 500);
+      fetchMock.deleteOnce(window.api_urls.job_detail(id), {
+        status: 500,
+        body: 'Oops.',
+      });
       const started = {
         type: 'JOB_CANCEL_REQUESTED',
         payload: id,
@@ -274,9 +290,14 @@ describe('requestCancelJob', () => {
         payload: id,
       };
 
-      expect.assertions(2);
+      expect.assertions(5);
       return store.dispatch(actions.requestCancelJob(id)).catch(() => {
-        expect(store.getActions()).toEqual([started, failed]);
+        const allActions = store.getActions();
+
+        expect(allActions[0]).toEqual(started);
+        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].payload.message).toEqual('Oops.');
+        expect(allActions[2]).toEqual(failed);
         expect(window.console.error).toHaveBeenCalled();
       });
     });
