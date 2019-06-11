@@ -9,7 +9,7 @@ import { connect } from 'react-redux';
 import routes from 'utils/routes';
 import { CONSTANTS } from 'store/plans/reducer';
 import { fetchJob, requestCancelJob, updateJob } from 'store/jobs/actions';
-import { fetchVersion } from 'store/products/actions';
+import { fetchPlan, fetchProduct, fetchVersion } from 'store/products/actions';
 import { selectJob, selectJobId } from 'store/jobs/selectors';
 import { selectPlan, selectPlanSlug } from 'store/plans/selectors';
 import {
@@ -19,7 +19,11 @@ import {
   selectVersionLabel,
 } from 'store/products/selectors';
 import { selectUserState } from 'store/user/selectors';
-import { getLoadingOrNotFound, shouldFetchVersion } from 'components/utils';
+import {
+  getLoadingOrNotFound,
+  shouldFetchPlan,
+  shouldFetchVersion,
+} from 'components/utils';
 import BackLink from 'components/backLink';
 import BodyContainer from 'components/bodyContainer';
 import CtaButton from 'components/jobs/ctaButton';
@@ -48,7 +52,7 @@ import type { User as UserType } from 'store/user/reducer';
 type Props = {
   ...InitialProps,
   user: UserType,
-  product: ProductType | null,
+  product: ProductType | null | void,
   productSlug: ?string,
   version: VersionType | null,
   versionLabel: ?string,
@@ -56,7 +60,9 @@ type Props = {
   planSlug: ?string,
   job: ?JobType,
   jobId: ?string,
+  doFetchProduct: typeof fetchProduct,
   doFetchVersion: typeof fetchVersion,
+  doFetchPlan: typeof fetchPlan,
   doFetchJob: typeof fetchJob,
   doUpdateJob: typeof updateJob,
   doRequestCancelJob: (id: string) => Promise<any>,
@@ -72,6 +78,14 @@ class JobDetail extends React.Component<Props, State> {
     this.state = { modalOpen: false, canceling: false };
   }
 
+  fetchProductIfMissing() {
+    const { product, productSlug, doFetchProduct } = this.props;
+    if (product === undefined && productSlug) {
+      // Fetch product from API
+      doFetchProduct({ slug: productSlug });
+    }
+  }
+
   fetchVersionIfMissing() {
     const { product, version, versionLabel, doFetchVersion } = this.props;
     if (
@@ -81,6 +95,23 @@ class JobDetail extends React.Component<Props, State> {
     ) {
       // Fetch version from API
       doFetchVersion({ product: product.id, label: versionLabel });
+    }
+  }
+
+  fetchPlanIfMissing() {
+    const { product, version, plan, planSlug, doFetchPlan } = this.props;
+    if (
+      product &&
+      version &&
+      planSlug &&
+      shouldFetchPlan({ version, plan, planSlug })
+    ) {
+      // Fetch plan from API
+      doFetchPlan({
+        product: product.id,
+        version: version.id,
+        slug: planSlug,
+      });
     }
   }
 
@@ -98,21 +129,44 @@ class JobDetail extends React.Component<Props, State> {
   }
 
   componentDidMount() {
+    this.fetchProductIfMissing();
     this.fetchVersionIfMissing();
+    this.fetchPlanIfMissing();
     this.fetchJobIfMissing();
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const { product, version, versionLabel, job, jobId } = this.props;
+    const {
+      product,
+      productSlug,
+      version,
+      versionLabel,
+      plan,
+      planSlug,
+      job,
+      jobId,
+    } = this.props;
     const prevJob = prevProps.job;
     const jobIdChanged = jobId !== prevProps.jobId;
+    const productChanged =
+      product !== prevProps.product || productSlug !== prevProps.productSlug;
     const versionChanged =
-      product !== prevProps.product ||
+      productChanged ||
       version !== prevProps.version ||
       versionLabel !== prevProps.versionLabel;
-    const jobChanged = job !== prevJob || jobIdChanged;
+    const planChanged =
+      versionChanged ||
+      plan !== prevProps.plan ||
+      planSlug !== prevProps.planSlug;
+    const jobChanged = planChanged || job !== prevJob || jobIdChanged;
+    if (productChanged) {
+      this.fetchProductIfMissing();
+    }
     if (versionChanged) {
       this.fetchVersionIfMissing();
+    }
+    if (planChanged) {
+      this.fetchPlanIfMissing();
     }
     if (jobChanged) {
       this.fetchJobIfMissing();
@@ -309,7 +363,9 @@ const select = (appState: AppState, props: InitialProps) => ({
 });
 
 const actions = {
+  doFetchProduct: fetchProduct,
   doFetchVersion: fetchVersion,
+  doFetchPlan: fetchPlan,
   doFetchJob: fetchJob,
   doUpdateJob: updateJob,
   doRequestCancelJob: requestCancelJob,

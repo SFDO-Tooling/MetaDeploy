@@ -7,7 +7,7 @@ import type { InitialProps } from 'components/utils';
 import type { Plan as PlanType } from 'store/plans/reducer';
 import type {
   Product as ProductType,
-  Products as ProductsType,
+  ProductsState,
   Version as VersionType,
 } from 'store/products/reducer';
 
@@ -20,14 +20,14 @@ export type VersionPlanType = {
   +maybeSlug?: string,
 };
 
-const selectProductsState = (appState: AppState): ProductsType =>
+const selectProductsState = (appState: AppState): ProductsState =>
   appState.products;
 
 const selectProductsByCategory: AppState => ProductsMapType = createSelector(
   selectProductsState,
-  (products: ProductsType): ProductsMapType => {
+  (products: ProductsState): ProductsMapType => {
     const productsByCategory = new Map();
-    for (const product of products) {
+    for (const product of products.products) {
       if (
         product.is_allowed &&
         product.is_listed &&
@@ -55,19 +55,35 @@ const selectProductSlug = (
   { match: { params } }: InitialProps,
 ): ?string => params.productSlug;
 
+const selectProductNotFound: (
+  AppState,
+  InitialProps,
+) => boolean = createSelector(
+  [selectProductsState, selectProductSlug],
+  (products: ProductsState, productSlug: ?string): boolean =>
+    Boolean(productSlug && products.notFound.includes(productSlug)),
+);
+
 const selectProduct: (
   AppState,
   InitialProps,
-) => ProductType | null = createSelector(
-  [selectProductsState, selectProductSlug],
-  (products: ProductsType, productSlug: ?string): ProductType | null => {
+) => ProductType | null | void = createSelector(
+  [selectProductsState, selectProductSlug, selectProductNotFound],
+  (
+    products: ProductsState,
+    productSlug: ?string,
+    notFound: boolean,
+  ): ProductType | null | void => {
     if (!productSlug) {
-      return null;
+      return undefined;
     }
-    const product = products.find(
+    const product = products.products.find(
       p => p.slug === productSlug || p.old_slugs.includes(productSlug),
     );
-    return product || null;
+    if (product) {
+      return product;
+    }
+    return notFound ? null : undefined;
   },
 );
 
@@ -81,7 +97,10 @@ const selectVersion: (
   InitialProps,
 ) => VersionType | null = createSelector(
   [selectProduct, selectVersionLabel],
-  (product: ProductType | null, versionLabel: ?string): VersionType | null => {
+  (
+    product: ProductType | null | void,
+    versionLabel: ?string,
+  ): VersionType | null => {
     if (!product || !versionLabel) {
       return null;
     }
@@ -104,7 +123,7 @@ const selectVersionLabelOrPlanSlug: (
 ) => VersionPlanType = createSelector(
   [selectProduct, selectVersion, selectVersionLabel],
   (
-    product: ProductType | null,
+    product: ProductType | null | void,
     version: VersionType | null,
     maybeVersionLabel: ?string,
   ): VersionPlanType => {
@@ -165,6 +184,7 @@ export {
   selectProductCategories,
   selectProductSlug,
   selectProduct,
+  selectProductNotFound,
   selectVersionLabel,
   selectVersion,
   selectVersionLabelOrPlanSlug,

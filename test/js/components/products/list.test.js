@@ -9,7 +9,7 @@ import ProductsList from 'components/products/list';
 describe('<Products />', () => {
   const setup = (
     initialState = {
-      products: [],
+      products: { products: [], notFound: [] },
     },
     props = {},
   ) => {
@@ -48,30 +48,33 @@ describe('<Products />', () => {
 
   test('renders products list (1 category)', () => {
     const initialState = {
-      products: [
-        {
-          id: 'p1',
-          title: 'Product 1',
-          description: 'This is a test product.',
-          category: 'salesforce',
-          most_recent_version: {
-            id: 'v1',
-            product: 'p1',
-            label: '1.0.0',
-            description: 'This is a test product version.',
-            primary_plan: {
-              id: 'plan-1',
-              title: 'My Plan',
+      products: {
+        products: [
+          {
+            id: 'p1',
+            title: 'Product 1',
+            description: 'This is a test product.',
+            category: 'salesforce',
+            most_recent_version: {
+              id: 'v1',
+              product: 'p1',
+              label: '1.0.0',
+              description: 'This is a test product version.',
+              primary_plan: {
+                id: 'plan-1',
+                title: 'My Plan',
+                is_listed: true,
+                is_allowed: true,
+                requires_preflight: true,
+              },
               is_listed: true,
-              is_allowed: true,
-              requires_preflight: true,
             },
             is_listed: true,
+            is_allowed: true,
           },
-          is_listed: true,
-          is_allowed: true,
-        },
-      ],
+        ],
+        notFound: [],
+      },
     };
     const { getByText, queryByText } = setup(initialState);
 
@@ -81,79 +84,82 @@ describe('<Products />', () => {
 
   describe('2 categories', () => {
     const initialState = {
-      products: [
-        {
-          id: 'p1',
-          title: 'Product 1',
-          description: 'This is a test product.',
-          category: 'salesforce',
-          icon: {
-            type: 'slds',
-            category: 'utility',
-            name: 'salesforce1',
-          },
-          most_recent_version: {
-            id: 'v1',
-            product: 'p1',
-            label: '1.0.0',
-            description: 'This is a test product version.',
-            primary_plan: {
-              id: 'plan-1',
-              title: 'My Plan',
+      products: {
+        products: [
+          {
+            id: 'p1',
+            title: 'Product 1',
+            description: 'This is a test product.',
+            category: 'salesforce',
+            icon: {
+              type: 'slds',
+              category: 'utility',
+              name: 'salesforce1',
+            },
+            most_recent_version: {
+              id: 'v1',
+              product: 'p1',
+              label: '1.0.0',
+              description: 'This is a test product version.',
+              primary_plan: {
+                id: 'plan-1',
+                title: 'My Plan',
+                is_listed: true,
+                is_allowed: true,
+                requires_preflight: true,
+              },
               is_listed: true,
-              is_allowed: true,
-              requires_preflight: true,
             },
             is_listed: true,
+            is_allowed: true,
           },
-          is_listed: true,
-          is_allowed: true,
-        },
-        {
-          id: 'p2',
-          title: 'Product 2',
-          description: 'This is another test product.',
-          category: 'community',
-          color: '#fff',
-          most_recent_version: {
-            id: 'v2',
-            product: 'p2',
-            label: '1.0.0',
-            description: 'This is a test product version.',
-            primary_plan: {
-              id: 'plan-2',
-              title: 'My Plan',
+          {
+            id: 'p2',
+            title: 'Product 2',
+            description: 'This is another test product.',
+            category: 'community',
+            color: '#fff',
+            most_recent_version: {
+              id: 'v2',
+              product: 'p2',
+              label: '1.0.0',
+              description: 'This is a test product version.',
+              primary_plan: {
+                id: 'plan-2',
+                title: 'My Plan',
+                is_listed: true,
+                is_allowed: true,
+                requires_preflight: true,
+              },
               is_listed: true,
-              is_allowed: true,
-              requires_preflight: true,
             },
             is_listed: true,
+            is_allowed: true,
           },
-          is_listed: true,
-          is_allowed: true,
-        },
-        {
-          id: 'p3',
-          title: 'Product 3',
-          description: 'This is an unlisted product.',
-          category: 'community',
-          most_recent_version: {
-            id: 'v3',
-            product: 'p3',
-            label: '1.0.0',
-            description: 'This is a product version.',
-            primary_plan: {
-              id: 'plan-3',
-              title: 'My Plan',
+          {
+            id: 'p3',
+            title: 'Product 3',
+            description: 'This is an unlisted product.',
+            category: 'community',
+            most_recent_version: {
+              id: 'v3',
+              product: 'p3',
+              label: '1.0.0',
+              description: 'This is a product version.',
+              primary_plan: {
+                id: 'plan-3',
+                title: 'My Plan',
+                is_listed: true,
+                is_allowed: true,
+                requires_preflight: true,
+              },
               is_listed: true,
-              is_allowed: true,
-              requires_preflight: true,
             },
-            is_listed: true,
+            is_listed: false,
           },
-          is_listed: false,
-        },
-      ],
+        ],
+        notFound: [],
+      },
     };
 
     afterEach(() => {

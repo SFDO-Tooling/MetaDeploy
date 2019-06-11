@@ -134,7 +134,7 @@ class VersionFactory(factory.django.DjangoModelFactory):
         model = Version
 
     product = factory.SubFactory(ProductFactory)
-    label = "v0.1.0"
+    label = factory.Sequence("v0.{}.0".format)
     description = "A sample version."
     commit_ish = "feature/preflight"
 

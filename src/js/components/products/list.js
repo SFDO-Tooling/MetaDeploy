@@ -19,7 +19,7 @@ import { EmptyIllustration } from 'components/404';
 import type { AppState } from 'store';
 import type { InitialProps } from 'components/utils';
 import type { ProductsMapType } from 'store/products/selectors';
-import type { Products as ProductsType } from 'store/products/reducer';
+import type { Product } from 'store/products/reducer';
 
 type Props = {
   ...InitialProps,
@@ -53,7 +53,7 @@ class ProductsList extends React.Component<Props, State> {
     this.state = { activeProductsTab };
   }
 
-  static getProductsList(products: ProductsType): React.Node {
+  static getProductsList(products: Array<Product>): React.Node {
     return (
       <div
         className="slds-grid
