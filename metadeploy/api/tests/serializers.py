@@ -519,3 +519,20 @@ class TestProductCategorySerializer:
                 }
             ],
         }
+
+    def test_get_first_page__paginated(self, rf, product_factory, user_factory):
+        request = rf.get("")
+        request.query_params = {}
+        request.user = user_factory()
+        product = product_factory()
+        category = product.category
+        for _ in range(30):
+            product_factory(category=category)
+        serializer = ProductCategorySerializer(category, context={"request": request})
+        # Too much trouble to compare this key:
+        serializer.data["first_page"].pop("results")
+        assert serializer.data["first_page"] == {
+            "count": 31,
+            "previous": None,
+            "next": f"http://testserver/api/products/?category={category.id}&page=2",
+        }
