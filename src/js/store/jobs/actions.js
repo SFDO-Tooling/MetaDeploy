@@ -4,8 +4,15 @@ import type { ThunkAction } from 'redux-thunk';
 
 import apiFetch, { addUrlParams } from 'utils/api';
 import type { Job } from 'store/jobs/reducer';
+import type { StepResult } from 'store/plans/reducer';
 
-export type JobData = { plan: string, steps: Array<string> };
+export type JobData = {
+  plan: string,
+  steps: Array<string>,
+  results: {|
+    [string]: StepResult,
+  |},
+};
 
 type FetchJobStarted = {
   type: 'FETCH_JOB_STARTED',

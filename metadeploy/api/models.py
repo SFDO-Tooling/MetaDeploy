@@ -32,7 +32,7 @@ from sfdo_template_helpers.crypto import fernet_decrypt
 from sfdo_template_helpers.fields import MarkdownField
 
 from .belvedere_utils import convert_to_18
-from .constants import ERROR, OPTIONAL, ORGANIZATION_DETAILS
+from .constants import ERROR, HIDE, OPTIONAL, ORGANIZATION_DETAILS
 from .flows import JobFlowCallback, PreflightFlowCallback
 from .push import (
     notify_org_result_changed,
@@ -787,7 +787,9 @@ class PreflightResult(models.Model):
 
         So this will return a list of step PKs, for now.
         """
-        return [str(k) for k, v in self.results.items() if v["status"] == OPTIONAL]
+        return [
+            str(k) for k, v in self.results.items() if v["status"] in (OPTIONAL, HIDE)
+        ]
 
     def _push_if_condition(self, condition, fn):
         if condition:

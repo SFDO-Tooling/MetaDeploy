@@ -6,7 +6,7 @@ from rest_framework import serializers
 from rest_framework.fields import SkipField
 from rest_framework.relations import PKOnlyObject
 
-from .constants import ERROR, WARN
+from .constants import ERROR, HIDE, WARN
 from .models import (
     ORG_TYPES,
     Job,
@@ -316,7 +316,6 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             "created_at": {"read_only": True},
             "edited_at": {"read_only": True},
             "enqueued_at": {"read_only": True},
-            "results": {"read_only": True},
             "job_id": {"read_only": True},
             "status": {"read_only": True},
             "org_type": {"read_only": True},
@@ -430,6 +429,14 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         )
         if invalid_steps:
             raise serializers.ValidationError(_("Invalid steps for plan."))
+
+        if self.instance and "results" in data:
+            # results are read-only except during creation
+            del data["results"]
+        elif "results" in data:
+            # make sure results can't be set initially except to hide steps
+            if any(result["status"] != HIDE for result in data["results"].values()):
+                raise serializers.ValidationError(_("Invalid initial results."))
 
         pending_job = not self.instance and self._pending_job_exists(user=user)
         if pending_job:

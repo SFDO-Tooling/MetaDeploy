@@ -197,22 +197,35 @@ class CtaButton extends React.Component<
       history,
       productSlug,
       versionLabel,
+      preflight,
       plan,
       selectedSteps,
       doStartJob,
     } = this.props;
-    doStartJob({ plan: plan.id, steps: [...selectedSteps] }).then(action => {
-      const { type, payload } = action;
-      if (type === 'JOB_STARTED' && payload && payload.id) {
-        const url = routes.job_detail(
-          productSlug,
-          versionLabel,
-          plan.slug,
-          payload.id,
-        );
-        history.push(url);
-      }
-    });
+    // propagate hidden steps from the preflight results to the job results
+    const results = {};
+    if (preflight && preflight.results) {
+      Object.keys(preflight.results).forEach(id => {
+        const result = preflight.results[id];
+        if (result && result.status === CONSTANTS.RESULT_STATUS.HIDE) {
+          results[id] = result;
+        }
+      });
+    }
+    doStartJob({ plan: plan.id, steps: [...selectedSteps], results }).then(
+      action => {
+        const { type, payload } = action;
+        if (type === 'JOB_STARTED' && payload && payload.id) {
+          const url = routes.job_detail(
+            productSlug,
+            versionLabel,
+            plan.slug,
+            payload.id,
+          );
+          history.push(url);
+        }
+      },
+    );
   };
 
   // Returns an action btn if logged in with a valid token;
