@@ -1,10 +1,12 @@
 from collections import OrderedDict
 
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.fields import SkipField
 from rest_framework.relations import PKOnlyObject
+from rest_framework.utils.urls import replace_query_param
 
 from .constants import ERROR, WARN
 from .models import (
@@ -222,6 +224,22 @@ class ProductCategorySerializer(serializers.ModelSerializer):
         model = ProductCategory
         fields = ("id", "title", "first_page")
 
+    def get_next_link(self, paginator, category_id):
+        if not paginator.page.has_next():
+            return None
+        path = reverse("product-list")
+        page_number = paginator.page.next_page_number()
+        url = paginator.request.build_absolute_uri(path)
+        url = replace_query_param(url, "category", category_id)
+        return replace_query_param(url, paginator.page_query_param, page_number)
+
+    def get_previous_link(self, paginator, category_id):
+        """
+        We expect this to always be None, because we know we're returning the first
+        page.
+        """
+        return None
+
     def get_first_page(self, obj):
         paginator = ProductPaginator()
         page = paginator.paginate_queryset(
@@ -229,8 +247,8 @@ class ProductCategorySerializer(serializers.ModelSerializer):
         )
         return {
             "count": paginator.page.paginator.count,
-            "next": paginator.get_next_link(),
-            "previous": paginator.get_previous_link(),
+            "next": self.get_next_link(paginator, str(obj.id)),
+            "previous": self.get_previous_link(paginator, str(obj.id)),
             "results": ProductSerializer(page, many=True, context=self.context).data,
         }
 
