@@ -1,14 +1,16 @@
 // @flow
-
+// @TODO FIX SPINNER STYLES
+// SET COUNT ON STATE TO KNOW IF NEXT NEEDED
+// GET CATEGORY ID FROM PROPS
 import * as React from 'react';
+import Spinner from '@salesforce/design-system-react/components/spinner';
 import DocumentTitle from 'react-document-title';
 import Tabs from '@salesforce/design-system-react/components/tabs';
 import TabsPanel from '@salesforce/design-system-react/components/tabs/panel';
 import i18n from 'i18next';
 import { connect } from 'react-redux';
-
+import { fetchMoreProducts } from 'store/products/actions';
 import { prettyUrlHash } from 'utils/helpers';
-import { fetchProducts } from 'store/products/actions';
 import {
   selectProductCategories,
   selectProductsByCategory,
@@ -26,7 +28,7 @@ type Props = {
   ...InitialProps,
   productsByCategory: ProductsMapType,
   productCategories: Array<string>,
-  doFetchProducts: typeof fetchProducts,
+  doFetchMoreProducts: typeof fetchMoreProducts,
 };
 type State = {
   activeProductsTab: string | null,
@@ -69,10 +71,6 @@ class ProductsList extends React.Component<Props, State> {
     );
   }
 
-  static isBottom(el) {
-    return el.getBoundingClientRect().bottom <= window.innerHeight;
-  }
-
   handleSelect = (index: number) => {
     const { history } = this.props;
     try {
@@ -106,9 +104,12 @@ class ProductsList extends React.Component<Props, State> {
       Math.ceil(scrollTop + clientHeight) >= scrollHeight;
 
     if (scrolledToBottom) {
+      const { doFetchMoreProducts } = this.props;
       this.setState({ fetchingProducts: true });
-      const { doFetchProducts } = this.props;
-      doFetchProducts();
+      // @todo get from props/state
+      doFetchMoreProducts(26, 2).then(() => {
+        this.setState({ fetchingProducts: false });
+      });
     }
   };
 
@@ -185,16 +186,13 @@ class ProductsList extends React.Component<Props, State> {
             {fetchingProducts && (
               <div
                 className="slds-align_absolute-center"
-                style={{ height: '2.5rem' }}
+                style={{ height: '2.5rem', position: 'relative' }}
               >
-                <div
-                  role="status"
-                  className="slds-spinner slds-spinner_small slds-spinner_brand spinner-container"
-                >
-                  <span className="slds-assistive-text">Loading</span>
-                  <div className="slds-spinner__dot-a" />
-                  <div className="slds-spinner__dot-b" />
-                </div>
+                <Spinner
+                  size="small"
+                  variant="base"
+                  assistiveText={{ label: 'Small spinner' }}
+                />
                 <span>{i18n.t('Loading…')}</span>
               </div>
             )}
@@ -211,7 +209,7 @@ const select = (appState: AppState) => ({
 });
 
 const actions = {
-  doFetchProducts: fetchProducts,
+  doFetchMoreProducts: fetchMoreProducts,
 };
 const WrappedProductsList: React.ComponentType<InitialProps> = connect(
   select,

@@ -43,13 +43,23 @@ export type ProductsState = {
   notFound: Array<string>,
 };
 
+export type Category = {
+  id: number,
+  title: string,
+  // @todo: omit the results from stored categories
+};
+
 const reducer = (
-  products: ProductsState = { products: [], notFound: [] },
+  products: ProductsState = { products: [], notFound: [], categories: [] },
   action: ProductsAction,
 ): ProductsState => {
   switch (action.type) {
     case 'FETCH_PRODUCTS_SUCCEEDED':
-      return { ...products, products: action.payload };
+      return {
+        ...products,
+        products: action.payload[0],
+        categories: action.payload[1],
+      };
     case 'FETCH_PRODUCT_SUCCEEDED': {
       const { product, slug } = action.payload;
       if (product) {
