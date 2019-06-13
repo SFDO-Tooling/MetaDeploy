@@ -70,6 +70,9 @@ type FetchPlanFailed = {
   payload: PlanFilters,
 };
 // @TODO ADD TYPES FOR NEW ACTIONS
+type FetchMoreProductsStarted = {};
+type FetchMoreProductsSucceeded = {};
+type FetchMoreProductsFailed = {};
 
 export type ProductsAction =
   | FetchProductsStarted
@@ -97,8 +100,19 @@ export const fetchMoreProducts = (
 
   return apiFetch(baseUrl, dispatch)
     .then(response => {
-      console.log(response);
+      const products = response.results;
       // SEND RESULTS, CONCAT TO PRODUCTS ARR
+      if (!Array.isArray(response.results)) {
+        const error = (new Error('Invalid response received'): {
+          [string]: mixed,
+        });
+        error.response = response;
+        throw error;
+      }
+      return dispatch({
+        type: 'FETCH_MORE_PRODUCTS_SUCCEEDED',
+        payload: products,
+      });
     })
     .catch(err => {
       dispatch({ type: 'FETCH_MORE_PRODUCTS_FAILED' });

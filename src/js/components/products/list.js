@@ -33,6 +33,9 @@ type Props = {
 type State = {
   activeProductsTab: string | null,
   fetchingProducts: boolean,
+  categoryId: number,
+  count: number,
+  hasMoreProducts: boolean,
 };
 
 class ProductsList extends React.Component<Props, State> {
@@ -41,8 +44,9 @@ class ProductsList extends React.Component<Props, State> {
     let activeProductsTab = null;
     let hashTab;
     try {
+      // @todo this needs some cleanup
       if (window.location.hash) {
-        hashTab = props.productCategories.find(
+        hashTab = Object.values(props.productCategories).find(
           category =>
             window.location.hash.substring(1) === prettyUrlHash(category),
         );
@@ -55,7 +59,12 @@ class ProductsList extends React.Component<Props, State> {
     } catch (e) {
       // swallow error
     }
-    this.state = { activeProductsTab, fetchingProducts: false };
+    this.state = {
+      activeProductsTab,
+      fetchingProducts: false,
+      categoryId: null,
+      count: 2,
+    };
   }
 
   static getProductsList(products: Array<Product>): React.Node {
@@ -75,10 +84,15 @@ class ProductsList extends React.Component<Props, State> {
     const { history } = this.props;
     try {
       const category = this.props.productCategories[index];
+
       /* istanbul ignore else */
       if (category) {
-        window.sessionStorage.setItem('activeProductsTab', category);
-        history.replace({ hash: prettyUrlHash(category) });
+        window.sessionStorage.setItem(
+          'activeProductsTab',
+          Object.values(category),
+        );
+        this.setState({ categoryId: Object.keys(category)[0] });
+        history.replace({ hash: prettyUrlHash(Object.values(category)[0]) });
       } else {
         window.sessionStorage.removeItem('activeProductsTab');
         history.replace({ hash: '' });
@@ -89,6 +103,7 @@ class ProductsList extends React.Component<Props, State> {
   };
 
   handleOnScroll = () => {
+    const { fetchingProducts } = this.state;
     const scrollTop =
       (document.documentElement && document.documentElement.scrollTop) ||
       (document.body && document.body.scrollTop) ||
@@ -103,14 +118,22 @@ class ProductsList extends React.Component<Props, State> {
     const scrolledToBottom =
       Math.ceil(scrollTop + clientHeight) >= scrollHeight;
 
-    if (scrolledToBottom) {
-      const { doFetchMoreProducts } = this.props;
-      this.setState({ fetchingProducts: true });
-      // @todo get from props/state
-      doFetchMoreProducts(26, 2).then(() => {
-        this.setState({ fetchingProducts: false });
-      });
+    if (fetchingProducts) {
+      return;
     }
+    if (scrolledToBottom) {
+      this.setState({ fetchingProducts: true });
+      this.shouldFetchMoreProducts();
+    }
+  };
+
+  shouldFetchMoreProducts = () => {
+    const { doFetchMoreProducts, activeProductsTab } = this.props;
+    const { categoryId, count, fetchingProducts } = this.state;
+    // @TODO GET 'NEXT` FROM PRODUCT LIST, OR CATCH 404 ERROR AT END OF LIST //
+    doFetchMoreProducts(categoryId, count).then(() => {
+      this.setState({ fetchingProducts: false, count: this.state.count + 1 });
+    });
   };
 
   componentDidMount() {
@@ -147,9 +170,9 @@ class ProductsList extends React.Component<Props, State> {
           );
           tabs.push(panel);
         }
-        const savedTabIndex = this.props.productCategories.indexOf(
-          this.state.activeProductsTab,
-        );
+        const savedTabIndex = this.props.productCategories[
+          this.state.activeProductsTab
+        ];
         contents = (
           <Tabs
             variant="scoped"
@@ -186,12 +209,12 @@ class ProductsList extends React.Component<Props, State> {
             {fetchingProducts && (
               <div
                 className="slds-align_absolute-center"
-                style={{ height: '2.5rem', position: 'relative' }}
+                style={{ height: '10rem', position: 'relative' }}
               >
                 <Spinner
                   size="small"
                   variant="base"
-                  assistiveText={{ label: 'Small spinner' }}
+                  assistiveText={{ label: 'Loading' }}
                 />
                 <span>{i18n.t('Loading…')}</span>
               </div>

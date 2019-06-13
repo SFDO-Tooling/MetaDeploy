@@ -20,6 +20,9 @@ export type VersionPlanType = {
   +maybeSlug?: string,
 };
 
+const transformList = (key, value) => {
+  return { [key]: value };
+};
 const selectProductsState = (appState: AppState): ProductsState =>
   appState.products;
 
@@ -43,11 +46,18 @@ const selectProductsByCategory: AppState => ProductsMapType = createSelector(
   },
 );
 
+const productCategories = (appState: AppState): ProductsState =>
+  appState.products.categories;
+
 const selectProductCategories: AppState => Array<string> = createSelector(
-  selectProductsByCategory,
-  (productsByCategory: ProductsMapType): Array<string> => [
-    ...productsByCategory.keys(),
-  ],
+  productCategories,
+  categories => {
+    const list = categories.map(item => {
+      return transformList(item.id, item.title);
+    });
+    const categoryList = { ...list };
+    return categoryList;
+  },
 );
 
 const selectProductSlug = (

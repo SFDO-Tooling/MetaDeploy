@@ -177,6 +177,12 @@ const reducer = (
         }),
       };
     }
+    case 'FETCH_MORE_PRODUCTS_SUCCEEDED': {
+      return {
+        ...products,
+        products: [...products.products, ...action.payload],
+      };
+    }
   }
   return products;
 };
