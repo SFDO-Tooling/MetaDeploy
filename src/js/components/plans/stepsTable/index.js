@@ -38,6 +38,7 @@ type Props = {
   user?: UserType,
   plan: PlanType,
   preflight?: ?PreflightType,
+  steps: Array<StepType> | null,
   selectedSteps?: SelectedStepsType,
   job?: JobType,
   handleStepsChange?: (string, boolean) => void,
@@ -172,6 +173,7 @@ class StepsTable extends React.Component<Props, State> {
       user,
       plan,
       preflight,
+      steps,
       selectedSteps,
       job,
       handleStepsChange,
@@ -189,7 +191,7 @@ class StepsTable extends React.Component<Props, State> {
       slds-size_1-of-1"
       >
         <article className="slds-card slds-scrollable_x">
-          <DataTable items={plan.steps} id="plan-steps-table">
+          <DataTable items={steps} id="plan-steps-table">
             <DataTableColumn
               key="name"
               label={

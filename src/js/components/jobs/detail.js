@@ -292,6 +292,14 @@ class JobDetail extends React.Component<Props, State> {
       plan.slug,
     );
     const { canceling } = this.state;
+    const steps = plan.steps
+      ? plan.steps.filter(step => {
+          const result = job.results[step.id];
+          const hidden =
+            result && result.status === CONSTANTS.RESULT_STATUS.HIDE;
+          return !hidden;
+        })
+      : [];
     return (
       <DocumentTitle
         title={`${i18n.t('Installation')} | ${plan.title} | ${
@@ -340,8 +348,8 @@ class JobDetail extends React.Component<Props, State> {
             />
             <UserInfo job={job} />
             <ProgressBar job={job} />
-            {plan.steps && plan.steps.length ? (
-              <StepsTable plan={plan} job={job} />
+            {steps && steps.length ? (
+              <StepsTable steps={steps} plan={plan} job={job} />
             ) : null}
           </BodyContainer>
         </>

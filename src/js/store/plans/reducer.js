@@ -27,7 +27,7 @@ export type Plan = {
 };
 
 export type StepResult = {|
-  +status: 'ok' | 'warn' | 'error' | 'skip' | 'optional',
+  +status: 'ok' | 'warn' | 'error' | 'skip' | 'optional' | 'hide',
   +message?: string,
   +logs?: string,
 |};
@@ -64,6 +64,7 @@ type Constants = {|
     ERROR: 'error',
     SKIP: 'skip',
     OPTIONAL: 'optional',
+    HIDE: 'hide',
   |},
   AUTO_START_PREFLIGHT: 'start_preflight',
 |};
@@ -81,6 +82,7 @@ export const CONSTANTS: Constants = {
     ERROR: 'error',
     SKIP: 'skip',
     OPTIONAL: 'optional',
+    HIDE: 'hide',
   },
   AUTO_START_PREFLIGHT: 'start_preflight',
 };

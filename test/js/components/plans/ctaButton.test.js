@@ -351,7 +351,7 @@ describe('<CtaButton />', () => {
   });
 
   describe('start-install click', () => {
-    test('calls doStartJob with plan id and steps', () => {
+    test('calls doStartJob with plan id, steps, and results', () => {
       const jobStarted = Promise.resolve({});
       const doStartJob = jest.fn(() => jobStarted);
       const history = { push: jest.fn() };
@@ -362,6 +362,7 @@ describe('<CtaButton />', () => {
       expect(doStartJob).toHaveBeenCalledWith({
         plan: 'plan-1',
         steps: ['step-1'],
+        results: {},
       });
       return jobStarted.then(() => {
         expect(history.push).not.toHaveBeenCalled();
@@ -376,19 +377,51 @@ describe('<CtaButton />', () => {
         });
         const doStartJob = jest.fn(() => jobStarted);
         const history = { push: jest.fn() };
-        const { getByText } = setup({ doStartJob, history });
+        const plan = { ...defaultPlan, requires_preflight: false };
+        const { getByText } = setup({
+          doStartJob,
+          history,
+          plan,
+          preflight: undefined,
+        });
         fireEvent.click(getByText('Install'));
 
         expect.assertions(2);
         expect(doStartJob).toHaveBeenCalledWith({
           plan: 'plan-1',
           steps: ['step-1'],
+          results: {},
         });
         return jobStarted.then(() => {
           expect(history.push).toHaveBeenCalledWith(
             '/products/product/version/my-plan/jobs/job-1',
           );
         });
+      });
+    });
+  });
+
+  describe('start-install click (hidden steps)', () => {
+    test('calls doStartJob with plan id, steps, and results', () => {
+      const jobStarted = Promise.resolve({});
+      const doStartJob = jest.fn(() => jobStarted);
+      const history = { push: jest.fn() };
+      const preflight = {
+        ...defaultPreflight,
+        results: {
+          'step-1': { status: 'hide' },
+        },
+      };
+      const { getByText } = setup({ doStartJob, history, preflight });
+      fireEvent.click(getByText('Install'));
+
+      expect.assertions(1);
+      expect(doStartJob).toHaveBeenCalledWith({
+        plan: 'plan-1',
+        steps: ['step-1'],
+        results: {
+          'step-1': { status: 'hide' },
+        },
       });
     });
   });
