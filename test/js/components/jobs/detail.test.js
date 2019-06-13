@@ -413,7 +413,7 @@ describe('<JobDetail />', () => {
                   primary_plan: {
                     ...defaultState.products.products[0].most_recent_version
                       .primary_plan,
-                    steps: [],
+                    steps: undefined,
                   },
                 },
               },

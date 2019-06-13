@@ -410,6 +410,15 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             )
         return value
 
+    def _validate_results(self, data):
+        if self.instance:
+            # results are read-only except during creation
+            del data["results"]
+        else:
+            # make sure results can't be set initially except to hide steps
+            if any(result["status"] != HIDE for result in data["results"].values()):
+                raise serializers.ValidationError(_("Invalid initial results."))
+
     def validate(self, data):
         user = self._get_from_data_or_instance(data, "user")
         plan = self._get_from_data_or_instance(data, "plan")
@@ -430,13 +439,8 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         if invalid_steps:
             raise serializers.ValidationError(_("Invalid steps for plan."))
 
-        if self.instance and "results" in data:
-            # results are read-only except during creation
-            del data["results"]
-        elif "results" in data:
-            # make sure results can't be set initially except to hide steps
-            if any(result["status"] != HIDE for result in data["results"].values()):
-                raise serializers.ValidationError(_("Invalid initial results."))
+        if "results" in data:
+            self._validate_results(data)
 
         pending_job = not self.instance and self._pending_job_exists(user=user)
         if pending_job:
