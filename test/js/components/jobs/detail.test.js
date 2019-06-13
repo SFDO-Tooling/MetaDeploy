@@ -399,6 +399,25 @@ describe('<JobDetail />', () => {
       expect(queryByText('Type:')).toBeNull();
     });
 
+    test('renders job detail (hidden step)', () => {
+      const { getByText, queryByText } = setup({
+        initialState: {
+          ...defaultState,
+          jobs: {
+            'job-1': {
+              ...defaultState.jobs['job-1'],
+              results: {
+                'step-4': { status: 'hide' },
+              },
+            },
+          },
+        },
+      });
+
+      expect(getByText('Step 1')).toBeVisible();
+      expect(queryByText('Step 4')).toBeNull();
+    });
+
     test('renders job detail (no user, no steps)', () => {
       const { queryByText } = setup({
         initialState: {
