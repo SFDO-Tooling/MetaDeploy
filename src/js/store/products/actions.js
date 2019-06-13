@@ -101,7 +101,6 @@ export const fetchMoreProducts = (
   return apiFetch(baseUrl, dispatch)
     .then(response => {
       const products = response.results;
-      // SEND RESULTS, CONCAT TO PRODUCTS ARR
       if (!Array.isArray(response.results)) {
         const error = (new Error('Invalid response received'): {
           [string]: mixed,
@@ -135,14 +134,16 @@ export const fetchProducts = (): ThunkAction => dispatch => {
       }
       let categories = [];
       let products = [];
+      let count = [];
       response.forEach(({ first_page, id, title }) => {
         products = products.concat(first_page.results);
         categories = categories.concat({ first_page, id, title });
+        count = count.concat({ [id]: first_page.count });
       });
 
       return dispatch({
         type: 'FETCH_PRODUCTS_SUCCEEDED',
-        payload: [products, categories],
+        payload: [products, categories, count],
       });
     })
     .catch(err => {

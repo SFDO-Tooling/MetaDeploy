@@ -10,10 +10,11 @@ import TabsPanel from '@salesforce/design-system-react/components/tabs/panel';
 import i18n from 'i18next';
 import { connect } from 'react-redux';
 import { fetchMoreProducts } from 'store/products/actions';
-import { prettyUrlHash } from 'utils/helpers';
+import { arrayToObject, prettyUrlHash } from 'utils/helpers';
 import {
   selectProductCategories,
   selectProductsByCategory,
+  selectProductCount,
 } from 'store/products/selectors';
 import Header from 'components/header';
 import PageHeader from 'components/products/listHeader';
@@ -62,6 +63,7 @@ class ProductsList extends React.Component<Props, State> {
     this.state = {
       activeProductsTab,
       fetchingProducts: false,
+      hasMoreProducts: true,
       categoryId: null,
       count: 2,
     };
@@ -131,6 +133,7 @@ class ProductsList extends React.Component<Props, State> {
     const { doFetchMoreProducts, activeProductsTab } = this.props;
     const { categoryId, count, fetchingProducts } = this.state;
     // @TODO GET 'NEXT` FROM PRODUCT LIST, OR CATCH 404 ERROR AT END OF LIST //
+
     doFetchMoreProducts(categoryId, count).then(() => {
       this.setState({ fetchingProducts: false, count: this.state.count + 1 });
     });
@@ -185,7 +188,7 @@ class ProductsList extends React.Component<Props, State> {
         break;
       }
     }
-    const { fetchingProducts } = this.state;
+    const { fetchingProducts, hasMoreProducts } = this.state;
     return (
       <DocumentTitle title={`${i18n.t('Products')} | ${window.SITE_NAME}`}>
         <>
@@ -206,7 +209,7 @@ class ProductsList extends React.Component<Props, State> {
               />
             ) : null}
             {contents}
-            {fetchingProducts && (
+            {fetchingProducts && hasMoreProducts ? (
               <div
                 className="slds-align_absolute-center"
                 style={{ height: '10rem', position: 'relative' }}
@@ -218,7 +221,7 @@ class ProductsList extends React.Component<Props, State> {
                 />
                 <span>{i18n.t('Loading…')}</span>
               </div>
-            )}
+            ) : null}
           </div>
         </>
       </DocumentTitle>
@@ -229,6 +232,7 @@ class ProductsList extends React.Component<Props, State> {
 const select = (appState: AppState) => ({
   productCategories: selectProductCategories(appState),
   productsByCategory: selectProductsByCategory(appState),
+  productCount: selectProductCount,
 });
 
 const actions = {

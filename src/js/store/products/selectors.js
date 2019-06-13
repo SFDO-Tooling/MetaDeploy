@@ -59,6 +59,17 @@ const selectProductCategories: AppState => Array<string> = createSelector(
     return categoryList;
   },
 );
+const productCount = (appState: AppState): ProductsState =>
+  appState.products.categories;
+
+const selectProductCount: AppState => Array<string> = createSelector(
+  productCount,
+  count => {
+    const categoryIdCount = new Set();
+    categoryIdCount.add(count);
+    return categoryIdCount;
+  },
+);
 
 const selectProductSlug = (
   appState: AppState,
@@ -198,4 +209,5 @@ export {
   selectVersionLabel,
   selectVersion,
   selectVersionLabelOrPlanSlug,
+  selectProductCount,
 };
