@@ -1,20 +1,18 @@
 // @flow
-// @TODO FIX SPINNER STYLES
-// SET COUNT ON STATE TO KNOW IF NEXT NEEDED
-// GET CATEGORY ID FROM PROPS
+
 import * as React from 'react';
-import Spinner from '@salesforce/design-system-react/components/spinner';
 import DocumentTitle from 'react-document-title';
+import Spinner from '@salesforce/design-system-react/components/spinner';
 import Tabs from '@salesforce/design-system-react/components/tabs';
 import TabsPanel from '@salesforce/design-system-react/components/tabs/panel';
 import i18n from 'i18next';
 import { connect } from 'react-redux';
+
 import { fetchMoreProducts } from 'store/products/actions';
-import { arrayToObject, prettyUrlHash } from 'utils/helpers';
+import { prettyUrlHash } from 'utils/helpers';
 import {
   selectProductCategories,
   selectProductsByCategory,
-  selectProductCount,
 } from 'store/products/selectors';
 import Header from 'components/header';
 import PageHeader from 'components/products/listHeader';
@@ -23,37 +21,33 @@ import { EmptyIllustration } from 'components/404';
 import type { AppState } from 'store';
 import type { InitialProps } from 'components/utils';
 import type { ProductsMapType } from 'store/products/selectors';
-import type { Product } from 'store/products/reducer';
+import type { Category, Product } from 'store/products/reducer';
 
 type Props = {
   ...InitialProps,
   productsByCategory: ProductsMapType,
-  productCategories: Array<string>,
-  doFetchMoreProducts: typeof fetchMoreProducts,
+  productCategories: Array<Category>,
+  doFetchMoreProducts: ({ url: string, id: number }) => Promise<any>,
 };
 type State = {
   activeProductsTab: string | null,
   fetchingProducts: boolean,
-  categoryId: number,
-  count: number,
-  hasMoreProducts: boolean,
 };
 
 class ProductsList extends React.Component<Props, State> {
   constructor(props) {
     super(props);
     let activeProductsTab = null;
-    let hashTab;
+    let hashTab: Category | void;
     try {
-      // @todo this needs some cleanup
       if (window.location.hash) {
-        hashTab = Object.values(props.productCategories).find(
+        hashTab = props.productCategories.find(
           category =>
-            window.location.hash.substring(1) === prettyUrlHash(category),
+            window.location.hash.substring(1) === prettyUrlHash(category.title),
         );
       }
       if (hashTab) {
-        activeProductsTab = hashTab;
+        activeProductsTab = hashTab.title;
       } else {
         activeProductsTab = window.sessionStorage.getItem('activeProductsTab');
       }
@@ -63,9 +57,6 @@ class ProductsList extends React.Component<Props, State> {
     this.state = {
       activeProductsTab,
       fetchingProducts: false,
-      hasMoreProducts: true,
-      categoryId: null,
-      count: 2,
     };
   }
 
@@ -83,18 +74,13 @@ class ProductsList extends React.Component<Props, State> {
   }
 
   handleSelect = (index: number) => {
-    const { history } = this.props;
+    const { history, productCategories } = this.props;
     try {
-      const category = this.props.productCategories[index];
-
+      const category = productCategories[index];
       /* istanbul ignore else */
       if (category) {
-        window.sessionStorage.setItem(
-          'activeProductsTab',
-          Object.values(category),
-        );
-        this.setState({ categoryId: Object.keys(category)[0] });
-        history.replace({ hash: prettyUrlHash(Object.values(category)[0]) });
+        window.sessionStorage.setItem('activeProductsTab', category.title);
+        history.replace({ hash: prettyUrlHash(category.title) });
       } else {
         window.sessionStorage.removeItem('activeProductsTab');
         history.replace({ hash: '' });
@@ -105,7 +91,9 @@ class ProductsList extends React.Component<Props, State> {
   };
 
   handleOnScroll = () => {
-    const { fetchingProducts } = this.state;
+    if (this.state.fetchingProducts) {
+      return;
+    }
     const scrollTop =
       (document.documentElement && document.documentElement.scrollTop) ||
       (document.body && document.body.scrollTop) ||
@@ -120,23 +108,27 @@ class ProductsList extends React.Component<Props, State> {
     const scrolledToBottom =
       Math.ceil(scrollTop + clientHeight) >= scrollHeight;
 
-    if (fetchingProducts) {
-      return;
-    }
     if (scrolledToBottom) {
-      this.setState({ fetchingProducts: true });
-      this.shouldFetchMoreProducts();
+      this.maybeFetchMoreProducts();
     }
   };
 
-  shouldFetchMoreProducts = () => {
-    const { doFetchMoreProducts, activeProductsTab } = this.props;
-    const { categoryId, count, fetchingProducts } = this.state;
-    // @TODO GET 'NEXT` FROM PRODUCT LIST, OR CATCH 404 ERROR AT END OF LIST //
+  maybeFetchMoreProducts = () => {
+    const { activeProductsTab, fetchingProducts } = this.state;
+    const { productCategories, doFetchMoreProducts } = this.props;
+    const activeCategory = activeProductsTab
+      ? productCategories.find(category => category.title === activeProductsTab)
+      : productCategories[0];
+    const moreProductsUrl = activeCategory && activeCategory.next;
 
-    doFetchMoreProducts(categoryId, count).then(() => {
-      this.setState({ fetchingProducts: false, count: this.state.count + 1 });
-    });
+    if (activeCategory && moreProductsUrl && !fetchingProducts) {
+      this.setState({ fetchingProducts: true });
+      doFetchMoreProducts({ url: moreProductsUrl, id: activeCategory.id }).then(
+        () => {
+          this.setState({ fetchingProducts: false });
+        },
+      );
+    }
   };
 
   componentDidMount() {
@@ -148,8 +140,10 @@ class ProductsList extends React.Component<Props, State> {
   }
 
   render(): React.Node {
+    const { activeProductsTab, fetchingProducts } = this.state;
+    const { productsByCategory, productCategories } = this.props;
     let contents;
-    switch (this.props.productsByCategory.size) {
+    switch (productsByCategory.size) {
       case 0: {
         // No products; show empty message
         const msg = i18n.t('We couldn’t find any products. Try again later?');
@@ -158,14 +152,14 @@ class ProductsList extends React.Component<Props, State> {
       }
       case 1: {
         // Products are all in one category; no need for multicategory tabs
-        const products = Array.from(this.props.productsByCategory.values())[0];
+        const products = Array.from(productsByCategory.values())[0];
         contents = ProductsList.getProductsList(products);
         break;
       }
       default: {
         // Products are in multiple categories; divide into tabs
         const tabs = [];
-        for (const [category, products] of this.props.productsByCategory) {
+        for (const [category, products] of productsByCategory) {
           const panel = (
             <TabsPanel label={category} key={category}>
               {ProductsList.getProductsList(products)}
@@ -173,9 +167,9 @@ class ProductsList extends React.Component<Props, State> {
           );
           tabs.push(panel);
         }
-        const savedTabIndex = this.props.productCategories[
-          this.state.activeProductsTab
-        ];
+        const savedTabIndex = productCategories.findIndex(
+          category => category.title === activeProductsTab,
+        );
         contents = (
           <Tabs
             variant="scoped"
@@ -188,7 +182,7 @@ class ProductsList extends React.Component<Props, State> {
         break;
       }
     }
-    const { fetchingProducts, hasMoreProducts } = this.state;
+
     return (
       <DocumentTitle title={`${i18n.t('Products')} | ${window.SITE_NAME}`}>
         <>
@@ -209,17 +203,12 @@ class ProductsList extends React.Component<Props, State> {
               />
             ) : null}
             {contents}
-            {fetchingProducts && hasMoreProducts ? (
-              <div
-                className="slds-align_absolute-center"
-                style={{ height: '10rem', position: 'relative' }}
-              >
-                <Spinner
-                  size="small"
-                  variant="base"
-                  assistiveText={{ label: 'Loading' }}
-                />
-                <span>{i18n.t('Loading…')}</span>
+            {fetchingProducts ? (
+              <div className="slds-align_absolute-center">
+                <span className="slds-is-relative slds-m-right_large">
+                  <Spinner variant="brand" size="small" />
+                </span>
+                {i18n.t('Loading…')}
               </div>
             ) : null}
           </div>
@@ -232,12 +221,12 @@ class ProductsList extends React.Component<Props, State> {
 const select = (appState: AppState) => ({
   productCategories: selectProductCategories(appState),
   productsByCategory: selectProductsByCategory(appState),
-  productCount: selectProductCount,
 });
 
 const actions = {
   doFetchMoreProducts: fetchMoreProducts,
 };
+
 const WrappedProductsList: React.ComponentType<InitialProps> = connect(
   select,
   actions,

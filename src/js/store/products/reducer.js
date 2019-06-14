@@ -38,17 +38,15 @@ export type Product = {
   +not_allowed_instructions: string | null,
   +click_through_agreement: string | null,
 };
-export type ProductsState = {
-  products: Array<Product>,
-  notFound: Array<string>,
-  categories: Array<Category>,
-  count: [],
-};
-
 export type Category = {
-  id: number,
-  title: string,
-  // @todo: omit the results from stored categories
+  +id: number,
+  +title: string,
+  +next: string | null,
+};
+export type ProductsState = {
+  +products: Array<Product>,
+  +notFound: Array<string>,
+  +categories: Array<Category>,
 };
 
 const reducer = (
@@ -56,18 +54,18 @@ const reducer = (
     products: [],
     notFound: [],
     categories: [],
-    count: [],
   },
   action: ProductsAction,
 ): ProductsState => {
   switch (action.type) {
-    case 'FETCH_PRODUCTS_SUCCEEDED':
+    case 'FETCH_PRODUCTS_SUCCEEDED': {
+      const { products: fetchedProducts, categories } = action.payload;
       return {
         ...products,
-        products,
+        products: fetchedProducts,
         categories,
-        count,
       };
+    }
     case 'FETCH_PRODUCT_SUCCEEDED': {
       const { product, slug } = action.payload;
       if (product) {
@@ -186,9 +184,16 @@ const reducer = (
       };
     }
     case 'FETCH_MORE_PRODUCTS_SUCCEEDED': {
+      const { products: fetchedProducts, category, next } = action.payload;
       return {
         ...products,
-        products: [...products.products, ...action.payload],
+        products: [...products.products, ...fetchedProducts],
+        categories: products.categories.map(c => {
+          if (c.id === category) {
+            return { ...c, next };
+          }
+          return c;
+        }),
       };
     }
   }

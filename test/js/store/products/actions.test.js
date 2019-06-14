@@ -12,15 +12,25 @@ describe('fetchProducts', () => {
       const product = {
         id: 'p1',
         title: 'Product 1',
+        category: 'Salesforce',
         description: 'This is a test product.',
       };
-      fetchMock.getOnce(window.api_urls.product_list(), { results: [product] });
+      fetchMock.getOnce(window.api_urls.productcategory_list(), [
+        {
+          id: 1,
+          title: 'Salesforce',
+          first_page: { next: null, results: [product] },
+        },
+      ]);
       const started = {
         type: 'FETCH_PRODUCTS_STARTED',
       };
       const succeeded = {
         type: 'FETCH_PRODUCTS_SUCCEEDED',
-        payload: [product],
+        payload: {
+          products: [product],
+          categories: [{ id: 1, title: 'Salesforce', next: null }],
+        },
       };
 
       expect.assertions(1);
@@ -33,7 +43,7 @@ describe('fetchProducts', () => {
   describe('error', () => {
     test('throws Error', () => {
       const store = storeWithApi({});
-      fetchMock.getOnce(window.api_urls.product_list(), 'string');
+      fetchMock.getOnce(window.api_urls.productcategory_list(), 'string');
 
       expect.assertions(1);
       return expect(store.dispatch(actions.fetchProducts())).rejects.toThrow();
@@ -41,7 +51,7 @@ describe('fetchProducts', () => {
 
     test('dispatches FETCH_PRODUCTS_FAILED action', () => {
       const store = storeWithApi({});
-      fetchMock.getOnce(window.api_urls.product_list(), 500);
+      fetchMock.getOnce(window.api_urls.productcategory_list(), 500);
       const started = {
         type: 'FETCH_PRODUCTS_STARTED',
       };

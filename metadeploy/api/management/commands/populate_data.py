@@ -275,7 +275,7 @@ class Command(BaseCommand):
         )
 
     def create_eda(self):
-        sf_category = ProductCategory.objects.get(title="salesforce.org products")
+        sf_category = ProductCategory.objects.get(title="Salesforce.org Products")
         product = Product.objects.create(
             title="Education Data Architecture (EDA)",
             description="## Welcome to the EDA installer!",
@@ -442,10 +442,10 @@ class Command(BaseCommand):
         self.create_token_expiry_job()
         self.create_preflight_expiry_job()
         sf_category = ProductCategory.objects.create(
-            title="salesforce.org products", order_key=0
+            title="Salesforce.org Products", order_key=0
         )
         co_category = ProductCategory.objects.create(
-            title="community products", order_key=1
+            title="Community Products", order_key=1
         )
         product1 = self.create_product(
             title="Product With Useful Data",
@@ -535,7 +535,7 @@ class Command(BaseCommand):
         version4 = self.create_version(product4)
         self.create_plan(version4)
 
-        for i in range(4):
+        for i in range(30):
             product = self.create_product(
                 title=f"Sample Community Product {i}", category=co_category, order_key=i
             )

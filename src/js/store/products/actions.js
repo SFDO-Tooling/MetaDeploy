@@ -9,7 +9,7 @@ import type { Plan } from 'store/plans/reducer';
 type FetchProductsStarted = { type: 'FETCH_PRODUCTS_STARTED' };
 type FetchProductsSucceeded = {
   type: 'FETCH_PRODUCTS_SUCCEEDED',
-  payload: [Array<Product>, Array<Category>],
+  payload: { products: Array<Product>, categories: Array<Category> },
 };
 type FetchProductsFailed = { type: 'FETCH_PRODUCTS_FAILED' };
 type ProductFilters = {|
@@ -70,14 +70,26 @@ type FetchPlanFailed = {
   payload: PlanFilters,
 };
 // @TODO ADD TYPES FOR NEW ACTIONS
-type FetchMoreProductsStarted = {};
-type FetchMoreProductsSucceeded = {};
-type FetchMoreProductsFailed = {};
+type FetchMoreProductsStarted = {
+  type: 'FETCH_MORE_PRODUCTS_STARTED',
+  payload: { url: string, id: number },
+};
+type FetchMoreProductsSucceeded = {
+  type: 'FETCH_MORE_PRODUCTS_SUCCEEDED',
+  payload: { products: Array<Product>, category: number, next: string | null },
+};
+type FetchMoreProductsFailed = {
+  type: 'FETCH_MORE_PRODUCTS_FAILED',
+  payload: { url: string, id: number },
+};
 
 export type ProductsAction =
   | FetchProductsStarted
   | FetchProductsSucceeded
   | FetchProductsFailed
+  | FetchMoreProductsStarted
+  | FetchMoreProductsSucceeded
+  | FetchMoreProductsFailed
   | FetchProductStarted
   | FetchProductSucceeded
   | FetchProductFailed
@@ -91,14 +103,45 @@ export type ProductsAction =
   | FetchPlanSucceeded
   | FetchPlanFailed;
 
-export const fetchMoreProducts = (
-  category: string,
-  page: number,
-): ThunkAction => dispatch => {
-  dispatch({ type: 'FETCH_MORE_PRODUCTS_STARTED' });
-  const baseUrl = `${window.api_urls.product_list()}?category=${category}&page=${page}`;
-
+export const fetchProducts = (): ThunkAction => dispatch => {
+  dispatch({ type: 'FETCH_PRODUCTS_STARTED' });
+  const baseUrl = window.api_urls.productcategory_list();
   return apiFetch(baseUrl, dispatch)
+    .then(response => {
+      if (!Array.isArray(response)) {
+        const error = (new Error('Invalid response received'): {
+          [string]: mixed,
+        });
+        error.response = response;
+        throw error;
+      }
+      let products = [];
+      let categories = [];
+      response.forEach(({ id, title, first_page }) => {
+        products = products.concat(first_page.results);
+        categories = categories.concat({ id, title, next: first_page.next });
+      });
+
+      return dispatch({
+        type: 'FETCH_PRODUCTS_SUCCEEDED',
+        payload: { products, categories },
+      });
+    })
+    .catch(err => {
+      dispatch({ type: 'FETCH_PRODUCTS_FAILED' });
+      throw err;
+    });
+};
+
+export const fetchMoreProducts = ({
+  url,
+  id,
+}: {
+  url: string,
+  id: number,
+}): ThunkAction => dispatch => {
+  dispatch({ type: 'FETCH_MORE_PRODUCTS_STARTED', payload: { url, id } });
+  return apiFetch(url, dispatch)
     .then(response => {
       const products = response.results;
       if (!Array.isArray(response.results)) {
@@ -110,44 +153,11 @@ export const fetchMoreProducts = (
       }
       return dispatch({
         type: 'FETCH_MORE_PRODUCTS_SUCCEEDED',
-        payload: products,
+        payload: { products, category: id, next: response.next },
       });
     })
     .catch(err => {
-      dispatch({ type: 'FETCH_MORE_PRODUCTS_FAILED' });
-      throw err;
-    });
-};
-
-export const fetchProducts = (): ThunkAction => dispatch => {
-  dispatch({ type: 'FETCH_PRODUCTS_STARTED' });
-  const baseUrl = window.api_urls.productcategory_list();
-
-  return apiFetch(baseUrl, dispatch)
-    .then(response => {
-      if (!Array.isArray(response)) {
-        const error = (new Error('Invalid response received'): {
-          [string]: mixed,
-        });
-        error.response = response;
-        throw error;
-      }
-      let categories = [];
-      let products = [];
-      let count = [];
-      response.forEach(({ first_page, id, title }) => {
-        products = products.concat(first_page.results);
-        categories = categories.concat({ first_page, id, title });
-        count = count.concat({ [id]: first_page.count });
-      });
-
-      return dispatch({
-        type: 'FETCH_PRODUCTS_SUCCEEDED',
-        payload: [products, categories, count],
-      });
-    })
-    .catch(err => {
-      dispatch({ type: 'FETCH_PRODUCTS_FAILED' });
+      dispatch({ type: 'FETCH_MORE_PRODUCTS_FAILED', payload: { url, id } });
       throw err;
     });
 };

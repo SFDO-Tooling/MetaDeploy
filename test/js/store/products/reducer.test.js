@@ -2,7 +2,7 @@ import reducer from 'store/products/reducer';
 
 describe('reducer', () => {
   test('returns initial state', () => {
-    const expected = { products: [], notFound: [] };
+    const expected = { products: [], notFound: [], categories: [] };
     const actual = reducer(undefined, {});
 
     expect(actual).toEqual(expected);
@@ -21,12 +21,17 @@ describe('reducer', () => {
       description: 'This is another test product.',
       category: 'salesforce',
     };
-    const expected = { products: [product2] };
+    const category = {
+      id: 1,
+      title: 'salesforce',
+      next: null,
+    };
+    const expected = { products: [product2], categories: [category] };
     const actual = reducer(
       { products: [product1] },
       {
         type: 'FETCH_PRODUCTS_SUCCEEDED',
-        payload: [product2],
+        payload: { products: [product2], categories: [category] },
       },
     );
 

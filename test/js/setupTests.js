@@ -4,6 +4,14 @@ import '@testing-library/react/cleanup-after-each';
 import fetchMock from 'fetch-mock';
 
 beforeAll(() => {
+  document.createRange = () => ({
+    setStart: jest.fn(),
+    setEnd: jest.fn(),
+    commonAncestorContainer: {
+      nodeName: 'BODY',
+      ownerDocument: document,
+    },
+  });
   window.api_urls = {
     account_logout: () => '/accounts/logout/',
     job_detail: id => `/api/jobs/${id}/`,
@@ -14,6 +22,7 @@ beforeAll(() => {
     plan_preflight: id => `/api/plans/${id}/preflight/`,
     product_get_one: () => '/api/products/get_one/',
     product_list: () => '/api/products/',
+    productcategory_list: () => '/api/categories/',
     salesforce_custom_login: () => '/accounts/salesforce-custom/login/',
     salesforce_production_login: () => '/accounts/salesforce-production/login/',
     salesforce_test_login: () => '/accounts/salesforce-test/login/',

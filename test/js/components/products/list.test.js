@@ -9,7 +9,7 @@ import ProductsList from 'components/products/list';
 describe('<Products />', () => {
   const setup = (
     initialState = {
-      products: { products: [], notFound: [] },
+      products: { products: [], notFound: [], categories: [] },
     },
     props = {},
   ) => {
@@ -74,6 +74,7 @@ describe('<Products />', () => {
           },
         ],
         notFound: [],
+        categories: [{ id: 1, title: 'salesforce', next: null }],
       },
     };
     const { getByText, queryByText } = setup(initialState);
@@ -159,6 +160,10 @@ describe('<Products />', () => {
           },
         ],
         notFound: [],
+        categories: [
+          { id: 1, title: 'salesforce', next: null },
+          { id: 2, title: 'community', next: null },
+        ],
       },
     };
 
