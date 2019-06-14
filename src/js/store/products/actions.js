@@ -12,6 +12,18 @@ type FetchProductsSucceeded = {
   payload: { products: Array<Product>, categories: Array<Category> },
 };
 type FetchProductsFailed = { type: 'FETCH_PRODUCTS_FAILED' };
+type FetchMoreProductsStarted = {
+  type: 'FETCH_MORE_PRODUCTS_STARTED',
+  payload: { url: string, id: number },
+};
+type FetchMoreProductsSucceeded = {
+  type: 'FETCH_MORE_PRODUCTS_SUCCEEDED',
+  payload: { products: Array<Product>, category: number, next: string | null },
+};
+type FetchMoreProductsFailed = {
+  type: 'FETCH_MORE_PRODUCTS_FAILED',
+  payload: { url: string, id: number },
+};
 type ProductFilters = {|
   slug: string,
 |};
@@ -68,19 +80,6 @@ type FetchPlanSucceeded = {
 type FetchPlanFailed = {
   type: 'FETCH_PLAN_FAILED',
   payload: PlanFilters,
-};
-// @TODO ADD TYPES FOR NEW ACTIONS
-type FetchMoreProductsStarted = {
-  type: 'FETCH_MORE_PRODUCTS_STARTED',
-  payload: { url: string, id: number },
-};
-type FetchMoreProductsSucceeded = {
-  type: 'FETCH_MORE_PRODUCTS_SUCCEEDED',
-  payload: { products: Array<Product>, category: number, next: string | null },
-};
-type FetchMoreProductsFailed = {
-  type: 'FETCH_MORE_PRODUCTS_FAILED',
-  payload: { url: string, id: number },
 };
 
 export type ProductsAction =
