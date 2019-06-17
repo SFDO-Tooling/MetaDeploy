@@ -66,6 +66,24 @@ const reducer = (
         categories,
       };
     }
+    case 'FETCH_MORE_PRODUCTS_SUCCEEDED': {
+      const { products: fetchedProducts, category, next } = action.payload;
+      // Store list of known product IDs to filter out duplicates
+      const ids = products.products.map(p => p.id);
+      return {
+        ...products,
+        products: [
+          ...products.products,
+          ...fetchedProducts.filter(p => !ids.includes(p.id)),
+        ],
+        categories: products.categories.map(c => {
+          if (c.id === category) {
+            return { ...c, next };
+          }
+          return c;
+        }),
+      };
+    }
     case 'FETCH_PRODUCT_SUCCEEDED': {
       const { product, slug } = action.payload;
       if (product) {
@@ -180,19 +198,6 @@ const reducer = (
             }
           }
           return p;
-        }),
-      };
-    }
-    case 'FETCH_MORE_PRODUCTS_SUCCEEDED': {
-      const { products: fetchedProducts, category, next } = action.payload;
-      return {
-        ...products,
-        products: [...products.products, ...fetchedProducts],
-        categories: products.categories.map(c => {
-          if (c.id === category) {
-            return { ...c, next };
-          }
-          return c;
         }),
       };
     }
