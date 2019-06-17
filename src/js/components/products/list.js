@@ -7,6 +7,7 @@ import Tabs from '@salesforce/design-system-react/components/tabs';
 import TabsPanel from '@salesforce/design-system-react/components/tabs/panel';
 import i18n from 'i18next';
 import { connect } from 'react-redux';
+import { withScroll } from 'react-fns';
 
 import { fetchMoreProducts } from 'store/products/actions';
 import { prettyUrlHash } from 'utils/helpers';
@@ -25,6 +26,8 @@ import type { Category, Product } from 'store/products/reducer';
 
 type Props = {
   ...InitialProps,
+  x: number,
+  y: number,
   productsByCategory: ProductsMapType,
   productCategories: Array<Category>,
   doFetchMoreProducts: ({ url: string, id: number }) => Promise<any>,
@@ -81,35 +84,14 @@ class ProductsList extends React.Component<Props, State> {
       if (category) {
         window.sessionStorage.setItem('activeProductsTab', category.title);
         history.replace({ hash: prettyUrlHash(category.title) });
+        this.setState({ activeProductsTab: category.title });
       } else {
         window.sessionStorage.removeItem('activeProductsTab');
         history.replace({ hash: '' });
+        this.setState({ activeProductsTab: null });
       }
     } catch (e) {
       // swallor error
-    }
-  };
-
-  handleOnScroll = () => {
-    if (this.state.fetchingProducts) {
-      return;
-    }
-    const scrollTop =
-      (document.documentElement && document.documentElement.scrollTop) ||
-      (document.body && document.body.scrollTop) ||
-      0;
-    const scrollHeight =
-      (document.documentElement && document.documentElement.scrollHeight) ||
-      (document.body && document.body.scrollHeight) ||
-      Infinity;
-    const clientHeight =
-      (document.documentElement && document.documentElement.clientHeight) ||
-      window.innerHeight;
-    const scrolledToBottom =
-      Math.ceil(scrollTop + clientHeight) >= scrollHeight;
-
-    if (scrolledToBottom) {
-      this.maybeFetchMoreProducts();
     }
   };
 
@@ -131,12 +113,25 @@ class ProductsList extends React.Component<Props, State> {
     }
   };
 
-  componentDidMount() {
-    document.addEventListener('scroll', this.handleOnScroll);
-  }
+  componentDidUpdate(prevProps) {
+    const { y } = this.props;
+    const { fetchingProducts } = this.state;
+    if (y === prevProps.y || fetchingProducts) {
+      return;
+    }
+    const scrollHeight =
+      (document.documentElement && document.documentElement.scrollHeight) ||
+      (document.body && document.body.scrollHeight) ||
+      Infinity;
+    const clientHeight =
+      (document.documentElement && document.documentElement.clientHeight) ||
+      window.innerHeight;
+    // Fetch more products if within 100px of bottom of page...
+    const scrolledToBottom = scrollHeight - Math.ceil(y + clientHeight) <= 100;
 
-  componentWillUnmount() {
-    document.removeEventListener('scroll', this.handleOnScroll);
+    if (scrolledToBottom) {
+      this.maybeFetchMoreProducts();
+    }
   }
 
   render(): React.Node {
@@ -230,6 +225,6 @@ const actions = {
 const WrappedProductsList: React.ComponentType<InitialProps> = connect(
   select,
   actions,
-)(ProductsList);
+)(withScroll(ProductsList));
 
 export default WrappedProductsList;
