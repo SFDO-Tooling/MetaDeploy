@@ -204,7 +204,7 @@ class ProductsList extends React.Component<Props, State> {
             ) : null}
             {contents}
             {fetchingProducts ? (
-              <div className="slds-align_absolute-center">
+              <div className="slds-align_absolute-center slds-m-top_x-large">
                 <span className="slds-is-relative slds-m-right_large">
                   <Spinner variant="brand" size="small" />
                 </span>
