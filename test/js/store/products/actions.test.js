@@ -73,6 +73,76 @@ describe('fetchProducts', () => {
   });
 });
 
+describe('fetchMoreProducts', () => {
+  describe('success', () => {
+    test('GETs next products list for category', () => {
+      const store = storeWithApi({});
+      const url = `${window.api_urls.product_list()}?category=30&page=2`;
+      const id = 30;
+      const nextProducts = [{ id: 'p2', title: 'product-2' }];
+      const mockResponse = {
+        count: 2,
+        next: null,
+        previous: `${window.api_urls.product_list()}?category=30`,
+        results: nextProducts,
+      };
+      fetchMock.getOnce(url, mockResponse);
+      const started = {
+        type: 'FETCH_MORE_PRODUCTS_STARTED',
+        payload: { url, id },
+      };
+      const succeeded = {
+        type: 'FETCH_MORE_PRODUCTS_SUCCEEDED',
+        payload: { products: nextProducts, category: id, next: null },
+      };
+      expect.assertions(1);
+      return store.dispatch(actions.fetchMoreProducts({ url, id })).then(() => {
+        expect(store.getActions()).toEqual([started, succeeded]);
+      });
+    });
+  });
+  describe('error', () => {
+    test('throws Error', () => {
+      const store = storeWithApi({});
+      const url = `${window.api_urls.product_list()}?category=30&page=2`;
+      const id = 30;
+      fetchMock.getOnce(url, 'string');
+
+      expect.assertions(1);
+      return expect(
+        store.dispatch(actions.fetchMoreProducts({ id, url })),
+      ).rejects.toThrow();
+    });
+
+    test('dispatches FETCH_MORE_PRODUCTS_FAILED action', () => {
+      const store = storeWithApi({});
+      const url = `${window.api_urls.product_list()}?category=30&page=2`;
+      const id = 30;
+      fetchMock.getOnce(url, 500);
+      const started = {
+        type: 'FETCH_MORE_PRODUCTS_STARTED',
+        payload: { url, id },
+      };
+      const failed = {
+        type: 'FETCH_MORE_PRODUCTS_FAILED',
+        payload: { url, id },
+      };
+      return store
+        .dispatch(actions.fetchMoreProducts({ url, id }))
+        .catch(() => {
+          const allActions = store.getActions();
+          expect(allActions[0]).toEqual(started);
+          expect(allActions[1].type).toEqual('ERROR_ADDED');
+          expect(allActions[1].payload.message).toEqual(
+            'Internal Server Error',
+          );
+          expect(allActions[2]).toEqual(failed);
+          expect(window.console.error).toHaveBeenCalled();
+        });
+    });
+  });
+});
+
 describe('fetchProduct', () => {
   let baseUrl;
 
