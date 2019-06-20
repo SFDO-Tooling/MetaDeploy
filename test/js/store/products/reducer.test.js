@@ -38,6 +38,37 @@ describe('reducer', () => {
     expect(actual).toEqual(expected);
   });
 
+  describe('FETCH_MORE_PRODUCTS_SUCCEEDED action', () => {
+    const mockProducts = {
+      categories: [{ id: 37, title: 'first Products', next: 'next-url' }],
+      notFound: [],
+      products: [
+        {
+          category: 'first Products',
+          id: 'product1',
+          title: 'Product1 title',
+        },
+      ],
+    };
+
+    const fetchedProduct = [
+      {
+        category: 'first Products',
+        id: 'product2',
+        title: 'Product2 title',
+      },
+    ];
+    const expected = {
+      ...mockProducts,
+      products: [...mockProducts.products, ...fetchedProduct],
+    };
+    const actual = reducer(mockProducts, {
+      type: 'FETCH_MORE_PRODUCTS_SUCCEEDED',
+      payload: { products: fetchedProduct, category: 37, next: 'next-url' },
+    });
+    expect(actual).toEqual(expected);
+  });
+
   describe('FETCH_PRODUCT_SUCCEEDED', () => {
     test('adds product', () => {
       const product1 = {
