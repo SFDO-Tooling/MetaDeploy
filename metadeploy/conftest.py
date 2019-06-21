@@ -25,6 +25,13 @@ from metadeploy.api.models import (
 User = get_user_model()
 
 
+def format_timestamp(value):
+    value = value.isoformat()
+    if value.endswith("+00:00"):
+        value = value[:-6] + "Z"
+    return value
+
+
 @register
 class SocialAppFactory(factory.django.DjangoModelFactory):
     class Meta:

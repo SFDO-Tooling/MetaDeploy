@@ -1,15 +1,10 @@
 import pytest
 from django.urls import reverse
 
+from metadeploy.conftest import format_timestamp
+
 from ..constants import ORGANIZATION_DETAILS
 from ..models import Job, Plan, PreflightResult
-
-
-def format_timestamp(value):
-    value = value.isoformat()
-    if value.endswith("+00:00"):
-        value = value[:-6] + "Z"
-    return value
 
 
 @pytest.mark.django_db

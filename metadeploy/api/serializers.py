@@ -242,15 +242,25 @@ class ProductCategorySerializer(serializers.ModelSerializer):
 
     def get_first_page(self, obj):
         paginator = ProductPaginator()
-        page = paginator.paginate_queryset(
-            obj.product_set.all(), self.context["request"]
-        )
+        qs = self._get_product_qs(obj)
+        page = paginator.paginate_queryset(qs, self.context["request"])
         return {
             "count": paginator.page.paginator.count,
             "next": self.get_next_link(paginator, str(obj.id)),
             "previous": self.get_previous_link(paginator, str(obj.id)),
             "results": ProductSerializer(page, many=True, context=self.context).data,
         }
+
+    def _get_product_qs(self, obj):
+        user = self.context["request"].user
+        qs = obj.product_set.published().exclude(is_listed=False)
+        if user.is_authenticated:
+            qs = qs.exclude(
+                visible_to__isnull=False,
+                visible_to__org_type__contains=[user.full_org_type],
+                visible_to__list_for_allowed_by_orgs=False,
+            )
+        return qs
 
 
 class ProductSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
