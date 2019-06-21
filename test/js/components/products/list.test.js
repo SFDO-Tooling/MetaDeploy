@@ -2,9 +2,23 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { fireEvent } from '@testing-library/react';
 
-import { renderWithRedux } from './../../utils';
+import { renderWithRedux, storeWithApi } from './../../utils';
 
 import ProductsList from 'components/products/list';
+import { fetchMoreProducts } from 'store/products/actions';
+
+jest.mock('react-fns', () => ({
+  withScroll(Component) {
+    // eslint-disable-next-line react/display-name
+    return props => <Component x={0} y={0} {...props} />;
+  },
+}));
+jest.mock('store/products/actions');
+fetchMoreProducts.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+
+afterEach(() => {
+  fetchMoreProducts.mockClear();
+});
 
 describe('<Products />', () => {
   const setup = (
@@ -12,20 +26,17 @@ describe('<Products />', () => {
       products: { products: [], notFound: [], categories: [] },
     },
     props = {},
+    rerenderFn = null,
   ) => {
-    const {
-      getByText,
-      getAllByText,
-      queryByText,
-      baseElement,
-      rerender,
-    } = renderWithRedux(
+    const { getByText, getAllByText, queryByText, rerender } = renderWithRedux(
       <MemoryRouter>
         <ProductsList {...props} />
       </MemoryRouter>,
       initialState,
+      storeWithApi,
+      rerenderFn,
     );
-    return { getByText, getAllByText, queryByText, baseElement, rerender };
+    return { getByText, getAllByText, queryByText, rerender };
   };
 
   describe('site welcome_text', () => {
@@ -228,41 +239,51 @@ describe('<Products />', () => {
     });
   });
 
-  test('renders loading while fetching more products', () => {
-    const initialState = {
-      products: {
-        products: [
-          {
-            id: 'p1',
-            title: 'Product 1',
-            description: 'This is a test product.',
-            category: 'salesforce',
-            most_recent_version: {
-              id: 'v1',
-              product: 'p1',
-              label: '1.0.0',
-              description: 'This is a test product version.',
-              primary_plan: {
-                id: 'plan-1',
-                title: 'My Plan',
+  describe('fetching more products', () => {
+    beforeAll(() => {
+      jest
+        .spyOn(document.documentElement, 'scrollHeight', 'get')
+        .mockImplementation(() => 1100);
+    });
+
+    test('renders loading while fetching more products', () => {
+      const initialState = {
+        products: {
+          products: [
+            {
+              id: 'p1',
+              title: 'Product 1',
+              description: 'This is a test product.',
+              category: 'salesforce',
+              most_recent_version: {
+                id: 'v1',
+                product: 'p1',
+                label: '1.0.0',
+                description: 'This is a test product version.',
+                primary_plan: {
+                  id: 'plan-1',
+                  title: 'My Plan',
+                  is_listed: true,
+                  is_allowed: true,
+                  requires_preflight: true,
+                },
                 is_listed: true,
-                is_allowed: true,
-                requires_preflight: true,
               },
               is_listed: true,
+              is_allowed: true,
             },
-            is_listed: true,
-            is_allowed: true,
-          },
-        ],
-        notFound: [],
-        categories: [{ id: 1, title: 'salesforce', next: null }],
-      },
-    };
-    const newProducts = {};
-    const { baseElement } = setup(initialState);
-    console.log(window.pageYOffset);
-    fireEvent.scroll(baseElement, { y: 1000 });
-    console.log(window.pageYOffset);
+          ],
+          notFound: [],
+          categories: [{ id: 1, title: 'salesforce', next: 'next-url' }],
+        },
+      };
+      const { rerender } = setup(initialState);
+      setup(initialState, { y: 1000 }, rerender);
+
+      expect(fetchMoreProducts).toHaveBeenCalledWith({
+        url: 'next-url',
+        id: 1,
+      });
+    });
   });
 });
