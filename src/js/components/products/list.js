@@ -83,15 +83,15 @@ class ProductsList extends React.Component<Props, State> {
       /* istanbul ignore else */
       if (category) {
         window.sessionStorage.setItem('activeProductsTab', category.title);
-        history.replace({ hash: prettyUrlHash(category.title) });
         this.setState({ activeProductsTab: category.title });
+        history.replace({ hash: prettyUrlHash(category.title) });
       } else {
         window.sessionStorage.removeItem('activeProductsTab');
-        history.replace({ hash: '' });
         this.setState({ activeProductsTab: null });
+        history.replace({ hash: '' });
       }
     } catch (e) {
-      // swallor error
+      // swallow error
     }
   };
 
