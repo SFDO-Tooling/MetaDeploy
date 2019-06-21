@@ -40,7 +40,10 @@ describe('reducer', () => {
 
   describe('FETCH_MORE_PRODUCTS_SUCCEEDED action', () => {
     const mockProducts = {
-      categories: [{ id: 37, title: 'first Products', next: 'next-url' }],
+      categories: [
+        { id: 37, title: 'first Products', next: 'next-url' },
+        { id: 38, title: 'second Products', next: null },
+      ],
       notFound: [],
       products: [
         {
@@ -60,11 +63,15 @@ describe('reducer', () => {
     ];
     const expected = {
       ...mockProducts,
+      categories: [
+        { id: 37, title: 'first Products', next: null },
+        { id: 38, title: 'second Products', next: null },
+      ],
       products: [...mockProducts.products, ...fetchedProduct],
     };
     const actual = reducer(mockProducts, {
       type: 'FETCH_MORE_PRODUCTS_SUCCEEDED',
-      payload: { products: fetchedProduct, category: 37, next: 'next-url' },
+      payload: { products: fetchedProduct, category: 37, next: null },
     });
     expect(actual).toEqual(expected);
   });

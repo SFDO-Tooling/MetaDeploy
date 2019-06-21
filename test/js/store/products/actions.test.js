@@ -77,13 +77,15 @@ describe('fetchMoreProducts', () => {
   describe('success', () => {
     test('GETs next products list for category', () => {
       const store = storeWithApi({});
-      const url = `${window.api_urls.product_list()}?category=30&page=2`;
+      const baseUrl = window.api_urls.product_list();
+      const filters = { category: 30, page: 2 };
+      const url = addUrlParams(baseUrl, filters);
       const id = 30;
       const nextProducts = [{ id: 'p2', title: 'product-2' }];
       const mockResponse = {
         count: 2,
         next: null,
-        previous: `${window.api_urls.product_list()}?category=30`,
+        previous: addUrlParams(baseUrl, { category: 30 }),
         results: nextProducts,
       };
       fetchMock.getOnce(url, mockResponse);
@@ -95,12 +97,14 @@ describe('fetchMoreProducts', () => {
         type: 'FETCH_MORE_PRODUCTS_SUCCEEDED',
         payload: { products: nextProducts, category: id, next: null },
       };
+
       expect.assertions(1);
       return store.dispatch(actions.fetchMoreProducts({ url, id })).then(() => {
         expect(store.getActions()).toEqual([started, succeeded]);
       });
     });
   });
+
   describe('error', () => {
     test('throws Error', () => {
       const store = storeWithApi({});

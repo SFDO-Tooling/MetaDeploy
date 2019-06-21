@@ -236,6 +236,17 @@ describe('<Products />', () => {
 
         expect(actual).toEqual('community');
       });
+
+      test('changes active tab onSelect', () => {
+        window.sessionStorage.setItem('activeProductsTab', 'salesforce');
+        const { getByText } = setup(initialState);
+        const activeTab = getByText('salesforce');
+        const inactiveTab = getByText('community');
+
+        expect(activeTab).toHaveClass('slds-active');
+        fireEvent.click(inactiveTab);
+        expect(inactiveTab).toHaveClass('slds-active');
+      });
     });
   });
 
