@@ -119,6 +119,7 @@ class ProductsList extends React.Component<Props, State> {
     if (y === prevProps.y || fetchingProducts) {
       return;
     }
+    /* istanbul ignore next */
     const scrollHeight =
       (document.documentElement && document.documentElement.scrollHeight) ||
       (document.body && document.body.scrollHeight) ||
@@ -129,6 +130,7 @@ class ProductsList extends React.Component<Props, State> {
     // Fetch more products if within 100px of bottom of page...
     const scrolledToBottom = scrollHeight - Math.ceil(y + clientHeight) <= 100;
 
+    /* istanbul ignore else */
     if (scrolledToBottom) {
       this.maybeFetchMoreProducts();
     }

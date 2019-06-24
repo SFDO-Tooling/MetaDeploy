@@ -74,18 +74,22 @@ describe('fetchProducts', () => {
 });
 
 describe('fetchMoreProducts', () => {
+  let url;
+
+  beforeAll(() => {
+    const baseUrl = window.api_urls.product_list();
+    const filters = { category: 30, page: 2 };
+    url = addUrlParams(baseUrl, filters);
+  });
+
   describe('success', () => {
     test('GETs next products list for category', () => {
       const store = storeWithApi({});
-      const baseUrl = window.api_urls.product_list();
-      const filters = { category: 30, page: 2 };
-      const url = addUrlParams(baseUrl, filters);
       const id = 30;
       const nextProducts = [{ id: 'p2', title: 'product-2' }];
       const mockResponse = {
         count: 2,
         next: null,
-        previous: addUrlParams(baseUrl, { category: 30 }),
         results: nextProducts,
       };
       fetchMock.getOnce(url, mockResponse);
@@ -108,7 +112,6 @@ describe('fetchMoreProducts', () => {
   describe('error', () => {
     test('throws Error', () => {
       const store = storeWithApi({});
-      const url = `${window.api_urls.product_list()}?category=30&page=2`;
       const id = 30;
       fetchMock.getOnce(url, 'string');
 
@@ -120,7 +123,6 @@ describe('fetchMoreProducts', () => {
 
     test('dispatches FETCH_MORE_PRODUCTS_FAILED action', () => {
       const store = storeWithApi({});
-      const url = `${window.api_urls.product_list()}?category=30&page=2`;
       const id = 30;
       fetchMock.getOnce(url, 500);
       const started = {
@@ -131,6 +133,8 @@ describe('fetchMoreProducts', () => {
         type: 'FETCH_MORE_PRODUCTS_FAILED',
         payload: { url, id },
       };
+
+      expect.assertions(5);
       return store
         .dispatch(actions.fetchMoreProducts({ url, id }))
         .catch(() => {

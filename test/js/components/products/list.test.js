@@ -251,69 +251,88 @@ describe('<Products />', () => {
   });
 
   describe('fetching more products', () => {
+    const initialState = {
+      products: {
+        products: [
+          {
+            id: 'p1',
+            title: 'Product 1',
+            description: 'This is a test product.',
+            category: 'salesforce',
+            most_recent_version: {
+              id: 'v1',
+              product: 'p1',
+              label: '1.0.0',
+              description: 'This is a test product version.',
+              primary_plan: {
+                id: 'plan-1',
+                title: 'My Plan',
+                is_listed: true,
+                is_allowed: true,
+                requires_preflight: true,
+              },
+              is_listed: true,
+            },
+            is_listed: true,
+            is_allowed: true,
+          },
+          {
+            id: 'p2',
+            title: 'Product 2',
+            description: 'This is a test product.',
+            category: 'community',
+            most_recent_version: {
+              id: 'v2',
+              product: 'p2',
+              label: '1.0.0',
+              description: 'This is a test product version.',
+              primary_plan: {
+                id: 'plan-1',
+                title: 'My Plan',
+                is_listed: true,
+                is_allowed: true,
+                requires_preflight: true,
+              },
+              is_listed: true,
+            },
+            is_listed: true,
+            is_allowed: true,
+          },
+        ],
+        notFound: [],
+        categories: [
+          { id: 1, title: 'salesforce', next: 'sf-next-url' },
+          { id: 2, title: 'community', next: 'community-next-url' },
+        ],
+      },
+    };
+
     beforeAll(() => {
       jest
         .spyOn(document.documentElement, 'scrollHeight', 'get')
         .mockImplementation(() => 1100);
     });
 
-    test('fetches products with 2 categories', () => {
-      const initialState = {
-        products: {
-          products: [
-            {
-              id: 'p1',
-              title: 'Product 1',
-              description: 'This is a test product.',
-              category: 'salesforce',
-              most_recent_version: {
-                id: 'v1',
-                product: 'p1',
-                label: '1.0.0',
-                description: 'This is a test product version.',
-                primary_plan: {
-                  id: 'plan-1',
-                  title: 'My Plan',
-                  is_listed: true,
-                  is_allowed: true,
-                  requires_preflight: true,
-                },
-                is_listed: true,
-              },
-              is_listed: true,
-              is_allowed: true,
-            },
-            {
-              id: 'p2',
-              title: 'Product 2',
-              description: 'This is a test product.',
-              category: 'community',
-              most_recent_version: {
-                id: 'v2',
-                product: 'p2',
-                label: '1.0.0',
-                description: 'This is a test product version.',
-                primary_plan: {
-                  id: 'plan-1',
-                  title: 'My Plan',
-                  is_listed: true,
-                  is_allowed: true,
-                  requires_preflight: true,
-                },
-                is_listed: true,
-              },
-              is_listed: true,
-              is_allowed: true,
-            },
-          ],
-          notFound: [],
-          categories: [
-            { id: 1, title: 'salesforce', next: 'next-url' },
-            { id: 2, title: 'community', next: 'next-url' },
-          ],
-        },
-      };
-      window.sessionStorage.setItem('activeProductsTab', 'salesforce');
+    afterEach(() => {
+      window.sessionStorage.removeItem('activeProductsTab');
+    });
+
+    test('fetches next page of products for active tab', () => {
+      window.sessionStorage.setItem('activeProductsTab', 'community');
+      const { rerender, getByText } = setup(initialState);
+      const activeTab = getByText('community');
+
+      setup(initialState, { y: 1000 }, rerender);
+
+      expect(activeTab).toHaveClass('slds-active');
+      expect(getByText('Loading…')).toBeVisible();
+      expect(fetchMoreProducts).toHaveBeenCalledWith({
+        url: 'community-next-url',
+        id: 2,
+      });
+    });
+
+    test('fetches next page of products for first tab by default', () => {
       const { rerender, getByText } = setup(initialState);
       const activeTab = getByText('salesforce');
 
@@ -322,87 +341,28 @@ describe('<Products />', () => {
       expect(activeTab).toHaveClass('slds-active');
       expect(getByText('Loading…')).toBeVisible();
       expect(fetchMoreProducts).toHaveBeenCalledWith({
-        url: 'next-url',
+        url: 'sf-next-url',
         id: 1,
       });
     });
 
-    test('displays spinner while loading', () => {
-      const initialState = {
-        products: {
-          products: [
-            {
-              id: 'p1',
-              title: 'Product 1',
-              description: 'This is a test product.',
-              category: 'salesforce',
-              most_recent_version: {
-                id: 'v1',
-                product: 'p1',
-                label: '1.0.0',
-                description: 'This is a test product version.',
-                primary_plan: {
-                  id: 'plan-1',
-                  title: 'My Plan',
-                  is_listed: true,
-                  is_allowed: true,
-                  requires_preflight: true,
-                },
-                is_listed: true,
-              },
-              is_listed: true,
-              is_allowed: true,
-            },
-          ],
-          notFound: [],
-          categories: [{ id: 1, title: 'salesforce', next: 'next-url' }],
-        },
-      };
-
-      const nextState = {
+    test('does not fetch next page if no more products', () => {
+      const state = {
         ...initialState,
         products: {
-          products: [
-            initialState.products.products,
-            {
-              id: 'p2',
-              title: 'Product 2',
-              description: 'This is a test product.',
-              category: 'salesforce',
-              most_recent_version: {
-                id: 'v1',
-                product: 'p1',
-                label: '1.0.0',
-                description: 'This is a test product version.',
-                primary_plan: {
-                  id: 'plan-2',
-                  title: 'My Plan',
-                  is_listed: true,
-                  is_allowed: true,
-                  requires_preflight: true,
-                },
-                is_listed: true,
-              },
-              is_listed: true,
-              is_allowed: true,
-            },
+          ...initialState.products,
+          categories: [
+            { id: 1, title: 'salesforce', next: null },
+            { id: 2, title: 'community', next: 'community-next-url' },
           ],
         },
       };
+      const { rerender, queryByText } = setup(state);
 
-      const { rerender, getByText } = setup(initialState);
+      setup(state, { y: 1000 }, rerender);
 
-      setup(
-        initialState,
-        { y: 1000, products: nextState.products.products },
-        rerender,
-      );
-
-      expect(getByText('Loading…')).toBeVisible();
-      expect(fetchMoreProducts).toHaveBeenCalledWith({
-        url: 'next-url',
-        id: 1,
-      });
+      expect(queryByText('Loading…')).toBeNull();
+      expect(fetchMoreProducts).not.toHaveBeenCalled();
     });
   });
 });

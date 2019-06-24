@@ -53,7 +53,6 @@ describe('reducer', () => {
         },
       ],
     };
-
     const fetchedProduct = [
       {
         category: 'first Products',
@@ -73,6 +72,7 @@ describe('reducer', () => {
       type: 'FETCH_MORE_PRODUCTS_SUCCEEDED',
       payload: { products: fetchedProduct, category: 37, next: null },
     });
+
     expect(actual).toEqual(expected);
   });
 
