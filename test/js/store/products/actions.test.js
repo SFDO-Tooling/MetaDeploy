@@ -12,15 +12,25 @@ describe('fetchProducts', () => {
       const product = {
         id: 'p1',
         title: 'Product 1',
+        category: 'Salesforce',
         description: 'This is a test product.',
       };
-      fetchMock.getOnce(window.api_urls.product_list(), [product]);
+      fetchMock.getOnce(window.api_urls.productcategory_list(), [
+        {
+          id: 1,
+          title: 'Salesforce',
+          first_page: { next: null, results: [product] },
+        },
+      ]);
       const started = {
         type: 'FETCH_PRODUCTS_STARTED',
       };
       const succeeded = {
         type: 'FETCH_PRODUCTS_SUCCEEDED',
-        payload: [product],
+        payload: {
+          products: [product],
+          categories: [{ id: 1, title: 'Salesforce', next: null }],
+        },
       };
 
       expect.assertions(1);
@@ -33,7 +43,7 @@ describe('fetchProducts', () => {
   describe('error', () => {
     test('throws Error', () => {
       const store = storeWithApi({});
-      fetchMock.getOnce(window.api_urls.product_list(), 'string');
+      fetchMock.getOnce(window.api_urls.productcategory_list(), 'string');
 
       expect.assertions(1);
       return expect(store.dispatch(actions.fetchProducts())).rejects.toThrow();
@@ -41,7 +51,7 @@ describe('fetchProducts', () => {
 
     test('dispatches FETCH_PRODUCTS_FAILED action', () => {
       const store = storeWithApi({});
-      fetchMock.getOnce(window.api_urls.product_list(), 500);
+      fetchMock.getOnce(window.api_urls.productcategory_list(), 500);
       const started = {
         type: 'FETCH_PRODUCTS_STARTED',
       };
@@ -59,6 +69,84 @@ describe('fetchProducts', () => {
         expect(allActions[2]).toEqual(failed);
         expect(window.console.error).toHaveBeenCalled();
       });
+    });
+  });
+});
+
+describe('fetchMoreProducts', () => {
+  let url;
+
+  beforeAll(() => {
+    const baseUrl = window.api_urls.product_list();
+    const filters = { category: 30, page: 2 };
+    url = addUrlParams(baseUrl, filters);
+  });
+
+  describe('success', () => {
+    test('GETs next products list for category', () => {
+      const store = storeWithApi({});
+      const id = 30;
+      const nextProducts = [{ id: 'p2', title: 'product-2' }];
+      const mockResponse = {
+        count: 2,
+        next: null,
+        results: nextProducts,
+      };
+      fetchMock.getOnce(url, mockResponse);
+      const started = {
+        type: 'FETCH_MORE_PRODUCTS_STARTED',
+        payload: { url, id },
+      };
+      const succeeded = {
+        type: 'FETCH_MORE_PRODUCTS_SUCCEEDED',
+        payload: { products: nextProducts, category: id, next: null },
+      };
+
+      expect.assertions(1);
+      return store.dispatch(actions.fetchMoreProducts({ url, id })).then(() => {
+        expect(store.getActions()).toEqual([started, succeeded]);
+      });
+    });
+  });
+
+  describe('error', () => {
+    test('throws Error', () => {
+      const store = storeWithApi({});
+      const id = 30;
+      fetchMock.getOnce(url, 'string');
+
+      expect.assertions(1);
+      return expect(
+        store.dispatch(actions.fetchMoreProducts({ id, url })),
+      ).rejects.toThrow();
+    });
+
+    test('dispatches FETCH_MORE_PRODUCTS_FAILED action', () => {
+      const store = storeWithApi({});
+      const id = 30;
+      fetchMock.getOnce(url, 500);
+      const started = {
+        type: 'FETCH_MORE_PRODUCTS_STARTED',
+        payload: { url, id },
+      };
+      const failed = {
+        type: 'FETCH_MORE_PRODUCTS_FAILED',
+        payload: { url, id },
+      };
+
+      expect.assertions(5);
+      return store
+        .dispatch(actions.fetchMoreProducts({ url, id }))
+        .catch(() => {
+          const allActions = store.getActions();
+          expect(allActions[0]).toEqual(started);
+          expect(allActions[1].type).toEqual('ERROR_ADDED');
+          expect(allActions[1].payload.message).toEqual(
+            'Internal Server Error',
+          );
+          expect(allActions[2]).toEqual(failed);
+          expect(window.console.error).toHaveBeenCalled();
+        });
     });
   });
 });

@@ -1,15 +1,10 @@
 import pytest
 from django.urls import reverse
 
+from metadeploy.conftest import format_timestamp
+
 from ..constants import ORGANIZATION_DETAILS
 from ..models import Job, Plan, PreflightResult
-
-
-def format_timestamp(value):
-    value = value.isoformat()
-    if value.endswith("+00:00"):
-        value = value[:-6] + "Z"
-    return value
 
 
 @pytest.mark.django_db
@@ -195,7 +190,12 @@ class TestBasicGetViews:
         response = client.get(reverse("product-list"))
 
         assert response.status_code == 200
-        assert response.json() == []
+        assert response.json() == {
+            "count": 0,
+            "results": [],
+            "previous": None,
+            "next": None,
+        }
 
     def test_version(self, client, version_factory):
         version = version_factory()

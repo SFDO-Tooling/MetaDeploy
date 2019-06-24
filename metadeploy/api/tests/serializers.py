@@ -3,12 +3,15 @@ from datetime import timedelta
 import pytest
 from django.utils import timezone
 
+from metadeploy.conftest import format_timestamp
+
 from ..models import Job, PreflightResult
 from ..serializers import (
     JobSerializer,
     JobSummarySerializer,
     PlanSerializer,
     PreflightResultSerializer,
+    ProductCategorySerializer,
     ProductSerializer,
 )
 
@@ -514,3 +517,72 @@ class TestJobSummarySerializer:
                 org_id="00Dxxxxxxxxxxxxxxx",
             )
         assert JobSummarySerializer(job).data["plan_average_duration"] == "30.0"
+
+
+@pytest.mark.django_db
+class TestProductCategorySerializer:
+    def test_get_first_page(self, rf, product_factory, version_factory, user_factory):
+        request = rf.get("")
+        request.query_params = {}
+        request.user = user_factory()
+        product = product_factory(is_listed=True)
+        version = version_factory(product=product)
+        category = product.category
+        serializer = ProductCategorySerializer(category, context={"request": request})
+        results = serializer.data["first_page"].pop("results")
+        assert serializer.data["first_page"] == {
+            "count": 1,
+            "previous": None,
+            "next": None,
+        }
+        expected = [
+            {
+                "id": str(product.id),
+                "title": product.title,
+                "description": "<p>This is a sample product.</p>",
+                "short_description": "",
+                "click_through_agreement": "",
+                "category": "salesforce",
+                "color": "#FFFFFF",
+                "icon": None,
+                "image": None,
+                "most_recent_version": {
+                    "id": str(version.id),
+                    "product": str(product.id),
+                    "label": str(version.label),
+                    "description": "A sample version.",
+                    "created_at": format_timestamp(version.created_at),
+                    "primary_plan": None,
+                    "secondary_plan": None,
+                    "is_listed": True,
+                },
+                "slug": product.slug,
+                "old_slugs": [],
+                "is_allowed": True,
+                "is_listed": True,
+                "order_key": 0,
+                "not_allowed_instructions": None,
+            }
+        ]
+        assert results == expected
+
+    def test_get_first_page__paginated(
+        self, rf, product_factory, version_factory, user_factory
+    ):
+        request = rf.get("")
+        request.query_params = {}
+        request.user = user_factory()
+        product = product_factory()
+        version_factory(product=product)
+        category = product.category
+        for _ in range(30):
+            product = product_factory(category=category)
+            version_factory(product=product)
+        serializer = ProductCategorySerializer(category, context={"request": request})
+        # Too much trouble to compare this key:
+        serializer.data["first_page"].pop("results")
+        assert serializer.data["first_page"] == {
+            "count": 31,
+            "previous": None,
+            "next": f"http://testserver/api/products/?category={category.id}&page=2",
+        }

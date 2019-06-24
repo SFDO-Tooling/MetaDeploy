@@ -1,6 +1,5 @@
 # See https://github.com/stylelint/stylelint/blob/master/docs/user-guide/rules.md
 # Also https://github.com/kristerkari/stylelint-scss#list-of-rules
-# -------------------------------------------------------------------------------
 
 extends: stylelint-config-recommended-scss
 
