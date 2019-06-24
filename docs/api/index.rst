@@ -6,6 +6,7 @@ API Reference
    :caption: Contents:
 
    jobs
+   categories
    products
    versions
    plans

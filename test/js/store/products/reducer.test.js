@@ -2,7 +2,7 @@ import reducer from 'store/products/reducer';
 
 describe('reducer', () => {
   test('returns initial state', () => {
-    const expected = { products: [], notFound: [] };
+    const expected = { products: [], notFound: [], categories: [] };
     const actual = reducer(undefined, {});
 
     expect(actual).toEqual(expected);
@@ -21,14 +21,57 @@ describe('reducer', () => {
       description: 'This is another test product.',
       category: 'salesforce',
     };
-    const expected = { products: [product2] };
+    const category = {
+      id: 1,
+      title: 'salesforce',
+      next: null,
+    };
+    const expected = { products: [product2], categories: [category] };
     const actual = reducer(
       { products: [product1] },
       {
         type: 'FETCH_PRODUCTS_SUCCEEDED',
-        payload: [product2],
+        payload: { products: [product2], categories: [category] },
       },
     );
+
+    expect(actual).toEqual(expected);
+  });
+
+  describe('FETCH_MORE_PRODUCTS_SUCCEEDED action', () => {
+    const mockProducts = {
+      categories: [
+        { id: 37, title: 'first Products', next: 'next-url' },
+        { id: 38, title: 'second Products', next: null },
+      ],
+      notFound: [],
+      products: [
+        {
+          category: 'first Products',
+          id: 'product1',
+          title: 'Product1 title',
+        },
+      ],
+    };
+    const fetchedProduct = [
+      {
+        category: 'first Products',
+        id: 'product2',
+        title: 'Product2 title',
+      },
+    ];
+    const expected = {
+      ...mockProducts,
+      categories: [
+        { id: 37, title: 'first Products', next: null },
+        { id: 38, title: 'second Products', next: null },
+      ],
+      products: [...mockProducts.products, ...fetchedProduct],
+    };
+    const actual = reducer(mockProducts, {
+      type: 'FETCH_MORE_PRODUCTS_SUCCEEDED',
+      payload: { products: fetchedProduct, category: 37, next: null },
+    });
 
     expect(actual).toEqual(expected);
   });

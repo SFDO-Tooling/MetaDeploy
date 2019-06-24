@@ -38,18 +38,52 @@ export type Product = {
   +not_allowed_instructions: string | null,
   +click_through_agreement: string | null,
 };
+export type Category = {
+  +id: number,
+  +title: string,
+  +next: string | null,
+};
 export type ProductsState = {
-  products: Array<Product>,
-  notFound: Array<string>,
+  +products: Array<Product>,
+  +notFound: Array<string>,
+  +categories: Array<Category>,
 };
 
 const reducer = (
-  products: ProductsState = { products: [], notFound: [] },
+  products: ProductsState = {
+    products: [],
+    notFound: [],
+    categories: [],
+  },
   action: ProductsAction,
 ): ProductsState => {
   switch (action.type) {
-    case 'FETCH_PRODUCTS_SUCCEEDED':
-      return { ...products, products: action.payload };
+    case 'FETCH_PRODUCTS_SUCCEEDED': {
+      const { products: fetchedProducts, categories } = action.payload;
+      return {
+        ...products,
+        products: fetchedProducts,
+        categories,
+      };
+    }
+    case 'FETCH_MORE_PRODUCTS_SUCCEEDED': {
+      const { products: fetchedProducts, category, next } = action.payload;
+      // Store list of known product IDs to filter out duplicates
+      const ids = products.products.map(p => p.id);
+      return {
+        ...products,
+        products: [
+          ...products.products,
+          ...fetchedProducts.filter(p => !ids.includes(p.id)),
+        ],
+        categories: products.categories.map(c => {
+          if (c.id === category) {
+            return { ...c, next };
+          }
+          return c;
+        }),
+      };
+    }
     case 'FETCH_PRODUCT_SUCCEEDED': {
       const { product, slug } = action.payload;
       if (product) {

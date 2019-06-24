@@ -11,11 +11,15 @@ class PlanFilter(filters.FilterSet):
         model = Plan
         fields = ("slug", "version", "product")
 
+    required_fields = {"slug", "version", "product"}
+
 
 class VersionFilter(filters.FilterSet):
     class Meta:
         model = Version
         fields = ("label", "product")
+
+    required_fields = {"label", "product"}
 
 
 class ProductFilter(filters.FilterSet):
@@ -23,4 +27,6 @@ class ProductFilter(filters.FilterSet):
 
     class Meta:
         model = Product
-        fields = ("slug",)
+        fields = ("slug", "category")
+
+    required_fields = {"slug"}

@@ -16,84 +16,89 @@ List
 
    HTTP/1.1 200 OK
 
-   [
-     {
-       "id": "ZPweolo",
-       "title": "Product With Useful Data",
-       "description": "<p>Description for Product</p>",
-       "short_description": "",
-       "click_through_agreement": "<p>Lorem ipsum dolor sit amet</p>",
-       "category": "salesforce.org products",
-       "color": "",
-       "icon": null,
-       "image": null,
-       "most_recent_version": {
-         "id": "m9vAdwZ",
-         "product": "ZPweolo",
-         "label": "0.3.1",
-         "description": "This is a description of the product version.",
-         "created_at": "2019-04-02T20:07:33.205093Z",
-         "primary_plan": {
-           "id": "owEgDlm",
-           "title": "Full Install",
-           "version": "m9vAdwZ",
-           "preflight_message": "<p>Preflight message</p>",
-           "tier": "primary",
-           "slug": "full-install",
-           "old_slugs": [],
-           "steps": [
-             {
-               "id": "Lw7K5wK",
-               "name": "Quick step",
-               "description": "This is a description of the step.",
-               "is_required": true,
-               "is_recommended": false,
-               "kind": "Metadata",
-               "kind_icon": "package"
-             },
-             ...
-           ],
-           "is_allowed": true,
-           "is_listed": true,
-           "not_allowed_instructions": null,
-           "requires_preflight": true
+   {
+     "count": 150,
+     "next": "https://.../api/products/?page=2",
+     "previous": null,
+     "results": [
+       {
+         "id": "ZPweolo",
+         "title": "Product With Useful Data",
+         "description": "<p>Description for Product</p>",
+         "short_description": "",
+         "click_through_agreement": "<p>Lorem ipsum dolor sit amet</p>",
+         "category": "salesforce.org products",
+         "color": "",
+         "icon": null,
+         "image": null,
+         "most_recent_version": {
+           "id": "m9vAdwZ",
+           "product": "ZPweolo",
+           "label": "0.3.1",
+           "description": "This is a description of the product version.",
+           "created_at": "2019-04-02T20:07:33.205093Z",
+           "primary_plan": {
+             "id": "owEgDlm",
+             "title": "Full Install",
+             "version": "m9vAdwZ",
+             "preflight_message": "<p>Preflight message</p>",
+             "tier": "primary",
+             "slug": "full-install",
+             "old_slugs": [],
+             "steps": [
+               {
+                 "id": "Lw7K5wK",
+                 "name": "Quick step",
+                 "description": "This is a description of the step.",
+                 "is_required": true,
+                 "is_recommended": false,
+                 "kind": "Metadata",
+                 "kind_icon": "package"
+               },
+               ...
+             ],
+             "is_allowed": true,
+             "is_listed": true,
+             "not_allowed_instructions": null,
+             "requires_preflight": true
+           },
+           "secondary_plan": {
+             "id": "olNjglg",
+             "title": "Reports and Dashboards",
+             "version": "m9vAdwZ",
+             "preflight_message": "<p>Preflight message</p>",
+             "tier": "secondary",
+             "slug": "reports-and-dashboards",
+             "old_slugs": [],
+             "steps": [
+               {
+                 "id": "ologald",
+                 "name": "Quick step",
+                 "description": "This is a description of the step.",
+                 "is_required": true,
+                 "is_recommended": false,
+                 "kind": "Metadata",
+                 "kind_icon": "package"
+               },
+               ...
+             ],
+             "is_allowed": true,
+             "is_listed": true,
+             "not_allowed_instructions": null,
+             "requires_preflight": true
+           },
+           "is_listed": true
          },
-         "secondary_plan": {
-           "id": "olNjglg",
-           "title": "Reports and Dashboards",
-           "version": "m9vAdwZ",
-           "preflight_message": "<p>Preflight message</p>",
-           "tier": "secondary",
-           "slug": "reports-and-dashboards",
-           "old_slugs": [],
-           "steps": [
-             {
-               "id": "ologald",
-               "name": "Quick step",
-               "description": "This is a description of the step.",
-               "is_required": true,
-               "is_recommended": false,
-               "kind": "Metadata",
-               "kind_icon": "package"
-             },
-             ...
-           ],
-           "is_allowed": true,
-           "is_listed": true,
-           "not_allowed_instructions": null,
-           "requires_preflight": true
-         },
-         "is_listed": true
+         "slug": "product-with-useful-data",
+         "old_slugs": [],
+         "is_allowed": true,
+         "is_listed": true,
+         "order_key": 0,
+         "not_allowed_instructions": null
        },
-       "slug": "product-with-useful-data",
-       "old_slugs": [],
-       "is_allowed": true,
-       "is_listed": true,
-       "order_key": 0,
-       "not_allowed_instructions": null
-     },
-     ...
-   ]
+       ...
+     ]
+   }
 
 Retrieve
 --------

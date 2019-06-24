@@ -11,7 +11,8 @@ from rest_framework.response import Response
 from .constants import REDIS_JOB_CANCEL_KEY
 from .filters import PlanFilter, ProductFilter, VersionFilter
 from .jobs import preflight_job
-from .models import Job, Plan, PreflightResult, Product, Version
+from .models import Job, Plan, PreflightResult, Product, ProductCategory, Version
+from .paginators import ProductPaginator
 from .permissions import OnlyOwnerOrSuperuserCanDelete
 from .serializers import (
     FullUserSerializer,
@@ -19,6 +20,7 @@ from .serializers import (
     OrgSerializer,
     PlanSerializer,
     PreflightResultSerializer,
+    ProductCategorySerializer,
     ProductSerializer,
     VersionSerializer,
 )
@@ -57,7 +59,7 @@ class GetOneMixin:
         # We want to include more items than the list view includes:
         filter = self.filterset_class(request.GET, queryset=self.model.objects.all())
         try:
-            if filter.filters.keys() != request.GET.keys():
+            if filter.required_fields != request.GET.keys():
                 raise InvalidFields
             result = filter.qs.get()
             serializer = self.get_serializer(result)
@@ -111,10 +113,16 @@ class JobViewSet(
         cache.set(REDIS_JOB_CANCEL_KEY.format(id=instance.id), True)
 
 
+class ProductCategoryViewSet(viewsets.ModelViewSet):
+    serializer_class = ProductCategorySerializer
+    queryset = ProductCategory.objects.all()
+
+
 class ProductViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ProductFilter
+    pagination_class = ProductPaginator
     model = Product
 
     def get_queryset(self):

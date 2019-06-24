@@ -57,7 +57,7 @@ export const invalidateToken = (): TokenInvalidAction => ({
 
 export const refetchAllData = (): ThunkAction => dispatch => {
   dispatch({ type: 'REFETCH_DATA_STARTED' });
-  return apiFetch(window.api_urls.user(), dispatch, {}, [401, 404])
+  return apiFetch(window.api_urls.user(), dispatch, {}, [401, 403, 404])
     .then(payload => {
       dispatch({ type: 'REFETCH_DATA_SUCCEEDED' });
       dispatch({ type: 'USER_LOGGED_OUT' });

@@ -3,15 +3,27 @@
 import type { ThunkAction } from 'redux-thunk';
 
 import apiFetch, { addUrlParams } from 'utils/api';
-import type { Product, Version } from 'store/products/reducer';
+import type { Category, Product, Version } from 'store/products/reducer';
 import type { Plan } from 'store/plans/reducer';
 
 type FetchProductsStarted = { type: 'FETCH_PRODUCTS_STARTED' };
 type FetchProductsSucceeded = {
   type: 'FETCH_PRODUCTS_SUCCEEDED',
-  payload: Array<Product>,
+  payload: { products: Array<Product>, categories: Array<Category> },
 };
 type FetchProductsFailed = { type: 'FETCH_PRODUCTS_FAILED' };
+type FetchMoreProductsStarted = {
+  type: 'FETCH_MORE_PRODUCTS_STARTED',
+  payload: { url: string, id: number },
+};
+type FetchMoreProductsSucceeded = {
+  type: 'FETCH_MORE_PRODUCTS_SUCCEEDED',
+  payload: { products: Array<Product>, category: number, next: string | null },
+};
+type FetchMoreProductsFailed = {
+  type: 'FETCH_MORE_PRODUCTS_FAILED',
+  payload: { url: string, id: number },
+};
 type ProductFilters = {|
   slug: string,
 |};
@@ -74,6 +86,9 @@ export type ProductsAction =
   | FetchProductsStarted
   | FetchProductsSucceeded
   | FetchProductsFailed
+  | FetchMoreProductsStarted
+  | FetchMoreProductsSucceeded
+  | FetchMoreProductsFailed
   | FetchProductStarted
   | FetchProductSucceeded
   | FetchProductFailed
@@ -89,7 +104,8 @@ export type ProductsAction =
 
 export const fetchProducts = (): ThunkAction => dispatch => {
   dispatch({ type: 'FETCH_PRODUCTS_STARTED' });
-  return apiFetch(window.api_urls.product_list(), dispatch)
+  const baseUrl = window.api_urls.productcategory_list();
+  return apiFetch(baseUrl, dispatch)
     .then(response => {
       if (!Array.isArray(response)) {
         const error = (new Error('Invalid response received'): {
@@ -98,10 +114,49 @@ export const fetchProducts = (): ThunkAction => dispatch => {
         error.response = response;
         throw error;
       }
-      return dispatch({ type: 'FETCH_PRODUCTS_SUCCEEDED', payload: response });
+      let products = [];
+      let categories = [];
+      response.forEach(({ id, title, first_page }) => {
+        products = products.concat(first_page.results);
+        categories = categories.concat({ id, title, next: first_page.next });
+      });
+
+      return dispatch({
+        type: 'FETCH_PRODUCTS_SUCCEEDED',
+        payload: { products, categories },
+      });
     })
     .catch(err => {
       dispatch({ type: 'FETCH_PRODUCTS_FAILED' });
+      throw err;
+    });
+};
+
+export const fetchMoreProducts = ({
+  url,
+  id,
+}: {
+  url: string,
+  id: number,
+}): ThunkAction => dispatch => {
+  dispatch({ type: 'FETCH_MORE_PRODUCTS_STARTED', payload: { url, id } });
+  return apiFetch(url, dispatch)
+    .then(response => {
+      const products = response.results;
+      if (!Array.isArray(response.results)) {
+        const error = (new Error('Invalid response received'): {
+          [string]: mixed,
+        });
+        error.response = response;
+        throw error;
+      }
+      return dispatch({
+        type: 'FETCH_MORE_PRODUCTS_SUCCEEDED',
+        payload: { products, category: id, next: response.next },
+      });
+    })
+    .catch(err => {
+      dispatch({ type: 'FETCH_MORE_PRODUCTS_FAILED', payload: { url, id } });
       throw err;
     });
 };
