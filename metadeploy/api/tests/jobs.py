@@ -73,7 +73,7 @@ def test_run_flows(mocker, job_factory, user_factory, plan_factory, step_factory
 def test_run_flows__preflight(
     mocker, preflight_result_factory, user_factory, plan_factory, step_factory
 ):
-    run_flow = mocker.patch("cumulusci.core.flowrunner.FlowCoordinator.run")
+    run_flow = mocker.patch("cumulusci.core.flowrunner.PreflightFlowCoordinator.run")
 
     user = user_factory()
     plan = plan_factory()

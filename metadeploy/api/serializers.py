@@ -8,7 +8,7 @@ from rest_framework.fields import SkipField
 from rest_framework.relations import PKOnlyObject
 from rest_framework.utils.urls import replace_query_param
 
-from .constants import ERROR, WARN
+from .constants import ERROR, HIDE, WARN
 from .models import (
     ORG_TYPES,
     Job,
@@ -191,7 +191,7 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
         return getattr(obj.visible_to, "description_markdown", None)
 
     def get_requires_preflight(self, obj):
-        return bool(obj.preflight_flow_name)
+        return obj.requires_preflight
 
 
 class VersionSerializer(serializers.ModelSerializer):
@@ -366,7 +366,6 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             "created_at": {"read_only": True},
             "edited_at": {"read_only": True},
             "enqueued_at": {"read_only": True},
-            "results": {"read_only": True},
             "job_id": {"read_only": True},
             "status": {"read_only": True},
             "org_type": {"read_only": True},
@@ -421,7 +420,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
 
     @staticmethod
     def _has_valid_preflight(most_recent_preflight, plan):
-        if not plan.preflight_flow_name:
+        if not plan.requires_preflight:
             return True
 
         if not most_recent_preflight:
@@ -461,6 +460,15 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             )
         return value
 
+    def _validate_results(self, data):
+        if self.instance:
+            # results are read-only except during creation
+            del data["results"]
+        else:
+            # make sure results can't be set initially except to hide steps
+            if any(result["status"] != HIDE for result in data["results"].values()):
+                raise serializers.ValidationError(_("Invalid initial results."))
+
     def validate(self, data):
         user = self._get_from_data_or_instance(data, "user")
         plan = self._get_from_data_or_instance(data, "plan")
@@ -480,6 +488,9 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         )
         if invalid_steps:
             raise serializers.ValidationError(_("Invalid steps for plan."))
+
+        if "results" in data:
+            self._validate_results(data)
 
         pending_job = not self.instance and self._pending_job_exists(user=user)
         if pending_job:

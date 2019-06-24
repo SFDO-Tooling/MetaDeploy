@@ -73,9 +73,16 @@ class PlanTemplateViewSet(AdminAPIViewSet):
     model_name = "PlanTemplate"
 
 
+class PlanFilter(filters.FilterSet):
+    class Meta:
+        model = models.Plan
+        exclude = ("preflight_checks",)
+
+
 class PlanViewSet(AdminAPIViewSet):
     model_name = "Plan"
     serializer_base = PlanSerializer
+    filterset_class = PlanFilter
 
 
 class PlanSlugViewSet(AdminAPIViewSet):

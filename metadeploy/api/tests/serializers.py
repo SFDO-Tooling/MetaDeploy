@@ -203,7 +203,7 @@ class TestJob:
     def test_create_good_no_preflight(
         self, rf, user_factory, plan_factory, step_factory
     ):
-        plan = plan_factory(preflight_flow_name="")
+        plan = plan_factory()
         user = user_factory()
         step1 = step_factory(plan=plan)
         step2 = step_factory(plan=plan)
@@ -224,7 +224,9 @@ class TestJob:
         plan = plan_factory()
         user = user_factory()
         step1 = step_factory(plan=plan)
-        step2 = step_factory(plan=plan)
+        step2 = step_factory(
+            plan=plan, task_config={"checks": [{"when": "True", "action": "error"}]}
+        )
         step3 = step_factory(plan=plan)
         request = rf.get("/")
         request.user = user
@@ -244,7 +246,7 @@ class TestJob:
         assert not serializer.is_valid(), serializer.errors
 
     def test_create_bad_no_preflight(self, rf, user_factory, plan_factory):
-        plan = plan_factory()
+        plan = plan_factory(preflight_checks=[{"when": "True", "action": "error"}])
         user = user_factory()
         request = rf.get("/")
         request.user = user
@@ -440,7 +442,7 @@ class TestJob:
         assert not serializer.is_valid()
 
     def test_expired_token(self, rf, user_factory, plan_factory, step_factory):
-        plan = plan_factory(preflight_flow_name="")
+        plan = plan_factory()
         user = user_factory()
         for token in user.socialaccount_set.get().socialtoken_set.all():
             token.delete()
@@ -458,6 +460,36 @@ class TestJob:
             f"The connection to your org has been lost. Please log in again."
             in non_field_errors
         )
+
+    def test_invalid_results(self, rf, user_factory, plan_factory, step_factory):
+        plan = plan_factory()
+        user = user_factory()
+        step1 = step_factory(plan=plan)
+        request = rf.get("/")
+        request.user = user
+        data = {
+            "plan": str(plan.id),
+            "steps": [str(step1.id)],
+            "results": {str(step1.id): {"status": "ok"}},
+        }
+        serializer = JobSerializer(data=data, context=dict(request=request))
+
+        assert not serializer.is_valid(), serializer.errors
+
+    def test_results_readonly_on_update(self, rf, user_factory, job_factory):
+        user = user_factory()
+        request = rf.get("/")
+        request.user = user
+        job = job_factory(org_id=user.org_id)
+        serializer = JobSerializer(
+            job,
+            data={"results": {"foo": "bar"}},
+            context=dict(request=request),
+            partial=True,
+        )
+
+        assert serializer.is_valid(), serializer.errors
+        assert serializer.data["results"] == {}
 
 
 @pytest.mark.django_db

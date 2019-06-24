@@ -54,7 +54,7 @@ class TestPlanViewSet:
                 {
                     "id": f"{plan.id}",
                     "is_listed": True,
-                    "preflight_flow_name": "slow_steps_preflight_good",
+                    "preflight_checks": [],
                     "preflight_message_additional": "",
                     "plan_template": (
                         f"http://testserver/admin/rest/plantemplates/"
@@ -83,7 +83,7 @@ class TestPlanViewSet:
         assert response.json() == {
             "id": str(plan.id),
             "is_listed": True,
-            "preflight_flow_name": "slow_steps_preflight_good",
+            "preflight_checks": [],
             "preflight_message_additional": "",
             "plan_template": (
                 f"http://testserver/admin/rest/plantemplates/{plan.plan_template.id}"
@@ -147,7 +147,7 @@ class TestPlanViewSet:
         expected = {
             "id": plan_id,
             "is_listed": True,
-            "preflight_flow_name": "",
+            "preflight_checks": [],
             "preflight_message_additional": "",
             "plan_template": (
                 f"http://testserver/admin/rest/plantemplates/{plan_template.id}"

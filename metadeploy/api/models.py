@@ -5,7 +5,12 @@ from typing import Union
 
 from asgiref.sync import async_to_sync
 from colorfield.fields import ColorField
-from cumulusci.core.flowrunner import StepSpec
+from cumulusci.core.config import FlowConfig
+from cumulusci.core.flowrunner import (
+    FlowCoordinator,
+    PreflightFlowCoordinator,
+    StepSpec,
+)
 from cumulusci.core.tasks import BaseTask
 from cumulusci.core.utils import import_class
 from django.conf import settings
@@ -27,7 +32,8 @@ from sfdo_template_helpers.crypto import fernet_decrypt
 from sfdo_template_helpers.fields import MarkdownField
 
 from .belvedere_utils import convert_to_18
-from .constants import ERROR, OPTIONAL, ORGANIZATION_DETAILS
+from .constants import ERROR, HIDE, OPTIONAL, ORGANIZATION_DETAILS
+from .flows import JobFlowCallback, PreflightFlowCallback
 from .push import (
     notify_org_result_changed,
     notify_post_job,
@@ -486,13 +492,9 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
 
     plan_template = models.ForeignKey(PlanTemplate, on_delete=models.PROTECT)
     version = models.ForeignKey(Version, on_delete=models.PROTECT)
-    preflight_flow_name = models.CharField(
-        max_length=256,
-        blank=True,
-        help_text="If this is blank, the Plan requires no preflight.",
-    )
     tier = models.CharField(choices=Tier, default=Tier.primary, max_length=64)
     is_listed = models.BooleanField(default=True)
+    preflight_checks = JSONField(default=list, blank=True)
 
     slug_class = PlanSlug
 
@@ -533,6 +535,14 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
 
     def __str__(self):
         return "{}, Plan {}".format(self.version, self.title)
+
+    @property
+    def requires_preflight(self):
+        has_plan_checks = bool(self.preflight_checks)
+        has_step_checks = any(
+            step.task_config.get("checks") for step in self.steps.iterator()
+        )
+        return has_plan_checks or has_step_checks
 
 
 class DottedArray(Func):
@@ -710,6 +720,12 @@ class Job(HashIdMixin, models.Model):
             preflight.is_valid = False
             preflight.save()
 
+    def run(self, ctx, plan, steps, org):
+        flow_coordinator = FlowCoordinator.from_steps(
+            ctx.project_config, steps, name="default", callbacks=JobFlowCallback(self)
+        )
+        flow_coordinator.run(org)
+
 
 class PreflightResultQuerySet(models.QuerySet):
     def most_recent(self, *, user, plan, is_valid_and_complete=True):
@@ -771,7 +787,9 @@ class PreflightResult(models.Model):
 
         So this will return a list of step PKs, for now.
         """
-        return [str(k) for k, v in self.results.items() if v["status"] == OPTIONAL]
+        return [
+            str(k) for k, v in self.results.items() if v["status"] in (OPTIONAL, HIDE)
+        ]
 
     def _push_if_condition(self, condition, fn):
         if condition:
@@ -821,6 +839,17 @@ class PreflightResult(models.Model):
             logger.warn(f"RuntimeError: {error}")
 
         return ret
+
+    def run(self, ctx, plan, steps, org):
+        flow_config = FlowConfig({"checks": plan.preflight_checks, "steps": {}})
+        flow_coordinator = PreflightFlowCoordinator(
+            ctx.project_config,
+            flow_config,
+            name="preflight",
+            callbacks=PreflightFlowCallback(self),
+        )
+        flow_coordinator.steps = steps
+        flow_coordinator.run(org)
 
 
 class SiteProfile(TranslatableModel):

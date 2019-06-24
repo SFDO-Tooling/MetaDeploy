@@ -64,6 +64,7 @@ describe('<StepsTable />', () => {
         plan={opts.plan}
         user={opts.user}
         preflight={opts.preflight}
+        steps={opts.plan.steps}
         selectedSteps={opts.selectedSteps}
         job={opts.job}
         handleStepsChange={handleStepsChange}
@@ -113,6 +114,7 @@ describe('<StepsTable />', () => {
         rerender(
           <StepsTable
             plan={defaultPlan}
+            steps={defaultPlan.steps}
             selectedSteps={selectedSteps}
             job={job}
             handleStepsChange={handleStepsChange}
@@ -134,6 +136,7 @@ describe('<StepsTable />', () => {
         rerender(
           <StepsTable
             plan={defaultPlan}
+            steps={defaultPlan.steps}
             selectedSteps={selectedSteps}
             job={job}
             handleStepsChange={handleStepsChange}
@@ -185,6 +188,7 @@ describe('<StepsTable />', () => {
         rerender(
           <StepsTable
             plan={defaultPlan}
+            steps={defaultPlan.steps}
             selectedSteps={selectedSteps}
             job={changedJob}
             handleStepsChange={handleStepsChange}
@@ -377,6 +381,7 @@ describe('<StepsTable />', () => {
       rerender(
         <StepsTable
           plan={defaultPlan}
+          steps={defaultPlan.steps}
           selectedSteps={selectedSteps}
           job={job}
           handleStepsChange={handleStepsChange}

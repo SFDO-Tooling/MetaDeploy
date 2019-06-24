@@ -71,6 +71,12 @@ const defaultState = {
                 is_required: false,
                 is_recommended: false,
               },
+              {
+                id: 'step-5',
+                name: 'Step 5',
+                is_required: false,
+                is_recommended: false,
+              },
             ],
             is_allowed: true,
             requires_preflight: true,
@@ -123,6 +129,7 @@ const defaultState = {
       results: {
         'step-1': { status: 'optional' },
         'step-3': { status: 'skip' },
+        'step-5': { status: 'hide' },
       },
       is_ready: true,
     },

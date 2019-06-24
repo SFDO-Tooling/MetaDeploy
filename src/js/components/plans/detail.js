@@ -53,6 +53,7 @@ import type { Org as OrgType } from 'store/org/reducer';
 import type {
   Plan as PlanType,
   Preflight as PreflightType,
+  Step as StepType,
 } from 'store/plans/reducer';
 import type {
   Product as ProductType,
@@ -186,6 +187,22 @@ class PlanDetail extends React.Component<Props, State> {
     this.setState({ changedSteps });
   };
 
+  getVisibleSteps(): Array<StepType> {
+    const { plan, preflight } = this.props;
+    const steps = [];
+    if (!plan || !plan.steps) {
+      return steps;
+    }
+    for (const step of plan.steps) {
+      const { id } = step;
+      const result = preflight && preflight.results && preflight.results[id];
+      if (!result || result.status !== RESULT_STATUS.HIDE) {
+        steps.push(step);
+      }
+    }
+    return steps;
+  }
+
   getSelectedSteps(): SelectedSteps {
     const { plan, preflight } = this.props;
     const selectedSteps = new Set();
@@ -197,12 +214,13 @@ class PlanDetail extends React.Component<Props, State> {
     for (const step of plan.steps) {
       const { id } = step;
       const result = preflight && preflight.results && preflight.results[id];
-      let skipped, optional;
+      let hidden, skipped, optional;
       if (result) {
+        hidden = result.status === RESULT_STATUS.HIDE ? result : null;
         skipped = result.status === RESULT_STATUS.SKIP ? result : null;
         optional = result.status === RESULT_STATUS.OPTIONAL ? result : null;
       }
-      if (!skipped) {
+      if (!hidden && !skipped) {
         const required = step.is_required && !optional;
         const recommended = !required && step.is_recommended;
         const manuallyChecked = changedSteps.get(id) === true;
@@ -360,6 +378,7 @@ class PlanDetail extends React.Component<Props, State> {
       return <ProductNotFound />;
     }
 
+    const steps = this.getVisibleSteps();
     const selectedSteps = this.getSelectedSteps();
 
     const isMostRecent =
@@ -432,6 +451,7 @@ class PlanDetail extends React.Component<Props, State> {
                   user={user}
                   plan={plan}
                   preflight={preflight}
+                  steps={steps}
                   selectedSteps={selectedSteps}
                   handleStepsChange={this.handleStepsChange}
                 />

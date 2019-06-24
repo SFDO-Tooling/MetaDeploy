@@ -101,8 +101,6 @@ class Command(BaseCommand):
         )
 
     def create_plan(self, version, title="Full Install", tier="primary", **kwargs):
-        combined_kwargs = {"preflight_flow_name": "static_preflight"}
-        combined_kwargs.update(kwargs)
         plan_template = PlanTemplate.objects.create(
             name="{} for {}".format(title, version),
             preflight_message=(
@@ -120,7 +118,7 @@ class Command(BaseCommand):
             title=title,
             tier=tier,
             plan_template=plan_template,
-            **combined_kwargs,
+            **kwargs,
         )
         PlanSlug.objects.create(parent=plan.plan_template, slug=slugify(title))
         return plan
@@ -457,42 +455,67 @@ class Command(BaseCommand):
         self.create_plan(old_version)
 
         version1 = self.create_version(product1, commit_ish="feature/preflight")
-        plan = self.create_plan(
-            version1, preflight_flow_name="slow_steps_preflight_good"
-        )
+        plan = self.create_plan(version1)
         self.add_steps(plan)
 
         plan2 = self.create_plan(
-            version1,
-            title="Reports and Dashboards",
-            tier="secondary",
-            preflight_flow_name="",
+            version1, title="Reports and Dashboards", tier="secondary"
         )
         self.add_steps(plan2, fail=True)
 
         plan3 = self.create_plan(
-            version1,
-            title="Account Record Types",
-            tier="additional",
-            preflight_flow_name="messy_preflight",
+            version1, title="Account Record Types", tier="additional"
         )
         self.add_steps(plan3)
+        step = plan3.steps.get(path="deploy_pre")
+        step.task_config["checks"] = [
+            {
+                "when": "True",
+                "action": "warn",
+                "message": "You may see an error with the next task.",
+            }
+        ]
+        step.save()
+        step = plan3.steps.get(path="install_managed")
+        step.task_config["checks"] = [
+            {
+                "when": "True",
+                "action": "error",
+                "message": "You cannot install CumulusCI-Test into "
+                "the CumulusCI-Test Packaging org, you goof!",
+            }
+        ]
+        step.save()
+        step = plan3.steps.get(path="deploy_post")
+        step.task_config["checks"] = [{"when": "True", "action": "optional"}]
+        step.save()
+        step = plan3.steps.get(path="update_admin_profile")
+        step.task_config["checks"] = [{"when": "True", "action": "skip"}]
+        step.save()
 
         plan4 = self.create_plan(
             version1,
             title="Plan-Level Failing Preflight",
             tier="additional",
-            preflight_flow_name="error_preflight",
+            preflight_checks=[
+                {"when": "True", "action": "error", "message": "This plan is verboten."}
+            ],
         )
         self.add_steps(plan4)
 
         plan5 = self.create_plan(
-            version1,
-            title="Preflight With Warnings",
-            tier="additional",
-            preflight_flow_name="slow_steps_preflight_warn",
+            version1, title="Preflight With Warnings", tier="additional"
         )
         self.add_steps(plan5)
+        step = plan5.steps.get(path="slow_task")
+        step.task_config["checks"] = [
+            {
+                "when": "True",
+                "action": "warn",
+                "message": "This might cause headache and eyestrain.",
+            }
+        ]
+        step.save()
 
         product2 = self.create_product(
             title=f"Red Salesforce Product",
