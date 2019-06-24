@@ -71,6 +71,12 @@ class PreflightWarningModal extends React.Component<Props, State> {
     this.setState({ confirmed: false });
   };
 
+  handleSubmit = () => {
+    const { startJob } = this.props;
+    this.handleClose();
+    startJob();
+  };
+
   handleChange = (
     event: SyntheticInputEvent<HTMLInputElement>,
     { checked }: { checked: boolean },
@@ -79,7 +85,7 @@ class PreflightWarningModal extends React.Component<Props, State> {
   };
 
   render(): React.Node {
-    const { isOpen, startJob, results, steps, selectedSteps } = this.props;
+    const { isOpen, results, steps, selectedSteps } = this.props;
     const { confirmed } = this.state;
     const footer = [
       <Button
@@ -91,7 +97,7 @@ class PreflightWarningModal extends React.Component<Props, State> {
         key="submit"
         label={i18n.t('Confirm')}
         variant="brand"
-        onClick={startJob}
+        onClick={this.handleSubmit}
         disabled={!confirmed}
       />,
     ];
