@@ -27,6 +27,12 @@ class ClickThroughAgreementModal extends React.Component<Props, State> {
     this.setState({ confirmed: false });
   };
 
+  handleSubmit = () => {
+    const { startJob } = this.props;
+    this.handleClose();
+    startJob();
+  };
+
   handleChange = (
     event: SyntheticInputEvent<HTMLInputElement>,
     { checked }: { checked: boolean },
@@ -35,7 +41,7 @@ class ClickThroughAgreementModal extends React.Component<Props, State> {
   };
 
   render(): React.Node {
-    const { isOpen, text, startJob } = this.props;
+    const { isOpen, text } = this.props;
     const { confirmed } = this.state;
     const footer = [
       <Button
@@ -47,7 +53,7 @@ class ClickThroughAgreementModal extends React.Component<Props, State> {
         key="submit"
         label={i18n.t('Confirm')}
         variant="brand"
-        onClick={startJob}
+        onClick={this.handleSubmit}
         disabled={!confirmed}
       />,
     ];
