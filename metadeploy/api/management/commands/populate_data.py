@@ -101,8 +101,6 @@ class Command(BaseCommand):
         )
 
     def create_plan(self, version, title="Full Install", tier="primary", **kwargs):
-        combined_kwargs = {}
-        combined_kwargs.update(kwargs)
         plan_template = PlanTemplate.objects.create(
             name="{} for {}".format(title, version),
             preflight_message=(
@@ -120,7 +118,7 @@ class Command(BaseCommand):
             title=title,
             tier=tier,
             plan_template=plan_template,
-            **combined_kwargs,
+            **kwargs,
         )
         PlanSlug.objects.create(parent=plan.plan_template, slug=slugify(title))
         return plan
