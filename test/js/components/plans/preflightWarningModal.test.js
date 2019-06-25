@@ -53,9 +53,10 @@ describe('<PreflightWarningModal />', () => {
   });
 
   describe('confirm', () => {
-    test('starts new job', () => {
+    test('starts new job and closes modal', () => {
+      const toggleModal = jest.fn();
       const startJob = jest.fn();
-      const { getByText, getByLabelText } = setup({ startJob });
+      const { getByText, getByLabelText } = setup({ startJob, toggleModal });
       const btn = getByText('Confirm');
       const confirm = getByLabelText('I understand these warnings', {
         exact: false,
@@ -70,6 +71,7 @@ describe('<PreflightWarningModal />', () => {
       fireEvent.click(btn);
 
       expect(startJob).toHaveBeenCalled();
+      expect(toggleModal).toHaveBeenCalledWith(false);
     });
   });
 
