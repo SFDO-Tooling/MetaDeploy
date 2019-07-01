@@ -3,7 +3,7 @@
 -r base.txt
 
 # Pytest:
-pytest==5.0.0
+pytest==4.6.4  # pyup: <5.0.0
 pytest-asyncio==0.10.0
 pytest-cov==2.7.1
 pytest-django==3.5.1
