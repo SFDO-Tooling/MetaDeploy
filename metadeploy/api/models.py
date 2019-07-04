@@ -1,4 +1,3 @@
-import itertools
 import logging
 from statistics import median
 from typing import Union
@@ -22,7 +21,6 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import Count, F, Func, Q
-from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from hashid_field import HashidAutoField
 from model_utils import Choices, FieldTracker
@@ -30,6 +28,7 @@ from parler.managers import TranslatableQuerySet
 from parler.models import TranslatableModel, TranslatedFields
 from sfdo_template_helpers.crypto import fernet_decrypt
 from sfdo_template_helpers.fields import MarkdownField
+from sfdo_template_helpers.slugs import AbstractSlug, SlugMixin
 
 from .belvedere_utils import convert_to_18
 from .constants import ERROR, HIDE, OPTIONAL, ORGANIZATION_DETAILS
@@ -198,52 +197,6 @@ class User(HashIdMixin, AbstractUser):
         return None
 
 
-class SlugMixin:
-    """
-    Please provide:
-
-        self.slug_class: the class that implements slugs for this model.
-        self.slug_queryset: the name of the queryset for slugs for this
-            model.
-        self.slug_parent: the instance to assign as the slug parent.
-    """
-
-    def _find_unique_slug(self, original):
-        max_length = 50  # This from SlugField
-
-        candidate = original
-        for i in itertools.count(1):
-            if not self.slug_class.objects.filter(slug=candidate).exists():
-                return candidate
-
-            suffix = f"-{i}"
-            candidate = candidate[: max_length - len(suffix)] + suffix
-
-    @property
-    def slug(self):
-        slug = self.slug_queryset.filter(is_active=True).first()
-        if slug:
-            return slug.slug
-        return None
-
-    @property
-    def old_slugs(self):
-        slugs = self.slug_queryset.filter(is_active=True)[1:]
-        return [slug.slug for slug in slugs]
-
-    @property
-    def slug_parent(self):
-        return self
-
-    def ensure_slug(self):
-        if not self.slug_queryset.filter(is_active=True).exists():
-            slug = slugify(self.title)
-            slug = self._find_unique_slug(slug)
-            self.slug_class.objects.create(
-                parent=self.slug_parent, slug=slug, is_active=True
-            )
-
-
 class ProductCategory(models.Model):
     title = models.CharField(max_length=256)
     order_key = models.PositiveIntegerField(default=0)
@@ -256,29 +209,8 @@ class ProductCategory(models.Model):
         return self.title
 
 
-class ProductSlug(models.Model):
-    """
-    Rather than have a slugfield directly on the Product model, we have
-    a related model. That way, we can have a bunch of slugs that pertain
-    to a particular model, and even if the slug changes and someone uses
-    an old slug, we can redirect them appropriately.
-    """
-
-    slug = models.SlugField(unique=True)
+class ProductSlug(AbstractSlug):
     parent = models.ForeignKey("Product", on_delete=models.PROTECT)
-    is_active = models.BooleanField(
-        default=True,
-        help_text=_(
-            "If multiple slugs are active, we will default to the most recent."
-        ),
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ("-created_at",)
-
-    def __str__(self):
-        return self.slug
 
 
 class ProductQuerySet(TranslatableQuerySet):
@@ -339,6 +271,7 @@ class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel)
     order_key = models.PositiveIntegerField(default=0)
 
     slug_class = ProductSlug
+    slug_field_name = "title"
 
     @property
     def slug_queryset(self):
@@ -412,23 +345,9 @@ class Version(HashIdMixin, TranslatableModel):
         return self.plan_set.filter(tier=Plan.Tier.additional).order_by("id")
 
 
-class PlanSlug(models.Model):
-    """
-    Rather than have a slugfield directly on the PlanTemplate model, we
-    have a related model. That way, we can have a bunch of slugs that
-    pertain to a particular model, and even if the slug changes and
-    someone uses an old slug, we can redirect them appropriately.
-    """
-
+class PlanSlug(AbstractSlug):
     slug = models.SlugField()
     parent = models.ForeignKey("PlanTemplate", on_delete=models.PROTECT)
-    is_active = models.BooleanField(
-        default=True,
-        help_text=_(
-            "If multiple slugs are active, we will default to the most recent."
-        ),
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
 
     def validate_unique(self, *args, **kwargs):
         super().validate_unique(*args, **kwargs)
@@ -442,12 +361,6 @@ class PlanSlug(models.Model):
 
     def get_associated_products(self):
         return Product.objects.filter(version__plan__plan_template=self.parent)
-
-    class Meta:
-        ordering = ("-created_at",)
-
-    def __str__(self):
-        return self.slug
 
 
 class PlanTemplate(SlugMixin, TranslatableModel):
@@ -497,6 +410,7 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
     preflight_checks = JSONField(default=list, blank=True)
 
     slug_class = PlanSlug
+    slug_field_name = "title"
 
     @property
     def preflight_message_additional_markdown(self):
