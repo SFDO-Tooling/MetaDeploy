@@ -24,19 +24,10 @@ jobs:
       - run:
           name: Install Dependencies
           command: |
-            yarn
+            yarn install --frozen-lockfile
             python3 -m venv venv
             . venv/bin/activate
             pip install -Ur requirements/local.txt
-      - run:
-          name: Check that yarn.lock matches package.json
-          command: |
-            if [[ ! "${CIRCLE_BRANCH}" =~ greenkeeper\/.* ]]; then
-              [[ $(git diff --name-only yarn.lock) == "" ]] && exit 0
-              echo ">> yarn.lock is out of date, run \"yarn\""
-              git diff --no-pager yarn.lock
-              exit 1
-            fi
       - run:
           name: Compile Front-End Assets
           command: yarn prod
@@ -106,15 +97,30 @@ jobs:
     working_directory: ~/metadeploy
     docker:
       - image: circleci/python:3.7.3
+        environment:
+          BUCKETEER_AWS_ACCESS_KEY_ID: circle_test
+          BUCKETEER_AWS_SECRET_ACCESS_KEY: circle_test
+          BUCKETEER_BUCKET_NAME: circle_test
+          CONNECTED_APP_CALLBACK_URL: circle_test
+          CONNECTED_APP_CLIENT_ID: circle_test
+          CONNECTED_APP_CLIENT_SECRET: circle_test
+          DATABASE_URL: postgres://ubuntu@localhost:5432/circle_test
+          DB_ENCRYPTION_KEY: s38Tpa-rzNJsDwmn_bNuUK4T1zaNG9j1J9u1Yrk9P9c=
+          DJANGO_DEBUG: False
+          DJANGO_HASHID_SALT: test_hash_id
+          DJANGO_SECRET_KEY: test_secret_key
+          DJANGO_SETTINGS_MODULE: config.settings.test
+          GITHUB_TOKEN: circle_test
+          SECURE_SSL_REDIRECT: False
       - image: circleci/redis:latest
       - image: circleci/postgres:latest
         environment:
-          POSTGRES_USER: ubuntu
-          POSTGRES_DB: circle_test
-          POSTGRES_PASSWORD: circle_test
+          AWS_ACCESS_KEY_ID: None
           AWS_BUCKET_NAME: None
           AWS_SECRET_ACCESS_KEY: None
-          AWS_ACCESS_KEY_ID: None
+          POSTGRES_DB: circle_test
+          POSTGRES_PASSWORD: circle_test
+          POSTGRES_USER: ubuntu
     steps:
       - checkout
       - attach_workspace:
@@ -151,6 +157,8 @@ jobs:
     working_directory: ~/metadeploy
     docker:
       - image: circleci/python:3.7.3
+    environment:
+      COVERALLS_PARALLEL: true
     steps:
       - checkout
       - attach_workspace:
