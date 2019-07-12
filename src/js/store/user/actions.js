@@ -13,8 +13,8 @@ export type TokenInvalidAction = { type: 'USER_TOKEN_INVALIDATED' };
 export type UserAction = LoginAction | LogoutAction | TokenInvalidAction;
 
 export const login = (payload: User): ThunkAction => dispatch => {
-  if (window.Raven && window.Raven.isSetup()) {
-    window.Raven.setUserContext(payload);
+  if (window.Sentry) {
+    window.Sentry.setUser(payload);
   }
   /* istanbul ignore else */
   if (payload && window.socket) {
@@ -44,8 +44,8 @@ export const logout = (): ThunkAction => dispatch =>
     if (window.socket) {
       window.socket.reconnect();
     }
-    if (window.Raven && window.Raven.isSetup()) {
-      window.Raven.setUserContext();
+    if (window.Sentry) {
+      window.Sentry.configureScope(scope => scope.clear());
     }
     dispatch({ type: 'USER_LOGGED_OUT' });
     return dispatch(fetchProducts());
