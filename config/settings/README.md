@@ -86,8 +86,10 @@ dream alive.
 
 - `web`: the asgi server that handles HTTP and WebSockets
 - `worker`: the main worker type
+- `worker-short`: a queue dedicated to very fast jobs
 - `scheduler`: the town clock, that implements cron scheduling for jobs on any
   work queue
+- `devworker`: a combined worker process that works all queues
 
 # Security Posture
 
