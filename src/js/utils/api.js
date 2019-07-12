@@ -62,6 +62,7 @@ const apiFetch = (
             msg = body.non_field_errors;
           }
         }
+        dispatch(addError(msg));
         const error = (new Error(msg): { [string]: mixed });
         error.response = response;
         throw error;
@@ -73,7 +74,6 @@ const apiFetch = (
     )
     .catch(err => {
       logError(err);
-      dispatch(addError(err.message));
       throw err;
     });
 };

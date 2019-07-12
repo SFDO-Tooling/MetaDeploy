@@ -28,7 +28,7 @@ module.exports = {
   collectCoverageFrom: [
     'src/js/**/*.{js,jsx}',
     '!src/js/index.js',
-    '!src/js/raven.js',
+    '!src/js/sentry.js',
     '!src/js/i18n.js',
   ],
 
@@ -55,7 +55,7 @@ module.exports = {
   //   '!__mocks__',
   //   '!test',
   //   '!src/js/index.js',
-  //   '!src/js/raven.js',
+  //   '!src/js/sentry.js',
   //   '!src/js/i18n.js',
   // ],
 

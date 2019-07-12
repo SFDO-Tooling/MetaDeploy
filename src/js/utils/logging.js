@@ -4,12 +4,15 @@ export const logError = (
   message: string | Error,
   data: { [string]: mixed } = {},
 ) => {
-  if (window.Raven && window.Raven.isSetup()) {
-    if (message instanceof Error) {
-      window.Raven.captureException(message, data);
-    } else {
-      window.Raven.captureMessage(message, data);
-    }
+  if (window.Sentry) {
+    window.Sentry.withScope(scope => {
+      scope.setExtras(data);
+      if (message instanceof Error) {
+        window.Sentry.captureException(message);
+      } else {
+        window.Sentry.captureMessage(message);
+      }
+    });
   }
   window.console.error(message, data);
 };

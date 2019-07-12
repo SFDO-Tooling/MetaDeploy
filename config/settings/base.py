@@ -15,7 +15,9 @@ from pathlib import Path
 from typing import List
 
 import dj_database_url
+import sentry_sdk
 from django.core.exceptions import ImproperlyConfigured
+from sentry_sdk.integrations.django import DjangoIntegration
 
 BOOLS = ("True", "true", "T", "t", "1", 1)
 
@@ -356,10 +358,6 @@ AVERAGE_JOB_WINDOW = env("AVERAGE_JOB_WINDOW", type_=int, default=20)
 
 API_PRODUCT_PAGE_SIZE = env("API_PRODUCT_PAGE_SIZE", type_=int, default=25)
 
-
-# Raven / Sentry
-SENTRY_DSN = env("SENTRY_DSN", default="")
-
 LOG_REQUESTS = True
 LOG_REQUEST_ID_HEADER = "HTTP_X_REQUEST_ID"
 GENERATE_REQUEST_ID_IF_NOT_IN_HEADER = True
@@ -429,27 +427,8 @@ LOGGING = {
     },
 }
 
-if SENTRY_DSN:
-    INSTALLED_APPS += ["raven.contrib.django.raven_compat"]
-    RAVEN_CONFIG = {"dsn": SENTRY_DSN}
-    MIDDLEWARE = [
-        (
-            "raven.contrib.django.raven_compat.middleware."
-            "SentryResponseErrorIdMiddleware"
-        )
-    ] + MIDDLEWARE
+# Sentry
+SENTRY_DSN = env("SENTRY_DSN", default="")
 
-    if not DEBUG:
-        # Extend the logging dict with Sentry settings:
-        LOGGING["root"] = {"level": "WARNING", "handlers": ["sentry"]}
-        LOGGING["handlers"]["sentry"] = {
-            "level": "ERROR",
-            "class": ("raven.contrib.django.raven_compat.handlers." "SentryHandler"),
-            "tags": {"custom-tag": "x"},
-        }
-        LOGGING["loggers"]["raven"] = {
-            "level": "DEBUG",
-            "handlers": ["console"],
-            "propagate": False,
-        }
-        LOGGING["loggers"]["rq.worker"]["handlers"].append("sentry")
+if SENTRY_DSN:
+    sentry_sdk.init(dsn=SENTRY_DSN, integrations=[DjangoIntegration()])

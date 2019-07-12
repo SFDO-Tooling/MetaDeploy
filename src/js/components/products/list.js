@@ -38,6 +38,13 @@ type State = {
 };
 
 class ProductsList extends React.Component<Props, State> {
+  // This is often considered an anti-pattern in React, but it's acceptable in
+  // cases where we don't want to cancel or cleanup an asynchronous action on
+  // unmount -- we just want to prevent a post-unmount state update after the
+  // action finishes.
+  // https://reactjs.org/blog/2015/12/16/ismounted-antipattern.html
+  _isMounted: boolean;
+
   constructor(props) {
     super(props);
     let activeProductsTab = null;
@@ -76,6 +83,15 @@ class ProductsList extends React.Component<Props, State> {
     );
   }
 
+  componentDidMount() {
+    this._isMounted = true;
+  }
+
+  /* istanbul ignore next */
+  componentWillUnMount() {
+    this._isMounted = false;
+  }
+
   handleSelect = (index: number) => {
     const { history, productCategories } = this.props;
     try {
@@ -105,11 +121,15 @@ class ProductsList extends React.Component<Props, State> {
 
     if (activeCategory && moreProductsUrl && !fetchingProducts) {
       this.setState({ fetchingProducts: true });
-      doFetchMoreProducts({ url: moreProductsUrl, id: activeCategory.id }).then(
-        () => {
+      doFetchMoreProducts({
+        url: moreProductsUrl,
+        id: activeCategory.id,
+      }).finally(() => {
+        /* istanbul ignore else */
+        if (this._isMounted) {
           this.setState({ fetchingProducts: false });
-        },
-      );
+        }
+      });
     }
   };
 
