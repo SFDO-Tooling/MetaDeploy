@@ -32,4 +32,13 @@ describe('reducer', () => {
       });
     },
   );
+
+  test('handles PREFLIGHT_COMPLETED action', () => {
+    const initial = { current_preflight: 1 };
+    const expected = { current_preflight: null };
+    const actual = reducer(initial, {
+      type: 'PREFLIGHT_COMPLETED',
+    });
+    expect(actual).toEqual(expected);
+  });
 });

@@ -4,6 +4,7 @@ import type { ThunkAction } from 'redux-thunk';
 
 import apiFetch from 'utils/api';
 import type { Org } from 'store/org/reducer';
+import type { PreflightCompleted } from 'store/plans/actions';
 
 type FetchOrgJobsStarted = {
   type: 'FETCH_ORG_JOBS_STARTED',
@@ -23,7 +24,8 @@ export type OrgAction =
   | FetchOrgJobsStarted
   | FetchOrgJobsSucceeded
   | FetchOrgJobsFailed
-  | OrgChanged;
+  | OrgChanged
+  | PreflightCompleted;
 
 export const fetchOrgJobs = (): ThunkAction => dispatch => {
   dispatch({ type: 'FETCH_ORG_JOBS_STARTED' });
