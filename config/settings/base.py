@@ -358,8 +358,7 @@ API_PRODUCT_PAGE_SIZE = env("API_PRODUCT_PAGE_SIZE", type_=int, default=25)
 
 
 # Raven / Sentry
-# SENTRY_DSN = env("SENTRY_DSN", default="")
-SENTRY_DSN = ""
+SENTRY_DSN = env("SENTRY_DSN", default="")
 
 LOG_REQUESTS = True
 LOG_REQUEST_ID_HEADER = "HTTP_X_REQUEST_ID"
