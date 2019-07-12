@@ -67,8 +67,8 @@ class PreflightWarningModal extends React.Component<Props, State> {
   }
 
   handleClose = () => {
-    this.props.toggleModal(false);
     this.setState({ confirmed: false });
+    this.props.toggleModal(false);
   };
 
   handleSubmit = () => {

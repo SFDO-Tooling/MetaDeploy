@@ -22,8 +22,8 @@ class CustomDomainModal extends React.Component<Props, { url: string }> {
   }
 
   handleClose = () => {
-    this.props.toggleModal(false);
     this.setState({ url: '' });
+    this.props.toggleModal(false);
   };
 
   handleSubmit = (event: SyntheticEvent<HTMLFormElement>) => {

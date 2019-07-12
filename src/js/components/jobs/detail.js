@@ -73,6 +73,13 @@ type State = {
 };
 
 class JobDetail extends React.Component<Props, State> {
+  // This is often considered an anti-pattern in React, but it's acceptable in
+  // cases where we don't want to cancel or cleanup an asynchronous action on
+  // unmount -- we just want to prevent a post-unmount state update after the
+  // action finishes.
+  // https://reactjs.org/blog/2015/12/16/ismounted-antipattern.html
+  _isMounted: boolean;
+
   constructor(props: Props) {
     super(props);
     this.state = { modalOpen: false, canceling: false };
@@ -133,6 +140,11 @@ class JobDetail extends React.Component<Props, State> {
     this.fetchVersionIfMissing();
     this.fetchPlanIfMissing();
     this.fetchJobIfMissing();
+    this._isMounted = true;
+  }
+
+  componentWillUnMount() {
+    this._isMounted = false;
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -201,7 +213,9 @@ class JobDetail extends React.Component<Props, State> {
       return;
     }
     doRequestCancelJob(job.id).then(() => {
-      this.setState({ canceling: true });
+      if (this._isMounted) {
+        this.setState({ canceling: true });
+      }
     });
   };
 
