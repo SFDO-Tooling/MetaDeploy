@@ -56,7 +56,7 @@
     "scheduler": {
       "quantity": 1
     },
-    "devworker": {
+    "worker": {
       "quantity": 1
     }
   },
