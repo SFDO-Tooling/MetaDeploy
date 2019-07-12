@@ -143,6 +143,7 @@ class JobDetail extends React.Component<Props, State> {
     this._isMounted = true;
   }
 
+  /* istanbul ignore next */
   componentWillUnMount() {
     this._isMounted = false;
   }
@@ -213,6 +214,7 @@ class JobDetail extends React.Component<Props, State> {
       return;
     }
     doRequestCancelJob(job.id).then(() => {
+      /* istanbul ignore else */
       if (this._isMounted) {
         this.setState({ canceling: true });
       }
