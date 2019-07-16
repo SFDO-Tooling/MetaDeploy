@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
+import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import type { RouterHistory } from 'react-router-dom';
@@ -39,7 +40,11 @@ type Props = {
 class Header extends React.Component<Props> {
   controls = () => {
     const { user, doLogout } = this.props;
-    return user ? <Logout user={user} doLogout={doLogout} /> : <Login />;
+    return (
+      <PageHeaderControl>
+        {user ? <Logout user={user} doLogout={doLogout} /> : <Login />}
+      </PageHeaderControl>
+    );
   };
 
   componentWillUnmount() {
@@ -82,7 +87,6 @@ class Header extends React.Component<Props> {
             </Link>
           }
           onRenderControls={this.controls}
-          variant="object-home"
         />
       </>
     );

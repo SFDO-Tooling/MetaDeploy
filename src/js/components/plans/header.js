@@ -19,7 +19,7 @@ const Header = ({
   product,
   version,
   plan,
-  onRenderControls,
+  onRenderActions,
   job,
   userLoggedIn,
   preflightStatus,
@@ -29,7 +29,7 @@ const Header = ({
   product: ProductType,
   version: VersionType,
   plan: PlanType,
-  onRenderControls?: () => React.Node,
+  onRenderActions?: () => React.Node,
   job?: JobType,
   userLoggedIn?: boolean,
   preflightStatus?: ?string,
@@ -49,7 +49,7 @@ const Header = ({
           {product.title}, {version.label}
         </Link>,
       ]}
-      onRenderControls={onRenderControls ? onRenderControls : null}
+      onRenderActions={onRenderActions ? onRenderActions : null}
       icon={<ProductIcon item={product} />}
       variant="object-home"
     />
