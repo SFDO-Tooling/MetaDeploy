@@ -3,6 +3,7 @@
 import * as React from 'react';
 import Button from '@salesforce/design-system-react/components/button';
 import DocumentTitle from 'react-document-title';
+import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import i18n from 'i18next';
 import { connect } from 'react-redux';
 
@@ -254,8 +255,8 @@ class JobDetail extends React.Component<Props, State> {
     return null;
   }
 
-  controls = () => (
-    <>
+  actions = () => (
+    <PageHeaderControl>
       {this.getCancelBtn()}
       <Button
         label={i18n.t('Share Installation')}
@@ -264,7 +265,7 @@ class JobDetail extends React.Component<Props, State> {
         iconPosition="left"
         onClick={this.openModal}
       />
-    </>
+    </PageHeaderControl>
   );
 
   render(): React.Node {
@@ -329,7 +330,7 @@ class JobDetail extends React.Component<Props, State> {
             version={version}
             plan={plan}
             job={job}
-            onRenderControls={this.controls}
+            onRenderActions={this.actions}
           />
           <ShareModal
             isOpen={this.state.modalOpen}
