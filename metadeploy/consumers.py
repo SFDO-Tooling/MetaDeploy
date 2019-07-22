@@ -30,6 +30,7 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
 
             channel_layer.group_send(group_name, {
                 'type': 'notify',  # This routes it to this handler.
+                'group': group_name,
                 'content': json_message,
             })
         """
