@@ -30,7 +30,7 @@ async def push_message_about_instance(instance, message):
     id = str(instance.id)
     group_name = CHANNELS_GROUP_NAME.format(model=model_name, id=id)
     channel_layer = get_channel_layer()
-    sent_message = {"type": "notify", "content": message}
+    sent_message = {"type": "notify", "group": group_name, "content": message}
     if await get_set_message_semaphore(channel_layer, sent_message):
         await channel_layer.group_send(group_name, sent_message)
 
@@ -42,6 +42,7 @@ async def push_serializable(instance, serializer, type_):
     serializer_name = f"{serializer.__module__}.{serializer.__name__}"
     message = {
         "type": "notify",
+        "group": group_name,
         "instance": {"model": model_name, "id": id},
         "serializer": serializer_name,
         "inner_type": type_,
@@ -131,10 +132,14 @@ async def notify_org_result_changed(result):
     serializer = OrgSerializer(
         {"current_job": current_job, "current_preflight": current_preflight}
     )
-    message = {"type": "notify", "content": {"type": type_, "payload": serializer.data}}
     group_name = CHANNELS_GROUP_NAME.format(
         model="org", id=convert_org_id_to_key(org_id)
     )
+    message = {
+        "type": "notify",
+        "group": group_name,
+        "content": {"type": type_, "payload": serializer.data},
+    }
     channel_layer = get_channel_layer()
     if await get_set_message_semaphore(channel_layer, message):
         await channel_layer.group_send(group_name, message)

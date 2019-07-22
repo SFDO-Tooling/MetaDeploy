@@ -23,9 +23,6 @@ const reducer = (org: Org = null, action: OrgAction | LogoutAction): Org => {
     case 'FETCH_ORG_JOBS_SUCCEEDED':
     case 'ORG_CHANGED':
       return action.payload;
-    case 'PREFLIGHT_COMPLETED':
-      // workaround for ORG_CHANGED sometimes being missed
-      return { ...org, current_preflight: null };
   }
   return org;
 };
