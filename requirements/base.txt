@@ -1,16 +1,16 @@
 -e git+https://github.com/SFDO-Tooling/sfdo-template-helpers.git@v0.9.0#egg=sfdo-template-helpers
 Django==2.2.3
-Pillow==6.0.0
+Pillow==6.1.0
 ansi2html==1.5.2
 bleach==3.1.0
-boto3==1.9.180
+boto3==1.9.193
 channels==2.2.0
 channels_redis==2.4.0
-cumulusci==2.5.3
+cumulusci==2.5.4
 dj-database-url==0.5.0
 django-allauth==0.39.1
 django-colorfield==0.1.15
-django-filter==2.1.0
+django-filter==2.2.0
 django-hashid-field==2.1.6
 django-js-reverse==0.9.1
 django-log-request-id==1.3.2
@@ -20,17 +20,17 @@ django-redis==4.10.0
 django-rq-scheduler==1.1.3
 django-rq==2.1.0
 django-storages==1.7.1
-djangorestframework==3.9.4
+djangorestframework==3.10.1
 github3.py==1.3.0
 logfmt==0.4
 newrelic==4.20.1.121
 psycopg2-binary==2.8.3
 pyopenssl==19.0.0
-rq==1.0
-sentry-sdk==0.10.1
+rq==1.1.0
+sentry-sdk==0.10.2
 service_identity==18.1.0
-werkzeug==0.15.4
-whitenoise==4.1.2
+werkzeug==0.15.5
+whitenoise==4.1.3
 
 # Transitive dependencies
 Automat==0.7.0
@@ -40,7 +40,7 @@ Markdown==3.1.1
 MarkupSafe==1.1.1
 PyHamcrest==1.9.0
 PyYAML==5.1.1
-SQLAlchemy==1.3.5
+SQLAlchemy==1.3.6
 Twisted==19.2.1
 aioredis==1.2.0
 asgiref==3.1.4
@@ -48,7 +48,7 @@ asn1crypto==0.24.0
 async-timeout==3.0.1
 autobahn==19.7.1
 bleach==3.1.0
-botocore==1.12.187
+botocore==1.12.193
 certifi==2019.6.16
 cffi==1.12.3
 chardet==3.0.4
@@ -58,9 +58,9 @@ croniter==0.3.30
 cryptography==2.7
 daphne==2.3.0
 defusedxml==0.6.0
-django-filter==2.1.0
-djangorestframework==3.9.4
-docutils==0.14
+django-filter==2.2.0
+djangorestframework==3.10.1
+docutils==0.15
 entrypoints==0.3
 future==0.17.1
 github3.py==1.3.0
@@ -72,7 +72,7 @@ idna==2.8
 incremental==17.5.0
 jmespath==0.9.4
 jwcrypto==0.6.0
-keyring==18.0.1
+keyring==19.0.2
 logfmt==0.4
 lxml==4.3.4
 msgpack==0.6.1
@@ -97,7 +97,7 @@ salesforce-bulk==2.1.0
 sarge==0.1.5.post0
 selenium==3.141.0
 setuptools==41.0.1
-simple-salesforce==0.74.2
+simple-salesforce==0.74.3
 six==1.12.0
 sqlparse==0.3.0
 txaio==18.8.1
