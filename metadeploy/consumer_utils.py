@@ -18,7 +18,9 @@ async def get_set_message_semaphore(channel_layer, message):
     Used to prevent sending the same message twice within 5 seconds."""
     msg_hash = message_to_hash(message)
     async with channel_layer.connection(0) as connection:
-        return await connection.set(msg_hash, 1, nx=True, ex=5)
+        return await connection.set(
+            msg_hash, 1, expire=5, exist=connection.SET_IF_NOT_EXIST
+        )
 
 
 async def clear_message_semaphore(channel_layer, message):
