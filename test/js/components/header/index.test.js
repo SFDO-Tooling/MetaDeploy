@@ -29,7 +29,7 @@ describe('<Header />', () => {
     beforeAll(() => {
       window.SITE_NAME = 'My Site';
       window.GLOBALS.SITE = {
-        product_logo: 'my/logo.png',
+        company_logo: 'my/logo.png',
       };
     });
 

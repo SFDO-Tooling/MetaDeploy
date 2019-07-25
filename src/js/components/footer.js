@@ -3,7 +3,7 @@
 import * as React from 'react';
 import i18n from 'i18next';
 
-const Footer = (props: { logoSrc?: string }) => {
+const Footer = () => {
   let copyright = `${i18n.t('Copyright')} ${window.GLOBALS.YEAR}`;
   if (window.GLOBALS.SITE && window.GLOBALS.SITE.company_name) {
     copyright = `${copyright} ${window.GLOBALS.SITE.company_name}`;
@@ -19,16 +19,23 @@ const Footer = (props: { logoSrc?: string }) => {
       slds-text-body_small
       site-contentinfo"
     >
-      {props.logoSrc ? (
+      {window.GLOBALS.SITE && window.GLOBALS.SITE.product_logo ? (
         <div
           className="footer-logo
         footer-item
         slds-m-right_medium
         slds-grow"
-          style={{ backgroundImage: `url(${props.logoSrc})` }}
+          style={{
+            backgroundImage: `url(${window.GLOBALS.SITE.product_logo})`,
+          }}
           data-testid="footer-logo"
         />
-      ) : null}
+      ) : (
+        <div className="slds-text-heading_large">
+          <span data-logo-bit="start">meta</span>
+          <span data-logo-bit="end">deploy</span>
+        </div>
+      )}
       <div
         className="footer-item
         slds-grid"

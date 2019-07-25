@@ -5,6 +5,12 @@
   background-color: $color-background;
 }
 
+[data-logo-bit='end'] {
+  color: $color-text-brand;
+  font-weight: $font-weight-regular;
+  text-transform: uppercase;
+}
+
 .footer-logo {
   background-size: contain;
   background-repeat: no-repeat;

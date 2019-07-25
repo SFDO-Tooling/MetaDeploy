@@ -4,11 +4,23 @@ import { render } from '@testing-library/react';
 import Footer from 'components/footer';
 
 describe('<Footer />', () => {
-  test('renders logo with `backgroundImage` set to `logoSrc`', () => {
-    const { getByTestId } = render(<Footer logoSrc="my/logo.png" />);
-    expect(getByTestId('footer-logo')).toHaveStyle(
-      'background-image: url(my/logo.png)',
-    );
+  describe('logo', () => {
+    beforeAll(() => {
+      window.GLOBALS.SITE = {
+        product_logo: 'my/logo.png',
+      };
+    });
+
+    afterAll(() => {
+      window.GLOBALS = {};
+    });
+
+    test('renders logo with `backgroundImage` set to product logo', () => {
+      const { getByTestId } = render(<Footer />);
+      expect(getByTestId('footer-logo')).toHaveStyle(
+        'background-image: url(my/logo.png)',
+      );
+    });
   });
 
   test('renders default copyright notice', () => {
