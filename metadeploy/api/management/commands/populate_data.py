@@ -243,7 +243,7 @@ class Command(BaseCommand):
                 name="Enqueuer",
                 interval=1,
                 interval_unit="minutes",
-                queue="default",
+                queue="short",
                 scheduled_time=timezone.now(),
             ),
         )
@@ -255,7 +255,7 @@ class Command(BaseCommand):
                 name="Expire User Tokens",
                 interval=1,
                 interval_unit="minutes",
-                queue="default",
+                queue="short",
                 scheduled_time=timezone.now(),
             ),
         )
@@ -267,7 +267,7 @@ class Command(BaseCommand):
                 name="Expire Preflight Results",
                 interval=1,
                 interval_unit="minutes",
-                queue="default",
+                queue="short",
                 scheduled_time=timezone.now(),
             ),
         )
