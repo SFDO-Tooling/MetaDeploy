@@ -84,13 +84,7 @@ const App = () => (
             </Switch>
           </ErrorBoundary>
         </div>
-        <Footer
-          logoSrc={
-            window.GLOBALS.SITE && window.GLOBALS.SITE.company_logo
-              ? window.GLOBALS.SITE.company_logo
-              : undefined
-          }
-        />
+        <Footer />
       </ErrorBoundary>
     </div>
   </DocumentTitle>

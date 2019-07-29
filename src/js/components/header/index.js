@@ -54,6 +54,7 @@ class Header extends React.Component<Props> {
 
   render() {
     const { socket, org, errors, history, jobId, doRemoveError } = this.props;
+    const logoSrc = window.GLOBALS.SITE && window.GLOBALS.SITE.company_logo;
     return (
       <>
         {socket ? null : <OfflineAlert />}
@@ -71,19 +72,14 @@ class Header extends React.Component<Props> {
               className="slds-text-heading_large
                 slds-text-link_reset"
             >
-              {window.GLOBALS.SITE && window.GLOBALS.SITE.product_logo ? (
+              {logoSrc ? (
                 <img
                   className="site-logo"
-                  src={window.GLOBALS.SITE.product_logo}
+                  src={logoSrc}
                   alt={window.SITE_NAME}
                   title={window.SITE_NAME}
                 />
-              ) : (
-                <>
-                  <span data-logo-bit="start">meta</span>
-                  <span data-logo-bit="end">deploy</span>
-                </>
-              )}
+              ) : null}
             </Link>
           }
           onRenderControls={this.controls}
