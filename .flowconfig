@@ -9,12 +9,13 @@
 
 [lints]
 all=warn
-sketchy-null-mixed=off
-sketchy-null-string=off
-sketchy-null-bool=off
-inexact-spread=off
 deprecated-utility=off
 dynamic-export=off
+inexact-spread=off
+non-array-spread=off
+sketchy-null-bool=off
+sketchy-null-mixed=off
+sketchy-null-string=off
 unclear-type=off
 
 [options]

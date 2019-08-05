@@ -3,7 +3,6 @@
 from django.db import migrations
 from django.utils.translation import activate
 from parler.models import ParlerOptions
-from parler.utils import compat
 
 
 # We have to inline a bunch of logic from django-parler here, because
@@ -31,7 +30,7 @@ def forwards(apps, schema_editor):
         None,
         shared_model=SiteProfile,
         translations_model=SiteProfileTranslation,
-        related_name=compat.get_remote_field(SiteProfileTranslation).related_name,
+        related_name=SiteProfileTranslation.master.field.remote_field.related_name,
     )
     for site in Site.objects.all():
         SiteProfile.objects.create(site=site, name=site.name)
