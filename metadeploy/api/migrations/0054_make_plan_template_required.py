@@ -2,7 +2,6 @@
 
 from django.db import migrations
 from parler.models import ParlerOptions
-from parler.utils import compat
 
 
 # We have to inline a bunch of logic from django-parler here, because
@@ -28,7 +27,7 @@ def forwards(apps, schema_editor):
         None,
         shared_model=PlanTemplate,
         translations_model=PlanTemplateTranslation,
-        related_name=compat.get_remote_field(PlanTemplateTranslation).related_name,
+        related_name=PlanTemplateTranslation.master.field.remote_field.related_name,
     )
     Plan = apps.get_model("api", "Plan")
     for plan in Plan.objects.filter(plan_template__isnull=True):
