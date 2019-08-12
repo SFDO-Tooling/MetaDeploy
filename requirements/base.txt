@@ -74,7 +74,7 @@ jmespath==0.9.4
 jwcrypto==0.6.0
 keyring==19.0.2
 logfmt==0.4
-lxml==4.4.0
+lxml==4.4.1
 msgpack==0.6.1
 oauthlib==3.0.2
 plaintable==0.1.1
