@@ -76,7 +76,7 @@ keyring==19.0.2
 logfmt==0.4
 lxml==4.4.1
 msgpack==0.6.1
-oauthlib==3.0.2
+oauthlib==3.1.0
 plaintable==0.1.1
 pyasn1-modules==0.2.6
 pyasn1==0.4.6
