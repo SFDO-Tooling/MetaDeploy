@@ -45,6 +45,7 @@ from .push import (
 
 logger = logging.getLogger(__name__)
 VERSION_STRING = r"^[a-zA-Z0-9._+-]+$"
+STEP_NUM = r"^[\d\./]+$"
 WorkableModel = Union["Job", "PreflightResult"]
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
 
@@ -460,12 +461,20 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
 
 
 class DottedArray(Func):
-    """ Turns a dotted string into an array of ints.
+    """ Turns a step number into an array of ints for sorting.
 
-    Useful for version numbers."""
+    The step number must be a string including positive integers separated by / and .
+
+    / will be encoded as |-2|
+    . will be encoded as |-1|
+    Then we can split on | to get an array of ints
+    """
 
     function = "string_to_array"
-    template = "%(function)s(%(expressions)s, '.')::int[]"
+    template = (
+        "%(function)s(replace(replace(%(expressions)s, '.', '|-2|')"
+        ", '/', '|-1|'), '|')::int[]"
+    )
 
 
 class Step(HashIdMixin, TranslatableModel):
@@ -490,7 +499,9 @@ class Step(HashIdMixin, TranslatableModel):
         max_length=2048, help_text="dotted path e.g. flow1.flow2.task_name"
     )
     step_num = models.CharField(
-        max_length=64, help_text="dotted step number for CCI task"
+        max_length=64,
+        help_text="dotted step number for CCI task",
+        validators=[RegexValidator(regex=STEP_NUM)],
     )
     task_class = models.CharField(
         max_length=2048, help_text="dotted module path to BaseTask implementation"

@@ -5,7 +5,7 @@ from django.contrib.sites.models import Site
 from django.core.exceptions import MultipleObjectsReturned, ValidationError
 from django.utils import timezone
 
-from ..models import Job, SiteProfile, Version
+from ..models import Job, SiteProfile, Step, Version
 
 
 @pytest.mark.django_db
@@ -435,9 +435,22 @@ class TestPlan:
 
 
 @pytest.mark.django_db
-def test_step_str(step_factory):
-    step = step_factory(name="Test step", step_num="3.1", plan__title="The Plan")
-    assert str(step) == "Step Test step of The Plan (3.1)"
+class TestStep:
+    def test_str(self, step_factory):
+        step = step_factory(name="Test step", step_num="3.1", plan__title="The Plan")
+        assert str(step) == "Step Test step of The Plan (3.1)"
+
+    def test_ordering(self, step_factory):
+        step_factory(step_num="1/1/1")
+        step_factory(step_num="1/1.1")
+        step_factory(step_num="1/1")
+        step_nums = [step.step_num for step in Step.objects.all()]
+        assert step_nums == ["1/1", "1/1.1", "1/1/1"]
+
+    def test_step_num_validator(self, step_factory):
+        step = step_factory(step_num="a")
+        with pytest.raises(ValidationError):
+            step.full_clean()
 
 
 @pytest.mark.django_db
