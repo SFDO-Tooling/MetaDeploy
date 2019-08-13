@@ -146,7 +146,7 @@ class Command(BaseCommand):
             ),
             is_recommended=False,
             path="quick_task",
-            step_num="0.9",
+            step_num="0/9",
         )
         self.create_step(
             plan=plan,
@@ -327,7 +327,7 @@ class Command(BaseCommand):
                 "description": "",
                 "kind": Step.Kind.metadata,
                 "path": "dependencies.deploy_pre.acc_record_types",
-                "step_num": "1.2.1",
+                "step_num": "1/2/1",
                 "task_class": "cumulusci.tasks.salesforce.UpdateDependencies",
                 "task_config": {
                     "options": {
@@ -347,7 +347,7 @@ class Command(BaseCommand):
                 "description": "",
                 "kind": Step.Kind.metadata,
                 "path": "dependencies.deploy_pre.contact_key_affl_fields",
-                "step_num": "1.2.2",
+                "step_num": "1/2/2",
                 "task_class": "cumulusci.tasks.salesforce.UpdateDependencies",
                 "task_config": {
                     "options": {
@@ -385,7 +385,7 @@ class Command(BaseCommand):
                 "description": "",
                 "kind": Step.Kind.metadata,
                 "path": "deploy_post.course_connection_record_types",
-                "step_num": "3.1",
+                "step_num": "3/1",
                 "task_class": "cumulusci.tasks.salesforce.UpdateDependencies",
                 "task_config": {
                     "options": {
@@ -411,7 +411,7 @@ class Command(BaseCommand):
                 "description": "",
                 "kind": Step.Kind.metadata,
                 "path": "deploy_post.facility_display_name",
-                "step_num": "3.2",
+                "step_num": "3/2",
                 "task_class": "cumulusci.tasks.salesforce.UpdateDependencies",
                 "task_config": {
                     "options": {
