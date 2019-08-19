@@ -3,10 +3,10 @@ Django==2.2.4
 Pillow==6.1.0
 ansi2html==1.5.2
 bleach==3.1.0
-boto3==1.9.206
+boto3==1.9.211
 channels==2.2.0
 channels_redis==2.4.0
-cumulusci==2.5.5
+cumulusci==2.5.6
 dj-database-url==0.5.0
 django-allauth==0.39.1
 django-colorfield==0.1.15
@@ -23,11 +23,11 @@ django-storages==1.7.1
 djangorestframework==3.10.2
 github3.py==1.3.0
 logfmt==0.4
-newrelic==5.0.1.125
+newrelic==5.0.2.126
 psycopg2-binary==2.8.3
 pyopenssl==19.0.0
 rq==1.1.0
-sentry-sdk==0.10.2
+sentry-sdk==0.11.1
 service_identity==18.1.0
 werkzeug==0.15.5
 whitenoise==4.1.3
@@ -40,7 +40,7 @@ Markdown==3.1.1
 MarkupSafe==1.1.1
 PyHamcrest==1.9.0
 PyYAML==5.1.2
-SQLAlchemy==1.3.6
+SQLAlchemy==1.3.7
 Twisted==19.7.0
 aioredis==1.2.0
 asgiref==3.2.1
@@ -48,7 +48,7 @@ asn1crypto==0.24.0
 async-timeout==3.0.1
 autobahn==19.8.1
 bleach==3.1.0
-botocore==1.12.206
+botocore==1.12.211
 certifi==2019.6.16
 cffi==1.12.3
 chardet==3.0.4
@@ -85,7 +85,7 @@ python-dateutil==2.8.0
 python3-openid==3.1.0
 pytz==2019.2
 raven==6.10.0
-redis==3.3.6
+redis==3.3.7
 requests-oauthlib==1.2.0
 requests==2.22.0
 robotframework-seleniumlibrary==3.3.1
@@ -96,7 +96,7 @@ s3transfer==0.2.1
 salesforce-bulk==2.1.0
 sarge==0.1.5.post0
 selenium==3.141.0
-setuptools==41.0.1
+setuptools==41.1.0
 simple-salesforce==0.74.3
 six==1.12.0
 sqlparse==0.3.0
