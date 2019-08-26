@@ -20,7 +20,7 @@ vcrpy==2.1.0
 
 # Transitive dependencies
 Babel==2.7.0
-Faker==2.0.0
+Faker==2.0.1
 Pygments==2.4.2
 Sphinx==2.2.0
 alabaster==0.7.12
