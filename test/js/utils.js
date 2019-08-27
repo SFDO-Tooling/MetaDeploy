@@ -10,17 +10,19 @@ export const renderWithRedux = (
   ui,
   initialState = {},
   customStore = mockStore,
-  rerender = false,
 ) => {
   const store = customStore(initialState);
-  const renderFn = rerender ? rerender : render;
   return {
-    ...renderFn(<Provider store={store}>{ui}</Provider>),
+    ...render(<Provider store={store}>{ui}</Provider>),
     // adding `store` to the returned utilities to allow us
     // to reference it in our tests (just try to avoid using
     // this to test implementation details).
     store,
   };
 };
+
+export const reRenderWithRedux = (ui, store, rerender) => ({
+  ...rerender(<Provider store={store}>{ui}</Provider>),
+});
 
 export const storeWithApi = configureStore([thunk]);

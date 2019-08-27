@@ -2,7 +2,11 @@ import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 import { fireEvent } from '@testing-library/react';
 
-import { renderWithRedux, storeWithApi } from './../../utils';
+import {
+  renderWithRedux,
+  reRenderWithRedux,
+  storeWithApi,
+} from './../../utils';
 
 import routes from 'utils/routes';
 import { fetchPreflight } from 'store/plans/actions';
@@ -143,39 +147,32 @@ describe('<PlanDetail />', () => {
   const setup = options => {
     const defaults = {
       initialState: defaultState,
+      customStore: storeWithApi,
       productSlug: 'product-1',
       versionLabel: '1.0.0',
       planSlug: 'my-plan',
     };
     const opts = { ...defaults, ...options };
-    const { productSlug, versionLabel, planSlug, rerenderFn } = opts;
-    const context = {};
     const {
-      getByText,
-      getAllByText,
-      queryByText,
-      getByAltText,
-      container,
-      rerender,
-    } = renderWithRedux(
+      productSlug,
+      versionLabel,
+      planSlug,
+      rerenderFn,
+      customStore,
+      initialState,
+    } = opts;
+    const context = {};
+    const ui = (
       <StaticRouter context={context}>
         <PlanDetail
           match={{ params: { productSlug, versionLabel, planSlug } }}
         />
-      </StaticRouter>,
-      opts.initialState,
-      storeWithApi,
-      rerenderFn,
+      </StaticRouter>
     );
-    return {
-      getByText,
-      getAllByText,
-      queryByText,
-      getByAltText,
-      container,
-      rerender,
-      context,
-    };
+    if (rerenderFn && customStore) {
+      return { ...reRenderWithRedux(ui, customStore, rerenderFn), context };
+    }
+    return { ...renderWithRedux(ui, initialState, customStore), context };
   };
 
   describe('insufficient permissions for user', () => {
@@ -324,11 +321,15 @@ describe('<PlanDetail />', () => {
   describe('componentDidUpdate', () => {
     describe('product is changed', () => {
       test('fetches product', () => {
-        const { rerender } = setup();
+        const { rerender, store } = setup();
 
         expect(fetchProduct).not.toHaveBeenCalled();
 
-        setup({ productSlug: 'other-product', rerenderFn: rerender });
+        setup({
+          productSlug: 'other-product',
+          rerenderFn: rerender,
+          customStore: store,
+        });
 
         expect(fetchProduct).toHaveBeenCalledWith({
           slug: 'other-product',
@@ -338,11 +339,15 @@ describe('<PlanDetail />', () => {
 
     describe('version is changed', () => {
       test('fetches version', () => {
-        const { rerender } = setup();
+        const { rerender, store } = setup();
 
         expect(fetchVersion).not.toHaveBeenCalled();
 
-        setup({ versionLabel: '2.0.0', rerenderFn: rerender });
+        setup({
+          versionLabel: '2.0.0',
+          rerenderFn: rerender,
+          customStore: store,
+        });
 
         expect(fetchVersion).toHaveBeenCalledWith({
           product: 'p1',
@@ -353,13 +358,14 @@ describe('<PlanDetail />', () => {
 
     describe('preflight is removed', () => {
       test('fetches preflight', () => {
-        const { rerender } = setup();
+        const { rerender, store } = setup();
 
         expect(fetchPreflight).not.toHaveBeenCalled();
 
         setup({
           planSlug: 'other-plan',
           rerenderFn: rerender,
+          customStore: store,
         });
 
         expect(fetchPreflight).toHaveBeenCalledWith('plan-2');

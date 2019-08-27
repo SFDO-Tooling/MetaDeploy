@@ -53,13 +53,7 @@ describe('<StepsTable />', () => {
   const setup = options => {
     const defaults = { plan: defaultPlan, user: null, selectedSteps };
     const opts = { ...defaults, ...options };
-    const {
-      getByText,
-      getAllByText,
-      queryByText,
-      container,
-      rerender,
-    } = render(
+    return render(
       <StepsTable
         plan={opts.plan}
         user={opts.user}
@@ -70,7 +64,6 @@ describe('<StepsTable />', () => {
         handleStepsChange={handleStepsChange}
       />,
     );
-    return { getByText, getAllByText, queryByText, container, rerender };
   };
 
   test('renders steps', () => {

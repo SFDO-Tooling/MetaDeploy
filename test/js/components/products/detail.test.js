@@ -1,7 +1,7 @@
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import { renderWithRedux } from './../../utils';
+import { renderWithRedux, reRenderWithRedux } from './../../utils';
 
 import routes from 'utils/routes';
 import {
@@ -89,17 +89,17 @@ describe('<ProductDetail />', () => {
       productSlug: 'product-1',
     };
     const opts = Object.assign({}, defaults, options);
-    const { initialState, productSlug, rerenderFn } = opts;
+    const { initialState, productSlug, rerenderFn, customStore } = opts;
     const context = {};
-    const { getByText, rerender } = renderWithRedux(
+    const ui = (
       <StaticRouter context={context}>
         <ProductDetail match={{ params: { productSlug } }} />
-      </StaticRouter>,
-      initialState,
-      opts.customStore,
-      rerenderFn,
+      </StaticRouter>
     );
-    return { getByText, context, rerender };
+    if (rerenderFn && customStore) {
+      return { ...reRenderWithRedux(ui, customStore, rerenderFn), context };
+    }
+    return { ...renderWithRedux(ui, initialState, customStore), context };
   };
 
   test('redirects to version_detail', () => {
@@ -171,11 +171,15 @@ describe('<ProductDetail />', () => {
   describe('componentDidUpdate', () => {
     describe('product is changed', () => {
       test('fetches product', () => {
-        const { rerender } = setup();
+        const { rerender, store } = setup();
 
         expect(fetchProduct).not.toHaveBeenCalled();
 
-        setup({ productSlug: 'other-product', rerenderFn: rerender });
+        setup({
+          productSlug: 'other-product',
+          rerenderFn: rerender,
+          customStore: store,
+        });
 
         expect(fetchProduct).toHaveBeenCalledWith({
           slug: 'other-product',
@@ -193,9 +197,15 @@ describe('<VersionDetail />', () => {
       versionLabel: '1.0.0',
     };
     const opts = Object.assign({}, defaults, options);
-    const { productSlug, versionLabel, rerenderFn } = opts;
+    const {
+      productSlug,
+      versionLabel,
+      rerenderFn,
+      customStore,
+      initialState,
+    } = opts;
     const context = {};
-    const { getByText, queryByText, getByAltText, rerender } = renderWithRedux(
+    const ui = (
       <StaticRouter context={context}>
         <VersionDetail
           match={{
@@ -205,12 +215,15 @@ describe('<VersionDetail />', () => {
             },
           }}
         />
-      </StaticRouter>,
-      opts.initialState,
-      opts.customStore,
-      rerenderFn,
+      </StaticRouter>
     );
-    return { getByText, queryByText, getByAltText, rerender, context };
+    if (rerenderFn && customStore) {
+      return { ...reRenderWithRedux(ui, customStore, rerenderFn), context };
+    }
+    return {
+      ...renderWithRedux(ui, initialState, customStore, rerenderFn),
+      context,
+    };
   };
 
   describe('no product', () => {
@@ -308,11 +321,15 @@ describe('<VersionDetail />', () => {
   describe('componentDidUpdate', () => {
     describe('product is changed', () => {
       test('fetches product', () => {
-        const { rerender } = setup();
+        const { rerender, store } = setup();
 
         expect(fetchProduct).not.toHaveBeenCalled();
 
-        setup({ productSlug: 'other-product', rerenderFn: rerender });
+        setup({
+          productSlug: 'other-product',
+          rerenderFn: rerender,
+          customStore: store,
+        });
 
         expect(fetchProduct).toHaveBeenCalledWith({
           slug: 'other-product',
@@ -320,27 +337,16 @@ describe('<VersionDetail />', () => {
       });
     });
 
-    // describe('version is unchanged', () => {
-    //   test('does not fetch version', () => {
-    //     const { rerender } = setup();
-
-    //     expect(fetchVersion).not.toHaveBeenCalled();
-
-    //     setup({ rerenderFn: rerender });
-
-    //     expect(fetchVersion).not.toHaveBeenCalled();
-    //   });
-    // });
-
     describe('version is changed', () => {
       test('fetches plan', () => {
-        const { rerender } = setup({ versionLabel: '1.0.0' });
+        const { rerender, store } = setup({ versionLabel: '1.0.0' });
 
         expect(fetchPlan).not.toHaveBeenCalled();
 
         setup({
           versionLabel: '2.0.0',
           rerenderFn: rerender,
+          customStore: store,
         });
 
         expect(fetchPlan).toHaveBeenCalledWith({
@@ -352,7 +358,7 @@ describe('<VersionDetail />', () => {
 
       test('fetches version', () => {
         const product = defaultState.products.products[0];
-        const { rerender } = setup({
+        const { rerender, store } = setup({
           versionLabel: '1.0.0',
           initialState: {
             products: {
@@ -377,6 +383,7 @@ describe('<VersionDetail />', () => {
         setup({
           versionLabel: '2.0.0',
           rerenderFn: rerender,
+          customStore: store,
         });
 
         expect(fetchVersion).toHaveBeenCalledWith({

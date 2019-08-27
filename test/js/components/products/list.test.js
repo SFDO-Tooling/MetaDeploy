@@ -2,7 +2,11 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { fireEvent } from '@testing-library/react';
 
-import { renderWithRedux, storeWithApi } from './../../utils';
+import {
+  renderWithRedux,
+  reRenderWithRedux,
+  storeWithApi,
+} from './../../utils';
 
 import ProductsList from 'components/products/list';
 import { fetchMoreProducts } from 'store/products/actions';
@@ -28,15 +32,15 @@ describe('<Products />', () => {
     props = {},
     rerenderFn = null,
   ) => {
-    const { getByText, getAllByText, queryByText, rerender } = renderWithRedux(
+    const ui = (
       <MemoryRouter>
         <ProductsList {...props} />
-      </MemoryRouter>,
-      initialState,
-      storeWithApi,
-      rerenderFn,
+      </MemoryRouter>
     );
-    return { getByText, getAllByText, queryByText, rerender };
+    if (rerenderFn) {
+      return reRenderWithRedux(ui, storeWithApi(initialState), rerenderFn);
+    }
+    return renderWithRedux(ui, initialState, storeWithApi);
   };
 
   describe('site welcome_text', () => {

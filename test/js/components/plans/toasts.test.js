@@ -16,10 +16,7 @@ describe('<Toasts />', () => {
       label: defaultLabel,
     };
     const opts = { ...defaults, ...options };
-    const { getByText, container, rerender } = render(
-      <Toasts job={opts.job} label={opts.label} />,
-    );
-    return { getByText, container, rerender };
+    return render(<Toasts job={opts.job} label={opts.label} />);
   };
 
   describe('started job', () => {
