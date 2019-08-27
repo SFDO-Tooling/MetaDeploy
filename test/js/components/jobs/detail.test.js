@@ -2,7 +2,11 @@ import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 import { fireEvent } from '@testing-library/react';
 
-import { renderWithRedux, storeWithApi } from './../../utils';
+import {
+  renderWithRedux,
+  reRenderWithRedux,
+  storeWithApi,
+} from './../../utils';
 
 import routes from 'utils/routes';
 import { fetchJob, requestCancelJob } from 'store/jobs/actions';
@@ -102,40 +106,41 @@ describe('<JobDetail />', () => {
   const setup = options => {
     const defaults = {
       initialState: defaultState,
+      customStore: storeWithApi,
       productSlug: 'product-1',
       versionLabel: '1.0.0',
       planSlug: 'my-plan',
       jobId: 'job-1',
     };
     const opts = { ...defaults, ...options };
-    const { productSlug, versionLabel, planSlug, jobId, rerenderFn } = opts;
-    const context = {};
     const {
-      getByText,
-      getAllByText,
-      queryByText,
-      getByAltText,
-      container,
-      rerender,
-    } = renderWithRedux(
+      productSlug,
+      versionLabel,
+      planSlug,
+      jobId,
+      rerenderFn,
+      customStore,
+      initialState,
+    } = opts;
+    const context = {};
+    const ui = (
       <StaticRouter context={context}>
         <JobDetail
           match={{ params: { productSlug, versionLabel, planSlug, jobId } }}
         />
-      </StaticRouter>,
-      opts.initialState,
-      storeWithApi,
-      rerenderFn,
+      </StaticRouter>
     );
-    return {
-      getByText,
-      getAllByText,
-      queryByText,
-      getByAltText,
-      container,
-      rerender,
-      context,
-    };
+    if (rerenderFn) {
+      return {
+        ...reRenderWithRedux(
+          ui,
+          customStore || storeWithApi(initialState),
+          rerenderFn,
+        ),
+        context,
+      };
+    }
+    return { ...renderWithRedux(ui, initialState, customStore), context };
   };
 
   describe('unknown product', () => {
@@ -274,11 +279,15 @@ describe('<JobDetail />', () => {
   describe('componentDidUpdate', () => {
     describe('product is changed', () => {
       test('fetches product', () => {
-        const { rerender } = setup();
+        const { rerender, store } = setup();
 
         expect(fetchProduct).not.toHaveBeenCalled();
 
-        setup({ productSlug: 'product-2', rerenderFn: rerender });
+        setup({
+          productSlug: 'product-2',
+          rerenderFn: rerender,
+          customStore: store,
+        });
 
         expect(fetchProduct).toHaveBeenCalledWith({
           slug: 'product-2',
@@ -288,11 +297,15 @@ describe('<JobDetail />', () => {
 
     describe('version is changed', () => {
       test('fetches version', () => {
-        const { rerender } = setup();
+        const { rerender, store } = setup();
 
         expect(fetchVersion).not.toHaveBeenCalled();
 
-        setup({ versionLabel: '2.0.0', rerenderFn: rerender });
+        setup({
+          versionLabel: '2.0.0',
+          rerenderFn: rerender,
+          customStore: store,
+        });
 
         expect(fetchVersion).toHaveBeenCalledWith({
           product: 'p1',
@@ -303,11 +316,15 @@ describe('<JobDetail />', () => {
 
     describe('plan is changed', () => {
       test('fetches plan', () => {
-        const { rerender } = setup();
+        const { rerender, store } = setup();
 
         expect(fetchPlan).not.toHaveBeenCalled();
 
-        setup({ planSlug: 'other-plan', rerenderFn: rerender });
+        setup({
+          planSlug: 'other-plan',
+          rerenderFn: rerender,
+          customStore: store,
+        });
 
         expect(fetchPlan).toHaveBeenCalledWith({
           product: 'p1',
@@ -319,13 +336,14 @@ describe('<JobDetail />', () => {
 
     describe('job is removed', () => {
       test('fetches job', () => {
-        const { rerender } = setup();
+        const { rerender, store } = setup();
 
         expect(fetchJob).not.toHaveBeenCalled();
 
         setup({
           jobId: 'other-job',
           rerenderFn: rerender,
+          customStore: store,
         });
 
         expect(fetchJob).toHaveBeenCalledWith({
@@ -352,6 +370,7 @@ describe('<JobDetail />', () => {
             },
           },
           rerenderFn: rerender,
+          customStore: false,
         });
 
         expect(getByText('Resolve Installation Error')).toBeVisible();
