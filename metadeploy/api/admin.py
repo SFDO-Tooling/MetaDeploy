@@ -121,7 +121,7 @@ class PlanSlugAdmin(admin.ModelAdmin):
 class PreflightResult(admin.ModelAdmin, PlanMixin):
     autocomplete_fields = ("plan", "user")
     list_filter = ("status", "is_valid", "plan__version__product")
-    list_display = ("user", "status", "is_valid", "plan_title", "product", "version")
+    list_display = ("user", "status", "is_valid", "plan_title", "product", "version", "created_at")
     list_select_related = ("user", "plan", "plan__version", "plan__version__product")
     search_fields = ("user", "plan", "exception")
 
