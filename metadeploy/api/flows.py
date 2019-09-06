@@ -21,9 +21,9 @@ class BasicFlowCallback(FlowCallback):
     def __init__(self, ctx):
         self.context = ctx  # will be either a preflight or a job...
 
-    def _get_step_id(self, path):
+    def _get_step_id(self, **filters):
         try:
-            return str(self.context.plan.steps.filter(path=path).first().id)
+            return str(self.context.plan.steps.filter(**filters).first().id)
         except AttributeError:
             logger.error(f"Unknown task name {path} for {self.context}")
             return None
@@ -67,7 +67,7 @@ class JobFlowCallback(BasicFlowCallback):
         self.set_current_key_by_step(step)
 
     def post_task(self, step, result):
-        step_id = self._get_step_id(step.path)
+        step_id = self._get_step_id(step_num=step.step_num)
         if step_id:
             if step_id not in self.context.results:
                 self.context.results[step_id] = {}
@@ -83,7 +83,7 @@ class JobFlowCallback(BasicFlowCallback):
 
     def set_current_key_by_step(self, step):
         if step is not None:
-            self.result_handler.current_key = self._get_step_id(step.path)
+            self.result_handler.current_key = self._get_step_id(step_num=step.step_num)
         else:
             self.result_handler.current_key = None
 
@@ -98,7 +98,7 @@ class PreflightFlowCallback(BasicFlowCallback):
         results = coordinator.preflight_results
         sanitized_results = {}
         for path, step_results in results.items():
-            step_id = self._get_step_id(path) if path else "plan"
+            step_id = self._get_step_id(path=path) if path else "plan"
             step_result = step_results[0]
             if step_result["message"]:
                 step_result["message"] = bleach.clean(step_result["message"])
