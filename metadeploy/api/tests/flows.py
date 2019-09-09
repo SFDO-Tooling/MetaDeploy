@@ -16,7 +16,7 @@ from ..models import Step
 def test_get_step_id(mocker):
     callbacks = BasicFlowCallback(sentinel.result)
     callbacks._steps = Step.objects.none()
-    result = callbacks._get_step_id("anything")
+    result = callbacks._get_step_id(step_num="anything")
 
     assert result is None
 
@@ -39,13 +39,13 @@ class TestJobFlow:
         self, mocker, user_factory, plan_factory, step_factory, job_factory
     ):
         plan = plan_factory()
-        steps = [step_factory(plan=plan, path=f"task_{i}") for i in range(3)]
+        steps = [step_factory(plan=plan, step_num=str(i)) for i in range(3)]
 
         job = job_factory(plan=plan, steps=steps, org_id="00Dxxxxxxxxxxxxxxx")
 
         callbacks = JobFlowCallback(job)
 
-        stepspecs = [MagicMock(path=f"task_{i}") for i in range(3)]
+        stepspecs = [MagicMock(step_num=str(i)) for i in range(3)]
         MagicMock(exception=None)
 
         callbacks.pre_flow(sentinel.flow_coordinator)
@@ -60,7 +60,7 @@ class TestJobFlow:
         self, mocker, user_factory, plan_factory, step_factory, job_factory
     ):
         plan = plan_factory()
-        steps = [step_factory(plan=plan, path=f"task_{i}") for i in range(3)]
+        steps = [step_factory(plan=plan, step_num=str(i)) for i in range(3)]
 
         job = job_factory(plan=plan, steps=steps, org_id="00Dxxxxxxxxxxxxxxx")
 
@@ -68,7 +68,7 @@ class TestJobFlow:
 
         stepspecs = [MagicMock() for _ in range(3)]
         for i, stepspec in enumerate(stepspecs):
-            stepspec.path = f"task_{i}"
+            stepspec.step_num = str(i)
         result = MagicMock(exception=None)
 
         callbacks.pre_flow(sentinel.flow_coordinator)
@@ -83,13 +83,13 @@ class TestJobFlow:
     ):
         user = user_factory()
         plan = plan_factory()
-        steps = [step_factory(plan=plan, path=f"task_{i}") for i in range(3)]
+        steps = [step_factory(plan=plan, step_num=str(i)) for i in range(3)]
 
         job = job_factory(user=user, plan=plan, steps=steps, org_id=user.org_id)
 
         callbacks = JobFlowCallback(job)
 
-        step = MagicMock(path="task_0")
+        step = MagicMock(step_num="0")
         step.result = MagicMock(exception=ValueError("Some error"))
 
         callbacks.pre_flow(sentinel.flow_coordinator)

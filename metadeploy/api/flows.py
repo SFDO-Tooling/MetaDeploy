@@ -25,7 +25,7 @@ class BasicFlowCallback(FlowCallback):
         try:
             return str(self.context.plan.steps.filter(**filters).first().id)
         except AttributeError:
-            logger.error(f"Unknown task name {path} for {self.context}")
+            logger.error(f"Unknown task {filters} for {self.context}")
             return None
 
     def pre_task(self, step):
