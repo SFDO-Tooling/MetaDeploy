@@ -12,6 +12,7 @@ Welcome to MetaDeploy's documentation!
    :caption: Contents:
 
    tutorial
+   troubleshooting
    api/index
 
 
