@@ -49,7 +49,7 @@ async-timeout==3.0.1
 autobahn==19.9.3
 bleach==3.1.0
 botocore==1.12.229
-certifi==2019.6.16
+certifi==2019.9.11
 cffi==1.12.3
 chardet==3.0.4
 coloredlogs==10.0
