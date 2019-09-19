@@ -1,12 +1,16 @@
 # See https://github.com/stylelint/stylelint/blob/master/docs/user-guide/rules.md
 # Also https://github.com/kristerkari/stylelint-scss#list-of-rules
 
-extends: stylelint-config-recommended-scss
+extends: stylelint-config-recommended
+plugins: stylelint-scss
 
 ignoreFiles:
   - '**/*.js'
 
 rules:
+  at-rule-no-unknown: null
+  scss/at-rule-no-unknown: true
+
   # possible errors (these are all on by default)
   no-descending-specificity: null
 

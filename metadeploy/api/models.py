@@ -96,7 +96,7 @@ class AllowedListOrg(models.Model):
     def save(self, *args, **kwargs):
         if len(self.org_id) == 15:
             self.org_id = convert_to_18(self.org_id)
-        super().save(*args, **kwargs)
+        return super().save(*args, **kwargs)
 
 
 class AllowedListAccessMixin(models.Model):
