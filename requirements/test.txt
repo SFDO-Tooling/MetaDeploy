@@ -20,7 +20,7 @@ vcrpy==2.1.0
 
 # Transitive dependencies
 Babel==2.7.0
-Faker==2.0.1
+Faker==2.0.2
 Pygments==2.4.2
 Sphinx==2.2.0
 alabaster==0.7.12
@@ -36,7 +36,7 @@ inflection==0.3.1
 mccabe==0.6.1
 more-itertools==7.2.0
 multidict==4.5.2
-packaging==19.1
+packaging==19.2
 pluggy==0.13.0
 py==1.8.0
 pycodestyle==2.5.0
