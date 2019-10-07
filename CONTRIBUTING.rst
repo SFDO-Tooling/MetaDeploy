@@ -160,15 +160,15 @@ Development Tasks
 - ``yarn pytest:integration``: run Python integration tests
 - ``yarn test``: run JS tests
 - ``yarn test:watch``: run JS tests with a watcher for development
-- ``yarn lint``: formats and lints ``.scss`` and ``.js`` files; lints ``.py``
-  files
-- ``yarn prettier``: formats ``.scss`` and ``.js`` files
-- ``yarn eslint``: lints ``.js`` files
+- ``yarn lint``: formats and lints all files
+- ``yarn lint:js``: formats, lints, and type-checks ``.js`` files
+- ``yarn lint:sass``: formats and lints ``.scss`` files
+- ``yarn lint:py``: formats and lints ``.py`` files
+- ``yarn prettier:js``: formats ``.js`` files
+- ``yarn prettier:other``: formats ``.json``, ``.md``, and ``.yml`` files
 - ``yarn flow``: runs JS type-checking
 - ``yarn flow-typed``: updates third-party type definitions (in ``flow-typed/``
   dir)
-- ``yarn stylelint``: lints ``.scss`` files
-- ``yarn flake8``: lints ``.py`` files
 - ``yarn build``: builds development (unminified) static assets into ``dist/``
   dir
 - ``yarn prod``: builds production (minified) static assets into ``dist/prod/``
