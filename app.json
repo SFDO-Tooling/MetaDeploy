@@ -1,6 +1,6 @@
 {
   "name": "MetaDeploy",
-  "description": "The future, today.",
+  "description": "Web-based tool for installing Salesforce products",
   "repository": "https://github.com/SFDO-Tooling/MetaDeploy",
   "keywords": ["ci", "python", "django", "salesforce", "github"],
   "env": {
