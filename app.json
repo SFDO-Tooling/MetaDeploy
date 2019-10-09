@@ -12,6 +12,11 @@
       "description": "The url path to the admin section of the site",
       "value": "admin"
     },
+    "ADMIN_API_ALLOWED_SUBNETS": {
+      "description": "Comma-separated list of IPv4 networks which will have Django admin access",
+      "value": "0.0.0.0/0",
+      "required": false
+    },
     "DJANGO_SECRET_KEY": {
       "description": "A secret key used to provide cryptographic signing",
       "generator": "secret"
@@ -25,13 +30,20 @@
       "value": "config.settings.production"
     },
     "AWS_ACCESS_KEY_ID": {
-      "description": "The AWS Access Key ID for S3 storages."
+      "description": "The AWS Access Key ID for S3 storages (if not using Heroku Bucketeer buildpack).",
+      "required": false
     },
     "AWS_SECRET_ACCESS_KEY": {
-      "description": "The AWS Secret Access Key for S3 storages."
+      "description": "The AWS Secret Access Key for S3 storages (if not using Heroku Bucketeer buildpack).",
+      "required": false
     },
     "AWS_BUCKET_NAME": {
-      "description": "The S3 bucket name to use for S3 storages."
+      "description": "The S3 bucket name to use for S3 storages (if not using Heroku Bucketeer buildpack).",
+      "required": false
+    },
+    "SENTRY_DSN": {
+      "description": "Sentry DSN for error reporting (if not using Heroku Sentry buildpack).",
+      "required": false
     },
     "CONNECTED_APP_CLIENT_ID": {
       "description": "The client id (consumer key) for the connected app used to auth with Salesforce."
@@ -60,8 +72,13 @@
       "quantity": 1
     }
   },
-  "image": "heroku/python",
-  "addons": ["heroku-postgresql", "heroku-redis"],
+  "addons": [
+    "heroku-postgresql",
+    "heroku-redis",
+    "bucketeer",
+    "newrelic",
+    "sentry"
+  ],
   "buildpacks": [{ "url": "heroku/nodejs" }, { "url": "heroku/python" }],
   "environments": {
     "test": {
