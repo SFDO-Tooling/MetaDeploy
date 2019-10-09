@@ -152,7 +152,7 @@ texinfo_documents = [
         u"MetaDeploy Documentation",
         author,
         "cookiecutterproject_name",
-        """A short description of the project.""",
+        """Web-based tool for installing Salesforce products""",
         "Miscellaneous",
     )
 ]
