@@ -32,8 +32,8 @@ urlpatterns = [
         include("metadeploy.adminapi.urls", namespace="admin_rest"),
     ),
     # Put this after all other things using `PREFIX`:
-    re_path(PREFIX + "$", RedirectView.as_view(url=f"/{PREFIX}/")),
-    path(PREFIX + "/", admin.site.urls),
+    re_path(PREFIX.rstrip("/") + "$", RedirectView.as_view(url=f"/{PREFIX}")),
+    path(PREFIX, admin.site.urls),
     path("accounts/", include("allauth.urls")),
     path("api/", include("metadeploy.api.urls")),
     # Catchall for the rest. Right now, it just trusts that PREFIX ==
