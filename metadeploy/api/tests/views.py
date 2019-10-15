@@ -366,6 +366,26 @@ class TestPreflight:
 
         assert response.status_code == 403
 
+    def test_preflight_where_plan_not_listed(
+        self, client, plan_factory, preflight_result_factory
+    ):
+        plan = plan_factory()
+        plan.is_listed = False
+        plan.save()
+
+        preflight_result_factory(
+            plan=plan,
+            user=client.user,
+            organization_url=client.user.instance_url,
+            org_id=client.user.org_id,
+        )
+
+        get_response = client.get(reverse("plan-preflight", kwargs={"pk": plan.id}))
+        assert get_response.status_code == 200
+
+        post_response = client.post(reverse("plan-preflight", kwargs={"pk": plan.id}))
+        assert post_response.status_code == 201
+
 
 @pytest.mark.django_db
 class TestOrgViewset:
