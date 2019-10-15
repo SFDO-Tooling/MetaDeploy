@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.core import exceptions
 from django.core.cache import cache
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, mixins, status, viewsets
 from rest_framework.decorators import action
@@ -156,10 +157,11 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ModelViewSet):
     model = Plan
 
     def get_queryset(self):
-        return self.omit_allowed_by_org(Plan.objects.exclude(is_listed=False))
+        plans = Plan.objects.exclude(is_listed=False)
+        return self.omit_allowed_by_org(plans)
 
     def preflight_get(self, request):
-        plan = self.get_object()
+        plan = get_object_or_404(Plan.objects, id=self.kwargs["pk"])
         preflight = PreflightResult.objects.most_recent(
             user=request.user, plan=plan, is_valid_and_complete=False
         )
@@ -169,7 +171,7 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def preflight_post(self, request):
-        plan = self.get_object()
+        plan = get_object_or_404(Plan.objects, id=self.kwargs["pk"])
         is_visible_to = plan.is_visible_to(
             request.user
         ) and plan.version.product.is_visible_to(request.user)
