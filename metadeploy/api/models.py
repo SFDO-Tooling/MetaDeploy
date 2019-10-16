@@ -491,7 +491,7 @@ class Step(HashIdMixin, TranslatableModel):
         description=models.TextField(blank=True),
     )
 
-    plan = models.ForeignKey(Plan, on_delete=models.PROTECT, related_name="steps")
+    plan = models.ForeignKey(Plan, on_delete=models.CASCADE, related_name="steps")
     is_required = models.BooleanField(default=True)
     is_recommended = models.BooleanField(default=True)
     kind = models.CharField(choices=Kind, default=Kind.metadata, max_length=64)
