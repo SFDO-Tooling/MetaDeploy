@@ -507,6 +507,7 @@ class Step(HashIdMixin, TranslatableModel):
         max_length=2048, help_text="dotted module path to BaseTask implementation"
     )
     task_config = JSONField(default=dict, blank=True)
+    source = JSONField(blank=True, null=True)
 
     class Meta:
         ordering = (DottedArray(F("step_num")),)
@@ -523,7 +524,9 @@ class Step(HashIdMixin, TranslatableModel):
             return "paste"
         return None
 
-    def to_spec(self, skip: bool = False):
+    def to_spec(self, project_config, skip: bool = False):
+        if self.source:
+            project_config = project_config.include_source(self.source)
         task_class = import_class(self.task_class)
         assert issubclass(task_class, BaseTask)
         return StepSpec(
@@ -532,6 +535,7 @@ class Step(HashIdMixin, TranslatableModel):
             task_config=self.task_config or {"options": {}},
             task_class=task_class,
             skip=skip,
+            project_config=project_config,
         )
 
     def __str__(self):
