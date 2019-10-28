@@ -2,7 +2,7 @@
 
 -r test.txt
 
-django-extensions==2.2.3
+django-extensions==2.2.5
 ipython==7.8.0
 
 # Transitive dependencies
