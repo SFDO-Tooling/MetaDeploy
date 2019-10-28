@@ -55,7 +55,7 @@ chardet==3.0.4
 coloredlogs==10.0
 constantly==15.1.0
 croniter==0.3.30
-cryptography==2.7
+cryptography==2.8
 daphne==2.3.0
 defusedxml==0.6.0
 django-filter==2.2.0
