@@ -27,7 +27,7 @@ newrelic==5.2.0.127
 psycopg2-binary==2.8.3
 pyopenssl==19.0.0
 rq==1.1.0
-sentry-sdk==0.12.3
+sentry-sdk==0.13.1
 service_identity==18.1.0
 werkzeug==0.16.0
 whitenoise==4.1.4
