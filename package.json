@@ -56,7 +56,7 @@
     "js-cookie": "^2.2.1",
     "react": "^16.10.2",
     "react-document-title": "^2.0.3",
-    "react-dom": "^16.10.2",
+    "react-dom": "^16.11.0",
     "react-fns": "^1.4.0",
     "react-i18next": "^10.13.1",
     "react-redux": "^7.1.1",
