@@ -1,5 +1,5 @@
-// flow-typed signature: 09cf2598b67f9de85f0243528672647c
-// flow-typed version: c6154227d1/reselect_v4.x.x/flow_>=v0.104.x
+// flow-typed signature: 6e52cb2cbf619ada2372cc5ec183f876
+// flow-typed version: 89b0d35e3a/reselect_v4.x.x/flow_>=v0.104.x
 
 type ExtractReturnType = <Return>((...rest: any[]) => Return) => Return;
 
@@ -12,7 +12,7 @@ declare module "reselect" {
     & {
     recomputations(): number,
     resetRecomputations(): number,
-    resultFunc(state: TState, props: TProps, ...rest: Array<any>): TResult,
+    resultFunc(...args: any[]): TResult,
     ...
   };
 
