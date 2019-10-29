@@ -1,6 +1,8 @@
 from datetime import timedelta
+from unittest import mock
 
 import pytest
+from cumulusci.core.flowrunner import StepSpec
 from django.contrib.sites.models import Site
 from django.core.exceptions import MultipleObjectsReturned, ValidationError
 from django.utils import timezone
@@ -451,6 +453,13 @@ class TestStep:
         step = step_factory(step_num="a")
         with pytest.raises(ValidationError):
             step.full_clean()
+
+    def test_to_spec(self, step_factory):
+        step = step_factory(source={"github": "foo"})
+        project_config = mock.Mock()
+        spec = step.to_spec(project_config)
+        project_config.include_source.assert_called_once()
+        assert isinstance(spec, StepSpec)
 
 
 @pytest.mark.django_db
