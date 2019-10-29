@@ -98,6 +98,7 @@ class TestPlanViewSet:
                     "name": "Sample step",
                     "path": "main_task",
                     "step_num": "1.0",
+                    "source": None,
                     "task_class": "cumulusci.core.tests.test_tasks._TaskHasResult",
                     "task_config": {},
                 }
@@ -162,6 +163,7 @@ class TestPlanViewSet:
                     "name": "Task 1",
                     "path": "task1",
                     "step_num": "1.0",
+                    "source": None,
                     "task_class": "cumulusci.core.tests.test_tasks._TaskHasResult",
                     "task_config": {},
                 },
@@ -173,6 +175,7 @@ class TestPlanViewSet:
                     "name": "Task 2",
                     "path": "task2",
                     "step_num": "1.3",
+                    "source": None,
                     "task_class": "cumulusci.core.tests.test_tasks._TaskHasResult",
                     "task_config": {},
                 },
