@@ -216,7 +216,10 @@ def run_flows(*, user, plan, skip_tasks, organization_url, result_class, result_
         ctx.keychain.set_service("github", github_app, True)
 
         steps = [
-            step.to_spec(skip=step.path in skip_tasks) for step in plan.steps.all()
+            step.to_spec(
+                project_config=ctx.project_config, skip=step.path in skip_tasks
+            )
+            for step in plan.steps.all()
         ]
         org = ctx.keychain.get_org(current_org)
         result.run(ctx, plan, steps, org)
