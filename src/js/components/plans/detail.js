@@ -383,7 +383,8 @@ class PlanDetail extends React.Component<Props, State> {
 
     const isMostRecent =
       product.most_recent_version &&
-      version.id === product.most_recent_version.id;
+      new Date(version.created_at) >=
+        new Date(product.most_recent_version.created_at);
 
     return (
       <DocumentTitle
