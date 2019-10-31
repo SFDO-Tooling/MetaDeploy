@@ -248,7 +248,8 @@ class VersionDetail extends React.Component<VersionDetailProps> {
       (product.description && product.description.startsWith('<h2>'));
     const isMostRecent =
       product.most_recent_version &&
-      version.id === product.most_recent_version.id;
+      new Date(version.created_at) >=
+        new Date(product.most_recent_version.created_at);
 
     return (
       <DocumentTitle title={`${product.title} | ${window.SITE_NAME}`}>

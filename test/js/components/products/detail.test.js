@@ -41,6 +41,7 @@ const defaultState = {
           id: 'v1',
           product: 'p1',
           label: '1.0.0',
+          created_at: '2019-10-31T00:00:00.000000Z',
           description: 'This is a test product version.',
           primary_plan: {
             id: 'plan-1',
@@ -524,6 +525,7 @@ describe('<VersionDetail />', () => {
       id: 'v2',
       product: 'p1',
       label: '2.0.0',
+      created_at: '2019-01-01T00:00:00.000000Z',
       description: 'This is another test product version.',
       primary_plan: {
         id: 'plan-4',
