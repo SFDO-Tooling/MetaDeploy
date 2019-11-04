@@ -79,7 +79,7 @@
     "@babel/preset-env": "^7.6.3",
     "@babel/preset-flow": "^7.0.0",
     "@babel/preset-react": "^7.6.3",
-    "@testing-library/jest-dom": "^4.2.0",
+    "@testing-library/jest-dom": "^4.2.3",
     "@testing-library/react": "^9.3.0",
     "autoprefixer": "^9.7.0",
     "babel-eslint": "^10.0.3",
