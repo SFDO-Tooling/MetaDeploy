@@ -81,7 +81,7 @@ plaintable==0.1.1
 pyasn1-modules==0.2.6
 pyasn1==0.4.7
 pycparser==2.19
-python-dateutil==2.8.0
+python-dateutil==2.8.1
 python3-openid==3.1.0
 pytz==2019.3
 raven==6.10.0
