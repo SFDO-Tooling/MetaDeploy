@@ -1,9 +1,9 @@
 -e git+https://github.com/SFDO-Tooling/sfdo-template-helpers.git@v0.9.0#egg=sfdo-template-helpers
-Django==2.2.6
+Django==2.2.7
 Pillow==6.2.0
 ansi2html==1.5.2
 bleach==3.1.0
-boto3==1.10.8
+boto3==1.10.9
 channels==2.3.0
 channels_redis==2.4.0
 cumulusci==3.1.0
@@ -48,7 +48,7 @@ asn1crypto==1.0.1
 async-timeout==3.0.1
 autobahn==19.10.1
 bleach==3.1.0
-botocore==1.13.8
+botocore==1.13.9
 certifi==2019.9.11
 cffi==1.13.2
 chardet==3.0.4
