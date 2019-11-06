@@ -13,14 +13,6 @@ MetaDeploy
      :target: https://greenkeeper.io/
      :alt: Greenkeeper Status
 
-.. image:: https://pyup.io/repos/github/SFDO-Tooling/MetaDeploy/shield.svg
-     :target: https://pyup.io/repos/github/SFDO-Tooling/MetaDeploy/
-     :alt: Python Updates
-
-.. image:: https://pyup.io/repos/github/SFDO-Tooling/MetaDeploy/python-3-shield.svg
-     :target: https://pyup.io/repos/github/SFDO-Tooling/MetaDeploy/
-     :alt: Python 3 Status
-
 Development
 -----------
 
