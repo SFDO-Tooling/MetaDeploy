@@ -102,9 +102,6 @@ const actions = {
   doRemoveError: removeError,
 };
 
-const WrappedHeader: React.ComponentType<{}> = connect(
-  select,
-  actions,
-)(Header);
+const WrappedHeader: React.ComponentType<{}> = connect(select, actions)(Header);
 
 export default WrappedHeader;
