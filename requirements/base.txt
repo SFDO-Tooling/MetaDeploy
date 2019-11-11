@@ -23,7 +23,7 @@ django-storages==1.7.2
 djangorestframework==3.10.3
 github3.py==1.3.0
 logfmt==0.4
-newrelic==5.2.0.127
+newrelic==5.2.2.130
 psycopg2-binary==2.8.3
 pyopenssl==19.0.0
 rq==1.1.0
