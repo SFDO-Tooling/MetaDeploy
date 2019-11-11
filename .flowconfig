@@ -23,6 +23,8 @@ include_warnings=true
 module.system.node.resolve_dirname=src/js
 module.system.node.resolve_dirname=static
 module.system.node.resolve_dirname=node_modules
+module.system.node.allow_root_relative=true
+module.system.node.root_relative_dirname=./src/js
 server.max_workers=4
 
 [strict]

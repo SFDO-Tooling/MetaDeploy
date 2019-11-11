@@ -122,10 +122,10 @@ export const createSocket = ({
   url: string,
   options?: { [string]: mixed },
   dispatch: Dispatch,
-}): {
+}): ({
   subscribe: (payload: Subscription) => void,
   reconnect: () => void,
-} | null => {
+} | null) => {
   /* istanbul ignore if */
   if (!(url && dispatch)) {
     return null;
