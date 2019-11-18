@@ -22,8 +22,8 @@ import type {
 import type { SelectedSteps as SelectedStepsType } from 'components/plans/detail';
 import type { User as UserType } from 'store/user/reducer';
 
-export type DataCellProps = {
-  [string]: mixed,
+export type DataCellProps = {|
+  [string]: string,
   user?: UserType,
   preflight?: ?PreflightType,
   item?: StepType,
@@ -32,7 +32,7 @@ export type DataCellProps = {
   handleStepsChange?: (string, boolean) => void,
   job?: JobType,
   activeJobStep?: string | null,
-};
+|};
 
 type Props = {
   user?: UserType,
