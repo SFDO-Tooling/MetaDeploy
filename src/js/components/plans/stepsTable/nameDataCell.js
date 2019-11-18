@@ -15,10 +15,11 @@ import type { DataCellProps } from 'components/plans/stepsTable';
 
 const { RESULT_STATUS } = CONSTANTS;
 
-type Props = {
+type Props = {|
+  ...DataCellProps,
   togglePanel: (val: string) => void,
   expandedPanels: Set<string>,
-} & DataCellProps;
+|};
 
 class NameDataCell extends React.Component<Props> {
   togglePanel = () => {
