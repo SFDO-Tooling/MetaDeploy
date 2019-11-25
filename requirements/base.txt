@@ -3,7 +3,7 @@ Django==2.2.7
 Pillow==6.2.0
 ansi2html==1.5.2
 bleach==3.1.0
-boto3==1.10.19
+boto3==1.10.26
 channels==2.3.0
 channels_redis==2.4.0
 cumulusci==3.1.2
@@ -19,7 +19,7 @@ django-parler==2.0
 django-redis==4.10.0
 django-rq-scheduler==1.1.3
 django-rq==2.1.0
-django-storages==1.7.2
+django-storages==1.8
 djangorestframework==3.10.3
 github3.py==1.3.0
 logfmt==0.4
@@ -48,7 +48,7 @@ asn1crypto==1.0.1
 async-timeout==3.0.1
 autobahn==19.11.1
 bleach==3.1.0
-botocore==1.13.19
+botocore==1.13.26
 certifi==2019.9.11
 cffi==1.13.2
 chardet==3.0.4
@@ -56,7 +56,7 @@ coloredlogs==10.0
 constantly==15.1.0
 croniter==0.3.30
 cryptography==2.7
-daphne==2.3.0
+daphne==2.4.0
 defusedxml==0.6.0
 django-filter==2.2.0
 djangorestframework==3.10.3
@@ -96,7 +96,7 @@ s3transfer==0.2.1
 salesforce-bulk==2.1.0
 sarge==0.1.5.post0
 selenium==3.141.0
-setuptools==41.5.1
+setuptools==42.0.0
 simple-salesforce==0.74.3
 six==1.13.0
 sqlparse==0.3.0
