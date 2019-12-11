@@ -20,7 +20,7 @@ vcrpy==2.1.1
 
 # Transitive dependencies
 Babel==2.7.0
-Faker==2.0.4
+Faker==3.0.0
 Pygments==2.5.2
 alabaster==0.7.12
 appdirs==1.4.3
