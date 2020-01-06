@@ -418,7 +418,7 @@ LOGGING = {
         },
         "rq.worker": {"handlers": ["rq_console"], "level": "DEBUG"},
         "metadeploy.multisalesforce": {"handlers": ["console"], "level": "DEBUG"},
-        "metadeploy.api.jobs": {"handlers": ["console"], "level": "DEBUG"},
+        "metadeploy.api": {"handlers": ["console"], "level": "DEBUG"},
         "metadeploy.logging_middleware": {
             "handlers": ["console"],
             "level": "DEBUG",
