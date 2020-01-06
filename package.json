@@ -128,10 +128,6 @@
     "webpack-dev-server": "^3.9.0",
     "webpack-merge": "^4.2.2"
   },
-  "resolutions": {
-    "eslint": "~6.1.0",
-    "espree": "6.0.0"
-  },
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged",
