@@ -12,7 +12,6 @@ all=warn
 deprecated-utility=off
 dynamic-export=off
 inexact-spread=off
-non-array-spread=off
 sketchy-null-bool=off
 sketchy-null-mixed=off
 sketchy-null-string=off
