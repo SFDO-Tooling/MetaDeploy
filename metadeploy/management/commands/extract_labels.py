@@ -1,3 +1,5 @@
+import json
+
 from django.core.management.base import BaseCommand
 
 from metadeploy.api.models import ClickThroughAgreement
@@ -10,6 +12,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         click_through_agreements = ClickThroughAgreement.objects.all()
+
+        agreements_dict = {}
         for agreement in click_through_agreements:
-            # Output Id, text in csv format
-            self.stdout.write(f"{agreement.id}, {agreement.text}")
+            agreements_dict[agreement.id] = agreement.text
+
+        self.stdout.write(json.dumps(agreements_dict))
