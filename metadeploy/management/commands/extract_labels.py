@@ -17,4 +17,6 @@ class Command(BaseCommand):
         for agreement in click_through_agreements:
             agreements_dict[agreement.id] = agreement.text
 
-        self.stdout.write(json.dumps(agreements_dict))
+        localization = {"en": agreements_dict}
+
+        self.stdout.write(json.dumps(localization))
