@@ -1,8 +1,7 @@
 import json
 
+from django.apps import apps
 from django.core.management.base import BaseCommand
-
-from metadeploy.api.models import ClickThroughAgreement
 
 
 class Command(BaseCommand):
@@ -10,13 +9,77 @@ class Command(BaseCommand):
         "Queries for api_clickthroughagreement records and outputs them in csv format"
     )
 
+    translatable_objects = {
+        "Product": {
+            "fields": [
+                "title",
+                "short_description",
+                "description",
+                "click_through_agreement",
+                "error_message",
+            ]
+        },
+        "PlanTemplate": {
+            "fields": ["preflight_message", "post_install_message", "error_message"]
+        },
+        # "Plan": {
+        # "fields": [
+        # "title",
+        # "preflight_message_additional",
+        # "post_install_message_additional",
+        # ]
+        # },
+        # "Step": {"fields": ["name", "description"]},
+        "SiteProfile": {
+            "fields": ["name", "company_name", "welcome_text", "copyright_notice"]
+        },
+    }
+
+    field_descriptions = {
+        "Product": {
+            "title": "The name of the product",
+            "short_description": "Short Description of the product",
+            "description": "Description of the product",
+            "click_through_agreement": "Users must check a box to agree to this legal text before running the installer",
+            "error_message": "A message regarding what to do if an error occurs during installation",
+        },
+        "PlanTemplate": {
+            "preflight_message": " Message displayed during preflight checks",
+            "post_install_message": "Message displayed after installation completes",
+            "error_message": "A message displayed to users if an error occurs",
+        },
+        # "Plan": {
+        # "title": "Title of the plan",
+        # "preflight_message_additional": "An additional preflight message",
+        # "post_install_message_additional": "An additional post install message",
+        # },
+        # "Step": {
+        # "name": "The name of the step",
+        # "description": "Description of the step",
+        # },
+        "SiteProfile": {
+            "name": "Name of the site profile",
+            "company_name": "Name of the company",
+            "welcome_text": "Text that welcomes the user",
+            "copyright_notice": "Copyright notice displayed to the user",
+        },
+    }
+
     def handle(self, *args, **options):
-        click_through_agreements = ClickThroughAgreement.objects.all()
+        translatable_labels = {}
+        for obj in self.translatable_objects.keys():
+            model = apps.get_model("api", obj)
+            model_fields = self.translatable_objects[obj]["fields"]
 
-        agreements_dict = {}
-        for agreement in click_through_agreements:
-            agreements_dict[agreement.id] = agreement.text
+            record_info = {}
+            for record in model.objects.all():
+                record_info[str(record.id)] = {}
+                for field in model_fields:
+                    field_info = {
+                        "message": getattr(record, field),
+                        "description": self.field_descriptions[obj][field],
+                    }
+                    record_info[str(record.id)][field] = field_info
+                translatable_labels[obj] = record_info
 
-        localization = {"en": agreements_dict}
-
-        self.stdout.write(json.dumps(localization))
+        self.stdout.write(json.dumps(translatable_labels))
