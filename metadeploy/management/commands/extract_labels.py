@@ -39,14 +39,14 @@ class Command(BaseCommand):
         "Product": {
             "title": "The name of the product",
             "short_description": "Short Description of the product",
-            "description": "Description of the product",
+            "description": "Description of the Product",
             "click_through_agreement": "Users must check a box to agree to this legal text before running the installer",
-            "error_message": "A message regarding what to do if an error occurs during installation",
+            "error_message": "Message regarding what to do if an error occurs during installation",
         },
         "PlanTemplate": {
-            "preflight_message": " Message displayed during preflight checks",
+            "preflight_message": "Message displayed during preflight checks",
             "post_install_message": "Message displayed after installation completes",
-            "error_message": "A message displayed to users if an error occurs",
+            "error_message": "Message displayed to users if an error occurs",
         },
         # "Plan": {
         # "title": "Title of the plan",
@@ -60,8 +60,8 @@ class Command(BaseCommand):
         "SiteProfile": {
             "name": "Name of the site profile",
             "company_name": "Name of the company",
-            "welcome_text": "Text that welcomes the user",
-            "copyright_notice": "Copyright notice displayed to the user",
+            "welcome_text": "Text shown above products on the home page",
+            "copyright_notice": "Copyright notice shown in the footer of the page",
         },
     }
 
