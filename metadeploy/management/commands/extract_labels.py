@@ -70,7 +70,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         translatable_labels = {}
-        for obj in self.translatable_objects.keys():
+        for obj in self.translatable_objects:
             model = apps.get_model("api", obj)
             model_fields = self.translatable_objects[obj]["fields"]
 
