@@ -6,9 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 
 class Command(BaseCommand):
-    help = (
-        "Queries for api_clickthroughagreement records and outputs them in csv format"
-    )
+    help = "Queries for translatable field values and outputs them in JSON format"
 
     translatable_objects = {
         "Product": {
