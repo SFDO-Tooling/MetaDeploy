@@ -1,6 +1,4 @@
 import json
-import parler
-
 
 from django.apps import apps
 from django.core.management.base import BaseCommand
