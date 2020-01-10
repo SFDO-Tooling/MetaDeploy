@@ -74,4 +74,5 @@ def test_error_handling(getattr, product):
     call_command("extract_labels", stdout=out)
 
     out = out.getvalue()
-    assert out == '{"Product": {"DpLKPYV": {}}}\n'
+    expected = '{"Product": {"' + str(product.id) + '": {}}}\n'
+    assert out == expected
