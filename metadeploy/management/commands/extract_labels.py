@@ -81,9 +81,9 @@ class Command(BaseCommand):
                             "message": getattr(record, field),
                             "description": self.field_descriptions[obj][field],
                         }
+                        record_info[str(record.id)][field] = field_info
                     except ObjectDoesNotExist:
                         pass
-                    record_info[str(record.id)][field] = field_info
                 translatable_labels[obj] = record_info
 
         self.stdout.write(json.dumps(translatable_labels))

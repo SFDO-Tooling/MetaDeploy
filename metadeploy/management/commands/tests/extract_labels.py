@@ -1,15 +1,16 @@
 import json
 import pytest
 from io import StringIO
+from unittest import mock
 
 from metadeploy.api.models import Product, ProductCategory
 
 from django.core.management import call_command
+from django.core.exceptions import ObjectDoesNotExist
 
 
-@pytest.mark.django_db
-def test_extract_labels():
-    """ Test extract labels command."""
+@pytest.fixture
+def product():
     category = ProductCategory.objects.create(title="Test Category", order_key=10)
 
     title = "Test Product Title"
@@ -17,7 +18,7 @@ def test_extract_labels():
     description = "This is slightly more descriptive."
     click_through_agreement = "# Please check the box below"
     error_message = "# This is an error message"
-    product = Product.objects.create(
+    return Product.objects.create(
         title=title,
         short_description=short_description,
         description=description,
@@ -26,6 +27,10 @@ def test_extract_labels():
         category=category,
     )
 
+
+@pytest.mark.django_db
+def test_extract_labels(product):
+    """ Test extract labels command."""
     out = StringIO()
     call_command("extract_labels", stdout=out)
 
@@ -58,3 +63,15 @@ def test_extract_labels():
     actual = out.getvalue()
     expected = json.dumps(expected) + "\n"
     assert actual == expected
+
+
+@pytest.mark.django_db
+@mock.patch("metadeploy.management.commands.extract_labels.getattr")
+def test_error_handling(getattr, product):
+    getattr.side_effect = ObjectDoesNotExist
+    out = StringIO()
+
+    call_command("extract_labels", stdout=out)
+
+    out = out.getvalue()
+    assert out == '{"Product": {"DpLKPYV": {}}}\n'
