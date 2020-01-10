@@ -38,8 +38,8 @@ class Command(BaseCommand):
     field_descriptions = {
         "Product": {
             "title": "The name of the product",
-            "short_description": "Short Description of the product",
-            "description": "Description of the Product",
+            "short_description": "Short description of the product",
+            "description": "Description of the product",
             "click_through_agreement": "Users must check a box to agree to this legal text before running the installer",
             "error_message": "Message regarding what to do if an error occurs during installation",
         },
