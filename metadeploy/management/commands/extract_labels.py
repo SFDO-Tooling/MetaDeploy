@@ -1,7 +1,10 @@
 import json
+import parler
+
 
 from django.apps import apps
 from django.core.management.base import BaseCommand
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class Command(BaseCommand):
@@ -75,10 +78,13 @@ class Command(BaseCommand):
             for record in model.objects.all():
                 record_info[str(record.id)] = {}
                 for field in model_fields:
-                    field_info = {
-                        "message": getattr(record, field),
-                        "description": self.field_descriptions[obj][field],
-                    }
+                    try:
+                        field_info = {
+                            "message": getattr(record, field),
+                            "description": self.field_descriptions[obj][field],
+                        }
+                    except ObjectDoesNotExist:
+                        pass
                     record_info[str(record.id)][field] = field_info
                 translatable_labels[obj] = record_info
 
