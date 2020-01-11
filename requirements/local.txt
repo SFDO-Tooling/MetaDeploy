@@ -3,17 +3,17 @@
 -r test.txt
 
 django-extensions==2.2.3
-ipython==7.8.0
+ipython==7.11.1
 
 # Transitive dependencies
 appnope==0.1.0
 backcall==0.1.0
 decorator==4.4.0
 ipython-genutils==0.2.0
-jedi==0.15.1
-parso==0.5.1
+jedi==0.15.2
+parso==0.5.2
 pexpect==4.7.0
 pickleshare==0.7.5
-prompt-toolkit==2.0.10
+prompt-toolkit==3.0.2
 ptyprocess==0.6.0
 traitlets==4.3.3
