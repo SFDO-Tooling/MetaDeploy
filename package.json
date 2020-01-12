@@ -77,7 +77,7 @@
     "@babel/plugin-proposal-export-namespace-from": "^7.5.2",
     "@babel/plugin-proposal-object-rest-spread": "^7.6.2",
     "@babel/preset-env": "^7.7.6",
-    "@babel/preset-flow": "^7.0.0",
+    "@babel/preset-flow": "^7.8.0",
     "@babel/preset-react": "^7.7.0",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.4.0",
