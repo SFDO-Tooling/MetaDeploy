@@ -17,12 +17,16 @@ Websocket notifications you can subscribe to:
     org.:org_url
         ORG_CHANGED
 """
+import logging
+
 from channels.layers import get_channel_layer
 from django.utils.translation import gettext_lazy as _
 
 from ..consumer_utils import get_set_message_semaphore
 from .constants import CHANNELS_GROUP_NAME
 from .hash_url import convert_org_id_to_key
+
+logger = logging.getLogger("metadeploy.api.push")
 
 
 async def push_message_about_instance(instance, message):
@@ -32,6 +36,7 @@ async def push_message_about_instance(instance, message):
     channel_layer = get_channel_layer()
     sent_message = {"type": "notify", "group": group_name, "content": message}
     if await get_set_message_semaphore(channel_layer, sent_message):
+        logger.info(f"Sending message {sent_message}")
         await channel_layer.group_send(group_name, sent_message)
 
 
@@ -49,6 +54,7 @@ async def push_serializable(instance, serializer, type_):
     }
     channel_layer = get_channel_layer()
     if await get_set_message_semaphore(channel_layer, message):
+        logger.info(f"Sending message {message}")
         await channel_layer.group_send(group_name, message)
 
 
@@ -142,4 +148,5 @@ async def notify_org_result_changed(result):
     }
     channel_layer = get_channel_layer()
     if await get_set_message_semaphore(channel_layer, message):
+        logger.info(f"Sending message {message}")
         await channel_layer.group_send(group_name, message)
