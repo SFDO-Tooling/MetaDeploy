@@ -99,7 +99,7 @@ setuptools==45.0.0
 simple-salesforce==0.74.3
 six==1.13.0
 sqlparse==0.3.0
-txaio==18.8.1
+txaio==20.1.1
 unicodecsv==0.14.1
 uritemplate==3.0.1
 urllib3==1.25.7
