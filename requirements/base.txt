@@ -35,7 +35,7 @@ whitenoise==5.0.1
 # Transitive dependencies
 Automat==0.7.0
 Click==7.0
-Jinja2==2.10.3
+Jinja2==2.11.1
 Markdown==3.1.1
 MarkupSafe==1.1.1
 PyHamcrest==1.9.0
