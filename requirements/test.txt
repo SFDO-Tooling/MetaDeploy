@@ -33,7 +33,7 @@ imagesize==1.2.0
 importlib-metadata==1.4.0
 inflection==0.3.1
 mccabe==0.6.1
-more-itertools==8.1.0
+more-itertools==8.2.0
 multidict==4.7.4
 packaging==20.0
 pluggy==0.13.1
