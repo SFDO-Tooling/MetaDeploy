@@ -14,7 +14,7 @@ pytest-cov==2.8.1
 pytest-django==3.7.0
 pytest-factoryboy==2.0.3
 pytest-mock==2.0.0
-pytest==5.3.2
+pytest==5.3.5
 sphinxcontrib-httpdomain==1.7.0
 vcrpy==4.0.2
 
