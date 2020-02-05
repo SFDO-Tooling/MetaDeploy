@@ -24,6 +24,9 @@ from .routing import websockets
 
 PREFIX = settings.ADMIN_AREA_PREFIX
 
+# Custom error views
+handler500 = "metadeploy.views.custom_server_error_view"
+
 
 urlpatterns = [
     path(urljoin(PREFIX, r"django-rq/"), include("django_rq.urls")),
