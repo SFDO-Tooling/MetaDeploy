@@ -25,7 +25,7 @@ from .routing import websockets
 PREFIX = settings.ADMIN_AREA_PREFIX
 
 # Custom error views
-handler500 = "metadeploy.views.custom_server_error_view"
+handler403 = "metadeploy.views.custom_permission_denied_view"
 
 
 urlpatterns = [

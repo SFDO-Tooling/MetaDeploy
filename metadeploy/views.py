@@ -1,12 +1,12 @@
-from django.http import HttpResponse
+from django.shortcuts import render
 
 from metadeploy.multisalesforce.views import SalesforcePermissionsError
 
 
-def custom_server_error_view(request):
-    error = ""
-    if isinstance(error, SalesforcePermissionsError):
-        return HttpResponse("<show exception message here>")
+def custom_permission_denied_view(request, exception):
+    if isinstance(exception, SalesforcePermissionsError):
+        message = exception
     else:
-        # TODO: Should this be translatable?
-        return HttpResponse("An internal error occurred while processing your request.")
+        message = "An internal error occurred while processing your request."
+
+    return render(request, "auth_error.html", context={"error_message": message})
