@@ -5,6 +5,8 @@ import requests
 from django.core.exceptions import SuspiciousOperation
 from sfdo_template_helpers.crypto import fernet_decrypt, fernet_encrypt
 
+from metadeploy.multisalesforce.views import SalesforcePermissionsError
+
 from ..views import (
     LoggingOAuth2CallbackView,
     LoggingOAuth2LoginView,
@@ -59,8 +61,6 @@ class TestSalesforceOAuth2Mixin:
 
     def test_complete_login_fail(self, rf, mocker):
         # This is a mess of terrible mocking and I do not like it.
-        # This is really just to exercise the mixin, and confirm that it
-        # assigns organization_details to None if there's an error.
         bad_response = mock.MagicMock()
         bad_response.raise_for_status.side_effect = requests.HTTPError
         get = mocker.patch("requests.get")
@@ -82,8 +82,10 @@ class TestSalesforceOAuth2Mixin:
         token = mock.MagicMock()
         token.token = fernet_encrypt("token")
 
-        ret = adapter.complete_login(request, None, token, response={})
-        assert ret.account.extra_data["organization_details"] is None
+        with pytest.raises(SalesforcePermissionsError):
+            adapter.complete_login(request, None, token, response={})
+
+        # assert ret.account.extra_data["organization_details"] is None
 
     def test_parse_token(self):
         adapter = SalesforceOAuth2CustomAdapter(request=None)
