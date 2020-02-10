@@ -130,6 +130,18 @@ init_i18n(i18nError => {
     window.SITE_NAME =
       (window.GLOBALS.SITE && window.GLOBALS.SITE.name) || i18n.t('MetaDeploy');
 
+    // Get JS context
+    let JS_CONTEXT = {};
+    try {
+      const contextEl = document.getElementById('js-context');
+      if (contextEl) {
+        JS_CONTEXT = JSON.parse(contextEl.textContent);
+      }
+    } catch (err) {
+      logError(err);
+    }
+    window.JS_CONTEXT = JS_CONTEXT;
+
     // Get logged-in/out status
     const userString = el.getAttribute('data-user');
     if (userString) {

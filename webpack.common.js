@@ -108,9 +108,5 @@ module.exports = {
       inject: false,
       template: path.join(__dirname, 'src', 'index.html'),
     }),
-    new HtmlWebpackPlugin({
-      inject: false,
-      template: path.join(__dirname, 'src', 'auth_error.html'),
-    }),
   ],
 };
