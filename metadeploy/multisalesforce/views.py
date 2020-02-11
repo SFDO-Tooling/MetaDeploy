@@ -10,7 +10,7 @@ from allauth.socialaccount.providers.salesforce.views import (
     SalesforceOAuth2Adapter as SalesforceOAuth2BaseAdapter,
 )
 from allauth.utils import get_request_param
-from django.core.exceptions import SuspiciousOperation
+from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from sfdo_template_helpers.crypto import fernet_decrypt, fernet_encrypt
 
 from metadeploy.api.constants import ORGANIZATION_DETAILS
@@ -26,7 +26,7 @@ ORGID_RE = re.compile(r"^00D[a-zA-Z0-9]{15}$")
 CUSTOM_DOMAIN_RE = re.compile(r"^[a-zA-Z0-9.-]+$")
 
 
-class SalesforcePermissionsError(Exception):
+class SalesforcePermissionsError(PermissionDenied):
     pass
 
 
@@ -44,7 +44,9 @@ class SalesforceOAuth2Mixin:
         # Also contains resp.json()["name"], but not ["type"], so it's
         # insufficient to just call this endpoint.
         if not resp.json()["userSettings"]["canModifyAllData"]:
-            raise SalesforcePermissionsError
+            raise SalesforcePermissionsError(
+                "Error logging in: User does not have 'Modify All Data' Permission."
+            )
 
         # Get org name and type:
         org_id = extra_data["organization_id"]
@@ -70,11 +72,7 @@ class SalesforceOAuth2Mixin:
         instance_url = kwargs.get("response", {}).get("instance_url", None)
         ret = self.get_provider().sociallogin_from_response(request, extra_data)
         ret.account.extra_data["instance_url"] = instance_url
-        try:
-            org_details = self.get_org_details(extra_data, token)
-        except (requests.HTTPError, KeyError, SalesforcePermissionsError):
-            org_details = None
-
+        org_details = self.get_org_details(extra_data, token)
         ret.account.extra_data[ORGANIZATION_DETAILS] = org_details
         return ret
 
@@ -114,7 +112,7 @@ class SalesforceOAuth2CustomAdapter(SalesforceOAuth2Mixin, SalesforceOAuth2BaseA
         if not CUSTOM_DOMAIN_RE.match(custom_domain):
             raise SuspiciousOperation("Invalid custom domain")
         self.request.session["custom_domain"] = custom_domain
-        return "https://{}.my.salesforce.com".format(custom_domain)
+        return f"https://{custom_domain}.my.salesforce.com"
 
 
 class LoggingOAuth2LoginView(OAuth2LoginView):

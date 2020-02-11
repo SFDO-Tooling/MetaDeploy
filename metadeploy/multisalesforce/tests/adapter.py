@@ -1,3 +1,6 @@
+import pytest
+from requests import exceptions
+
 from ..adapter import CustomSocialAccountAdapter
 
 
@@ -7,5 +10,8 @@ def test_authentication_error_logs(mocker):
     )  # noqa
     error = mocker.patch("metadeploy.multisalesforce.adapter.logger.error")
     adapter = CustomSocialAccountAdapter()
-    adapter.authentication_error()
+
+    with pytest.raises(exceptions.ConnectionError):
+        adapter.authentication_error(exception=exceptions.ConnectionError)
+
     assert error.called
