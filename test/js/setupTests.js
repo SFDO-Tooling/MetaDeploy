@@ -2,6 +2,8 @@ import 'isomorphic-fetch';
 import '@testing-library/jest-dom/extend-expect';
 import fetchMock from 'fetch-mock';
 
+let location;
+
 beforeAll(() => {
   document.createRange = () => ({
     setStart: jest.fn(),
@@ -35,6 +37,18 @@ beforeAll(() => {
   window.console.error = jest.fn();
   window.console.warn = jest.fn();
   window.console.info = jest.fn();
+
+  location = window.location;
+  delete window.location;
+  window.location = {
+    ...location,
+    assign: href => location.assign(href),
+    reload: () => location.reload(),
+  };
 });
 
 afterEach(fetchMock.reset);
+
+afterAll(() => {
+  window.location = location;
+});

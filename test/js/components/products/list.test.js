@@ -218,7 +218,7 @@ describe('<Products />', () => {
 
     test('uses saved tab from url hash', () => {
       window.sessionStorage.setItem('activeProductsTab', 'salesforce');
-      window.location.hash = 'community';
+      window.location.hash = '#community';
       const { getByText, getAllByText } = setup(initialState);
       const activeTab = getByText('community');
 
