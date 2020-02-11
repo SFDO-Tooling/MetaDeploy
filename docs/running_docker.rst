@@ -198,7 +198,7 @@ Then run the following command:
     or 
     docker-compose up (for debug mode)
 
-After running this command which will take a couple minutes on startup visit ``localhost:8000/admin/login``
+This command may take a few minutes to finish. Once it's done, visit ``localhost:8000/admin/login``
 and login with the following credentials if DJANGO_SETTINGS_MODULE is config.settings.local:
 
 username:
