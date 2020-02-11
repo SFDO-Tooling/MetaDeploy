@@ -72,13 +72,7 @@ class SalesforceOAuth2Mixin:
         instance_url = kwargs.get("response", {}).get("instance_url", None)
         ret = self.get_provider().sociallogin_from_response(request, extra_data)
         ret.account.extra_data["instance_url"] = instance_url
-        try:
-            org_details = self.get_org_details(extra_data, token)
-        except (requests.HTTPError, KeyError):
-            raise SalesforcePermissionsError(
-                "We encountered an issue attempting to log in to your org."
-            )
-
+        org_details = self.get_org_details(extra_data, token)
         ret.account.extra_data[ORGANIZATION_DETAILS] = org_details
         return ret
 

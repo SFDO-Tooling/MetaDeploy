@@ -10,5 +10,8 @@ def custom_permission_denied_view(request, exception):
         message = "An internal error occurred while processing your request."
 
     return render(
-        request, "index.html", context={"JS_CONTEXT": {"error_message": message}}
+        request,
+        "index.html",
+        context={"JS_CONTEXT": {"error_message": message}},
+        status=403,
     )
