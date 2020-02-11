@@ -62,7 +62,7 @@ Local Variables
 
 POSTGRES_USER: 
     Environment variable set in the docker-compose.yml file under the postgres service, 
-    represents database user. This value has already been configured for you unless 
+    represents database user. This value has already been configured for you, but 
     you decide to reconfigure it.
 
 POSTGRES_PASSWORD: 
