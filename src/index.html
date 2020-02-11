@@ -12,7 +12,6 @@
     <meta name="language" content="en-us" />
     {% if GLOBALS.SITE and GLOBALS.SITE.favicon %}<link rel="shortcut icon" href="{{ GLOBALS.SITE.favicon }}" />{% endif %}
 
-
     <!-- Page Info -->
     <title>{% block title %}{% if GLOBALS.SITE and GLOBALS.SITE.name %}{{ GLOBALS.SITE.name }}{% else %}MetaDeploy{% endif %}{% endblock %}</title>
     <meta name="description" content="{% block description %}Web-based tool for installing Salesforce products{% endblock description %}" />
@@ -22,7 +21,7 @@
     <link rel="stylesheet" href="<%= htmlWebpackPlugin.files.chunks.app.css[0] %>" type="text/css">
   </head>
   <body>
-    <main id="app" class="slds-grid slds-grid_vertical"{% if user.is_authenticated %} data-user="{{ user|serialize }}"{% endif %}>
+    <main id="app" class="slds-grid slds-grid_vertical" {% if user.is_authenticated %} data-user="{{ user|serialize }}"{% endif %}>
       <div role="status" class="slds-spinner slds-spinner_large">
         <span class="slds-assistive-text">Loading…</span>
         <div class="slds-spinner__dot-a"></div>
@@ -42,7 +41,8 @@
       </script>
       <script type="text/javascript" src="<%= htmlWebpackPlugin.files.chunks.sentry.entry %>"></script>
     {% endif %}
-    {{ GLOBALS|json_script:"js-globals" }}
+    {{ GLOBALS | json_script:"js-globals" }}
+    {{ JS_CONTEXT | json_script:"js-context" }}
     <script type="text/javascript" charset="utf-8">
       {% js_reverse_inline %}
     </script>
