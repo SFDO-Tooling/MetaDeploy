@@ -111,7 +111,7 @@ BUCKETEER_BUCKET_NAME
 Other Variables 
 ---------------
 
-*Some variables are preset in this section if this is the case it will explicitly tell you where its declaration is in the description.*
+*Some variables in this section are preset; the description will state where it is declared.*
 
 DJANGO_SECRET_KEY: 
     This represents the secret key for the django web application and is used to sign session cookies;, 
