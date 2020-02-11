@@ -174,7 +174,7 @@ project, a template of variables needed can be found under ``env.example``.
 To configure and run your environment you must run 2 commands in the root directory of MetaDeploy
 Note that docker-compose build will take some significant time to build the first time but will
 be much faster for subsequent builds. It is also important to note that once you bring 
-up the web application it will take roughly 60 seconds to fully compile.
+up the web application it will take a minute or two to build.
 ::
     
     docker-compose build
