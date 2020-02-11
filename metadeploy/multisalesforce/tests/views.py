@@ -85,8 +85,6 @@ class TestSalesforceOAuth2Mixin:
         with pytest.raises(SalesforcePermissionsError):
             adapter.complete_login(request, None, token, response={})
 
-        # assert ret.account.extra_data["organization_details"] is None
-
     def test_parse_token(self):
         adapter = SalesforceOAuth2CustomAdapter(request=None)
         data = {"access_token": "token", "refresh_token": "token"}

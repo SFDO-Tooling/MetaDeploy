@@ -17,7 +17,7 @@ import type { InitialProps } from 'components/utils';
 import type { User as UserType } from 'store/user/reducer';
 
 const AuthError = ({ user, history }: { ...InitialProps, user: UserType }) => {
-  const message = window.JS_CONTEXT.error_message ? window.JS_CONTEXT.error_message : (
+  const message = (window.JS_CONTEXT || {}).error_message || (
     <Trans i18nKey="errorWithAccount">
       An error occurred with your account. Try the{' '}
       <Link to={routes.home()}>home page</Link>?

@@ -76,7 +76,7 @@ class SalesforceOAuth2Mixin:
             org_details = self.get_org_details(extra_data, token)
         except (requests.HTTPError, KeyError):
             raise SalesforcePermissionsError(
-                "We encountered an issue attempting to login to your org."
+                "We encountered an issue attempting to log in to your org."
             )
 
         ret.account.extra_data[ORGANIZATION_DETAILS] = org_details
