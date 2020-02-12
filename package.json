@@ -68,6 +68,7 @@
     "redux-logger": "^3.0.6",
     "redux-thunk": "^2.3.0",
     "reselect": "^4.0.0",
+    "run-p": "^0.0.0",
     "sockette": "^2.0.6",
     "uuid": "^3.4.0",
     "whatwg-fetch": "^3.0.0"
