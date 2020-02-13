@@ -41,7 +41,7 @@ command::
 Development Tasks
 -----------------
 
-To run these tests with docker first run the following commands, 
+To run these tests with Docker first run the following commands, 
 
 ::
 
