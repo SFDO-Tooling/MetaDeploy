@@ -2460,7 +2460,7 @@ block-stream@*:
   dependencies:
     inherits "~2.0.0"
 
-bluebird@^3.5.3, bluebird@^3.5.5:
+bluebird@^3.5.5, bluebird@^3.7.2:
   version "3.7.2"
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.7.2.tgz#9f229c15be272454ffa973ace0dbee79a1b0c36f"
   integrity sha512-XpNj6GDQzdfW+r2Wnn7xiSAd7TM3jzkxGXBGTtWKuSXv1xUV+azxAm8jdWZN06QTQk+2N2XB9jRDkvbmQmcRtg==
@@ -3195,7 +3195,7 @@ color@^3.0.0:
     color-convert "^1.9.1"
     color-string "^1.5.2"
 
-colors@^1.3.2, colors@^1.3.3:
+colors@^1.3.2, colors@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/colors/-/colors-1.4.0.tgz#c50491479d4c1bdaed2c9ced32cf7c7dc2360f78"
   integrity sha512-a+UqTh4kgZg/SlGvfbzDHpgRu7AAQOmmqRHJnxhRZICKFUT91brVhNNt58CMWU9PsBbv3PDCZUHbVxuDiH2mtA==
@@ -3217,7 +3217,7 @@ commander@2.17.x:
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.17.1.tgz#bd77ab7de6de94205ceacc72f1716d29f20a77bf"
   integrity sha512-wPMUt6FnH2yzG95SA6mzjQOEKUU3aLaDEmzs1ti+1E9h+CsrZghRlqEM/EJ4KscsQVG8uNN4uVreUeT8+drlgg==
 
-commander@^2.11.0, commander@^2.19.0, commander@^2.20.0:
+commander@^2.11.0, commander@^2.20.0:
   version "2.20.3"
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.20.3.tgz#fd485e84c03eb4881c20722ba48035e8531aeb33"
   integrity sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==
@@ -3381,7 +3381,7 @@ core-js@^3.0.0:
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.6.1.tgz#39d5e2e346258cc01eb7d44345b1c3c014ca3f05"
   integrity sha512-186WjSik2iTGfDjfdCZAxv2ormxtKgemjC3SI6PL31qOA0j5LhTDVjHChccoc7brwLvpvLPiMyRlcO88C4l1QQ==
 
-core-js@^3.0.0-beta.8, core-js@^3.6.4:
+core-js@^3.4.7, core-js@^3.6.4:
   version "3.6.4"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.6.4.tgz#440a83536b458114b9cb2ac1580ba377dc470647"
   integrity sha512-4paDGScNgZP2IXXilaffL9X7968RuvwlkK3xWtZRVqgd8SYNiVKRJvkFd1aqqEuPfN7E68ZHEp9hDj6lHj4Hyw==
@@ -8064,11 +8064,6 @@ no-case@^2.2.0:
   dependencies:
     lower-case "^1.1.1"
 
-node-bin-setup@^1.0.0:
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/node-bin-setup/-/node-bin-setup-1.0.6.tgz#4b5c9bb937ece702d7069b36ca78af4684677528"
-  integrity sha512-uPIxXNis1CRbv1DwqAxkgBk5NFV3s7cMN/Gf556jSw6jBvV7ca4F9lRL/8cALcZecRibeqU+5dFYqFFmzv5a0Q==
-
 node-fetch@^1.0.1:
   version "1.7.3"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-1.7.3.tgz#980f6f72d85211a5347c6b2bc18c5b84c3eb47ef"
@@ -8198,13 +8193,6 @@ node-sass@^4.13.1:
     sass-graph "^2.2.4"
     stdout-stream "^1.4.0"
     "true-case-path" "^1.0.2"
-
-node@^12.13.0:
-  version "12.13.0"
-  resolved "https://registry.yarnpkg.com/node/-/node-12.13.0.tgz#9702970a7038dc19f83a8c63f4486719fd877f0e"
-  integrity sha512-quDNTkbEEXCuDQNXX0B3faD17s1ggJ7MpdhqQKiOnvy0jooaDHSJ079pP+MfOzRkujcJgEHNIA0/G2imOGZImg==
-  dependencies:
-    node-bin-setup "^1.0.0"
 
 "nopt@2 || 3":
   version "3.0.6"
@@ -10009,16 +9997,15 @@ redent@^3.0.0:
     strip-indent "^3.0.0"
 
 redis-cli@^1.3.1:
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/redis-cli/-/redis-cli-1.3.1.tgz#16a45667a67f3db8d698c06305bba57c0c884291"
-  integrity sha512-/dRQ61AmKZvruqCbXb29KsoWTEVIZEW1wHNwquXFmCqeFwgNqbSOmHFuFYfVwe11DZe+g+Bm1ZueUPe/Q8R38A==
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/redis-cli/-/redis-cli-1.4.0.tgz#dba826aef59617e593e81c19ce81bf9e5d7f8b01"
+  integrity sha512-Ij7Y1Mcj+Y70IwoCvJnxbkHu2DJJfsVqlbJmFA/3EmjGgHwkUD1v63Xreoy3X9MLJloVbv4WTBzzlU/bOb/Gmg==
   dependencies:
-    bluebird "^3.5.3"
-    colors "^1.3.3"
-    commander "^2.19.0"
-    core-js "^3.0.0-beta.8"
+    bluebird "^3.7.2"
+    colors "^1.4.0"
+    commander "^4.0.1"
+    core-js "^3.4.7"
     redis "^2.8.0"
-    rxjs "^6.3.3"
     splitargs "0.0.7"
 
 redis-commands@^1.2.0:

@@ -95,8 +95,6 @@ DEBUG = env("DJANGO_DEBUG", default=False, type_=boolish)
 MODE = env("DJANGO_MODE", default="dev" if DEBUG else "prod")
 
 ALLOWED_HOSTS = [
-    "0.0.0.0",
-    "0.0.0.0:8000",
     "127.0.0.1",
     "127.0.0.1:8000",
     "127.0.0.1:8080",
