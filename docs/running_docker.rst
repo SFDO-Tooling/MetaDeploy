@@ -75,7 +75,7 @@ POSTGRES_DB:
     represents database. This variable has already been set to the proper 
     value `metadeploy` for the user.
 
-MetaDeploy needs a connection to the GitHub API to fetch repositories and create releases. 
+MetaDeploy needs a connection to the GitHub API to fetch repositories for installation. 
 This can be set up using a personal GitHub account by setting GITHUB_USERNAME and GITHUB_PASSWORD, 
 or using a GitHub App by setting GITHUB_APP_ID and GITHUB_APP_KEY.
 
