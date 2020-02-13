@@ -167,7 +167,7 @@ ADMIN_API_ALLOWED_SUBNETS:
 Building Your Docker Containers
 -------------------------------
 
-This next section assumes you have downloaded ``docker`` and ``docker-compose``.
+This next section assumes you have installed ``docker`` and ``docker-compose``.
 Additionally it assumes you have a ``.env`` file in the root directory of this 
 project, a template of variables needed can be found under ``env.example``.
 
