@@ -13,7 +13,7 @@ Cloning the project
 Docker and Docker-Compose Installation
 --------------------------------------
 
-To download and install docker please visit: https://hub.docker.com/?overlay=onboarding 
+To download and install Docker please visit: https://hub.docker.com/?overlay=onboarding 
 and follow the installation instructions to download Docker if needed.
 To verify you have successfully installed docker type:
 
