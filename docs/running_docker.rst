@@ -15,7 +15,7 @@ Docker and Docker-Compose Installation
 
 To download and install Docker please visit: https://hub.docker.com/?overlay=onboarding 
 and follow the installation instructions to download Docker if needed.
-To verify you have successfully installed docker type:
+To verify you have successfully installed Docker type:
 
 ::
     
