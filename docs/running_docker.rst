@@ -67,7 +67,7 @@ POSTGRES_USER:
 
 POSTGRES_PASSWORD: 
     Environment variable set in the docker-compose.yml file under the postgres service,
-    represents database password.This database is configured with no password for 
+    represents database password. This database is configured with no password for 
     development purposes so leave as is unless changing for production purposes.
 
 POSTGRES_DB:
