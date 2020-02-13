@@ -5,7 +5,7 @@ Development MetaDeploy
 Using Docker
 ------------
 
-To set up MetaDeploy using docker please
+To set up MetaDeploy using Docker please
 see the following instructions `<./docs/running_docker.rst>`_.
 
 Using Local Machine
