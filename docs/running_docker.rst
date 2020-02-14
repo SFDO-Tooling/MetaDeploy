@@ -55,7 +55,7 @@ Below are the following steps necessary to run MetaDeploy on Docker:
 .env File Creation And Variable Declaration
 -------------------------------------------
 
-*Please begin by making a copy of env.example and renaming it .env in your root project directory*
+*Please begin by making a copy of .env.docker.example and renaming it .env in your root project directory*
 
 Local Variables
 ---------------
@@ -76,8 +76,7 @@ POSTGRES_DB:
     value `metadeploy` for the user.
 
 MetaDeploy needs a connection to the GitHub API to fetch repositories for installation. 
-This can be set up using a personal GitHub account by setting GITHUB_USERNAME and GITHUB_PASSWORD, 
-or using a GitHub App by setting GITHUB_APP_ID and GITHUB_APP_KEY.
+This can be set up using a personal GitHub account by providing your personal access token.
 
 GITHUB_TOKEN:
     This represents the users github personal access token. If you need to 
@@ -86,44 +85,29 @@ GITHUB_TOKEN:
 
 CONNECTED_APP_CLIENT_ID:
     This represents the client id of the connected app that MetaDeploy will use for authenticating to any persistent org. 
-    It's fine to use the same connected app that is being used for SFDX_CLIENT_ID and SFDX_HUB_KEY.
 
 CONNECTED_APP_CLIENT_SECRET: 
-    This represents the secret of the packaging org configured for MetaDeploy
+    This represents the consumer secret of the connected app.
+    
 
 CONNECTED_APP_CALLBACK_URL:
-    This represents the packaging org's callback url 
-
-To acquire the connected_app variables just use the client id, client secret and callback url 
-of the connected app that was created for ``SFDX_CLIENT_ID`` and ``SFDX_HUB_KEY``.
+    This represents the callback url of the connected app.
 
 
-Production Variables
---------------------
-
-BUCKETEER_AWS_ACCESS_KEY_ID
-    definition here
-BUCKETEER_AWS_SECRET_ACCESS_KEY
-    definition here
-BUCKETEER_BUCKET_NAME
-    definition here
 
 Other Variables 
 ---------------
 
 *Some variables in this section are preset; the description will state where it is declared.*
 
-DJANGO_SECRET_KEY: 
-    This represents the secret key for the django web application and is used to sign session cookies;, 
-    arbritary strings such as the one given in the env.example are used. Important this variable is 
-    not copied from another Django site.
 DB_ENCRYPTION_KEY:
     This key is used as an encryption key for database use. 
     Generate a value using cryptography.fernet.Fernet.generate_key()
 BUILD_ENV: 
     Docker argument variable used to determine what dependencies and scripts to run when 
     installing dependencies and populating databases, currently set in docker-compose.yml
-    web service ARG variable section.
+    web service ARG variable section. For production this value is set to producion. 
+    For development purposes set this value to development.
 
 NODE_VERSION: 
     Environment variable used to set node version for download, this variable is set in the Dockerfile
@@ -150,7 +134,7 @@ DJANGO_SECRET_KEY:
     This represents the key for the django web application, currently set to arbritary
     string due to non production defaults, can be overridden in docker-compose.yml.
     Currently set in Dockerfile. For local testing, arbritary strings such as the one given 
-    in the env.example will suffice. Otherwise use your production secret key.
+    in the .env.docker.example will suffice. Otherwise use your production secret key.
     
 DJANGO_DEBUG:
     This represents the value needed for django development debugging. 
@@ -169,7 +153,7 @@ Building Your Docker Containers
 
 This next section assumes you have installed ``docker`` and ``docker-compose``.
 Additionally it assumes you have a ``.env`` file in the root directory of this 
-project, a template of variables needed can be found under ``env.example``.
+project, a template of variables needed can be found under ``.env.docker.example``.
 
 To configure and run your environment you must run two commands in the project root.
 Note that docker-compose build will take some significant time to build the first time but will

@@ -11,7 +11,7 @@ see the following instructions `<./docs/running_docker.rst>`_.
 Using Local Machine
 -------------------
 
-As mentioned above, MetaDeploy can be configured locally. 
+MetaDeploy can be configured locally. 
 To achieve this follow the instructions provided in `<./docs/running.rst>`_.
 
 Logging in with Salesforce

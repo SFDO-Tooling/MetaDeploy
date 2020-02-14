@@ -18,11 +18,6 @@ if [ "${DJANGO_SETTINGS_MODULE}" = "config.settings.local" ] ; then
         echo "Admin user has already been created."
     fi
 fi
-# creating for authorization
-echo $SFDX_HUB_KEY > /app/sfdx_hub.key
-echo "AUTHORIZING SFDX via JWT key auth..."
-# authorizing sfdx via jwt key authorization
-sfdx force:auth:jwt:grant -u $SFDX_HUB_USERNAME -f /app/sfdx_hub.key -i $SFDX_CLIENT_ID --setdefaultdevhubusername
 # starting server and webpack
 yarn serve
 
