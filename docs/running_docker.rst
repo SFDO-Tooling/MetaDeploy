@@ -79,8 +79,8 @@ MetaDeploy needs a connection to the GitHub API to fetch repositories for instal
 This can be set up using a personal GitHub account by providing your personal access token.
 
 GITHUB_TOKEN:
-    This represents the users github personal access token. If you need to 
-    generate a personal access token please visit the following: 
+    This represents the users github personal access token which requires a scope of `repo`. 
+    If you need to generate a personal access token please visit the following: 
     https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line
 
 CONNECTED_APP_CLIENT_ID:
@@ -128,7 +128,6 @@ DJANGO_HASHID_SALT:
     This represents the hashid salt for the django application, currently set to 
     arbritary string due to non production defaults, can be overridden 
     in docker-compose.yml. Currently set in Dockerfile.
-
 
 DJANGO_SECRET_KEY: 
     This represents the key for the django web application, currently set to arbritary

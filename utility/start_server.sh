@@ -13,6 +13,8 @@ if [ "${DJANGO_SETTINGS_MODULE}" = "config.settings.local" ] ; then
         python /app/manage.py populate_db;
         # running job scheduler 
         python /app/manage.py metaci_scheduled_jobs;
+        # populating socialApp records
+        python /app/manage.py populate_social_apps;
     else
         # Redirect stdout from echo command to stderr.
         echo "Admin user has already been created."
