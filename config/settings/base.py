@@ -143,6 +143,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -180,7 +181,17 @@ ASGI_APPLICATION = "metadeploy.routing.application"
 
 SITE_ID = 1
 
-PARLER_LANGUAGES = {1: ({"code": "en-us"},), "default": {"fallback": "en-us"}}
+PARLER_LANGUAGES = {
+    1: (
+        {"code": "en-us"},
+        {"code": "de"},
+        {"code": "es"},
+        {"code": "fr"},
+        {"code": "ja"},
+        {"code": "nl"},
+    ),
+    "default": {"fallback": "en-us"},
+}
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
@@ -237,6 +248,14 @@ SECURE_HSTS_PRELOAD = env("SECURE_HSTS_PRELOAD", default=False, type_=boolish)
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
+LANGUAGES = (
+    ("en", "English (US)"),
+    ("de", "German"),
+    ("es", "Spanish"),
+    ("fr", "French"),
+    ("ja", "Japanese"),
+    ("nl", "Dutch"),
+)
 
 TIME_ZONE = "UTC"
 
