@@ -141,3 +141,24 @@ This starts a process running Django, a process running Node, and an ``rq`` work
 The running server will be available at `<http://localhost:8080/>`_.
 
 .. _Redis Quick Start: https://redis.io/topics/quickstart
+
+Logging in with Salesforce
+==========================
+
+To setup the Salesforce OAuth integration, run the ``populate_social_apps``
+management command. The values to use in place of the ``XXX`` and ``YYY`` flags
+can be found on the Connected App you've made in your Salesforce configuration,
+or if you're an OddBird, you can find these values in the shared Keybase team
+folder (``metadeploy/prod.db``)::
+
+    python manage.py populate_social_apps --prod-id XXX --prod-secret YYY
+
+You can also run it with ``--test-id`` and ``--test-secret``, or
+``--cust-id`` and ``--cust-secret``, or all three sets at once, to
+populate all three providers.
+
+Once you've logged in, you probably want to make your user a superuser.
+You can do that easily via the ``promote_superuser`` management
+command::
+
+    python manage.py promote_superuser <your email>
