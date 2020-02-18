@@ -20,6 +20,7 @@ class TestProductViewSet:
                     "click_through_agreement": "",
                     "color": "#FFFFFF",
                     "description": "This is a sample product.",
+                    "error_message": "",
                     "icon_url": "",
                     "id": product.id,
                     "image": None,

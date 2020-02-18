@@ -11,6 +11,7 @@ class ProductSerializer(AdminAPISerializer):
     short_description = serializers.CharField()
     description = serializers.CharField()
     click_through_agreement = serializers.CharField()
+    error_message = serializers.CharField()
 
     class Meta:
         fields = "__all__"
@@ -69,8 +70,18 @@ class PlanSerializer(AdminAPISerializer):
         return super().update(instance, validated_data)
 
 
+class PlanTemplateSerializer(AdminAPISerializer):
+    preflight_message = serializers.CharField()
+    post_install_message = serializers.CharField()
+    error_message = serializers.CharField()
+
+    class Meta:
+        fields = "__all__"
+
+
 class PlanTemplateViewSet(AdminAPIViewSet):
     model_name = "PlanTemplate"
+    serializer_base = PlanTemplateSerializer
 
 
 class PlanFilter(filters.FilterSet):
