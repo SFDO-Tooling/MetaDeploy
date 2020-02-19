@@ -1,12 +1,12 @@
 import json
-import pytest
 from io import StringIO
 from unittest import mock
 
-from metadeploy.api.models import Product, ProductCategory
-
-from django.core.management import call_command
+import pytest
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.management import call_command
+
+from metadeploy.api.models import Product, ProductCategory
 
 
 @pytest.fixture
