@@ -46,7 +46,7 @@
     "heroku-postbuild": "yarn prod"
   },
   "dependencies": {
-    "@salesforce-ux/design-system": "^2.11.3",
+    "@salesforce-ux/design-system": "^2.11.4",
     "@salesforce/design-system-react": "0.10.18",
     "@sentry/browser": "^5.12.1",
     "classnames": "^2.2.6",
