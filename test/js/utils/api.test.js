@@ -1,6 +1,11 @@
 import fetchMock from 'fetch-mock';
 
-import apiFetch, { addUrlParams, getUrlParam, removeUrlParam } from 'utils/api';
+import apiFetch, {
+  addUrlParams,
+  getUrlParam,
+  removeUrlParam,
+  extractCustomDomain,
+} from 'utils/api';
 
 const dispatch = jest.fn();
 
@@ -135,6 +140,16 @@ describe('removeUrlParam', () => {
   test('handles missing param', () => {
     const actual = removeUrlParam('foo');
     const expected = window.location.search;
+
+    return expect(actual).toBe(expected);
+  });
+});
+
+describe('extractCustomDomain', () => {
+  test('extracts custom subdomain from url', () => {
+    const input = 'https://foo-bar-01.cs42.my.salesforce.com/';
+    const expected = 'foo-bar-01.cs42';
+    const actual = extractCustomDomain(input);
 
     return expect(actual).toBe(expected);
   });
