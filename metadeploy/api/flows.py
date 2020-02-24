@@ -97,8 +97,8 @@ class PreflightFlowCallback(BasicFlowCallback):
         """
         results = coordinator.preflight_results
         sanitized_results = {}
-        for path, step_results in results.items():
-            step_id = self._get_step_id(path=path) if path else "plan"
+        for step_num, step_results in results.items():
+            step_id = self._get_step_id(step_num=step_num) if step_num else "plan"
             step_result = step_results[0]
             if step_result["message"]:
                 step_result["message"] = bleach.clean(step_result["message"])
