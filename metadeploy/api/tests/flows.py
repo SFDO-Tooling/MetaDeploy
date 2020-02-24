@@ -1,4 +1,3 @@
-from distutils.version import LooseVersion
 from unittest.mock import MagicMock, sentinel
 
 import pytest
@@ -112,11 +111,11 @@ class TestPreflightFlow:
     ):
         user = user_factory()
         plan = plan_factory()
-        step1 = step_factory(plan=plan, path="name_1", step_num=LooseVersion("1.1"))
-        step_factory(plan=plan, path="name_2", step_num=LooseVersion("1.2"))
-        step3 = step_factory(plan=plan, path="name_3", step_num=LooseVersion("2"))
-        step4 = step_factory(plan=plan, path="name_4", step_num=LooseVersion("3"))
-        step5 = step_factory(plan=plan, path="name_5", step_num=LooseVersion("3.4"))
+        step1 = step_factory(plan=plan, path="name_1", step_num="1.1")
+        step_factory(plan=plan, path="name_2", step_num="1.2")
+        step3 = step_factory(plan=plan, path="name_3", step_num="2")
+        step4 = step_factory(plan=plan, path="name_4", step_num="3")
+        step5 = step_factory(plan=plan, path="name_5", step_num="3.4")
         pfr = preflight_result_factory(user=user, plan=plan, org_id=user.org_id)
         results = {
             "1.1": [{"status": "error", "message": "error 1"}],
