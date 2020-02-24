@@ -6,7 +6,7 @@ import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
 
-import { addUrlParams } from 'utils/api';
+import { addUrlParams, extractCustomDomain } from 'utils/api';
 import type { UrlParams } from 'utils/api';
 
 type Props = {
@@ -28,7 +28,7 @@ class CustomDomainModal extends React.Component<Props, { url: string }> {
 
   handleSubmit = (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const val = this.state.url.trim();
+    const val = extractCustomDomain(this.state.url.trim());
     if (!val) {
       return;
     }
@@ -91,7 +91,11 @@ class CustomDomainModal extends React.Component<Props, { url: string }> {
               data-testid="custom-domain"
             >
               https://
-              {this.state.url.trim() ? this.state.url.trim() : <em>domain</em>}
+              {this.state.url.trim() ? (
+                extractCustomDomain(this.state.url.trim())
+              ) : (
+                <em>domain</em>
+              )}
               .my.salesforce.com
             </div>
           </Input>

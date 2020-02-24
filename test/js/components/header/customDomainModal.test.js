@@ -36,6 +36,12 @@ describe('<CustomDomainModal />', () => {
     fireEvent.change(input, { target: { value: ' foobar' } });
 
     expect(getByTestId('custom-domain')).toHaveTextContent('foobar');
+
+    fireEvent.change(input, {
+      target: { value: 'https://foobar.my.salesforce.com' },
+    });
+
+    expect(getByTestId('custom-domain')).toHaveTextContent('foobar');
   });
 
   test('updates window.location.href on submit', () => {

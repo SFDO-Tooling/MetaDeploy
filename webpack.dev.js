@@ -24,6 +24,7 @@ module.exports = merge(common, {
   devtool: 'cheap-module-inline-source-map',
   devServer: {
     index: '',
+    host: '0.0.0.0',
     proxy: {
       '**': 'http://localhost:8000',
       '/ws': {
