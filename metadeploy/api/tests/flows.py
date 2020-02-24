@@ -1,3 +1,4 @@
+from distutils.version import LooseVersion
 from unittest.mock import MagicMock, sentinel
 
 import pytest
@@ -111,17 +112,17 @@ class TestPreflightFlow:
     ):
         user = user_factory()
         plan = plan_factory()
-        step1 = step_factory(plan=plan, path="name_1")
-        step_factory(plan=plan, path="name_2")
-        step3 = step_factory(plan=plan, path="name_3")
-        step4 = step_factory(plan=plan, path="name_4")
-        step5 = step_factory(plan=plan, path="name_5")
+        step1 = step_factory(plan=plan, path="name_1", step_num=LooseVersion("1.1"))
+        step_factory(plan=plan, path="name_2", step_num=LooseVersion("1.2"))
+        step3 = step_factory(plan=plan, path="name_3", step_num=LooseVersion("2"))
+        step4 = step_factory(plan=plan, path="name_4", step_num=LooseVersion("3"))
+        step5 = step_factory(plan=plan, path="name_5", step_num=LooseVersion("3.4"))
         pfr = preflight_result_factory(user=user, plan=plan, org_id=user.org_id)
         results = {
-            "name_1": [{"status": "error", "message": "error 1"}],
-            "name_3": [{"status": "warn", "message": "warn 1"}],
-            "name_4": [{"status": "optional", "message": ""}],
-            "name_5": [{"status": "skip", "message": "skip 1"}],
+            "1.1": [{"status": "error", "message": "error 1"}],
+            "2": [{"status": "warn", "message": "warn 1"}],
+            "3": [{"status": "optional", "message": ""}],
+            "3.4": [{"status": "skip", "message": "skip 1"}],
         }
         flow_coordinator = MagicMock(preflight_results=results)
 
