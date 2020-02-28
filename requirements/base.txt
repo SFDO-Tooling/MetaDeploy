@@ -67,7 +67,7 @@ hashids==1.2.0
 hiredis==1.0.1
 humanfriendly==7.1.1
 hyperlink==19.0.0
-idna==2.8
+idna==2.9
 incremental==17.5.0
 jmespath==0.9.4
 jwcrypto==0.6.0
