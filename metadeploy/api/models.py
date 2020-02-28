@@ -246,15 +246,17 @@ class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel)
 
     @property
     def description_markdown(self):
-        return self.get_translation("en-us").description_markdown
+        return self._get_translated_model(use_fallback=True).description_markdown
 
     @property
     def click_through_agreement_markdown(self):
-        return self.get_translation("en-us").click_through_agreement_markdown
+        return self._get_translated_model(
+            use_fallback=True
+        ).click_through_agreement_markdown
 
     @property
     def error_message_markdown(self):
-        return self.get_translation("en-us").error_message_markdown
+        return self._get_translated_model(use_fallback=True).error_message_markdown
 
     category = models.ForeignKey(ProductCategory, on_delete=models.PROTECT)
     color = ColorField(blank=True)
@@ -377,15 +379,17 @@ class PlanTemplate(SlugMixin, TranslatableModel):
 
     @property
     def preflight_message_markdown(self):
-        return self.get_translation("en-us").preflight_message_markdown
+        return self._get_translated_model(use_fallback=True).preflight_message_markdown
 
     @property
     def post_install_message_markdown(self):
-        return self.get_translation("en-us").post_install_message_markdown
+        return self._get_translated_model(
+            use_fallback=True
+        ).post_install_message_markdown
 
     @property
     def error_message_markdown(self):
-        return self.get_translation("en-us").error_message_markdown
+        return self._get_translated_model(use_fallback=True).error_message_markdown
 
     def __str__(self):
         return f"{self.product.title}: {self.name}"
@@ -415,11 +419,15 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
 
     @property
     def preflight_message_additional_markdown(self):
-        return self.get_translation("en-us").preflight_message_additional_markdown
+        return self._get_translated_model(
+            use_fallback=True
+        ).preflight_message_additional_markdown
 
     @property
     def post_install_message_additional_markdown(self):
-        return self.get_translation("en-us").post_install_message_additional_markdown
+        return self._get_translated_model(
+            use_fallback=True
+        ).post_install_message_additional_markdown
 
     @property
     def required_step_ids(self):
@@ -797,11 +805,11 @@ class SiteProfile(TranslatableModel):
 
     @property
     def welcome_text_markdown(self):
-        return self.get_translation("en-us").welcome_text_markdown
+        return self._get_translated_model(use_fallback=True).welcome_text_markdown
 
     @property
     def copyright_notice_markdown(self):
-        return self.get_translation("en-us").copyright_notice_markdown
+        return self._get_translated_model(use_fallback=True).copyright_notice_markdown
 
     def __str__(self):
         return self.name
