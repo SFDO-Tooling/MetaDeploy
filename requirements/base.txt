@@ -33,7 +33,7 @@ werkzeug==1.0.0
 whitenoise==5.0.1
 
 # Transitive dependencies
-Automat==0.7.0
+Automat==20.2.0
 Click==7.0
 Jinja2==2.11.1
 Markdown==3.2.1
