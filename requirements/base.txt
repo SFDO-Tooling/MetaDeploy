@@ -69,7 +69,7 @@ humanfriendly==7.1.1
 hyperlink==19.0.0
 idna==2.8
 incremental==17.5.0
-jmespath==0.9.4
+jmespath==0.9.5
 jwcrypto==0.6.0
 keyring==21.1.0
 logfmt==0.4
