@@ -96,7 +96,7 @@ salesforce-bulk==2.1.0
 sarge==0.1.5.post0
 selenium==3.141.0
 setuptools==45.2.0
-simple-salesforce==0.74.3
+simple-salesforce==0.75.3
 six==1.14.0
 sqlparse==0.3.0
 txaio==20.1.1
