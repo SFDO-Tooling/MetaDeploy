@@ -249,7 +249,7 @@ SECURE_HSTS_PRELOAD = env("SECURE_HSTS_PRELOAD", default=False, type_=boolish)
 
 LANGUAGE_CODE = "en-us"
 LANGUAGES = (
-    ("en", "English (US)"),
+    ("en-us", "English (US)"),
     ("de", "German"),
     ("es", "Spanish"),
     ("fr", "French"),
