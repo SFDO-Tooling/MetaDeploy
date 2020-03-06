@@ -138,23 +138,19 @@
   "lint-staged": {
     "*.js": [
       "prettier --write",
-      "eslint --plugin flowtype-errors --rule 'flowtype-errors/show-errors: 2' --rule 'flowtype-errors/show-warnings: 1'",
-      "git add"
+      "eslint --plugin flowtype-errors --rule 'flowtype-errors/show-errors: 2' --rule 'flowtype-errors/show-warnings: 1'"
     ],
     "*.scss": [
       "prettier --write",
-      "stylelint",
-      "git add"
+      "stylelint"
     ],
     "*.py": [
       "isort",
       "black",
-      "flake8",
-      "git add"
+      "flake8"
     ],
     "*.{json,yml}": [
-      "prettier --write",
-      "git add"
+      "prettier --write"
     ]
   }
 }
