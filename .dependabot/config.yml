@@ -5,17 +5,9 @@ update_configs:
     update_schedule: 'weekly'
     ignored_updates:
       - match:
-          # coveralls not compatible yet
-          dependency_name: 'coverage'
-          version_requirement: '5.x'
-      - match:
-          # django-parler not compatible yet
+          # django-rq-scheduler not compatible yet
           dependency_name: 'Django'
           version_requirement: '3.x'
-      - match:
-          # No published source tarball for 0.74.3
-          dependency_name: 'simple-salesforce'
-          version_requirement: '0.74.3'
 
   - package_manager: 'javascript'
     directory: '/'
