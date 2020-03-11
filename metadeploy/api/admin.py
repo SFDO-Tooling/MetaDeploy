@@ -18,6 +18,7 @@ from .models import (
     ProductSlug,
     SiteProfile,
     Step,
+    Translation,
     User,
     Version,
 )
@@ -195,3 +196,8 @@ class ClickThroughAgreementAdmin(admin.ModelAdmin):
 @admin.register(SiteProfile)
 class SiteProfileAdmin(TranslatableAdmin):
     list_display = ("name", "site")
+
+
+@admin.register(Translation)
+class TranslationAdmin(admin.ModelAdmin):
+    list_display = ("lang", "context", "slug", "text")

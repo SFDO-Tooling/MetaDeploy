@@ -299,6 +299,9 @@ class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel)
             }
         return None
 
+    def get_translation_strategy(self):
+        return "fields", f"{self.slug}:product"
+
 
 class VersionQuerySet(TranslatableQuerySet):
     def get_by_natural_key(self, *, product, label):
@@ -347,6 +350,9 @@ class Version(HashIdMixin, TranslatableModel):
     def additional_plans(self):
         return self.plan_set.filter(tier=Plan.Tier.additional).order_by("id")
 
+    def get_translation_strategy(self):
+        return "fields", f"{self.product.slug}:version:{self.label}"
+
 
 class PlanSlug(AbstractSlug):
     slug = models.SlugField()
@@ -393,6 +399,9 @@ class PlanTemplate(SlugMixin, TranslatableModel):
 
     def __str__(self):
         return f"{self.product.title}: {self.name}"
+
+    def get_translation_strategy(self):
+        return "fields", f"{self.product.slug}:plan:{self.name}"
 
 
 class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
@@ -466,6 +475,21 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
             step.task_config.get("checks") for step in self.steps.iterator()
         )
         return has_plan_checks or has_step_checks
+
+    def get_translation_strategy(self):
+        return (
+            "fields",
+            f"{self.plan_template.product.slug}:plan:{self.plan_template.name}",
+        )
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        from ..adminapi.translations import update_translations
+
+        update_translations(self.plan_template.product)
+        update_translations(self.plan_template)
+        update_translations(self)
 
 
 class DottedArray(Func):
@@ -548,6 +572,16 @@ class Step(HashIdMixin, TranslatableModel):
 
     def __str__(self):
         return f"Step {self.name} of {self.plan.title} ({self.step_num})"
+
+    def get_translation_strategy(self):
+        return "text", f"steps"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        from ..adminapi.translations import update_translations
+
+        update_translations(self)
 
 
 class ClickThroughAgreement(models.Model):
@@ -813,3 +847,19 @@ class SiteProfile(TranslatableModel):
 
     def __str__(self):
         return self.name
+
+
+class Translation(models.Model):
+    """Holds a generic catalog of translated text.
+
+    Used when a new Plan is published to populate the django-parler translation tables.
+    This way translations can be reused.
+    """
+
+    context = models.TextField()
+    slug = models.TextField()
+    text = models.TextField()
+    lang = models.CharField(max_length=5)
+
+    class Meta:
+        unique_together = (("context", "slug", "lang"),)

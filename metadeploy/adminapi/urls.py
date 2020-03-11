@@ -9,6 +9,7 @@ from .api import (
     ProductCategoryViewSet,
     ProductSlugViewSet,
     ProductViewSet,
+    TranslationViewSet,
     VersionViewSet,
 )
 
@@ -29,4 +30,5 @@ router.register(r"productcategory", ProductCategoryViewSet)
 router.register(r"products", ProductViewSet)
 router.register(r"productslug", ProductSlugViewSet)
 router.register(r"versions", VersionViewSet)
+router.register(r"translations", TranslationViewSet)
 urlpatterns = router.urls
