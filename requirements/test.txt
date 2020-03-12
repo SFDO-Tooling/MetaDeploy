@@ -35,7 +35,7 @@ inflection==0.3.1
 mccabe==0.6.1
 more-itertools==8.2.0
 multidict==4.7.5
-packaging==20.1
+packaging==20.3
 pluggy==0.13.1
 py==1.8.1
 pycodestyle==2.5.0
