@@ -1,9 +1,9 @@
 tasks:
     robot:
         options:
-            suites: robot/suites
+            suites: robot/tasks
             options:
-                outputdir: robot/output
+                outputdir: robot/results
 
 orgs:
     scratch:

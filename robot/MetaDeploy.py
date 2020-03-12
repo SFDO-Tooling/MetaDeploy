@@ -6,12 +6,22 @@ from selenium.webdriver.chrome.options import Options
 
 
 class MetaDeploy:
+    """Robot Framework library for MetaDeploy
+
+    The library supports interacting with MetaDeploy in different languages.
+    Specify the language when loading the library like this:
+
+        Library  path/to/MetaDeploy.py  es
+
+    Here `es` is the ISO 639-1 language code for Spanish.
+    """
 
     ROBOT_LIBRARY_SCOPE = "GLOBAL"
 
-    def __init__(self, lang):
+    def __init__(self, lang="en"):
         self.lang = lang
 
+        # Load translations for the target language from the locales folder
         langfam = lang.split("-")[0]
         trans_path = (
             pathlib.Path(__file__).parent.parent / f"locales/{langfam}/translation.json"
@@ -30,6 +40,7 @@ class MetaDeploy:
             options.add_argument("--disable-dev-shm-usage")
             options.add_argument("--disable-background-timer-throttling")
         else:
+            # language is set a different way for non-headless mode ¯\_(ツ)_/¯
             options.add_experimental_option(
                 "prefs", {"intl.accept_languages": self.lang}
             )
@@ -37,4 +48,7 @@ class MetaDeploy:
         self.selenium.open_browser(url, browser="Chrome", options=options)
 
     def translate_text(self, orig_text):
-        return self.translations[orig_text]
+        try:
+            return self.translations[orig_text]
+        except KeyError:
+            raise Exception(f"No {self.lang} translation found for '{orig_text}'")
