@@ -21,7 +21,7 @@ vcrpy==4.0.2
 # Transitive dependencies
 Babel==2.8.0
 Faker==4.0.1
-Pygments==2.5.2
+Pygments==2.6.1
 alabaster==0.7.12
 appdirs==1.4.3
 atomicwrites==1.3.0
