@@ -5676,10 +5676,10 @@ i18next-browser-languagedetector@^4.0.0:
   dependencies:
     "@babel/runtime" "^7.5.5"
 
-i18next-scanner-webpack@^0.4.4:
-  version "0.4.4"
-  resolved "https://registry.yarnpkg.com/i18next-scanner-webpack/-/i18next-scanner-webpack-0.4.4.tgz#10db480f716c810cd7868318fdf521738825ae97"
-  integrity sha512-cEYUtaIlFmzKkg1N2kfymbhDPJ0J7MKw/yl5CZxfOXQ26bayLAVJcqK1LQ2K6YyVv1T4XlFC7w/p7Od7v1aPyw==
+i18next-scanner-webpack@^0.4.5:
+  version "0.4.5"
+  resolved "https://registry.yarnpkg.com/i18next-scanner-webpack/-/i18next-scanner-webpack-0.4.5.tgz#63cc7df999b25ce42206c5869acefc648913eb61"
+  integrity sha512-OIkgTztJYsQwzaw9nwFVogs7glHrHjr3gPrkdUZ+qI12bHiOqxjLbl/DKDmKKgH01qzTgk2lZuMhQ5uiO9UB6Q==
   dependencies:
     i18next-scanner "^2.10.3"
     vinyl-fs "^3.0.3"
