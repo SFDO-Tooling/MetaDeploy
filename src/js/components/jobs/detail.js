@@ -340,7 +340,7 @@ class JobDetail extends React.Component<Props, State> {
             updateJob={doUpdateJob}
           />
           <BodyContainer>
-            <Toasts job={job} label={i18n.t('Installation')} />
+            <Toasts job={job} label="Installation" />
             <Intro
               averageDuration={plan.average_duration}
               isProductionOrg={job.is_production_org}
