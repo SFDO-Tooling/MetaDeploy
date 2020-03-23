@@ -114,12 +114,14 @@ class JobViewSet(
         cache.set(REDIS_JOB_CANCEL_KEY.format(id=instance.id), True)
 
 
-class ProductCategoryViewSet(viewsets.ModelViewSet):
+class ProductCategoryViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ProductCategorySerializer
     queryset = ProductCategory.objects.all()
 
 
-class ProductViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ModelViewSet):
+class ProductViewSet(
+    FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelViewSet
+):
     serializer_class = ProductSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ProductFilter
@@ -132,7 +134,7 @@ class ProductViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ModelViewSet
         )
 
 
-class VersionViewSet(GetOneMixin, viewsets.ModelViewSet):
+class VersionViewSet(GetOneMixin, viewsets.ReadOnlyModelViewSet):
     serializer_class = VersionSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = VersionFilter
@@ -150,7 +152,7 @@ class VersionViewSet(GetOneMixin, viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ModelViewSet):
+class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelViewSet):
     serializer_class = PlanSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = PlanFilter
