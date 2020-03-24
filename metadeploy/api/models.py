@@ -574,7 +574,7 @@ class Step(HashIdMixin, TranslatableModel):
         return f"Step {self.name} of {self.plan.title} ({self.step_num})"
 
     def get_translation_strategy(self):
-        return "text", f"steps"
+        return "text", f"{self.plan.plan_template.product.slug}:steps"
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
