@@ -15,6 +15,7 @@ class ProductSerializer(AdminAPISerializer):
     description = serializers.CharField()
     click_through_agreement = serializers.CharField()
     error_message = serializers.CharField()
+    slug = serializers.CharField()
 
     class Meta:
         fields = "__all__"
