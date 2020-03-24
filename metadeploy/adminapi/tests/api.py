@@ -30,6 +30,7 @@ class TestProductViewSet:
                     "short_description": "",
                     "slds_icon_category": "",
                     "slds_icon_name": "",
+                    "slug": "sample-product-0",
                     "title": "Sample Product 0",
                     "url": f"{url}/products/{product.id}",
                     "visible_to": None,

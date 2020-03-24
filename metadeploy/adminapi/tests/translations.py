@@ -3,17 +3,18 @@ import pytest
 
 @pytest.mark.django_db
 class TestTranslationViewSet:
-    def test_partial_update(self, admin_api_client, product_factory, step_factory):
-        product = product_factory(title="Example")
-        step1 = step_factory(name="Foo")
-        step2 = step_factory(name="Install Example 1.0")
+    def test_partial_update(self, admin_api_client, plan_factory, step_factory):
+        plan = plan_factory(version__product__title="Example")
+        product = plan.version.product
+        step1 = step_factory(name="Foo", plan=plan)
+        step2 = step_factory(name="Install Example 1.0", plan=plan)
 
         url = "http://testserver/admin/rest"
         response = admin_api_client.patch(
             f"{url}/translations/es",
             {
                 "example:product": {"title": {"message": "Ejemplo"}},
-                "steps": {
+                "example:steps": {
                     "Install {product} {version}": {
                         "message": "Instalar {product} {version}"
                     },
