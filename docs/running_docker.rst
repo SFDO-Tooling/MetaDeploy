@@ -140,8 +140,7 @@ DJANGO_DEBUG:
     Please set this to true. Production may want to have this disabled.
 
 SECURE_SSL_REDIRECT:
-    This variable is for Security! Better to use DNS for this task, 
-    but you can use redirect. Please set this variable to false.
+    Set to True to force redirecting to https.
 
 ADMIN_API_ALLOWED_SUBNETS:
     This is a value to signify what subnets are allowed access to the admin view.
