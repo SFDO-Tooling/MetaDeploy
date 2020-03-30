@@ -5,12 +5,11 @@ Library  ../MetaDeploy.py  ${LANG}
 Resource  cumulusci/robotframework/CumulusCI.robot
 
 Suite Setup  Load MetaDeploy
-Test Teardown  Capture Page Screenshot  ${OUTPUTDIR}/${LANG}/teardown.png
 Suite Teardown  Close All Browsers
 
 *** Variables ***
 
-${BASE_URL}  http://localhost:8080
+${BASE_URL}  https://metadeploy-stg.herokuapp.com
 ${LANG}  en
 ${PRODUCT}  npsp
 ${PLAN}  install
