@@ -4,6 +4,7 @@ import * as React from 'react';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import Icon from '@salesforce/design-system-react/components/icon';
 import classNames from 'classnames';
+import i18n from 'i18next';
 
 import type { DataCellProps } from 'components/plans/stepsTable';
 
@@ -18,7 +19,7 @@ const KindDataCell = (props: DataCellProps): React.Node => {
   const { className, ...otherProps } = props;
   return (
     <DataTableCell
-      title={value}
+      title={i18n.t(value)}
       className={classNames(className, 'plan-step-item', 'plan-step-type', {
         'is-installing': isActive,
       })}
@@ -30,12 +31,12 @@ const KindDataCell = (props: DataCellProps): React.Node => {
           category="utility"
           name={iconName}
           assistiveText={{
-            label: value,
+            label: i18n.t(value),
           }}
           size="x-small"
         />
       ) : null}
-      <span>{value}</span>
+      <span>{i18n.t(value)}</span>
     </DataTableCell>
   );
 };
