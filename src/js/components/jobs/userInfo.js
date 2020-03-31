@@ -25,17 +25,17 @@ const UserInfo = ({ job }: { job: JobType }): React.Node => {
           <ul>
             {username ? (
               <li>
-                <strong>{i18n.t('User')}:</strong> {username}
+                <strong>{i18n.t('User:')}</strong> {username}
               </li>
             ) : null}
             {org_name ? (
               <li>
-                <strong>{i18n.t('Org')}:</strong> {org_name}
+                <strong>{i18n.t('Org:')}</strong> {org_name}
               </li>
             ) : null}
             {org_type ? (
               <li>
-                <strong>{i18n.t('Type')}:</strong> {org_type}
+                <strong>{i18n.t('Type:')}</strong> {org_type}
               </li>
             ) : null}
           </ul>

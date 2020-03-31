@@ -412,10 +412,7 @@ class PlanDetail extends React.Component<Props, State> {
                 />
               ) : null}
               {preflight && user ? (
-                <Toasts
-                  preflight={preflight}
-                  label={i18n.t('Pre-install validation')}
-                />
+                <Toasts preflight={preflight} label="Pre-install validation" />
               ) : null}
               <Intro
                 averageDuration={plan.average_duration}

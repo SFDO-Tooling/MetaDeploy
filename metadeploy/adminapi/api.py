@@ -1,8 +1,11 @@
 from django_filters import rest_framework as filters
-from rest_framework import serializers
+from rest_framework import serializers, viewsets
+from rest_framework.response import Response
+from sfdo_template_helpers.admin.permissions import IsAPIUser
 from sfdo_template_helpers.admin.serializers import AdminAPISerializer
 from sfdo_template_helpers.admin.views import AdminAPIViewSet
 
+from metadeploy.adminapi.translations import update_all_translations
 from metadeploy.api import models
 
 
@@ -12,6 +15,7 @@ class ProductSerializer(AdminAPISerializer):
     description = serializers.CharField()
     click_through_agreement = serializers.CharField()
     error_message = serializers.CharField()
+    slug = serializers.CharField()
 
     class Meta:
         fields = "__all__"
@@ -71,9 +75,9 @@ class PlanSerializer(AdminAPISerializer):
 
 
 class PlanTemplateSerializer(AdminAPISerializer):
-    preflight_message = serializers.CharField()
-    post_install_message = serializers.CharField()
-    error_message = serializers.CharField()
+    preflight_message = serializers.CharField(required=False, allow_blank=True)
+    post_install_message = serializers.CharField(required=False, allow_blank=True)
+    error_message = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         fields = "__all__"
@@ -119,3 +123,36 @@ class AllowedListOrgSerializer(AdminAPISerializer):
 class AllowedListOrgViewSet(AdminAPIViewSet):
     model_name = "AllowedListOrg"
     serializer_base = AllowedListOrgSerializer
+
+
+class TranslationViewSet(viewsets.ViewSet):
+    """Facilitates adding/updating translated text.
+
+    PATCH /admin/rest/translations/es
+
+    {
+        "context": {
+            "slug": {
+                "message": "En español",
+                "description": "Spanish translation for slug in this context"
+            }
+        }
+    }
+    """
+
+    permission_classes = [IsAPIUser]
+    model_name = "Translation"
+
+    def partial_update(self, request, pk=None):
+        # Add or update a Translation record for each message
+        lang = pk
+        for context, messages in request.data.items():
+            for slug, message in messages.items():
+                record, created = models.Translation.objects.get_or_create(
+                    lang=lang, context=context, slug=slug,
+                )
+                record.text = message["message"]
+                record.save()
+
+        update_all_translations(lang)
+        return Response({})
