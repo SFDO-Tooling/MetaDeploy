@@ -19,7 +19,8 @@ def update_all_translations(lang):
 
 def update_translations(obj, langs=None):
     """Update one object's translations from the Translation model"""
-    assert obj.get_current_language() == "en-us"
+    # Make sure we were pased an object in the default language
+    assert obj.get_current_language() == settings.LANGUAGE_CODE
     strategy, context = obj.get_translation_strategy()
     if langs is None:
         langs = [language["code"][:2] for language in settings.PARLER_LANGUAGES[1]]
