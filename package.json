@@ -68,7 +68,7 @@
     "reselect": "^4.0.0",
     "run-p": "^0.0.0",
     "sockette": "^2.0.6",
-    "uuid": "^7.0.2",
+    "uuid": "^7.0.3",
     "whatwg-fetch": "^3.0.0"
   },
   "devDependencies": {
