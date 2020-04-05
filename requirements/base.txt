@@ -2,7 +2,7 @@ cumulusci==3.9.1
 
 -e git+https://github.com/SFDO-Tooling/sfdo-template-helpers.git@v0.9.0#egg=sfdo-template-helpers
 Django==2.2.11
-Pillow==7.0.0
+Pillow==7.1.1
 ansi2html==1.5.2
 bleach==3.1.4
 boto3==1.12.32
