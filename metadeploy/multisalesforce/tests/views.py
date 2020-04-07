@@ -59,7 +59,7 @@ class TestSalesforceOAuth2Mixin:
         )
         assert ret.account.extra_data["instance_url"] == "https://example.com"
 
-    def test_complete_login_fail(self, rf, mocker):
+    def test_complete_login__no_modify_all_data_perm(self, rf, mocker):
         # This is a mess of terrible mocking and I do not like it.
         bad_response = mock.MagicMock()
         bad_response.raise_for_status.side_effect = requests.HTTPError
@@ -69,6 +69,35 @@ class TestSalesforceOAuth2Mixin:
             "userSettings": {"canModifyAllData": False}
         }
         get.side_effect = [mock.MagicMock(), insufficient_perms_mock]
+        adapter = SalesforceOAuth2Mixin()
+        adapter.userinfo_url = None
+        adapter.get_provider = mock.MagicMock()
+        slfr = mock.MagicMock()
+        slfr.account.extra_data = {}
+        prov_ret = mock.MagicMock()
+        prov_ret.sociallogin_from_response.return_value = slfr
+        adapter.get_provider.return_value = prov_ret
+        request = rf.get("/")
+        request.session = {"socialaccount_state": (None, "some-verifier")}
+        token = mock.MagicMock()
+        token.token = fernet_encrypt("token")
+
+        with pytest.raises(SalesforcePermissionsError):
+            adapter.complete_login(request, None, token, response={})
+
+    def test_complete_login__api_disabled_for_org(self, rf, mocker):
+        get = mocker.patch("requests.get")
+        userinfo_mock = mock.MagicMock()
+        userinfo_mock.json.return_value = {
+            "organization_id": "00D000000000001EAA",
+            "urls": mock.MagicMock(),
+        }
+        api_disabled_mock = mock.MagicMock(
+            status_code=403,
+            text='[{"message":"The REST API is not enabled for this Organization.","errorCode":"API_DISABLED_FOR_ORG"}]',
+        )
+
+        get.side_effect = [userinfo_mock, mock.MagicMock(), api_disabled_mock]
         adapter = SalesforceOAuth2Mixin()
         adapter.userinfo_url = None
         adapter.get_provider = mock.MagicMock()
