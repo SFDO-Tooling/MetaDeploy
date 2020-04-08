@@ -55,8 +55,18 @@ class SalesforceOAuth2Mixin:
             version="44.0", org_id=org_id
         )
         resp = requests.get(org_url, headers=headers)
-        resp.raise_for_status()
-        return resp.json()
+        resp_json = resp.json()
+        if (
+            resp.status_code == 403
+            and len(resp_json)
+            and resp_json[0]["errorCode"] == "API_DISABLED_FOR_ORG"
+        ):
+            raise SalesforcePermissionsError(
+                "Sorry, MetaDeploy requires an org with the API enabled."
+            )
+        else:
+            resp.raise_for_status()
+        return resp_json
 
     def complete_login(self, request, app, token, **kwargs):
         token = fernet_decrypt(token.token)
