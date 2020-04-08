@@ -92,10 +92,13 @@ class TestSalesforceOAuth2Mixin:
             "organization_id": "00D000000000001EAA",
             "urls": mock.MagicMock(),
         }
-        api_disabled_mock = mock.MagicMock(
-            status_code=403,
-            text='[{"message":"The REST API is not enabled for this Organization.","errorCode":"API_DISABLED_FOR_ORG"}]',
-        )
+        api_disabled_mock = mock.MagicMock(status_code=403)
+        api_disabled_mock.json.return_value = [
+            {
+                "message": "The REST API is not enabled for this Organization.",
+                "errorCode": "API_DISABLED_FOR_ORG",
+            }
+        ]
 
         get.side_effect = [userinfo_mock, mock.MagicMock(), api_disabled_mock]
         adapter = SalesforceOAuth2Mixin()
