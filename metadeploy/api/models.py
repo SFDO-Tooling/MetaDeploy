@@ -82,7 +82,7 @@ class AllowedList(models.Model):
 
 class AllowedListOrg(models.Model):
     allowed_list = models.ForeignKey(
-        AllowedList, related_name="orgs", on_delete=models.PROTECT
+        AllowedList, related_name="orgs", on_delete=models.CASCADE
     )
     org_id = models.CharField(max_length=18)
     description = models.TextField(
@@ -104,7 +104,7 @@ class AllowedListAccessMixin(models.Model):
         abstract = True
 
     visible_to = models.ForeignKey(
-        AllowedList, on_delete=models.SET_NULL, null=True, blank=True
+        AllowedList, on_delete=models.PROTECT, null=True, blank=True
     )
 
     def is_visible_to(self, user):
@@ -211,7 +211,7 @@ class ProductCategory(models.Model):
 
 
 class ProductSlug(AbstractSlug):
-    parent = models.ForeignKey("Product", on_delete=models.PROTECT)
+    parent = models.ForeignKey("Product", on_delete=models.CASCADE)
 
 
 class ProductQuerySet(TranslatableQuerySet):
@@ -356,7 +356,7 @@ class Version(HashIdMixin, TranslatableModel):
 
 class PlanSlug(AbstractSlug):
     slug = models.SlugField()
-    parent = models.ForeignKey("PlanTemplate", on_delete=models.PROTECT)
+    parent = models.ForeignKey("PlanTemplate", on_delete=models.CASCADE)
 
     def validate_unique(self, *args, **kwargs):
         super().validate_unique(*args, **kwargs)
@@ -425,6 +425,20 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
 
     slug_class = PlanSlug
     slug_field_name = "title"
+
+    class Meta:
+        constraints = [
+            # No duplicate plans with the same version and plan template
+            models.UniqueConstraint(
+                fields=["version", "plan_template"], name="unique_version_plan_template"
+            ),
+            # Only one primary-tier plan per version
+            models.UniqueConstraint(
+                fields=["version"],
+                condition=Q(tier="primary"),
+                name="unique_version_primary_plan",
+            ),
+        ]
 
     @property
     def preflight_message_additional_markdown(self):
@@ -610,16 +624,18 @@ class Job(HashIdMixin, models.Model):
     is_public = models.BooleanField(default=False)
     success_at = models.DateTimeField(
         null=True,
+        blank=True,
         help_text=("If the job completed successfully, the time of that success."),
     )
     canceled_at = models.DateTimeField(
         null=True,
+        blank=True,
         help_text=(
             "The time at which the Job canceled itself, likely just a bit after it was "
             "told to cancel itself."
         ),
     )
-    exception = models.TextField(null=True)
+    exception = models.TextField(null=True, blank=True)
     log = models.TextField(blank=True)
     click_through_agreement = models.ForeignKey(
         ClickThroughAgreement, on_delete=models.PROTECT, null=True

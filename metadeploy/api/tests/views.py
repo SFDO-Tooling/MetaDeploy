@@ -489,7 +489,10 @@ class TestUnlisted:
         plan_template2 = plan_template_factory(product=product)
         plan_factory(version=version, plan_template=plan_template1)
         plan = plan_factory(
-            version=version, plan_template=plan_template2, is_listed=False
+            version=version,
+            plan_template=plan_template2,
+            is_listed=False,
+            tier="additional",
         )
 
         response = client.get(
@@ -514,7 +517,10 @@ class TestUnlisted:
         plan_template2 = plan_template_factory(product=product)
         plan_factory(version=version, plan_template=plan_template1)
         plan = plan_factory(
-            version=version, plan_template=plan_template2, is_listed=False
+            version=version,
+            plan_template=plan_template2,
+            is_listed=False,
+            tier="additional",
         )
 
         response = client.get(
