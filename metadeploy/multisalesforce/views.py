@@ -1,4 +1,3 @@
-import json
 import logging
 import re
 
@@ -59,7 +58,8 @@ class SalesforceOAuth2Mixin:
         resp_json = resp.json()
         if (
             resp.status_code == 403
-            and len(resp_json) and resp_json[0]["errorCode"] == "API_DISABLED_FOR_ORG"
+            and len(resp_json)
+            and resp_json[0]["errorCode"] == "API_DISABLED_FOR_ORG"
         ):
             raise SalesforcePermissionsError(
                 "Sorry, MetaDeploy requires an org with the API enabled."
