@@ -201,3 +201,4 @@ class SiteProfileAdmin(TranslatableAdmin):
 @admin.register(Translation)
 class TranslationAdmin(admin.ModelAdmin):
     list_display = ("lang", "context", "slug", "text")
+    list_filter = ("lang",)
