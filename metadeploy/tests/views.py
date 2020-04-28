@@ -2,8 +2,8 @@ from unittest import mock
 
 import pytest
 from django.test import RequestFactory
+from sfdo_template_helpers.oauth2.salesforce.views import SalesforcePermissionsError
 
-from ..multisalesforce.views import SalesforcePermissionsError
 from ..views import custom_permission_denied_view
 
 

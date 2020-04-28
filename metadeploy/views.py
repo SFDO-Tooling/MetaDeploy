@@ -1,6 +1,5 @@
 from django.shortcuts import render
-
-from metadeploy.multisalesforce.views import SalesforcePermissionsError
+from sfdo_template_helpers.oauth2.salesforce.views import SalesforcePermissionsError
 
 
 def custom_permission_denied_view(request, exception):

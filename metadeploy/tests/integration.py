@@ -45,8 +45,8 @@ def test_can_reach_salesforce(
         user=user,
         extra_data={
             "instance_url": INSTANCE_URL,
+            "organization_id": ORGANIZATION_ID,
             "organization_details": {
-                "Id": ORGANIZATION_ID,
                 "Name": "Oddbird",
                 "OrganizationType": "Developer Edition",
             },

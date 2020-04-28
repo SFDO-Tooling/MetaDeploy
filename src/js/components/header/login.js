@@ -5,7 +5,6 @@ import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import i18n from 'i18next';
 
 import { addUrlParams } from 'utils/api';
-import { logError } from 'utils/logging';
 import CustomDomainModal from 'components/header/customDomainModal';
 import type { UrlParams } from 'utils/api';
 
@@ -23,9 +22,8 @@ type Props = {
 type MenuOption =
   | {|
       label: string,
-      href?: string,
+      login_domain: string,
       disabled: boolean,
-      modal?: boolean,
     |}
   | {| type: string |};
 
@@ -43,15 +41,6 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
   constructor(props: Props) {
     super(props);
     this.state = { modalOpen: false };
-    if (!window.api_urls.salesforce_production_login) {
-      logError('Login URL not found for salesforce_production provider.');
-    }
-    if (!window.api_urls.salesforce_test_login) {
-      logError('Login URL not found for salesforce_test provider.');
-    }
-    if (!window.api_urls.salesforce_custom_login) {
-      logError('Login URL not found for salesforce_custom provider.');
-    }
   }
 
   toggleModal = (isOpen: boolean) => {
@@ -59,43 +48,39 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
   };
 
   handleSelect = (opt: MenuOption) => {
-    if (opt.modal) {
+    const login_domain = opt.login_domain || '';
+    if (login_domain === '') {
       this.toggleModal(true);
       return;
     }
-    if (opt.href) {
-      const { redirectParams } = this.props;
-      window.location.assign(
-        addUrlParams(opt.href, {
-          next: addUrlParams(window.location.href, redirectParams),
-        }),
-      );
-    }
+    const { redirectParams } = this.props;
+    window.location.assign(
+      addUrlParams(window.api_urls.salesforce_login(), {
+        custom_domain: login_domain,
+        next: addUrlParams(window.location.href, redirectParams),
+      }),
+    );
   };
 
   static getMenuOpts(): Array<MenuOption> {
     return [
       {
         label: i18n.t('Production or Developer Org'),
-        href:
-          window.api_urls.salesforce_production_login &&
-          window.api_urls.salesforce_production_login(),
-        disabled: !window.api_urls.salesforce_production_login,
+        login_domain: 'login',
+        disabled: false,
       },
       {
         label: i18n.t('Sandbox or Scratch Org'),
-        href:
-          window.api_urls.salesforce_test_login &&
-          window.api_urls.salesforce_test_login(),
-        disabled: !window.api_urls.salesforce_test_login,
+        login_domain: 'test',
+        disabled: false,
       },
       {
         type: 'divider',
       },
       {
         label: i18n.t('Use Custom Domain'),
-        modal: Boolean(window.api_urls.salesforce_custom_login),
-        disabled: !window.api_urls.salesforce_custom_login,
+        login_domain: '',
+        disabled: false,
       },
     ];
   }

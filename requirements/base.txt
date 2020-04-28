@@ -1,6 +1,6 @@
 cumulusci==3.11.0
 
--e git+https://github.com/SFDO-Tooling/sfdo-template-helpers.git@v0.9.0#egg=sfdo-template-helpers
+-e git+https://github.com/SFDO-Tooling/sfdo-template-helpers.git@feature/salesforce-allauth#egg=sfdo-template-helpers
 Django==2.2.11
 Pillow==7.1.1
 ansi2html==1.5.2
