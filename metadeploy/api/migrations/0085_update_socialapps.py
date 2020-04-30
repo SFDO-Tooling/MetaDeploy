@@ -29,13 +29,11 @@ def forwards(apps, schema_editor):
         for account in SocialAccount.objects.filter(
             provider__in=("salesforce-test", "salesforce-custom")
         ):
-            sid = transaction.savepoint()
             try:
-                account.provider = "salesforce"
-                account.save()
-                transaction.savepoint_commit(sid)
+                with transaction.atomic():
+                    account.provider = "salesforce"
+                    account.save()
             except IntegrityError:
-                transaction.savepoint_rollback(sid)
                 account.delete()
 
         # Remove the old SocialApps (and any related tokens)
