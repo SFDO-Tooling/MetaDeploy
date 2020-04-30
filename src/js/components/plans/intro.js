@@ -33,7 +33,7 @@ const Intro = ({
       <div className="slds-text-longform">
         {duration ? (
           <div className="slds-m-bottom_small">
-            <strong>{i18n.t('Average Install Time')}:</strong> {duration}.
+            <strong>{i18n.t('Average Install Time:')}</strong> {duration}.
             {isProductionOrg ? (
               <Tooltip
                 content={i18n.t(

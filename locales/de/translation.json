@@ -9,7 +9,7 @@
   "An installation is currently running on this org.": "In dieser Organisation wird aktuell eine Installation ausgeführt.",
   "Anyone with the link can view this installation job.": "Jeder, der über den Link verfügt, kann diesen Installationsauftrag anzeigen.",
   "Authentication Error": "Authentifizierungsfehler",
-  "Average Install Time": "Durchschnittliche Installationszeit",
+  "Average Install Time:": "Durchschnittliche Installationszeit:",
   "Average install time is": "Die durchschnittliche Installationszeit beträgt",
   "Cancel": "Abbrechen",
   "Cancel Installation": "Installation abbrechen",
