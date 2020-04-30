@@ -143,8 +143,8 @@ async def test_push_notification_consumer__subscribe_org(
         extra_data={
             # instance_url is the important part here:
             "instance_url": "https://example.com/",
+            "organization_id": "00Dxxxxxxxxxxxxxxx",
             "organization_details": {
-                "Id": "00Dxxxxxxxxxxxxxxx",
                 "Name": "Sample Org",
                 "OrganizationType": "Developer Edition",
             },

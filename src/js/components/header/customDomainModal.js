@@ -11,7 +11,7 @@ import type { UrlParams } from 'utils/api';
 
 type Props = {
   isOpen: boolean,
-  toggleModal: boolean => void,
+  toggleModal: (boolean) => void,
   redirectParams: UrlParams,
 };
 
@@ -32,7 +32,7 @@ class CustomDomainModal extends React.Component<Props, { url: string }> {
     if (!val) {
       return;
     }
-    const baseUrl = window.api_urls.salesforce_custom_login();
+    const baseUrl = window.api_urls.salesforce_login();
     const { redirectParams } = this.props;
     window.location.assign(
       addUrlParams(baseUrl, {
