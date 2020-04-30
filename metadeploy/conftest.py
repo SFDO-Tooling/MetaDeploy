@@ -38,8 +38,8 @@ class SocialAppFactory(factory.django.DjangoModelFactory):
         model = SocialApp
         django_get_or_create = ("provider",)
 
-    name = "Salesforce Production"
-    provider = "salesforce-production"
+    name = "Salesforce"
+    provider = "salesforce"
     key = "https://login.salesforce.com/"
 
 
@@ -58,13 +58,13 @@ class SocialAccountFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = SocialAccount
 
-    provider = "salesforce-production"
+    provider = "salesforce"
     uid = factory.Sequence("https://example.com/{}".format)
     socialtoken_set = factory.RelatedFactory(SocialTokenFactory, "account")
     extra_data = {
+        "organization_id": "00Dxxxxxxxxxxxxxxx",
         "instance_url": "https://example.com",
         "organization_details": {
-            "Id": "00Dxxxxxxxxxxxxxxx",
             "Name": "Sample Org",
             "OrganizationType": "Developer Edition",
             "IsSandbox": False,

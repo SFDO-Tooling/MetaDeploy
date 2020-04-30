@@ -146,7 +146,8 @@ class User(HashIdMixin, AbstractUser):
 
     @property
     def org_id(self):
-        return self._get_org_property("Id")
+        if self.social_account:
+            return self.social_account.extra_data["organization_id"]
 
     @property
     def org_name(self):

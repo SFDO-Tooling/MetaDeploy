@@ -3,7 +3,6 @@ from django.urls import reverse
 
 from metadeploy.conftest import format_timestamp
 
-from ..constants import ORGANIZATION_DETAILS
 from ..models import Job, Plan, PreflightResult
 
 
@@ -269,7 +268,7 @@ class TestBasicGetViews:
         plan = plan_factory(visible_to=allowed_list)
         user = user_factory()
         social_account = user.socialaccount_set.all()[0]
-        social_account.extra_data[ORGANIZATION_DETAILS]["Id"] = allowed_list_org.org_id
+        social_account.extra_data["organization_id"] = allowed_list_org.org_id
         social_account.save()
         client.force_login(user)
         response = client.get(reverse("plan-detail", kwargs={"pk": plan.id}))

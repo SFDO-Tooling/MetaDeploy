@@ -130,8 +130,8 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "django_filters",
     "parler",
+    "sfdo_template_helpers.oauth2.salesforce",
     "metadeploy",
-    "metadeploy.multisalesforce",
     "metadeploy.api",
     "metadeploy.adminapi.apps.AdminapiConfig",
     "django_js_reverse",
@@ -308,15 +308,23 @@ STATIC_ROOT = str(PROJECT_ROOT / "staticfiles")
 # > you won't benefit from cache versioning
 # WHITENOISE_ROOT = PROJECT_ROOT.joinpath(static_dir_root)
 
+# SF Connected App and GitHub configuration:
+CONNECTED_APP_CLIENT_SECRET = env("CONNECTED_APP_CLIENT_SECRET")
+CONNECTED_APP_CALLBACK_URL = env("CONNECTED_APP_CALLBACK_URL")
+CONNECTED_APP_CLIENT_ID = env("CONNECTED_APP_CLIENT_ID")
+GITHUB_TOKEN = env("GITHUB_TOKEN")
+
 SOCIALACCOUNT_PROVIDERS = {
-    "salesforce-production": {"SCOPE": ["web", "full", "refresh_token"]},
-    "salesforce-test": {"SCOPE": ["web", "full", "refresh_token"]},
-    "salesforce-custom": {"SCOPE": ["web", "full", "refresh_token"]},
+    "salesforce": {
+        "SCOPE": ["web", "full", "refresh_token"],
+        "APP": {
+            "client_id": CONNECTED_APP_CLIENT_ID,
+            "secret": CONNECTED_APP_CLIENT_SECRET,
+        },
+    },
 }
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_UNIQUE_EMAIL = False
 ACCOUNT_EMAIL_VERIFICATION = "none"
-SOCIALACCOUNT_ADAPTER = "metadeploy.multisalesforce.adapter.CustomSocialAccountAdapter"
+SOCIALACCOUNT_ADAPTER = "sfdo_template_helpers.oauth2.adapter.SFDOSocialAccountAdapter"
 
 JS_REVERSE_JS_VAR_NAME = "api_urls"
 JS_REVERSE_EXCLUDE_NAMESPACES = ["admin", "admin_rest"]
@@ -365,14 +373,6 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
     ),
 }
-
-
-# SF Connected App and GitHub configuration:
-CONNECTED_APP_CLIENT_SECRET = env("CONNECTED_APP_CLIENT_SECRET")
-CONNECTED_APP_CALLBACK_URL = env("CONNECTED_APP_CALLBACK_URL")
-CONNECTED_APP_CLIENT_ID = env("CONNECTED_APP_CLIENT_ID")
-GITHUB_TOKEN = env("GITHUB_TOKEN")
-
 
 # Token expiration
 TOKEN_LIFETIME_MINUTES = env("TOKEN_LIFETIME_MINUTES", type_=int, default=10)
