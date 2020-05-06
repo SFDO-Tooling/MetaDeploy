@@ -50,7 +50,7 @@ const selectedSteps = new Set(['step-1', 'step-2', 'step-3']);
 describe('<StepsTable />', () => {
   const handleStepsChange = jest.fn();
 
-  const setup = options => {
+  const setup = (options) => {
     const defaults = { plan: defaultPlan, user: null, selectedSteps };
     const opts = { ...defaults, ...options };
     return render(

@@ -103,7 +103,7 @@ const defaultState = {
 };
 
 describe('<JobDetail />', () => {
-  const setup = options => {
+  const setup = (options) => {
     const defaults = {
       initialState: defaultState,
       customStore: storeWithApi,

@@ -52,7 +52,7 @@ const defaultPreflight = {
 };
 
 describe('<CtaButton />', () => {
-  const setup = options => {
+  const setup = (options) => {
     const defaults = {
       plan: defaultPlan,
       user: { valid_token_for: 'foo' },

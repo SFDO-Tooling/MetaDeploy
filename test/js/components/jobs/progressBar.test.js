@@ -11,7 +11,7 @@ const defaultJob = {
 };
 
 describe('<ProgressBar />', () => {
-  const setup = options => {
+  const setup = (options) => {
     const defaults = {
       job: defaultJob,
     };

@@ -25,16 +25,16 @@ export type OrgAction =
   | FetchOrgJobsFailed
   | OrgChanged;
 
-export const fetchOrgJobs = (): ThunkAction => dispatch => {
+export const fetchOrgJobs = (): ThunkAction => (dispatch) => {
   dispatch({ type: 'FETCH_ORG_JOBS_STARTED' });
   return apiFetch(window.api_urls.org_list(), dispatch)
-    .then(response =>
+    .then((response) =>
       dispatch({
         type: 'FETCH_ORG_JOBS_SUCCEEDED',
         payload: response,
       }),
     )
-    .catch(err => {
+    .catch((err) => {
       dispatch({ type: 'FETCH_ORG_JOBS_FAILED' });
       throw err;
     });

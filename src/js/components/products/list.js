@@ -52,7 +52,7 @@ class ProductsList extends React.Component<Props, State> {
     try {
       if (window.location.hash) {
         hashTab = props.productCategories.find(
-          category =>
+          (category) =>
             window.location.hash.substring(1) === prettyUrlHash(category.title),
         );
       }
@@ -76,7 +76,7 @@ class ProductsList extends React.Component<Props, State> {
         className="slds-grid
           slds-wrap"
       >
-        {products.map(item => (
+        {products.map((item) => (
           <ProductItem item={item} key={item.id} />
         ))}
       </div>
@@ -115,7 +115,9 @@ class ProductsList extends React.Component<Props, State> {
     const { activeProductsTab, fetchingProducts } = this.state;
     const { productCategories, doFetchMoreProducts } = this.props;
     const activeCategory = activeProductsTab
-      ? productCategories.find(category => category.title === activeProductsTab)
+      ? productCategories.find(
+          (category) => category.title === activeProductsTab,
+        )
       : productCategories[0];
     const moreProductsUrl = activeCategory && activeCategory.next;
 
@@ -185,7 +187,7 @@ class ProductsList extends React.Component<Props, State> {
           tabs.push(panel);
         }
         const savedTabIndex = productCategories.findIndex(
-          category => category.title === activeProductsTab,
+          (category) => category.title === activeProductsTab,
         );
         contents = (
           <Tabs

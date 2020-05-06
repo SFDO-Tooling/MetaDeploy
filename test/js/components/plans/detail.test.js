@@ -145,7 +145,7 @@ const defaultState = {
 };
 
 describe('<PlanDetail />', () => {
-  const setup = options => {
+  const setup = (options) => {
     const defaults = {
       initialState: defaultState,
       customStore: storeWithApi,

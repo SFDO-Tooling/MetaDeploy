@@ -19,7 +19,7 @@ const defaultPreflight = {
 };
 
 describe('<PreflightResults />', () => {
-  const setup = options => {
+  const setup = (options) => {
     const defaults = {
       preflight: defaultPreflight,
     };

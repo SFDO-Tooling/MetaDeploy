@@ -60,7 +60,7 @@ class Command(BaseCommand):
         click_through_agreement = kwargs.pop(
             "click_through_agreement",
             (
-                f"Lorem ipsum dolor sit amet, consectetur adipiscing elit, "
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, "
                 "sed do eiusmod tempor incididunt ut labore et dolore "
                 "magna aliqua. Tellus elementum sagittis vitae et leo "
                 "duis ut diam. Sem fringilla ut morbi tincidunt augue "
@@ -141,7 +141,7 @@ class Command(BaseCommand):
             plan=plan,
             name="Quick step",
             description=(
-                f"This is a description of the step. Could be any step, "
+                "This is a description of the step. Could be any step, "
                 "optional or required. The description wraps."
             ),
             is_recommended=False,
@@ -518,8 +518,8 @@ class Command(BaseCommand):
         step.save()
 
         product2 = self.create_product(
-            title=f"Red Salesforce Product",
-            description=f"This product should have a red icon.",
+            title="Red Salesforce Product",
+            description="This product should have a red icon.",
             category=sf_category,
             color="#c23934",
             order_key=1,
@@ -536,8 +536,8 @@ class Command(BaseCommand):
         )
 
         product3 = self.create_product(
-            title=f"Custom Icon Salesforce Product",
-            description=f"This product should have a custom icon.",
+            title="Custom Icon Salesforce Product",
+            description="This product should have a custom icon.",
             category=sf_category,
             icon_url=("https://lightningdesignsystem.com/assets/images" "/avatar3.jpg"),
             order_key=2,
@@ -547,8 +547,8 @@ class Command(BaseCommand):
         self.create_plan(version3, title="Unrestricted Plan", tier="secondary")
 
         product4 = self.create_product(
-            title=f"Custom SLDS Icon Salesforce Product",
-            description=f"This product should have a custom SLDS icon.",
+            title="Custom SLDS Icon Salesforce Product",
+            description="This product should have a custom SLDS icon.",
             category=sf_category,
             slds_icon_category="utility",
             slds_icon_name="world",

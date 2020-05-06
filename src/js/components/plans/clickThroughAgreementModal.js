@@ -9,7 +9,7 @@ import i18n from 'i18next';
 type Props = {
   isOpen: boolean,
   text: string,
-  toggleModal: boolean => void,
+  toggleModal: (boolean) => void,
   startJob: () => void,
 };
 type State = {

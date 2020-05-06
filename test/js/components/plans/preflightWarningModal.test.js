@@ -18,7 +18,7 @@ describe('<PreflightWarningModal />', () => {
   ];
   const selectedSteps = new Set(['step-1', 'step-2', 'step-3']);
 
-  const setup = options => {
+  const setup = (options) => {
     const defaults = {
       toggleModal: jest.fn(),
       startJob: jest.fn(),

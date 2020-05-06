@@ -14,7 +14,7 @@ import { fetchMoreProducts } from 'store/products/actions';
 jest.mock('react-fns', () => ({
   withScroll(Component) {
     // eslint-disable-next-line react/display-name
-    return props => <Component x={0} y={0} {...props} />;
+    return (props) => <Component x={0} y={0} {...props} />;
   },
 }));
 jest.mock('store/products/actions');

@@ -118,7 +118,7 @@ describe('shouldFetchPlan', () => {
 });
 
 describe('getLoadingOrNotFound', () => {
-  const setup = opts => {
+  const setup = (opts) => {
     const context = {};
     const { getByText } = renderWithRedux(
       <StaticRouter context={context}>

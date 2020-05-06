@@ -90,7 +90,7 @@ const App = () => (
   </DocumentTitle>
 );
 
-init_i18n(i18nError => {
+init_i18n((i18nError) => {
   if (i18nError) {
     log(i18nError);
   }

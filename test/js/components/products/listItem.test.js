@@ -5,11 +5,11 @@ import { render } from '@testing-library/react';
 import ProductItem from 'components/products/listItem';
 
 describe('<ProductItem />', () => {
-  const setup = initialState => {
+  const setup = (initialState) => {
     const { getByText, queryByText } = render(
       <MemoryRouter>
         <>
-          {initialState.products.products.map(item => (
+          {initialState.products.products.map((item) => (
             <ProductItem item={item} key={item.id} />
           ))}
         </>

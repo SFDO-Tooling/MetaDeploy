@@ -20,7 +20,7 @@ const defaultJob = {
 };
 
 describe('<jobResults />', () => {
-  const setup = options => {
+  const setup = (options) => {
     const defaults = {
       job: defaultJob,
     };

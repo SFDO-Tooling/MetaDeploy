@@ -84,7 +84,7 @@ const defaultState = {
 };
 
 describe('<ProductDetail />', () => {
-  const setup = options => {
+  const setup = (options) => {
     const defaults = {
       initialState: defaultState,
       productSlug: 'product-1',
@@ -191,7 +191,7 @@ describe('<ProductDetail />', () => {
 });
 
 describe('<VersionDetail />', () => {
-  const setup = options => {
+  const setup = (options) => {
     const defaults = {
       initialState: defaultState,
       productSlug: 'product-1',

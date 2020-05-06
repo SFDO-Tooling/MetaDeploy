@@ -24,17 +24,17 @@ export type VersionPlanType = {
 const selectProductsState = (appState: AppState): ProductsState =>
   appState.products;
 
-const selectProducts: AppState => Array<Product> = createSelector(
+const selectProducts: (AppState) => Array<Product> = createSelector(
   selectProductsState,
   (products: ProductsState): Array<Product> => products.products,
 );
 
-const selectProductCategories: AppState => Array<Category> = createSelector(
+const selectProductCategories: (AppState) => Array<Category> = createSelector(
   selectProductsState,
   (products: ProductsState): Array<Category> => products.categories,
 );
 
-const selectProductsByCategory: AppState => ProductsMapType = createSelector(
+const selectProductsByCategory: (AppState) => ProductsMapType = createSelector(
   [selectProducts, selectProductCategories],
   (products: Array<Product>, categories: Array<Category>): ProductsMapType => {
     const productsByCategory = new Map();
@@ -42,7 +42,7 @@ const selectProductsByCategory: AppState => ProductsMapType = createSelector(
       productsByCategory.set(
         category.title,
         products.filter(
-          product =>
+          (product) =>
             product.is_allowed &&
             product.is_listed &&
             product.most_recent_version &&
@@ -82,7 +82,7 @@ const selectProduct: (
       return undefined;
     }
     const product = products.find(
-      p => p.slug === productSlug || p.old_slugs.includes(productSlug),
+      (p) => p.slug === productSlug || p.old_slugs.includes(productSlug),
     );
     if (product) {
       return product;

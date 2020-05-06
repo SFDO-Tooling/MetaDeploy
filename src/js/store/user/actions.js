@@ -12,7 +12,7 @@ export type LogoutAction = { type: 'USER_LOGGED_OUT' };
 export type TokenInvalidAction = { type: 'USER_TOKEN_INVALIDATED' };
 export type UserAction = LoginAction | LogoutAction | TokenInvalidAction;
 
-export const login = (payload: User): ThunkAction => dispatch => {
+export const login = (payload: User): ThunkAction => (dispatch) => {
   if (window.Sentry) {
     window.Sentry.setUser(payload);
   }
@@ -36,7 +36,7 @@ export const login = (payload: User): ThunkAction => dispatch => {
   return dispatch(fetchOrgJobs());
 };
 
-export const logout = (): ThunkAction => dispatch =>
+export const logout = (): ThunkAction => (dispatch) =>
   apiFetch(window.api_urls.account_logout(), dispatch, {
     method: 'POST',
   }).then(() => {
@@ -45,7 +45,7 @@ export const logout = (): ThunkAction => dispatch =>
       window.socket.reconnect();
     }
     if (window.Sentry) {
-      window.Sentry.configureScope(scope => scope.clear());
+      window.Sentry.configureScope((scope) => scope.clear());
     }
     dispatch({ type: 'USER_LOGGED_OUT' });
     return dispatch(fetchProducts());
@@ -55,10 +55,10 @@ export const invalidateToken = (): TokenInvalidAction => ({
   type: 'USER_TOKEN_INVALIDATED',
 });
 
-export const refetchAllData = (): ThunkAction => dispatch => {
+export const refetchAllData = (): ThunkAction => (dispatch) => {
   dispatch({ type: 'REFETCH_DATA_STARTED' });
   return apiFetch(window.api_urls.user(), dispatch, {}, [401, 403, 404])
-    .then(payload => {
+    .then((payload) => {
       dispatch({ type: 'REFETCH_DATA_SUCCEEDED' });
       dispatch({ type: 'USER_LOGGED_OUT' });
       if (!payload) {
@@ -66,7 +66,7 @@ export const refetchAllData = (): ThunkAction => dispatch => {
       }
       return dispatch(login(payload));
     })
-    .catch(err => {
+    .catch((err) => {
       dispatch({ type: 'REFETCH_DATA_FAILED' });
       throw err;
     });
