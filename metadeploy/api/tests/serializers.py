@@ -457,7 +457,7 @@ class TestJob:
             str(error) for error in serializer.errors["non_field_errors"]
         ]
         assert (
-            f"The connection to your org has been lost. Please log in again."
+            "The connection to your org has been lost. Please log in again."
             in non_field_errors
         )
 
