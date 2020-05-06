@@ -10,7 +10,7 @@ const defaultJob = {
 const defaultLabel = 'Installation';
 
 describe('<Toasts />', () => {
-  const setup = options => {
+  const setup = (options) => {
     const defaults = {
       job: defaultJob,
       label: defaultLabel,

@@ -4,7 +4,7 @@ import { fireEvent, render } from '@testing-library/react';
 import ClickThroughAgreementModal from 'components/plans/clickThroughAgreementModal';
 
 describe('<ClickThroughAgreementModal />', () => {
-  const setup = options => {
+  const setup = (options) => {
     const defaults = {
       toggleModal: jest.fn(),
       startJob: jest.fn(),

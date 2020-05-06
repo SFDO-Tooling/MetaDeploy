@@ -310,7 +310,7 @@ class JobDetail extends React.Component<Props, State> {
     );
     const { canceling } = this.state;
     const steps = plan.steps
-      ? plan.steps.filter(step => {
+      ? plan.steps.filter((step) => {
           const result = job.results[step.id];
           const hidden =
             result && result.status === CONSTANTS.RESULT_STATUS.HIDE;

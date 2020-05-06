@@ -28,7 +28,7 @@ export type TransientMessageProps = {|
   hideTransientMessage?: () => void,
 |};
 
-export const withTransientMessage = function<
+export const withTransientMessage = function <
   Props: {},
   Component: React.ComponentType<Props>,
 >(

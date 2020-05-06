@@ -17,7 +17,7 @@ import type { SelectedSteps as SelectedStepsType } from 'components/plans/detail
 
 type Props = {
   isOpen: boolean,
-  toggleModal: boolean => void,
+  toggleModal: (boolean) => void,
   startJob: () => void,
   results: PreflightErrorsType,
   steps: Array<StepType>,
@@ -111,8 +111,8 @@ class PreflightWarningModal extends React.Component<Props, State> {
       >
         <div className="slds-p-horizontal_large slds-p-vertical_medium">
           {results.plan ? <Warning id="plan" result={results.plan} /> : null}
-          {[...selectedSteps].map(id => {
-            const step = steps.find(s => s.id === id);
+          {[...selectedSteps].map((id) => {
+            const step = steps.find((s) => s.id === id);
             const stepResult = results[id];
             if (!step || !stepResult) {
               return null;

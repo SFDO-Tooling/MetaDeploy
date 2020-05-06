@@ -40,7 +40,7 @@ const Errors = ({
 }) => (
   <ToastContainer className="half-container">
     {errors &&
-      errors.map(err => (
+      errors.map((err) => (
         <ErrorToast key={err.id} error={err} doRemoveError={doRemoveError} />
       ))}
   </ToastContainer>

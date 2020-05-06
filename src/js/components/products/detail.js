@@ -311,7 +311,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                         {i18n.t('Additional Plans')}
                       </h2>
                     ) : null}
-                    {listedAdditionalPlans.map(plan => (
+                    {listedAdditionalPlans.map((plan) => (
                       <p key={plan.id}>
                         <Link
                           to={routes.plan_detail(

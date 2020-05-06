@@ -4,7 +4,7 @@ import { fireEvent, render } from '@testing-library/react';
 import CurrentJobAlert from 'components/jobs/currentJobAlert';
 
 describe('<CurrentJobAlert />', () => {
-  const setup = options => {
+  const setup = (options) => {
     const opts = {
       currentJob: {
         id: 'my-job',

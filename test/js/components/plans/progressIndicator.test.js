@@ -4,7 +4,7 @@ import { render } from '@testing-library/react';
 import ProgressIndicator from 'components/plans/progressIndicator';
 
 describe('<ProgressIndicator />', () => {
-  const setup = options => {
+  const setup = (options) => {
     const defaults = {
       userLoggedIn: true,
       preflightStatus: null,

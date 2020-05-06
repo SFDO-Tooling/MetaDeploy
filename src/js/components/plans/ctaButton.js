@@ -205,7 +205,7 @@ class CtaButton extends React.Component<
     // propagate hidden steps from the preflight results to the job results
     const results = {};
     if (preflight && preflight.results) {
-      Object.keys(preflight.results).forEach(id => {
+      Object.keys(preflight.results).forEach((id) => {
         const result = preflight.results[id];
         if (result && result.status === CONSTANTS.RESULT_STATUS.HIDE) {
           results[id] = result;
@@ -213,7 +213,7 @@ class CtaButton extends React.Component<
       });
     }
     doStartJob({ plan: plan.id, steps: [...selectedSteps], results }).then(
-      action => {
+      (action) => {
         const { type, payload } = action;
         if (type === 'JOB_STARTED' && payload && payload.id) {
           const url = routes.job_detail(
@@ -278,7 +278,7 @@ class CtaButton extends React.Component<
       return false;
     }
     return [...selectedSteps].some(
-      id =>
+      (id) =>
         preflight.results[id] &&
         preflight.results[id].message &&
         preflight.results[id].status === RESULT_STATUS.WARN,

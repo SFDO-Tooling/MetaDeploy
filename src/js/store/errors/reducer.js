@@ -15,7 +15,7 @@ const reducer = (
     case 'ERROR_ADDED':
       return [...errors, action.payload];
     case 'ERROR_REMOVED':
-      return errors.filter(err => err.id !== action.payload);
+      return errors.filter((err) => err.id !== action.payload);
     case 'ERRORS_CLEARED':
       return [];
   }
