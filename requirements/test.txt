@@ -38,7 +38,7 @@ multidict==4.7.5
 packaging==20.3
 pluggy==0.13.1
 py==1.8.1
-pycodestyle==2.5.0
+pycodestyle==2.6.0
 pyflakes==2.2.0
 pyparsing==2.4.7
 snowballstemmer==2.0.0
