@@ -14,10 +14,11 @@ def populate_created_at(apps, schema_editor):
     model = apps.get_model("api", "Plan")
 
     repos = {}
-    gh = github3.login(token=settings.GITHUB_TOKEN)
+    gh = None
 
     for plan in model.objects.all():
         try:
+            gh = gh or github3.login(token=settings.GITHUB_TOKEN)
             repo_url = plan.version.product.repo_url
             if repo_url not in repos:
                 gh_user, repo_name = extract_user_and_repo(repo_url)
