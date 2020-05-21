@@ -23,7 +23,7 @@ class MetadeployProjectConfig(BaseProjectConfig):
                 "url": repo_url,
                 "name": repo_name,
                 "owner": user,
-                "commit": plan.version.commit_ish,
+                "commit": plan.commit_ish or plan.version.commit_ish,
             }
 
         super().__init__(*args, repo_info=repo_info, **kwargs)

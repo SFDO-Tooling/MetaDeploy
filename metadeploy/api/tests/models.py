@@ -5,7 +5,6 @@ import pytest
 from cumulusci.core.flowrunner import StepSpec
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
-from django.db.utils import IntegrityError
 from django.utils import timezone
 
 from ..models import Job, SiteProfile, Step, Version
@@ -428,20 +427,6 @@ class TestPlan:
             )
 
         assert plan.average_duration == timedelta(seconds=30)
-
-    def test_uniqueness__duplicate_plan_template_for_version(self, plan_factory):
-        plan1 = plan_factory()
-        plan1.save()
-
-        with pytest.raises(IntegrityError):
-            plan_factory(version=plan1.version, plan_template=plan1.plan_template)
-
-    def test_uniqueness__multiple_primary_tier_plans_for_version(self, plan_factory):
-        plan1 = plan_factory(tier="primary")
-        plan1.save()
-
-        with pytest.raises(IntegrityError):
-            plan_factory(version=plan1.version, tier="primary")
 
 
 @pytest.mark.django_db
