@@ -134,7 +134,7 @@ def run_flows(*, user, plan, skip_tasks, organization_url, result_class, result_
     result = result_class.objects.get(pk=result_id)
     token, token_secret = user.token
     repo_url = plan.version.product.repo_url
-    commit_ish = plan.version.commit_ish
+    commit_ish = plan.commit_ish or plan.version.commit_ish
 
     with contextlib.ExitStack() as stack:
         stack.enter_context(finalize_result(result))

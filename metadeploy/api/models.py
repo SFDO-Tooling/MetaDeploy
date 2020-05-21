@@ -420,26 +420,24 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
 
     plan_template = models.ForeignKey(PlanTemplate, on_delete=models.PROTECT)
     version = models.ForeignKey(Version, on_delete=models.PROTECT)
+    commit_ish = models.CharField(
+        max_length=256,
+        null=True,
+        blank=True,
+        help_text=_(
+            "This is usually a tag, sometimes a branch. "
+            "Use this to optionally override the Version's commit_ish."
+        ),
+    )
+
     tier = models.CharField(choices=Tier, default=Tier.primary, max_length=64)
     is_listed = models.BooleanField(default=True)
     preflight_checks = JSONField(default=list, blank=True)
 
+    created_at = models.DateTimeField(auto_now_add=True)
+
     slug_class = PlanSlug
     slug_field_name = "title"
-
-    class Meta:
-        constraints = [
-            # No duplicate plans with the same version and plan template
-            models.UniqueConstraint(
-                fields=["version", "plan_template"], name="unique_version_plan_template"
-            ),
-            # Only one primary-tier plan per version
-            models.UniqueConstraint(
-                fields=["version"],
-                condition=Q(tier="primary"),
-                name="unique_version_primary_plan",
-            ),
-        ]
 
     @property
     def preflight_message_additional_markdown(self):

@@ -51,9 +51,13 @@ class TestPlanViewSet:
 
         assert response.status_code == 200
         version_url = f"http://testserver/admin/rest/versions/{plan.version.id}"
-        assert response.json() == {
+        json = response.json()
+        # Remove timestamp for easy comparison
+        del json["data"][0]["created_at"]
+        assert json == {
             "data": [
                 {
+                    "commit_ish": None,
                     "id": f"{plan.id}",
                     "is_listed": True,
                     "preflight_checks": [],
@@ -82,7 +86,11 @@ class TestPlanViewSet:
         response = admin_api_client.get(url)
 
         assert response.status_code == 200
-        assert response.json() == {
+        json = response.json()
+        # Remove timestamp for easy comparison
+        del json["created_at"]
+        assert json == {
+            "commit_ish": None,
             "id": str(plan.id),
             "is_listed": True,
             "preflight_checks": [],
@@ -146,8 +154,11 @@ class TestPlanViewSet:
 
         assert response.status_code == 201, response.json()
         json = response.json()
+        # Remove timestamp for easy comparison
+        del json["created_at"]
         plan_id = json["id"]
         expected = {
+            "commit_ish": None,
             "id": plan_id,
             "is_listed": True,
             "preflight_checks": [],
