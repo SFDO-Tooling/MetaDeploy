@@ -66,9 +66,4 @@ class Migration(migrations.Migration):
             preserve_default=False,
         ),
         migrations.RunPython(populate_created_at, backwards),
-        migrations.AlterField(
-            model_name="plan",
-            name="created_at",
-            field=models.DateTimeField(auto_now_add=True),
-        ),
     ]
