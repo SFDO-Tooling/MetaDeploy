@@ -30,7 +30,7 @@ rq==1.4.1
 sentry-sdk==0.14.4
 service_identity==18.1.0
 werkzeug==1.0.1
-whitenoise==5.0.1
+whitenoise==5.1.0
 
 # Transitive dependencies
 Automat==20.2.0
