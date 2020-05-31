@@ -53,7 +53,7 @@ cffi==1.14.0
 chardet==3.0.4
 coloredlogs==14.0
 constantly==15.1.0
-croniter==0.3.31
+croniter==0.3.32
 daphne==2.5.0
 defusedxml==0.6.0
 django-filter==2.2.0
