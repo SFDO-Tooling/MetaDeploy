@@ -100,7 +100,7 @@
     "eslint-plugin-react": "^7.18.3",
     "fetch-mock": "^9.4.0",
     "file-loader": "^6.0.0",
-    "flow-bin": "^0.125.1",
+    "flow-bin": "^0.126.1",
     "flow-typed": "^3.1.0",
     "html-webpack-plugin": "^4.3.0",
     "husky": "^4.2.5",
