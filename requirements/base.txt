@@ -27,7 +27,7 @@ logfmt==0.4
 newrelic==5.14.0.142
 psycopg2-binary==2.8.5
 rq==1.4.2
-sentry-sdk==0.14.4
+sentry-sdk==0.15.1
 service_identity==18.1.0
 werkzeug==1.0.1
 whitenoise==5.1.0
