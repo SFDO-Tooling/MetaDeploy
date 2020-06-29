@@ -39,14 +39,11 @@ urlpatterns = [
     path(PREFIX, admin.site.urls),
     path("accounts/", include("allauth.urls")),
     path("api/", include("metadeploy.api.urls")),
-    # Catchall for the rest. Right now, it just trusts that PREFIX ==
-    # 'admin/', because we don't want to do string munging to get just
-    # the part without the regex and path cruft on it.
+    # These paths render the frontend SPA
     re_path(
-        r"^(?!{admin}|accounts|api|static)".format(admin=PREFIX),
-        TemplateView.as_view(template_name="index.html"),
-        name="frontend",
+        r"^products", TemplateView.as_view(template_name="index.html"), name="frontend",
     ),
+    path("", TemplateView.as_view(template_name="index.html"), name="home"),
     # Add WebSocket routes so that non-HTTP paths can be accessible by
     # `reverse` in Python and `window.api_urls` in JavaScript. These will
     # usually only be the path component, not a full URL, and so the caller
