@@ -510,14 +510,14 @@ class TestJob:
 
         assert job.click_through_agreement.text == "Test"
 
-    def test_skip_tasks(self, plan_factory, step_factory, job_factory):
+    def test_skip_steps(self, plan_factory, step_factory, job_factory):
         plan = plan_factory()
         step1 = step_factory(plan=plan, path="task1")
         step2 = step_factory(plan=plan, path="task2")
         step3 = step_factory(plan=plan, path="task3")
         job = job_factory(plan=plan, steps=[step1, step3], org_id="00Dxxxxxxxxxxxxxxx")
 
-        assert job.skip_tasks() == [step2.path]
+        assert job.skip_steps() == [step2.step_num]
 
     def test_invalidate_related_preflight(self, job_factory, preflight_result_factory):
         job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
