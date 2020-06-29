@@ -112,7 +112,7 @@ def zip_file_is_safe(zip_file):
     return all(is_safe_path(info.filename) for info in zip_file.infolist())
 
 
-def run_flows(*, user, plan, skip_tasks, organization_url, result_class, result_id):
+def run_flows(*, user, plan, skip_steps, organization_url, result_class, result_id):
     """
     This operates with side effects; it changes things in a Salesforce
     org, and then records the results of those operations on to a
@@ -121,8 +121,8 @@ def run_flows(*, user, plan, skip_tasks, organization_url, result_class, result_
     Args:
         user (User): The User requesting this flow be run.
         plan (Plan): The Plan instance for the flow you're running.
-        skip_tasks (List[str]): The strings in the list should be valid
-            task_name values for steps in this flow.
+        skip_steps (List[str]): The strings in the list should be valid
+            step_num values for steps in this flow.
         organization_url (str): The URL of the organization, required by
             the OrgConfig.
         result_class (Union[Type[Job], Type[PreflightResult]]): The type
@@ -217,7 +217,7 @@ def run_flows(*, user, plan, skip_tasks, organization_url, result_class, result_
 
         steps = [
             step.to_spec(
-                project_config=ctx.project_config, skip=step.path in skip_tasks
+                project_config=ctx.project_config, skip=step.step_num in skip_steps
             )
             for step in plan.steps.all()
         ]
@@ -235,7 +235,7 @@ def enqueuer():
         rq_job = run_flows_job.delay(
             user=j.user,
             plan=j.plan,
-            skip_tasks=j.skip_tasks(),
+            skip_steps=j.skip_steps(),
             organization_url=j.organization_url,
             result_class=Job,
             result_id=j.id,
@@ -284,7 +284,7 @@ def preflight(preflight_result_id):
     run_flows(
         user=preflight_result.user,
         plan=preflight_result.plan,
-        skip_tasks=[],
+        skip_steps=[],
         organization_url=preflight_result.organization_url,
         result_class=PreflightResult,
         result_id=preflight_result.id,
