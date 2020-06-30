@@ -19,11 +19,11 @@ const KindDataCell = (props: DataCellProps): React.Node => {
   const { className, ...otherProps } = props;
   return (
     <DataTableCell
+      {...otherProps}
       title={i18n.t(value)}
       className={classNames(className, 'plan-step-item', 'plan-step-type', {
         'is-installing': isActive,
       })}
-      {...otherProps}
     >
       {iconName ? (
         <Icon

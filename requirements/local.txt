@@ -2,15 +2,15 @@
 
 -r test.txt
 
-django-extensions==2.2.9
-ipython==7.15.0
+django-extensions==3.0.1
+ipython==7.16.1
 
 # Transitive dependencies
 appnope==0.1.0
 backcall==0.2.0
 decorator==4.4.2
 ipython-genutils==0.2.0
-jedi==0.17.0
+jedi==0.17.1
 parso==0.7.0
 pexpect==4.8.0
 pickleshare==0.7.5
