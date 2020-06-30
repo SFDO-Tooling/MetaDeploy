@@ -6,10 +6,6 @@ updates:
     interval: weekly
     day: sunday
   open-pull-requests-limit: 99
-  ignore:
-  - dependency-name: Django
-    versions:
-    - "= 3.x"
 - package-ecosystem: npm
   directory: "/"
   schedule:
