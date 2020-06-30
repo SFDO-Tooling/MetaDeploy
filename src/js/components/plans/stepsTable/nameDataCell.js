@@ -101,7 +101,7 @@ class NameDataCell extends React.Component<Props> {
       </Tooltip>
     ) : null;
     return (
-      <DataTableCell title={name} className={classes} {...otherProps}>
+      <DataTableCell {...otherProps} title={name} className={classes}>
         {logs ? (
           <>
             <Accordion
