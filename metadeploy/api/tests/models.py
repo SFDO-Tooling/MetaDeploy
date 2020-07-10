@@ -233,30 +233,42 @@ class TestIconProperty:
 
 
 @pytest.mark.django_db
-class TestPlansProperties:
+class TestVersion:
     def test_primary_plan__none(self, version_factory):
         version = version_factory()
         assert version.primary_plan is None
 
-    def test_primary_plan__good(self, version_factory, plan_factory):
+    def test_primary_plan__multiple(self, version_factory, plan_factory):
         version = version_factory()
-        plan = plan_factory(version=version, tier="primary")
-        assert version.primary_plan == plan
+        plan_factory(version=version, tier="primary")
+        plan2 = plan_factory(version=version, tier="primary")
+        assert version.primary_plan == plan2
 
     def test_secondary_plan__none(self, version_factory, plan_factory):
         version = version_factory()
         assert version.secondary_plan is None
 
-    def test_secondary_plan__good(self, version_factory, plan_factory):
+    def test_secondary_plan__multiple(self, version_factory, plan_factory):
         version = version_factory()
-        plan = plan_factory(version=version, tier="secondary")
-        assert version.secondary_plan == plan
+        plan_factory(version=version, tier="secondary")
+        plan2 = plan_factory(version=version, tier="secondary")
+        assert version.secondary_plan == plan2
 
     def test_additional_plans(self, version_factory, plan_factory):
         version = version_factory()
         plan1 = plan_factory(version=version, tier="additional")
         plan2 = plan_factory(version=version, tier="additional")
         assert list(version.additional_plans) == [plan1, plan2]
+
+    def test_additional_plans__one_per_plan_template(
+        self, version_factory, plan_factory
+    ):
+        version = version_factory()
+        plan1 = plan_factory(version=version, tier="additional")
+        plan2 = plan_factory(
+            version=version, plan_template=plan1.plan_template, tier="additional"
+        )
+        assert list(version.additional_plans) == [plan2]
 
 
 @pytest.mark.django_db
