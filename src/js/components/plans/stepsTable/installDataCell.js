@@ -145,11 +145,11 @@ const JobCell = (props: DataCellProps): React.Node => {
   }
   return (
     <DataTableCell
+      {...otherProps}
       title={title}
       className={classNames(className, 'plan-step-item', 'plan-step-options', {
         'is-installing': isActive,
       })}
-      {...otherProps}
     >
       {contents}
     </DataTableCell>
@@ -230,9 +230,9 @@ class PreflightCell extends React.Component<DataCellProps> {
     }
     return (
       <DataTableCell
+        {...otherProps}
         title={title}
         className={classNames(className, 'plan-step-item', 'plan-step-options')}
-        {...otherProps}
       >
         {content}
       </DataTableCell>

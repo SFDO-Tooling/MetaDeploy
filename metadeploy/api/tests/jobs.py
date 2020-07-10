@@ -28,14 +28,14 @@ def test_report_error(mocker, job_factory, user_factory, plan_factory, step_fact
 
     user = user_factory()
     plan = plan_factory()
-    steps = [step_factory(plan=plan)]
+    step_factory(plan=plan)
     job = job_factory(user=user, plan=plan, org_id=user.org_id)
 
     with pytest.raises(Exception):
         run_flows(
             user=user,
             plan=plan,
-            skip_tasks=steps,
+            skip_steps=[],
             organization_url=job.organization_url,
             result_class=Job,
             result_id=job.id,
@@ -53,13 +53,13 @@ def test_run_flows(mocker, job_factory, user_factory, plan_factory, step_factory
 
     user = user_factory()
     plan = plan_factory()
-    steps = [step_factory(plan=plan)]
+    step_factory(plan=plan)
     job = job_factory(user=user, plan=plan, org_id=user.org_id)
 
     run_flows(
         user=user,
         plan=plan,
-        skip_tasks=steps,
+        skip_steps=[],
         organization_url=job.organization_url,
         result_class=Job,
         result_id=job.id,
@@ -77,7 +77,7 @@ def test_run_flows__preflight(
 
     user = user_factory()
     plan = plan_factory()
-    steps = [step_factory(plan=plan)]
+    step_factory(plan=plan)
     preflight_result = preflight_result_factory(
         user=user, plan=plan, org_id=user.org_id
     )
@@ -85,7 +85,7 @@ def test_run_flows__preflight(
     run_flows(
         user=user,
         plan=plan,
-        skip_tasks=steps,
+        skip_steps=[],
         organization_url=preflight_result.organization_url,
         result_class=PreflightResult,
         result_id=preflight_result.id,
@@ -134,13 +134,13 @@ def test_malicious_zip_file(
 
     user = user_factory()
     plan = plan_factory()
-    steps = [step_factory(plan=plan)]
+    step_factory(plan=plan)
     job = job_factory(user=user, org_id=user.org_id)
 
     run_flows(
         user=user,
         plan=plan,
-        skip_tasks=steps,
+        skip_steps=[],
         organization_url=job.organization_url,
         result_class=Job,
         result_id=job.id,

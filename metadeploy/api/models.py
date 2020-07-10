@@ -651,9 +651,9 @@ class Job(HashIdMixin, models.Model):
     def subscribable_by(self, user):
         return self.is_public or user.is_staff or user == self.user
 
-    def skip_tasks(self):
+    def skip_steps(self):
         return [
-            step.path for step in set(self.plan.steps.all()) - set(self.steps.all())
+            step.step_num for step in set(self.plan.steps.all()) - set(self.steps.all())
         ]
 
     def _push_if_condition(self, condition, fn):
