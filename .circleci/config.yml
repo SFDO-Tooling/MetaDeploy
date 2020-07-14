@@ -176,6 +176,8 @@ jobs:
       - run:
           name: Report Test Coverage
           command: |
+            export COVERALLS_SERVICE_NUMBER=$CIRCLE_BUILD_NUM
+            export COVERALLS_SERVICE_JOB_ID=$CIRCLE_WORKFLOW_ID
             . venv/bin/activate
             yarn pytest:report-coverage
             yarn test:report-coverage
