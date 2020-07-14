@@ -37,6 +37,9 @@ extends:
   - prettier/flowtype
   - prettier/react
 rules:
+  # React
+  react/prop-types: 0
+
   # Prettier
   prettier/prettier:
     - 2
