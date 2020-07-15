@@ -527,3 +527,37 @@ class TestUnlisted:
         )
 
         assert response.status_code == 404
+
+    def test_plan__multiple(
+        self,
+        client,
+        product_factory,
+        version_factory,
+        plan_template_factory,
+        plan_factory,
+    ):
+        # If there are multiple plans for the same version/plan template,
+        # we expect to get the most recently created one.
+        product = product_factory()
+        version = version_factory(product=product)
+        plan_template = plan_template_factory(product=product)
+        plan_factory(
+            version=version,
+            plan_template=plan_template,
+            is_listed=False,
+            tier="additional",
+        )
+        plan = plan_factory(
+            version=version,
+            plan_template=plan_template,
+            is_listed=False,
+            tier="additional",
+        )
+
+        response = client.get(
+            reverse("plan-get-one"),
+            {"slug": plan.slug, "version": str(version.id), "product": str(product.id)},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["id"] == plan.id

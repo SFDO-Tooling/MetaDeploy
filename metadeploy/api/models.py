@@ -17,7 +17,7 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
 from django.contrib.postgres.fields import ArrayField, JSONField
 from django.contrib.sites.models import Site
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import Count, F, Func, Q
@@ -338,18 +338,26 @@ class Version(HashIdMixin, TranslatableModel):
 
     @property
     def primary_plan(self):
-        try:
-            return self.plan_set.filter(tier=Plan.Tier.primary).get()
-        except ObjectDoesNotExist:
-            return None
+        return (
+            self.plan_set.filter(tier=Plan.Tier.primary).order_by("-created_at").first()
+        )
 
     @property
     def secondary_plan(self):
-        return self.plan_set.filter(tier=Plan.Tier.secondary).first()
+        return (
+            self.plan_set.filter(tier=Plan.Tier.secondary)
+            .order_by("-created_at")
+            .first()
+        )
 
     @property
     def additional_plans(self):
-        return self.plan_set.filter(tier=Plan.Tier.additional).order_by("id")
+        # get the most recently created plan for each plan template
+        return (
+            self.plan_set.filter(tier=Plan.Tier.additional)
+            .order_by("plan_template_id", "-created_at")
+            .distinct("plan_template_id")
+        )
 
     def get_translation_strategy(self):
         return "fields", f"{self.product.slug}:version:{self.label}"
