@@ -22,7 +22,7 @@ from ..models import Job, PreflightResult
 
 @pytest.mark.django_db
 def test_report_error(mocker, job_factory, user_factory, plan_factory, step_factory):
-    login = mocker.patch("metadeploy.api.jobs.github3.login")
+    login = mocker.patch("cumulusci.core.github.get_github_api_for_repo")
     login.side_effect = Exception
     report_error = mocker.patch("metadeploy.api.jobs.sync_report_error")
 
@@ -120,7 +120,7 @@ def test_malicious_zip_file(
     mocker.patch("shutil.rmtree")
     glob = mocker.patch("metadeploy.api.jobs.glob")
     glob.return_value = ["test"]
-    mocker.patch("github3.login")
+    mocker.patch("cumulusci.core.github.get_github_api_for_repo")
     zip_info = MagicMock()
     zip_info.filename = "/etc/passwd"
     zip_file_instance = MagicMock()
@@ -195,7 +195,7 @@ def test_preflight_failure(
 ):
     glob = mocker.patch("metadeploy.api.jobs.glob")
     glob.side_effect = Exception
-    mocker.patch("github3.login")
+    mocker.patch("cumulusci.core.github.get_github_api_for_repo")
 
     user = user_factory()
     plan = plan_factory()
