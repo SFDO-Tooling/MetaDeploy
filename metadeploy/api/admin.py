@@ -101,9 +101,17 @@ class PlanTemplateAdmin(TranslatableAdmin):
 class PlanAdmin(TranslatableAdmin):
     autocomplete_fields = ("version",)
     list_filter = ("version__product", "tier", "is_listed")
-    list_display = ("title", "product", "version_label", "tier", "is_listed")
+    list_display = (
+        "title",
+        "product",
+        "version_label",
+        "tier",
+        "is_listed",
+        "created_at",
+    )
     list_select_related = ("version", "version__product")
     search_fields = ("translations__title", "version", "version__product")
+    readonly_fields = ("created_at",)
 
     def product(self, obj):
         return obj.version.product
