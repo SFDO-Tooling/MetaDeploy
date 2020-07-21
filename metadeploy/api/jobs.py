@@ -22,10 +22,10 @@ import zipfile
 from datetime import timedelta
 from glob import glob
 
-import github3
 from allauth.socialaccount.models import SocialToken
 from asgiref.sync import async_to_sync
 from cumulusci.core.config import OrgConfig, ServiceConfig
+from cumulusci.core.github import get_github_api_for_repo
 from cumulusci.utils import temporary_dir
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -146,8 +146,8 @@ def run_flows(*, user, plan, skip_steps, organization_url, result_class, result_
         stack.enter_context(prepend_python_path(os.path.abspath(tmpdirname)))
 
         # Let's clone the repo locally:
-        gh = github3.login(token=settings.GITHUB_TOKEN)
         user, repo_name = extract_user_and_repo(repo_url)
+        gh = get_github_api_for_repo(None, user, repo_name)
         repo = gh.repository(user, repo_name)
         # Make sure we have the actual owner/repo name if we were redirected
         user = repo.owner.login
@@ -200,20 +200,6 @@ def run_flows(*, user, plan, skip_steps, organization_url, result_class, result_
             }
         )
         ctx.keychain.set_service("connected_app", connected_app, True)
-
-        # Set up github:
-        github_app = ServiceConfig(
-            {
-                # It would be nice to only need the token:
-                "token": settings.GITHUB_TOKEN,
-                # The following three values don't matter and aren't used,
-                # but are required to validate the Service:
-                "password": settings.GITHUB_TOKEN,
-                "email": "test@example.com",
-                "username": "not-a-username",
-            }
-        )
-        ctx.keychain.set_service("github", github_app, True)
 
         steps = [
             step.to_spec(

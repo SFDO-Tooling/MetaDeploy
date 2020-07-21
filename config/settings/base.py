@@ -312,7 +312,24 @@ STATIC_ROOT = str(PROJECT_ROOT / "staticfiles")
 CONNECTED_APP_CLIENT_SECRET = env("CONNECTED_APP_CLIENT_SECRET")
 CONNECTED_APP_CALLBACK_URL = env("CONNECTED_APP_CALLBACK_URL")
 CONNECTED_APP_CLIENT_ID = env("CONNECTED_APP_CLIENT_ID")
-GITHUB_TOKEN = env("GITHUB_TOKEN")
+GITHUB_TOKEN = env("GITHUB_TOKEN", default=None)
+if GITHUB_TOKEN in ("", "None"):
+    GITHUB_TOKEN = None
+GITHUB_APP_ID = env("GITHUB_APP_ID", default=None)
+if GITHUB_APP_ID in ("", "None"):
+    GITHUB_APP_ID = None
+GITHUB_APP_KEY = env("GITHUB_APP_KEY", default=None)
+if GITHUB_APP_KEY in ("", "None"):
+    GITHUB_APP_KEY = None
+
+if GITHUB_TOKEN is None and GITHUB_APP_ID is None and GITHUB_APP_KEY is None:
+    raise ImproperlyConfigured(
+        "You must set either GITHUB_TOKEN or GITHUB_APP_ID and GITHUB_APP_KEY"
+    )
+if GITHUB_APP_ID is not None and GITHUB_APP_KEY is None:
+    raise ImproperlyConfigured("You must set GITHUB_APP_KEY if GITHUB_APP_ID is set")
+if GITHUB_APP_ID is None and GITHUB_APP_KEY is not None:
+    raise ImproperlyConfigured("You must set GITHUB_APP_ID if GITHUB_APP_KEY is set")
 
 SOCIALACCOUNT_PROVIDERS = {
     "salesforce": {
