@@ -1,45 +1,43 @@
-import {createSelector} from 'reselect'
+import { RouteComponentProps } from 'react-router-dom';
+import { createSelector } from 'reselect';
 
-import {AppState} from '@/store'
-import {InitialProps} from '@/components/utils'
-import {Plan as PlanType} from '@/store/plans/reducer'
+import { AppState } from '@/store';
+import { Plan as PlanType } from '@/store/plans/reducer';
 import {
   Category,
   Product,
   ProductsState,
   Version,
-} from '@/store/products/reducer'
+} from '@/store/products/reducer';
 
-export type ProductsMapType = Map<string, Array<Product>>
+export type ProductsMapType = Map<string, Product[]>;
 
 export type VersionPlanType = {
-  readonly label?: string | null
-  readonly slug?: string | null
-  readonly maybeVersion?: string
-  readonly maybeSlug?: string
-}
+  readonly label?: string | null;
+  readonly slug?: string | null;
+  readonly maybeVersion?: string;
+  readonly maybeSlug?: string;
+};
 
 const selectProductsState = (appState: AppState): ProductsState =>
-  appState.products
+  appState.products;
 
-const selectProducts: (arg0: AppState) => Array<Product> = createSelector(
+const selectProducts = createSelector(
   selectProductsState,
-  (products: ProductsState): Array<Product> => products.products,
-)
+  (products: ProductsState): Product[] => products.products,
+);
 
-const selectProductCategories: (
-  arg0: AppState,
-) => Array<Category> = createSelector(
+const selectProductCategories = createSelector(
   selectProductsState,
-  (products: ProductsState): Array<Category> => products.categories,
-)
+  (products: ProductsState): Category[] => products.categories,
+);
 
 const selectProductsByCategory: (
-  arg0: AppState,
+  appState: AppState,
 ) => ProductsMapType = createSelector(
   [selectProducts, selectProductCategories],
-  (products: Array<Product>, categories: Array<Category>): ProductsMapType => {
-    const productsByCategory = new Map()
+  (products: Product[], categories: Category[]): ProductsMapType => {
+    const productsByCategory = new Map();
     for (const category of categories) {
       productsByCategory.set(
         category.title,
@@ -50,83 +48,71 @@ const selectProductsByCategory: (
             product.most_recent_version &&
             product.category === category.title,
         ),
-      )
+      );
     }
-    return productsByCategory
+    return productsByCategory;
   },
-)
+);
 
 const selectProductSlug = (
   appState: AppState,
-  {match: {params}}: InitialProps,
-): string | null | undefined => params.productSlug
+  { match: { params } }: RouteComponentProps<{ productSlug?: string }>,
+): string | null | undefined => params.productSlug;
 
-const selectProductNotFound: (
-  arg0: AppState,
-  arg1: InitialProps,
-) => boolean = createSelector(
+const selectProductNotFound = createSelector(
   [selectProductsState, selectProductSlug],
   (products: ProductsState, productSlug: string | null | undefined): boolean =>
     Boolean(productSlug && products.notFound.includes(productSlug)),
-)
+);
 
-const selectProduct: (
-  arg0: AppState,
-  arg1: InitialProps,
-) => Product | null | void = createSelector(
+const selectProduct = createSelector(
   [selectProducts, selectProductSlug, selectProductNotFound],
   (
-    products: Array<Product>,
+    products: Product[],
     productSlug: string | null | undefined,
     notFound: boolean,
   ): Product | null | void => {
     if (!productSlug) {
-      return undefined
+      return undefined;
     }
     const product = products.find(
       (p) => p.slug === productSlug || p.old_slugs.includes(productSlug),
-    )
+    );
     if (product) {
-      return product
+      return product;
     }
-    return notFound ? null : undefined
+    return notFound ? null : undefined;
   },
-)
+);
 
 const selectVersionLabel = (
   appState: AppState,
-  {match: {params}}: InitialProps,
-): string | null | undefined => params.versionLabel
+  { match: { params } }: RouteComponentProps<{ versionLabel?: string }>,
+): string | null | undefined => params.versionLabel;
 
-const selectVersion: (
-  arg0: AppState,
-  arg1: InitialProps,
-) => Version | null = createSelector(
+const selectVersion = createSelector(
   [selectProduct, selectVersionLabel],
   (
     product: Product | null | void,
     versionLabel: string | null | undefined,
   ): Version | null => {
     if (!product || !versionLabel) {
-      return null
+      return null;
     }
     if (
       product.most_recent_version &&
       product.most_recent_version.label === versionLabel
     ) {
-      return product.most_recent_version
+      return product.most_recent_version;
     }
-    if (product.versions && product.versions[versionLabel]) {
-      return product.versions[versionLabel]
+    if (product.versions?.[versionLabel]) {
+      return product.versions[versionLabel];
     }
-    return null
+    return null;
   },
-)
+);
 
-const selectVersionLabelOrPlanSlug: (
-  arg0: AppState,
-  arg1: InitialProps,
-) => VersionPlanType = createSelector(
+const selectVersionLabelOrPlanSlug = createSelector(
   [selectProduct, selectVersion, selectVersionLabel],
   (
     product: Product | null | void,
@@ -136,20 +122,20 @@ const selectVersionLabelOrPlanSlug: (
     // There's a chance that the versionLabel is really a planSlug.
     // Check the most recent version in the product and see.
     if (!product || !maybeVersionLabel) {
-      return {label: null, slug: null}
+      return { label: null, slug: null };
     }
-    const {most_recent_version} = product
+    const { most_recent_version } = product;
     if (!version && most_recent_version) {
-      const slugs = []
+      const slugs = [];
 
       /* istanbul ignore else */
       if (most_recent_version.primary_plan) {
-        slugs.push(most_recent_version.primary_plan.slug)
+        slugs.push(most_recent_version.primary_plan.slug);
       }
 
       /* istanbul ignore else */
       if (most_recent_version.secondary_plan) {
-        slugs.push(most_recent_version.secondary_plan.slug)
+        slugs.push(most_recent_version.secondary_plan.slug);
       }
 
       /* istanbul ignore else */
@@ -157,15 +143,15 @@ const selectVersionLabelOrPlanSlug: (
         // Add all slugs (current and old) from all known plans
         slugs.push(
           ...(Object.entries(most_recent_version.additional_plans) as any)
-            .filter((item: Array<[string, PlanType | null]>) => item[1])
-            .map((item: Array<[string, PlanType]>) => item[0]),
-        )
+            .filter((item: [string, PlanType | null][]) => item[1])
+            .map((item: [string, PlanType][]) => item[0]),
+        );
       }
       if (slugs.includes(maybeVersionLabel)) {
         return {
           label: most_recent_version.label,
           slug: maybeVersionLabel,
-        }
+        };
       }
       if (
         !(
@@ -177,15 +163,15 @@ const selectVersionLabelOrPlanSlug: (
         return {
           maybeVersion: most_recent_version.id,
           maybeSlug: maybeVersionLabel,
-        }
+        };
       }
     }
     return {
       label: maybeVersionLabel,
       slug: null,
-    }
+    };
   },
-)
+);
 
 export {
   selectProductCategories,
@@ -196,4 +182,4 @@ export {
   selectVersionLabel,
   selectVersion,
   selectVersionLabelOrPlanSlug,
-}
+};

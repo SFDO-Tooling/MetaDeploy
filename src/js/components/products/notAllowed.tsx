@@ -12,7 +12,7 @@ const NotAllowed = ({
 }: {
   isLoggedIn: boolean;
   message: string | null;
-  link: React.Node;
+  link: React.ReactNode;
 }) => (
   <>
     <Illustration
@@ -26,8 +26,7 @@ const NotAllowed = ({
         <div
           className="slds-text-longform
             slds-text-body_regular
-            markdown"
-          // This message is pre-cleaned by the API
+            markdown" // This message is pre-cleaned by the API
           dangerouslySetInnerHTML={{
             __html: message,
           }}

@@ -5,11 +5,8 @@ import { Link } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
 import Login from '@/components/header/login';
-import type { Plan as PlanType } from '@/store/plans/reducer';
-import type {
-  Product as ProductType,
-  Version as VersionType,
-} from '@/store/products/reducer';
+import { Plan } from '@/store/plans/reducer';
+import { Product, Version } from '@/store/products/reducer';
 import routes from '@/utils/routes';
 
 const JobNotFound = ({
@@ -18,9 +15,9 @@ const JobNotFound = ({
   plan,
   isLoggedIn,
 }: {
-  product: ProductType;
-  version: VersionType;
-  plan: PlanType;
+  product: Product;
+  version: Version;
+  plan: Plan;
   isLoggedIn?: boolean;
 }) => (
   <>

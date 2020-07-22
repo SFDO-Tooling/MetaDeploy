@@ -1,7 +1,8 @@
 import { fireEvent } from '@testing-library/react';
-import Header from '@/components/header';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+
+import Header from '@/components/header';
 
 import { renderWithRedux } from './../../utils';
 

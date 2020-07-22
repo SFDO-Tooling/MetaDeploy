@@ -2,11 +2,11 @@ import Avatar from '@salesforce/design-system-react/components/avatar';
 import Icon from '@salesforce/design-system-react/components/icon';
 import * as React from 'react';
 
-import type { Product as ProductType } from '@/store/products/reducer';
+import { Product } from '@/store/products/reducer';
 
-const ProductIcon = ({ item }: { item: ProductType }) => {
+const ProductIcon = ({ item }: { item: Product }) => {
   const icon = item.icon;
-  if (icon && icon.type === 'url' && icon.url) {
+  if (icon?.type === 'url' && icon?.url) {
     // Custom icon at provided URL
     return (
       <Avatar
@@ -18,13 +18,10 @@ const ProductIcon = ({ item }: { item: ProductType }) => {
       />
     );
   }
-  if (icon && icon.type === 'slds' && icon.category && icon.name) {
+  if (icon?.type === 'slds' && icon?.category && icon?.name) {
     // Custom SLDS svg icon
     return (
-      <span
-        className="slds-avatar
-          slds-avatar_medium"
-      >
+      <span className="slds-avatar slds-avatar_medium">
         <Icon
           assistiveText={{ label: item.title }}
           category={icon.category}
@@ -36,7 +33,7 @@ const ProductIcon = ({ item }: { item: ProductType }) => {
   if (item.color) {
     // Standard entity icon (initials) with custom color
     return (
-      <div style={{ '--custom-color': item.color }}>
+      <div style={{ '--custom-color': item.color } as React.CSSProperties}>
         <Avatar variant="entity" label={item.title} />
       </div>
     );

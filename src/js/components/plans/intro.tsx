@@ -15,12 +15,12 @@ const Intro = ({
 }: {
   averageDuration: string | null;
   isProductionOrg: boolean;
-  results: React.Node;
-  cta: React.Node;
-  preMessage?: React.Node;
-  postMessage?: React.Node;
-  backLink?: React.Node;
-}): React.Node => {
+  results: React.ReactNode;
+  cta: React.ReactNode;
+  preMessage?: React.ReactNode;
+  postMessage?: React.ReactNode;
+  backLink?: React.ReactNode;
+}) => {
   const duration = getDuration(averageDuration);
   return (
     <div

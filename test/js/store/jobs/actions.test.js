@@ -1,4 +1,5 @@
 import fetchMock from 'fetch-mock';
+
 import * as actions from '@/store/jobs/actions';
 import { addUrlParams } from '@/utils/api';
 
@@ -186,6 +187,7 @@ describe('startJob', () => {
     const payload = { foo: 'bar' };
     const expected = { type, payload };
 
+    // eslint-disable-next-line import/namespace
     expect(actions[action](payload)).toEqual(expected);
   });
 });

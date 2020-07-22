@@ -7,7 +7,7 @@ import * as React from 'react';
 type Props = {
   isOpen: boolean;
   text: string;
-  toggleModal: (boolean) => void;
+  toggleModal: (open: boolean) => void;
   startJob: () => void;
 };
 type State = {
@@ -32,13 +32,13 @@ class ClickThroughAgreementModal extends React.Component<Props, State> {
   };
 
   handleChange = (
-    event: SyntheticInputEvent<HTMLInputElement>,
+    event: React.ChangeEvent<HTMLInputElement>,
     { checked }: { checked: boolean },
   ) => {
     this.setState({ confirmed: checked });
   };
 
-  render(): React.Node {
+  render(): React.ReactNode {
     const { isOpen, text } = this.props;
     const { confirmed } = this.state;
     const footer = [

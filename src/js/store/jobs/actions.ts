@@ -24,7 +24,7 @@ type FetchJobFailed = {
   payload: string;
 };
 type JobRequested = { type: 'JOB_REQUESTED'; payload: JobData };
-type JobStarted = {
+export type JobStarted = {
   type: 'JOB_STARTED';
   payload: Job;
 };

@@ -1,6 +1,6 @@
+import { RouteComponentProps } from 'react-router-dom';
 import { createSelector } from 'reselect';
 
-import { InitialProps } from '@/components/utils';
 import { AppState } from '@/store';
 import { Job as JobType, JobsState } from '@/store/jobs/reducer';
 import { Plan as PlanType } from '@/store/plans/reducer';
@@ -10,13 +10,10 @@ export const selectJobsState = (appState: AppState): JobsState => appState.jobs;
 
 export const selectJobId = (
   appState: AppState,
-  { match: { params } }: InitialProps,
+  { match: { params } }: RouteComponentProps<{ jobId?: string }>,
 ): string | null | undefined => params.jobId;
 
-export const selectJob: (
-  arg0: AppState,
-  arg1: InitialProps,
-) => JobType | null | undefined = createSelector(
+export const selectJob = createSelector(
   [selectJobsState, selectJobId, selectPlan],
   (
     jobs: JobsState,

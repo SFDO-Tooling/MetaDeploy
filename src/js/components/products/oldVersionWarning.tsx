@@ -1,18 +1,15 @@
-import * as React from 'react';
 import Toast from '@salesforce/design-system-react/components/toast';
 import ToastContainer from '@salesforce/design-system-react/components/toast/container';
 import i18n from 'i18next';
-import { withRouter } from 'react-router-dom';
-
-import type { InitialProps } from '@/components/utils';
+import * as React from 'react';
+import { RouteComponentProps, withRouter } from 'react-router';
 
 type Props = {
-  ...InitialProps,
-  link: string,
-};
+  link: string;
+} & RouteComponentProps;
 
 type State = {
-  isOpen: boolean,
+  isOpen: boolean;
 };
 
 class OldVersionWarning extends React.Component<Props, State> {

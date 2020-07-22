@@ -1,24 +1,47 @@
+import i18n from 'i18next';
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
-import i18n from 'i18next';
-import { Link } from 'react-router-dom';
 import { Trans } from 'react-i18next';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
+import { RouteComponentProps, withRouter } from 'react-router';
+import { Link } from 'react-router-dom';
 
-import routes from '@/utils/routes';
-import { CONSTANTS } from '@/store/plans/reducer';
-import { fetchPreflight, startPreflight } from '@/store/plans/actions';
+import BackLink from '@/components/backLink';
+import BodyContainer from '@/components/bodyContainer';
+import Header from '@/components/header';
+import CtaButton, { LoginBtn } from '@/components/plans/ctaButton';
+import PageHeader from '@/components/plans/header';
+import Intro from '@/components/plans/intro';
+import PreflightResults, {
+  ErrorIcon,
+  WarningIcon,
+} from '@/components/plans/preflightResults';
+import StepsTable from '@/components/plans/stepsTable';
+import Toasts from '@/components/plans/toasts';
+import UserInfo from '@/components/plans/userInfo';
+import PlanNotAllowed from '@/components/products/notAllowed';
+import OldVersionWarning from '@/components/products/oldVersionWarning';
+import ProductNotFound from '@/components/products/product404';
 import {
-  fetchPlan,
-  fetchProduct,
-  fetchVersion,
-} from '@/store/products/actions';
+  getLoadingOrNotFound,
+  shouldFetchPlan,
+  shouldFetchVersion,
+} from '@/components/utils';
+import { AppState } from '@/store';
+import { startJob } from '@/store/jobs/actions';
 import { selectOrg } from '@/store/org/selectors';
+import { fetchPreflight, startPreflight } from '@/store/plans/actions';
+import { CONSTANTS, Step } from '@/store/plans/reducer';
 import {
   selectPlan,
   selectPlanSlug,
   selectPreflight,
 } from '@/store/plans/selectors';
+import {
+  fetchPlan,
+  fetchProduct,
+  fetchVersion,
+} from '@/store/products/actions';
 import {
   selectProduct,
   selectProductSlug,
@@ -26,64 +49,12 @@ import {
   selectVersionLabel,
 } from '@/store/products/selectors';
 import { selectUserState } from '@/store/user/selectors';
-import {
-  getLoadingOrNotFound,
-  shouldFetchPlan,
-  shouldFetchVersion,
-} from '@/components/utils';
-import { startJob } from '@/store/jobs/actions';
-import BackLink from '@/components/backLink';
-import BodyContainer from '@/components/bodyContainer';
-import CtaButton, { LoginBtn } from '@/components/plans/ctaButton';
-import Header from '@/components/header';
-import Intro from '@/components/plans/intro';
-import OldVersionWarning from '@/components/products/oldVersionWarning';
-import PageHeader from '@/components/plans/header';
-import PlanNotAllowed from '@/components/products/notAllowed';
-import PreflightResults, {
-  ErrorIcon,
-  WarningIcon,
-} from '@/components/plans/preflightResults';
-import ProductNotFound from '@/components/products/product404';
-import StepsTable from '@/components/plans/stepsTable';
-import Toasts from '@/components/plans/toasts';
-import UserInfo from '@/components/plans/userInfo';
-import type { AppState } from '@/store';
-import type { InitialProps } from '@/components/utils';
-import type { JobData } from '@/store/jobs/actions';
-import type { Org as OrgType } from '@/store/org/reducer';
-import type {
-  Plan as PlanType,
-  Preflight as PreflightType,
-  Step as StepType,
-} from '@/store/plans/reducer';
-import type {
-  Product as ProductType,
-  Version as VersionType,
-} from '@/store/products/reducer';
-import type { User as UserType } from '@/store/user/reducer';
+import routes from '@/utils/routes';
 
 export type SelectedSteps = Set<string>;
-type Props = {
-  ...InitialProps,
-  user: UserType,
-  product: ProductType | null | void,
-  productSlug: ?string,
-  version: VersionType | null,
-  versionLabel: ?string,
-  plan: PlanType | null,
-  planSlug: ?string,
-  preflight: ?PreflightType,
-  org: OrgType,
-  doFetchProduct: typeof fetchProduct,
-  doFetchVersion: typeof fetchVersion,
-  doFetchPlan: typeof fetchPlan,
-  doFetchPreflight: typeof fetchPreflight,
-  doStartJob: (data: JobData) => Promise<any>,
-  doStartPreflight: typeof startPreflight,
-};
+type Props = PropsFromRedux & RouteComponentProps;
 type State = {
-  changedSteps: Map<string, boolean>,
+  changedSteps: Map<string, boolean>;
 };
 
 const { RESULT_STATUS } = CONSTANTS;
@@ -133,7 +104,7 @@ class PlanDetail extends React.Component<Props, State> {
 
   fetchPreflightIfMissing() {
     const { user, plan, preflight, doFetchPreflight } = this.props;
-    if (user && plan && preflight === undefined && plan.requires_preflight) {
+    if (user && preflight === undefined && plan?.requires_preflight) {
       // Fetch most recent preflight result (if any exists)
       doFetchPreflight(plan.id);
     }
@@ -146,7 +117,7 @@ class PlanDetail extends React.Component<Props, State> {
     this.fetchPreflightIfMissing();
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps: Props) {
     const {
       product,
       productSlug,
@@ -189,15 +160,15 @@ class PlanDetail extends React.Component<Props, State> {
     this.setState({ changedSteps });
   };
 
-  getVisibleSteps(): Array<StepType> {
+  getVisibleSteps(): Step[] {
     const { plan, preflight } = this.props;
-    const steps = [];
+    const steps: Step[] = [];
     if (!plan || !plan.steps) {
       return steps;
     }
     for (const step of plan.steps) {
       const { id } = step;
-      const result = preflight && preflight.results && preflight.results[id];
+      const result = preflight?.results?.[id];
       if (!result || result.status !== RESULT_STATUS.HIDE) {
         steps.push(step);
       }
@@ -207,7 +178,8 @@ class PlanDetail extends React.Component<Props, State> {
 
   getSelectedSteps(): SelectedSteps {
     const { plan, preflight } = this.props;
-    const selectedSteps = new Set();
+    const selectedSteps = new Set<string>();
+
     /* istanbul ignore if */
     if (!plan || !plan.steps) {
       return selectedSteps;
@@ -215,7 +187,7 @@ class PlanDetail extends React.Component<Props, State> {
     const { changedSteps } = this.state;
     for (const step of plan.steps) {
       const { id } = step;
-      const result = preflight && preflight.results && preflight.results[id];
+      const result = preflight?.results?.[id];
       let hidden, skipped, optional;
       if (result) {
         hidden = result.status === RESULT_STATUS.HIDE ? result : null;
@@ -239,8 +211,9 @@ class PlanDetail extends React.Component<Props, State> {
     return selectedSteps;
   }
 
-  getPostMessage(): React.Node {
+  getPostMessage(): React.ReactNode {
     const { user, product, version, plan, org } = this.props;
+
     /* istanbul ignore if */
     if (!product || !version || !plan) {
       return null;
@@ -304,7 +277,7 @@ class PlanDetail extends React.Component<Props, State> {
     return null;
   }
 
-  getCTA(selectedSteps: SelectedSteps): React.Node {
+  getCTA(selectedSteps: SelectedSteps): React.ReactNode {
     const {
       history,
       user,
@@ -316,6 +289,7 @@ class PlanDetail extends React.Component<Props, State> {
       doStartPreflight,
       doStartJob,
     } = this.props;
+
     /* istanbul ignore if */
     if (!product || !version || !plan) {
       return null;
@@ -327,7 +301,7 @@ class PlanDetail extends React.Component<Props, State> {
           label={i18n.t('Log in with a different org')}
         />
       );
-    } else if (plan.steps && plan.steps.length) {
+    } else if (plan.steps?.length) {
       return (
         <CtaButton
           history={history}
@@ -338,9 +312,7 @@ class PlanDetail extends React.Component<Props, State> {
           plan={plan}
           preflight={preflight}
           selectedSteps={selectedSteps}
-          preventAction={Boolean(
-            org && (org.current_job || org.current_preflight),
-          )}
+          preventAction={Boolean(org?.current_job || org?.current_preflight)}
           doStartPreflight={doStartPreflight}
           doStartJob={doStartJob}
         />
@@ -349,7 +321,7 @@ class PlanDetail extends React.Component<Props, State> {
     return null;
   }
 
-  render(): React.Node {
+  render(): React.ReactNode {
     const {
       user,
       product,
@@ -375,6 +347,7 @@ class PlanDetail extends React.Component<Props, State> {
     }
     // this redundant check is required to satisfy Flow:
     // https://flow.org/en/docs/lang/refinements/#toc-refinement-invalidations
+
     /* istanbul ignore if */
     if (!product || !version || !plan) {
       return <ProductNotFound />;
@@ -398,10 +371,10 @@ class PlanDetail extends React.Component<Props, State> {
             product={product}
             version={version}
             plan={plan}
-            userLoggedIn={Boolean(user && user.valid_token_for)}
-            preflightStatus={preflight && preflight.status}
-            preflightIsValid={Boolean(preflight && preflight.is_valid)}
-            preflightIsReady={Boolean(preflight && preflight.is_ready)}
+            userLoggedIn={Boolean(user?.valid_token_for)}
+            preflightStatus={preflight?.status}
+            preflightIsValid={Boolean(preflight?.is_valid)}
+            preflightIsReady={Boolean(preflight?.is_ready)}
           />
           {product.is_allowed && plan.is_allowed ? (
             <BodyContainer>
@@ -418,10 +391,9 @@ class PlanDetail extends React.Component<Props, State> {
               ) : null}
               <Intro
                 averageDuration={plan.average_duration}
-                isProductionOrg={Boolean(user && user.is_production_org)}
+                isProductionOrg={Boolean(user?.is_production_org)}
                 preMessage={
-                  plan.preflight_message ? (
-                    // These messages are pre-cleaned by the API
+                  plan.preflight_message ? ( // These messages are pre-cleaned by the API
                     <div
                       className="markdown"
                       dangerouslySetInnerHTML={{
@@ -446,7 +418,7 @@ class PlanDetail extends React.Component<Props, State> {
                 }
               />
               <UserInfo user={user} />
-              {plan.steps && plan.steps.length ? (
+              {plan.steps?.length ? (
                 <StepsTable
                   user={user}
                   plan={plan}
@@ -478,7 +450,7 @@ class PlanDetail extends React.Component<Props, State> {
   }
 }
 
-const select = (appState: AppState, props: InitialProps) => ({
+const select = (appState: AppState, props: RouteComponentProps) => ({
   user: selectUserState(appState),
   product: selectProduct(appState, props),
   productSlug: selectProductSlug(appState, props),
@@ -499,9 +471,10 @@ const actions = {
   doStartJob: startJob,
 };
 
-const WrappedPlanDetail: React.ComponentType<InitialProps> = connect(
-  select,
-  actions,
-)(PlanDetail);
+const connector = connect(select, actions);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+const WrappedPlanDetail = connector(withRouter(PlanDetail));
 
 export default WrappedPlanDetail;

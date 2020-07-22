@@ -2,10 +2,10 @@ import SLDSProgressIndicator from '@salesforce/design-system-react/components/pr
 import * as React from 'react';
 
 import { getSteps } from '@/components/plans/progressIndicator';
-import type { Job as JobType } from '@/store/jobs/reducer';
+import { Job } from '@/store/jobs/reducer';
 import { CONSTANTS } from '@/store/plans/reducer';
 
-const ProgressIndicator = ({ job }: { job: JobType }) => {
+const ProgressIndicator = ({ job }: { job: Job }) => {
   const steps = getSteps();
   const completedSteps =
     job.status === CONSTANTS.STATUS.COMPLETE

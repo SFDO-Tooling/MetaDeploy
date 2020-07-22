@@ -3,13 +3,12 @@ import ToastContainer from '@salesforce/design-system-react/components/toast/con
 import i18n from 'i18next';
 import * as React from 'react';
 
-import type { Job as JobType } from '@/store/jobs/reducer';
-import type { Preflight as PreflightType } from '@/store/plans/reducer';
-import { CONSTANTS } from '@/store/plans/reducer';
+import { Job } from '@/store/jobs/reducer';
+import { CONSTANTS, Preflight } from '@/store/plans/reducer';
 
 type Props = {
-  job?: JobType;
-  preflight?: PreflightType;
+  job?: Job;
+  preflight?: Preflight;
   label: string;
 };
 
@@ -29,7 +28,7 @@ class Toasts extends React.Component<Props, State> {
     this.setState({ isOpen: false });
   };
 
-  getToastComponent(label: string, variant = 'error'): React.Node {
+  getToastComponent(label: string, variant = 'error'): React.ReactNode {
     return (
       <Toast
         labels={{
@@ -41,9 +40,10 @@ class Toasts extends React.Component<Props, State> {
     );
   }
 
-  getToast(): React.Node | null {
+  getToast(): React.ReactNode | null {
     const { job, preflight, label } = this.props;
     const model = job || preflight;
+
     /* istanbul ignore if */
     if (!model) {
       return null;
@@ -85,6 +85,7 @@ class Toasts extends React.Component<Props, State> {
   static getDerivedStateFromProps(props: Props, state: State) {
     const { job, preflight } = props;
     const model = job || preflight;
+
     /* istanbul ignore if */
     if (!model) {
       return null;
@@ -96,7 +97,7 @@ class Toasts extends React.Component<Props, State> {
     return null;
   }
 
-  render(): React.Node {
+  render() {
     const { isOpen } = this.state;
     return (
       <ToastContainer className="half-container">

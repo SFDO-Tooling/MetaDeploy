@@ -5,12 +5,9 @@ import { Link } from 'react-router-dom';
 import JobProgressIndicator from '@/components/jobs/progressIndicator';
 import PlanProgressIndicator from '@/components/plans/progressIndicator';
 import ProductIcon from '@/components/products/icon';
-import type { Job as JobType } from '@/store/jobs/reducer';
-import type { Plan as PlanType } from '@/store/plans/reducer';
-import type {
-  Product as ProductType,
-  Version as VersionType,
-} from '@/store/products/reducer';
+import { Job } from '@/store/jobs/reducer';
+import { Plan } from '@/store/plans/reducer';
+import { Product, Version } from '@/store/products/reducer';
 import routes from '@/utils/routes';
 
 const Header = ({
@@ -24,13 +21,13 @@ const Header = ({
   preflightIsValid,
   preflightIsReady,
 }: {
-  product: ProductType;
-  version: VersionType;
-  plan: PlanType;
-  onRenderActions?: () => React.Node;
-  job?: JobType;
+  product: Product;
+  version: Version;
+  plan: Plan;
+  onRenderActions?: () => React.ReactNode;
+  job?: Job;
   userLoggedIn?: boolean;
-  preflightStatus?: ?string;
+  preflightStatus?: string | null | undefined;
   preflightIsValid?: boolean;
   preflightIsReady?: boolean;
 }) => (

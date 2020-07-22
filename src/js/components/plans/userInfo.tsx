@@ -7,9 +7,9 @@ import * as React from 'react';
 import { Trans } from 'react-i18next';
 
 import Login from '@/components/header/login';
-import type { User as UserType } from '@/store/user/reducer';
+import { User } from '@/store/user/reducer';
 
-const LoggedOut = (): React.Node => (
+const LoggedOut = () => (
   <Illustration
     heading={i18n.t('Not Connected to Salesforce')}
     name="No Connection"
@@ -18,7 +18,7 @@ const LoggedOut = (): React.Node => (
   />
 );
 
-const Footer = (): React.Node => (
+const Footer = () => (
   <>
     {i18n.t('Is this the correct org? If not, please')}{' '}
     <Login
@@ -30,9 +30,11 @@ const Footer = (): React.Node => (
   </>
 );
 
-const UserInfo = ({ user }: { user: UserType }): React.Node => {
-  const hasValidToken = user && user.valid_token_for !== null;
-  const { username, org_name, org_type } = user === null ? {} : user;
+const UserInfo = ({ user }: { user: User }) => {
+  const hasValidToken = Boolean(user?.valid_token_for);
+  const username = user?.username;
+  const org_name = user?.org_name;
+  const org_type = user?.org_type;
   const token_minutes = window.GLOBALS.TOKEN_LIFETIME_MINUTES || 10;
   return (
     <div

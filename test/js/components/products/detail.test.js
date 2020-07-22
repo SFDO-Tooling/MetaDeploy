@@ -1,13 +1,13 @@
-import { ProductDetail, VersionDetail } from '@/components/products/detail';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
+
+import { ProductDetail, VersionDetail } from '@/components/products/detail';
 import {
   fetchAdditionalPlans,
   fetchPlan,
   fetchProduct,
   fetchVersion,
 } from '@/store/products/actions';
-
 import routes from '@/utils/routes';
 
 import { renderWithRedux, reRenderWithRedux } from './../../utils';

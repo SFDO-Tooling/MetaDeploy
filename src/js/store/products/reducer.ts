@@ -46,9 +46,9 @@ export type Category = {
   next: string | null;
 };
 export type ProductsState = {
-  products: Array<Product>;
-  notFound: Array<string>;
-  categories: Array<Category>;
+  products: Product[];
+  notFound: string[];
+  categories: Category[];
 };
 
 const reducer = (
@@ -119,7 +119,7 @@ const reducer = (
         ...products,
         products: products.products.map((p) => {
           if (p.id === product) {
-            if (p.most_recent_version && p.most_recent_version.id === version) {
+            if (p.most_recent_version?.id === version) {
               return {
                 ...p,
                 most_recent_version: {
@@ -131,9 +131,7 @@ const reducer = (
             } else if (p.versions) {
               const thisVersion: Version | null | undefined = (Object.values(
                 p.versions,
-              ) as any).find(
-                (v: Version | null) => v !== null && v.id === version,
-              );
+              ) as any).find((v: Version | null) => v?.id === version);
               if (thisVersion) {
                 return {
                   ...p,
@@ -156,7 +154,7 @@ const reducer = (
     case 'FETCH_PLAN_SUCCEEDED': {
       const { product, version, slug, plan } = action.payload;
       const additional_plans = { [slug]: plan };
-      if (plan && plan.old_slugs) {
+      if (plan?.old_slugs) {
         for (const oldSlug of plan.old_slugs) {
           additional_plans[oldSlug] = plan;
         }
@@ -165,7 +163,7 @@ const reducer = (
         ...products,
         products: products.products.map((p) => {
           if (p.id === product) {
-            if (p.most_recent_version && p.most_recent_version.id === version) {
+            if (p.most_recent_version?.id === version) {
               return {
                 ...p,
                 most_recent_version: {
@@ -179,9 +177,7 @@ const reducer = (
             } else if (p.versions) {
               const thisVersion: Version | null | undefined = (Object.values(
                 p.versions,
-              ) as any).find(
-                (v: Version | null) => v !== null && v.id === version,
-              );
+              ) as any).find((v: Version | null) => v?.id === version);
               if (thisVersion) {
                 return {
                   ...p,

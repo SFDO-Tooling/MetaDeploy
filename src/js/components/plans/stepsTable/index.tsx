@@ -1,8 +1,9 @@
-import * as React from 'react';
 import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import i18n from 'i18next';
+import * as React from 'react';
 
+import { SelectedSteps } from '@/components/plans/detail';
 import InstallDataCell, {
   InstallDataColumnLabel,
 } from '@/components/plans/stepsTable/installDataCell';
@@ -10,45 +11,38 @@ import KindDataCell from '@/components/plans/stepsTable/kindDataCell';
 import NameDataCell from '@/components/plans/stepsTable/nameDataCell';
 import RequiredDataCell from '@/components/plans/stepsTable/requiredDataCell';
 import ToggleLogsDataColumnLabel from '@/components/plans/stepsTable/toggleLogsDataColumnLabel';
-import { CONSTANTS } from '@/store/plans/reducer';
-import type { Job as JobType } from '@/store/jobs/reducer';
-import type {
-  Plan as PlanType,
-  Preflight as PreflightType,
-  Step as StepType,
-} from '@/store/plans/reducer';
-import type { SelectedSteps as SelectedStepsType } from '@/components/plans/detail';
-import type { User as UserType } from '@/store/user/reducer';
+import { Job } from '@/store/jobs/reducer';
+import { CONSTANTS, Plan, Preflight, Step } from '@/store/plans/reducer';
+import { User } from '@/store/user/reducer';
 
-export type DataCellProps = {|
-  [string]: string,
-  user?: UserType,
-  preflight?: ?PreflightType,
-  item?: StepType,
-  className?: string,
-  selectedSteps?: SelectedStepsType,
-  handleStepsChange?: (string, boolean) => void,
-  job?: JobType,
-  activeJobStep?: string | null,
-|};
+export type DataCellProps = {
+  item?: Step;
+  user?: User;
+  preflight?: Preflight | null | undefined;
+  className?: string;
+  selectedSteps?: SelectedSteps;
+  handleStepsChange?: (arg0: string, arg1: boolean) => void;
+  job?: Job;
+  activeJobStep?: string | null;
+};
 
 type Props = {
-  user?: UserType,
-  plan: PlanType,
-  preflight?: ?PreflightType,
-  steps: Array<StepType> | null,
-  selectedSteps?: SelectedStepsType,
-  job?: JobType,
-  handleStepsChange?: (string, boolean) => void,
+  user?: User;
+  plan: Plan;
+  preflight?: Preflight | null | undefined;
+  steps: Step[] | null;
+  selectedSteps?: SelectedSteps;
+  job?: Job;
+  handleStepsChange?: (arg0: string, arg1: boolean) => void;
 };
 
 type State = {
-  showLogs: boolean,
-  expandedPanels: Set<string>,
+  showLogs: boolean;
+  expandedPanels: Set<string>;
 };
 
 class StepsTable extends React.Component<Props, State> {
-  state = { showLogs: false, expandedPanels: new Set() };
+  state = { showLogs: false, expandedPanels: new Set<string>() };
 
   componentDidUpdate(prevProps: Props) {
     const { job } = this.props;
@@ -58,7 +52,7 @@ class StepsTable extends React.Component<Props, State> {
     }
     const jobStatusChanged =
       !prevProps.job || job.status !== prevProps.job.status;
-    const updates = {};
+    const updates: Partial<State> = {};
     if (jobStatusChanged && showLogs) {
       // Remove auto-expand when job status changes
       updates.showLogs = false;
@@ -70,6 +64,7 @@ class StepsTable extends React.Component<Props, State> {
       const newPanels = new Set([...expandedPanels]);
       let changed = false;
       // Auto-collapse previously-active step
+
       /* istanbul ignore else */
       if (previousActiveJob && newPanels.has(previousActiveJob)) {
         changed = true;
@@ -80,22 +75,23 @@ class StepsTable extends React.Component<Props, State> {
         changed = true;
         newPanels.add(currentActiveJob);
       }
+
       /* istanbul ignore else */
       if (changed) {
         updates.expandedPanels = newPanels;
       }
     }
     if (Object.keys(updates).length) {
-      this.setState(updates);
+      this.setState(updates as State);
     }
   }
 
-  getActiveStep = (job?: JobType): string | null => {
+  getActiveStep = (job?: Job): string | null => {
     // Get the currently-running step
     let activeJobStepId = null;
     if (job && this.jobIsRunning(job)) {
       for (const step of job.steps) {
-        if (!(job.results[step] && job.results[step].status)) {
+        if (!job.results[step]?.status) {
           activeJobStepId = step;
           break;
         }
@@ -104,18 +100,19 @@ class StepsTable extends React.Component<Props, State> {
     return activeJobStepId;
   };
 
-  jobIsRunning = (job?: JobType): boolean =>
-    Boolean(job && job.status === CONSTANTS.STATUS.STARTED);
+  jobIsRunning = (job?: Job): boolean =>
+    Boolean(job?.status === CONSTANTS.STATUS.STARTED);
 
   jobHasLogs = (): boolean => {
     const { job } = this.props;
     let hasLogs = false;
+
     /* istanbul ignore if */
     if (!job) {
       return hasLogs;
     }
     for (const step of job.steps) {
-      if (job.results[step] && job.results[step].logs) {
+      if (job.results[step]?.logs) {
         hasLogs = true;
         break;
       }
@@ -143,6 +140,7 @@ class StepsTable extends React.Component<Props, State> {
 
   toggleLogs = (hide: boolean): void => {
     const { job } = this.props;
+
     /* istanbul ignore if */
     if (!job) {
       return;
@@ -155,6 +153,7 @@ class StepsTable extends React.Component<Props, State> {
       const { expandedPanels } = this.state;
       const panels = new Set([...expandedPanels]);
       const activeJobStepId = this.getActiveStep(job);
+
       /* istanbul ignore else */
       if (activeJobStepId) {
         panels.add(activeJobStepId);
@@ -179,15 +178,11 @@ class StepsTable extends React.Component<Props, State> {
     const { expandedPanels } = this.state;
     const activeJobStepId = this.getActiveStep(job);
 
-    const hasValidToken = user && user.valid_token_for !== null;
-    const hasReadyPreflight =
-      !plan.requires_preflight || (preflight && preflight.is_ready);
+    const hasValidToken = Boolean(user?.valid_token_for);
+    const hasReadyPreflight = !plan.requires_preflight || preflight?.is_ready;
     const logsExpanded = expandedPanels.size > 0;
     return (
-      <div
-        className="slds-p-around_medium
-      slds-size_1-of-1"
-      >
+      <div className="slds-p-around_medium slds-size_1-of-1">
         <article className="slds-card slds-scrollable_x">
           <DataTable items={steps} id="plan-steps-table">
             <DataTableColumn

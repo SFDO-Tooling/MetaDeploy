@@ -1,6 +1,7 @@
-import AuthError from '@/components/authError';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+
+import AuthError from '@/components/authError';
 
 import { renderWithRedux } from './../utils';
 

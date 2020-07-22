@@ -1,6 +1,6 @@
+import { RouteComponentProps } from 'react-router-dom';
 import { createSelector } from 'reselect';
 
-import { InitialProps } from '@/components/utils';
 import { AppState } from '@/store';
 import {
   Plan as PlanType,
@@ -15,13 +15,10 @@ import { selectProduct, selectVersion } from '@/store/products/selectors';
 
 export const selectPlanSlug = (
   appState: AppState,
-  { match: { params } }: InitialProps,
+  { match: { params } }: RouteComponentProps<{ planSlug?: string }>,
 ): string | null | undefined => params.planSlug;
 
-export const selectPlan: (
-  arg0: AppState,
-  arg1: InitialProps,
-) => PlanType | null = createSelector(
+export const selectPlan = createSelector(
   [selectProduct, selectVersion, selectPlanSlug],
   (
     product: ProductType | null | void,
@@ -46,7 +43,7 @@ export const selectPlan: (
     ) {
       return secondary_plan;
     }
-    const plan = additional_plans && additional_plans[planSlug];
+    const plan = additional_plans?.[planSlug];
     return plan || null;
   },
 );
@@ -54,10 +51,7 @@ export const selectPlan: (
 const selectPreflightsState = (appState: AppState): PreflightsState =>
   appState.preflights;
 
-export const selectPreflight: (
-  arg0: AppState,
-  arg1: InitialProps,
-) => PreflightType | null | undefined = createSelector(
+export const selectPreflight = createSelector(
   [selectPreflightsState, selectPlan],
   (
     preflights: PreflightsState,

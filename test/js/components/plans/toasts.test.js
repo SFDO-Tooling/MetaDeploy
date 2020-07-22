@@ -1,6 +1,7 @@
 import { fireEvent, render } from '@testing-library/react';
-import Toasts from '@/components/plans/toasts';
 import React from 'react';
+
+import Toasts from '@/components/plans/toasts';
 
 const defaultJob = {
   status: 'started',

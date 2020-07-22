@@ -171,6 +171,7 @@ describe('startPreflight', () => {
     const payload = { foo: 'bar' };
     const expected = { type, payload };
 
+    // eslint-disable-next-line import/namespace
     expect(actions[action](payload)).toEqual(expected);
   });
 });

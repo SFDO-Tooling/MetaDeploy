@@ -1,11 +1,11 @@
+import React from 'react';
+import { StaticRouter } from 'react-router-dom';
+
 import {
   getLoadingOrNotFound,
   shouldFetchPlan,
   shouldFetchVersion,
 } from '@/components/utils';
-import React from 'react';
-import { StaticRouter } from 'react-router-dom';
-
 import routes from '@/utils/routes';
 
 import { renderWithRedux } from './../utils';

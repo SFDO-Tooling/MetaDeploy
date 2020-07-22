@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Link } from 'react-router-dom';
 
 import { ActionBtn, LabelWithSpinner } from '@/components/plans/ctaButton';
-import type { Job as JobType } from '@/store/jobs/reducer';
+import { Job } from '@/store/jobs/reducer';
 import { CONSTANTS } from '@/store/plans/reducer';
 
 const { STATUS } = CONSTANTS;
@@ -14,10 +14,10 @@ const CtaButton = ({
   linkToPlan,
   canceling,
 }: {
-  job: JobType;
+  job: Job;
   linkToPlan: string;
   canceling: boolean;
-}): React.Node => {
+}) => {
   switch (job.status) {
     case STATUS.STARTED:
       return (

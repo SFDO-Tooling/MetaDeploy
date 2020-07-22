@@ -1,49 +1,43 @@
-import * as React from 'react';
-import DocumentTitle from 'react-document-title';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import Tabs from '@salesforce/design-system-react/components/tabs';
 import TabsPanel from '@salesforce/design-system-react/components/tabs/panel';
 import i18n from 'i18next';
-import { connect } from 'react-redux';
+import * as React from 'react';
+import DocumentTitle from 'react-document-title';
 import { withScroll } from 'react-fns';
+import { connect, ConnectedProps } from 'react-redux';
+import { RouteComponentProps, withRouter } from 'react-router';
 
+import { EmptyIllustration } from '@/components/404';
+import Header from '@/components/header';
+import PageHeader from '@/components/products/listHeader';
+import ProductItem from '@/components/products/listItem';
+import { AppState } from '@/store';
 import { fetchMoreProducts } from '@/store/products/actions';
-import { prettyUrlHash } from '@/utils/helpers';
+import { Category, Product } from '@/store/products/reducer';
 import {
   selectProductCategories,
   selectProductsByCategory,
 } from '@/store/products/selectors';
-import Header from '@/components/header';
-import PageHeader from '@/components/products/listHeader';
-import ProductItem from '@/components/products/listItem';
-import { EmptyIllustration } from '@/components/404';
-import type { AppState } from '@/store';
-import type { InitialProps } from '@/components/utils';
-import type { ProductsMapType } from '@/store/products/selectors';
-import type { Category, Product } from '@/store/products/reducer';
+import { prettyUrlHash } from '@/utils/helpers';
 
 type Props = {
-  ...InitialProps,
-  x: number,
-  y: number,
-  productsByCategory: ProductsMapType,
-  productCategories: Array<Category>,
-  doFetchMoreProducts: ({ url: string, id: number }) => Promise<any>,
-};
+  x: number;
+  y: number;
+} & PropsFromRedux &
+  RouteComponentProps;
 type State = {
-  activeProductsTab: string | null,
-  fetchingProducts: boolean,
+  activeProductsTab: string | null;
+  fetchingProducts: boolean;
 };
 
 class ProductsList extends React.Component<Props, State> {
-  // This is often considered an anti-pattern in React, but it's acceptable in
-  // cases where we don't want to cancel or cleanup an asynchronous action on
   // unmount -- we just want to prevent a post-unmount state update after the
   // action finishes.
   // https://reactjs.org/blog/2015/12/16/ismounted-antipattern.html
-  _isMounted: boolean;
+  _isMounted!: boolean;
 
-  constructor(props) {
+  constructor(props: Props) {
     super(props);
     let activeProductsTab = null;
     let hashTab: Category | void;
@@ -68,7 +62,7 @@ class ProductsList extends React.Component<Props, State> {
     };
   }
 
-  static getProductsList(products: Array<Product>): React.Node {
+  static getProductsList(products: Array<Product>) {
     return (
       <div
         className="slds-grid
@@ -94,6 +88,7 @@ class ProductsList extends React.Component<Props, State> {
     const { history, productCategories } = this.props;
     try {
       const category = productCategories[index];
+
       /* istanbul ignore else */
       if (category) {
         window.sessionStorage.setItem('activeProductsTab', category.title);
@@ -117,7 +112,7 @@ class ProductsList extends React.Component<Props, State> {
           (category) => category.title === activeProductsTab,
         )
       : productCategories[0];
-    const moreProductsUrl = activeCategory && activeCategory.next;
+    const moreProductsUrl = activeCategory?.next;
 
     if (activeCategory && moreProductsUrl && !fetchingProducts) {
       this.setState({ fetchingProducts: true });
@@ -133,20 +128,20 @@ class ProductsList extends React.Component<Props, State> {
     }
   };
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps: Props) {
     const { y } = this.props;
     const { fetchingProducts } = this.state;
     if (y === prevProps.y || fetchingProducts) {
       return;
     }
+
     /* istanbul ignore next */
     const scrollHeight =
-      (document.documentElement && document.documentElement.scrollHeight) ||
-      (document.body && document.body.scrollHeight) ||
+      document.documentElement?.scrollHeight ||
+      document.body?.scrollHeight ||
       Infinity;
     const clientHeight =
-      (document.documentElement && document.documentElement.clientHeight) ||
-      window.innerHeight;
+      document.documentElement?.clientHeight || window.innerHeight;
     // Fetch more products if within 100px of bottom of page...
     const scrolledToBottom = scrollHeight - Math.ceil(y + clientHeight) <= 100;
 
@@ -156,7 +151,7 @@ class ProductsList extends React.Component<Props, State> {
     }
   }
 
-  render(): React.Node {
+  render() {
     const { activeProductsTab, fetchingProducts } = this.state;
     const { productsByCategory, productCategories } = this.props;
     let contents;
@@ -206,8 +201,7 @@ class ProductsList extends React.Component<Props, State> {
           <Header history={this.props.history} />
           <PageHeader />
           <div className="slds-p-around_x-large">
-            {window.GLOBALS.SITE && window.GLOBALS.SITE.welcome_text ? (
-              // These messages are pre-cleaned by the API
+            {window.GLOBALS.SITE?.welcome_text ? ( // These messages are pre-cleaned by the API
               <div
                 className="markdown
                   slds-p-bottom_medium
@@ -244,9 +238,10 @@ const actions = {
   doFetchMoreProducts: fetchMoreProducts,
 };
 
-const WrappedProductsList: React.ComponentType<InitialProps> = connect(
-  select,
-  actions,
-)(withScroll(ProductsList));
+const connector = connect(select, actions);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+const WrappedProductsList = connector(withScroll(withRouter(ProductsList)));
 
 export default WrappedProductsList;

@@ -1,6 +1,7 @@
 import { fireEvent, render } from '@testing-library/react';
-import StepsTable from '@/components/plans/stepsTable';
 import React from 'react';
+
+import StepsTable from '@/components/plans/stepsTable';
 
 const defaultPlan = {
   id: 'plan-1',

@@ -26,7 +26,7 @@ const ProgressIndicator = ({
   preflightIsReady,
 }: {
   userLoggedIn?: boolean;
-  preflightStatus?: ?string;
+  preflightStatus?: string | null | undefined;
   preflightIsValid?: boolean;
   preflightIsReady?: boolean;
 }) => {

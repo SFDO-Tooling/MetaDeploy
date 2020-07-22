@@ -1,4 +1,3 @@
-import * as React from 'react';
 import Accordion from '@salesforce/design-system-react/components/accordion';
 import AccordionPanel from '@salesforce/design-system-react/components/accordion/panel';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
@@ -6,29 +5,32 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
 import i18n from 'i18next';
+import * as React from 'react';
 
-import { CONSTANTS } from '@/store/plans/reducer';
 import { JobError } from '@/components/plans/preflightResults';
-import type { DataCellProps } from '@/components/plans/stepsTable';
+import { DataCellProps } from '@/components/plans/stepsTable';
+import { CONSTANTS } from '@/store/plans/reducer';
 
 const { RESULT_STATUS } = CONSTANTS;
 
-type Props = {|
-  ...DataCellProps,
-  togglePanel: (val: string) => void,
-  expandedPanels: Set<string>,
-|};
+type Props = DataCellProps & {
+  togglePanel: (val: string) => void;
+  expandedPanels: Set<string>;
+};
 
 class NameDataCell extends React.Component<Props> {
+  static displayName = DataTableCell.displayName;
+
   togglePanel = () => {
     const { item, togglePanel } = this.props;
+
     /* istanbul ignore else */
     if (item) {
       togglePanel(item.id);
     }
   };
 
-  render(): React.Node {
+  render() {
     const {
       preflight,
       job,
@@ -39,6 +41,7 @@ class NameDataCell extends React.Component<Props> {
       expandedPanels,
       ...otherProps
     } = this.props;
+
     /* istanbul ignore if */
     if (!item) {
       return null;
@@ -47,7 +50,7 @@ class NameDataCell extends React.Component<Props> {
     const { name, description } = item;
     const { id } = item;
     const isActive = Boolean(activeJobStep && id === activeJobStep);
-    const result = currentJob && currentJob.results && currentJob.results[id];
+    const result = currentJob?.results?.[id];
     const showErrorColors = !selectedSteps || selectedSteps.has(id);
     let hasError = false;
     let hasWarning = false;
@@ -55,12 +58,14 @@ class NameDataCell extends React.Component<Props> {
     let optional, logs;
     if (result) {
       hasError = result.status === RESULT_STATUS.ERROR;
-      hasWarning = result.message && result.status === RESULT_STATUS.WARN;
+      hasWarning = Boolean(
+        result.message && result.status === RESULT_STATUS.WARN,
+      );
       optional = result.status === RESULT_STATUS.OPTIONAL ? result : null;
-      optionalMsg = optional && optional.message;
+      optionalMsg = optional?.message || '';
       logs = job ? result.logs : null;
     }
-    let display = name;
+    let display: React.ReactNode = name;
     if (optionalMsg) {
       display = `${name} — ${optionalMsg}`;
     }
@@ -155,6 +160,5 @@ class NameDataCell extends React.Component<Props> {
     );
   }
 }
-NameDataCell.displayName = DataTableCell.displayName;
 
 export default NameDataCell;

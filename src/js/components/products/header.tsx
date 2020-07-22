@@ -3,15 +3,15 @@ import i18n from 'i18next';
 import * as React from 'react';
 
 import ProductIcon from '@/components/products/icon';
-import type { Product as ProductType } from '@/store/products/reducer';
+import { Product } from '@/store/products/reducer';
 
 const Header = ({
   product,
   versionLabel,
 }: {
-  product: ProductType;
+  product: Product;
   versionLabel: string;
-}): React.Node => (
+}) => (
   <PageHeader
     className="page-header
       slds-p-around_x-large"

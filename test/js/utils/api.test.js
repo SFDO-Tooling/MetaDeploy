@@ -1,4 +1,5 @@
 import fetchMock from 'fetch-mock';
+
 import apiFetch, {
   addUrlParams,
   extractCustomDomain,

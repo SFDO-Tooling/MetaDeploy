@@ -2,10 +2,10 @@ import classNames from 'classnames';
 import i18n from 'i18next';
 import * as React from 'react';
 
-import type { Job as JobType } from '@/store/jobs/reducer';
+import { Job } from '@/store/jobs/reducer';
 import { CONSTANTS } from '@/store/plans/reducer';
 
-type Props = { job: JobType };
+type Props = { job: Job };
 type State = {
   stepProgressPercent: number;
   completedSteps: number;
@@ -18,7 +18,7 @@ const DEFAULTS = {
 };
 
 class ProgressBar extends React.Component<Props, State> {
-  interval: ?IntervalID;
+  interval: NodeJS.Timeout | null | undefined;
 
   constructor(props: Props) {
     super(props);
@@ -79,7 +79,7 @@ class ProgressBar extends React.Component<Props, State> {
     }
   }
 
-  static getCompletedSteps(job: JobType): number {
+  static getCompletedSteps(job: Job): number {
     // Get number of completed steps
     return job.steps.filter(
       (step) =>
@@ -101,7 +101,7 @@ class ProgressBar extends React.Component<Props, State> {
     );
   }
 
-  render(): React.Node {
+  render(): React.ReactNode {
     const { job } = this.props;
     const isRunning = job.status === CONSTANTS.STATUS.STARTED;
     const isFailed =
@@ -111,10 +111,7 @@ class ProgressBar extends React.Component<Props, State> {
     const progressRounded = Math.min(Math.round(progress), 100);
     const id = `${job.id}-progress`;
     return (
-      <div
-        className="slds-p-around_medium
-        slds-size_1-of-1"
-      >
+      <div className="slds-p-around_medium slds-size_1-of-1">
         <div
           id={id}
           className="slds-grid
@@ -151,8 +148,8 @@ class ProgressBar extends React.Component<Props, State> {
             'slds-progress-bar_large',
             { 'is-running': isRunning },
           )}
-          aria-valuemin="0"
-          aria-valuemax="100"
+          aria-valuemin={0}
+          aria-valuemax={100}
           aria-valuenow={progress}
           aria-labelledby={id}
           role="progressbar"

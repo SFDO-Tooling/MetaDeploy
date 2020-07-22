@@ -15,7 +15,7 @@ type FetchPreflightFailed = {
   payload: string;
 };
 type PreflightRequested = { type: 'PREFLIGHT_REQUESTED'; payload: string };
-type PreflightStarted = {
+export type PreflightStarted = {
   type: 'PREFLIGHT_STARTED';
   payload: Preflight;
 };

@@ -47,6 +47,7 @@ describe('getAction', () => {
     test(`handles msg: ${type}`, () => {
       const payload = { foo: 'bar' };
       const msg = { type, payload };
+      // eslint-disable-next-line import/namespace
       const expected = preflightActions[action](payload);
       const actual = sockets.getAction(msg);
 
@@ -63,6 +64,7 @@ describe('getAction', () => {
     test(`handles msg: ${type}`, () => {
       const payload = { foo: 'bar' };
       const msg = { type, payload };
+      // eslint-disable-next-line import/namespace
       const expected = jobActions[action](payload);
       const actual = sockets.getAction(msg);
 

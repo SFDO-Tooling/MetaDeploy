@@ -1,7 +1,8 @@
 import { fireEvent } from '@testing-library/react';
-import JobDetail from '@/components/jobs/detail';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
+
+import JobDetail from '@/components/jobs/detail';
 import { fetchJob, requestCancelJob } from '@/store/jobs/actions';
 import {
   fetchPlan,

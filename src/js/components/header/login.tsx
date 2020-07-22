@@ -1,29 +1,27 @@
-import * as React from 'react';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import i18n from 'i18next';
+import * as React from 'react';
 
-import { addUrlParams } from '@/utils/api';
 import CustomDomainModal from '@/components/header/customDomainModal';
-import type { UrlParams } from '@/utils/api';
+import { addUrlParams, UrlParams } from '@/utils/api';
 
 type Props = {
-  id: string,
-  label?: string | React.Node,
-  buttonClassName: string,
-  buttonVariant: string,
-  triggerClassName?: string,
-  disabled: boolean,
-  menuPosition: string,
-  nubbinPosition: string,
-  redirectParams: UrlParams,
+  id: string;
+  label?: string | React.ReactNode;
+  buttonClassName: string;
+  buttonVariant: string;
+  triggerClassName?: string;
+  disabled: boolean;
+  menuPosition: string;
+  nubbinPosition: string;
+  redirectParams: UrlParams;
 };
-type MenuOption =
-  | {|
-      label: string,
-      login_domain: string,
-      disabled: boolean,
-    |}
-  | {| type: string |};
+type MenuOption = {
+  label: string;
+  login_domain: string;
+  disabled: boolean;
+};
+type MenuDivider = { type: string };
 
 class Login extends React.Component<Props, { modalOpen: boolean }> {
   static defaultProps = {
@@ -45,8 +43,8 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
     this.setState({ modalOpen: isOpen });
   };
 
-  handleSelect = (opt: MenuOption) => {
-    const login_domain = opt.login_domain || '';
+  handleSelect = (opt: MenuOption | MenuDivider) => {
+    const login_domain = (opt as MenuOption).login_domain || '';
     if (login_domain === '') {
       this.toggleModal(true);
       return;
@@ -60,7 +58,7 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
     );
   };
 
-  static getMenuOpts(): Array<MenuOption> {
+  static getMenuOpts(): (MenuOption | MenuDivider)[] {
     return [
       {
         label: i18n.t('Production or Developer Org'),
@@ -83,7 +81,7 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
     ];
   }
 
-  render(): React.Node {
+  render() {
     const menuOpts = Login.getMenuOpts();
     const {
       id,

@@ -13,9 +13,7 @@ export type Job = {
   plan: string;
   status: 'started' | 'complete' | 'failed' | 'canceled';
   steps: string[];
-  results: {
-    [key: string]: StepResult;
-  };
+  results: { plan?: StepResult } & { [key: string]: StepResult };
   org_name: string | null;
   org_type: string | null;
   is_production_org: boolean;

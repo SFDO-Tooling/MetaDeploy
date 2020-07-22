@@ -1,6 +1,7 @@
 import { fireEvent, render } from '@testing-library/react';
-import CurrentJobAlert from '@/components/jobs/currentJobAlert';
 import React from 'react';
+
+import CurrentJobAlert from '@/components/jobs/currentJobAlert';
 
 describe('<CurrentJobAlert />', () => {
   const setup = (options) => {

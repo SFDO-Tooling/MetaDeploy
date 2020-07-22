@@ -1,7 +1,8 @@
 import { fireEvent } from '@testing-library/react';
-import PlanDetail from '@/components/plans/detail';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
+
+import PlanDetail from '@/components/plans/detail';
 import { fetchPreflight } from '@/store/plans/actions';
 import {
   fetchPlan,

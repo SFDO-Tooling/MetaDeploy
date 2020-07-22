@@ -3,12 +3,8 @@ import i18n from 'i18next';
 import * as React from 'react';
 import { Trans } from 'react-i18next';
 
-import type { Job as JobType } from '@/store/jobs/reducer';
-import type {
-  Preflight as PreflightType,
-  StepResult as StepResultType,
-} from '@/store/plans/reducer';
-import { CONSTANTS } from '@/store/plans/reducer';
+import { Job } from '@/store/jobs/reducer';
+import { CONSTANTS, Preflight, StepResult } from '@/store/plans/reducer';
 
 export const ErrorIcon = ({
   size,
@@ -16,7 +12,7 @@ export const ErrorIcon = ({
 }: {
   size?: string;
   containerClassName?: string;
-}): React.Node => (
+}) => (
   <Icon
     assistiveText={{ label: i18n.t('Error') }}
     category="utility"
@@ -28,7 +24,7 @@ export const ErrorIcon = ({
   />
 );
 
-export const WarningIcon = (): React.Node => (
+export const WarningIcon = () => (
   <Icon
     assistiveText={{ label: i18n.t('Warning') }}
     category="utility"
@@ -41,8 +37,9 @@ export const WarningIcon = (): React.Node => (
 );
 
 // Job "error" or "warning" message
-export const JobError = ({ err }: { err: StepResultType }): React.Node => {
+export const JobError = ({ err }: { err: StepResult }) => {
   let node = null;
+
   /* istanbul ignore else */
   if (err.message) {
     switch (err.status) {
@@ -78,15 +75,12 @@ export const getErrorInfo = ({
   preflight,
   label,
 }: {
-  job?: JobType;
-  preflight?: PreflightType;
+  job?: Job;
+  preflight?: Preflight;
   label: string;
-}): {
-  failed: boolean;
-  message: React.Node | null;
-} => {
+}) => {
   const currentJob = job || preflight;
-  const info = {
+  const info: { failed: boolean; message: string | null } = {
     failed: false,
     message: null,
   };
@@ -132,18 +126,14 @@ export const getErrorInfo = ({
       canceledPreflight;
     info.failed = Boolean(failed);
     info.message =
-      preflight && !currentJob.is_valid && !failed
+      preflight && !(currentJob as Preflight).is_valid && !failed
         ? i18n.t(`${label} has expired; please run it again.`)
         : `${i18n.t(`${label} encountered`)} ${msg}.`;
   }
   return info;
 };
 
-const PreflightResults = ({
-  preflight,
-}: {
-  preflight: PreflightType;
-}): React.Node => {
+const PreflightResults = ({ preflight }: { preflight: Preflight }) => {
   if (
     preflight.status !== CONSTANTS.STATUS.COMPLETE &&
     preflight.status !== CONSTANTS.STATUS.FAILED &&
@@ -156,7 +146,7 @@ const PreflightResults = ({
     preflight,
     label: i18n.t('Pre-install validation'),
   });
-  const planErrors = preflight.results && preflight.results.plan;
+  const planErrors = preflight.results?.plan;
   if (message !== null) {
     return (
       <>

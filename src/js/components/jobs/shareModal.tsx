@@ -1,32 +1,37 @@
-import * as React from 'react';
 import Button from '@salesforce/design-system-react/components/button';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
-import Radio from '@salesforce/design-system-react/components/radio-group/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
+import Radio from '@salesforce/design-system-react/components/radio-group/radio';
 import i18n from 'i18next';
+import * as React from 'react';
 
-import { CONSTANTS } from '@/store/plans/reducer';
-import { withTransientMessage } from '@/components/utils';
-import type { Job as JobType } from '@/store/jobs/reducer';
-import type { Plan as PlanType } from '@/store/plans/reducer';
-import type { TransientMessageProps } from '@/components/utils';
-import typeof { updateJob as UpdateJobType } from '@/store/jobs/actions';
+import {
+  TransientMessageProps,
+  withTransientMessage,
+} from '@/components/utils';
+import { JobUpdated } from '@/store/jobs/actions';
+import { Job } from '@/store/jobs/reducer';
+import { CONSTANTS, Plan } from '@/store/plans/reducer';
 
-type Props = {|
-  isOpen: boolean,
-  job: JobType,
-  plan: PlanType,
-  toggleModal: (boolean) => void,
-  updateJob: UpdateJobType,
-|};
+type Props = {
+  isOpen: boolean;
+  job: Job;
+  plan: Plan;
+  toggleModal: (open: boolean) => void;
+  updateJob: (payload: {
+    [key: string]: unknown;
+    readonly id: string;
+  }) => Promise<JobUpdated>;
+};
 type WrappedProps = Props & TransientMessageProps;
 
 class ShareModal extends React.Component<WrappedProps> {
-  input: ?HTMLInputElement;
+  input: HTMLInputElement | null | undefined;
 
   handleClose = () => {
     const { toggleModal, hideTransientMessage } = this.props;
+
     /* istanbul ignore else */
     if (hideTransientMessage) {
       hideTransientMessage();
@@ -38,6 +43,7 @@ class ShareModal extends React.Component<WrappedProps> {
     const { showTransientMessage } = this.props;
     this.handleFocus();
     document.execCommand('copy');
+
     /* istanbul ignore else */
     if (showTransientMessage) {
       showTransientMessage();
@@ -50,7 +56,7 @@ class ShareModal extends React.Component<WrappedProps> {
     }
   };
 
-  handleChange = (event: SyntheticInputEvent<HTMLInputElement>) => {
+  handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { job, updateJob } = this.props;
     updateJob({ id: job.id, is_public: event.target.value });
   };
@@ -68,7 +74,7 @@ class ShareModal extends React.Component<WrappedProps> {
     if (showError) {
       let stepName = null;
       let stepError = null;
-      if (plan.steps && plan.steps.length) {
+      if (plan.steps?.length) {
         // Get step-specific error (and step name)
         for (const id of Object.keys(job.results)) {
           const result = job.results[id];
@@ -118,7 +124,7 @@ class ShareModal extends React.Component<WrappedProps> {
     return null;
   }
 
-  render(): React.Node {
+  render() {
     const { job, transientMessageVisible } = this.props;
     const errorMsg = this.getErrorMessage();
     return (

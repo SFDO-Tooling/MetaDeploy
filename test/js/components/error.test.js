@@ -1,6 +1,7 @@
 import { render } from '@testing-library/react';
-import ErrorBoundary from '@/components/error';
 import React from 'react';
+
+import ErrorBoundary from '@/components/error';
 
 class TestableErrorBoundary extends ErrorBoundary {
   constructor(props) {

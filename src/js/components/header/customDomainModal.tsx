@@ -4,12 +4,11 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
 import * as React from 'react';
 
-import type { UrlParams } from '@/utils/api';
-import { addUrlParams, extractCustomDomain } from '@/utils/api';
+import { addUrlParams, extractCustomDomain, UrlParams } from '@/utils/api';
 
 type Props = {
   isOpen: boolean;
-  toggleModal: (boolean) => void;
+  toggleModal: (open: boolean) => void;
   redirectParams: UrlParams;
 };
 
@@ -24,7 +23,7 @@ class CustomDomainModal extends React.Component<Props, { url: string }> {
     this.props.toggleModal(false);
   };
 
-  handleSubmit = (event: SyntheticEvent<HTMLFormElement>) => {
+  handleSubmit = (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
     const val = extractCustomDomain(this.state.url.trim());
     if (!val) {
@@ -40,11 +39,11 @@ class CustomDomainModal extends React.Component<Props, { url: string }> {
     );
   };
 
-  handleChange = (event: SyntheticInputEvent<HTMLInputElement>) => {
+  handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ url: event.target.value });
   };
 
-  render(): React.Node {
+  render() {
     const footer = [
       <Button
         key="cancel"

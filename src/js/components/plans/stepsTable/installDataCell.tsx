@@ -8,12 +8,12 @@ import i18n from 'i18next';
 import * as React from 'react';
 
 import { ErrorIcon } from '@/components/plans/preflightResults';
-import type { DataCellProps } from '@/components/plans/stepsTable';
+import { DataCellProps } from '@/components/plans/stepsTable';
 import { CONSTANTS } from '@/store/plans/reducer';
 
 const { STATUS, RESULT_STATUS } = CONSTANTS;
 
-export const InstallDataColumnLabel = (): React.Node => (
+export const InstallDataColumnLabel = () => (
   <>
     <span title={i18n.t('Install')}>{i18n.t('Install')}</span>
     <Tooltip
@@ -40,8 +40,9 @@ export const InstallDataColumnLabel = (): React.Node => (
   </>
 );
 
-const JobCell = (props: DataCellProps): React.Node => {
+const JobCell = (props: DataCellProps) => {
   const { item, job, activeJobStep, className, ...otherProps } = props;
+
   /* istanbul ignore if */
   if (!item || !job) {
     return null;
@@ -90,8 +91,7 @@ const JobCell = (props: DataCellProps): React.Node => {
       <>
         <ErrorIcon
           size="small"
-          containerClassName="slds-m-left_xx-small
-            slds-m-right_x-small"
+          containerClassName="slds-m-left_xx-small slds-m-right_x-small"
         />
         {title}
       </>
@@ -156,17 +156,18 @@ const JobCell = (props: DataCellProps): React.Node => {
 
 class PreflightCell extends React.Component<DataCellProps> {
   handleChange = (
-    event: SyntheticInputEvent<HTMLInputElement>,
+    event: React.ChangeEvent<HTMLInputElement>,
     { checked }: { checked: boolean },
   ) => {
     const { item, handleStepsChange } = this.props;
+
     /* istanbul ignore else */
     if (handleStepsChange && item) {
       handleStepsChange(item.id, checked);
     }
   };
 
-  render(): React.Node {
+  render() {
     const {
       preflight,
       item,
@@ -174,12 +175,13 @@ class PreflightCell extends React.Component<DataCellProps> {
       className,
       ...otherProps
     } = this.props;
+
     /* istanbul ignore if */
     if (!item) {
       return null;
     }
     const { id } = item;
-    const result = preflight && preflight.results && preflight.results[id];
+    const result = preflight?.results?.[id];
     let skipped, optional, content;
     if (result) {
       skipped = result.status === RESULT_STATUS.SKIP ? result : null;
@@ -196,7 +198,7 @@ class PreflightCell extends React.Component<DataCellProps> {
       title = i18n.t('recommended');
     }
     let label = '';
-    if (skipped && skipped.message) {
+    if (skipped?.message) {
       label = skipped.message;
     } else if (recommended) {
       label = i18n.t('recommended');
@@ -217,7 +219,7 @@ class PreflightCell extends React.Component<DataCellProps> {
       content = (
         <Checkbox
           id={`step-${id}`}
-          checked={selectedSteps && selectedSteps.has(id)}
+          checked={selectedSteps?.has(id)}
           labels={{ label }}
           assistiveText={{
             label: title,
@@ -238,7 +240,7 @@ class PreflightCell extends React.Component<DataCellProps> {
   }
 }
 
-const InstallDataCell = (props: DataCellProps): React.Node => {
+const InstallDataCell = (props: DataCellProps) => {
   if (props.job) {
     return <JobCell {...props} />;
   }

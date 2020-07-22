@@ -1,49 +1,41 @@
-import * as React from 'react';
 import Spinner from '@salesforce/design-system-react/components/spinner';
+import * as React from 'react';
 import { Redirect } from 'react-router-dom';
-import type { Match, RouterHistory } from 'react-router-dom';
 
 import JobNotFound from '@/components/jobs/job404';
 import PlanNotFound from '@/components/plans/plan404';
 import ProductNotFound from '@/components/products/product404';
 import VersionNotFound from '@/components/products/version404';
-import routes from '@/utils/routes';
-import type { Job as JobType } from '@/store/jobs/reducer';
-import type { Plan as PlanType } from '@/store/plans/reducer';
-import type {
+import { Job as JobType } from '@/store/jobs/reducer';
+import { Plan as PlanType } from '@/store/plans/reducer';
+import {
   Product as ProductType,
   Version as VersionType,
 } from '@/store/products/reducer';
-
-export type InitialProps = {| match: Match, history: RouterHistory |};
+import routes from '@/utils/routes';
 
 type TransientMessageState = {
-  transientMessageVisible: boolean,
+  transientMessageVisible: boolean;
 };
-export type TransientMessageProps = {|
-  transientMessageVisible?: boolean,
-  showTransientMessage?: () => void,
-  hideTransientMessage?: () => void,
-|};
+export type TransientMessageProps = {
+  transientMessageVisible?: boolean;
+  showTransientMessage?: () => void;
+  hideTransientMessage?: () => void;
+};
 
-export const withTransientMessage = function <
-  Props: {},
-  Component: React.ComponentType<Props>,
->(
-  WrappedComponent: Component,
+export const withTransientMessage = function <Props>(
+  WrappedComponent: React.ComponentType<Props & TransientMessageProps>,
   options?: { duration?: number },
-): Class<
-  React.Component<$Diff<Props, TransientMessageProps>, TransientMessageState>,
-> {
+) {
   const defaults = {
     duration: 5 * 1000,
   };
   const opts = { ...defaults, ...options };
   return class WithTransientMessage extends React.Component<
     Props,
-    TransientMessageState,
+    TransientMessageState
   > {
-    timeout: ?TimeoutID;
+    timeout: NodeJS.Timeout | null | undefined;
 
     constructor(props: Props) {
       super(props);
@@ -75,7 +67,7 @@ export const withTransientMessage = function <
       this.clearTimeout();
     };
 
-    render(): React.Node {
+    render() {
       return (
         <WrappedComponent
           {...this.props}
@@ -93,14 +85,13 @@ export const shouldFetchVersion = ({
   version,
   versionLabel,
 }: {
-  product: ProductType | null | void,
-  version?: VersionType | null,
-  versionLabel?: ?string,
+  product: ProductType | null | void;
+  version?: VersionType | null;
+  versionLabel?: string | null | undefined;
 }): boolean => {
   const hasVersion = version !== null;
   if (product && !hasVersion && versionLabel) {
-    const version404 =
-      product && product.versions && product.versions[versionLabel] === null;
+    const version404 = product?.versions?.[versionLabel] === null;
     if (!version404) {
       // Fetch version from API
       return true;
@@ -114,9 +105,9 @@ export const shouldFetchPlan = ({
   plan,
   planSlug,
 }: {
-  version: VersionType | null,
-  plan?: PlanType | null,
-  planSlug?: ?string,
+  version: VersionType | null;
+  plan?: PlanType | null;
+  planSlug?: string | null | undefined;
 }): boolean => {
   const hasVersion = version !== null;
   const hasPlan = plan !== null;
@@ -147,19 +138,19 @@ export const getLoadingOrNotFound = ({
   maybeVersion,
   maybeSlug,
 }: {
-  product: ProductType | null | void,
-  productSlug: ?string,
-  version?: VersionType | null,
-  versionLabel?: ?string,
-  plan?: PlanType | null,
-  planSlug?: ?string,
-  job?: JobType | null,
-  jobId?: ?string,
-  isLoggedIn?: boolean,
-  route: string,
-  maybeVersion?: string,
-  maybeSlug?: string,
-}): React.Node | false => {
+  product: ProductType | null | void;
+  productSlug: string | null | undefined;
+  version?: VersionType | null;
+  versionLabel?: string | null | undefined;
+  plan?: PlanType | null;
+  planSlug?: string | null | undefined;
+  job?: JobType | null;
+  jobId?: string | null | undefined;
+  isLoggedIn?: boolean;
+  route: 'product_detail' | 'version_detail' | 'plan_detail' | 'job_detail';
+  maybeVersion?: string;
+  maybeSlug?: string;
+}): React.ReactNode | false => {
   if (!product) {
     if (!productSlug || product === null) {
       return <ProductNotFound />;
@@ -179,10 +170,7 @@ export const getLoadingOrNotFound = ({
     );
   }
   if (version === null) {
-    if (
-      !versionLabel ||
-      (product.versions && product.versions[versionLabel] === null)
-    ) {
+    if (!versionLabel || product.versions?.[versionLabel] === null) {
       // Versions have already been fetched...
       return <VersionNotFound product={product} />;
     }
@@ -193,10 +181,7 @@ export const getLoadingOrNotFound = ({
     if (!version) {
       return <VersionNotFound product={product} />;
     }
-    if (
-      !planSlug ||
-      (version.additional_plans && version.additional_plans[planSlug] === null)
-    ) {
+    if (!planSlug || version.additional_plans?.[planSlug] === null) {
       return <PlanNotFound product={product} version={version} />;
     }
     // Fetching plan from API
@@ -224,11 +209,11 @@ export const getLoadingOrNotFound = ({
   ) {
     return (
       <Redirect
-        to={routes[route](
+        to={(routes[route] as (...args: any[]) => string)(
           product.slug,
-          (version && version.label) || versionLabel,
-          (plan && plan.slug) || planSlug,
-          (job && job.id) || jobId,
+          version?.label || versionLabel,
+          plan?.slug || planSlug,
+          job?.id || jobId,
         )}
       />
     );

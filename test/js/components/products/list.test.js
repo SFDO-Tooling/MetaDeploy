@@ -1,7 +1,8 @@
 import { fireEvent } from '@testing-library/react';
-import ProductsList from '@/components/products/list';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+
+import ProductsList from '@/components/products/list';
 import { fetchMoreProducts } from '@/store/products/actions';
 
 import {

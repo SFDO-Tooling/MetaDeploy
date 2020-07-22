@@ -1,37 +1,32 @@
-import * as React from 'react';
 import Button from '@salesforce/design-system-react/components/button';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import i18n from 'i18next';
-import type { RouterHistory } from 'react-router-dom';
+import * as React from 'react';
+import { RouteComponentProps } from 'react-router';
 
-import routes from '@/utils/routes';
-import { CONSTANTS } from '@/store/plans/reducer';
-import { getUrlParam, removeUrlParam } from '@/utils/api';
-import ClickThroughAgreementModal from '@/components/plans/clickThroughAgreementModal';
 import Login from '@/components/header/login';
+import ClickThroughAgreementModal from '@/components/plans/clickThroughAgreementModal';
+import { SelectedSteps } from '@/components/plans/detail';
 import PreflightWarningModal from '@/components/plans/preflightWarningModal';
-import type { JobData } from '@/store/jobs/actions';
-import type {
-  Plan as PlanType,
-  Preflight as PreflightType,
-} from '@/store/plans/reducer';
-import type { SelectedSteps as SelectedStepsType } from '@/components/plans/detail';
-import type { UrlParams } from '@/utils/api';
-import type { User as UserType } from '@/store/user/reducer';
-import typeof { startPreflight as StartPreflightType } from '@/store/plans/actions';
+import { JobData, JobStarted } from '@/store/jobs/actions';
+import { PreflightStarted } from '@/store/plans/actions';
+import { CONSTANTS, Plan, Preflight, StepResult } from '@/store/plans/reducer';
+import { User } from '@/store/user/reducer';
+import { getUrlParam, removeUrlParam, UrlParams } from '@/utils/api';
+import routes from '@/utils/routes';
 
 type Props = {
-  history: RouterHistory,
-  user: UserType,
-  productSlug: string,
-  clickThroughAgreement: string | null,
-  versionLabel: string,
-  plan: PlanType,
-  preflight: ?PreflightType,
-  selectedSteps: SelectedStepsType,
-  preventAction: boolean,
-  doStartPreflight: StartPreflightType,
-  doStartJob: (data: JobData) => Promise<any>,
+  history: RouteComponentProps['history'];
+  user: User;
+  productSlug: string;
+  clickThroughAgreement: string | null;
+  versionLabel: string;
+  plan: Plan;
+  preflight: Preflight | null | undefined;
+  selectedSteps: SelectedSteps;
+  preventAction: boolean;
+  doStartPreflight: (planId: string) => Promise<PreflightStarted>;
+  doStartJob: (data: JobData) => Promise<JobStarted>;
 };
 
 const { AUTO_START_PREFLIGHT, RESULT_STATUS, STATUS } = CONSTANTS;
@@ -43,10 +38,10 @@ export const LabelWithSpinner = ({
   variant,
   size,
 }: {
-  label: string,
-  variant?: string,
-  size?: string,
-}): React.Node => (
+  label: string;
+  variant?: string;
+  size?: string;
+}) => (
   <>
     <span className="slds-is-relative slds-m-right_large">
       <Spinner variant={variant || 'inverse'} size={size || 'small'} />
@@ -61,10 +56,10 @@ export const LoginBtn = ({
   label,
   redirectParams,
 }: {
-  id?: string,
-  label: string,
-  redirectParams?: UrlParams,
-}): React.Node => (
+  id?: string;
+  label: string;
+  redirectParams?: UrlParams;
+}) => (
   <Login
     id={id || 'plan-detail-login'}
     buttonClassName={btnClasses}
@@ -83,10 +78,10 @@ export const ActionBtn = ({
   disabled,
   onClick,
 }: {
-  label: string | React.Node,
-  disabled?: boolean,
-  onClick?: () => void,
-}): React.Node => (
+  label: string | React.ReactNode;
+  disabled?: boolean;
+  onClick?: () => void;
+}) => (
   <Button
     className={btnClasses}
     label={label}
@@ -99,10 +94,10 @@ export const ActionBtn = ({
 class CtaButton extends React.Component<
   Props,
   {
-    preflightModalOpen: boolean,
-    clickThroughModal: boolean,
-    startPreflight: boolean,
-  },
+    preflightModalOpen: boolean;
+    clickThroughModal: boolean;
+    startPreflight: boolean;
+  }
 > {
   constructor(props: Props) {
     super(props);
@@ -159,8 +154,7 @@ class CtaButton extends React.Component<
     //   - no prior preflight exists OR
     //     prior preflight exists, but was unsuccessful (not ready for install)
     return Boolean(
-      user &&
-        user.valid_token_for !== null &&
+      user?.valid_token_for &&
         !preventAction &&
         (preflight === null ||
           (preflight &&
@@ -201,11 +195,11 @@ class CtaButton extends React.Component<
       doStartJob,
     } = this.props;
     // propagate hidden steps from the preflight results to the job results
-    const results = {};
-    if (preflight && preflight.results) {
+    const results: { [key: string]: StepResult } = {};
+    if (preflight?.results) {
       Object.keys(preflight.results).forEach((id) => {
         const result = preflight.results[id];
-        if (result && result.status === CONSTANTS.RESULT_STATUS.HIDE) {
+        if (result?.status === CONSTANTS.RESULT_STATUS.HIDE) {
           results[id] = result;
         }
       });
@@ -213,7 +207,7 @@ class CtaButton extends React.Component<
     doStartJob({ plan: plan.id, steps: [...selectedSteps], results }).then(
       (action) => {
         const { type, payload } = action;
-        if (type === 'JOB_STARTED' && payload && payload.id) {
+        if (type === 'JOB_STARTED' && payload?.id) {
           const url = routes.job_detail(
             productSlug,
             versionLabel,
@@ -232,10 +226,10 @@ class CtaButton extends React.Component<
     actionLabel: string,
     loginLabel: string,
     onClick: () => void,
-    startPreflightAfterLogin?: boolean = false,
-  ): React.Node {
+    startPreflightAfterLogin = false,
+  ) {
     const { user, preventAction } = this.props;
-    const hasValidToken = user && user.valid_token_for !== null;
+    const hasValidToken = Boolean(user?.valid_token_for);
     if (hasValidToken) {
       return (
         <ActionBtn
@@ -256,7 +250,7 @@ class CtaButton extends React.Component<
     );
   }
 
-  getClickThroughAgreementModal(): React.Node {
+  getClickThroughAgreementModal() {
     const { clickThroughAgreement } = this.props;
     const { clickThroughModal } = this.state;
     return clickThroughAgreement ? (
@@ -271,8 +265,9 @@ class CtaButton extends React.Component<
 
   warningsInSelectedSteps(): boolean {
     const { selectedSteps, preflight } = this.props;
+
     /* istanbul ignore if */
-    if (!(preflight && preflight.results)) {
+    if (!preflight?.results) {
       return false;
     }
     return [...selectedSteps].some(
@@ -283,7 +278,7 @@ class CtaButton extends React.Component<
     );
   }
 
-  render(): React.Node {
+  render() {
     const {
       user,
       clickThroughAgreement,

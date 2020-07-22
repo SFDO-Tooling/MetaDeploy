@@ -1,25 +1,25 @@
-import * as React from 'react';
 import Avatar from '@salesforce/design-system-react/components/avatar';
 import Button from '@salesforce/design-system-react/components/button';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import DropdownTrigger from '@salesforce/design-system-react/components/menu-dropdown/button-trigger';
 import i18n from 'i18next';
+import * as React from 'react';
 
-import type { User } from '@/store/user/reducer';
-import typeof { logout as LogoutType } from '@/store/user/actions';
+import { FetchProductsSucceeded } from '@/store/products/actions';
+import { User } from '@/store/user/reducer';
 
 const Logout = ({
   user,
   doLogout,
 }: {
-  user: User,
-  doLogout: LogoutType,
-}): React.Node => (
+  user: User;
+  doLogout: () => Promise<FetchProductsSucceeded>;
+}) => (
   <Dropdown
     id="logout"
     options={[
       {
-        label: user && user.username,
+        label: user?.username,
         type: 'header',
       },
       { type: 'divider' },

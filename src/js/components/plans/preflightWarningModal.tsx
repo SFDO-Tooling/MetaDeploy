@@ -4,22 +4,22 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
 import * as React from 'react';
 
-import type { SelectedSteps as SelectedStepsType } from '@/components/plans/detail';
+import { SelectedSteps } from '@/components/plans/detail';
 import { WarningIcon } from '@/components/plans/preflightResults';
-import type {
-  PreflightErrors as PreflightErrorsType,
-  Step as StepType,
-  StepResult as StepResultType,
+import {
+  CONSTANTS,
+  PreflightErrors,
+  Step,
+  StepResult,
 } from '@/store/plans/reducer';
-import { CONSTANTS } from '@/store/plans/reducer';
 
 type Props = {
   isOpen: boolean;
-  toggleModal: (boolean) => void;
+  toggleModal: (open: boolean) => void;
   startJob: () => void;
-  results: PreflightErrorsType;
-  steps: Array<StepType>;
-  selectedSteps: SelectedStepsType;
+  results: PreflightErrors;
+  steps: Step[];
+  selectedSteps: SelectedSteps;
 };
 type State = {
   confirmed: boolean;
@@ -31,9 +31,9 @@ const Warning = ({
   name,
 }: {
   id: string;
-  result: StepResultType;
+  result: StepResult;
   name?: string;
-}): React.Node => {
+}) => {
   if (result.message && result.status === CONSTANTS.RESULT_STATUS.WARN) {
     return (
       <div className="slds-p-vertical_x-small">
@@ -76,13 +76,13 @@ class PreflightWarningModal extends React.Component<Props, State> {
   };
 
   handleChange = (
-    event: SyntheticInputEvent<HTMLInputElement>,
+    event: React.ChangeEvent<HTMLInputElement>,
     { checked }: { checked: boolean },
   ) => {
     this.setState({ confirmed: checked });
   };
 
-  render(): React.Node {
+  render() {
     const { isOpen, results, steps, selectedSteps } = this.props;
     const { confirmed } = this.state;
     const footer = [

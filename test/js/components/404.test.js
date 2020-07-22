@@ -1,6 +1,7 @@
-import FourOhFour from '@/components/404';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+
+import FourOhFour from '@/components/404';
 
 import { renderWithRedux } from './../utils';
 

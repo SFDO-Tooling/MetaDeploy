@@ -3,12 +3,12 @@ import classNames from 'classnames';
 import i18n from 'i18next';
 import * as React from 'react';
 
-import type { DataCellProps } from '@/components/plans/stepsTable';
+import { DataCellProps } from '@/components/plans/stepsTable';
 import { CONSTANTS } from '@/store/plans/reducer';
 
 const { RESULT_STATUS } = CONSTANTS;
 
-const RequiredDataCell = (props: DataCellProps): React.Node => {
+const RequiredDataCell = (props: DataCellProps) => {
   const {
     preflight,
     item,
@@ -17,13 +17,14 @@ const RequiredDataCell = (props: DataCellProps): React.Node => {
     activeJobStep,
     ...otherProps
   } = props;
+
   /* istanbul ignore if */
   if (!item) {
     return null;
   }
   const { id } = item;
   const isActive = activeJobStep && id === activeJobStep;
-  const result = preflight && preflight.results && preflight.results[id];
+  const result = preflight?.results?.[id];
   let skipped, optional;
   if (result) {
     skipped = result.status === RESULT_STATUS.SKIP ? result : null;

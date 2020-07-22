@@ -3,10 +3,10 @@ import { Trans } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
-import type { Product as ProductType } from '@/store/products/reducer';
+import { Product } from '@/store/products/reducer';
 import routes from '@/utils/routes';
 
-const VersionNotFound = ({ product }: { product: ProductType }) => (
+const VersionNotFound = ({ product }: { product: Product }) => (
   <FourOhFour
     message={
       product.most_recent_version ? (

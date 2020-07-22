@@ -4,13 +4,17 @@ import svgPath from 'images/desert.svg';
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
 import { Trans } from 'react-i18next';
-import type { RouterHistory } from 'react-router-dom';
+import { RouteComponentProps, withRouter } from 'react-router';
 import { Link } from 'react-router-dom';
 
 import Header from '@/components/header';
 import routes from '@/utils/routes';
 
-export const EmptyIllustration = ({ message }: { message: React.Node }) => (
+export const EmptyIllustration = ({
+  message,
+}: {
+  message: React.ReactNode;
+}) => (
   <Illustration
     heading="¯\_(ツ)_/¯"
     messageBody={message}
@@ -24,9 +28,8 @@ const FourOhFour = ({
   message,
   history,
 }: {
-  message?: React.Node;
-  history?: RouterHistory;
-}) => (
+  message?: React.ReactNode;
+} & RouteComponentProps) => (
   <DocumentTitle title={`${i18n.t('404')} | ${window.SITE_NAME}`}>
     <>
       <Header history={history} />
@@ -46,4 +49,4 @@ const FourOhFour = ({
   </DocumentTitle>
 );
 
-export default FourOhFour;
+export default withRouter(FourOhFour);

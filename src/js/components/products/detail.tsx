@@ -1,11 +1,22 @@
+import i18n from 'i18next';
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
-import i18n from 'i18next';
-import { Link, Redirect } from 'react-router-dom';
 import { Trans } from 'react-i18next';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
+import { RouteComponentProps, withRouter } from 'react-router';
+import { Link, Redirect } from 'react-router-dom';
 
-import routes from '@/utils/routes';
+import BackLink from '@/components/backLink';
+import BodyContainer from '@/components/bodyContainer';
+import Header from '@/components/header';
+import PageHeader from '@/components/products/header';
+import ProductNotAllowed from '@/components/products/notAllowed';
+import OldVersionWarning from '@/components/products/oldVersionWarning';
+import ProductNotFound from '@/components/products/product404';
+import VersionNotFound from '@/components/products/version404';
+import { getLoadingOrNotFound, shouldFetchVersion } from '@/components/utils';
+import { AppState } from '@/store';
+import { Plan as PlanType } from '@/store/plans/reducer';
 import {
   fetchAdditionalPlans,
   fetchPlan,
@@ -19,42 +30,11 @@ import {
   selectVersionLabelOrPlanSlug,
 } from '@/store/products/selectors';
 import { selectUserState } from '@/store/user/selectors';
-import { getLoadingOrNotFound, shouldFetchVersion } from '@/components/utils';
-import BackLink from '@/components/backLink';
-import BodyContainer from '@/components/bodyContainer';
-import Header from '@/components/header';
-import OldVersionWarning from '@/components/products/oldVersionWarning';
-import PageHeader from '@/components/products/header';
-import ProductNotAllowed from '@/components/products/notAllowed';
-import ProductNotFound from '@/components/products/product404';
-import VersionNotFound from '@/components/products/version404';
-import type { AppState } from '@/store';
-import type { InitialProps } from '@/components/utils';
-import type {
-  Product as ProductType,
-  Version as VersionType,
-} from '@/store/products/reducer';
-import type { User as UserType } from '@/store/user/reducer';
-import type { VersionPlanType } from '@/store/products/selectors';
-import type { Plan as PlanType } from '@/store/plans/reducer';
+import routes from '@/utils/routes';
 
-type ProductDetailProps = {
-  product: ProductType | null | void,
-  productSlug: ?string,
-  doFetchProduct: typeof fetchProduct,
-};
-type VersionDetailProps = {
-  ...InitialProps,
-  user: UserType,
-  product: ProductType | null | void,
-  productSlug: ?string,
-  version: VersionType | null,
-  versionLabelAndPlanSlug: VersionPlanType,
-  doFetchProduct: typeof fetchProduct,
-  doFetchVersion: typeof fetchVersion,
-  doFetchAdditionalPlans: typeof fetchAdditionalPlans,
-  doFetchPlan: typeof fetchPlan,
-};
+type ProductDetailProps = ProductPropsFromRedux;
+
+type VersionDetailProps = VersionPropsFromRedux & RouteComponentProps;
 
 class ProductDetail extends React.Component<ProductDetailProps> {
   fetchProductIfMissing() {
@@ -69,7 +49,7 @@ class ProductDetail extends React.Component<ProductDetailProps> {
     this.fetchProductIfMissing();
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps: ProductDetailProps) {
     const { product, productSlug } = this.props;
     const productChanged =
       product !== prevProps.product || productSlug !== prevProps.productSlug;
@@ -78,7 +58,7 @@ class ProductDetail extends React.Component<ProductDetailProps> {
     }
   }
 
-  render(): React.Node {
+  render() {
     const { product, productSlug } = this.props;
     const loadingOrNotFound = getLoadingOrNotFound({
       product,
@@ -90,6 +70,7 @@ class ProductDetail extends React.Component<ProductDetailProps> {
     }
     // This redundant check is required to satisfy Flow:
     // https://flow.org/en/docs/lang/refinements/#toc-refinement-invalidations
+
     /* istanbul ignore if */
     if (!product) {
       return <ProductNotFound />;
@@ -102,7 +83,7 @@ class ProductDetail extends React.Component<ProductDetailProps> {
   }
 }
 
-const BodySection = ({ children }: { children: ?React.Node }) => (
+const BodySection = ({ children }: { children?: React.ReactNode }) => (
   <div
     className="slds-text-longform
       slds-p-around_medium
@@ -171,7 +152,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     this.fetchPlanIfMissing();
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps: VersionDetailProps) {
     const {
       product,
       productSlug,
@@ -198,7 +179,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     }
   }
 
-  render(): React.Node {
+  render() {
     const {
       user,
       product,
@@ -223,27 +204,28 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     }
     // this redundant check is required to satisfy Flow:
     // https://flow.org/en/docs/lang/refinements/#toc-refinement-invalidations
+
     /* istanbul ignore if */
     if (!product || !version) {
       return <ProductNotFound />;
     }
 
     const listedAdditionalPlans: Array<PlanType> = version.additional_plans
-      ? (Object.entries(version.additional_plans): any)
+      ? (Object.entries(version.additional_plans) as any)
           .filter(
             ([key, plan]: [string, PlanType | null]) =>
-              plan && plan.is_listed && plan.is_allowed && key === plan.slug,
+              plan?.is_listed && plan?.is_allowed && key === plan?.slug,
           )
           .map((item: Array<[string, PlanType]>) => item[1])
       : [];
     const { primary_plan, secondary_plan } = version;
     const visiblePrimaryPlan =
-      primary_plan && primary_plan.is_listed && primary_plan.is_allowed;
+      primary_plan?.is_listed && primary_plan?.is_allowed;
     const visibleSecondaryPlan =
-      secondary_plan && secondary_plan.is_listed && secondary_plan.is_allowed;
+      secondary_plan?.is_listed && secondary_plan?.is_allowed;
     const productDescriptionHasTitle =
-      (product.description && product.description.startsWith('<h1>')) ||
-      (product.description && product.description.startsWith('<h2>'));
+      product.description?.startsWith('<h1>') ||
+      product.description?.startsWith('<h2>');
     const isMostRecent =
       product.most_recent_version &&
       new Date(version.created_at) >=
@@ -341,7 +323,9 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                 {/* This description is pre-cleaned by the API */}
                 <div
                   className="markdown"
-                  dangerouslySetInnerHTML={{ __html: product.description }}
+                  dangerouslySetInnerHTML={{
+                    __html: product.description || '',
+                  }}
                 />
               </BodySection>
             </BodyContainer>
@@ -363,12 +347,18 @@ class VersionDetail extends React.Component<VersionDetailProps> {
   }
 }
 
-const selectProductDetail = (appState: AppState, props: InitialProps) => ({
+const selectProductDetail = (
+  appState: AppState,
+  props: RouteComponentProps,
+) => ({
   product: selectProduct(appState, props),
   productSlug: selectProductSlug(appState, props),
 });
 
-const selectVersionDetail = (appState: AppState, props: InitialProps) => ({
+const selectVersionDetail = (
+  appState: AppState,
+  props: RouteComponentProps,
+) => ({
   user: selectUserState(appState),
   product: selectProduct(appState, props),
   productSlug: selectProductSlug(appState, props),
@@ -387,14 +377,14 @@ const versionActions = {
   doFetchPlan: fetchPlan,
 };
 
-const WrappedProductDetail: React.ComponentType<InitialProps> = connect(
-  selectProductDetail,
-  productActions,
-)(ProductDetail);
-const WrappedVersionDetail: React.ComponentType<InitialProps> = connect(
-  selectVersionDetail,
-  versionActions,
-)(VersionDetail);
+const productConnector = connect(selectProductDetail, productActions);
+const versionConnector = connect(selectVersionDetail, versionActions);
+
+type ProductPropsFromRedux = ConnectedProps<typeof productConnector>;
+type VersionPropsFromRedux = ConnectedProps<typeof versionConnector>;
+
+const WrappedProductDetail = productConnector(ProductDetail);
+const WrappedVersionDetail = versionConnector(withRouter(VersionDetail));
 
 export {
   WrappedProductDetail as ProductDetail,

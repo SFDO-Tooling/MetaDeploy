@@ -1,6 +1,7 @@
 import { render } from '@testing-library/react';
-import ProgressIndicator from '@/components/jobs/progressIndicator';
 import React from 'react';
+
+import ProgressIndicator from '@/components/jobs/progressIndicator';
 
 const defaultJob = {
   id: 'job-1',

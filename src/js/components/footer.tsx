@@ -3,26 +3,26 @@ import * as React from 'react';
 
 const Footer = () => {
   let copyright = `${i18n.t('Copyright')} ${window.GLOBALS.YEAR}`;
-  if (window.GLOBALS.SITE && window.GLOBALS.SITE.company_name) {
+  if (window.GLOBALS.SITE?.company_name) {
     copyright = `${copyright} ${window.GLOBALS.SITE.company_name}`;
   }
   return (
     <footer
       className="slds-grid
-      slds-grid--align-spread
-      slds-grid_vertical-align-center
-      slds-wrap
-      slds-p-horizontal_x-large
-      slds-p-vertical_medium
-      slds-text-body_small
-      site-contentinfo"
+        slds-grid--align-spread
+        slds-grid_vertical-align-center
+        slds-wrap
+        slds-p-horizontal_x-large
+        slds-p-vertical_medium
+        slds-text-body_small
+        site-contentinfo"
     >
-      {window.GLOBALS.SITE && window.GLOBALS.SITE.product_logo ? (
+      {window.GLOBALS.SITE?.product_logo ? (
         <div
           className="footer-logo
-        footer-item
-        slds-m-right_medium
-        slds-grow"
+            footer-item
+            slds-m-right_medium
+            slds-grow"
           style={{
             backgroundImage: `url(${window.GLOBALS.SITE.product_logo})`,
           }}
@@ -34,12 +34,8 @@ const Footer = () => {
           <span data-logo-bit="end">deploy</span>
         </div>
       )}
-      <div
-        className="footer-item
-        slds-grid"
-      >
-        {window.GLOBALS.SITE && window.GLOBALS.SITE.copyright_notice ? (
-          // These messages are pre-cleaned by the API
+      <div className="footer-item slds-grid">
+        {window.GLOBALS.SITE?.copyright_notice ? ( // These messages are pre-cleaned by the API
           <div
             dangerouslySetInnerHTML={{
               __html: window.GLOBALS.SITE.copyright_notice,

@@ -38,7 +38,7 @@ describe('reducer', () => {
     expect(actual).toEqual(expected);
   });
 
-  describe('FETCH_MORE_PRODUCTS_SUCCEEDED action', () => {
+  test('FETCH_MORE_PRODUCTS_SUCCEEDED action', () => {
     const mockProducts = {
       categories: [
         { id: 37, title: 'first Products', next: 'next-url' },

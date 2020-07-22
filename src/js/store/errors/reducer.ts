@@ -6,9 +6,9 @@ export type ErrorType = {
 };
 
 const reducer = (
-  errors: Array<ErrorType> = [],
+  errors: ErrorType[] = [],
   action: ErrorAction,
-): Array<ErrorType> => {
+): ErrorType[] => {
   switch (action.type) {
     case 'ERROR_ADDED':
       return [...errors, action.payload];

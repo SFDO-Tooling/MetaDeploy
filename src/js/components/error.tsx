@@ -5,7 +5,7 @@ import { EmptyIllustration } from '@/components/404';
 import { logError } from '@/utils/logging';
 import routes from '@/utils/routes';
 
-type Props = { children: React.Node };
+type Props = { children: React.ReactNode };
 
 class ErrorBoundary extends React.Component<Props, { hasError: boolean }> {
   constructor(props: Props) {
@@ -14,12 +14,12 @@ class ErrorBoundary extends React.Component<Props, { hasError: boolean }> {
   }
 
   /* istanbul ignore next */
-  componentDidCatch(error: Error, info: {}) {
+  componentDidCatch(error: Error, info: any) {
     this.setState({ hasError: true });
     logError(error, info);
   }
 
-  render(): React.Node {
+  render() {
     if (this.state.hasError) {
       return (
         <EmptyIllustration

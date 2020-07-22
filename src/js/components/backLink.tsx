@@ -19,8 +19,7 @@ const BackLink = ({
         name="back"
         size="x-small"
         className="slds-m-bottom_xxx-small"
-        containerClassName="slds-m-right_xx-small
-        slds-current-color"
+        containerClassName="slds-m-right_xx-small slds-current-color"
       />
       {label}
     </Link>

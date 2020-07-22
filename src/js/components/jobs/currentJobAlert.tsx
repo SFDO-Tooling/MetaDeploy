@@ -2,15 +2,15 @@ import Alert from '@salesforce/design-system-react/components/alert';
 import AlertContainer from '@salesforce/design-system-react/components/alert/container';
 import i18n from 'i18next';
 import * as React from 'react';
-import type { RouterHistory } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router';
 
-import type { CurrentJob } from '@/store/org/reducer';
+import { CurrentJob } from '@/store/org/reducer';
 import { getDuration } from '@/utils/dates';
 import routes from '@/utils/routes';
 
 type Props = {
   currentJob: CurrentJob;
-  history?: RouterHistory;
+  history?: RouteComponentProps['history'];
 };
 
 class CurrentJobAlert extends React.Component<Props> {
@@ -25,7 +25,7 @@ class CurrentJobAlert extends React.Component<Props> {
     }
   };
 
-  render(): React.Node {
+  render() {
     const { currentJob } = this.props;
     const { plan_average_duration } = currentJob;
     const duration = getDuration(plan_average_duration);

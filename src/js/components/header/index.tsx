@@ -1,8 +1,8 @@
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import * as React from 'react';
-import { connect } from 'react-redux';
-import type { RouterHistory } from 'react-router-dom';
+import { connect, ConnectedProps } from 'react-redux';
+import { RouteComponentProps } from 'react-router';
 import { Link } from 'react-router-dom';
 
 import Errors from '@/components/apiErrors';
@@ -10,32 +10,21 @@ import Login from '@/components/header/login';
 import Logout from '@/components/header/logout';
 import CurrentJobAlert from '@/components/jobs/currentJobAlert';
 import OfflineAlert from '@/components/offlineAlert';
-import type { AppState } from '@/store';
+import { AppState } from '@/store';
 import { clearErrors, removeError } from '@/store/errors/actions';
-import type { ErrorType } from '@/store/errors/reducer';
 import { selectErrors } from '@/store/errors/selectors';
-import type { Org as OrgType } from '@/store/org/reducer';
 import { selectOrg } from '@/store/org/selectors';
-import type { Socket } from '@/store/socket/reducer';
 import { selectSocketState } from '@/store/socket/selectors';
 import { logout } from '@/store/user/actions';
-import type { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
 import routes from '@/utils/routes';
 
 type Props = {
-  user: User;
-  socket: Socket;
-  org: OrgType;
-  errors: Array<ErrorType>;
-  history?: RouterHistory;
-  jobId?: string;
-  doLogout: typeof logout;
-  doClearErrors: typeof clearErrors;
-  doRemoveError: typeof removeError;
+  history?: RouteComponentProps['history'];
+  jobId?: string | null;
 };
 
-class Header extends React.Component<Props> {
+class Header extends React.Component<Props & PropsFromRedux> {
   controls = () => {
     const { user, doLogout } = this.props;
     return (
@@ -52,11 +41,11 @@ class Header extends React.Component<Props> {
 
   render() {
     const { socket, org, errors, history, jobId, doRemoveError } = this.props;
-    const logoSrc = window.GLOBALS.SITE && window.GLOBALS.SITE.company_logo;
+    const logoSrc = window.GLOBALS.SITE?.company_logo;
     return (
       <>
         {socket ? null : <OfflineAlert />}
-        {org && org.current_job && jobId !== org.current_job.id ? (
+        {org?.current_job && jobId !== org.current_job.id ? (
           <CurrentJobAlert currentJob={org.current_job} history={history} />
         ) : null}
         <Errors errors={errors} doRemoveError={doRemoveError} />
@@ -100,6 +89,8 @@ const actions = {
   doRemoveError: removeError,
 };
 
-const WrappedHeader: React.ComponentType<{}> = connect(select, actions)(Header);
+const connector = connect(select, actions);
 
-export default WrappedHeader;
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export default connector(Header);

@@ -1,20 +1,41 @@
-import * as React from 'react';
 import Button from '@salesforce/design-system-react/components/button';
-import DocumentTitle from 'react-document-title';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import i18n from 'i18next';
-import { connect } from 'react-redux';
+import * as React from 'react';
+import DocumentTitle from 'react-document-title';
+import { connect, ConnectedProps } from 'react-redux';
+import { RouteComponentProps, withRouter } from 'react-router';
 
-import routes from '@/utils/routes';
-import { CONSTANTS } from '@/store/plans/reducer';
+import BackLink from '@/components/backLink';
+import BodyContainer from '@/components/bodyContainer';
+import Header from '@/components/header';
+import CtaButton from '@/components/jobs/ctaButton';
+import JobMessage from '@/components/jobs/jobMessage';
+import JobResults from '@/components/jobs/jobResults';
+import ProgressBar from '@/components/jobs/progressBar';
+import ShareModal from '@/components/jobs/shareModal';
+import UserInfo from '@/components/jobs/userInfo';
+import { LabelWithSpinner } from '@/components/plans/ctaButton';
+import PageHeader from '@/components/plans/header';
+import Intro from '@/components/plans/intro';
+import StepsTable from '@/components/plans/stepsTable';
+import Toasts from '@/components/plans/toasts';
+import ProductNotFound from '@/components/products/product404';
+import {
+  getLoadingOrNotFound,
+  shouldFetchPlan,
+  shouldFetchVersion,
+} from '@/components/utils';
+import { AppState } from '@/store';
 import { fetchJob, requestCancelJob, updateJob } from '@/store/jobs/actions';
+import { selectJob, selectJobId } from '@/store/jobs/selectors';
+import { CONSTANTS } from '@/store/plans/reducer';
+import { selectPlan, selectPlanSlug } from '@/store/plans/selectors';
 import {
   fetchPlan,
   fetchProduct,
   fetchVersion,
 } from '@/store/products/actions';
-import { selectJob, selectJobId } from '@/store/jobs/selectors';
-import { selectPlan, selectPlanSlug } from '@/store/plans/selectors';
 import {
   selectProduct,
   selectProductSlug,
@@ -22,66 +43,20 @@ import {
   selectVersionLabel,
 } from '@/store/products/selectors';
 import { selectUserState } from '@/store/user/selectors';
-import {
-  getLoadingOrNotFound,
-  shouldFetchPlan,
-  shouldFetchVersion,
-} from '@/components/utils';
-import BackLink from '@/components/backLink';
-import BodyContainer from '@/components/bodyContainer';
-import CtaButton from '@/components/jobs/ctaButton';
-import Header from '@/components/header';
-import Intro from '@/components/plans/intro';
-import JobMessage from '@/components/jobs/jobMessage';
-import JobResults from '@/components/jobs/jobResults';
-import PageHeader from '@/components/plans/header';
-import ProductNotFound from '@/components/products/product404';
-import ProgressBar from '@/components/jobs/progressBar';
-import ShareModal from '@/components/jobs/shareModal';
-import StepsTable from '@/components/plans/stepsTable';
-import Toasts from '@/components/plans/toasts';
-import UserInfo from '@/components/jobs/userInfo';
-import { LabelWithSpinner } from '@/components/plans/ctaButton';
-import type { AppState } from '@/store';
-import type { InitialProps } from '@/components/utils';
-import type { Job as JobType } from '@/store/jobs/reducer';
-import type { Plan as PlanType } from '@/store/plans/reducer';
-import type {
-  Product as ProductType,
-  Version as VersionType,
-} from '@/store/products/reducer';
-import type { User as UserType } from '@/store/user/reducer';
+import routes from '@/utils/routes';
 
-type Props = {
-  ...InitialProps,
-  user: UserType,
-  product: ProductType | null | void,
-  productSlug: ?string,
-  version: VersionType | null,
-  versionLabel: ?string,
-  plan: PlanType | null,
-  planSlug: ?string,
-  job: ?JobType,
-  jobId: ?string,
-  doFetchProduct: typeof fetchProduct,
-  doFetchVersion: typeof fetchVersion,
-  doFetchPlan: typeof fetchPlan,
-  doFetchJob: typeof fetchJob,
-  doUpdateJob: typeof updateJob,
-  doRequestCancelJob: (id: string) => Promise<any>,
-};
+type Props = PropsFromRedux & RouteComponentProps;
+
 type State = {
-  modalOpen: boolean,
-  canceling: boolean,
+  modalOpen: boolean;
+  canceling: boolean;
 };
 
 class JobDetail extends React.Component<Props, State> {
-  // This is often considered an anti-pattern in React, but it's acceptable in
-  // cases where we don't want to cancel or cleanup an asynchronous action on
   // unmount -- we just want to prevent a post-unmount state update after the
   // action finishes.
   // https://reactjs.org/blog/2015/12/16/ismounted-antipattern.html
-  _isMounted: boolean;
+  _isMounted!: boolean;
 
   constructor(props: Props) {
     super(props);
@@ -151,7 +126,7 @@ class JobDetail extends React.Component<Props, State> {
     this._isMounted = false;
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps: Props, prevState: State) {
     const {
       product,
       productSlug,
@@ -212,6 +187,7 @@ class JobDetail extends React.Component<Props, State> {
 
   requestCancelJob = () => {
     const { job, doRequestCancelJob } = this.props;
+
     /* istanbul ignore if */
     if (!job) {
       return;
@@ -224,13 +200,14 @@ class JobDetail extends React.Component<Props, State> {
     });
   };
 
-  getCancelBtn(): React.Node {
+  getCancelBtn() {
     const { user, job } = this.props;
+
     /* istanbul ignore if */
     if (!job) {
       return null;
     }
-    if (job.status === CONSTANTS.STATUS.STARTED && user && user.is_staff) {
+    if (job.status === CONSTANTS.STATUS.STARTED && user?.is_staff) {
       const { canceling } = this.state;
       if (canceling) {
         return (
@@ -270,7 +247,7 @@ class JobDetail extends React.Component<Props, State> {
     </PageHeaderControl>
   );
 
-  render(): React.Node {
+  render() {
     const {
       user,
       product,
@@ -301,6 +278,7 @@ class JobDetail extends React.Component<Props, State> {
     }
     // this redundant check is required to satisfy Flow:
     // https://flow.org/en/docs/lang/refinements/#toc-refinement-invalidations
+
     /* istanbul ignore if */
     if (!product || !version || !plan || !job) {
       return <ProductNotFound />;
@@ -314,8 +292,7 @@ class JobDetail extends React.Component<Props, State> {
     const steps = plan.steps
       ? plan.steps.filter((step) => {
           const result = job.results[step.id];
-          const hidden =
-            result && result.status === CONSTANTS.RESULT_STATUS.HIDE;
+          const hidden = result?.status === CONSTANTS.RESULT_STATUS.HIDE;
           return !hidden;
         })
       : [];
@@ -367,7 +344,7 @@ class JobDetail extends React.Component<Props, State> {
             />
             <UserInfo job={job} />
             <ProgressBar job={job} />
-            {steps && steps.length ? (
+            {steps?.length ? (
               <StepsTable steps={steps} plan={plan} job={job} />
             ) : null}
           </BodyContainer>
@@ -377,7 +354,7 @@ class JobDetail extends React.Component<Props, State> {
   }
 }
 
-const select = (appState: AppState, props: InitialProps) => ({
+const select = (appState: AppState, props: RouteComponentProps) => ({
   user: selectUserState(appState),
   product: selectProduct(appState, props),
   productSlug: selectProductSlug(appState, props),
@@ -398,9 +375,10 @@ const actions = {
   doRequestCancelJob: requestCancelJob,
 };
 
-const WrappedJobDetail: React.ComponentType<InitialProps> = connect(
-  select,
-  actions,
-)(JobDetail);
+const connector = connect(select, actions);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+const WrappedJobDetail = connector(withRouter(JobDetail));
 
 export default WrappedJobDetail;

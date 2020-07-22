@@ -4,10 +4,10 @@ import * as React from 'react';
 import { Link } from 'react-router-dom';
 
 import ProductIcon from '@/components/products/icon';
-import type { Product as ProductType } from '@/store/products/reducer';
+import { Product } from '@/store/products/reducer';
 import routes from '@/utils/routes';
 
-const ProductItem = ({ item }: { item: ProductType }) => {
+const ProductItem = ({ item }: { item: Product }) => {
   if (!item.most_recent_version) {
     return null;
   }
@@ -33,9 +33,8 @@ const ProductItem = ({ item }: { item: ProductType }) => {
           <div className="slds-p-top_x-small">{item.short_description}</div>
         ) : (
           <div
-            className="md-truncate-children slds-p-top_x-small"
-            // This description is pre-cleaned by the API
-            dangerouslySetInnerHTML={{ __html: item.description }}
+            className="md-truncate-children slds-p-top_x-small" // This description is pre-cleaned by the API
+            dangerouslySetInnerHTML={{ __html: item.description || '' }}
           />
         )}
       </Card>

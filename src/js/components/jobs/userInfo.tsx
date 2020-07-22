@@ -3,11 +3,11 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import i18n from 'i18next';
 import * as React from 'react';
 
-import type { Job as JobType } from '@/store/jobs/reducer';
+import { Job } from '@/store/jobs/reducer';
 
-const UserInfo = ({ job }: { job: JobType }): React.Node => {
-  if ((job.creator && job.creator.username) || job.org_name || job.org_type) {
-    const { username } = job.creator ? job.creator : {};
+const UserInfo = ({ job }: { job: Job }) => {
+  if (job.creator?.username || job.org_name || job.org_type) {
+    const username = job.creator?.username;
     const { org_name, org_type } = job;
     return (
       <div

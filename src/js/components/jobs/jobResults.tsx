@@ -3,16 +3,16 @@ import i18n from 'i18next';
 import * as React from 'react';
 
 import { ErrorIcon, getErrorInfo } from '@/components/plans/preflightResults';
-import type { Job as JobType } from '@/store/jobs/reducer';
+import { Job } from '@/store/jobs/reducer';
 import { CONSTANTS } from '@/store/plans/reducer';
 
 const JobResults = ({
   job,
   openModal,
 }: {
-  job: JobType;
+  job: Job;
   openModal: () => void;
-}): React.Node => {
+}) => {
   if (
     job.status !== CONSTANTS.STATUS.COMPLETE &&
     job.status !== CONSTANTS.STATUS.FAILED &&

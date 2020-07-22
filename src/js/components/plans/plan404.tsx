@@ -3,18 +3,15 @@ import { Trans } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
-import type {
-  Product as ProductType,
-  Version as VersionType,
-} from '@/store/products/reducer';
+import { Product, Version } from '@/store/products/reducer';
 import routes from '@/utils/routes';
 
 const PlanNotFound = ({
   product,
   version,
 }: {
-  product: ProductType;
-  version: VersionType;
+  product: Product;
+  version: Version;
 }) => (
   <FourOhFour
     message={
