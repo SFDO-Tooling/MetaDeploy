@@ -28,6 +28,8 @@ services:
     depends_on:
       - postgres
       - redis
+    links:
+      - redis
     env_file:
       - .env
     volumes:

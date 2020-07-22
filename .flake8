@@ -9,6 +9,4 @@ exclude =
     node,
     node_modules,
     requirements
-max-line-length = 88
-select = C,E,F,W,B,B950
-ignore = E203, E501, W503
+max-line-length = 130

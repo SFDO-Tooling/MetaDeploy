@@ -234,7 +234,7 @@ class TestPlanViewSet:
         plan = plan_factory()
         response = client.get(f"http://testserver/admin/rest/plans/{plan.id}")
 
-        assert response.status_code == 400
+        assert response.status_code == 403
 
 
 @pytest.mark.django_db

@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.8.3
+      - image: circleci/python:3.8
     steps:
       - checkout
       - restore_cache:
@@ -52,7 +52,7 @@ jobs:
   lint:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.8.3
+      - image: circleci/python:3.8
     steps:
       - checkout
       - attach_workspace:
@@ -72,7 +72,7 @@ jobs:
   test-client:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.8.3
+      - image: circleci/python:3.8
     steps:
       - checkout
       - attach_workspace:
@@ -99,7 +99,7 @@ jobs:
   test-python:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.8.3
+      - image: circleci/python:3.8
         environment:
           BUCKETEER_AWS_ACCESS_KEY_ID: circle_test
           BUCKETEER_AWS_SECRET_ACCESS_KEY: circle_test
@@ -159,7 +159,7 @@ jobs:
   report-test-coverage:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.8.3
+      - image: circleci/python:3.8
     environment:
       COVERALLS_PARALLEL: true
     steps:
@@ -191,7 +191,7 @@ jobs:
   build-docs:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.8.3
+      - image: circleci/python:3.8
     steps:
       - checkout
       - attach_workspace:
