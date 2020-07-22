@@ -1,8 +1,8 @@
-import type { ErrorAction } from '@/store/errors/actions';
+import { ErrorAction } from '@/store/errors/actions';
 
 export type ErrorType = {
-  +id: string,
-  +message: string,
+  id: string;
+  message: string;
 };
 
 const reducer = (

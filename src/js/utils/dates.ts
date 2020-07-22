@@ -3,7 +3,7 @@ import i18n from 'i18next';
 export const pluralize = (count: number): string => (count === 1 ? '' : 's');
 
 export const getDuration = (seconds: string | null): string | null => {
-  let sec = parseInt(seconds, 10);
+  let sec = parseInt(seconds as string, 10);
   if (isNaN(sec) || sec < 0) {
     return null;
   }

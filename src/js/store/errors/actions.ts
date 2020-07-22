@@ -1,9 +1,9 @@
 import { v4 as uuid } from 'uuid';
 
-import type { ErrorType } from '@/store/errors/reducer';
+import { ErrorType } from '@/store/errors/reducer';
 
-type AddErrorAction = { type: 'ERROR_ADDED', payload: ErrorType };
-type RemoveErrorAction = { type: 'ERROR_REMOVED', payload: string };
+type AddErrorAction = { type: 'ERROR_ADDED'; payload: ErrorType };
+type RemoveErrorAction = { type: 'ERROR_REMOVED'; payload: string };
 type ClearErrorsAction = { type: 'ERRORS_CLEARED' };
 export type ErrorAction =
   | AddErrorAction

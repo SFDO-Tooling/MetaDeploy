@@ -1,12 +1,11 @@
-import type { ThunkAction } from 'redux-thunk';
-
-import type { Org } from '@/store/org/reducer';
+import { ThunkResult } from '@/store';
+import { Org } from '@/store/org/reducer';
 import apiFetch from '@/utils/api';
 
 type FetchOrgJobsStarted = {
   type: 'FETCH_ORG_JOBS_STARTED';
 };
-type FetchOrgJobsSucceeded = {
+export type FetchOrgJobsSucceeded = {
   type: 'FETCH_ORG_JOBS_SUCCEEDED';
   payload: Org;
 };
@@ -23,22 +22,23 @@ export type OrgAction =
   | FetchOrgJobsFailed
   | OrgChanged;
 
-export const fetchOrgJobs = (): ThunkAction => (dispatch) => {
-  dispatch({ type: 'FETCH_ORG_JOBS_STARTED' });
-  return apiFetch(window.api_urls.org_list(), dispatch)
-    .then((response) =>
-      dispatch({
-        type: 'FETCH_ORG_JOBS_SUCCEEDED',
-        payload: response,
-      }),
-    )
-    .catch((err) => {
-      dispatch({ type: 'FETCH_ORG_JOBS_FAILED' });
-      throw err;
+export const fetchOrgJobs = (): ThunkResult<
+  Promise<FetchOrgJobsSucceeded>
+> => async (dispatch) => {
+  dispatch({ type: 'FETCH_ORG_JOBS_STARTED' as const });
+  try {
+    const response = await apiFetch(window.api_urls.org_list(), dispatch);
+    return dispatch({
+      type: 'FETCH_ORG_JOBS_SUCCEEDED' as const,
+      payload: response,
     });
+  } catch (err) {
+    dispatch({ type: 'FETCH_ORG_JOBS_FAILED' as const });
+    throw err;
+  }
 };
 
 export const updateOrg = (payload: Org): OrgChanged => ({
-  type: 'ORG_CHANGED',
+  type: 'ORG_CHANGED' as const,
   payload,
 });

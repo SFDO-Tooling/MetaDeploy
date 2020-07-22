@@ -1,9 +1,9 @@
 import { createSelector } from 'reselect';
 
-import type { InitialProps } from '@/components/utils';
-import type { AppState } from '@/store';
-import type { Job as JobType, JobsState } from '@/store/jobs/reducer';
-import type { Plan as PlanType } from '@/store/plans/reducer';
+import { InitialProps } from '@/components/utils';
+import { AppState } from '@/store';
+import { Job as JobType, JobsState } from '@/store/jobs/reducer';
+import { Plan as PlanType } from '@/store/plans/reducer';
 import { selectPlan } from '@/store/plans/selectors';
 
 export const selectJobsState = (appState: AppState): JobsState => appState.jobs;
@@ -11,11 +11,18 @@ export const selectJobsState = (appState: AppState): JobsState => appState.jobs;
 export const selectJobId = (
   appState: AppState,
   { match: { params } }: InitialProps,
-): ?string => params.jobId;
+): string | null | undefined => params.jobId;
 
-export const selectJob: (AppState, InitialProps) => ?JobType = createSelector(
+export const selectJob: (
+  arg0: AppState,
+  arg1: InitialProps,
+) => JobType | null | undefined = createSelector(
   [selectJobsState, selectJobId, selectPlan],
-  (jobs: JobsState, jobId: ?string, plan: PlanType | null): ?JobType => {
+  (
+    jobs: JobsState,
+    jobId: string | null | undefined,
+    plan: PlanType | null,
+  ): JobType | null | undefined => {
     if (!jobId) {
       return undefined;
     }

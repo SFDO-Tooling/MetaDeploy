@@ -1,50 +1,54 @@
-import type { Plan } from '@/store/plans/reducer';
-import type { ProductsAction } from '@/store/products/actions';
+import { Plan } from '@/store/plans/reducer';
+import { ProductsAction } from '@/store/products/actions';
 
 export type Version = {
-  +id: string,
-  +product: string,
-  +label: string,
-  +description: string,
-  +created_at: string,
-  +primary_plan: Plan | null,
-  +secondary_plan: Plan | null,
-  +fetched_additional_plans?: boolean,
-  +additional_plans?: { [string]: Plan | null },
-  +is_listed: boolean,
+  id: string;
+  product: string;
+  label: string;
+  description: string;
+  created_at: string;
+  primary_plan: Plan | null;
+  secondary_plan: Plan | null;
+  fetched_additional_plans?: boolean;
+  additional_plans?: {
+    [key: string]: Plan | null;
+  };
+  is_listed: boolean;
 };
 export type Product = {
-  +id: string,
-  +slug: string,
-  +old_slugs: string[],
-  +title: string,
-  +description: string | null,
-  +short_description: string,
-  +category: string,
-  +color: string,
-  +icon: {
-    +type: 'url' | 'slds',
-    +category?: 'action' | 'custom' | 'doctype' | 'standard' | 'utility',
-    +name?: string,
-    +url?: string,
-  } | null,
-  +image: string | null,
-  +most_recent_version: Version | null,
-  +versions?: { [string]: Version | null },
-  +is_listed: boolean,
-  +is_allowed: boolean,
-  +not_allowed_instructions: string | null,
-  +click_through_agreement: string | null,
+  id: string;
+  slug: string;
+  old_slugs: string[];
+  title: string;
+  description: string | null;
+  short_description: string;
+  category: string;
+  color: string;
+  icon: {
+    type: 'url' | 'slds';
+    category?: 'action' | 'custom' | 'doctype' | 'standard' | 'utility';
+    name?: string;
+    url?: string;
+  } | null;
+  image: string | null;
+  most_recent_version: Version | null;
+  versions?: {
+    [key: string]: Version | null;
+  };
+  is_listed: boolean;
+  is_allowed: boolean;
+  not_allowed_instructions: string | null;
+  click_through_agreement: string | null;
 };
 export type Category = {
-  +id: number,
-  +title: string,
-  +next: string | null,
+  id: number;
+  title: string;
+  next: string | null;
 };
 export type ProductsState = {
-  +products: Array<Product>,
-  +notFound: Array<string>,
-  +categories: Array<Category>,
+  products: Array<Product>;
+  notFound: Array<string>;
+  categories: Array<Category>;
 };
 
 const reducer = (
@@ -110,7 +114,7 @@ const reducer = (
           obj[oldSlug] = item;
         }
         return obj;
-      }, {});
+      }, {} as { [key: string]: Plan | null });
       return {
         ...products,
         products: products.products.map((p) => {
@@ -125,9 +129,9 @@ const reducer = (
                 },
               };
             } else if (p.versions) {
-              const thisVersion: ?Version = (Object.values(
+              const thisVersion: Version | null | undefined = (Object.values(
                 p.versions,
-              ): any).find(
+              ) as any).find(
                 (v: Version | null) => v !== null && v.id === version,
               );
               if (thisVersion) {
@@ -173,9 +177,9 @@ const reducer = (
                 },
               };
             } else if (p.versions) {
-              const thisVersion: ?Version = (Object.values(
+              const thisVersion: Version | null | undefined = (Object.values(
                 p.versions,
-              ): any).find(
+              ) as any).find(
                 (v: Version | null) => v !== null && v.id === version,
               );
               if (thisVersion) {

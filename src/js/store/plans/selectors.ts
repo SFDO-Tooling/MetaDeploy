@@ -1,13 +1,13 @@
 import { createSelector } from 'reselect';
 
-import type { InitialProps } from '@/components/utils';
-import type { AppState } from '@/store';
-import type {
+import { InitialProps } from '@/components/utils';
+import { AppState } from '@/store';
+import {
   Plan as PlanType,
   Preflight as PreflightType,
   PreflightsState,
 } from '@/store/plans/reducer';
-import type {
+import {
   Product as ProductType,
   Version as VersionType,
 } from '@/store/products/reducer';
@@ -16,17 +16,17 @@ import { selectProduct, selectVersion } from '@/store/products/selectors';
 export const selectPlanSlug = (
   appState: AppState,
   { match: { params } }: InitialProps,
-): ?string => params.planSlug;
+): string | null | undefined => params.planSlug;
 
 export const selectPlan: (
-  AppState,
-  InitialProps,
+  arg0: AppState,
+  arg1: InitialProps,
 ) => PlanType | null = createSelector(
   [selectProduct, selectVersion, selectPlanSlug],
   (
     product: ProductType | null | void,
     version: VersionType | null,
-    planSlug: ?string,
+    planSlug: string | null | undefined,
   ): PlanType | null => {
     if (!product || !version || !planSlug) {
       return null;
@@ -55,11 +55,14 @@ const selectPreflightsState = (appState: AppState): PreflightsState =>
   appState.preflights;
 
 export const selectPreflight: (
-  AppState,
-  InitialProps,
-) => ?PreflightType = createSelector(
+  arg0: AppState,
+  arg1: InitialProps,
+) => PreflightType | null | undefined = createSelector(
   [selectPreflightsState, selectPlan],
-  (preflights: PreflightsState, plan: PlanType | null): ?PreflightType => {
+  (
+    preflights: PreflightsState,
+    plan: PlanType | null,
+  ): PreflightType | null | undefined => {
     if (!plan) {
       return null;
     }

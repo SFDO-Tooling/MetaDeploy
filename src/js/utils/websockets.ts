@@ -1,74 +1,73 @@
+import { ThunkDispatch } from 'redux-thunk';
 import Sockette from 'sockette';
-import type { Dispatch } from 'redux-thunk';
 
 import {
   cancelJob,
   completeJob,
   completeJobStep,
   failJob,
-} from '@/store/jobs/actions';
-import {
-  cancelPreflight,
-  completePreflight,
-  failPreflight,
-  invalidatePreflight,
-} from '@/store/plans/actions';
-import { connectSocket, disconnectSocket } from '@/store/socket/actions';
-import { invalidateToken } from '@/store/user/actions';
-import { log } from '@/utils/logging';
-import { updateOrg } from '@/store/org/actions';
-import type { Job } from '@/store/jobs/reducer';
-import type {
   JobCanceled,
   JobCompleted,
   JobFailed,
   JobStepCompleted,
 } from '@/store/jobs/actions';
-import type { Org } from '@/store/org/reducer';
-import type { OrgChanged } from '@/store/org/actions';
-import type { Preflight } from '@/store/plans/reducer';
-import type {
+import { Job } from '@/store/jobs/reducer';
+import { OrgChanged, updateOrg } from '@/store/org/actions';
+import { Org } from '@/store/org/reducer';
+import {
+  cancelPreflight,
+  completePreflight,
+  failPreflight,
+  invalidatePreflight,
   PreflightCanceled,
   PreflightCompleted,
   PreflightFailed,
   PreflightInvalid,
 } from '@/store/plans/actions';
-import type { TokenInvalidAction } from '@/store/user/actions';
+import { Preflight } from '@/store/plans/reducer';
+import { connectSocket, disconnectSocket } from '@/store/socket/actions';
+import { invalidateToken, TokenInvalidAction } from '@/store/user/actions';
+import { log } from '@/utils/logging';
 
-type SubscriptionEvent = {|
-  ok?: string,
-  error?: string,
-|};
-type ErrorEvent = {|
-  type: 'BACKEND_ERROR',
-  payload: {| message: string |},
-|};
-type UserEvent = {|
-  type: 'USER_TOKEN_INVALID',
-|};
-type PreflightEvent = {|
+export interface Socket {
+  subscribe: (payload: Subscription) => void;
+  reconnect: () => void;
+}
+
+interface Subscription {
+  model: string;
+  id: string;
+}
+
+interface SubscriptionEvent {
+  ok?: string;
+  error?: string;
+}
+interface ErrorEvent {
+  type: 'BACKEND_ERROR';
+  payload: { message: string };
+}
+interface UserEvent {
+  type: 'USER_TOKEN_INVALID';
+}
+interface PreflightEvent {
   type:
     | 'PREFLIGHT_COMPLETED'
     | 'PREFLIGHT_FAILED'
     | 'PREFLIGHT_CANCELED'
-    | 'PREFLIGHT_INVALIDATED',
-  payload: Preflight,
-|};
-type JobEvent = {|
-  type: 'TASK_COMPLETED' | 'JOB_COMPLETED' | 'JOB_FAILED' | 'JOB_CANCELED',
-  payload: Job,
-|};
-type OrgEvent = {|
-  type: 'ORG_CHANGED',
-  payload: Org,
-|};
-type EventType =
-  | SubscriptionEvent
-  | ErrorEvent
-  | UserEvent
-  | PreflightEvent
-  | JobEvent
-  | OrgEvent;
+    | 'PREFLIGHT_INVALIDATED';
+  payload: Preflight;
+}
+interface JobEvent {
+  type: 'TASK_COMPLETED' | 'JOB_COMPLETED' | 'JOB_FAILED' | 'JOB_CANCELED';
+  payload: Job;
+}
+interface OrgEvent {
+  type: 'ORG_CHANGED';
+  payload: Org;
+}
+type ModelEvent = UserEvent | PreflightEvent | JobEvent | OrgEvent;
+type EventType = SubscriptionEvent | ErrorEvent | ModelEvent;
 
 type Action =
   | TokenInvalidAction
@@ -81,10 +80,12 @@ type Action =
   | JobFailed
   | JobCanceled
   | OrgChanged;
-type Subscription = {| model: string, id: string |};
+
+const isSubscriptionEvent = (event: EventType): event is SubscriptionEvent =>
+  (event as ModelEvent).type === undefined;
 
 export const getAction = (event: EventType): Action | null => {
-  if (!event || !event.type) {
+  if (!event || isSubscriptionEvent(event)) {
     return null;
   }
   switch (event.type) {
@@ -117,13 +118,12 @@ export const createSocket = ({
   options = {},
   dispatch,
 }: {
-  url: string,
-  options?: { [string]: mixed },
-  dispatch: Dispatch,
-}): ({
-  subscribe: (payload: Subscription) => void,
-  reconnect: () => void,
-} | null) => {
+  url: string;
+  options?: {
+    [key: string]: any;
+  };
+  dispatch: ThunkDispatch<any, any, any>;
+}): Socket | null => {
   /* istanbul ignore if */
   if (!(url && dispatch)) {
     return null;
@@ -131,12 +131,14 @@ export const createSocket = ({
   const defaults = {
     timeout: 1000,
     maxAttempts: Infinity,
-    onopen: () => {},
-    onmessage: () => {},
-    onreconnect: () => {},
-    onmaximum: () => {},
-    onclose: () => {},
-    onerror: () => {},
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    onopen: (e?: Event) => {},
+    onmessage: (e?: Event) => {},
+    onreconnect: (e?: Event) => {},
+    onmaximum: (e?: Event) => {},
+    onclose: (e?: Event) => {},
+    onerror: (e?: Event) => {},
+    /* eslint-enable @typescript-eslint/no-unused-vars */
   };
   const opts = { ...defaults, ...options };
 
@@ -215,7 +217,7 @@ export const createSocket = ({
     }
   };
 
-  let reconnecting;
+  let reconnecting: NodeJS.Timeout | undefined;
   const clearReconnect = () => {
     /* istanbul ignore else */
     if (reconnecting) {

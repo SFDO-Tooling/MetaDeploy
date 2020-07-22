@@ -1,4 +1,4 @@
-import type { AppState } from '@/store';
-import type { User } from '@/store/user/reducer';
+import { AppState } from '@/store';
+import { User } from '@/store/user/reducer';
 
 export const selectUserState = (appState: AppState): User => appState.user;

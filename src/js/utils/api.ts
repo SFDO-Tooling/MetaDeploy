@@ -1,15 +1,24 @@
 import cookies from 'js-cookie';
-import type { Dispatch } from 'redux-thunk';
+import { ThunkDispatch } from 'redux-thunk';
 
 import { addError } from '@/store/errors/actions';
 import { logError } from '@/utils/logging';
 
-export type UrlParams = { [string]: string | number | boolean };
+export type UrlParams = {
+  [key: string]: string | number | boolean;
+};
+
+export class ApiError extends Error {
+  response?: Response;
+
+  body?: string | { [key: string]: any };
+}
 
 // these HTTP methods do not require CSRF protection
-const csrfSafeMethod = (method) => /^(GET|HEAD|OPTIONS|TRACE)$/.test(method);
+const csrfSafeMethod = (method: string) =>
+  /^(GET|HEAD|OPTIONS|TRACE)$/.test(method);
 
-const getResponse = (resp) =>
+const getResponse = (resp: Response): Promise<any> =>
   resp
     .text()
     .then((text) => {
@@ -30,14 +39,17 @@ const getResponse = (resp) =>
 
 const apiFetch = (
   url: string,
-  dispatch: Dispatch,
-  opts: { [string]: mixed } = {},
-  suppressErrorsOn: Array<number> = [404],
+  dispatch: ThunkDispatch<any, any, any>,
+  opts: {
+    [key: string]: any;
+  } = {},
+  suppressErrorsOn: number[] = [404],
 ): Promise<any> => {
   const options = Object.assign({}, { headers: {} }, opts);
   const method = options.method || 'GET';
   if (!csrfSafeMethod(method)) {
-    options.headers['X-CSRFToken'] = cookies.get('csrftoken') || '';
+    (options.headers as { [key: string]: any })['X-CSRFToken'] =
+      cookies.get('csrftoken') || '';
   }
 
   return fetch(url, options)
@@ -61,7 +73,7 @@ const apiFetch = (
           }
         }
         dispatch(addError(msg));
-        const error = (new Error(msg): { [string]: mixed });
+        const error: ApiError = new Error(msg);
         error.response = response;
         throw error;
       },

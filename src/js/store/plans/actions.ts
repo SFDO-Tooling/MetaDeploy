@@ -1,6 +1,5 @@
-import type { ThunkAction } from 'redux-thunk';
-
-import type { Preflight } from '@/store/plans/reducer';
+import { ThunkResult } from '@/store';
+import { Preflight } from '@/store/plans/reducer';
 import apiFetch from '@/utils/api';
 
 type FetchPreflightStarted = {
@@ -50,8 +49,10 @@ export type PlansAction =
   | PreflightCanceled
   | PreflightInvalid;
 
-export const fetchPreflight = (planId: string): ThunkAction => (dispatch) => {
-  dispatch({ type: 'FETCH_PREFLIGHT_STARTED', payload: planId });
+export const fetchPreflight = (
+  planId: string,
+): ThunkResult<Promise<FetchPreflightSucceeded>> => (dispatch) => {
+  dispatch({ type: 'FETCH_PREFLIGHT_STARTED' as const, payload: planId });
   return apiFetch(window.api_urls.plan_preflight(planId), dispatch)
     .then((response) => {
       if (response && window.socket) {
@@ -61,18 +62,20 @@ export const fetchPreflight = (planId: string): ThunkAction => (dispatch) => {
         });
       }
       return dispatch({
-        type: 'FETCH_PREFLIGHT_SUCCEEDED',
+        type: 'FETCH_PREFLIGHT_SUCCEEDED' as const,
         payload: { plan: planId, preflight: response },
       });
     })
     .catch((err) => {
-      dispatch({ type: 'FETCH_PREFLIGHT_FAILED', payload: planId });
+      dispatch({ type: 'FETCH_PREFLIGHT_FAILED' as const, payload: planId });
       throw err;
     });
 };
 
-export const startPreflight = (planId: string): ThunkAction => (dispatch) => {
-  dispatch({ type: 'PREFLIGHT_REQUESTED', payload: planId });
+export const startPreflight = (
+  planId: string,
+): ThunkResult<Promise<PreflightStarted>> => (dispatch) => {
+  dispatch({ type: 'PREFLIGHT_REQUESTED' as const, payload: planId });
   const url = window.api_urls.plan_preflight(planId);
   return apiFetch(url, dispatch, { method: 'POST' })
     .then((response) => {
@@ -83,30 +86,33 @@ export const startPreflight = (planId: string): ThunkAction => (dispatch) => {
           id: response.id,
         });
       }
-      return dispatch({ type: 'PREFLIGHT_STARTED', payload: response });
+      return dispatch({
+        type: 'PREFLIGHT_STARTED' as const,
+        payload: response,
+      });
     })
     .catch((err) => {
-      dispatch({ type: 'PREFLIGHT_REJECTED', payload: planId });
+      dispatch({ type: 'PREFLIGHT_REJECTED' as const, payload: planId });
       throw err;
     });
 };
 
 export const completePreflight = (payload: Preflight): PreflightCompleted => ({
-  type: 'PREFLIGHT_COMPLETED',
+  type: 'PREFLIGHT_COMPLETED' as const,
   payload,
 });
 
 export const failPreflight = (payload: Preflight): PreflightFailed => ({
-  type: 'PREFLIGHT_FAILED',
+  type: 'PREFLIGHT_FAILED' as const,
   payload,
 });
 
 export const cancelPreflight = (payload: Preflight): PreflightCanceled => ({
-  type: 'PREFLIGHT_CANCELED',
+  type: 'PREFLIGHT_CANCELED' as const,
   payload,
 });
 
 export const invalidatePreflight = (payload: Preflight): PreflightInvalid => ({
-  type: 'PREFLIGHT_INVALIDATED',
+  type: 'PREFLIGHT_INVALIDATED' as const,
   payload,
 });

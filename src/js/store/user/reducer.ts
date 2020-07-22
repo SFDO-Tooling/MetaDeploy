@@ -1,14 +1,14 @@
-import type { UserAction } from '@/store/user/actions';
+import { UserAction } from '@/store/user/actions';
 
 export type User = {
-  +id: string,
-  +username: string,
-  +email: string,
-  +is_staff: boolean,
-  +valid_token_for: string | null,
-  +org_name: string | null,
-  +org_type: string | null,
-  +is_production_org: boolean,
+  id: string;
+  username: string;
+  email: string;
+  is_staff: boolean;
+  valid_token_for: string | null;
+  org_name: string | null;
+  org_type: string | null;
+  is_production_org: boolean;
 } | null;
 
 const reducer = (user: User = null, action: UserAction): User => {

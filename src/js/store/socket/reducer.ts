@@ -1,4 +1,4 @@
-import type { SocketAction } from '@/store/socket/actions';
+import { SocketAction } from '@/store/socket/actions';
 
 export type Socket = boolean;
 

@@ -11,10 +11,10 @@ import DocumentTitle from 'react-document-title';
 import * as ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
-import { applyMiddleware, createStore } from 'redux';
+import { AnyAction, applyMiddleware, createStore } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import logger from 'redux-logger';
-import thunk from 'redux-thunk';
+import thunk, { ThunkDispatch } from 'redux-thunk';
 
 import FourOhFour from '@/components/404';
 import AuthError from '@/components/authError';
@@ -28,6 +28,7 @@ import init_i18n from '@/i18n';
 import reducer from '@/store';
 import { fetchProducts } from '@/store/products/actions';
 import { login, refetchAllData } from '@/store/user/actions';
+import { User } from '@/store/user/reducer';
 import { log, logError } from '@/utils/logging';
 import { routePatterns } from '@/utils/routes';
 import { createSocket } from '@/utils/websockets';
@@ -87,7 +88,7 @@ const App = () => (
   </DocumentTitle>
 );
 
-init_i18n((i18nError) => {
+init_i18n((i18nError?: string) => {
   if (i18nError) {
     log(i18nError);
   }
@@ -96,7 +97,7 @@ init_i18n((i18nError) => {
     // Create store
     const appStore = createStore(
       reducer,
-      {},
+      undefined,
       composeWithDevTools(applyMiddleware(thunk, logger)),
     );
 
@@ -108,7 +109,9 @@ init_i18n((i18nError) => {
       dispatch: appStore.dispatch,
       options: {
         onreconnect: () => {
-          appStore.dispatch(refetchAllData());
+          (appStore.dispatch as ThunkDispatch<any, void, AnyAction>)(
+            refetchAllData(),
+          );
         },
       },
     });
@@ -117,21 +120,20 @@ init_i18n((i18nError) => {
     let GLOBALS = {};
     try {
       const globalsEl = document.getElementById('js-globals');
-      if (globalsEl) {
+      if (globalsEl?.textContent) {
         GLOBALS = JSON.parse(globalsEl.textContent);
       }
     } catch (err) {
       logError(err);
     }
     window.GLOBALS = GLOBALS;
-    window.SITE_NAME =
-      (window.GLOBALS.SITE && window.GLOBALS.SITE.name) || i18n.t('MetaDeploy');
+    window.SITE_NAME = window.GLOBALS.SITE?.name || i18n.t('MetaDeploy');
 
     // Get JS context
     let JS_CONTEXT = {};
     try {
       const contextEl = document.getElementById('js-context');
-      if (contextEl) {
+      if (contextEl?.textContent) {
         JS_CONTEXT = JSON.parse(contextEl.textContent);
       }
     } catch (err) {
@@ -144,13 +146,13 @@ init_i18n((i18nError) => {
     if (userString) {
       let user;
       try {
-        user = JSON.parse(userString);
+        user = JSON.parse(userString) as User;
       } catch (err) {
         // swallow error
       }
       if (user) {
         // Login
-        appStore.dispatch(login(user));
+        (appStore.dispatch as ThunkDispatch<any, void, AnyAction>)(login(user));
       }
     }
     el.removeAttribute('data-user');
@@ -159,7 +161,9 @@ init_i18n((i18nError) => {
     settings.setAppElement(el);
 
     // Fetch products before rendering App
-    appStore.dispatch(fetchProducts()).finally(() => {
+    (appStore.dispatch as ThunkDispatch<any, void, AnyAction>)(
+      fetchProducts(),
+    ).finally(() => {
       ReactDOM.render(
         <Provider store={appStore}>
           <BrowserRouter>

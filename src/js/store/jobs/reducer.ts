@@ -1,34 +1,34 @@
-import type { JobsAction } from '@/store/jobs/actions';
-import type { LogoutAction } from '@/store/user/actions';
-import type { StepResult } from '@/store/plans/reducer';
+import { JobsAction } from '@/store/jobs/actions';
+import { StepResult } from '@/store/plans/reducer';
+import { LogoutAction } from '@/store/user/actions';
 
-export type Job = {|
-  +id: string,
-  +edited_at: string,
-  +job_id: string,
-  +creator: {
-    +username: string,
-    +is_staff: boolean,
-  } | null,
-  +plan: string,
-  +status: 'started' | 'complete' | 'failed' | 'canceled',
-  +steps: Array<string>,
-  +results: {|
-    [string]: StepResult,
-  |},
-  +org_name: string | null,
-  +org_type: string | null,
-  +is_production_org: boolean,
-  +organization_url: string | null,
-  +error_count: number,
-  +warning_count: number,
-  +is_public: boolean,
-  +user_can_edit: boolean,
-  +message: string,
-  +error_message: string | null,
-|};
+export type Job = {
+  id: string;
+  edited_at: string;
+  job_id: string;
+  creator: {
+    username: string;
+    is_staff: boolean;
+  } | null;
+  plan: string;
+  status: 'started' | 'complete' | 'failed' | 'canceled';
+  steps: string[];
+  results: {
+    [key: string]: StepResult;
+  };
+  org_name: string | null;
+  org_type: string | null;
+  is_production_org: boolean;
+  organization_url: string | null;
+  error_count: number;
+  warning_count: number;
+  is_public: boolean;
+  user_can_edit: boolean;
+  message: string;
+  error_message: string | null;
+};
 export type JobsState = {
-  [string]: Job,
+  [key: string]: Job;
 };
 
 const reducer = (
