@@ -121,7 +121,6 @@
     "i18next-scanner-webpack": "^0.5.1",
     "jest": "^26.1.0",
     "jest-junit": "^11.0.1",
-    "lint-staged": "^10.2.11",
     "mini-css-extract-plugin": "^0.9.0",
     "node-fetch": "^2.6.0",
     "npm-run-all": "^4.1.5",
@@ -147,25 +146,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged",
       "prepare-commit-msg": "./bin/prepare-commit-msg"
     }
-  },
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "prettier --write",
-      "eslint --fix"
-    ],
-    "*.scss": [
-      "stylelint --fix"
-    ],
-    "*.py": [
-      "isort",
-      "black",
-      "flake8"
-    ],
-    "*.{json,yml}": [
-      "prettier --write"
-    ]
   }
 }
