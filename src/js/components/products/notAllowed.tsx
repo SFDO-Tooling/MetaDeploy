@@ -1,8 +1,7 @@
-import Illustration from '@salesforce/design-system-react/components/illustration';
 import i18n from 'i18next';
-import svgPath from 'images/no-access.svg';
 import * as React from 'react';
 
+import svgPath from '!svg-inline-loader!images/no-access.svg';
 import Login from '@/components/header/login';
 
 const NotAllowed = ({
@@ -15,12 +14,15 @@ const NotAllowed = ({
   link: React.ReactNode;
 }) => (
   <>
-    <Illustration
-      heading={i18n.t('Restricted Access')}
-      name="No Access"
-      path={`${svgPath}#no-access`}
-      size="large"
-    />
+    <div className="slds-illustration slds-illustration_large">
+      <div
+        className="slds-m-vertical_xx-large"
+        dangerouslySetInnerHTML={{ __html: svgPath }}
+      />
+      <h3 className="slds-illustration__header slds-text-heading_medium">
+        {i18n.t('Restricted Access')}
+      </h3>
+    </div>
     {message ? (
       <div className="slds-align_absolute-center slds-size_2-of-3">
         <div

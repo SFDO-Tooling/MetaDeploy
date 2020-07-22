@@ -1,21 +1,23 @@
 import Card from '@salesforce/design-system-react/components/card';
 import Icon from '@salesforce/design-system-react/components/icon';
-import Illustration from '@salesforce/design-system-react/components/illustration';
 import i18n from 'i18next';
-import svgPath from 'images/no-connection.svg';
 import * as React from 'react';
 import { Trans } from 'react-i18next';
 
+import noConnectionSvg from '!svg-inline-loader!images/no-connection.svg';
 import Login from '@/components/header/login';
 import { User } from '@/store/user/reducer';
 
 const LoggedOut = () => (
-  <Illustration
-    heading={i18n.t('Not Connected to Salesforce')}
-    name="No Connection"
-    path={`${svgPath}#no-connection`}
-    style={{ height: '200px' }}
-  />
+  <div className="slds-illustration slds-illustration_small">
+    <div
+      className="slds-m-vertical_medium"
+      dangerouslySetInnerHTML={{ __html: noConnectionSvg }}
+    />
+    <h3 className="slds-illustration__header slds-text-heading_medium">
+      {i18n.t('Not Connected to Salesforce')}
+    </h3>
+  </div>
 );
 
 const Footer = () => (

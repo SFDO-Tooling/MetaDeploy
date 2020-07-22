@@ -59,6 +59,7 @@
   "MetaDeploy": "MetaDeploy",
   "Not Connected to Salesforce": "Not Connected to Salesforce",
   "Oh no! This installation encountered an error.": "Oh no! This installation encountered an error.",
+  "One Time Apex": "One Time Apex",
   "Only I and Salesforce staff can view this installation job.": "Only I and Salesforce staff can view this installation job.",
   "Oops! It looks like you don’t have permissions to run an installation on this org.": "Oops! It looks like you don’t have permissions to run an installation on this org.",
   "Optional": "Optional",
