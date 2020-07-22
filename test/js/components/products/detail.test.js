@@ -1,18 +1,18 @@
+import { ProductDetail, VersionDetail } from '@/components/products/detail';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
-
-import { renderWithRedux, reRenderWithRedux } from './../../utils';
-
-import routes from 'utils/routes';
 import {
   fetchAdditionalPlans,
   fetchPlan,
   fetchProduct,
   fetchVersion,
-} from 'store/products/actions';
-import { ProductDetail, VersionDetail } from 'components/products/detail';
+} from '@/store/products/actions';
 
-jest.mock('store/products/actions');
+import routes from '@/utils/routes';
+
+import { renderWithRedux, reRenderWithRedux } from './../../utils';
+
+jest.mock('@/store/products/actions');
 
 fetchAdditionalPlans.mockReturnValue({ type: 'TEST' });
 fetchPlan.mockReturnValue({ type: 'TEST' });

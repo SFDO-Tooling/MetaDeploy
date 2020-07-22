@@ -1,9 +1,8 @@
 import fetchMock from 'fetch-mock';
+import * as actions from '@/store/jobs/actions';
+import { addUrlParams } from '@/utils/api';
 
 import { storeWithApi } from './../../utils';
-
-import { addUrlParams } from 'utils/api';
-import * as actions from 'store/jobs/actions';
 
 describe('fetchJob', () => {
   let args, params, url;

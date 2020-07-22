@@ -1,11 +1,26 @@
 # http://eslint.org/docs/rules/
 
+parser: '@typescript-eslint/parser'
 parserOptions:
-  ecmaFeatures:
-    impliedStrict: true
-    jsx: true
   sourceType: module
+  ecmaFeatures:
+    jsx: true
+  project: ./tsconfig.json
 env:
   browser: true
-  commonjs: true
   node: false
+plugins:
+  - simple-import-sort
+  - '@typescript-eslint'
+extends:
+  - plugin:@typescript-eslint/recommended
+  - prettier/@typescript-eslint
+rules:
+  # TypeScript
+  '@typescript-eslint/explicit-module-boundary-types': 0
+  '@typescript-eslint/no-empty-function': 0
+  '@typescript-eslint/no-explicit-any': 0
+
+  # Import
+  simple-import-sort/sort: 1
+  import/order: 0

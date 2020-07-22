@@ -1,8 +1,7 @@
-import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-
-import { addUrlParams } from 'utils/api';
-import Login from 'components/header/login';
+import Login from '@/components/header/login';
+import React from 'react';
+import { addUrlParams } from '@/utils/api';
 
 describe('<Login />', () => {
   describe('login click', () => {

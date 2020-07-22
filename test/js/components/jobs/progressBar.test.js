@@ -1,7 +1,6 @@
-import React from 'react';
 import { render } from '@testing-library/react';
-
-import ProgressBar from 'components/jobs/progressBar';
+import ProgressBar from '@/components/jobs/progressBar';
+import React from 'react';
 
 const defaultJob = {
   id: 'job-1',

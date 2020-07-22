@@ -1,9 +1,8 @@
+import FourOhFour from '@/components/404';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
 import { renderWithRedux } from './../utils';
-
-import FourOhFour from 'components/404';
 
 describe('<404 />', () => {
   test('renders default msg with link', () => {

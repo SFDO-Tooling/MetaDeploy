@@ -1,7 +1,6 @@
-import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-
-import Errors from 'components/apiErrors';
+import Errors from '@/components/apiErrors';
+import React from 'react';
 
 describe('<Errors />', () => {
   const doRemoveError = jest.fn();

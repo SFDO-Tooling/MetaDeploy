@@ -1,9 +1,8 @@
-import React from 'react';
 import { render } from '@testing-library/react';
-
 import PreflightResults, {
   getErrorInfo,
-} from 'components/plans/preflightResults';
+} from '@/components/plans/preflightResults';
+import React from 'react';
 
 const defaultPreflight = {
   status: 'complete',

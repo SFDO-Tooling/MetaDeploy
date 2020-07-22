@@ -1,4 +1,4 @@
-FROM python:3.8
+FROM python:3.8.3
 
 ARG BUILD_ENV
 RUN mkdir /app
@@ -18,15 +18,15 @@ RUN /bin/sh /app/utility/install_sfdx.sh
 # installing python related dependencies with pip
 COPY ./requirements /app/requirements
 RUN if [ "${BUILD_ENV}" = "production" ] ; then \
-    pip install --no-cache --upgrade pip \ 
-    && pip install --no-cache -r /app/requirements/production.txt ; \ 
+    pip install --no-cache --upgrade pip \
+    && pip install --no-cache -r /app/requirements/production.txt ; \
     else pip install --no-cache --upgrade pip \
     && pip install --no-cache -r /app/requirements/local.txt ; \
     fi
 COPY ./package.json /app/package.json
 COPY ./yarn.lock /app/yarn.lock
 WORKDIR /app
-RUN yarn install
+RUN yarn install --check-files
 # copying rest of working directory to /app folder
 COPY . /app
 ENV PYTHONUNBUFFERED 1
@@ -41,7 +41,7 @@ ENV DB_ENCRYPTION_KEY=Ul-OySkEawSxUc7Ck13Twu2109IzIFh54C1WXO9KAFE=
 ENV CONNECTED_APP_CLIENT_SECRET ''
 ENV CONNECTED_APP_CALLBACK_URL ''
 ENV CONNECTED_APP_CLIENT_ID ''
-ENV GITHUB_TOKEN ''
+ENV GITHUB_TOKEN 'sample token'
 # Avoid building prod assets in development
 RUN if [ "${BUILD_ENV}" = "production" ] ; then yarn prod ; else mkdir -p dist/prod ; fi
 RUN python /app/manage.py collectstatic --noinput

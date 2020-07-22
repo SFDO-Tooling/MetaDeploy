@@ -1,10 +1,9 @@
-import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
+import CtaButton from '@/components/plans/ctaButton';
+import React from 'react';
+import { getUrlParam, removeUrlParam } from '@/utils/api';
 
-import { getUrlParam, removeUrlParam } from 'utils/api';
-import CtaButton from 'components/plans/ctaButton';
-
-jest.mock('utils/api');
+jest.mock('@/utils/api');
 
 afterEach(() => {
   getUrlParam.mockClear();

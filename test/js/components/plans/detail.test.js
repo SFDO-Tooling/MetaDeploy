@@ -1,6 +1,14 @@
+import { fireEvent } from '@testing-library/react';
+import PlanDetail from '@/components/plans/detail';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
-import { fireEvent } from '@testing-library/react';
+import { fetchPreflight } from '@/store/plans/actions';
+import {
+  fetchPlan,
+  fetchProduct,
+  fetchVersion,
+} from '@/store/products/actions';
+import routes from '@/utils/routes';
 
 import {
   renderWithRedux,
@@ -8,13 +16,8 @@ import {
   storeWithApi,
 } from './../../utils';
 
-import routes from 'utils/routes';
-import { fetchPreflight } from 'store/plans/actions';
-import { fetchPlan, fetchProduct, fetchVersion } from 'store/products/actions';
-import PlanDetail from 'components/plans/detail';
-
-jest.mock('store/products/actions');
-jest.mock('store/plans/actions');
+jest.mock('@/store/products/actions');
+jest.mock('@/store/plans/actions');
 
 fetchPlan.mockReturnValue({ type: 'TEST' });
 fetchPreflight.mockReturnValue({ type: 'TEST' });

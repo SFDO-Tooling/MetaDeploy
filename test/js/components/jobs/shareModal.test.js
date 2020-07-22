@@ -1,7 +1,6 @@
-import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-
-import ShareModal from 'components/jobs/shareModal';
+import ShareModal from '@/components/jobs/shareModal';
+import React from 'react';
 
 describe('<ShareModal />', () => {
   const defaultJob = {

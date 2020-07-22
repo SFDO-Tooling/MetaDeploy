@@ -1,7 +1,6 @@
-import React from 'react';
 import { render } from '@testing-library/react';
-
-import ProductIcon from 'components/products/icon';
+import ProductIcon from '@/components/products/icon';
+import React from 'react';
 
 describe('<ProductIcon />', () => {
   const setup = (item) => {

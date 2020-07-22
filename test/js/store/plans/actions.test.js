@@ -1,8 +1,8 @@
 import fetchMock from 'fetch-mock';
 
-import { storeWithApi } from './../../utils';
+import * as actions from '@/store/plans/actions';
 
-import * as actions from 'store/plans/actions';
+import { storeWithApi } from './../../utils';
 
 describe('fetchPreflight', () => {
   describe('success', () => {

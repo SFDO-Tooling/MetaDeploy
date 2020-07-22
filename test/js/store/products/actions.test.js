@@ -1,9 +1,8 @@
 import fetchMock from 'fetch-mock';
+import * as actions from '@/store/products/actions';
+import { addUrlParams } from '@/utils/api';
 
 import { storeWithApi } from './../../utils';
-
-import * as actions from 'store/products/actions';
-import { addUrlParams } from 'utils/api';
 
 describe('fetchProducts', () => {
   describe('success', () => {

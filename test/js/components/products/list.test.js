@@ -1,6 +1,8 @@
+import { fireEvent } from '@testing-library/react';
+import ProductsList from '@/components/products/list';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { fireEvent } from '@testing-library/react';
+import { fetchMoreProducts } from '@/store/products/actions';
 
 import {
   renderWithRedux,
@@ -8,16 +10,13 @@ import {
   storeWithApi,
 } from './../../utils';
 
-import ProductsList from 'components/products/list';
-import { fetchMoreProducts } from 'store/products/actions';
-
 jest.mock('react-fns', () => ({
   withScroll(Component) {
     // eslint-disable-next-line react/display-name
     return (props) => <Component x={0} y={0} {...props} />;
   },
 }));
-jest.mock('store/products/actions');
+jest.mock('@/store/products/actions');
 fetchMoreProducts.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {

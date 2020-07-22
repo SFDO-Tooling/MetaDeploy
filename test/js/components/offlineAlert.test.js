@@ -1,7 +1,6 @@
-import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-
-import OfflineAlert from 'components/offlineAlert';
+import OfflineAlert from '@/components/offlineAlert';
+import React from 'react';
 
 describe('<OfflineAlert />', () => {
   const setup = () => {

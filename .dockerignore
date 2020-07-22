@@ -31,6 +31,8 @@
 .devcontainer/
 .dockerignore
 .eggs/
+.env
+.git
 .hypothesis/
 .idea/
 .installed.cfg
@@ -46,6 +48,8 @@
 .tox/
 .venv
 .vscode/
+.yarn/
+.yarnrc
 ENV/
 __pycache__/
 build/
@@ -79,4 +83,3 @@ var/
 venv/
 wheels/
 yarn-error.log
-sfdx/

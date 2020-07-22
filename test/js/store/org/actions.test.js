@@ -1,8 +1,7 @@
 import fetchMock from 'fetch-mock';
+import * as actions from '@/store/org/actions';
 
 import { storeWithApi } from './../../utils';
-
-import * as actions from 'store/org/actions';
 
 describe('fetchOrgJobs', () => {
   describe('success', () => {

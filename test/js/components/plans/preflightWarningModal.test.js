@@ -1,7 +1,6 @@
-import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-
-import PreflightWarningModal from 'components/plans/preflightWarningModal';
+import PreflightWarningModal from '@/components/plans/preflightWarningModal';
+import React from 'react';
 
 describe('<PreflightWarningModal />', () => {
   const defaultResults = {
