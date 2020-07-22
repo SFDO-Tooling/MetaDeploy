@@ -80,8 +80,7 @@ const JobCell = (props: DataCellProps) => {
             label: title,
           }}
           size="xx-small"
-          containerClassName="slds-icon-standard-approval
-            slds-m-left_xxx-small"
+          containerClassName="slds-icon-standard-approval slds-m-left_xxx-small"
         />
       </div>
     );

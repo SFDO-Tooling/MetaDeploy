@@ -38,7 +38,7 @@ class ClickThroughAgreementModal extends React.Component<Props, State> {
     this.setState({ confirmed: checked });
   };
 
-  render(): React.ReactNode {
+  render() {
     const { isOpen, text } = this.props;
     const { confirmed } = this.state;
     const footer = [
@@ -65,10 +65,7 @@ class ClickThroughAgreementModal extends React.Component<Props, State> {
         <div className="slds-p-horizontal_large slds-p-vertical_medium">
           {/* This text is pre-cleaned by the API */}
           <div
-            className="slds-text-longform
-              slds-scrollable_y
-              slds-box
-              markdown"
+            className="slds-text-longform slds-scrollable_y slds-box markdown"
             style={{ maxHeight: '250px' }}
             dangerouslySetInnerHTML={{
               __html: text,

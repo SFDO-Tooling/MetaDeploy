@@ -16,7 +16,7 @@ import ProductNotFound from '@/components/products/product404';
 import VersionNotFound from '@/components/products/version404';
 import { getLoadingOrNotFound, shouldFetchVersion } from '@/components/utils';
 import { AppState } from '@/store';
-import { Plan as PlanType } from '@/store/plans/reducer';
+import { Plan } from '@/store/plans/reducer';
 import {
   fetchAdditionalPlans,
   fetchPlan,
@@ -210,13 +210,13 @@ class VersionDetail extends React.Component<VersionDetailProps> {
       return <ProductNotFound />;
     }
 
-    const listedAdditionalPlans: Array<PlanType> = version.additional_plans
+    const listedAdditionalPlans: Plan[] = version.additional_plans
       ? (Object.entries(version.additional_plans) as any)
           .filter(
-            ([key, plan]: [string, PlanType | null]) =>
+            ([key, plan]: [string, Plan | null]) =>
               plan?.is_listed && plan?.is_allowed && key === plan?.slug,
           )
-          .map((item: Array<[string, PlanType]>) => item[1])
+          .map((item: [string, Plan][]) => item[1])
       : [];
     const { primary_plan, secondary_plan } = version;
     const visiblePrimaryPlan =
@@ -256,9 +256,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                         version.label,
                         primary_plan.slug,
                       )}
-                      className="slds-button
-                        slds-button_brand
-                        slds-size_full"
+                      className="slds-button slds-button_brand slds-size_full"
                     >
                       {primary_plan.title} - {i18n.t('View Details')}
                     </Link>
@@ -321,12 +319,14 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                   />
                 ) : null}
                 {/* This description is pre-cleaned by the API */}
-                <div
-                  className="markdown"
-                  dangerouslySetInnerHTML={{
-                    __html: product.description || '',
-                  }}
-                />
+                {product.description && (
+                  <div
+                    className="markdown"
+                    dangerouslySetInnerHTML={{
+                      __html: product.description,
+                    }}
+                  />
+                )}
               </BodySection>
             </BodyContainer>
           ) : (

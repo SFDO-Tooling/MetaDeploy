@@ -35,16 +35,9 @@ import { createSocket } from '@/utils/websockets';
 
 const App = () => (
   <DocumentTitle title={window.SITE_NAME}>
-    <div
-      className="slds-grid
-        slds-grid_frame
-        slds-grid_vertical"
-    >
+    <div className="slds-grid slds-grid_frame slds-grid_vertical">
       <ErrorBoundary>
-        <div
-          className="slds-grow
-            slds-shrink-none"
-        >
+        <div className="slds-grow slds-shrink-none">
           <ErrorBoundary>
             <Switch>
               <Route

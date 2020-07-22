@@ -65,10 +65,7 @@ class CustomDomainModal extends React.Component<Props, { url: string }> {
         footer={footer}
       >
         <form className="slds-p-around_large" onSubmit={this.handleSubmit}>
-          <div
-            className="slds-form-element__help
-              slds-p-bottom_small"
-          >
+          <div className="slds-form-element__help slds-p-bottom_small">
             {i18n.t(
               'To go to your company’s login page, enter the custom domain name.',
             )}
@@ -82,9 +79,7 @@ class CustomDomainModal extends React.Component<Props, { url: string }> {
           >
             <div
               id="login-custom-domain-help"
-              className="slds-form-element__help
-                slds-truncate
-                slds-p-top_small"
+              className="slds-form-element__help slds-truncate slds-p-top_small"
               data-testid="custom-domain"
             >
               https://

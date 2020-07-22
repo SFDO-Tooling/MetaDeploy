@@ -33,7 +33,7 @@ const Errors = ({
   errors,
   doRemoveError,
 }: {
-  errors: Array<ErrorType>;
+  errors: ErrorType[];
   doRemoveError: typeof removeError;
 }) => (
   <ToastContainer className="half-container">

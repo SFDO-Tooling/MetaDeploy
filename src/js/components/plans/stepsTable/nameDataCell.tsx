@@ -125,11 +125,7 @@ class NameDataCell extends React.Component<Props> {
                 onTogglePanel={this.togglePanel}
               >
                 <pre>
-                  <code
-                    dangerouslySetInnerHTML={{
-                      __html: logs,
-                    }}
-                  />
+                  <code dangerouslySetInnerHTML={{ __html: logs }} />
                 </pre>
               </AccordionPanel>
             </Accordion>

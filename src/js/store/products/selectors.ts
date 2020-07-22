@@ -2,7 +2,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { createSelector } from 'reselect';
 
 import { AppState } from '@/store';
-import { Plan as PlanType } from '@/store/plans/reducer';
+import { Plan } from '@/store/plans/reducer';
 import {
   Category,
   Product,
@@ -143,8 +143,8 @@ const selectVersionLabelOrPlanSlug = createSelector(
         // Add all slugs (current and old) from all known plans
         slugs.push(
           ...(Object.entries(most_recent_version.additional_plans) as any)
-            .filter((item: [string, PlanType | null][]) => item[1])
-            .map((item: [string, PlanType][]) => item[0]),
+            .filter((item: [string, Plan | null][]) => item[1])
+            .map((item: [string, Plan][]) => item[0]),
         );
       }
       if (slugs.includes(maybeVersionLabel)) {

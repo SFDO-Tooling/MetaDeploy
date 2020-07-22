@@ -32,10 +32,13 @@ const ProductItem = ({ item }: { item: Product }) => {
         {item.short_description ? (
           <div className="slds-p-top_x-small">{item.short_description}</div>
         ) : (
-          <div
-            className="md-truncate-children slds-p-top_x-small" // This description is pre-cleaned by the API
-            dangerouslySetInnerHTML={{ __html: item.description || '' }}
-          />
+          item.description && (
+            <div
+              className="md-truncate-children slds-p-top_x-small"
+              // This description is pre-cleaned by the API
+              dangerouslySetInnerHTML={{ __html: item.description }}
+            />
+          )
         )}
       </Card>
     </Link>

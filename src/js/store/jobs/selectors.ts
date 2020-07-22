@@ -2,8 +2,8 @@ import { RouteComponentProps } from 'react-router-dom';
 import { createSelector } from 'reselect';
 
 import { AppState } from '@/store';
-import { Job as JobType, JobsState } from '@/store/jobs/reducer';
-import { Plan as PlanType } from '@/store/plans/reducer';
+import { Job, JobsState } from '@/store/jobs/reducer';
+import { Plan } from '@/store/plans/reducer';
 import { selectPlan } from '@/store/plans/selectors';
 
 export const selectJobsState = (appState: AppState): JobsState => appState.jobs;
@@ -18,8 +18,8 @@ export const selectJob = createSelector(
   (
     jobs: JobsState,
     jobId: string | null | undefined,
-    plan: PlanType | null,
-  ): JobType | null | undefined => {
+    plan: Plan | null,
+  ): Job | null | undefined => {
     if (!jobId) {
       return undefined;
     }

@@ -13,8 +13,7 @@ const Header = ({
   versionLabel: string;
 }) => (
   <PageHeader
-    className="page-header
-      slds-p-around_x-large"
+    className="page-header slds-p-around_x-large"
     title={i18n.t('Select a Plan')}
     trail={[
       <>

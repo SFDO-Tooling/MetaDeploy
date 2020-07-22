@@ -21,7 +21,7 @@ export type DataCellProps = {
   preflight?: Preflight | null | undefined;
   className?: string;
   selectedSteps?: SelectedSteps;
-  handleStepsChange?: (arg0: string, arg1: boolean) => void;
+  handleStepsChange?: (id: string, checked: boolean) => void;
   job?: Job;
   activeJobStep?: string | null;
 };
@@ -33,7 +33,7 @@ type Props = {
   steps: Step[] | null;
   selectedSteps?: SelectedSteps;
   job?: Job;
-  handleStepsChange?: (arg0: string, arg1: boolean) => void;
+  handleStepsChange?: (id: string, checked: boolean) => void;
 };
 
 type State = {

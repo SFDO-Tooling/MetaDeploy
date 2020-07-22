@@ -28,7 +28,7 @@ class Toasts extends React.Component<Props, State> {
     this.setState({ isOpen: false });
   };
 
-  getToastComponent(label: string, variant = 'error'): React.ReactNode {
+  getToastComponent(label: string, variant = 'error') {
     return (
       <Toast
         labels={{
@@ -40,7 +40,7 @@ class Toasts extends React.Component<Props, State> {
     );
   }
 
-  getToast(): React.ReactNode | null {
+  getToast() {
     const { job, preflight, label } = this.props;
     const model = job || preflight;
 

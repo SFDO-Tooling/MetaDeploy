@@ -10,12 +10,12 @@ import { EmptyIllustration } from '@/components/404';
 import Header from '@/components/header';
 import Login from '@/components/header/login';
 import { AppState } from '@/store';
-import { User as UserType } from '@/store/user/reducer';
+import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
 import routes from '@/utils/routes';
 
 const AuthError = withRouter(
-  ({ user, history }: { user: UserType } & RouteComponentProps) => {
+  ({ user, history }: { user: User } & RouteComponentProps) => {
     const message = (window.JS_CONTEXT || {}).error_message || (
       <Trans i18nKey="errorWithAccount">
         An error occurred with your account. Try the{' '}

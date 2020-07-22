@@ -19,10 +19,7 @@ const Footer = () => {
     >
       {window.GLOBALS.SITE?.product_logo ? (
         <div
-          className="footer-logo
-            footer-item
-            slds-m-right_medium
-            slds-grow"
+          className="footer-logo footer-item slds-m-right_medium slds-grow"
           style={{
             backgroundImage: `url(${window.GLOBALS.SITE.product_logo})`,
           }}

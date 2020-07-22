@@ -56,8 +56,7 @@ class Header extends React.Component<Props & PropsFromRedux> {
           title={
             <Link
               to={routes.home()}
-              className="slds-text-heading_large
-                slds-text-link_reset"
+              className="slds-text-heading_large slds-text-link_reset"
             >
               {logoSrc ? (
                 <img

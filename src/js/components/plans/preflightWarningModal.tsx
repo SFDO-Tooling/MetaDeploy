@@ -38,10 +38,7 @@ const Warning = ({
     return (
       <div className="slds-p-vertical_x-small">
         {name && id !== 'plan' ? (
-          <h2
-            className="slds-text-heading_small
-              slds-p-bottom_x-small"
-          >
+          <h2 className="slds-text-heading_small slds-p-bottom_x-small">
             {name}
           </h2>
         ) : null}

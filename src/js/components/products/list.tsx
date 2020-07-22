@@ -62,12 +62,9 @@ class ProductsList extends React.Component<Props, State> {
     };
   }
 
-  static getProductsList(products: Array<Product>) {
+  static getProductsList(products: Product[]) {
     return (
-      <div
-        className="slds-grid
-          slds-wrap"
-      >
+      <div className="slds-grid slds-wrap">
         {products.map((item) => (
           <ProductItem item={item} key={item.id} />
         ))}

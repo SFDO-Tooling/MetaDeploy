@@ -2,15 +2,8 @@ import { RouteComponentProps } from 'react-router-dom';
 import { createSelector } from 'reselect';
 
 import { AppState } from '@/store';
-import {
-  Plan as PlanType,
-  Preflight as PreflightType,
-  PreflightsState,
-} from '@/store/plans/reducer';
-import {
-  Product as ProductType,
-  Version as VersionType,
-} from '@/store/products/reducer';
+import { Plan, Preflight, PreflightsState } from '@/store/plans/reducer';
+import { Product, Version } from '@/store/products/reducer';
 import { selectProduct, selectVersion } from '@/store/products/selectors';
 
 export const selectPlanSlug = (
@@ -21,10 +14,10 @@ export const selectPlanSlug = (
 export const selectPlan = createSelector(
   [selectProduct, selectVersion, selectPlanSlug],
   (
-    product: ProductType | null | void,
-    version: VersionType | null,
+    product: Product | null | void,
+    version: Version | null,
     planSlug: string | null | undefined,
-  ): PlanType | null => {
+  ): Plan | null => {
     if (!product || !version || !planSlug) {
       return null;
     }
@@ -55,8 +48,8 @@ export const selectPreflight = createSelector(
   [selectPreflightsState, selectPlan],
   (
     preflights: PreflightsState,
-    plan: PlanType | null,
-  ): PreflightType | null | undefined => {
+    plan: Plan | null,
+  ): Preflight | null | undefined => {
     if (!plan) {
       return null;
     }

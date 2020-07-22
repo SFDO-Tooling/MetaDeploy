@@ -49,11 +49,7 @@ const JobResults = ({
             colorVariant="error"
           />
         </div>
-        <div
-          className="slds-media__body
-            slds-border_left
-            slds-p-around_small"
-        >
+        <div className="slds-media__body slds-border_left slds-p-around_small">
           <h2
             className="slds-truncate
               slds-text-heading_small

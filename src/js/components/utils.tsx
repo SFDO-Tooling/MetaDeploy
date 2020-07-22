@@ -6,12 +6,9 @@ import JobNotFound from '@/components/jobs/job404';
 import PlanNotFound from '@/components/plans/plan404';
 import ProductNotFound from '@/components/products/product404';
 import VersionNotFound from '@/components/products/version404';
-import { Job as JobType } from '@/store/jobs/reducer';
-import { Plan as PlanType } from '@/store/plans/reducer';
-import {
-  Product as ProductType,
-  Version as VersionType,
-} from '@/store/products/reducer';
+import { Job } from '@/store/jobs/reducer';
+import { Plan } from '@/store/plans/reducer';
+import { Product, Version } from '@/store/products/reducer';
 import routes from '@/utils/routes';
 
 type TransientMessageState = {
@@ -85,8 +82,8 @@ export const shouldFetchVersion = ({
   version,
   versionLabel,
 }: {
-  product: ProductType | null | void;
-  version?: VersionType | null;
+  product: Product | null | void;
+  version?: Version | null;
   versionLabel?: string | null | undefined;
 }): boolean => {
   const hasVersion = version !== null;
@@ -105,8 +102,8 @@ export const shouldFetchPlan = ({
   plan,
   planSlug,
 }: {
-  version: VersionType | null;
-  plan?: PlanType | null;
+  version: Version | null;
+  plan?: Plan | null;
   planSlug?: string | null | undefined;
 }): boolean => {
   const hasVersion = version !== null;
@@ -138,19 +135,19 @@ export const getLoadingOrNotFound = ({
   maybeVersion,
   maybeSlug,
 }: {
-  product: ProductType | null | void;
+  product: Product | null | void;
   productSlug: string | null | undefined;
-  version?: VersionType | null;
+  version?: Version | null;
   versionLabel?: string | null | undefined;
-  plan?: PlanType | null;
+  plan?: Plan | null;
   planSlug?: string | null | undefined;
-  job?: JobType | null;
+  job?: Job | null;
   jobId?: string | null | undefined;
   isLoggedIn?: boolean;
   route: 'product_detail' | 'version_detail' | 'plan_detail' | 'job_detail';
   maybeVersion?: string;
   maybeSlug?: string;
-}): React.ReactNode | false => {
+}) => {
   if (!product) {
     if (!productSlug || product === null) {
       return <ProductNotFound />;

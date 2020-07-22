@@ -211,7 +211,7 @@ class PlanDetail extends React.Component<Props, State> {
     return selectedSteps;
   }
 
-  getPostMessage(): React.ReactNode {
+  getPostMessage() {
     const { user, product, version, plan, org } = this.props;
 
     /* istanbul ignore if */
@@ -277,7 +277,7 @@ class PlanDetail extends React.Component<Props, State> {
     return null;
   }
 
-  getCTA(selectedSteps: SelectedSteps): React.ReactNode {
+  getCTA(selectedSteps: SelectedSteps) {
     const {
       history,
       user,
@@ -321,7 +321,7 @@ class PlanDetail extends React.Component<Props, State> {
     return null;
   }
 
-  render(): React.ReactNode {
+  render() {
     const {
       user,
       product,

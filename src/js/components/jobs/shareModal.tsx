@@ -169,10 +169,7 @@ class ShareModal extends React.Component<WrappedProps> {
             inputRef={this.storeInputRef}
             onFocus={this.handleFocus}
           >
-            <div
-              className="slds-form-element__help
-                slds-text-color_success"
-            >
+            <div className="slds-form-element__help slds-text-color_success">
               {transientMessageVisible ? i18n.t('Copied to clipboard') : ''}
               {/* Space added to preserve height even when empty. */}
               &nbsp;
@@ -203,10 +200,7 @@ class ShareModal extends React.Component<WrappedProps> {
                   checked={job.is_public}
                 />
               </RadioGroup>
-              <p
-                className="slds-text-body_small
-                  slds-p-top_small"
-              >
+              <p className="slds-text-body_small slds-p-top_small">
                 {i18n.t(
                   'Access to view the installation job does not provide access to your Salesforce org.',
                 )}

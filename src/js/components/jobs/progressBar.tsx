@@ -101,7 +101,7 @@ class ProgressBar extends React.Component<Props, State> {
     );
   }
 
-  render(): React.ReactNode {
+  render() {
     const { job } = this.props;
     const isRunning = job.status === CONSTANTS.STATUS.STARTED;
     const isFailed =

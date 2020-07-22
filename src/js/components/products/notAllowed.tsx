@@ -24,9 +24,8 @@ const NotAllowed = ({
     {message ? (
       <div className="slds-align_absolute-center slds-size_2-of-3">
         <div
-          className="slds-text-longform
-            slds-text-body_regular
-            markdown" // This message is pre-cleaned by the API
+          className="slds-text-longform slds-text-body_regular markdown"
+          // This message is pre-cleaned by the API
           dangerouslySetInnerHTML={{
             __html: message,
           }}
