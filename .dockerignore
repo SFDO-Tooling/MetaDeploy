@@ -83,3 +83,4 @@ var/
 venv/
 wheels/
 yarn-error.log
+sfdx/
