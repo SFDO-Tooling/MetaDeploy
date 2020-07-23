@@ -116,7 +116,7 @@ jobs:
           GITHUB_TOKEN: circle_test
           SECURE_SSL_REDIRECT: False
       - image: circleci/redis:5.0
-      - image: circleci/postgres:10.6
+      - image: circleci/postgres:12.3
         environment:
           AWS_ACCESS_KEY_ID: None
           AWS_BUCKET_NAME: None
