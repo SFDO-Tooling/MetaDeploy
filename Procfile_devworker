@@ -1,0 +1,3 @@
+worker_dev: python manage.py rqworker default
+worker_short_dev: python manage.py rqworker short
+worker_scheduler: python manage.py rqscheduler --queue short

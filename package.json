@@ -15,7 +15,6 @@
   "scripts": {
     "webpack:serve": "webpack-dev-server --config webpack.dev.js",
     "django:serve": "python manage.py runserver 0.0.0.0:${PORT:-8000}",
-    "django:serve:prod": "daphne --bind 0.0.0.0 --port ${PORT:-8000} metadeploy.asgi:application",
     "worker:serve": "python manage.py rqworker default short",
     "scheduler:serve": "python manage.py rqscheduler --queue short",
     "rq:serve": "run-p worker:serve scheduler:serve",
