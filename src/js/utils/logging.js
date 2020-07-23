@@ -5,7 +5,7 @@ export const logError = (
   data: { [string]: mixed } = {},
 ) => {
   if (window.Sentry) {
-    window.Sentry.withScope(scope => {
+    window.Sentry.withScope((scope) => {
       scope.setExtras(data);
       if (message instanceof Error) {
         window.Sentry.captureException(message);

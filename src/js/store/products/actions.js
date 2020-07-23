@@ -102,11 +102,11 @@ export type ProductsAction =
   | FetchPlanSucceeded
   | FetchPlanFailed;
 
-export const fetchProducts = (): ThunkAction => dispatch => {
+export const fetchProducts = (): ThunkAction => (dispatch) => {
   dispatch({ type: 'FETCH_PRODUCTS_STARTED' });
   const baseUrl = window.api_urls.productcategory_list();
   return apiFetch(baseUrl, dispatch)
-    .then(response => {
+    .then((response) => {
       if (!Array.isArray(response)) {
         const error = (new Error('Invalid response received'): {
           [string]: mixed,
@@ -126,7 +126,7 @@ export const fetchProducts = (): ThunkAction => dispatch => {
         payload: { products, categories },
       });
     })
-    .catch(err => {
+    .catch((err) => {
       dispatch({ type: 'FETCH_PRODUCTS_FAILED' });
       throw err;
     });
@@ -138,10 +138,10 @@ export const fetchMoreProducts = ({
 }: {
   url: string,
   id: number,
-}): ThunkAction => dispatch => {
+}): ThunkAction => (dispatch) => {
   dispatch({ type: 'FETCH_MORE_PRODUCTS_STARTED', payload: { url, id } });
   return apiFetch(url, dispatch)
-    .then(response => {
+    .then((response) => {
       const products = response.results;
       if (!Array.isArray(response.results)) {
         const error = (new Error('Invalid response received'): {
@@ -155,43 +155,43 @@ export const fetchMoreProducts = ({
         payload: { products, category: id, next: response.next },
       });
     })
-    .catch(err => {
+    .catch((err) => {
       dispatch({ type: 'FETCH_MORE_PRODUCTS_FAILED', payload: { url, id } });
       throw err;
     });
 };
 
-export const fetchProduct = (
-  filters: ProductFilters,
-): ThunkAction => dispatch => {
+export const fetchProduct = (filters: ProductFilters): ThunkAction => (
+  dispatch,
+) => {
   dispatch({ type: 'FETCH_PRODUCT_STARTED', payload: filters });
   const baseUrl = window.api_urls.product_get_one();
   return apiFetch(addUrlParams(baseUrl, { ...filters }), dispatch)
-    .then(response =>
+    .then((response) =>
       dispatch({
         type: 'FETCH_PRODUCT_SUCCEEDED',
         payload: { ...filters, product: response || null },
       }),
     )
-    .catch(err => {
+    .catch((err) => {
       dispatch({ type: 'FETCH_PRODUCT_FAILED', payload: filters });
       throw err;
     });
 };
 
-export const fetchVersion = (
-  filters: VersionFilters,
-): ThunkAction => dispatch => {
+export const fetchVersion = (filters: VersionFilters): ThunkAction => (
+  dispatch,
+) => {
   dispatch({ type: 'FETCH_VERSION_STARTED', payload: filters });
   const baseUrl = window.api_urls.version_get_one();
   return apiFetch(addUrlParams(baseUrl, { ...filters }), dispatch)
-    .then(response =>
+    .then((response) =>
       dispatch({
         type: 'FETCH_VERSION_SUCCEEDED',
         payload: { ...filters, version: response || null },
       }),
     )
-    .catch(err => {
+    .catch((err) => {
       dispatch({ type: 'FETCH_VERSION_FAILED', payload: filters });
       throw err;
     });
@@ -200,11 +200,11 @@ export const fetchVersion = (
 export const fetchAdditionalPlans = (filters: {
   product: string,
   version: string,
-}): ThunkAction => dispatch => {
+}): ThunkAction => (dispatch) => {
   dispatch({ type: 'FETCH_ADDITIONAL_PLANS_STARTED', payload: filters });
   const baseUrl = window.api_urls.version_additional_plans(filters.version);
   return apiFetch(baseUrl, dispatch)
-    .then(response => {
+    .then((response) => {
       if (!Array.isArray(response)) {
         const error = (new Error('Invalid response received'): {
           [string]: mixed,
@@ -217,23 +217,23 @@ export const fetchAdditionalPlans = (filters: {
         payload: { ...filters, plans: response },
       });
     })
-    .catch(err => {
+    .catch((err) => {
       dispatch({ type: 'FETCH_ADDITIONAL_PLANS_FAILED', payload: filters });
       throw err;
     });
 };
 
-export const fetchPlan = (filters: PlanFilters): ThunkAction => dispatch => {
+export const fetchPlan = (filters: PlanFilters): ThunkAction => (dispatch) => {
   dispatch({ type: 'FETCH_PLAN_STARTED', payload: filters });
   const baseUrl = window.api_urls.plan_get_one();
   return apiFetch(addUrlParams(baseUrl, { ...filters }), dispatch)
-    .then(response =>
+    .then((response) =>
       dispatch({
         type: 'FETCH_PLAN_SUCCEEDED',
         payload: { ...filters, plan: response || null },
       }),
     )
-    .catch(err => {
+    .catch((err) => {
       dispatch({ type: 'FETCH_PLAN_FAILED', payload: filters });
       throw err;
     });

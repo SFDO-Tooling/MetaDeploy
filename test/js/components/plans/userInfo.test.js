@@ -11,7 +11,7 @@ const defaultUser = {
 };
 
 describe('<UserInfo />', () => {
-  const setup = options => {
+  const setup = (options) => {
     const defaults = {
       user: defaultUser,
     };

@@ -9,12 +9,12 @@ import { logError } from 'utils/logging';
 export type UrlParams = { [string]: string | number | boolean };
 
 // these HTTP methods do not require CSRF protection
-const csrfSafeMethod = method => /^(GET|HEAD|OPTIONS|TRACE)$/.test(method);
+const csrfSafeMethod = (method) => /^(GET|HEAD|OPTIONS|TRACE)$/.test(method);
 
-const getResponse = resp =>
+const getResponse = (resp) =>
   resp
     .text()
-    .then(text => {
+    .then((text) => {
       try {
         return { response: resp, body: JSON.parse(text) };
       } catch (err) {
@@ -24,7 +24,7 @@ const getResponse = resp =>
     })
     .catch(
       /* istanbul ignore next */
-      err => {
+      (err) => {
         logError(err);
         throw err;
       },
@@ -67,12 +67,12 @@ const apiFetch = (
         error.response = response;
         throw error;
       },
-      err => {
+      (err) => {
         logError(err);
         throw err;
       },
     )
-    .catch(err => {
+    .catch((err) => {
       logError(err);
       throw err;
     });
@@ -84,7 +84,7 @@ export const addUrlParams = (
   params: UrlParams = {},
 ): string => {
   const url = new URL(baseUrl, window.location.origin);
-  Object.keys(params).forEach(key => {
+  Object.keys(params).forEach((key) => {
     const value = params[key].toString();
     // Disallow duplicate params with the same key:value
     if (url.searchParams.get(key) !== value) {

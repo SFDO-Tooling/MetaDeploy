@@ -44,6 +44,7 @@ const RequiredDataCell = (props: DataCellProps): React.Node => {
   }
   return (
     <DataTableCell
+      {...otherProps}
       title={text}
       className={classNames(
         className,
@@ -53,7 +54,6 @@ const RequiredDataCell = (props: DataCellProps): React.Node => {
           'is-installing': isActive,
         },
       )}
-      {...otherProps}
     >
       <span className={classes}>{text}</span>
     </DataTableCell>

@@ -1,11 +1,11 @@
 tasks:
-    robot:
-        options:
-            suites: robot/tasks
-            options:
-                outputdir: robot/results
+  robot:
+    options:
+      suites: robot/tasks
+      options:
+        outputdir: robot/results
 
 orgs:
-    scratch:
-        enterprise:
-            config_file: orgs/enterprise.json
+  scratch:
+    enterprise:
+      config_file: orgs/enterprise.json

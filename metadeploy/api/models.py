@@ -17,7 +17,7 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
 from django.contrib.postgres.fields import ArrayField, JSONField
 from django.contrib.sites.models import Site
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import Count, F, Func, Q
@@ -82,7 +82,7 @@ class AllowedList(models.Model):
 
 class AllowedListOrg(models.Model):
     allowed_list = models.ForeignKey(
-        AllowedList, related_name="orgs", on_delete=models.PROTECT
+        AllowedList, related_name="orgs", on_delete=models.CASCADE
     )
     org_id = models.CharField(max_length=18)
     description = models.TextField(
@@ -104,7 +104,7 @@ class AllowedListAccessMixin(models.Model):
         abstract = True
 
     visible_to = models.ForeignKey(
-        AllowedList, on_delete=models.SET_NULL, null=True, blank=True
+        AllowedList, on_delete=models.PROTECT, null=True, blank=True
     )
 
     def is_visible_to(self, user):
@@ -146,7 +146,8 @@ class User(HashIdMixin, AbstractUser):
 
     @property
     def org_id(self):
-        return self._get_org_property("Id")
+        if self.social_account:
+            return self.social_account.extra_data["organization_id"]
 
     @property
     def org_name(self):
@@ -211,7 +212,7 @@ class ProductCategory(models.Model):
 
 
 class ProductSlug(AbstractSlug):
-    parent = models.ForeignKey("Product", on_delete=models.PROTECT)
+    parent = models.ForeignKey("Product", on_delete=models.CASCADE)
 
 
 class ProductQuerySet(TranslatableQuerySet):
@@ -299,6 +300,9 @@ class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel)
             }
         return None
 
+    def get_translation_strategy(self):
+        return "fields", f"{self.slug}:product"
+
 
 class VersionQuerySet(TranslatableQuerySet):
     def get_by_natural_key(self, *, product, label):
@@ -334,23 +338,34 @@ class Version(HashIdMixin, TranslatableModel):
 
     @property
     def primary_plan(self):
-        try:
-            return self.plan_set.filter(tier=Plan.Tier.primary).get()
-        except ObjectDoesNotExist:
-            return None
+        return (
+            self.plan_set.filter(tier=Plan.Tier.primary).order_by("-created_at").first()
+        )
 
     @property
     def secondary_plan(self):
-        return self.plan_set.filter(tier=Plan.Tier.secondary).first()
+        return (
+            self.plan_set.filter(tier=Plan.Tier.secondary)
+            .order_by("-created_at")
+            .first()
+        )
 
     @property
     def additional_plans(self):
-        return self.plan_set.filter(tier=Plan.Tier.additional).order_by("id")
+        # get the most recently created plan for each plan template
+        return (
+            self.plan_set.filter(tier=Plan.Tier.additional)
+            .order_by("plan_template_id", "-created_at")
+            .distinct("plan_template_id")
+        )
+
+    def get_translation_strategy(self):
+        return "fields", f"{self.product.slug}:version:{self.label}"
 
 
 class PlanSlug(AbstractSlug):
     slug = models.SlugField()
-    parent = models.ForeignKey("PlanTemplate", on_delete=models.PROTECT)
+    parent = models.ForeignKey("PlanTemplate", on_delete=models.CASCADE)
 
     def validate_unique(self, *args, **kwargs):
         super().validate_unique(*args, **kwargs)
@@ -394,6 +409,9 @@ class PlanTemplate(SlugMixin, TranslatableModel):
     def __str__(self):
         return f"{self.product.title}: {self.name}"
 
+    def get_translation_strategy(self):
+        return "fields", f"{self.product.slug}:plan:{self.name}"
+
 
 class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
     Tier = Choices("primary", "secondary", "additional")
@@ -410,9 +428,21 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
 
     plan_template = models.ForeignKey(PlanTemplate, on_delete=models.PROTECT)
     version = models.ForeignKey(Version, on_delete=models.PROTECT)
+    commit_ish = models.CharField(
+        max_length=256,
+        null=True,
+        blank=True,
+        help_text=_(
+            "This is usually a tag, sometimes a branch. "
+            "Use this to optionally override the Version's commit_ish."
+        ),
+    )
+
     tier = models.CharField(choices=Tier, default=Tier.primary, max_length=64)
     is_listed = models.BooleanField(default=True)
     preflight_checks = JSONField(default=list, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
 
     slug_class = PlanSlug
     slug_field_name = "title"
@@ -466,6 +496,21 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
             step.task_config.get("checks") for step in self.steps.iterator()
         )
         return has_plan_checks or has_step_checks
+
+    def get_translation_strategy(self):
+        return (
+            "fields",
+            f"{self.plan_template.product.slug}:plan:{self.plan_template.name}",
+        )
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        from ..adminapi.translations import update_translations
+
+        update_translations(self.plan_template.product)
+        update_translations(self.plan_template)
+        update_translations(self)
 
 
 class DottedArray(Func):
@@ -549,6 +594,16 @@ class Step(HashIdMixin, TranslatableModel):
     def __str__(self):
         return f"Step {self.name} of {self.plan.title} ({self.step_num})"
 
+    def get_translation_strategy(self):
+        return "text", f"{self.plan.plan_template.product.slug}:steps"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        from ..adminapi.translations import update_translations
+
+        update_translations(self)
+
 
 class ClickThroughAgreement(models.Model):
     text = models.TextField()
@@ -576,16 +631,18 @@ class Job(HashIdMixin, models.Model):
     is_public = models.BooleanField(default=False)
     success_at = models.DateTimeField(
         null=True,
+        blank=True,
         help_text=("If the job completed successfully, the time of that success."),
     )
     canceled_at = models.DateTimeField(
         null=True,
+        blank=True,
         help_text=(
             "The time at which the Job canceled itself, likely just a bit after it was "
             "told to cancel itself."
         ),
     )
-    exception = models.TextField(null=True)
+    exception = models.TextField(null=True, blank=True)
     log = models.TextField(blank=True)
     click_through_agreement = models.ForeignKey(
         ClickThroughAgreement, on_delete=models.PROTECT, null=True
@@ -594,9 +651,9 @@ class Job(HashIdMixin, models.Model):
     def subscribable_by(self, user):
         return self.is_public or user.is_staff or user == self.user
 
-    def skip_tasks(self):
+    def skip_steps(self):
         return [
-            step.path for step in set(self.plan.steps.all()) - set(self.steps.all())
+            step.step_num for step in set(self.plan.steps.all()) - set(self.steps.all())
         ]
 
     def _push_if_condition(self, condition, fn):
@@ -813,3 +870,19 @@ class SiteProfile(TranslatableModel):
 
     def __str__(self):
         return self.name
+
+
+class Translation(models.Model):
+    """Holds a generic catalog of translated text.
+
+    Used when a new Plan is published to populate the django-parler translation tables.
+    This way translations can be reused.
+    """
+
+    context = models.TextField()
+    slug = models.TextField()
+    text = models.TextField()
+    lang = models.CharField(max_length=5)
+
+    class Meta:
+        unique_together = (("context", "slug", "lang"),)

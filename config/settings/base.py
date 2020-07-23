@@ -72,6 +72,8 @@ def env(name, default=NoDefaultValue, type_=str):
     except KeyError:
         if default == NoDefaultValue:
             raise ImproperlyConfigured(f"Missing environment variable: {name}.")
+        elif default is None:
+            return None
         val = default
     val = type_(val)
     return val
@@ -130,8 +132,8 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "django_filters",
     "parler",
+    "sfdo_template_helpers.oauth2.salesforce",
     "metadeploy",
-    "metadeploy.multisalesforce",
     "metadeploy.api",
     "metadeploy.adminapi.apps.AdminapiConfig",
     "django_js_reverse",
@@ -235,11 +237,18 @@ SECURE_PROXY_SSL_HEADER = env(
     type_=(lambda v: tuple(v.split(":", 1)) if (v is not None and ":" in v) else None),
 )
 SECURE_SSL_REDIRECT = env("SECURE_SSL_REDIRECT", default=True, type_=boolish)
-SESSION_COOKIE_SECURE = env("SESSION_COOKIE_SECURE", default=False, type_=boolish)
-CSRF_COOKIE_SECURE = env("CSRF_COOKIE_SECURE", default=False, type_=boolish)
-SECURE_HSTS_SECONDS = env("SECURE_HSTS_SECONDS", default=0, type_=int)
+SESSION_COOKIE_SECURE = env(
+    "SESSION_COOKIE_SECURE", default=SECURE_SSL_REDIRECT, type_=boolish
+)
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+CSRF_COOKIE_SECURE = env(
+    "CSRF_COOKIE_SECURE", default=SECURE_SSL_REDIRECT, type_=boolish
+)
+SECURE_HSTS_SECONDS = env(
+    "SECURE_HSTS_SECONDS", default=3600 if SECURE_SSL_REDIRECT else 0, type_=int
+)
 SECURE_HSTS_INCLUDE_SUBDOMAINS = env(
-    "SECURE_HSTS_INCLUDE_SUBDOMAINS", default=False, type_=boolish
+    "SECURE_HSTS_INCLUDE_SUBDOMAINS", default=True, type_=boolish
 )
 SECURE_HSTS_PRELOAD = env("SECURE_HSTS_PRELOAD", default=False, type_=boolish)
 
@@ -301,15 +310,34 @@ STATIC_ROOT = str(PROJECT_ROOT / "staticfiles")
 # > you won't benefit from cache versioning
 # WHITENOISE_ROOT = PROJECT_ROOT.joinpath(static_dir_root)
 
+# SF Connected App and GitHub configuration:
+CONNECTED_APP_CLIENT_SECRET = env("CONNECTED_APP_CLIENT_SECRET")
+CONNECTED_APP_CALLBACK_URL = env("CONNECTED_APP_CALLBACK_URL")
+CONNECTED_APP_CLIENT_ID = env("CONNECTED_APP_CLIENT_ID")
+GITHUB_TOKEN = env("GITHUB_TOKEN", default=None)
+GITHUB_APP_ID = env("GITHUB_APP_ID", default=None)
+GITHUB_APP_KEY = env("GITHUB_APP_KEY", default=None)
+
+if not GITHUB_TOKEN and not GITHUB_APP_ID and not GITHUB_APP_KEY:
+    raise ImproperlyConfigured(
+        "You must set either GITHUB_TOKEN or GITHUB_APP_ID and GITHUB_APP_KEY"
+    )
+if GITHUB_APP_ID and not GITHUB_APP_KEY:
+    raise ImproperlyConfigured("You must set GITHUB_APP_KEY if GITHUB_APP_ID is set")
+if GITHUB_APP_KEY and not GITHUB_APP_ID:
+    raise ImproperlyConfigured("You must set GITHUB_APP_ID if GITHUB_APP_KEY is set")
+
 SOCIALACCOUNT_PROVIDERS = {
-    "salesforce-production": {"SCOPE": ["web", "full", "refresh_token"]},
-    "salesforce-test": {"SCOPE": ["web", "full", "refresh_token"]},
-    "salesforce-custom": {"SCOPE": ["web", "full", "refresh_token"]},
+    "salesforce": {
+        "SCOPE": ["web", "full", "refresh_token"],
+        "APP": {
+            "client_id": CONNECTED_APP_CLIENT_ID,
+            "secret": CONNECTED_APP_CLIENT_SECRET,
+        },
+    },
 }
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_UNIQUE_EMAIL = False
 ACCOUNT_EMAIL_VERIFICATION = "none"
-SOCIALACCOUNT_ADAPTER = "metadeploy.multisalesforce.adapter.CustomSocialAccountAdapter"
+SOCIALACCOUNT_ADAPTER = "sfdo_template_helpers.oauth2.adapter.SFDOSocialAccountAdapter"
 
 JS_REVERSE_JS_VAR_NAME = "api_urls"
 JS_REVERSE_EXCLUDE_NAMESPACES = ["admin", "admin_rest"]
@@ -358,14 +386,6 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
     ),
 }
-
-
-# SF Connected App and GitHub configuration:
-CONNECTED_APP_CLIENT_SECRET = env("CONNECTED_APP_CLIENT_SECRET")
-CONNECTED_APP_CALLBACK_URL = env("CONNECTED_APP_CALLBACK_URL")
-CONNECTED_APP_CLIENT_ID = env("CONNECTED_APP_CLIENT_ID")
-GITHUB_TOKEN = env("GITHUB_TOKEN")
-
 
 # Token expiration
 TOKEN_LIFETIME_MINUTES = env("TOKEN_LIFETIME_MINUTES", type_=int, default=10)
@@ -436,8 +456,7 @@ LOGGING = {
             "propagate": False,
         },
         "rq.worker": {"handlers": ["rq_console"], "level": "DEBUG"},
-        "metadeploy.multisalesforce": {"handlers": ["console"], "level": "DEBUG"},
-        "metadeploy.api": {"handlers": ["console"], "level": "DEBUG"},
+        "metadeploy": {"handlers": ["console"], "level": "DEBUG"},
         "metadeploy.logging_middleware": {
             "handlers": ["console"],
             "level": "DEBUG",

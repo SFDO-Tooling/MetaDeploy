@@ -205,7 +205,7 @@ class CtaButton extends React.Component<
     // propagate hidden steps from the preflight results to the job results
     const results = {};
     if (preflight && preflight.results) {
-      Object.keys(preflight.results).forEach(id => {
+      Object.keys(preflight.results).forEach((id) => {
         const result = preflight.results[id];
         if (result && result.status === CONSTANTS.RESULT_STATUS.HIDE) {
           results[id] = result;
@@ -213,7 +213,7 @@ class CtaButton extends React.Component<
       });
     }
     doStartJob({ plan: plan.id, steps: [...selectedSteps], results }).then(
-      action => {
+      (action) => {
         const { type, payload } = action;
         if (type === 'JOB_STARTED' && payload && payload.id) {
           const url = routes.job_detail(
@@ -231,7 +231,8 @@ class CtaButton extends React.Component<
   // Returns an action btn if logged in with a valid token;
   // otherwise returns a login dropdown
   getLoginOrActionBtn(
-    label: string,
+    actionLabel: string,
+    loginLabel: string,
     onClick: () => void,
     startPreflightAfterLogin?: boolean = false,
   ): React.Node {
@@ -239,13 +240,17 @@ class CtaButton extends React.Component<
     const hasValidToken = user && user.valid_token_for !== null;
     if (hasValidToken) {
       return (
-        <ActionBtn label={label} onClick={onClick} disabled={preventAction} />
+        <ActionBtn
+          label={actionLabel}
+          onClick={onClick}
+          disabled={preventAction}
+        />
       );
     }
     // Require login first...
     return (
       <LoginBtn
-        label={i18n.t(`Log In to ${label}`)}
+        label={loginLabel}
         redirectParams={
           startPreflightAfterLogin ? { [AUTO_START_PREFLIGHT]: true } : {}
         }
@@ -273,7 +278,7 @@ class CtaButton extends React.Component<
       return false;
     }
     return [...selectedSteps].some(
-      id =>
+      (id) =>
         preflight.results[id] &&
         preflight.results[id].message &&
         preflight.results[id].status === RESULT_STATUS.WARN,
@@ -314,6 +319,7 @@ class CtaButton extends React.Component<
         // No prior preflight exists
         return this.getLoginOrActionBtn(
           i18n.t('Start Pre-Install Validation'),
+          i18n.t('Log In to Start Pre-Install Validation'),
           this.startPreflight,
           true,
         );
@@ -345,9 +351,14 @@ class CtaButton extends React.Component<
             const btn = hasWarnings
               ? this.getLoginOrActionBtn(
                   i18n.t('View Warnings to Continue Installation'),
+                  i18n.t('View Warnings to Continue Installation'),
                   this.openPreflightModal,
                 )
-              : this.getLoginOrActionBtn(i18n.t('Install'), action);
+              : this.getLoginOrActionBtn(
+                  i18n.t('Install'),
+                  i18n.t('Log In to Install'),
+                  action,
+                );
             return (
               <>
                 {btn}
@@ -368,6 +379,7 @@ class CtaButton extends React.Component<
           // Prior preflight exists, but is no longer valid or has errors
           return this.getLoginOrActionBtn(
             i18n.t('Re-Run Pre-Install Validation'),
+            i18n.t('Log In to Re-Run Pre-Install Validation'),
             this.startPreflight,
             true,
           );
@@ -377,6 +389,7 @@ class CtaButton extends React.Component<
           // Prior preflight exists, but failed or had plan-level errors
           return this.getLoginOrActionBtn(
             i18n.t('Re-Run Pre-Install Validation'),
+            i18n.t('Log In to Re-Run Pre-Install Validation'),
             this.startPreflight,
             true,
           );
@@ -391,7 +404,11 @@ class CtaButton extends React.Component<
       : this.startJob;
     return (
       <>
-        {this.getLoginOrActionBtn(i18n.t('Install'), action)}
+        {this.getLoginOrActionBtn(
+          i18n.t('Install'),
+          i18n.t('Log In to Install'),
+          action,
+        )}
         {this.getClickThroughAgreementModal()}
       </>
     );

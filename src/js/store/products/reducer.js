@@ -69,14 +69,14 @@ const reducer = (
     case 'FETCH_MORE_PRODUCTS_SUCCEEDED': {
       const { products: fetchedProducts, category, next } = action.payload;
       // Store list of known product IDs to filter out duplicates
-      const ids = products.products.map(p => p.id);
+      const ids = products.products.map((p) => p.id);
       return {
         ...products,
         products: [
           ...products.products,
-          ...fetchedProducts.filter(p => !ids.includes(p.id)),
+          ...fetchedProducts.filter((p) => !ids.includes(p.id)),
         ],
-        categories: products.categories.map(c => {
+        categories: products.categories.map((c) => {
           if (c.id === category) {
             return { ...c, next };
           }
@@ -95,7 +95,7 @@ const reducer = (
       const { product, label, version } = action.payload;
       return {
         ...products,
-        products: products.products.map(p => {
+        products: products.products.map((p) => {
           if (p.id === product) {
             const versions = { ...p.versions, [label]: version };
             return { ...p, versions };
@@ -115,7 +115,7 @@ const reducer = (
       }, {});
       return {
         ...products,
-        products: products.products.map(p => {
+        products: products.products.map((p) => {
           if (p.id === product) {
             if (p.most_recent_version && p.most_recent_version.id === version) {
               return {
@@ -161,7 +161,7 @@ const reducer = (
       }
       return {
         ...products,
-        products: products.products.map(p => {
+        products: products.products.map((p) => {
           if (p.id === product) {
             if (p.most_recent_version && p.most_recent_version.id === version) {
               return {

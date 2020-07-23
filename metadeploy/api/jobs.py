@@ -22,10 +22,10 @@ import zipfile
 from datetime import timedelta
 from glob import glob
 
-import github3
 from allauth.socialaccount.models import SocialToken
 from asgiref.sync import async_to_sync
 from cumulusci.core.config import OrgConfig, ServiceConfig
+from cumulusci.core.github import get_github_api_for_repo
 from cumulusci.utils import temporary_dir
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -112,7 +112,7 @@ def zip_file_is_safe(zip_file):
     return all(is_safe_path(info.filename) for info in zip_file.infolist())
 
 
-def run_flows(*, user, plan, skip_tasks, organization_url, result_class, result_id):
+def run_flows(*, user, plan, skip_steps, organization_url, result_class, result_id):
     """
     This operates with side effects; it changes things in a Salesforce
     org, and then records the results of those operations on to a
@@ -121,8 +121,8 @@ def run_flows(*, user, plan, skip_tasks, organization_url, result_class, result_
     Args:
         user (User): The User requesting this flow be run.
         plan (Plan): The Plan instance for the flow you're running.
-        skip_tasks (List[str]): The strings in the list should be valid
-            task_name values for steps in this flow.
+        skip_steps (List[str]): The strings in the list should be valid
+            step_num values for steps in this flow.
         organization_url (str): The URL of the organization, required by
             the OrgConfig.
         result_class (Union[Type[Job], Type[PreflightResult]]): The type
@@ -134,7 +134,7 @@ def run_flows(*, user, plan, skip_tasks, organization_url, result_class, result_
     result = result_class.objects.get(pk=result_id)
     token, token_secret = user.token
     repo_url = plan.version.product.repo_url
-    commit_ish = plan.version.commit_ish
+    commit_ish = plan.commit_ish or plan.version.commit_ish
 
     with contextlib.ExitStack() as stack:
         stack.enter_context(finalize_result(result))
@@ -146,8 +146,8 @@ def run_flows(*, user, plan, skip_tasks, organization_url, result_class, result_
         stack.enter_context(prepend_python_path(os.path.abspath(tmpdirname)))
 
         # Let's clone the repo locally:
-        gh = github3.login(token=settings.GITHUB_TOKEN)
         user, repo_name = extract_user_and_repo(repo_url)
+        gh = get_github_api_for_repo(None, user, repo_name)
         repo = gh.repository(user, repo_name)
         # Make sure we have the actual owner/repo name if we were redirected
         user = repo.owner.login
@@ -201,23 +201,9 @@ def run_flows(*, user, plan, skip_tasks, organization_url, result_class, result_
         )
         ctx.keychain.set_service("connected_app", connected_app, True)
 
-        # Set up github:
-        github_app = ServiceConfig(
-            {
-                # It would be nice to only need the token:
-                "token": settings.GITHUB_TOKEN,
-                # The following three values don't matter and aren't used,
-                # but are required to validate the Service:
-                "password": settings.GITHUB_TOKEN,
-                "email": "test@example.com",
-                "username": "not-a-username",
-            }
-        )
-        ctx.keychain.set_service("github", github_app, True)
-
         steps = [
             step.to_spec(
-                project_config=ctx.project_config, skip=step.path in skip_tasks
+                project_config=ctx.project_config, skip=step.step_num in skip_steps
             )
             for step in plan.steps.all()
         ]
@@ -235,7 +221,7 @@ def enqueuer():
         rq_job = run_flows_job.delay(
             user=j.user,
             plan=j.plan,
-            skip_tasks=j.skip_tasks(),
+            skip_steps=j.skip_steps(),
             organization_url=j.organization_url,
             result_class=Job,
             result_id=j.id,
@@ -249,17 +235,24 @@ enqueuer_job = job(enqueuer)
 
 
 def expire_user_tokens():
+    """Expire (delete) any SocialTokens older than TOKEN_LIFETIME_MINUTES.
+
+    Exception: if there is a job or preflight that started in the last day.
+    """
     token_lifetime_ago = timezone.now() - timedelta(
         minutes=settings.TOKEN_LIFETIME_MINUTES
     )
+    day_ago = timezone.now() - timedelta(days=1)
     for token in SocialToken.objects.filter(
         account__last_login__lte=token_lifetime_ago
     ):
         user = token.account.user
         has_running_jobs = (
-            user.job_set.filter(status=Job.Status.started).exists()
+            user.job_set.filter(
+                status=Job.Status.started, created_at__gt=day_ago
+            ).exists()
             or user.preflightresult_set.filter(
-                status=PreflightResult.Status.started
+                status=PreflightResult.Status.started, created_at__gt=day_ago
             ).exists()
         )
         if not has_running_jobs:
@@ -277,7 +270,7 @@ def preflight(preflight_result_id):
     run_flows(
         user=preflight_result.user,
         plan=preflight_result.plan,
-        skip_tasks=[],
+        skip_steps=[],
         organization_url=preflight_result.organization_url,
         result_class=PreflightResult,
         result_id=preflight_result.id,

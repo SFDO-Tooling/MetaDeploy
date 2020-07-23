@@ -4,7 +4,7 @@ from unittest import mock
 import pytest
 from cumulusci.core.flowrunner import StepSpec
 from django.contrib.sites.models import Site
-from django.core.exceptions import MultipleObjectsReturned, ValidationError
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 from ..models import Job, SiteProfile, Step, Version
@@ -233,37 +233,42 @@ class TestIconProperty:
 
 
 @pytest.mark.django_db
-class TestPlansProperties:
+class TestVersion:
     def test_primary_plan__none(self, version_factory):
         version = version_factory()
         assert version.primary_plan is None
 
-    def test_primary_plan__too_many(self, version_factory, plan_factory):
+    def test_primary_plan__multiple(self, version_factory, plan_factory):
         version = version_factory()
         plan_factory(version=version, tier="primary")
-        plan_factory(version=version, tier="primary")
-        with pytest.raises(MultipleObjectsReturned):
-            version.primary_plan
-
-    def test_primary_plan__good(self, version_factory, plan_factory):
-        version = version_factory()
-        plan = plan_factory(version=version, tier="primary")
-        assert version.primary_plan == plan
+        plan2 = plan_factory(version=version, tier="primary")
+        assert version.primary_plan == plan2
 
     def test_secondary_plan__none(self, version_factory, plan_factory):
         version = version_factory()
         assert version.secondary_plan is None
 
-    def test_secondary_plan__good(self, version_factory, plan_factory):
+    def test_secondary_plan__multiple(self, version_factory, plan_factory):
         version = version_factory()
-        plan = plan_factory(version=version, tier="secondary")
-        assert version.secondary_plan == plan
+        plan_factory(version=version, tier="secondary")
+        plan2 = plan_factory(version=version, tier="secondary")
+        assert version.secondary_plan == plan2
 
     def test_additional_plans(self, version_factory, plan_factory):
         version = version_factory()
         plan1 = plan_factory(version=version, tier="additional")
         plan2 = plan_factory(version=version, tier="additional")
         assert list(version.additional_plans) == [plan1, plan2]
+
+    def test_additional_plans__one_per_plan_template(
+        self, version_factory, plan_factory
+    ):
+        version = version_factory()
+        plan1 = plan_factory(version=version, tier="additional")
+        plan2 = plan_factory(
+            version=version, plan_template=plan1.plan_template, tier="additional"
+        )
+        assert list(version.additional_plans) == [plan2]
 
 
 @pytest.mark.django_db
@@ -517,14 +522,14 @@ class TestJob:
 
         assert job.click_through_agreement.text == "Test"
 
-    def test_skip_tasks(self, plan_factory, step_factory, job_factory):
+    def test_skip_steps(self, plan_factory, step_factory, job_factory):
         plan = plan_factory()
         step1 = step_factory(plan=plan, path="task1")
         step2 = step_factory(plan=plan, path="task2")
         step3 = step_factory(plan=plan, path="task3")
         job = job_factory(plan=plan, steps=[step1, step3], org_id="00Dxxxxxxxxxxxxxxx")
 
-        assert job.skip_tasks() == [step2.path]
+        assert job.skip_steps() == [step2.step_num]
 
     def test_invalidate_related_preflight(self, job_factory, preflight_result_factory):
         job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")

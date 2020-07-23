@@ -19,7 +19,7 @@ type Props = {|
   isOpen: boolean,
   job: JobType,
   plan: PlanType,
-  toggleModal: boolean => void,
+  toggleModal: (boolean) => void,
   updateJob: UpdateJobType,
 |};
 type WrappedProps = Props & TransientMessageProps;
@@ -78,7 +78,7 @@ class ShareModal extends React.Component<WrappedProps> {
             result.status === CONSTANTS.RESULT_STATUS.ERROR &&
             result.message
           ) {
-            const step = plan.steps.find(s => s.id === id);
+            const step = plan.steps.find((s) => s.id === id);
             if (step) {
               stepError = result.message;
               stepName = step.name;

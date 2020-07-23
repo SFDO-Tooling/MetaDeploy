@@ -3,7 +3,6 @@ from django.urls import reverse
 
 from metadeploy.conftest import format_timestamp
 
-from ..constants import ORGANIZATION_DETAILS
 from ..models import Job, Plan, PreflightResult
 
 
@@ -269,7 +268,7 @@ class TestBasicGetViews:
         plan = plan_factory(visible_to=allowed_list)
         user = user_factory()
         social_account = user.socialaccount_set.all()[0]
-        social_account.extra_data[ORGANIZATION_DETAILS]["Id"] = allowed_list_org.org_id
+        social_account.extra_data["organization_id"] = allowed_list_org.org_id
         social_account.save()
         client.force_login(user)
         response = client.get(reverse("plan-detail", kwargs={"pk": plan.id}))
@@ -489,7 +488,10 @@ class TestUnlisted:
         plan_template2 = plan_template_factory(product=product)
         plan_factory(version=version, plan_template=plan_template1)
         plan = plan_factory(
-            version=version, plan_template=plan_template2, is_listed=False
+            version=version,
+            plan_template=plan_template2,
+            is_listed=False,
+            tier="additional",
         )
 
         response = client.get(
@@ -514,7 +516,10 @@ class TestUnlisted:
         plan_template2 = plan_template_factory(product=product)
         plan_factory(version=version, plan_template=plan_template1)
         plan = plan_factory(
-            version=version, plan_template=plan_template2, is_listed=False
+            version=version,
+            plan_template=plan_template2,
+            is_listed=False,
+            tier="additional",
         )
 
         response = client.get(
@@ -522,3 +527,37 @@ class TestUnlisted:
         )
 
         assert response.status_code == 404
+
+    def test_plan__multiple(
+        self,
+        client,
+        product_factory,
+        version_factory,
+        plan_template_factory,
+        plan_factory,
+    ):
+        # If there are multiple plans for the same version/plan template,
+        # we expect to get the most recently created one.
+        product = product_factory()
+        version = version_factory(product=product)
+        plan_template = plan_template_factory(product=product)
+        plan_factory(
+            version=version,
+            plan_template=plan_template,
+            is_listed=False,
+            tier="additional",
+        )
+        plan = plan_factory(
+            version=version,
+            plan_template=plan_template,
+            is_listed=False,
+            tier="additional",
+        )
+
+        response = client.get(
+            reverse("plan-get-one"),
+            {"slug": plan.slug, "version": str(version.id), "product": str(product.id)},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["id"] == plan.id

@@ -37,7 +37,7 @@ describe('<ShareModal />', () => {
     requires_preflight: true,
   };
 
-  const setup = options => {
+  const setup = (options) => {
     const defaults = {
       toggleModal: jest.fn(),
       updateJob: jest.fn(),

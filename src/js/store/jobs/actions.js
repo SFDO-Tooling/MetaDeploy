@@ -79,7 +79,7 @@ export const fetchJob = ({
   productSlug: string,
   versionLabel: string,
   planSlug: string,
-}): ThunkAction => dispatch => {
+}): ThunkAction => (dispatch) => {
   dispatch({ type: 'FETCH_JOB_STARTED', payload: jobId });
   const url = window.api_urls.job_detail(jobId);
   const params = {
@@ -88,7 +88,7 @@ export const fetchJob = ({
     plan__version__product__productslug__slug: productSlug,
   };
   return apiFetch(addUrlParams(url, params), dispatch)
-    .then(response => {
+    .then((response) => {
       if (response && window.socket) {
         window.socket.subscribe({
           model: 'job',
@@ -100,13 +100,13 @@ export const fetchJob = ({
         payload: { id: jobId, job: response },
       });
     })
-    .catch(err => {
+    .catch((err) => {
       dispatch({ type: 'FETCH_JOB_FAILED', payload: jobId });
       throw err;
     });
 };
 
-export const startJob = (data: JobData): ThunkAction => dispatch => {
+export const startJob = (data: JobData): ThunkAction => (dispatch) => {
   dispatch({ type: 'JOB_REQUESTED', payload: data });
   const url = window.api_urls.job_list();
   return apiFetch(url, dispatch, {
@@ -116,7 +116,7 @@ export const startJob = (data: JobData): ThunkAction => dispatch => {
       'Content-Type': 'application/json',
     },
   })
-    .then(response => {
+    .then((response) => {
       if (!response) {
         throw new Error('Invalid response received');
       }
@@ -129,7 +129,7 @@ export const startJob = (data: JobData): ThunkAction => dispatch => {
       }
       return dispatch({ type: 'JOB_STARTED', payload: response });
     })
-    .catch(err => {
+    .catch((err) => {
       dispatch({ type: 'JOB_REJECTED', payload: data });
       throw err;
     });
@@ -153,7 +153,7 @@ export const failJob = (payload: Job): JobFailed => ({
 export const updateJob = (payload: {
   +id: string,
   [string]: mixed,
-}): ThunkAction => dispatch => {
+}): ThunkAction => (dispatch) => {
   const { id } = payload;
   dispatch({ type: 'JOB_UPDATE_REQUESTED', payload });
   const url = window.api_urls.job_detail(id);
@@ -164,21 +164,21 @@ export const updateJob = (payload: {
       'Content-Type': 'application/json',
     },
   })
-    .then(response => dispatch({ type: 'JOB_UPDATED', payload: response }))
-    .catch(err => {
+    .then((response) => dispatch({ type: 'JOB_UPDATED', payload: response }))
+    .catch((err) => {
       dispatch({ type: 'JOB_UPDATE_REJECTED', payload });
       throw err;
     });
 };
 
-export const requestCancelJob = (id: string): ThunkAction => dispatch => {
+export const requestCancelJob = (id: string): ThunkAction => (dispatch) => {
   dispatch({ type: 'JOB_CANCEL_REQUESTED', payload: id });
   const url = window.api_urls.job_detail(id);
   return apiFetch(url, dispatch, {
     method: 'DELETE',
   })
     .then(() => dispatch({ type: 'JOB_CANCEL_ACCEPTED', payload: id }))
-    .catch(err => {
+    .catch((err) => {
       dispatch({ type: 'JOB_CANCEL_REJECTED', payload: id });
       throw err;
     });
