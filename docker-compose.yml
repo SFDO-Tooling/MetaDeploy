@@ -25,6 +25,7 @@ services:
       /bin/sh /app/utility/start_server.sh;'
     ports:
       - '8080:8080'
+      - '8000:8000'
     stdin_open: true
     tty: true
     depends_on:
