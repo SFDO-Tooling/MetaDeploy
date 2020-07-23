@@ -1,7 +1,7 @@
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
 
-import UserInfo from 'components/plans/userInfo';
+import UserInfo from '@/components/plans/userInfo';
 
 const defaultUser = {
   username: 'Test User',

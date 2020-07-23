@@ -1,16 +1,20 @@
 # http://eslint.org/docs/rules/
 
 parserOptions:
-  ecmaFeatures:
-    impliedStrict: true
-    jsx: true
   sourceType: module
+  ecmaFeatures:
+    jsx: true
 env:
   browser: true
-  commonjs: true
   jest: true
   node: false
+plugins:
+  - simple-import-sort
+  - jest
+extends:
+  - plugin:jest/recommended
+  - plugin:jest/style
 rules:
-  import/namespace:
-    - 2
-    - allowComputed: true
+  # Import
+  simple-import-sort/sort: 1
+  import/order: 0

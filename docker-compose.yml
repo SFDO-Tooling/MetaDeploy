@@ -11,7 +11,7 @@ services:
       - '5432:5432/tcp'
     restart: always
   redis:
-    image: 'redis:5'
+    image: redis:5.0
     ports:
       - '6379:6379'
   web:
@@ -25,10 +25,16 @@ services:
       /bin/sh /app/utility/start_server.sh;'
     ports:
       - '8080:8080'
+      - '8000:8000'
+    stdin_open: true
+    tty: true
     depends_on:
       - postgres
+      - redis
+    links:
       - redis
     env_file:
       - .env
     volumes:
-      - .:/app
+      - .:/app:cached
+      - /app/node_modules

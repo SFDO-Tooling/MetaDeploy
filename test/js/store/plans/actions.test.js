@@ -1,8 +1,8 @@
 import fetchMock from 'fetch-mock';
 
-import { storeWithApi } from './../../utils';
+import * as actions from '@/store/plans/actions';
 
-import * as actions from 'store/plans/actions';
+import { storeWithApi } from './../../utils';
 
 describe('fetchPreflight', () => {
   describe('success', () => {
@@ -171,6 +171,7 @@ describe('startPreflight', () => {
     const payload = { foo: 'bar' };
     const expected = { type, payload };
 
+    // eslint-disable-next-line import/namespace
     expect(actions[action](payload)).toEqual(expected);
   });
 });

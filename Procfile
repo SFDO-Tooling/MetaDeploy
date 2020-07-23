@@ -1,4 +1,4 @@
-web: daphne --bind 0.0.0.0 --port $PORT metadeploy.asgi:application
+web: yarn django:serve:prod
 devworker: python manage.py rqworker default short
 scheduler: python manage.py rqscheduler --queue short
 worker: python manage.py rqworker default

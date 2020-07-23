@@ -1,4 +1,4 @@
-import { getDuration } from 'utils/dates';
+import { getDuration } from '@/utils/dates';
 
 describe('getDuration', () => {
   [

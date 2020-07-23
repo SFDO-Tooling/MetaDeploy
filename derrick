@@ -1,0 +1,87 @@
+#!/bin/bash -e
+
+function dcr {
+  docker-compose run --rm web $@
+}
+
+function dcrq {
+  docker-compose run --rm --no-deps web $@
+}
+
+case "$1" in
+    "up")
+        docker-compose up
+        ;;
+    "down")
+        docker-compose down
+        ;;
+    "build")
+        docker-compose build
+        ;;
+    "manage")
+        dcr python manage.py "${@:2}"
+        ;;
+    "populate")
+        dcr python manage.py populate_data "${@:2}"
+        ;;
+    "truncate")
+        dcr python manage.py truncate_data "${@:2}"
+        ;;
+    "lint")
+        dcrq yarn lint "${@:2}"
+        ;;
+    "lint:py")
+        dcrq yarn lint:py "${@:2}"
+        ;;
+    "lint:js")
+        dcrq yarn lint:js "${@:2}"
+        ;;
+    "test")
+        dcr yarn test "${@:2}"
+        ;;
+    "test:js:watch")
+        dcrq yarn test:js:watch "${@:2}"
+        ;;
+    "test:py")
+        dcr yarn test:py "${@:2}"
+        ;;
+    "test:js")
+        dcrq yarn test:js "${@:2}"
+        ;;
+    "add:js")
+        dcrq yarn add "${@:2}"
+        ;;
+    "migrate")
+        dcr python manage.py migrate "${@:2}"
+        ;;
+    "makemigrations")
+        dcr python manage.py makemigrations "${@:2}"
+        ;;
+    "showmigrations")
+        dcr python manage.py showmigrations "${@:2}"
+        ;;
+    "messages")
+        dcr python manage.py makemessages --locale "${@:2}"
+        dcr python manage.py compilemessages
+        ;;
+    "shell" | "bash" | "sh")
+        dcr bash "${@:2}"
+        ;;
+    "ipy")
+        dcr python manage.py shell "${@:2}"
+        ;;
+    "dbshell")
+        dcr python manage.py dbshell "${@:2}"
+        ;;
+    "manage")
+        dcr python manage.py "${@:2}"
+        ;;
+    "prune")
+        # See https://docs.docker.com/config/pruning/ for more detail.
+        docker system prune -f --volumes
+        ;;
+    *)
+        echo "Sorry, I don't know that command."
+        exit 1
+        ;;
+esac

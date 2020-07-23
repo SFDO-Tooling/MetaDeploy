@@ -1,8 +1,8 @@
+import { render } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { render } from '@testing-library/react';
 
-import CtaButton from 'components/jobs/ctaButton';
+import CtaButton from '@/components/jobs/ctaButton';
 
 const defaultJob = {
   id: 'job-1',

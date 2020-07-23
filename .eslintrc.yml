@@ -1,44 +1,47 @@
 # http://eslint.org/docs/rules/
 
 root: true
-parser: babel-eslint
 parserOptions:
   sourceType: script
-  ecmaVersion: 2015
-  allowImportExportEverywhere: true
+  ecmaVersion: 2018
 env:
   es6: true
   node: true
 settings:
   import/resolver:
+    typescript: {}
     webpack:
       config:
         resolve:
           extensions:
             - .js
             - .jsx
+            - .ts
+            - .tsx
           modules:
-            - src/js
+            - src
             - static
             - node_modules
+          alias:
+            '@': js
   react:
     version: 'detect'
-    flowVersion: '0.110.1'
 plugins:
-  - react
   - prettier
-  - flowtype
+  - import
+  - react
+  - react-hooks
 extends:
   - eslint:recommended
-  - plugin:flowtype/recommended
-  - plugin:react/recommended
   - plugin:import/recommended
-  - plugin:prettier/recommended
-  - prettier/flowtype
+  - plugin:import/typescript
   - prettier/react
+  - plugin:prettier/recommended
+  - plugin:react/recommended
 rules:
-  # React
-  react/prop-types: 0
+  # React Hooks
+  react-hooks/rules-of-hooks: 2
+  react-hooks/exhaustive-deps: 1
 
   # Prettier
   prettier/prettier:
@@ -50,6 +53,7 @@ rules:
   import/order:
     - 1
     - newlines-between: always
+  import/named: 1
 
   # Possible Errors
   getter-return: 2
@@ -67,6 +71,7 @@ rules:
   guard-for-in: 2
   no-alert: 2
   no-caller: 2
+  no-console: 1
   no-div-regex: 2
   no-else-return: 2
   no-eq-null: 2
@@ -85,6 +90,7 @@ rules:
   no-new-func: 2
   no-new-wrappers: 2
   no-octal-escape: 2
+  no-param-reassign: 1
   no-proto: 2
   no-return-assign: 2
   no-return-await: 2

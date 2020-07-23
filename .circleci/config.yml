@@ -3,15 +3,17 @@ jobs:
   build:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.8.3
+      - image: circleci/python:3.8
     steps:
       - checkout
       - restore_cache:
           keys:
             - metadeploy-py-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+            - metadeploy-py-
       - restore_cache:
           keys:
             - metadeploy-npm-{{ checksum "yarn.lock" }}
+            - metadeploy-npm-
       - run:
           name: Install Node & Yarn
           command: ./bin/unpack-node
@@ -24,11 +26,7 @@ jobs:
       - run:
           name: Install Dependencies
           command: |
-            if [[ "${CIRCLE_BRANCH}" =~ greenkeeper\/.* ]]; then
-              yarn install
-            else
-              yarn install --frozen-lockfile
-            fi
+            yarn install --frozen-lockfile
             python3 -m venv venv
             . venv/bin/activate
             pip install -Ur requirements/local.txt
@@ -38,6 +36,7 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
+            - ./dist
             - ./venv
             - ./node_modules
             - ./node
@@ -53,7 +52,7 @@ jobs:
   lint:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.8.3
+      - image: circleci/python:3.8
     steps:
       - checkout
       - attach_workspace:
@@ -68,12 +67,12 @@ jobs:
           name: Lint
           command: |
             . venv/bin/activate
-            yarn lint
+            yarn lint:nofix
 
   test-client:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.8.3
+      - image: circleci/python:3.8
     steps:
       - checkout
       - attach_workspace:
@@ -86,7 +85,7 @@ jobs:
             source $BASH_ENV
       - run:
           name: Test JS
-          command: yarn test:coverage
+          command: yarn test:js:coverage
       - store_artifacts:
           path: coverage
           destination: js-reports
@@ -100,7 +99,7 @@ jobs:
   test-python:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.8.3
+      - image: circleci/python:3.8
         environment:
           BUCKETEER_AWS_ACCESS_KEY_ID: circle_test
           BUCKETEER_AWS_SECRET_ACCESS_KEY: circle_test
@@ -108,7 +107,7 @@ jobs:
           CONNECTED_APP_CALLBACK_URL: circle_test
           CONNECTED_APP_CLIENT_ID: circle_test
           CONNECTED_APP_CLIENT_SECRET: circle_test
-          DATABASE_URL: postgres://ubuntu@localhost:5432/circle_test
+          DATABASE_URL: postgres://ubuntu:circle_test@localhost:5432/circle_test
           DB_ENCRYPTION_KEY: s38Tpa-rzNJsDwmn_bNuUK4T1zaNG9j1J9u1Yrk9P9c=
           DJANGO_DEBUG: False
           DJANGO_HASHID_SALT: test_hash_id
@@ -116,8 +115,8 @@ jobs:
           DJANGO_SETTINGS_MODULE: config.settings.test
           GITHUB_TOKEN: circle_test
           SECURE_SSL_REDIRECT: False
-      - image: circleci/redis:latest
-      - image: circleci/postgres:latest
+      - image: circleci/redis:5.0
+      - image: circleci/postgres:10.6
         environment:
           AWS_ACCESS_KEY_ID: None
           AWS_BUCKET_NAME: None
@@ -160,7 +159,7 @@ jobs:
   report-test-coverage:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.8.3
+      - image: circleci/python:3.8
     environment:
       COVERALLS_PARALLEL: true
     steps:
@@ -179,20 +178,20 @@ jobs:
             export COVERALLS_SERVICE_NUMBER=$CIRCLE_BUILD_NUM
             export COVERALLS_SERVICE_JOB_ID=$CIRCLE_WORKFLOW_ID
             . venv/bin/activate
-            yarn pytest:report-coverage
-            yarn test:report-coverage
+            yarn test:py:report-coverage
+            yarn test:js:report-coverage
             curl -k "https://coveralls.io/webhook?repo_token=${COVERALLS_REPO_TOKEN}" -d "payload[build_num]=${CIRCLE_BUILD_NUM}&payload[status]=done"
       - run:
           name: Check Test Coverage
           command: |
             . venv/bin/activate
-            yarn pytest:check-coverage
-            yarn test:check-coverage
+            yarn test:py:check-coverage
+            yarn test:js:check-coverage
 
   build-docs:
     working_directory: ~/metadeploy
     docker:
-      - image: circleci/python:3.8.3
+      - image: circleci/python:3.8
     steps:
       - checkout
       - attach_workspace:
