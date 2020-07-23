@@ -1,6 +1,5 @@
 web: daphne --bind 0.0.0.0 --port $PORT metadeploy.asgi:application
-devworker: python manage.py rqworker default short
-scheduler: python manage.py rqscheduler --queue short
+devworker: honcho start -f Procfile_devworker
 worker: python manage.py rqworker default
-worker-short: python manage.py rqworker short
+worker-short: honcho start -f Procfile_worker_short
 release: python manage.py migrate --noinput

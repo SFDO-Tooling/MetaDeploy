@@ -2,3 +2,5 @@
 # production that isn't in development.
 
 -r base.txt
+
+honcho==1.0.1
