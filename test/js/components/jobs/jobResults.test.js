@@ -1,7 +1,7 @@
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
 
-import JobResults from 'components/jobs/jobResults';
+import JobResults from '@/components/jobs/jobResults';
 
 const defaultJob = {
   status: 'complete',

@@ -1,11 +1,11 @@
 import Sockette from 'sockette';
 
-import * as jobActions from 'store/jobs/actions';
-import * as preflightActions from 'store/plans/actions';
-import * as sockets from 'utils/websockets';
-import { connectSocket, disconnectSocket } from 'store/socket/actions';
-import { invalidateToken } from 'store/user/actions';
-import { updateOrg } from 'store/org/actions';
+import * as jobActions from '@/store/jobs/actions';
+import { updateOrg } from '@/store/org/actions';
+import * as preflightActions from '@/store/plans/actions';
+import { connectSocket, disconnectSocket } from '@/store/socket/actions';
+import { invalidateToken } from '@/store/user/actions';
+import * as sockets from '@/utils/websockets';
 
 const mockJson = jest.fn();
 const mockClose = jest.fn();
@@ -47,6 +47,7 @@ describe('getAction', () => {
     test(`handles msg: ${type}`, () => {
       const payload = { foo: 'bar' };
       const msg = { type, payload };
+      // eslint-disable-next-line import/namespace
       const expected = preflightActions[action](payload);
       const actual = sockets.getAction(msg);
 
@@ -63,6 +64,7 @@ describe('getAction', () => {
     test(`handles msg: ${type}`, () => {
       const payload = { foo: 'bar' };
       const msg = { type, payload };
+      // eslint-disable-next-line import/namespace
       const expected = jobActions[action](payload);
       const actual = sockets.getAction(msg);
 

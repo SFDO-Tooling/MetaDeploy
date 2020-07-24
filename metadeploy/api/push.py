@@ -112,8 +112,8 @@ async def notify_post_task(job):
 
 
 async def notify_post_job(job):
-    from .serializers import JobSerializer
     from .models import Job
+    from .serializers import JobSerializer
 
     if job.status == Job.Status.complete:
         type_ = "JOB_COMPLETED"
@@ -125,8 +125,8 @@ async def notify_post_job(job):
 
 
 async def notify_org_result_changed(result):
-    from .serializers import OrgSerializer
     from .models import Job, PreflightResult
+    from .serializers import OrgSerializer
 
     type_ = "ORG_CHANGED"
     org_id = result.org_id

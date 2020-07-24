@@ -5,13 +5,12 @@
 process.env.NODE_ENV = 'development';
 
 const fs = require('fs');
+const path = require('path');
 
 const I18nextWebpackPlugin = require('i18next-scanner-webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const babel = require('@babel/core');
 const { merge } = require('webpack-merge');
-const path = require('path');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 const common = require('./webpack.common.js');
 
@@ -36,7 +35,6 @@ module.exports = merge(common, {
     writeToDisk: true,
   },
   plugins: [
-    new CleanWebpackPlugin(),
     new MiniCssExtractPlugin({
       filename: '[name].css',
     }),
@@ -48,7 +46,7 @@ module.exports = merge(common, {
         attr: false,
         func: {
           list: ['t', 'i18next.t', 'i18n.t', 'translate'],
-          extensions: ['.js'],
+          extensions: ['.js', '.jsx', '.ts', '.tsx'],
         },
         nsSeparator: false,
         keySeparator: false,
@@ -60,31 +58,33 @@ module.exports = merge(common, {
         resource: {
           savePath: '../locales_dev/{{lng}}/{{ns}}.json',
         },
-        defaultValue(lng, ns, key) {
+        defaultValue(lng, ns, key, opts) {
           if (lng === 'en') {
             // Return key as the default value for English language
-            return key;
+            return opts.defaultValue || key;
           }
           // Return the string '__NOT_TRANSLATED__' for other languages
           return '__NOT_TRANSLATED__';
         },
       },
-      // Custom transform to allow parsing Js with Flow types
+      // Custom transform to allow parsing JS with TypeScript types
       // https://github.com/i18next/i18next-scanner/issues/88
       transform(file, enc, done) {
         const extname = path.extname(file.path);
-        if (['.js'].includes(extname)) {
+        if (['.js', '.jsx', '.ts', '.tsx'].includes(extname)) {
           const parser = this.parser;
           fs.readFile(file.path, enc, (err, data) => {
             if (err) {
               done(err);
             } else {
               const options = {
-                presets: ['@babel/preset-flow'],
+                filename: file.path,
+                presets: ['@babel/preset-typescript'],
                 plugins: [
                   '@babel/plugin-syntax-jsx',
                   '@babel/plugin-proposal-class-properties',
                   '@babel/plugin-proposal-object-rest-spread',
+                  '@babel/plugin-proposal-optional-chaining',
                 ],
                 configFile: false,
               };

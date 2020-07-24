@@ -1,7 +1,7 @@
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
 
-import ProgressIndicator from 'components/plans/progressIndicator';
+import ProgressIndicator from '@/components/plans/progressIndicator';
 
 describe('<ProgressIndicator />', () => {
   const setup = (options) => {

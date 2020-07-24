@@ -1,7 +1,7 @@
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
 
-import Footer from 'components/footer';
+import Footer from '@/components/footer';
 
 describe('<Footer />', () => {
   describe('logo', () => {

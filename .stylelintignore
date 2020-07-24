@@ -10,7 +10,6 @@ coverage/
 dist/
 docs/
 env/
-flow-typed/
 htmlcov/
 jscache/
 locales/

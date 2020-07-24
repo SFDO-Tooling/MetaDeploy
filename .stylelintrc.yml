@@ -10,6 +10,9 @@ plugins:
 
 ignoreFiles:
   - '**/*.js'
+  - '**/*.jsx'
+  - '**/*.ts'
+  - '**/*.tsx'
 
 rules:
   prettier/prettier: true

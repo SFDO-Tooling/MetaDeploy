@@ -2,10 +2,10 @@ import fetchMock from 'fetch-mock';
 
 import apiFetch, {
   addUrlParams,
+  extractCustomDomain,
   getUrlParam,
   removeUrlParam,
-  extractCustomDomain,
-} from 'utils/api';
+} from '@/utils/api';
 
 const dispatch = jest.fn();
 
