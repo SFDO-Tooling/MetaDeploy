@@ -441,6 +441,7 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
     tier = models.CharField(choices=Tier, default=Tier.primary, max_length=64)
     is_listed = models.BooleanField(default=True)
     preflight_checks = JSONField(default=list, blank=True)
+    make_scratch_org = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
