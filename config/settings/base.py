@@ -402,6 +402,9 @@ LOG_REQUEST_ID_HEADER = "HTTP_X_REQUEST_ID"
 GENERATE_REQUEST_ID_IF_NOT_IN_HEADER = True
 REQUEST_ID_RESPONSE_HEADER = "X-Request-ID"
 
+# Salesforce integration settings:
+DEVHUB_USERNAME = env("DEVHUB_USERNAME", default=None)
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": True,
