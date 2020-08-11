@@ -318,6 +318,15 @@ GITHUB_TOKEN = env("GITHUB_TOKEN", default=None)
 GITHUB_APP_ID = env("GITHUB_APP_ID", default=None)
 GITHUB_APP_KEY = env("GITHUB_APP_KEY", default=None)
 
+# SF client settings:
+SF_CALLBACK_URL = env("SF_CALLBACK_URL", default=None)
+# Ugly hack to fix https://github.com/moby/moby/issues/12997
+SF_CLIENT_KEY = env("SF_CLIENT_KEY", default="").replace("\\n", "\n")
+SF_CLIENT_ID = env("SF_CLIENT_ID", default=None)
+SF_CLIENT_SECRET = env("SF_CLIENT_SECRET", default=None)
+SF_SIGNUP_INSTANCE = env("SF_SIGNUP_INSTANCE", default=None)
+
+
 if not GITHUB_TOKEN and not GITHUB_APP_ID and not GITHUB_APP_KEY:
     raise ImproperlyConfigured(
         "You must set either GITHUB_TOKEN or GITHUB_APP_ID and GITHUB_APP_KEY"

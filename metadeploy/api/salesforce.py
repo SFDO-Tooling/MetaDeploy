@@ -20,24 +20,6 @@ SF_CLIENT_SECRET = settings.SF_CLIENT_SECRET
 
 DURATION_DAYS = 30
 
-# Deploy org settings metadata -- this should get moved into CumulusCI
-SETTINGS_XML_t = """<?xml version="1.0" encoding="UTF-8"?>
-<{settingsName} xmlns="http://soap.sforce.com/2006/04/metadata">
-    {values}
-</{settingsName}>"""
-ORGPREF_t = """<preferences>
-    <settingName>{name}</settingName>
-    <settingValue>{value}</settingValue>
-</preferences>"""
-PACKAGE_XML = """<?xml version="1.0" encoding="UTF-8"?>
-<Package xmlns="http://soap.sforce.com/2006/04/metadata">
-    <types>
-        <members>*</members>
-        <name>Settings</name>
-    </types>
-    <version>47.0</version>
-</Package>"""
-
 
 def _get_devhub_api():
     """Get an access token.
