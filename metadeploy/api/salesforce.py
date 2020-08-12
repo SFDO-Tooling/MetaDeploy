@@ -13,10 +13,11 @@ from simple_salesforce import Salesforce as SimpleSalesforce
 
 # Salesforce connected app
 # Assign these locally, for brevity:
-SF_CALLBACK_URL = settings.SF_CALLBACK_URL
-SF_CLIENT_KEY = settings.SF_CLIENT_KEY
-SF_CLIENT_ID = settings.SF_CLIENT_ID
-SF_CLIENT_SECRET = settings.SF_CLIENT_SECRET
+SF_CALLBACK_URL = settings.CONNECTED_APP_CALLBACK_URL
+SF_CLIENT_KEY = settings.CONNECTED_APP_CLIENT_KEY
+SF_CLIENT_ID = settings.CONNECTED_APP_CLIENT_ID
+SF_CLIENT_SECRET = settings.CONNECTED_APP_CLIENT_SECRET
+SF_SIGNUP_INSTANCE = settings.CONNECTED_APP_SIGNUP_INSTANCE
 
 DURATION_DAYS = 30
 
@@ -132,8 +133,8 @@ def _get_org_result(
         # optional fields from the scratch org definition file,
         # but this will work for a start
     }
-    if settings.SF_SIGNUP_INSTANCE:
-        create_args["Instance"] = settings.SF_SIGNUP_INSTANCE
+    if SF_SIGNUP_INSTANCE:
+        create_args["Instance"] = SF_SIGNUP_INSTANCE
     response = devhub_api.ScratchOrgInfo.create(create_args)
 
     # Get details and update scratch org config
