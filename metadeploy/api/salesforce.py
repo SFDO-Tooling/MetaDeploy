@@ -57,7 +57,7 @@ def _get_org_details(*, cci, org_name, project_path):
     return (scratch_org_config, scratch_org_definition)
 
 
-def _refresh_access_token(*, config, org_name, scratch_org, originating_user_id):
+def _refresh_access_token(*, config, org_name):
     """Refresh the JWT.
 
     Construct a new OrgConfig because ScratchOrgConfig tries to use sfdx
@@ -73,9 +73,7 @@ def _refresh_access_token(*, config, org_name, scratch_org, originating_user_id)
     return org_config
 
 
-def _deploy_org_settings(
-    *, cci, org_name, scratch_org_config, scratch_org, originating_user_id
-):
+def _deploy_org_settings(*, cci, org_name, scratch_org_config):
     """Deploy org settings via Metadata API.
 
     Do a Metadata API deployment to configure org settings as specified
@@ -84,8 +82,6 @@ def _deploy_org_settings(
     org_config = _refresh_access_token(
         config=scratch_org_config.config,
         org_name=org_name,
-        scratch_org=scratch_org,
-        originating_user_id=originating_user_id,
     )
     path = os.path.join(cci.project_config.repo_root, scratch_org_config.config_file)
     task_config = TaskConfig({"options": {"definition_file": path}})
@@ -187,20 +183,15 @@ def create_scratch_org(
     repo_name,
     repo_url,
     repo_branch,
-    user,
+    email,
     project_path,
-    scratch_org,
     org_name,
-    originating_user_id,
-    sf_username=None,
 ):
     """Create a new scratch org
 
     Expects to be called inside a project checkout, so that it has
     access to the cumulusci.yml.
     """
-    email = user.email  # TODO: check that this is reliably right.
-
     cci = BaseCumulusCI(
         repo_info={
             "root": project_path,
@@ -245,8 +236,6 @@ def create_scratch_org(
     org_config = _deploy_org_settings(
         # Passed in to create_scratch_org:
         org_name=org_name,
-        scratch_org=scratch_org,
-        originating_user_id=originating_user_id,
         # Created in create_scratch_org:
         cci=cci,
         # From _get_org_details:
