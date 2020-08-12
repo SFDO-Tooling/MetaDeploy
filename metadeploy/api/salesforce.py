@@ -194,7 +194,11 @@ def create_scratch_org(
     originating_user_id,
     sf_username=None,
 ):
-    """Create a new scratch org"""
+    """Create a new scratch org
+
+    Expects to be called inside a project checkout, so that it has
+    access to the cumulusci.yml.
+    """
     email = user.email  # TODO: check that this is reliably right.
 
     cci = BaseCumulusCI(
