@@ -1,3 +1,8 @@
+"""
+Salesforce utilities
+"""
+
+
 import json
 import os
 from datetime import datetime
@@ -80,8 +85,7 @@ def _deploy_org_settings(*, cci, org_name, scratch_org_config):
     in the scratch org definition file.
     """
     org_config = _refresh_access_token(
-        config=scratch_org_config.config,
-        org_name=org_name,
+        config=scratch_org_config.config, org_name=org_name,
     )
     path = os.path.join(cci.project_config.repo_root, scratch_org_config.config_file)
     task_config = TaskConfig({"options": {"definition_file": path}})
@@ -178,14 +182,7 @@ def _get_access_token(*, org_result, scratch_org_config):
 
 
 def create_scratch_org(
-    *,
-    repo_owner,
-    repo_name,
-    repo_url,
-    repo_branch,
-    email,
-    project_path,
-    org_name,
+    *, repo_owner, repo_name, repo_url, repo_branch, email, project_path, org_name,
 ):
     """Create a new scratch org
 

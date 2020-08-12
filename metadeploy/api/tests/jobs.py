@@ -22,7 +22,7 @@ from ..models import Job, PreflightResult
 
 @pytest.mark.django_db
 def test_report_error(mocker, job_factory, user_factory, plan_factory, step_factory):
-    mocker.patch("metadeploy.api.jobs.get_github_api_for_repo", side_effect=Exception)
+    mocker.patch("metadeploy.api.jobs.local_github_checkout", side_effect=Exception)
     report_error = mocker.patch("metadeploy.api.jobs.sync_report_error")
 
     user = user_factory()
@@ -110,45 +110,6 @@ def test_enqueuer(mocker, job_factory):
 
 
 @pytest.mark.django_db
-def test_malicious_zip_file(
-    mocker, job_factory, user_factory, plan_factory, step_factory
-):
-    # TODO: I don't like this test at all. But there's a lot of IO that
-    # this code causes, so I'm mocking it out.
-    mocker.patch("shutil.move")
-    mocker.patch("shutil.rmtree")
-    glob = mocker.patch("metadeploy.api.jobs.glob")
-    glob.return_value = ["test"]
-    mocker.patch("metadeploy.api.jobs.get_github_api_for_repo")
-    zip_info = MagicMock()
-    zip_info.filename = "/etc/passwd"
-    zip_file_instance = MagicMock()
-    zip_file_instance.infolist.return_value = [zip_info]
-    zip_file = mocker.patch("zipfile.ZipFile")
-    zip_file.return_value = zip_file_instance
-    mocker.patch("metadeploy.api.jobs.OrgConfig")
-    mocker.patch("metadeploy.api.jobs.ServiceConfig")
-    mocker.patch("metadeploy.api.jobs.MetaDeployCCI")
-    job_flow = mocker.patch("metadeploy.api.flows.JobFlowCallback")
-
-    user = user_factory()
-    plan = plan_factory()
-    step_factory(plan=plan)
-    job = job_factory(user=user, org_id=user.org_id)
-
-    run_flows(
-        user=user,
-        plan=plan,
-        skip_steps=[],
-        organization_url=job.organization_url,
-        result_class=Job,
-        result_id=job.id,
-    )
-
-    assert not job_flow.called
-
-
-@pytest.mark.django_db
 def test_expire_user_tokens(user_factory):
     user1 = user_factory()
     user1.socialaccount_set.update(last_login=timezone.now())
@@ -194,7 +155,7 @@ def test_preflight_failure(
 ):
     glob = mocker.patch("metadeploy.api.jobs.glob")
     glob.side_effect = Exception
-    mocker.patch("metadeploy.api.jobs.get_github_api_for_repo")
+    mocker.patch("metadeploy.api.jobs.local_github_checkout")
 
     user = user_factory()
     plan = plan_factory()

@@ -12,21 +12,15 @@ instances of the Job model and triggers the run_flows_job.
 """
 
 import contextlib
-import itertools
 import logging
 import os
-import shutil
 import sys
 import traceback
-import zipfile
 from datetime import timedelta
-from glob import glob
 
 from allauth.socialaccount.models import SocialToken
 from asgiref.sync import async_to_sync
 from cumulusci.core.config import OrgConfig, ServiceConfig
-from cumulusci.core.github import get_github_api_for_repo
-from cumulusci.utils import temporary_dir
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.utils import timezone
@@ -36,6 +30,7 @@ from rq.worker import StopRequested
 
 from .cci_configs import MetaDeployCCI, extract_user_and_repo
 from .flows import StopFlowException
+from .github import local_github_checkout
 from .models import Job, PreflightResult
 from .push import report_error, user_token_expired
 
@@ -139,45 +134,21 @@ def run_flows(*, user, plan, skip_steps, organization_url, result_class, result_
     with contextlib.ExitStack() as stack:
         stack.enter_context(finalize_result(result))
         stack.enter_context(report_errors_to(user))
-        tmpdirname = stack.enter_context(temporary_dir())
-
-        # Get cwd into Python path, so that the tasks below can import
-        # from the checked-out repo:
-        stack.enter_context(prepend_python_path(os.path.abspath(tmpdirname)))
 
         # Let's clone the repo locally:
         user, repo_name = extract_user_and_repo(repo_url)
-        gh = get_github_api_for_repo(None, user, repo_name)
-        repo = gh.repository(user, repo_name)
-        # Make sure we have the actual owner/repo name if we were redirected
-        user = repo.owner.login
-        repo_name = repo.name
-        zip_file_name = "archive.zip"
-        repo.archive("zipball", path=zip_file_name, ref=commit_ish)
-        zip_file = zipfile.ZipFile(zip_file_name)
-        if not zip_file_is_safe(zip_file):
-            # This is very unlikely, as we get the zipfile from GitHub,
-            # but must be considered:
-            url = f"https://github.com/{user}/{repo_name}#{commit_ish}"
-            logger.error(f"Malformed or malicious zip file from {url}.")
-            return
-        zip_file.extractall()
-        # We know that the zipball contains a root directory named
-        # something like this by GitHub's convention. If that ever
-        # breaks, this will break:
-        zipball_root = glob(f"{user}-{repo_name}-*")[0]
-        # It's not unlikely that the zipball root contains a directory
-        # with the same name, so we pre-emptively rename it to probably
-        # avoid collisions:
-        shutil.move(zipball_root, "zipball_root")
-        for path in itertools.chain(glob("zipball_root/*"), glob("zipball_root/.*")):
-            shutil.move(path, ".")
-        shutil.rmtree("zipball_root")
+        repo_root = stack.enter_context(
+            local_github_checkout(user, repo_name, commit_ish)
+        )
+
+        # Get cwd into Python path, so that the tasks below can import
+        # from the checked-out repo:
+        stack.enter_context(prepend_python_path(os.path.abspath(repo_root)))
 
         # There's a lot of setup to make configs and keychains, link
         # them properly, and then eventually pass them into a flow,
         # which we then run:
-        ctx = MetaDeployCCI(repo_root=tmpdirname, plan=plan)
+        ctx = MetaDeployCCI(repo_root=repo_root, plan=plan)
 
         current_org = "current_org"
         org_config = OrgConfig(
