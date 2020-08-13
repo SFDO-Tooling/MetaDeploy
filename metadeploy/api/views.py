@@ -16,6 +16,7 @@ from .models import Job, Plan, PreflightResult, Product, ProductCategory, Versio
 from .paginators import ProductPaginator
 from .permissions import OnlyOwnerOrSuperuserCanDelete
 from .serializers import (
+    CreateScratchOrgSerializer,
     FullUserSerializer,
     JobSerializer,
     OrgSerializer,
@@ -206,6 +207,20 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
             return self.preflight_get(request)
         if request.method == "POST":
             return self.preflight_post(request)
+
+    @action(detail=True, methods=["post"])
+    def create_scratch_org(self, request, pk=None):
+        from .jobs import create_scratch_org_job
+
+        plan = self.get_object()
+        serializer = CreateScratchOrgSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        email = serializer.validated_data["email"]
+        org_name = serializer.validated_data["org_name"]
+        create_scratch_org_job.delay(plan=plan, email=email, org_name=org_name)
+        return Response(status=status.HTTP_202_ACCEPTED)
 
 
 class OrgViewSet(viewsets.ViewSet):

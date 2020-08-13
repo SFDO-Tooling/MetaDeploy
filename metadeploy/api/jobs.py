@@ -31,8 +31,9 @@ from rq.worker import StopRequested
 from .cci_configs import MetaDeployCCI, extract_user_and_repo
 from .flows import StopFlowException
 from .github import local_github_checkout
-from .models import Job, PreflightResult
+from .models import Job, Plan, PreflightResult
 from .push import report_error, user_token_expired
+from .salesforce import create_scratch_org as create_scratch_org_on_sf
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -97,14 +98,6 @@ def prepend_python_path(path):
         yield
     finally:
         sys.path = prev_path
-
-
-def is_safe_path(path):
-    return not os.path.isabs(path) and ".." not in path.split(os.path.sep)
-
-
-def zip_file_is_safe(zip_file):
-    return all(is_safe_path(info.filename) for info in zip_file.infolist())
 
 
 def run_flows(*, user, plan, skip_steps, organization_url, result_class, result_id):
@@ -267,3 +260,25 @@ def expire_preflights():
 
 
 expire_preflights_job = job(expire_preflights)
+
+
+def create_scratch_org(*, plan_id, email, org_name="release"):
+    plan = Plan.objects.get(id=plan_id)
+    repo_url = plan.version.product.repo_url
+    repo_owner, repo_name = extract_user_and_repo(repo_url)
+    commit_ish = plan.commit_ish
+    with local_github_checkout(
+        repo_owner, repo_name, commit_ish=commit_ish
+    ) as repo_root:
+        create_scratch_org_on_sf(
+            repo_owner=repo_owner,
+            repo_name=repo_name,
+            repo_url=repo_url,
+            repo_branch=commit_ish,
+            email=email,
+            project_path=repo_root,
+            org_name=org_name,
+        )
+
+
+create_scratch_org_job = job(create_scratch_org)

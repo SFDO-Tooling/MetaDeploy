@@ -602,3 +602,8 @@ class SiteSerializer(serializers.ModelSerializer):
             "company_logo",
             "favicon",
         )
+
+
+class CreateScratchOrgSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    org_name = serializers.CharField()
