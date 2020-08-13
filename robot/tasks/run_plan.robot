@@ -83,14 +83,23 @@ Run Preflight
     ${text} =  Translate Text  Pre-install validation completed successfully.
     Wait Until Page Contains  ${text}  timeout=300
 
-Run Plan
-    ${text} =  Translate Text  Install
-    Click button  ${text}
+Maybe Execute Clickthrough
+    ${has_clickthrough} =  Run Keyword and Return Status
+    ...  Wait Until Page Contains Element //label[@for="click-through-confirm"]
+    ...  timeout=5
+    Run Keyword If  ${has_clickthrough}  Execute Clickthrough
+
+Execute Clickthrough
     Click element  //label[@for="click-through-confirm"]
     Capture Page Screenshot  ${OUTPUTDIR}/${LANG}/07_agreement.png
     ${text} =  Translate Text  Confirm
     Wait Until Page Contains  ${text}
     Click button  ${text}
+
+Run Plan
+    ${text} =  Translate Text  Install
+    Click button  ${text}
+    Maybe Execute Clickthrough
     ${text} =  Translate Text  Installation completed successfully.
     Wait Until Page Contains  ${text}  timeout=1200
     Capture Page Screenshot  ${OUTPUTDIR}/${LANG}/08_success.png
