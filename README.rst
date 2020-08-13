@@ -13,7 +13,8 @@ Development
 -----------
 
 .. image:: https://www.herokucdn.com/deploy/button.svg
-     :target: https://heroku.com/deploy
+     :target: https://heroku.com/deploy?template=https://github.com/SFDO-Tooling/MetaDeploy/tree/main
+
      :alt: Deploy to Heroku
 
 See `CONTRIBUTING.rst <CONTRIBUTING.rst>`_.
