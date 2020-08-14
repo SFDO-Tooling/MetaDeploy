@@ -7,14 +7,12 @@ import contextlib
 import itertools
 import logging
 import os
-import pathlib
 import shutil
 import zipfile
 from glob import glob
 
 from cumulusci.core.github import get_github_api_for_repo
-from cumulusci.utils import temporary_dir
-from github3.exceptions import NotFoundError
+from cumulusci.utils import download_extract_github, temporary_dir
 
 logger = logging.getLogger(__name__)
 
@@ -64,22 +62,6 @@ def _extract_zip_file(zip_file, owner, repo_name):
     os.remove(ZIP_FILE_NAME)
 
 
-def _validate_cumulusci_yml_unchanged(repo):
-    """Confirm cumulusci.yml is unchanged between default_branch and the cwd."""
-    try:
-        cci_config_default_branch = repo.file_contents(
-            "cumulusci.yml", ref=repo.default_branch
-        ).decoded.decode("utf-8")
-    except NotFoundError:
-        cci_config_default_branch = ""
-    try:
-        cci_config_branch = pathlib.Path("cumulusci.yml").read_text()
-    except IOError:
-        cci_config_branch = ""
-    if cci_config_default_branch != cci_config_branch:
-        raise Exception("cumulusci.yml contains unreviewed changes.")
-
-
 @contextlib.contextmanager
 def local_github_checkout(repo_owner, repo_name, commit_ish=None):
     with temporary_dir() as repo_root:
@@ -88,20 +70,9 @@ def local_github_checkout(repo_owner, repo_name, commit_ish=None):
 
         repo = get_github_api_for_repo(None, repo_owner, repo_name)
         if commit_ish is None:
-            commit_ish = repo.default_branch
-        zip_file = _get_zip_file(repo, commit_ish)
+            commit_ish = repo.repository(repo_owner, repo_name).default_branch
 
-        if not _zip_file_is_safe(zip_file):
-            _log_unsafe_zipfile_error(repo.html_url, commit_ish)
-            raise UnsafeZipfileError
-        else:
-            # Because subsequent operations require certain things to be
-            # present in the filesystem at cwd, things that are in the
-            # repo (we hope):
-            _extract_zip_file(zip_file, repo.owner.login, repo.name)
+        zip_file = download_extract_github(repo, repo_owner, repo_name, ref=commit_ish)
+        zip_file.extractall(repo_root)
 
-            # validate that cumulusci.yml is the same as default_branch
-            # @@@ Do we need to do this in Metadeploy?
-            _validate_cumulusci_yml_unchanged(repo)
-
-            yield repo_root
+        yield repo_root

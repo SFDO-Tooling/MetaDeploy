@@ -153,9 +153,8 @@ def test_preflight(mocker, user_factory, plan_factory, preflight_result_factory)
 def test_preflight_failure(
     mocker, user_factory, plan_factory, preflight_result_factory
 ):
-    glob = mocker.patch("metadeploy.api.jobs.glob")
-    glob.side_effect = Exception
-    mocker.patch("metadeploy.api.jobs.local_github_checkout")
+    local_github_checkout = mocker.patch("metadeploy.api.jobs.local_github_checkout")
+    local_github_checkout.side_effect = Exception
 
     user = user_factory()
     plan = plan_factory()
