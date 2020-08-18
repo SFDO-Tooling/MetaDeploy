@@ -1,4 +1,4 @@
-import * as logging from 'utils/logging';
+import * as logging from '@/utils/logging';
 
 describe('logError', () => {
   describe('with Sentry', () => {
@@ -9,7 +9,7 @@ describe('logError', () => {
         setExtras: jest.fn(),
       };
       window.Sentry = {
-        withScope: cb => cb(scope),
+        withScope: (cb) => cb(scope),
         captureException: jest.fn(),
         captureMessage: jest.fn(),
       };

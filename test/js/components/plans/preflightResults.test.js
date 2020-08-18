@@ -1,9 +1,9 @@
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
 
 import PreflightResults, {
   getErrorInfo,
-} from 'components/plans/preflightResults';
+} from '@/components/plans/preflightResults';
 
 const defaultPreflight = {
   status: 'complete',
@@ -19,7 +19,7 @@ const defaultPreflight = {
 };
 
 describe('<PreflightResults />', () => {
-  const setup = options => {
+  const setup = (options) => {
     const defaults = {
       preflight: defaultPreflight,
     };

@@ -4,13 +4,14 @@
 .nyc_output/
 .pytest_cache/
 .vscode/
+.yarn/
+.yarnrc
 ENV/
 __pycache__/
 coverage/
 dist/
 docs/
 env/
-flow-typed/
 htmlcov/
 jscache/
 locales/

@@ -1,7 +1,7 @@
-import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
+import React from 'react';
 
-import PreflightWarningModal from 'components/plans/preflightWarningModal';
+import PreflightWarningModal from '@/components/plans/preflightWarningModal';
 
 describe('<PreflightWarningModal />', () => {
   const defaultResults = {
@@ -18,7 +18,7 @@ describe('<PreflightWarningModal />', () => {
   ];
   const selectedSteps = new Set(['step-1', 'step-2', 'step-3']);
 
-  const setup = options => {
+  const setup = (options) => {
     const defaults = {
       toggleModal: jest.fn(),
       startJob: jest.fn(),

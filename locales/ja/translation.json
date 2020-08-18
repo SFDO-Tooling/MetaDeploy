@@ -9,7 +9,7 @@
   "An installation is currently running on this org.": "インストールがこの組織で現在実行中です。",
   "Anyone with the link can view this installation job.": "リンクを使用できるすべてのユーザがこのインストールジョブを参照できます。",
   "Authentication Error": "認証エラー",
-  "Average Install Time": "平均インストール時間",
+  "Average Install Time:": "平均インストール時間:",
   "Average install time is": "平均インストール時間:",
   "Cancel": "キャンセル",
   "Cancel Installation": "インストールのキャンセル",

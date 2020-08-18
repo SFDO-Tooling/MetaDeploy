@@ -1,6 +1,10 @@
+from allauth.socialaccount.admin import SocialTokenAdmin
+from allauth.socialaccount.models import SocialToken
 from django.contrib import admin
 from django.contrib.postgres.fields import ArrayField
 from django.forms.widgets import CheckboxSelectMultiple
+from django.shortcuts import redirect
+from django.urls import reverse
 from parler.admin import TranslatableAdmin
 
 from .models import (
@@ -97,9 +101,17 @@ class PlanTemplateAdmin(TranslatableAdmin):
 class PlanAdmin(TranslatableAdmin):
     autocomplete_fields = ("version",)
     list_filter = ("version__product", "tier", "is_listed")
-    list_display = ("title", "product", "version_label", "tier", "is_listed")
+    list_display = (
+        "title",
+        "product",
+        "version_label",
+        "tier",
+        "is_listed",
+        "created_at",
+    )
     list_select_related = ("version", "version__product")
     search_fields = ("translations__title", "version", "version__product")
+    readonly_fields = ("created_at",)
 
     def product(self, obj):
         return obj.version.product
@@ -201,3 +213,16 @@ class SiteProfileAdmin(TranslatableAdmin):
 @admin.register(Translation)
 class TranslationAdmin(admin.ModelAdmin):
     list_display = ("lang", "context", "slug", "text")
+    list_filter = ("lang",)
+
+
+# Disable editing SocialTokens
+admin.site.unregister(SocialToken)
+
+
+@admin.register(SocialToken)
+class CustomSocialTokenAdmin(SocialTokenAdmin):
+    list_display_links = None
+
+    def change_view(self, *args, **kwargs):
+        return redirect(reverse("admin:socialaccount_socialtoken_changelist"))

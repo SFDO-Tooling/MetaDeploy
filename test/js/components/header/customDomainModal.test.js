@@ -1,13 +1,13 @@
-import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
+import React from 'react';
 
-import { addUrlParams } from 'utils/api';
-import CustomDomainModal from 'components/header/customDomainModal';
+import CustomDomainModal from '@/components/header/customDomainModal';
+import { addUrlParams } from '@/utils/api';
 
 describe('<CustomDomainModal />', () => {
   const toggleModal = jest.fn();
 
-  const setup = options => {
+  const setup = (options) => {
     const defaults = {
       isOpen: true,
     };
@@ -56,7 +56,7 @@ describe('<CustomDomainModal />', () => {
 
     fireEvent.change(input, { target: { value: 'foobar' } });
     fireEvent.click(getByText('Continue'));
-    const baseUrl = window.api_urls.salesforce_custom_login();
+    const baseUrl = window.api_urls.salesforce_login();
     const expected = addUrlParams(baseUrl, {
       custom_domain: 'foobar',
       next: window.location.pathname,
@@ -74,7 +74,7 @@ describe('<CustomDomainModal />', () => {
     const input = getByLabelText('Custom Domain');
     fireEvent.change(input, { target: { value: 'foobar' } });
     fireEvent.click(getByText('Continue'));
-    const baseUrl = window.api_urls.salesforce_custom_login();
+    const baseUrl = window.api_urls.salesforce_login();
     const expected = addUrlParams(baseUrl, {
       custom_domain: 'foobar',
       next: addUrlParams(window.location.pathname, { foo: 'bar' }),

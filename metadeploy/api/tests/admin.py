@@ -87,3 +87,18 @@ class TestPlanAdmin:
         obj.version = Dummy()
         obj.version.label = "A version"
         assert admin.version_label(obj) == obj.version.label
+
+
+@pytest.mark.django_db
+class TestSocialTokenAdmin:
+    def test_change_view(self, client, user_factory):
+        user = user_factory(is_staff=True, is_superuser=True)
+        social_token = user.social_account.socialtoken_set.first()
+
+        client.force_login(user)
+        response = client.get(
+            f"/admin/socialaccount/socialtoken/{social_token.id}/change/"
+        )
+        # redirected back to model list
+        assert response.status_code == 302
+        assert response.url == "/admin/socialaccount/socialtoken/"

@@ -62,11 +62,16 @@ class GetOneMixin:
         try:
             if filter.required_fields != request.GET.keys():
                 raise InvalidFields
-            result = filter.qs.get()
+            qs = self.filter_get_one(filter.qs)
+            result = qs.get()
             serializer = self.get_serializer(result)
             return Response(serializer.data)
         except not_one_result:
             return Response("", status=status.HTTP_404_NOT_FOUND)
+
+    def filter_get_one(self, qs):
+        """Hook for viewsets using this mixin to apply additional filtering."""
+        return qs
 
 
 class UserView(generics.RetrieveAPIView):
@@ -161,6 +166,12 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
     def get_queryset(self):
         plans = Plan.objects.exclude(is_listed=False)
         return self.omit_allowed_by_org(plans)
+
+    def filter_get_one(self, qs):
+        # Make sure get_one only finds the most recent plan for each plan_template
+        return qs.order_by("plan_template_id", "-created_at").distinct(
+            "plan_template_id"
+        )
 
     def preflight_get(self, request):
         plan = get_object_or_404(Plan.objects, id=self.kwargs["pk"])

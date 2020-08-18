@@ -1,7 +1,7 @@
-import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
+import React from 'react';
 
-import Toasts from 'components/plans/toasts';
+import Toasts from '@/components/plans/toasts';
 
 const defaultJob = {
   status: 'started',
@@ -10,7 +10,7 @@ const defaultJob = {
 const defaultLabel = 'Installation';
 
 describe('<Toasts />', () => {
-  const setup = options => {
+  const setup = (options) => {
     const defaults = {
       job: defaultJob,
       label: defaultLabel,

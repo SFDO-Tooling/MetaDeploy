@@ -1,14 +1,14 @@
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import { renderWithRedux } from './../utils';
-
-import routes from 'utils/routes';
 import {
   getLoadingOrNotFound,
   shouldFetchPlan,
   shouldFetchVersion,
-} from 'components/utils';
+} from '@/components/utils';
+import routes from '@/utils/routes';
+
+import { renderWithRedux } from './../utils';
 
 const defaultProduct = {
   id: 'p1',
@@ -118,7 +118,7 @@ describe('shouldFetchPlan', () => {
 });
 
 describe('getLoadingOrNotFound', () => {
-  const setup = opts => {
+  const setup = (opts) => {
     const context = {};
     const { getByText } = renderWithRedux(
       <StaticRouter context={context}>

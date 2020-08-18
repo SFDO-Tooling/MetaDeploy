@@ -1,8 +1,8 @@
+import { render } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { render } from '@testing-library/react';
 
-import CtaButton from 'components/jobs/ctaButton';
+import CtaButton from '@/components/jobs/ctaButton';
 
 const defaultJob = {
   id: 'job-1',
@@ -11,7 +11,7 @@ const defaultJob = {
 };
 
 describe('<CtaButton />', () => {
-  const setup = options => {
+  const setup = (options) => {
     const defaults = {
       job: defaultJob,
       canceling: false,

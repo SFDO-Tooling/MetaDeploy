@@ -11,62 +11,36 @@ see the following instructions `<./docs/running_docker.rst>`_.
 Using Local Machine
 -------------------
 
-MetaDeploy can be configured locally. 
+MetaDeploy can be configured locally.
 To achieve this follow the instructions provided in `<./docs/running.rst>`_.
-
-Logging in with Salesforce
---------------------------
-
-To setup the Salesforce OAuth integration, run the ``populate_social_apps``
-management command. The values to use in place of the ``XXX`` and ``YYY`` flags
-can be found on the Connected App you've made in your Salesforce configuration,
-or if you're an OddBird, you can find these values in the shared Keybase team
-folder (``metadeploy/prod.db``)::
-
-    python manage.py populate_social_apps --prod-id XXX --prod-secret YYY
-
-You can also run it with ``--test-id`` and ``--test-secret``, or
-``--cust-id`` and ``--cust-secret``, or all three sets at once, to
-populate all three providers.
-
-If you don't have a Salesforce account, ask `Kit <mailto:kit@oddbird.net>`_ to
-send you an invitation by email.
-
-Once you've logged in, you probably want to make your user a superuser.
-You can do that easily via the ``promote_superuser`` management
-command::
-
-    python manage.py promote_superuser <your email>
 
 Development Tasks
 -----------------
 
-To run these tests with Docker first run the following commands, 
+To run these tests with Docker first run the following commands,
 
 ::
 
     docker-compose up -d
     docker-compose exec web bash
 
-If you are not using Docker or are using the VS Code integrated terminal 
-inside the Docker container simply execute the commands in your project's 
+If you are not using Docker or are using the VS Code integrated terminal
+inside the Docker container simply execute the commands in your project's
 root directory:
 
 - ``yarn serve``: starts development server (with watcher) at
   `<http://localhost:8080/>`_ (assets are served from ``dist/`` dir)
-- ``yarn pytest``: run Python tests
-- ``yarn pytest:integration``: run Python integration tests
-- ``yarn test``: run JS tests
-- ``yarn test:watch``: run JS tests with a watcher for development
+- ``yarn test:py``: run Python tests
+- ``yarn test:py:integration``: run Python integration tests
+- ``yarn test:js``: run JS tests
+- ``yarn test:js:watch``: run JS tests with a watcher for development
 - ``yarn lint``: formats and lints all files
 - ``yarn lint:js``: formats, lints, and type-checks ``.js`` files
 - ``yarn lint:sass``: formats and lints ``.scss`` files
 - ``yarn lint:py``: formats and lints ``.py`` files
 - ``yarn prettier:js``: formats ``.js`` files
 - ``yarn prettier:other``: formats ``.json``, ``.md``, and ``.yml`` files
-- ``yarn flow``: runs JS type-checking
-- ``yarn flow-typed``: updates third-party type definitions (in ``flow-typed/``
-  dir)
+- ``yarn tsc``: runs JS type-checking
 - ``yarn build``: builds development (unminified) static assets into ``dist/``
   dir
 - ``yarn prod``: builds production (minified) static assets into ``dist/prod/``

@@ -17,7 +17,7 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
 from django.contrib.postgres.fields import ArrayField, JSONField
 from django.contrib.sites.models import Site
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import Count, F, Func, Q
@@ -146,7 +146,8 @@ class User(HashIdMixin, AbstractUser):
 
     @property
     def org_id(self):
-        return self._get_org_property("Id")
+        if self.social_account:
+            return self.social_account.extra_data["organization_id"]
 
     @property
     def org_name(self):
@@ -337,18 +338,26 @@ class Version(HashIdMixin, TranslatableModel):
 
     @property
     def primary_plan(self):
-        try:
-            return self.plan_set.filter(tier=Plan.Tier.primary).get()
-        except ObjectDoesNotExist:
-            return None
+        return (
+            self.plan_set.filter(tier=Plan.Tier.primary).order_by("-created_at").first()
+        )
 
     @property
     def secondary_plan(self):
-        return self.plan_set.filter(tier=Plan.Tier.secondary).first()
+        return (
+            self.plan_set.filter(tier=Plan.Tier.secondary)
+            .order_by("-created_at")
+            .first()
+        )
 
     @property
     def additional_plans(self):
-        return self.plan_set.filter(tier=Plan.Tier.additional).order_by("id")
+        # get the most recently created plan for each plan template
+        return (
+            self.plan_set.filter(tier=Plan.Tier.additional)
+            .order_by("plan_template_id", "-created_at")
+            .distinct("plan_template_id")
+        )
 
     def get_translation_strategy(self):
         return "fields", f"{self.product.slug}:version:{self.label}"
@@ -419,26 +428,24 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
 
     plan_template = models.ForeignKey(PlanTemplate, on_delete=models.PROTECT)
     version = models.ForeignKey(Version, on_delete=models.PROTECT)
+    commit_ish = models.CharField(
+        max_length=256,
+        null=True,
+        blank=True,
+        help_text=_(
+            "This is usually a tag, sometimes a branch. "
+            "Use this to optionally override the Version's commit_ish."
+        ),
+    )
+
     tier = models.CharField(choices=Tier, default=Tier.primary, max_length=64)
     is_listed = models.BooleanField(default=True)
     preflight_checks = JSONField(default=list, blank=True)
 
+    created_at = models.DateTimeField(auto_now_add=True)
+
     slug_class = PlanSlug
     slug_field_name = "title"
-
-    class Meta:
-        constraints = [
-            # No duplicate plans with the same version and plan template
-            models.UniqueConstraint(
-                fields=["version", "plan_template"], name="unique_version_plan_template"
-            ),
-            # Only one primary-tier plan per version
-            models.UniqueConstraint(
-                fields=["version"],
-                condition=Q(tier="primary"),
-                name="unique_version_primary_plan",
-            ),
-        ]
 
     @property
     def preflight_message_additional_markdown(self):
@@ -644,9 +651,9 @@ class Job(HashIdMixin, models.Model):
     def subscribable_by(self, user):
         return self.is_public or user.is_staff or user == self.user
 
-    def skip_tasks(self):
+    def skip_steps(self):
         return [
-            step.path for step in set(self.plan.steps.all()) - set(self.steps.all())
+            step.step_num for step in set(self.plan.steps.all()) - set(self.steps.all())
         ]
 
     def _push_if_condition(self, condition, fn):

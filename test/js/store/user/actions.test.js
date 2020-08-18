@@ -1,8 +1,8 @@
 import fetchMock from 'fetch-mock';
 
-import { storeWithApi } from './../../utils';
+import * as actions from '@/store/user/actions';
 
-import * as actions from 'store/user/actions';
+import { storeWithApi } from './../../utils';
 
 describe('login', () => {
   let store;
@@ -141,7 +141,7 @@ describe('logout', () => {
         clear: jest.fn(),
       };
       window.Sentry = {
-        configureScope: cb => cb(scope),
+        configureScope: (cb) => cb(scope),
       };
     });
 

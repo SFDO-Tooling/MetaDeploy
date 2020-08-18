@@ -1,6 +1,7 @@
 import logging
 
 from django.conf import settings
+from django_rq import job
 from parler.models import TranslatableModel
 
 from metadeploy.api.models import Translation
@@ -8,6 +9,7 @@ from metadeploy.api.models import Translation
 logger = logging.getLogger(__name__)
 
 
+@job
 def update_all_translations(lang):
     """Update all objects' translations from the Translation model"""
     for model in TranslatableModel.__subclasses__():

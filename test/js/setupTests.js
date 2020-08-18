@@ -1,5 +1,6 @@
 import 'isomorphic-fetch';
 import '@testing-library/jest-dom/extend-expect';
+
 import fetchMock from 'fetch-mock';
 
 let location;
@@ -15,20 +16,18 @@ beforeAll(() => {
   });
   window.api_urls = {
     account_logout: () => '/accounts/logout/',
-    job_detail: id => `/api/jobs/${id}/`,
+    job_detail: (id) => `/api/jobs/${id}/`,
     job_list: () => '/api/jobs/',
     org_list: () => '/api/org/',
     plan_get_one: () => '/api/plans/get_one/',
     plan_list: () => '/api/plans/',
-    plan_preflight: id => `/api/plans/${id}/preflight/`,
+    plan_preflight: (id) => `/api/plans/${id}/preflight/`,
     product_get_one: () => '/api/products/get_one/',
     product_list: () => '/api/products/',
     productcategory_list: () => '/api/categories/',
-    salesforce_custom_login: () => '/accounts/salesforce-custom/login/',
-    salesforce_production_login: () => '/accounts/salesforce-production/login/',
-    salesforce_test_login: () => '/accounts/salesforce-test/login/',
+    salesforce_login: () => '/accounts/salesforce/login/',
     user: () => '/api/user/',
-    version_additional_plans: id => `/api/versions/${id}/additional_plans/`,
+    version_additional_plans: (id) => `/api/versions/${id}/additional_plans/`,
     version_get_one: () => '/api/versions/get_one/',
     version_list: () => '/api/versions/',
   };
@@ -42,7 +41,7 @@ beforeAll(() => {
   delete window.location;
   window.location = {
     ...location,
-    assign: href => location.assign(href),
+    assign: (href) => location.assign(href),
     reload: () => location.reload(),
   };
 });

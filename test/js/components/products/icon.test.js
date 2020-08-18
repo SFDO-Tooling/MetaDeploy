@@ -1,10 +1,10 @@
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
 
-import ProductIcon from 'components/products/icon';
+import ProductIcon from '@/components/products/icon';
 
 describe('<ProductIcon />', () => {
-  const setup = item => {
+  const setup = (item) => {
     const { getByAltText } = render(<ProductIcon item={item} />);
     return { getByAltText };
   };

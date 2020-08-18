@@ -11,8 +11,6 @@ if [ "${DJANGO_SETTINGS_MODULE}" = "config.settings.local" ] ; then
         # populating database with test data, done only once
         echo "POPULATING DATABASE WITH TEST DATA..."
         python /app/manage.py populate_data;
-        # populating SocialApp records
-        python /app/manage.py populate_social_apps --cust-id "${CONNECTED_APP_CLIENT_ID}" --cust-secret "${CONNECTED_APP_CLIENT_SECRET}";
     else
         # Redirect stdout from echo command to stderr.
         echo "Admin user has already been created."
