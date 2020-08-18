@@ -37,19 +37,21 @@ WORKDIR /app
 RUN yarn install --check-files
 # copying rest of working directory to /app folder
 COPY . /app
+
+# Avoid building prod assets in development
+RUN if [ "${BUILD_ENV}" = "production" ] ; then yarn prod ; else mkdir -p dist/prod ; fi
+
 ENV PYTHONUNBUFFERED 1
 # Don't write .pyc files
 ENV PYTHONDONTWRITEBYTECODE 1
-ENV REDIS_URL "redis://redis:6379"
 ENV DJANGO_SETTINGS_MODULE config.settings.local
-ENV DATABASE_URL postgres://postgres@postgres:5432/metadeploy
-ENV DJANGO_HASHID_SALT 'sample hashid salt'
-ENV DJANGO_SECRET_KEY 'sample secret key'
-ENV DB_ENCRYPTION_KEY=Ul-OySkEawSxUc7Ck13Twu2109IzIFh54C1WXO9KAFE=
-ENV CONNECTED_APP_CLIENT_SECRET ''
-ENV CONNECTED_APP_CALLBACK_URL ''
-ENV CONNECTED_APP_CLIENT_ID ''
-ENV GITHUB_TOKEN 'sample token'
-# Avoid building prod assets in development
-RUN if [ "${BUILD_ENV}" = "production" ] ; then yarn prod ; else mkdir -p dist/prod ; fi
-RUN python /app/manage.py collectstatic --noinput
+
+RUN DATABASE_URL="" \
+  DB_ENCRYPTION_KEY="Ul-OySkEawSxUc7Ck13Twu2109IzIFh54C1WXO9KAFE=" \
+  DJANGO_HASHID_SALT="" \
+  DJANGO_SECRET_KEY="sample secret key" \
+  CONNECTED_APP_CLIENT_SECRET="" \
+  CONNECTED_APP_CALLBACK_URL="" \
+  CONNECTED_APP_CLIENT_ID="" \
+  GITHUB_TOKEN="sample token" \
+  python manage.py collectstatic --noinput
