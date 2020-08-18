@@ -1,5 +1,13 @@
 FROM python:3.8
 
+# System setup:
+RUN apt-get update \
+  && apt-get install -y \
+    redis-tools \
+    --no-install-recommends \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+
 ARG BUILD_ENV
 RUN mkdir /app
 # declaring necessary node and yarn versions
