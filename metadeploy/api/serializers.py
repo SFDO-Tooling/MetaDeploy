@@ -164,6 +164,7 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
             "tier",
             "slug",
             "old_slugs",
+            "order",
             "steps",
             "is_allowed",
             "is_listed",
