@@ -25,7 +25,7 @@ const JobResults = ({
 
   const { message } = getErrorInfo({
     job,
-    label: i18n.t('Installation'),
+    label: 'Installation', // Do not translate - used to construct string name
   });
   if (message !== null) {
     const title = i18n.t('View Installation Error Details & Link');

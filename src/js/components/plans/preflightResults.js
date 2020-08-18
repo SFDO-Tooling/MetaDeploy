@@ -156,7 +156,7 @@ const PreflightResults = ({
 
   const { failed, message } = getErrorInfo({
     preflight,
-    label: i18n.t('Pre-install validation'),
+    label: 'Pre-install validation', // Do not translate - used to construct string name
   });
   const planErrors = preflight.results && preflight.results.plan;
   if (message !== null) {
