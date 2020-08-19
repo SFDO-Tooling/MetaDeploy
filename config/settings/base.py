@@ -314,9 +314,16 @@ STATIC_ROOT = str(PROJECT_ROOT / "staticfiles")
 CONNECTED_APP_CLIENT_SECRET = env("CONNECTED_APP_CLIENT_SECRET")
 CONNECTED_APP_CALLBACK_URL = env("CONNECTED_APP_CALLBACK_URL")
 CONNECTED_APP_CLIENT_ID = env("CONNECTED_APP_CLIENT_ID")
+CONNECTED_APP_SIGNUP_INSTANCE = env("CONNECTED_APP_SIGNUP_INSTANCE", default=None)
+# Ugly hack to fix https://github.com/moby/moby/issues/12997
+CONNECTED_APP_CLIENT_KEY = env("CONNECTED_APP_CLIENT_KEY", default="").replace(
+    "\\n", "\n"
+)
+
 GITHUB_TOKEN = env("GITHUB_TOKEN", default=None)
 GITHUB_APP_ID = env("GITHUB_APP_ID", default=None)
 GITHUB_APP_KEY = env("GITHUB_APP_KEY", default=None)
+
 
 if not GITHUB_TOKEN and not GITHUB_APP_ID and not GITHUB_APP_KEY:
     raise ImproperlyConfigured(
@@ -401,6 +408,9 @@ LOG_REQUESTS = True
 LOG_REQUEST_ID_HEADER = "HTTP_X_REQUEST_ID"
 GENERATE_REQUEST_ID_IF_NOT_IN_HEADER = True
 REQUEST_ID_RESPONSE_HEADER = "X-Request-ID"
+
+# Salesforce integration settings:
+DEVHUB_USERNAME = env("DEVHUB_USERNAME", default=None)
 
 LOGGING = {
     "version": 1,

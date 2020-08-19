@@ -48,6 +48,7 @@ VERSION_STRING = r"^[a-zA-Z0-9._+-]+$"
 STEP_NUM = r"^[\d\./]+$"
 WorkableModel = Union["Job", "PreflightResult"]
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
+SUPPORTED_ORG_TYPES = Choices("Persistent", "Scratch", "Both")
 
 
 class HashIdMixin(models.Model):
@@ -441,6 +442,11 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
     tier = models.CharField(choices=Tier, default=Tier.primary, max_length=64)
     is_listed = models.BooleanField(default=True)
     preflight_checks = JSONField(default=list, blank=True)
+    supported_orgs = models.CharField(
+        max_length=32,
+        choices=SUPPORTED_ORG_TYPES,
+        default=SUPPORTED_ORG_TYPES.Persistent,
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
 

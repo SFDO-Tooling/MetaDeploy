@@ -170,6 +170,7 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
             "not_allowed_instructions",
             "average_duration",
             "requires_preflight",
+            "supported_orgs",
         )
         circumspect_fields = ("steps", "preflight_message")
 
@@ -601,3 +602,8 @@ class SiteSerializer(serializers.ModelSerializer):
             "company_logo",
             "favicon",
         )
+
+
+class CreateScratchOrgSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    org_name = serializers.CharField()

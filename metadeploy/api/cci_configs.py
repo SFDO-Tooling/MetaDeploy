@@ -30,7 +30,7 @@ class MetadeployProjectConfig(BaseProjectConfig):
 
     def construct_subproject_config(self, **kwargs):
         return MetadeployProjectConfig(
-            self.global_config_obj,
+            self.universal_config_obj,
             plan=self.plan,
             included_sources=self.included_sources,
             **kwargs
