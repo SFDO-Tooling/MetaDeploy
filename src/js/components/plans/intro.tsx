@@ -1,6 +1,8 @@
+import Button from '@salesforce/design-system-react/components/button';
+import Modal from '@salesforce/design-system-react/components/modal';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import i18n from 'i18next';
-import * as React from 'react';
+import React, { useState } from 'react';
 
 import { getDuration } from '@/utils/dates';
 
@@ -21,7 +23,15 @@ const Intro = ({
   postMessage?: React.ReactNode;
   backLink?: React.ReactNode;
 }) => {
+  const [
+    createOrgAgreementModalOpen,
+    setcreateOrgAgreementModalOpen,
+  ] = useState(false);
   const duration = getDuration(averageDuration);
+
+  const closeAgreementModal = () => {
+    setcreateOrgAgreementModalOpen(false);
+  };
   return (
     <div
       className="slds-p-around_medium
@@ -49,7 +59,20 @@ const Intro = ({
         {postMessage}
       </div>
       {cta}
+      <Button
+        label={i18n.t('Create Scratch Org')}
+        variant="brand"
+        onClick={() => setcreateOrgAgreementModalOpen(true)}
+      />
       {backLink}
+      <Modal
+        isOpen={createOrgAgreementModalOpen}
+        onRequestClose={closeAgreementModal}
+        size="medium"
+        heading={i18n.t('Product Terms of Use & Licenses')}
+      >
+        terms and such go here...
+      </Modal>
     </div>
   );
 };

@@ -540,4 +540,17 @@ describe('<PlanDetail />', () => {
       expect(checkbox4.checked).toBe(true);
     });
   });
+
+  describe('creating new org', () => {
+    test('opens closes click through agreement', () => {
+      const { getByText, getByTitle, queryByText } = setup();
+
+      fireEvent.click(getByText('Create Scratch Org'));
+
+      expect(getByText('Product Terms of Use & Licenses')).toBeVisible();
+
+      fireEvent.click(getByTitle('Close'));
+      expect(queryByText('Product Terms of Use & Licenses')).toBeNull();
+    });
+  });
 });
