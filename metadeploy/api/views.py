@@ -11,7 +11,7 @@ from rest_framework.response import Response
 
 from .constants import REDIS_JOB_CANCEL_KEY
 from .filters import PlanFilter, ProductFilter, VersionFilter
-from .jobs import preflight_job
+from .jobs import create_scratch_org_job, preflight_job
 from .models import Job, Plan, PreflightResult, Product, ProductCategory, Version
 from .paginators import ProductPaginator
 from .permissions import OnlyOwnerOrSuperuserCanDelete
@@ -210,15 +210,13 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
 
     @action(detail=True, methods=["post"])
     def create_scratch_org(self, request, pk=None):
-        from .jobs import create_scratch_org_job
-
         plan = self.get_object()
         serializer = CreateScratchOrgSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         email = serializer.validated_data["email"]
-        org_name = serializer.validated_data["org_name"]
+        org_name = plan.org_name
         create_scratch_org_job.delay(plan=plan, email=email, org_name=org_name)
         return Response(status=status.HTTP_202_ACCEPTED)
 

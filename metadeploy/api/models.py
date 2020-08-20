@@ -447,6 +447,7 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
         choices=SUPPORTED_ORG_TYPES,
         default=SUPPORTED_ORG_TYPES.Persistent,
     )
+    org_name = models.CharField(max_length=64, default="release")
 
     created_at = models.DateTimeField(auto_now_add=True)
 
