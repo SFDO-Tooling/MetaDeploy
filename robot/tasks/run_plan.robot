@@ -55,12 +55,12 @@ Log in to Org
     ${text} =  Translate Text  Use Custom Domain
     Click link  ${text}
     &{ORG} =  Get Org Info
-    Input text  css:#login-custom-domain  &{ORG}[instance_url]
+    Input text  css:#login-custom-domain  ${ORG}[instance_url]
     Capture Page Screenshot  ${OUTPUTDIR}/${LANG}/04_custom_domain.png
     ${text} =  Translate Text  Continue
     Click button  ${text}
-    Input text  css:#username  &{ORG}[username]
-    Input password  css:#password  &{ORG}[password]
+    Input text  css:#username  ${ORG}[username]
+    Input password  css:#password  ${ORG}[password]
     Click button  css:#Login
     ${needs_oauth_approval}=  Run Keyword And Return Status
     ...  Element Should Be Visible   css:#oaapprove
@@ -85,7 +85,7 @@ Run Preflight
 
 Maybe Execute Clickthrough
     ${has_clickthrough} =  Run Keyword and Return Status
-    ...  Wait Until Page Contains Element //label[@for="click-through-confirm"]
+    ...  Wait Until Page Contains Element  //label[@for="click-through-confirm"]
     ...  timeout=5
     Run Keyword If  ${has_clickthrough}  Execute Clickthrough
 
