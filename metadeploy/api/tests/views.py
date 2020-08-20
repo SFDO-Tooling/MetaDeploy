@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 from django.urls import reverse
 
@@ -566,3 +568,25 @@ class TestUnlisted:
 
         assert response.status_code == 200
         assert response.json()["id"] == plan.id
+
+
+@pytest.mark.django_db
+class TestPlanView:
+    def test_create_scratch_org__bad(self, client, plan_factory):
+        plan = plan_factory()
+        response = client.post(
+            reverse("plan-create-scratch-org", kwargs={"pk": str(plan.id)})
+        )
+        assert response.status_code == 400
+
+    def test_create_scratch_org__good(self, client, plan_factory):
+        plan = plan_factory()
+        with patch(
+            "metadeploy.api.views.create_scratch_org_job"
+        ) as create_scratch_org_job:
+            response = client.post(
+                reverse("plan-create-scratch-org", kwargs={"pk": str(plan.id)}),
+                {"email": "test@example.com"},
+            )
+            assert response.status_code == 202
+            assert create_scratch_org_job.delay.called

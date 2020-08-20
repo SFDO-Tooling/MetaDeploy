@@ -606,4 +606,3 @@ class SiteSerializer(serializers.ModelSerializer):
 
 class CreateScratchOrgSerializer(serializers.Serializer):
     email = serializers.EmailField()
-    org_name = serializers.CharField()
