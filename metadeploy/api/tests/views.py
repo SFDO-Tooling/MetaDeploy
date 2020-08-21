@@ -234,6 +234,7 @@ class TestBasicGetViews:
             "not_allowed_instructions": None,
             "average_duration": None,
             "supported_orgs": "Persistent",
+            "org_name": "release",
         }
 
     def test_plan__not_visible(self, client, allowed_list_factory, plan_factory):
@@ -257,6 +258,7 @@ class TestBasicGetViews:
             "not_allowed_instructions": "<p>Sample instructions.</p>",
             "average_duration": None,
             "supported_orgs": "Persistent",
+            "org_name": "release",
         }
 
     def test_plan__visible(
@@ -293,6 +295,7 @@ class TestBasicGetViews:
             "not_allowed_instructions": "<p>Sample instructions.</p>",
             "average_duration": None,
             "supported_orgs": "Persistent",
+            "org_name": "release",
         }
 
     def test_plan__visible_superuser(
@@ -320,6 +323,7 @@ class TestBasicGetViews:
             "not_allowed_instructions": "<p>Sample instructions.</p>",
             "average_duration": None,
             "supported_orgs": "Persistent",
+            "org_name": "release",
         }
 
 
@@ -451,6 +455,7 @@ class TestVersionAdditionalPlans:
                 "requires_preflight": False,
                 "average_duration": None,
                 "supported_orgs": "Persistent",
+                "org_name": "release",
             }
         ]
 
