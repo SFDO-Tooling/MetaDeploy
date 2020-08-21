@@ -43,6 +43,7 @@ const defaultState = {
         description: 'This is a test product.',
         category: 'salesforce',
         image: null,
+        click_through_agreement: '<p>Accept these terms, please</p>',
         most_recent_version: {
           id: 'v1',
           product: 'p1',
@@ -548,7 +549,7 @@ describe('<PlanDetail />', () => {
       fireEvent.click(getByText('Create Scratch Org'));
 
       expect(getByText('Product Terms of Use & Licenses')).toBeVisible();
-
+      fireEvent.click(getByText('Confirm')); // nothing happens yet...
       fireEvent.click(getByTitle('Close'));
       expect(queryByText('Product Terms of Use & Licenses')).toBeNull();
     });
