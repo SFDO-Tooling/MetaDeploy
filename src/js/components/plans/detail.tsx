@@ -416,6 +416,7 @@ class PlanDetail extends React.Component<Props, State> {
                     className="slds-p-top_small"
                   />
                 }
+                clickThroughAgreement={product.click_through_agreement}
               />
               <UserInfo user={user} />
               {plan.steps?.length ? (

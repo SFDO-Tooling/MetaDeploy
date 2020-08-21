@@ -11,6 +11,7 @@ const Intro = ({
   isProductionOrg,
   results,
   cta,
+  clickThroughAgreement,
   preMessage,
   postMessage,
   backLink,
@@ -19,6 +20,7 @@ const Intro = ({
   isProductionOrg: boolean;
   results: React.ReactNode;
   cta: React.ReactNode;
+  clickThroughAgreement: string | null;
   preMessage?: React.ReactNode;
   postMessage?: React.ReactNode;
   backLink?: React.ReactNode;
@@ -62,17 +64,36 @@ const Intro = ({
       <Button
         label={i18n.t('Create Scratch Org')}
         variant="brand"
+        className="slds-m-top_medium slds-p-vertical_xx-small"
         onClick={() => setcreateOrgAgreementModalOpen(true)}
       />
       {backLink}
-      <Modal
-        isOpen={createOrgAgreementModalOpen}
-        onRequestClose={closeAgreementModal}
-        size="medium"
-        heading={i18n.t('Product Terms of Use & Licenses')}
-      >
-        terms and such go here...
-      </Modal>
+      {clickThroughAgreement && (
+        <Modal
+          isOpen={createOrgAgreementModalOpen}
+          onRequestClose={closeAgreementModal}
+          size="medium"
+          heading={i18n.t('Product Terms of Use & Licenses')}
+          footer={[
+            <Button
+              key="cancel"
+              label="Cancel"
+              onClick={closeAgreementModal}
+            />,
+            <Button
+              key="confirm"
+              label="Confirm"
+              variant="brand"
+              onClick={() => console.log('ask for email next')}
+            />,
+          ]}
+        >
+          <section className="slds-p-around_medium">
+            {' '}
+            {clickThroughAgreement}
+          </section>
+        </Modal>
+      )}
     </div>
   );
 };

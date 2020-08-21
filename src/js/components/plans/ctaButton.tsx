@@ -30,7 +30,7 @@ type Props = {
 };
 
 const { AUTO_START_PREFLIGHT, RESULT_STATUS, STATUS } = CONSTANTS;
-const btnClasses = 'slds-size_full slds-p-vertical_xx-small';
+const btnClasses = 'slds-p-vertical_xx-small';
 
 // For use as a "loading" button label
 export const LabelWithSpinner = ({
