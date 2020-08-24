@@ -1,4 +1,5 @@
 import Button from '@salesforce/design-system-react/components/button';
+import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import i18n from 'i18next';
@@ -29,8 +30,18 @@ const Intro = ({
     createOrgAgreementModalOpen,
     setcreateOrgAgreementModalOpen,
   ] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
   const duration = getDuration(averageDuration);
 
+  const handleChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    { checked }: { checked: boolean },
+  ) => {
+    setConfirmed(checked);
+  };
+  const handleConfirmTerms = () => {
+    console.log('go to page 2');
+  };
   const closeAgreementModal = () => {
     setcreateOrgAgreementModalOpen(false);
   };
@@ -84,14 +95,31 @@ const Intro = ({
               key="confirm"
               label="Confirm"
               variant="brand"
-              onClick={() => console.log('ask for email next')}
+              onClick={handleConfirmTerms}
             />,
           ]}
         >
-          <section className="slds-p-around_medium">
-            {' '}
-            {clickThroughAgreement}
-          </section>
+          <div className="slds-p-horizontal_large slds-p-vertical_medium">
+            {/* This text is pre-cleaned by the API */}
+            <div
+              className="slds-text-longform slds-scrollable_y slds-box markdown"
+              style={{ maxHeight: '250px' }}
+              dangerouslySetInnerHTML={{
+                __html: clickThroughAgreement,
+              }}
+            />
+            <Checkbox
+              id="click-through-confirm"
+              className="slds-p-top_medium"
+              checked={confirmed}
+              labels={{
+                label: i18n.t(
+                  'I confirm I have read and agree to these product terms of use and licenses.',
+                ),
+              }}
+              onChange={handleChange}
+            />
+          </div>
         </Modal>
       )}
     </div>
