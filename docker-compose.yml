@@ -4,16 +4,22 @@ services:
   postgres:
     env_file:
       - .env
+    environment:
+      POSTGRES_DB: metadeploy
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: sample_db_password
     volumes:
       - ./postgres:/var/lib/postgresql/data:delegated
     image: postgres:12.3
     ports:
       - '5432:5432/tcp'
     restart: always
+
   redis:
     image: redis:5.0
     ports:
       - '6379:6379'
+
   web:
     build:
       context: .
@@ -35,6 +41,10 @@ services:
       - redis
     env_file:
       - .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.local
+      DATABASE_URL: postgres://postgres:sample_db_password@postgres:5432/metadeploy
+      REDIS_URL: redis://redis:6379
     volumes:
       - .:/app:cached
       - /app/node_modules

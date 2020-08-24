@@ -73,11 +73,9 @@ export const JobError = ({ err }: { err: StepResult }) => {
 export const getErrorInfo = ({
   job,
   preflight,
-  label,
 }: {
   job?: Job;
   preflight?: Preflight;
-  label: string;
 }) => {
   const currentJob = job || preflight;
   const info: { failed: boolean; message: string | null } = {
@@ -125,10 +123,14 @@ export const getErrorInfo = ({
       currentJob.status === CONSTANTS.STATUS.FAILED ||
       canceledPreflight;
     info.failed = Boolean(failed);
-    info.message =
-      preflight && !(currentJob as Preflight).is_valid && !failed
-        ? i18n.t(`${label} has expired; please run it again.`)
-        : `${i18n.t(`${label} encountered`)} ${msg}.`;
+    if (preflight) {
+      info.message =
+        !preflight.is_valid && !failed
+          ? i18n.t('Pre-install validation has expired; please run it again.')
+          : `${i18n.t('Pre-install validation encountered')} ${msg}.`;
+    } else {
+      info.message = `${i18n.t('Installation encountered')} ${msg}.`;
+    }
   }
   return info;
 };
@@ -142,10 +144,7 @@ const PreflightResults = ({ preflight }: { preflight: Preflight }) => {
     return null;
   }
 
-  const { failed, message } = getErrorInfo({
-    preflight,
-    label: i18n.t('Pre-install validation'),
-  });
+  const { failed, message } = getErrorInfo({ preflight });
   const planErrors = preflight.results?.plan;
   if (message !== null) {
     return (
