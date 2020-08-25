@@ -1,10 +1,9 @@
 import Button from '@salesforce/design-system-react/components/button';
-import Checkbox from '@salesforce/design-system-react/components/checkbox';
-import Modal from '@salesforce/design-system-react/components/modal';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import i18n from 'i18next';
 import React, { useState } from 'react';
 
+import SpinOrgModal from '@/components/plans/spinOrgModal';
 import { getDuration } from '@/utils/dates';
 
 const Intro = ({
@@ -16,32 +15,24 @@ const Intro = ({
   preMessage,
   postMessage,
   backLink,
+  createOrg,
 }: {
   averageDuration: string | null;
   isProductionOrg: boolean;
   results: React.ReactNode;
   cta: React.ReactNode;
-  clickThroughAgreement: string | null;
+  clickThroughAgreement?: string | null;
   preMessage?: React.ReactNode;
   postMessage?: React.ReactNode;
   backLink?: React.ReactNode;
+  createOrg?: (email: string) => void;
 }) => {
   const [
     createOrgAgreementModalOpen,
     setcreateOrgAgreementModalOpen,
   ] = useState(false);
-  const [confirmed, setConfirmed] = useState(false);
   const duration = getDuration(averageDuration);
 
-  const handleChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-    { checked }: { checked: boolean },
-  ) => {
-    setConfirmed(checked);
-  };
-  const handleConfirmTerms = () => {
-    console.log('go to page 2');
-  };
   const closeAgreementModal = () => {
     setcreateOrgAgreementModalOpen(false);
   };
@@ -79,49 +70,12 @@ const Intro = ({
         onClick={() => setcreateOrgAgreementModalOpen(true)}
       />
       {backLink}
-      {clickThroughAgreement && (
-        <Modal
-          isOpen={createOrgAgreementModalOpen}
-          onRequestClose={closeAgreementModal}
-          size="medium"
-          heading={i18n.t('Product Terms of Use & Licenses')}
-          footer={[
-            <Button
-              key="cancel"
-              label="Cancel"
-              onClick={closeAgreementModal}
-            />,
-            <Button
-              key="confirm"
-              label="Confirm"
-              variant="brand"
-              onClick={handleConfirmTerms}
-            />,
-          ]}
-        >
-          <div className="slds-p-horizontal_large slds-p-vertical_medium">
-            {/* This text is pre-cleaned by the API */}
-            <div
-              className="slds-text-longform slds-scrollable_y slds-box markdown"
-              style={{ maxHeight: '250px' }}
-              dangerouslySetInnerHTML={{
-                __html: clickThroughAgreement,
-              }}
-            />
-            <Checkbox
-              id="click-through-confirm"
-              className="slds-p-top_medium"
-              checked={confirmed}
-              labels={{
-                label: i18n.t(
-                  'I confirm I have read and agree to these product terms of use and licenses.',
-                ),
-              }}
-              onChange={handleChange}
-            />
-          </div>
-        </Modal>
-      )}
+      <SpinOrgModal
+        isOpen={createOrgAgreementModalOpen}
+        clickThroughAgreement={clickThroughAgreement}
+        handleClose={closeAgreementModal}
+        createOrg={createOrg}
+      />
     </div>
   );
 };
