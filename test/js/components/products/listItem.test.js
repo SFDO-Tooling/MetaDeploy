@@ -1,8 +1,9 @@
-import { render } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
 import ProductItem from '@/components/products/listItem';
+
+import { render } from './../../utils';
 
 describe('<ProductItem />', () => {
   const setup = (initialState) => {

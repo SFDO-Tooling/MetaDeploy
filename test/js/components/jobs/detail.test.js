@@ -406,8 +406,7 @@ describe('<JobDetail />', () => {
         },
       });
 
-      expect(getByText('Average Install Time:')).toBeVisible();
-      expect(getByText('2 minutes.')).toBeVisible();
+      expect(getByText('Average Install Time: 2 minutes.')).toBeVisible();
     });
 
     test('renders job detail', () => {

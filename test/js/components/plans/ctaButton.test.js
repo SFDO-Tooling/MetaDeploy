@@ -1,8 +1,10 @@
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
 import CtaButton from '@/components/plans/ctaButton';
 import { getUrlParam, removeUrlParam } from '@/utils/api';
+
+import { render } from './../../utils';
 
 jest.mock('@/utils/api');
 

@@ -411,8 +411,7 @@ describe('<PlanDetail />', () => {
       },
     });
 
-    expect(getByText('Average Install Time:')).toBeVisible();
-    expect(getByText('30 seconds.')).toBeVisible();
+    expect(getByText('Average Install Time: 30 seconds.')).toBeVisible();
   });
 
   test('renders preflight expiration warning', () => {
