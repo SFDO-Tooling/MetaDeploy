@@ -9,14 +9,14 @@ type Props = {
   isOpen: boolean;
   clickThroughAgreement: string | null;
   handleClose: () => void;
-  createOrg: (email: string) => void;
+  doCreateOrg: (email: string) => void;
 };
 
 const SpinOrgModal = ({
   isOpen,
   clickThroughAgreement,
   handleClose,
-  createOrg,
+  doCreateOrg,
 }: Props) => {
   const [confirmed, setConfirmed] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
@@ -32,7 +32,7 @@ const SpinOrgModal = ({
       if (currentPage === 0) {
         nextPage();
       } /* istanbul ignore else */ else if (email) {
-        createOrg(email);
+        doCreateOrg(email);
       }
     }
   };
