@@ -37,6 +37,11 @@ export type PreflightInvalid = {
   payload: Preflight;
 };
 
+export type ScratchOrgProvision = {
+  type: 'SCRATCH_ORG_PROVISION';
+  payload: string; // todo
+};
+
 export type PlansAction =
   | FetchPreflightStarted
   | FetchPreflightSucceeded
@@ -95,6 +100,27 @@ export const startPreflight = (
       dispatch({ type: 'PREFLIGHT_REJECTED' as const, payload: planId });
       throw err;
     });
+};
+
+// export const createOrg = (planId, email) => console.log(planId, email);
+export const createOrg = (
+  planId: string,
+  email: string,
+): ThunkResult<Promise<ScratchOrgProvision>> => async (dispatch) => {
+  dispatch({ type: 'SCRATCH_ORG_PROVISION', payload: planId });
+  const url = window.api_urls.plan_scratch_org_create(planId, email);
+  const response = await apiFetch(url, dispatch, { method: 'POST' });
+  /* istanbul ignore else */
+  if (response && window.socket) {
+    window.socket.subscribe({
+      model: 'plan',
+      id: response.id,
+    });
+  }
+  return dispatch({
+    type: 'SCRATCH_ORG_PROVISION' as const,
+    payload: response,
+  });
 };
 
 export const completePreflight = (payload: Preflight): PreflightCompleted => ({

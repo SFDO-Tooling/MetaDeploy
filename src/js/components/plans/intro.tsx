@@ -15,6 +15,7 @@ const Intro = ({
   preMessage,
   postMessage,
   backLink,
+  planId,
   doCreateOrg,
 }: {
   averageDuration: string | null;
@@ -25,7 +26,8 @@ const Intro = ({
   preMessage?: React.ReactNode;
   postMessage?: React.ReactNode;
   backLink?: React.ReactNode;
-  doCreateOrg?: (email: string) => void;
+  planId?: string | null;
+  doCreateOrg?: (id: string, email: string) => void;
 }) => {
   const [
     createOrgAgreementModalOpen,
@@ -70,12 +72,13 @@ const Intro = ({
         onClick={() => setcreateOrgAgreementModalOpen(true)}
       />
       {backLink}
-      {clickThroughAgreement && doCreateOrg ? (
+      {clickThroughAgreement && doCreateOrg && planId ? (
         <SpinOrgModal
           isOpen={createOrgAgreementModalOpen}
           clickThroughAgreement={clickThroughAgreement}
           handleClose={closeAgreementModal}
           doCreateOrg={doCreateOrg}
+          planId={planId}
         />
       ) : null}
     </div>

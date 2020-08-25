@@ -30,7 +30,11 @@ import {
 import { AppState } from '@/store';
 import { startJob } from '@/store/jobs/actions';
 import { selectOrg } from '@/store/org/selectors';
-import { fetchPreflight, startPreflight } from '@/store/plans/actions';
+import {
+  createOrg,
+  fetchPreflight,
+  startPreflight,
+} from '@/store/plans/actions';
 import { CONSTANTS, Step } from '@/store/plans/reducer';
 import {
   selectPlan,
@@ -108,10 +112,6 @@ class PlanDetail extends React.Component<Props, State> {
       // Fetch most recent preflight result (if any exists)
       doFetchPreflight(plan.id);
     }
-  }
-
-  doCreateOrg(email: string) {
-    console.log(email);
   }
 
   componentDidMount() {
@@ -421,7 +421,8 @@ class PlanDetail extends React.Component<Props, State> {
                   />
                 }
                 clickThroughAgreement={product.click_through_agreement}
-                doCreateOrg={this.doCreateOrg} // @todo
+                doCreateOrg={createOrg}
+                planId={plan.id} // @todo
               />
               <UserInfo user={user} />
               {plan.steps?.length ? (
@@ -475,6 +476,7 @@ const actions = {
   doFetchPreflight: fetchPreflight,
   doStartPreflight: startPreflight,
   doStartJob: startJob,
+  createOrg,
 };
 
 const connector = connect(select, actions);

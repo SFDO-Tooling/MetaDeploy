@@ -6,13 +6,15 @@ import i18n from 'i18next';
 import React, { useState } from 'react';
 
 type Props = {
+  planId?: string | null;
   isOpen: boolean;
   clickThroughAgreement: string | null;
   handleClose: () => void;
-  doCreateOrg: (email: string) => void;
+  doCreateOrg: (planId: string, email: string) => void;
 };
 
 const SpinOrgModal = ({
+  planId,
   isOpen,
   clickThroughAgreement,
   handleClose,
@@ -28,11 +30,11 @@ const SpinOrgModal = ({
 
   const handleConfirmSubmit = () => {
     /* istanbul ignore else */
-    if (confirmed) {
+    if (confirmed && planId) {
       if (currentPage === 0) {
         nextPage();
       } /* istanbul ignore else */ else if (email) {
-        doCreateOrg(email);
+        doCreateOrg(planId, email);
       }
     }
   };
