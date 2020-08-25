@@ -1,5 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
+import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
 import React, { useState } from 'react';
@@ -19,33 +20,33 @@ const SpinOrgModal = ({
 }: Props) => {
   const [confirmed, setConfirmed] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
-
-  const handleChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-    { checked }: { checked: boolean },
-  ) => {
-    setConfirmed(checked);
-  };
+  const [email, setEmail] = useState('');
 
   const nextPage = () => {
     setCurrentPage(currentPage + 1);
   };
 
-  const handleConfirm = () => {
-    const email = 'erica@oddbird.net';
+  const handleConfirmSubmit = () => {
+    /* istanbul ignore else */
     if (confirmed) {
       if (currentPage === 0) {
         nextPage();
-      } else if (email) {
+      } /* istanbul ignore else */ else if (email) {
         createOrg(email);
       }
     }
   };
 
+  const resetAndClose = () => {
+    setConfirmed(false);
+    setEmail('');
+    setCurrentPage(0);
+    handleClose();
+  };
   const pages = [
     {
       heading: i18n.t('Product Terms of Use and Licenses'),
-      contents: (
+      content: (
         <>
           {clickThroughAgreement && (
             <>
@@ -66,7 +67,10 @@ const SpinOrgModal = ({
                     'I confirm I have read and agree to these product terms of use and licenses.',
                   ),
                 }}
-                onChange={handleChange}
+                onChange={(
+                  event: React.ChangeEvent<HTMLInputElement>,
+                  { checked }: { checked: boolean },
+                ) => setConfirmed(checked)}
               />
             </>
           )}
@@ -75,26 +79,47 @@ const SpinOrgModal = ({
     },
     {
       heading: i18n.t('Enter Your Email Address'),
-      content: <div>content here</div>, // todo add form for email, call confrim with email address and pass as callback to Intro component
+      content: (
+        <form
+          className="slds-p-horizontal_large slds-p-bottom_large"
+          onSubmit={handleConfirmSubmit}
+        >
+          <div className="slds-form-element__help slds-p-bottom_small slds-align_absolute-center">
+            {i18n.t(
+              'This email will be used as the admin of the scratch org that is created.',
+            )}
+          </div>
+          <Input
+            id="scratch-org-email"
+            label={i18n.t('Email')}
+            value={email}
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+              setEmail(event.target.value)
+            }
+            aria-describedby="scratch-org-email"
+            data-testid="scratch-org-email"
+          />
+        </form>
+      ),
     },
   ];
   return (
     <Modal
       isOpen={isOpen}
-      onRequestClose={handleClose}
+      onRequestClose={resetAndClose}
       size="medium"
       heading={pages[currentPage].heading}
       footer={[
-        <Button key="cancel" label="Cancel" onClick={handleClose} />,
+        <Button key="cancel" label="Cancel" onClick={resetAndClose} />,
         <Button
           key="confirm"
           label="Confirm"
           variant="brand"
-          onClick={handleConfirm}
+          onClick={handleConfirmSubmit}
         />,
       ]}
     >
-      <div className="slds-p-around_medium">{pages[currentPage].contents}</div>
+      <div className="slds-p-around_medium">{pages[currentPage].content}</div>
     </Modal>
   );
 };

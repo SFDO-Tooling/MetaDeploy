@@ -543,15 +543,40 @@ describe('<PlanDetail />', () => {
   });
 
   describe('creating new org', () => {
-    test('opens closes click through agreement', () => {
-      const { getByText, getByTitle, queryByText } = setup();
+    let queries;
+    beforeEach(() => {
+      queries = setup();
+      const { getByText, getByLabelText } = queries;
 
       fireEvent.click(getByText('Create Scratch Org'));
+      fireEvent.click(
+        getByLabelText(
+          'I confirm I have read and agree to these product terms of use and licenses.',
+        ),
+      );
+      fireEvent.click(getByText('Confirm'));
+    });
 
-      expect(getByText('Product Terms of Use & Licenses')).toBeVisible();
-      fireEvent.click(getByText('Confirm')); // nothing happens yet...
-      fireEvent.click(getByTitle('Close'));
+    test('closes spin org modal', () => {
+      const { getByText, queryByText } = queries;
+
+      fireEvent.click(getByText('Close'));
+
       expect(queryByText('Product Terms of Use & Licenses')).toBeNull();
+    });
+
+    test('spins new scratch org', () => {
+      const { getByText, getByLabelText } = queries;
+      const input = getByLabelText('Email');
+
+      expect(getByText('Enter Your Email Address')).toBeVisible();
+
+      fireEvent.change(input, { target: { value: 'foo@bar.com' } });
+
+      expect(input.value).toEqual('foo@bar.com');
+
+      fireEvent.click(getByText('Confirm'));
+      // todo
     });
   });
 });
