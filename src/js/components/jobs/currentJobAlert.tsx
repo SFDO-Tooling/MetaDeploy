@@ -31,7 +31,9 @@ class CurrentJobAlert extends React.Component<Props> {
     const duration = getDuration(plan_average_duration);
     let heading = i18n.t('An installation is currently running on this org.');
     if (duration) {
-      heading = `${heading} ${i18n.t('Average install time is')} ${duration}.`;
+      heading = `${heading} ${i18n.t('Average install time is {{duration}}.', {
+        duration,
+      })}`;
     }
     return (
       <AlertContainer className="current-job-alert">
