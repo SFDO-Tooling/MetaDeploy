@@ -70,12 +70,14 @@ const Intro = ({
         onClick={() => setcreateOrgAgreementModalOpen(true)}
       />
       {backLink}
-      <SpinOrgModal
-        isOpen={createOrgAgreementModalOpen}
-        clickThroughAgreement={clickThroughAgreement}
-        handleClose={closeAgreementModal}
-        createOrg={createOrg}
-      />
+      {clickThroughAgreement && createOrg ? (
+        <SpinOrgModal
+          isOpen={createOrgAgreementModalOpen}
+          clickThroughAgreement={clickThroughAgreement}
+          handleClose={closeAgreementModal}
+          createOrg={createOrg}
+        />
+      ) : null}
     </div>
   );
 };
