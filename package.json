@@ -147,6 +147,8 @@
     "webpack-merge": "^5.0.9"
   },
   "husky": {
-    "hooks": {}
+    "hooks": {
+      "prepare-commit-msg": "./bin/prepare-commit-msg"
+    }
   }
 }
