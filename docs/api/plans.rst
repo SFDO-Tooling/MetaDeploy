@@ -30,7 +30,8 @@ List
        "is_allowed": true,
        "is_listed": true,
        "not_allowed_instructions": null,
-       "requires_preflight": true
+       "requires_preflight": true,
+       "order_key" 0
      },
      ...
    ]
@@ -39,7 +40,7 @@ Retrieve
 --------
 
 .. sourcecode:: http
-   
+
    GET /api/plans/g45z7wA/ HTTP/1.1
 
 .. sourcecode:: http
@@ -58,14 +59,15 @@ Retrieve
      "is_allowed": true,
      "is_listed": true,
      "not_allowed_instructions": null,
-     "requires_preflight": true
+     "requires_preflight": true,
+     "order_key" 0
    }
 
 Create
 ------
 
 .. sourcecode:: http
-   
+
    POST /api/plans/ HTTP/1.1
 
    {
@@ -77,7 +79,8 @@ Create
      "is_allowed": true,
      "is_listed": true,
      "not_allowed_instructions": null,
-     "requires_preflight": true
+     "requires_preflight": true,
+     "order_key" 0
    }
 
 .. sourcecode:: http
@@ -88,7 +91,7 @@ Update
 ------
 
 .. sourcecode:: http
-   
+
    PATCH /api/plans/g45z7wA/ HTTP/1.1
 
    {
@@ -111,14 +114,15 @@ Update
      "is_allowed": true,
      "is_listed": true,
      "not_allowed_instructions": null,
-     "requires_preflight": true
+     "requires_preflight": true,
+     "order_key" 0
    }
 
 Destroy
 -------
 
 .. sourcecode:: http
-   
+
    DELETE /api/plans/g45z7wA/ HTTP/1.1
 
 .. sourcecode:: http
@@ -129,7 +133,7 @@ Preflight Create
 ----------------
 
 .. sourcecode:: http
-   
+
    POST /api/plans/g45z7wA/preflight/ HTTP/1.1
 
 .. sourcecode:: http
@@ -140,7 +144,7 @@ Preflight Get
 -------------
 
 .. sourcecode:: http
-   
+
    GET /api/plans/g45z7wA/preflight/ HTTP/1.1
 
 .. sourcecode:: http
