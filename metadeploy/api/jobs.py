@@ -262,7 +262,7 @@ def expire_preflights():
 expire_preflights_job = job(expire_preflights)
 
 
-def create_scratch_org(*, plan_id, email, org_name="release"):
+def create_scratch_org(*, plan_id, email, org_name):
     plan = Plan.objects.get(id=plan_id)
     repo_url = plan.version.product.repo_url
     repo_owner, repo_name = extract_user_and_repo(repo_url)
