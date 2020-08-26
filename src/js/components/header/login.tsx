@@ -1,4 +1,5 @@
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
+import LanguageDirection from '@salesforce/design-system-react/components/utilities/UNSAFE_direction/private/language-direction';
 import i18n from 'i18next';
 import * as React from 'react';
 
@@ -11,9 +12,9 @@ type Props = {
   buttonClassName: string;
   buttonVariant: string;
   triggerClassName?: string;
+  direction: string;
   disabled: boolean;
   menuPosition: string;
-  nubbinPosition: string;
   redirectParams: UrlParams;
 };
 type MenuOption = {
@@ -29,8 +30,8 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
     buttonClassName: 'slds-button_outline-brand',
     buttonVariant: 'base',
     disabled: false,
+    direction: 'ltr',
     menuPosition: 'overflowBoundaryElement',
-    nubbinPosition: 'top right',
     redirectParams: {},
   };
 
@@ -91,10 +92,11 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
       buttonVariant,
       disabled,
       menuPosition,
-      nubbinPosition,
       redirectParams,
     } = this.props;
     const { modalOpen } = this.state;
+    const nubbinPosition =
+      this.props.direction === 'ltr' ? 'top right' : 'top left';
 
     return (
       <>
@@ -124,4 +126,4 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
   }
 }
 
-export default Login;
+export default LanguageDirection(Login);
