@@ -4,6 +4,7 @@ import i18n from 'i18next';
 import React, { useState } from 'react';
 
 import SpinOrgModal from '@/components/plans/spinOrgModal';
+import { ScratchOrgProvision } from '@/store/plans/actions';
 import { getDuration } from '@/utils/dates';
 
 const Intro = ({
@@ -26,8 +27,8 @@ const Intro = ({
   preMessage?: React.ReactNode;
   postMessage?: React.ReactNode;
   backLink?: React.ReactNode;
-  planId?: string | null;
-  doCreateOrg?: (id: string, email: string) => void;
+  planId?: string;
+  doCreateOrg?: (planId: string, email: string) => Promise<ScratchOrgProvision>;
 }) => {
   const [
     createOrgAgreementModalOpen,
@@ -65,12 +66,14 @@ const Intro = ({
         {postMessage}
       </div>
       {cta}
-      <Button
-        label={i18n.t('Create Scratch Org')}
-        variant="brand"
-        className="slds-m-top_medium slds-p-vertical_xx-small"
-        onClick={() => setcreateOrgAgreementModalOpen(true)}
-      />
+      <div>
+        <Button
+          label={i18n.t('Create Scratch Org')}
+          variant="brand"
+          className="slds-m-top_medium slds-p-vertical_xx-small"
+          onClick={() => setcreateOrgAgreementModalOpen(true)}
+        />
+      </div>
       {backLink}
       {clickThroughAgreement && doCreateOrg && planId ? (
         <SpinOrgModal

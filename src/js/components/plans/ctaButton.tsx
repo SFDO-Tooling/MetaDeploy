@@ -64,7 +64,6 @@ export const LoginBtn = ({
     id={id || 'plan-detail-login'}
     buttonClassName={btnClasses}
     buttonVariant="brand"
-    triggerClassName="slds-size_full"
     label={label}
     menuPosition="relative"
     nubbinPosition="top"

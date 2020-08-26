@@ -335,6 +335,7 @@ class PlanDetail extends React.Component<Props, State> {
       plan,
       planSlug,
       preflight,
+      doCreateOrg,
       history,
     } = this.props;
     const loadingOrNotFound = getLoadingOrNotFound({
@@ -421,7 +422,7 @@ class PlanDetail extends React.Component<Props, State> {
                   />
                 }
                 clickThroughAgreement={product.click_through_agreement}
-                doCreateOrg={createOrg}
+                doCreateOrg={doCreateOrg}
                 planId={plan.id} // @todo
               />
               <UserInfo user={user} />
@@ -476,7 +477,7 @@ const actions = {
   doFetchPreflight: fetchPreflight,
   doStartPreflight: startPreflight,
   doStartJob: startJob,
-  createOrg,
+  doCreateOrg: createOrg,
 };
 
 const connector = connect(select, actions);
