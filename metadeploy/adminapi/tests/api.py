@@ -60,7 +60,7 @@ class TestPlanViewSet:
                     "commit_ish": None,
                     "id": f"{plan.id}",
                     "is_listed": True,
-                    "order": None,
+                    "order_key": 0,
                     "preflight_checks": [],
                     "preflight_message_additional": "",
                     "plan_template": (
@@ -94,7 +94,7 @@ class TestPlanViewSet:
             "commit_ish": None,
             "id": str(plan.id),
             "is_listed": True,
-            "order": None,
+            "order_key": 0,
             "preflight_checks": [],
             "preflight_message_additional": "",
             "plan_template": (
@@ -130,7 +130,7 @@ class TestPlanViewSet:
             url,
             {
                 "title": "Sample plan",
-                "order": None,
+                "order_key": 0,
                 "plan_template": (
                     f"http://testserver/admin/rest/plantemplates/{plan_template.id}"
                 ),
@@ -164,7 +164,7 @@ class TestPlanViewSet:
             "commit_ish": None,
             "id": plan_id,
             "is_listed": True,
-            "order": None,
+            "order_key": 0,
             "preflight_checks": [],
             "preflight_message_additional": "",
             "plan_template": (

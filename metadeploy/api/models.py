@@ -355,7 +355,7 @@ class Version(HashIdMixin, TranslatableModel):
         # get the most recently created plan for each plan template
         return (
             self.plan_set.filter(tier=Plan.Tier.additional)
-            .order_by("plan_template_id", "order", "-created_at")
+            .order_by("plan_template_id", "order_key", "-created_at")
             .distinct("plan_template_id")
         )
 
@@ -437,7 +437,7 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
             "Use this to optionally override the Version's commit_ish."
         ),
     )
-    order = models.PositiveSmallIntegerField(null=True, blank=True)
+    order_key = models.PositiveIntegerField(default=0)
 
     tier = models.CharField(choices=Tier, default=Tier.primary, max_length=64)
     is_listed = models.BooleanField(default=True)

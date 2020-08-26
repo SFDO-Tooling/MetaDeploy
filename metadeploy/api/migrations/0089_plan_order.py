@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name="plan",
-            name="order",
-            field=models.PositiveSmallIntegerField(blank=True, null=True),
+            name="order_key",
+            field=models.PositiveIntegerField(default=0),
         ),
     ]

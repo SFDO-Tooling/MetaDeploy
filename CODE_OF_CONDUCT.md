@@ -98,7 +98,7 @@ It includes adaptions and additions from [Go Community Code of Conduct][golang-c
 
 This Code of Conduct is licensed under the [Creative Commons Attribution 3.0 License][cc-by-3-us].
 
-[contributor-covenant-home]: https://www.contributor-covenant.org 'https://www.contributor-covenant.org/'
+[contributor-covenant-home]: https://www.contributor-covenant.org
 [golang-coc]: https://golang.org/conduct
 [cncf-coc]: https://github.com/cncf/foundation/blob/master/code-of-conduct.md
 [microsoft-coc]: https://opensource.microsoft.com/codeofconduct/

@@ -219,7 +219,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
           )
           .map((item: [string, Plan][]) => item[1])
       : [];
-    const additionalPlansSorted = sortBy(listedAdditionalPlans, ['order']);
+    const additionalPlansSorted = sortBy(listedAdditionalPlans, ['order_key']);
     const { primary_plan, secondary_plan } = version;
     const visiblePrimaryPlan =
       primary_plan?.is_listed && primary_plan?.is_allowed;
@@ -284,7 +284,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                   label={i18n.t('Select a different product')}
                   url={routes.product_list()}
                 />
-                {listedAdditionalPlans.length ? (
+                {additionalPlansSorted.length ? (
                   <div className="slds-p-top_x-large">
                     {visiblePrimaryPlan || visibleSecondaryPlan ? (
                       <h2 className="slds-text-heading_small">
@@ -292,7 +292,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                       </h2>
                     ) : null}
                     {additionalPlansSorted.map((plan) => (
-                      <p key={plan.id} data-testid="sorted_additional_plans">
+                      <p key={plan.id}>
                         <Link
                           to={routes.plan_detail(
                             product.slug,

@@ -70,7 +70,7 @@ const defaultState = {
               is_listed: true,
               is_allowed: true,
               requires_preflight: true,
-              order: 2,
+              order_key: 2,
             },
             'another-additional-plan': {
               id: 'plan-3',
@@ -80,7 +80,7 @@ const defaultState = {
               is_listed: true,
               is_allowed: true,
               requires_preflight: true,
-              order: 1,
+              order_key: 1,
             },
           },
           is_listed: true,
