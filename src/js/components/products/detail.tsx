@@ -1,4 +1,5 @@
 import i18n from 'i18next';
+import { sortBy } from 'lodash';
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
 import { Trans } from 'react-i18next';
@@ -218,6 +219,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
           )
           .map((item: [string, Plan][]) => item[1])
       : [];
+    const additionalPlansSorted = sortBy(listedAdditionalPlans, ['order_key']);
     const { primary_plan, secondary_plan } = version;
     const visiblePrimaryPlan =
       primary_plan?.is_listed && primary_plan?.is_allowed;
@@ -282,14 +284,14 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                   label={i18n.t('Select a different product')}
                   url={routes.product_list()}
                 />
-                {listedAdditionalPlans.length ? (
+                {additionalPlansSorted.length ? (
                   <div className="slds-p-top_x-large">
                     {visiblePrimaryPlan || visibleSecondaryPlan ? (
                       <h2 className="slds-text-heading_small">
                         {i18n.t('Additional Plans')}
                       </h2>
                     ) : null}
-                    {listedAdditionalPlans.map((plan) => (
+                    {additionalPlansSorted.map((plan) => (
                       <p key={plan.id}>
                         <Link
                           to={routes.plan_detail(
