@@ -108,8 +108,14 @@ export const createOrg = (
   email: string,
 ): ThunkResult<Promise<ScratchOrgProvision>> => async (dispatch) => {
   dispatch({ type: 'SCRATCH_ORG_PROVISION', payload: planId });
-  const url = window.api_urls.plan_scratch_org_create(planId, email);
-  const response = await apiFetch(url, dispatch, { method: 'POST' });
+  const url = window.api_urls.plan_create_scratch_org(planId);
+  const response = await apiFetch(url, dispatch, {
+    method: 'POST',
+    body: JSON.stringify({ email, plan_id: planId }),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
   /* istanbul ignore else */
   if (response && window.socket) {
     window.socket.subscribe({
