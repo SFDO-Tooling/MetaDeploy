@@ -16,6 +16,9 @@ Websocket notifications you can subscribe to:
         JOB_CANCELED
     org.:org_url
         ORG_CHANGED
+    scratch_org.:job_id
+        SCRATCH_ORG_CREATED
+        SCRATCH_ORG_ERROR
 """
 import logging
 
@@ -150,3 +153,18 @@ async def notify_org_result_changed(result):
     if await get_set_message_semaphore(channel_layer, message):
         logger.info(f"Sending message {message}")
         await channel_layer.group_send(group_name, message)
+
+
+async def notify_org_finished(job_id, error=None):
+    if error:
+        type_ = "SCRATCH_ORG_ERROR"
+    else:
+        type_ = "SCRATCH_ORG_CREATED"
+
+    message = {"type": type_, "payload": {}}
+    group_name = CHANNELS_GROUP_NAME.format(model="scratch_org", id=job_id)
+    channel_layer = get_channel_layer()
+    sent_message = {"type": "notify", "group": group_name, "content": message}
+    if await get_set_message_semaphore(channel_layer, sent_message):
+        logger.info(f"Sending message {sent_message}")
+        await channel_layer.group_send(group_name, sent_message)
