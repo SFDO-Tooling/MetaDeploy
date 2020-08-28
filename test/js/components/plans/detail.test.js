@@ -3,12 +3,13 @@ import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
 import PlanDetail from '@/components/plans/detail';
-import { fetchPreflight, spinOrg } from '@/store/plans/actions';
+import { fetchPreflight } from '@/store/plans/actions';
 import {
   fetchPlan,
   fetchProduct,
   fetchVersion,
 } from '@/store/products/actions';
+import { spinOrg } from '@/store/scratchOrgs/actions';
 import routes from '@/utils/routes';
 
 import {
@@ -19,6 +20,7 @@ import {
 
 jest.mock('@/store/products/actions');
 jest.mock('@/store/plans/actions');
+jest.mock('@/store/scratchOrgs/actions');
 
 fetchPlan.mockReturnValue({ type: 'TEST' });
 fetchPreflight.mockReturnValue({ type: 'TEST' });
@@ -569,6 +571,8 @@ describe('<PlanDetail />', () => {
 
     test('spins new scratch org', () => {
       const { getByText, getByLabelText } = queries;
+      const plan =
+        defaultState.products.products[0].most_recent_version.primary_plan;
       const input = getByLabelText('Email');
 
       expect(getByText('Enter Your Email Address')).toBeVisible();
@@ -579,7 +583,7 @@ describe('<PlanDetail />', () => {
 
       fireEvent.click(getByText('Confirm'));
 
-      expect(spinOrg).toHaveBeenCalledWith('plan-1', 'foo@bar.com');
+      expect(spinOrg).toHaveBeenCalledWith(plan, 'foo@bar.com');
     });
   });
 });

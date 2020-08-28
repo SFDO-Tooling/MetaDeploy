@@ -2,7 +2,6 @@ import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import i18n from 'i18next';
 import React from 'react';
 
-import { ScratchOrgSpinning } from '@/store/plans/actions';
 import { getDuration } from '@/utils/dates';
 
 const Intro = ({
@@ -20,11 +19,6 @@ const Intro = ({
   clickThroughAgreement?: string | null;
   preMessage?: React.ReactNode;
   postMessage?: React.ReactNode;
-  // backLink?: React.ReactNode;
-  planId?: string;
-  isSpinningOrg?: boolean;
-  isRunningInstall?: boolean;
-  doSpinOrg?: (planId: string, email: string) => Promise<ScratchOrgSpinning>;
 }) => {
   const duration = getDuration(averageDuration);
 

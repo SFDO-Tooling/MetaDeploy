@@ -37,21 +37,6 @@ export type PreflightInvalid = {
   payload: Preflight;
 };
 
-export type ScratchOrgSpinning = {
-  type: 'SCRATCH_ORG_SPINNING';
-  payload: string;
-};
-
-export type ScratchOrgCreated = {
-  type: 'SCRATCH_ORG_CREATED';
-  PAYLOAD: string;
-};
-
-export type ScratchOrgError = {
-  type: 'SCRATCH_ORG_ERROR';
-  payload: string; // todo
-};
-
 export type PlansAction =
   | FetchPreflightStarted
   | FetchPreflightSucceeded
@@ -62,10 +47,7 @@ export type PlansAction =
   | PreflightCompleted
   | PreflightFailed
   | PreflightCanceled
-  | PreflightInvalid
-  | ScratchOrgSpinning
-  | ScratchOrgCreated
-  | ScratchOrgError;
+  | PreflightInvalid;
 
 export const fetchPreflight = (
   planId: string,
@@ -113,37 +95,6 @@ export const startPreflight = (
       dispatch({ type: 'PREFLIGHT_REJECTED' as const, payload: planId });
       throw err;
     });
-};
-
-export const spinOrg = (
-  planId: string,
-  email: string,
-): ThunkResult<Promise<ScratchOrgSpinning>> => async (dispatch) => {
-  dispatch({ type: 'SCRATCH_ORG_SPINNING', payload: planId });
-  const url = window.api_urls.plan_create_scratch_org(planId);
-  try {
-    const response = await apiFetch(url, dispatch, {
-      method: 'POST',
-      body: JSON.stringify({ email, plan_id: planId }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    /* istanbul ignore else */
-    if (response && window.socket) {
-      window.socket.subscribe({
-        model: 'scratch_org',
-        id: response.job_id,
-      });
-    }
-    return dispatch({
-      type: 'SCRATCH_ORG_SPINNING' as const,
-      payload: response,
-    });
-  } catch (err) {
-    dispatch({ type: 'SCRATCH_ORG_ERROR' as const, payload: planId });
-    throw err;
-  }
 };
 
 export const completePreflight = (payload: Preflight): PreflightCompleted => ({

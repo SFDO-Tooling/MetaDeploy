@@ -6,17 +6,18 @@ import i18n from 'i18next';
 import React, { useState } from 'react';
 
 import { LabelWithSpinner } from '@/components/plans/ctaButton';
+import { Plan } from '@/store/plans/reducer';
 
 type Props = {
-  planId: string | null;
+  plan: Plan;
   clickThroughAgreement: string | null;
   isSpinningOrg?: boolean;
   isRunningInstall?: boolean;
-  doSpinOrg: (planId: string, email: string) => void;
+  doSpinOrg: (plan: Plan, email: string) => void;
 };
 
 const SpinOrg = ({
-  planId,
+  plan,
   clickThroughAgreement,
   isSpinningOrg,
   isRunningInstall,
@@ -40,11 +41,11 @@ const SpinOrg = ({
 
   const handleConfirmSubmit = () => {
     /* istanbul ignore else */
-    if (confirmed && planId) {
+    if (confirmed && plan) {
       if (currentPage === 0) {
         nextPage();
       } /* istanbul ignore else */ else if (email) {
-        doSpinOrg(planId, email);
+        doSpinOrg(plan, email);
         resetAndClose();
       }
     }

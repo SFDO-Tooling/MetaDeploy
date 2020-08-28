@@ -31,7 +31,7 @@ import {
 import { AppState } from '@/store';
 import { startJob } from '@/store/jobs/actions';
 import { selectOrg } from '@/store/org/selectors';
-import { fetchPreflight, spinOrg, startPreflight } from '@/store/plans/actions';
+import { fetchPreflight, startPreflight } from '@/store/plans/actions';
 import { CONSTANTS, Step } from '@/store/plans/reducer';
 import {
   selectPlan,
@@ -49,6 +49,7 @@ import {
   selectVersion,
   selectVersionLabel,
 } from '@/store/products/selectors';
+import { spinOrg } from '@/store/scratchOrgs/actions';
 import { selectUserState } from '@/store/user/selectors';
 import routes from '@/utils/routes';
 
@@ -413,13 +414,12 @@ class PlanDetail extends React.Component<Props, State> {
                 }
                 postMessage={this.getPostMessage()}
                 cta={this.getCTA(selectedSteps)}
-                planId={plan.id}
               />
               <div className="slds-p-around_medium slds-size_1-of-1">
                 <SpinOrg
                   clickThroughAgreement={product.click_through_agreement}
                   doSpinOrg={doSpinOrg}
-                  planId={plan.id}
+                  plan={plan}
                   isSpinningOrg={isSpinningOrg}
                   isRunningInstall={isRunningInstall}
                 />

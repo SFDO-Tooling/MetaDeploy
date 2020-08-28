@@ -25,6 +25,12 @@ import {
   PreflightInvalid,
 } from '@/store/plans/actions';
 import { Preflight } from '@/store/plans/reducer';
+import {
+  createScratchOrg,
+  errorScratchOrg,
+  ScratchOrgsAction,
+} from '@/store/scratchOrgs/actions';
+import { ScratchOrg } from '@/store/scratchOrgs/reducer';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
 import { invalidateToken, TokenInvalidAction } from '@/store/user/actions';
 import { log } from '@/utils/logging';
@@ -69,7 +75,7 @@ interface OrgEvent {
 
 interface ScratchOrgEvent {
   type: 'SCRATCH_ORG_CREATED' | 'SCRATCH_ORG_ERROR';
-  payload: {}; // todo
+  payload: ScratchOrg;
 }
 
 type ModelEvent = UserEvent | PreflightEvent | JobEvent | OrgEvent;
@@ -85,7 +91,8 @@ type Action =
   | JobCompleted
   | JobFailed
   | JobCanceled
-  | OrgChanged;
+  | OrgChanged
+  | ScratchOrgsAction;
 
 const isSubscriptionEvent = (event: EventType): event is SubscriptionEvent =>
   (event as ModelEvent).type === undefined;
@@ -116,10 +123,9 @@ export const getAction = (event: EventType): Action | null => {
     case 'ORG_CHANGED':
       return updateOrg(event.payload);
     case 'SCRATCH_ORG_CREATED':
-      return console.log(event); // todo
-    // return updateOrg(event.payload);
+      return createScratchOrg(event.payload);
     case 'SCRATCH_ORG_ERROR':
-      return console.log(event); // todo
+      return errorScratchOrg(event.payload);
   }
   return null;
 };
