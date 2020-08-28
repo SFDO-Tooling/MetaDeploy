@@ -1,9 +1,8 @@
-import Button from '@salesforce/design-system-react/components/button';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import i18n from 'i18next';
-import React, { useState } from 'react';
+import React from 'react';
 
-import SpinOrgModal from '@/components/plans/spinOrgModal';
+import SpinOrg from '@/components/plans/spinOrg';
 import { ScratchOrgProvision } from '@/store/plans/actions';
 import { getDuration } from '@/utils/dates';
 
@@ -17,6 +16,8 @@ const Intro = ({
   postMessage,
   backLink,
   planId,
+  isSpinningOrg,
+  isRunningInstall,
   doCreateOrg,
 }: {
   averageDuration: string | null;
@@ -28,17 +29,12 @@ const Intro = ({
   postMessage?: React.ReactNode;
   backLink?: React.ReactNode;
   planId?: string;
+  isSpinningOrg?: boolean;
+  isRunningInstall?: boolean;
   doCreateOrg?: (planId: string, email: string) => Promise<ScratchOrgProvision>;
 }) => {
-  const [
-    createOrgAgreementModalOpen,
-    setcreateOrgAgreementModalOpen,
-  ] = useState(false);
   const duration = getDuration(averageDuration);
 
-  const closeAgreementModal = () => {
-    setcreateOrgAgreementModalOpen(false);
-  };
   return (
     <div
       className="slds-p-around_medium
@@ -65,25 +61,19 @@ const Intro = ({
         {results}
         {postMessage}
       </div>
-      {cta}
       <div>
-        <Button
-          label={i18n.t('Create Scratch Org')}
-          variant="brand"
-          className="slds-m-top_medium slds-p-vertical_xx-small"
-          onClick={() => setcreateOrgAgreementModalOpen(true)}
-        />
+        {cta}
+        {clickThroughAgreement && doCreateOrg && planId ? (
+          <SpinOrg
+            clickThroughAgreement={clickThroughAgreement}
+            doCreateOrg={doCreateOrg}
+            planId={planId}
+            isSpinningOrg={isSpinningOrg}
+            isRunningInstall={isRunningInstall}
+          />
+        ) : null}
       </div>
       {backLink}
-      {clickThroughAgreement && doCreateOrg && planId ? (
-        <SpinOrgModal
-          isOpen={createOrgAgreementModalOpen}
-          clickThroughAgreement={clickThroughAgreement}
-          handleClose={closeAgreementModal}
-          doCreateOrg={doCreateOrg}
-          planId={planId}
-        />
-      ) : null}
     </div>
   );
 };

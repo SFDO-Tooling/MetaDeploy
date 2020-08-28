@@ -5,27 +5,37 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
 import React, { useState } from 'react';
 
+import { LabelWithSpinner } from '@/components/plans/ctaButton';
+
 type Props = {
-  planId?: string | null;
-  isOpen: boolean;
+  planId: string | null;
   clickThroughAgreement: string | null;
-  handleClose: () => void;
+  isSpinningOrg?: boolean;
+  isRunningInstall?: boolean;
   doCreateOrg: (planId: string, email: string) => void;
 };
 
-const SpinOrgModal = ({
+const SpinOrg = ({
   planId,
-  isOpen,
   clickThroughAgreement,
-  handleClose,
+  isSpinningOrg,
+  isRunningInstall,
   doCreateOrg,
 }: Props) => {
   const [confirmed, setConfirmed] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [email, setEmail] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
 
   const nextPage = () => {
     setCurrentPage(currentPage + 1);
+  };
+
+  const resetAndClose = () => {
+    setConfirmed(false);
+    setEmail('');
+    setCurrentPage(0);
+    setIsOpen(false);
   };
 
   const handleConfirmSubmit = () => {
@@ -35,16 +45,11 @@ const SpinOrgModal = ({
         nextPage();
       } /* istanbul ignore else */ else if (email) {
         doCreateOrg(planId, email);
+        resetAndClose();
       }
     }
   };
 
-  const resetAndClose = () => {
-    setConfirmed(false);
-    setEmail('');
-    setCurrentPage(0);
-    handleClose();
-  };
   const pages = [
     {
       heading: i18n.t('Product Terms of Use and Licenses'),
@@ -105,25 +110,50 @@ const SpinOrgModal = ({
       ),
     },
   ];
+
   return (
-    <Modal
-      isOpen={isOpen}
-      onRequestClose={resetAndClose}
-      size="medium"
-      heading={pages[currentPage].heading}
-      footer={[
-        <Button key="cancel" label="Cancel" onClick={resetAndClose} />,
-        <Button
-          key="confirm"
-          label="Confirm"
-          variant="brand"
-          onClick={handleConfirmSubmit}
-        />,
-      ]}
-    >
-      <div className="slds-p-around_medium">{pages[currentPage].content}</div>
-    </Modal>
+    <>
+      <Button
+        label={
+          !isSpinningOrg && !isRunningInstall ? (
+            i18n.t('Create Scratch Org')
+          ) : (
+            <LabelWithSpinner
+              label={
+                isSpinningOrg
+                  ? i18n.t('Scratch Org Creation in Progress...')
+                  : i18n.t('Running Pre-Install Validation...')
+              }
+            />
+          )
+        }
+        variant="brand"
+        className="slds-m-top_medium slds-p-vertical_xx-small"
+        onClick={() => setIsOpen(true)}
+      />
+      <Modal
+        isOpen={isOpen}
+        onRequestClose={resetAndClose}
+        size="medium"
+        heading={pages[currentPage].heading}
+        footer={[
+          <Button
+            key="cancel"
+            label={i18n.t('Cancel')}
+            onClick={resetAndClose}
+          />,
+          <Button
+            key="confirm"
+            label={i18n.t('Confirm')}
+            variant="brand"
+            onClick={handleConfirmSubmit}
+          />,
+        ]}
+      >
+        <div className="slds-p-around_medium">{pages[currentPage].content}</div>
+      </Modal>
+    </>
   );
 };
 
-export default SpinOrgModal;
+export default SpinOrg;

@@ -120,7 +120,7 @@ export const createOrg = (
   if (response && window.socket) {
     window.socket.subscribe({
       model: 'plan',
-      id: response.id,
+      id: response.job_id,
     });
   }
   return dispatch({

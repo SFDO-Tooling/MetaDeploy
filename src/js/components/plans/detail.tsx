@@ -423,7 +423,7 @@ class PlanDetail extends React.Component<Props, State> {
                 }
                 clickThroughAgreement={product.click_through_agreement}
                 doCreateOrg={doCreateOrg}
-                planId={plan.id} // @todo
+                planId={plan.id}
               />
               <UserInfo user={user} />
               {plan.steps?.length ? (
