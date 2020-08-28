@@ -1,5 +1,6 @@
+from django.conf import settings
 from django_filters import rest_framework as filters
-from rest_framework import serializers, viewsets
+from rest_framework import serializers, status, viewsets
 from rest_framework.response import Response
 from sfdo_template_helpers.admin.permissions import IsAPIUser
 from sfdo_template_helpers.admin.serializers import AdminAPISerializer
@@ -146,6 +147,8 @@ class TranslationViewSet(viewsets.ViewSet):
     def partial_update(self, request, pk=None):
         # Add or update a Translation record for each message
         lang = pk
+        if lang not in (lang for lang, label in settings.LANGUAGES):
+            return Response("", status=status.HTTP_404_NOT_FOUND)
         for context, messages in request.data.items():
             for slug, message in messages.items():
                 record, created = models.Translation.objects.get_or_create(

@@ -161,7 +161,7 @@ init_i18n((i18nError?: string) => {
       ReactDOM.render(
         <Provider store={appStore}>
           <BrowserRouter>
-            <UNSAFE_DirectionSettings.Provider value={document.dir}>
+            <UNSAFE_DirectionSettings.Provider value={document.dir || 'ltr'}>
               <IconSettings
                 actionSprite={actionSprite}
                 customSprite={customSprite}

@@ -258,6 +258,7 @@ LANGUAGES = [
     ("es-mx", "Mexican Spanish"),
     ("fi", "Finnish"),
     ("fr", "French"),
+    ("fr-ca", "Canadian French"),
     ("ga", "Irish"),
     ("he", "Hebrew"),
     ("hr", "Croatian"),
@@ -283,6 +284,14 @@ LANGUAGES = [
     ("zh-hans", "Simplified Chinese"),
     ("zh-hant", "Traditional Chinese"),
 ]
+
+PARLER_LANGUAGES = {
+    1: (
+        {"code": "es-mx", "fallbacks": ["es", "en-us"]},
+        {"code": "fr-ca", "fallbacks": ["fr", "en-us"]},
+        {"code": "pt-br", "fallbacks": ["pt", "en-us"]},
+    )
+}
 
 TIME_ZONE = "UTC"
 
