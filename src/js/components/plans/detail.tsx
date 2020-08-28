@@ -415,7 +415,7 @@ class PlanDetail extends React.Component<Props, State> {
                 cta={this.getCTA(selectedSteps)}
                 planId={plan.id}
               />
-              <div className="slds-p-around_medium">
+              <div className="slds-p-around_medium slds-size_1-of-1">
                 <SpinOrg
                   clickThroughAgreement={product.click_through_agreement}
                   doSpinOrg={doSpinOrg}
