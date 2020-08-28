@@ -49,3 +49,8 @@ urlpatterns = [
     # usually only be the path component, not a full URL, and so the caller
     # will have to build them with the right scheme and authority sections.
 ] + websockets.routes
+
+if "binary_database_files" in settings.INSTALLED_APPS:
+    from binary_database_files.views import serve_mixed
+
+    urlpatterns += [re_path(r"^files/(?P<name>.+)$", serve_mixed, name="database_file")]
