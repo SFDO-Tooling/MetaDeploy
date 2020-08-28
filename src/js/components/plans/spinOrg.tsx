@@ -12,7 +12,7 @@ type Props = {
   clickThroughAgreement: string | null;
   isSpinningOrg?: boolean;
   isRunningInstall?: boolean;
-  doCreateOrg: (planId: string, email: string) => void;
+  doSpinOrg: (planId: string, email: string) => void;
 };
 
 const SpinOrg = ({
@@ -20,7 +20,7 @@ const SpinOrg = ({
   clickThroughAgreement,
   isSpinningOrg,
   isRunningInstall,
-  doCreateOrg,
+  doSpinOrg,
 }: Props) => {
   const [confirmed, setConfirmed] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
@@ -44,7 +44,7 @@ const SpinOrg = ({
       if (currentPage === 0) {
         nextPage();
       } /* istanbul ignore else */ else if (email) {
-        doCreateOrg(planId, email);
+        doSpinOrg(planId, email);
         resetAndClose();
       }
     }

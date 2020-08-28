@@ -3,7 +3,7 @@ import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
 import PlanDetail from '@/components/plans/detail';
-import { createOrg, fetchPreflight } from '@/store/plans/actions';
+import { fetchPreflight, spinOrg } from '@/store/plans/actions';
 import {
   fetchPlan,
   fetchProduct,
@@ -24,14 +24,14 @@ fetchPlan.mockReturnValue({ type: 'TEST' });
 fetchPreflight.mockReturnValue({ type: 'TEST' });
 fetchProduct.mockReturnValue({ type: 'TEST' });
 fetchVersion.mockReturnValue({ type: 'TEST' });
-createOrg.mockReturnValue({ type: 'TEST', payload: 'abc123' });
+spinOrg.mockReturnValue({ type: 'TEST', payload: 'abc123' });
 
 afterEach(() => {
   fetchPlan.mockClear();
   fetchPreflight.mockClear();
   fetchProduct.mockClear();
   fetchVersion.mockClear();
-  createOrg.mockClear();
+  spinOrg.mockClear();
 });
 
 const defaultState = {
@@ -579,7 +579,7 @@ describe('<PlanDetail />', () => {
 
       fireEvent.click(getByText('Confirm'));
 
-      expect(createOrg).toHaveBeenCalledWith('plan-1', 'foo@bar.com');
+      expect(spinOrg).toHaveBeenCalledWith('plan-1', 'foo@bar.com');
     });
   });
 });

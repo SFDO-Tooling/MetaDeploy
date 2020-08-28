@@ -66,8 +66,14 @@ interface OrgEvent {
   type: 'ORG_CHANGED';
   payload: Org;
 }
+
+interface ScratchOrgEvent {
+  type: 'SCRATCH_ORG_CREATED' | 'SCRATCH_ORG_ERROR';
+  payload: {}; // todo
+}
+
 type ModelEvent = UserEvent | PreflightEvent | JobEvent | OrgEvent;
-type EventType = SubscriptionEvent | ErrorEvent | ModelEvent;
+type EventType = SubscriptionEvent | ErrorEvent | ModelEvent | ScratchOrgEvent;
 
 type Action =
   | TokenInvalidAction
@@ -109,6 +115,11 @@ export const getAction = (event: EventType): Action | null => {
       return failJob(event.payload);
     case 'ORG_CHANGED':
       return updateOrg(event.payload);
+    case 'SCRATCH_ORG_CREATED':
+      return console.log(event); // todo
+    // return updateOrg(event.payload);
+    case 'SCRATCH_ORG_ERROR':
+      return console.log(event); // todo
   }
   return null;
 };

@@ -31,11 +31,7 @@ import {
 import { AppState } from '@/store';
 import { startJob } from '@/store/jobs/actions';
 import { selectOrg } from '@/store/org/selectors';
-import {
-  createOrg,
-  fetchPreflight,
-  startPreflight,
-} from '@/store/plans/actions';
+import { fetchPreflight, spinOrg, startPreflight } from '@/store/plans/actions';
 import { CONSTANTS, Step } from '@/store/plans/reducer';
 import {
   selectPlan,
@@ -336,7 +332,7 @@ class PlanDetail extends React.Component<Props, State> {
       plan,
       planSlug,
       preflight,
-      doCreateOrg,
+      doSpinOrg,
       history,
     } = this.props;
     const loadingOrNotFound = getLoadingOrNotFound({
@@ -422,7 +418,7 @@ class PlanDetail extends React.Component<Props, State> {
               <div className="slds-p-around_medium">
                 <SpinOrg
                   clickThroughAgreement={product.click_through_agreement}
-                  doCreateOrg={doCreateOrg}
+                  doSpinOrg={doSpinOrg}
                   planId={plan.id}
                   isSpinningOrg={isSpinningOrg}
                   isRunningInstall={isRunningInstall}
@@ -485,7 +481,7 @@ const actions = {
   doFetchPreflight: fetchPreflight,
   doStartPreflight: startPreflight,
   doStartJob: startJob,
-  doCreateOrg: createOrg,
+  doSpinOrg: spinOrg,
 };
 
 const connector = connect(select, actions);
