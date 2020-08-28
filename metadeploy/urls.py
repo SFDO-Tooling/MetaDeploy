@@ -50,7 +50,7 @@ urlpatterns = [
     # will have to build them with the right scheme and authority sections.
 ] + websockets.routes
 
-if "binary_database_files" in settings.INSTALLED_APPS:
+if "binary_database_files" in settings.INSTALLED_APPS:  # pragma: no cover
     from binary_database_files.views import serve_mixed
 
     urlpatterns += [re_path(r"^files/(?P<name>.+)$", serve_mixed, name="database_file")]
