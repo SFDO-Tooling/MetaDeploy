@@ -16,6 +16,7 @@ import PreflightResults, {
   ErrorIcon,
   WarningIcon,
 } from '@/components/plans/preflightResults';
+import SpinOrg from '@/components/plans/spinOrg';
 import StepsTable from '@/components/plans/stepsTable';
 import Toasts from '@/components/plans/toasts';
 import UserInfo from '@/components/plans/userInfo';
@@ -365,7 +366,9 @@ class PlanDetail extends React.Component<Props, State> {
       product.most_recent_version &&
       new Date(version.created_at) >=
         new Date(product.most_recent_version.created_at);
-
+    // todo...
+    const isRunningInstall = false;
+    const isSpinningOrg = false;
     return (
       <DocumentTitle
         title={`${plan.title} | ${product.title} | ${window.SITE_NAME}`}
@@ -414,17 +417,22 @@ class PlanDetail extends React.Component<Props, State> {
                 }
                 postMessage={this.getPostMessage()}
                 cta={this.getCTA(selectedSteps)}
-                backLink={
-                  <BackLink
-                    label={i18n.t('Select a different plan')}
-                    url={routes.version_detail(product.slug, version.label)}
-                    className="slds-p-top_small"
-                  />
-                }
-                clickThroughAgreement={product.click_through_agreement}
-                doCreateOrg={doCreateOrg}
                 planId={plan.id}
               />
+              <div className="slds-p-around_medium">
+                <SpinOrg
+                  clickThroughAgreement={product.click_through_agreement}
+                  doCreateOrg={doCreateOrg}
+                  planId={plan.id}
+                  isSpinningOrg={isSpinningOrg}
+                  isRunningInstall={isRunningInstall}
+                />
+                <BackLink
+                  label={i18n.t('Select a different plan')}
+                  url={routes.version_detail(product.slug, version.label)}
+                  className="slds-p-top_small"
+                />
+              </div>
               <UserInfo user={user} />
               {plan.steps?.length ? (
                 <StepsTable

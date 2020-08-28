@@ -2,7 +2,6 @@ import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import i18n from 'i18next';
 import React from 'react';
 
-import SpinOrg from '@/components/plans/spinOrg';
 import { ScratchOrgProvision } from '@/store/plans/actions';
 import { getDuration } from '@/utils/dates';
 
@@ -11,14 +10,8 @@ const Intro = ({
   isProductionOrg,
   results,
   cta,
-  clickThroughAgreement,
   preMessage,
   postMessage,
-  backLink,
-  planId,
-  isSpinningOrg,
-  isRunningInstall,
-  doCreateOrg,
 }: {
   averageDuration: string | null;
   isProductionOrg: boolean;
@@ -27,7 +20,7 @@ const Intro = ({
   clickThroughAgreement?: string | null;
   preMessage?: React.ReactNode;
   postMessage?: React.ReactNode;
-  backLink?: React.ReactNode;
+  // backLink?: React.ReactNode;
   planId?: string;
   isSpinningOrg?: boolean;
   isRunningInstall?: boolean;
@@ -61,19 +54,7 @@ const Intro = ({
         {results}
         {postMessage}
       </div>
-      <div>
-        {cta}
-        {clickThroughAgreement && doCreateOrg && planId ? (
-          <SpinOrg
-            clickThroughAgreement={clickThroughAgreement}
-            doCreateOrg={doCreateOrg}
-            planId={planId}
-            isSpinningOrg={isSpinningOrg}
-            isRunningInstall={isRunningInstall}
-          />
-        ) : null}
-      </div>
-      {backLink}
+      <div>{cta}</div>
     </div>
   );
 };

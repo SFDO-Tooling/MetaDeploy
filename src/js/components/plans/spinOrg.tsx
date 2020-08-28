@@ -128,7 +128,8 @@ const SpinOrg = ({
           )
         }
         variant="brand"
-        className="slds-m-top_medium slds-p-vertical_xx-small"
+        className="slds-p-vertical_xx-small"
+        disabled={isSpinningOrg || isRunningInstall}
         onClick={() => setIsOpen(true)}
       />
       <Modal
