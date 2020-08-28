@@ -3,7 +3,7 @@ import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
 import PlanDetail from '@/components/plans/detail';
-import { fetchPreflight } from '@/store/plans/actions';
+import { createOrg, fetchPreflight } from '@/store/plans/actions';
 import {
   fetchPlan,
   fetchProduct,
@@ -24,12 +24,14 @@ fetchPlan.mockReturnValue({ type: 'TEST' });
 fetchPreflight.mockReturnValue({ type: 'TEST' });
 fetchProduct.mockReturnValue({ type: 'TEST' });
 fetchVersion.mockReturnValue({ type: 'TEST' });
+createOrg.mockReturnValue({ type: 'TEST', payload: 'abc123' });
 
 afterEach(() => {
   fetchPlan.mockClear();
   fetchPreflight.mockClear();
   fetchProduct.mockClear();
   fetchVersion.mockClear();
+  createOrg.mockClear();
 });
 
 const defaultState = {
@@ -576,7 +578,8 @@ describe('<PlanDetail />', () => {
       expect(input.value).toEqual('foo@bar.com');
 
       fireEvent.click(getByText('Confirm'));
-      // todo
+
+      expect(createOrg).toHaveBeenCalledWith('plan-1', 'foo@bar.com');
     });
   });
 });
