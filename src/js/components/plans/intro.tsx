@@ -11,6 +11,7 @@ const Intro = ({
   cta,
   preMessage,
   postMessage,
+  backLink,
 }: {
   averageDuration: string | null;
   isProductionOrg: boolean;
@@ -19,6 +20,7 @@ const Intro = ({
   clickThroughAgreement?: string | null;
   preMessage?: React.ReactNode;
   postMessage?: React.ReactNode;
+  backLink?: React.ReactNode;
 }) => {
   const duration = getDuration(averageDuration);
 
@@ -48,7 +50,8 @@ const Intro = ({
         {results}
         {postMessage}
       </div>
-      <div>{cta}</div>
+      {cta}
+      {backLink}
     </div>
   );
 };

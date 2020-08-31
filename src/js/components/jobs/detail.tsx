@@ -332,14 +332,16 @@ class JobDetail extends React.Component<Props, State> {
                 />
               }
               postMessage={<JobMessage job={job} />}
+              backLink={
+                job.status === CONSTANTS.STATUS.STARTED ? null : (
+                  <BackLink
+                    label={i18n.t('Install another product')}
+                    url={routes.product_list()}
+                    className="slds-p-top_small"
+                  />
+                )
+              }
             />
-            {job.status === CONSTANTS.STATUS.STARTED ? null : (
-              <BackLink
-                label={i18n.t('Install another product')}
-                url={routes.product_list()}
-                className="slds-p-top_small"
-              />
-            )}
             <UserInfo job={job} />
             <ProgressBar job={job} />
             {steps?.length ? (

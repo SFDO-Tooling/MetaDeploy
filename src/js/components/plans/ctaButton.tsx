@@ -8,11 +8,13 @@ import Login from '@/components/header/login';
 import ClickThroughAgreementModal from '@/components/plans/clickThroughAgreementModal';
 import { SelectedSteps } from '@/components/plans/detail';
 import PreflightWarningModal from '@/components/plans/preflightWarningModal';
+import SpinOrg from '@/components/scratchOrgs/spin';
 import { JobData, JobStarted } from '@/store/jobs/actions';
 import { PreflightStarted } from '@/store/plans/actions';
 import { CONSTANTS, Plan, Preflight, StepResult } from '@/store/plans/reducer';
 import { User } from '@/store/user/reducer';
 import { getUrlParam, removeUrlParam, UrlParams } from '@/utils/api';
+import { SUPPORTED_ORGS } from '@/utils/constants';
 import routes from '@/utils/routes';
 
 type Props = {
@@ -27,6 +29,7 @@ type Props = {
   preventAction: boolean;
   doStartPreflight: (planId: string) => Promise<PreflightStarted>;
   doStartJob: (data: JobData) => Promise<JobStarted>;
+  doSpinOrg: (plan: Plan, email: string) => void;
 };
 
 const { AUTO_START_PREFLIGHT, RESULT_STATUS, STATUS } = CONSTANTS;
@@ -284,6 +287,7 @@ class CtaButton extends React.Component<
       plan,
       preflight,
       selectedSteps,
+      doSpinOrg,
     } = this.props;
     if (plan.requires_preflight) {
       if (!user) {
@@ -394,15 +398,37 @@ class CtaButton extends React.Component<
     const action = clickThroughAgreement
       ? this.openClickThroughModal
       : this.startJob;
+
+    // todo...
+    const isRunningInstall = false;
+    const isSpinningOrg = false;
+    const devhubSet = Boolean(window.GLOBALS.DEVHUB_USERNAME);
+    const planCanSpinScratchOrg =
+      devhubSet &&
+      (plan.supported_orgs === SUPPORTED_ORGS.Scratch ||
+        plan.supported_orgs === SUPPORTED_ORGS.Both);
     return (
-      <>
-        {this.getLoginOrActionBtn(
-          i18n.t('Install'),
-          i18n.t('Log In to Install'),
-          action,
-        )}
-        {this.getClickThroughAgreementModal()}
-      </>
+      <div className="slds-grid slds-grid_vertical">
+        <div className="slds-col">
+          {this.getLoginOrActionBtn(
+            i18n.t('Install'),
+            i18n.t('Log In to Install'),
+            action,
+          )}
+          {this.getClickThroughAgreementModal()}
+        </div>
+        <div className="slds-col slds-m-top_large">
+          {planCanSpinScratchOrg && (
+            <SpinOrg
+              clickThroughAgreement={clickThroughAgreement}
+              doSpinOrg={doSpinOrg}
+              plan={plan}
+              isSpinningOrg={isSpinningOrg}
+              isRunningInstall={isRunningInstall}
+            />
+          )}
+        </div>
+      </div>
     );
   }
 }

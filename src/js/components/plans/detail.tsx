@@ -22,7 +22,6 @@ import UserInfo from '@/components/plans/userInfo';
 import PlanNotAllowed from '@/components/products/notAllowed';
 import OldVersionWarning from '@/components/products/oldVersionWarning';
 import ProductNotFound from '@/components/products/product404';
-import SpinOrg from '@/components/scratchOrgs/spin';
 import {
   getLoadingOrNotFound,
   shouldFetchPlan,
@@ -51,7 +50,6 @@ import {
 } from '@/store/products/selectors';
 import { spinOrg } from '@/store/scratchOrgs/actions';
 import { selectUserState } from '@/store/user/selectors';
-import { SUPPORTED_ORGS } from '@/utils/constants';
 import routes from '@/utils/routes';
 
 export type SelectedSteps = Set<string>;
@@ -291,6 +289,7 @@ class PlanDetail extends React.Component<Props, State> {
       org,
       doStartPreflight,
       doStartJob,
+      doSpinOrg,
     } = this.props;
 
     /* istanbul ignore if */
@@ -318,6 +317,7 @@ class PlanDetail extends React.Component<Props, State> {
           preventAction={Boolean(org?.current_job || org?.current_preflight)}
           doStartPreflight={doStartPreflight}
           doStartJob={doStartJob}
+          doSpinOrg={doSpinOrg}
         />
       );
     }
@@ -364,14 +364,7 @@ class PlanDetail extends React.Component<Props, State> {
       product.most_recent_version &&
       new Date(version.created_at) >=
         new Date(product.most_recent_version.created_at);
-    // todo...
-    const isRunningInstall = false;
-    const isSpinningOrg = false;
-    const devhubSet = Boolean(window.GLOBALS.DEVHUB_USERNAME);
-    const planCanSpinScratchOrg =
-      devhubSet &&
-      (plan.supported_orgs === SUPPORTED_ORGS.Scratch ||
-        plan.supported_orgs === SUPPORTED_ORGS.Both);
+
     return (
       <DocumentTitle
         title={`${plan.title} | ${product.title} | ${window.SITE_NAME}`}
@@ -420,23 +413,14 @@ class PlanDetail extends React.Component<Props, State> {
                 }
                 postMessage={this.getPostMessage()}
                 cta={this.getCTA(selectedSteps)}
-              />
-              <div className="slds-p-around_medium slds-size_1-of-1">
-                {planCanSpinScratchOrg && (
-                  <SpinOrg
-                    clickThroughAgreement={product.click_through_agreement}
-                    doSpinOrg={doSpinOrg}
-                    plan={plan}
-                    isSpinningOrg={isSpinningOrg}
-                    isRunningInstall={isRunningInstall}
+                backLink={
+                  <BackLink
+                    label={i18n.t('Select a different plan')}
+                    url={routes.version_detail(product.slug, version.label)}
+                    className="slds-p-top_small"
                   />
-                )}
-                <BackLink
-                  label={i18n.t('Select a different plan')}
-                  url={routes.version_detail(product.slug, version.label)}
-                  className="slds-p-top_small"
-                />
-              </div>
+                }
+              />
               <UserInfo user={user} />
               {plan.steps?.length ? (
                 <StepsTable
