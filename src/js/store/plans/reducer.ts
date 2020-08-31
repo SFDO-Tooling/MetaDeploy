@@ -1,5 +1,6 @@
 import { PlansAction } from '@/store/plans/actions';
 import { LogoutAction } from '@/store/user/actions';
+import { SupportedOrgs } from '@/utils/constants';
 
 export type Step = {
   id: string;
@@ -23,6 +24,7 @@ export type Plan = {
   average_duration: string | null;
   requires_preflight: boolean;
   order_key: number;
+  supported_orgs: SupportedOrgs;
 };
 
 export type StepResult = {

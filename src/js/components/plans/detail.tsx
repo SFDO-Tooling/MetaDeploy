@@ -51,6 +51,7 @@ import {
 } from '@/store/products/selectors';
 import { spinOrg } from '@/store/scratchOrgs/actions';
 import { selectUserState } from '@/store/user/selectors';
+import { SUPPORTED_ORGS } from '@/utils/constants';
 import routes from '@/utils/routes';
 
 export type SelectedSteps = Set<string>;
@@ -366,6 +367,11 @@ class PlanDetail extends React.Component<Props, State> {
     // todo...
     const isRunningInstall = false;
     const isSpinningOrg = false;
+    const devhubSet = Boolean(window.GLOBALS.DEVHUB_USERNAME);
+    const planCanSpinScratchOrg =
+      devhubSet &&
+      (plan.supported_orgs === SUPPORTED_ORGS.Scratch ||
+        plan.supported_orgs === SUPPORTED_ORGS.Both);
     return (
       <DocumentTitle
         title={`${plan.title} | ${product.title} | ${window.SITE_NAME}`}
@@ -416,13 +422,15 @@ class PlanDetail extends React.Component<Props, State> {
                 cta={this.getCTA(selectedSteps)}
               />
               <div className="slds-p-around_medium slds-size_1-of-1">
-                <SpinOrg
-                  clickThroughAgreement={product.click_through_agreement}
-                  doSpinOrg={doSpinOrg}
-                  plan={plan}
-                  isSpinningOrg={isSpinningOrg}
-                  isRunningInstall={isRunningInstall}
-                />
+                {planCanSpinScratchOrg && (
+                  <SpinOrg
+                    clickThroughAgreement={product.click_through_agreement}
+                    doSpinOrg={doSpinOrg}
+                    plan={plan}
+                    isSpinningOrg={isSpinningOrg}
+                    isRunningInstall={isRunningInstall}
+                  />
+                )}
                 <BackLink
                   label={i18n.t('Select a different plan')}
                   url={routes.version_detail(product.slug, version.label)}
