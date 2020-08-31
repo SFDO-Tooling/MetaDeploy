@@ -4,6 +4,7 @@ from channels.testing import WebsocketCommunicator
 from ..api.models import Job, PreflightResult
 from ..api.push import (
     notify_org_result_changed,
+    notify_org_finished,
     notify_post_job,
     preflight_completed,
     user_token_expired,
@@ -173,6 +174,30 @@ async def test_push_notification_consumer__subscribe_org(
     assert response == {
         "type": "ORG_CHANGED",
         "payload": OrgSerializer({"current_job": job, "current_preflight": None}).data,
+    }
+
+    await communicator.disconnect()
+
+
+@pytest.mark.django_db
+@pytest.mark.asyncio
+async def test_push_notification_consumer__subscribe_scratch_org(user_factory):
+    user = user_factory()
+
+    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator.scope["user"] = user
+    connected, _ = await communicator.connect()
+    assert connected
+
+    await communicator.send_json_to({"model": "scratch_org", "id": "abc123"})
+    response = await communicator.receive_json_from()
+    assert "ok" in response
+
+    await notify_org_finished("abc123")
+    response = await communicator.receive_json_from()
+    assert response == {
+        "type": "SCRATCH_ORG_CREATED",
+        "payload": {},
     }
 
     await communicator.disconnect()

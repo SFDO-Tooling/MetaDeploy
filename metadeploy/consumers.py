@@ -13,7 +13,7 @@ from .consumer_utils import clear_message_semaphore
 Request = namedtuple("Request", "user")
 
 
-KNOWN_MODELS = {"user", "preflightresult", "job", "org"}
+KNOWN_MODELS = {"user", "preflightresult", "job", "org", "scratch_org"}
 
 
 def user_context(user):
@@ -90,6 +90,8 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
     def has_good_permissions(self, content):
         if self.handle_org_special_case(content):
             return True
+        if self.handle_scratch_org_job_special_case(content):
+            return True
         possible_exceptions = (
             AttributeError,
             KeyError,
@@ -110,3 +112,6 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
             content["id"] = convert_org_id_to_key(self.scope["user"].org_id)
             return True
         return False
+
+    def handle_scratch_org_job_special_case(self, content):
+        return content["model"] == "scratch_org"
