@@ -268,7 +268,7 @@ def create_scratch_org(*, plan_id, email, org_name):
     repo_url = plan.version.product.repo_url
     repo_owner, repo_name = extract_user_and_repo(repo_url)
     commit_ish = plan.commit_ish
-    job_id = getattr(get_current_job(), "id")
+    job_id = getattr(get_current_job(), "id", None)
     try:
         with local_github_checkout(
             repo_owner, repo_name, commit_ish=commit_ish

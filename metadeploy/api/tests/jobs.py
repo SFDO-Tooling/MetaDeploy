@@ -259,30 +259,70 @@ def test_finalize_result_mdapi_error(job_factory):
 
 
 @pytest.mark.django_db
-def test_create_scratch_org(settings, plan_factory):
-    settings.DEVHUB_USERNAME = "test@example.com"
-    plan = plan_factory()
-    with ExitStack() as stack:
-        stack.enter_context(patch("metadeploy.api.jobs.local_github_checkout"),)
-        jwt_session = stack.enter_context(
-            patch("metadeploy.api.salesforce.jwt_session")
-        )
-        jwt_session.return_value = {
-            "instance_url": "https://sample.salesforce.org/",
-            "access_token": "abc123",
-        }
-        open = stack.enter_context(patch("metadeploy.api.salesforce.open"))
-        fake_json = json.dumps({"edition": ""})
-        open.return_value = MagicMock(
-            **{"__enter__.return_value": MagicMock(**{"read.return_value": fake_json})}
-        )
-        stack.enter_context(patch("metadeploy.api.salesforce.SimpleSalesforce"))
-        stack.enter_context(patch("metadeploy.api.salesforce.SalesforceOAuth2"))
-        BaseCumulusCI = stack.enter_context(
-            patch("metadeploy.api.salesforce.BaseCumulusCI")
-        )
-        BaseCumulusCI.return_value = MagicMock(**{"project_config.repo_root": "/"})
-        stack.enter_context(patch("metadeploy.api.salesforce.DeployOrgSettings"))
-        create_scratch_org(
-            plan_id=plan.id, email="test@example.com", org_name=plan.org_name,
-        )
+class TestCreateScratchOrg:
+    def test_create_scratch_org(self, settings, plan_factory):
+        settings.DEVHUB_USERNAME = "test@example.com"
+        plan = plan_factory()
+        with ExitStack() as stack:
+            stack.enter_context(patch("metadeploy.api.jobs.local_github_checkout"))
+            jwt_session = stack.enter_context(
+                patch("metadeploy.api.salesforce.jwt_session")
+            )
+            jwt_session.return_value = {
+                "instance_url": "https://sample.salesforce.org/",
+                "access_token": "abc123",
+            }
+            open = stack.enter_context(patch("metadeploy.api.salesforce.open"))
+            fake_json = json.dumps({"edition": ""})
+            open.return_value = MagicMock(
+                **{
+                    "__enter__.return_value": MagicMock(
+                        **{"read.return_value": fake_json}
+                    )
+                }
+            )
+            stack.enter_context(patch("metadeploy.api.salesforce.SimpleSalesforce"))
+            stack.enter_context(patch("metadeploy.api.salesforce.SalesforceOAuth2"))
+            BaseCumulusCI = stack.enter_context(
+                patch("metadeploy.api.salesforce.BaseCumulusCI")
+            )
+            BaseCumulusCI.return_value = MagicMock(**{"project_config.repo_root": "/"})
+            stack.enter_context(patch("metadeploy.api.salesforce.DeployOrgSettings"))
+            create_scratch_org(
+                plan_id=plan.id, email="test@example.com", org_name=plan.org_name,
+            )
+
+    def test_create_scratch_org__error(self, settings, plan_factory):
+        settings.DEVHUB_USERNAME = "test@example.com"
+        plan = plan_factory()
+        with ExitStack() as stack:
+            local_github_checkout = stack.enter_context(
+                patch("metadeploy.api.jobs.local_github_checkout")
+            )
+            local_github_checkout.side_effect = TypeError
+            jwt_session = stack.enter_context(
+                patch("metadeploy.api.salesforce.jwt_session")
+            )
+            jwt_session.return_value = {
+                "instance_url": "https://sample.salesforce.org/",
+                "access_token": "abc123",
+            }
+            open = stack.enter_context(patch("metadeploy.api.salesforce.open"))
+            fake_json = json.dumps({"edition": ""})
+            open.return_value = MagicMock(
+                **{
+                    "__enter__.return_value": MagicMock(
+                        **{"read.return_value": fake_json}
+                    )
+                }
+            )
+            stack.enter_context(patch("metadeploy.api.salesforce.SimpleSalesforce"))
+            stack.enter_context(patch("metadeploy.api.salesforce.SalesforceOAuth2"))
+            BaseCumulusCI = stack.enter_context(
+                patch("metadeploy.api.salesforce.BaseCumulusCI")
+            )
+            BaseCumulusCI.return_value = MagicMock(**{"project_config.repo_root": "/"})
+            stack.enter_context(patch("metadeploy.api.salesforce.DeployOrgSettings"))
+            create_scratch_org(
+                plan_id=plan.id, email="test@example.com", org_name=plan.org_name,
+            )

@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core import exceptions
 from django.core.cache import cache
@@ -12,7 +13,15 @@ from rest_framework.response import Response
 from .constants import REDIS_JOB_CANCEL_KEY
 from .filters import PlanFilter, ProductFilter, VersionFilter
 from .jobs import create_scratch_org_job, preflight_job
-from .models import Job, Plan, PreflightResult, Product, ProductCategory, Version
+from .models import (
+    SUPPORTED_ORG_TYPES,
+    Job,
+    Plan,
+    PreflightResult,
+    Product,
+    ProductCategory,
+    Version,
+)
 from .paginators import ProductPaginator
 from .permissions import OnlyOwnerOrSuperuserCanDelete
 from .serializers import (
@@ -210,7 +219,21 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
 
     @action(detail=True, methods=["post"])
     def create_scratch_org(self, request, pk=None):
+        devhub_enabled = settings.DEVHUB_USERNAME
+        if not devhub_enabled:
+            return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
+
         plan = self.get_object()
+        valid_plan_type = (
+            plan.supported_orgs == SUPPORTED_ORG_TYPES.Scratch
+            or plan.supported_orgs == SUPPORTED_ORG_TYPES.Both
+        )
+        if not valid_plan_type:
+            return Response(
+                {"error": "This plan does not support creating a scratch org."},
+                status=status.HTTP_409_CONFLICT,
+            )
+
         serializer = CreateScratchOrgSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -1,11 +1,11 @@
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from django.urls import reverse
 
 from metadeploy.conftest import format_timestamp
 
-from ..models import Job, Plan, PreflightResult
+from ..models import SUPPORTED_ORG_TYPES, Job, Plan, PreflightResult
 
 
 @pytest.mark.django_db
@@ -582,18 +582,39 @@ class TestUnlisted:
 
 @pytest.mark.django_db
 class TestPlanView:
-    def test_create_scratch_org__bad(self, client, plan_factory):
+    def test_create_scratch_org__no_devhub_username(
+        self, client, plan_factory, settings
+    ):
+        settings.DEVHUB_USERNAME = None
         plan = plan_factory()
+        response = client.post(
+            reverse("plan-create-scratch-org", kwargs={"pk": str(plan.id)})
+        )
+        assert response.status_code == 501
+
+    def test_create_scratch_org__invalid_plan(self, client, plan_factory, settings):
+        settings.DEVHUB_USERNAME = "devhub@username"
+        plan = plan_factory()
+        response = client.post(
+            reverse("plan-create-scratch-org", kwargs={"pk": str(plan.id)})
+        )
+        assert response.status_code == 409
+
+    def test_create_scratch_org__bad_data(self, client, plan_factory, settings):
+        settings.DEVHUB_USERNAME = "devhub@username"
+        plan = plan_factory(supported_orgs=SUPPORTED_ORG_TYPES.Scratch)
         response = client.post(
             reverse("plan-create-scratch-org", kwargs={"pk": str(plan.id)})
         )
         assert response.status_code == 400
 
-    def test_create_scratch_org__good(self, client, plan_factory):
-        plan = plan_factory()
+    def test_create_scratch_org__good(self, client, plan_factory, settings):
+        settings.DEVHUB_USERNAME = "devhub@username"
+        plan = plan_factory(supported_orgs=SUPPORTED_ORG_TYPES.Scratch)
         with patch(
             "metadeploy.api.views.create_scratch_org_job"
         ) as create_scratch_org_job:
+            create_scratch_org_job.delay.return_value = MagicMock(id="abc123")
             response = client.post(
                 reverse("plan-create-scratch-org", kwargs={"pk": str(plan.id)}),
                 {"email": "test@example.com"},
