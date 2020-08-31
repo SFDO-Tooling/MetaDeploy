@@ -18,5 +18,6 @@ def env(request):
         "SITE": site_serializer.data,
         "YEAR": datetime.utcnow().year,
         "SENTRY_DSN": settings.SENTRY_DSN,
+        "DEVHUB_USERNAME": settings.DEVHUB_USERNAME,
     }
     return {"GLOBALS": GLOBALS}
