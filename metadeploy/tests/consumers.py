@@ -3,8 +3,8 @@ from channels.testing import WebsocketCommunicator
 
 from ..api.models import Job, PreflightResult
 from ..api.push import (
-    notify_org_result_changed,
     notify_org_finished,
+    notify_org_result_changed,
     notify_post_job,
     preflight_completed,
     user_token_expired,
