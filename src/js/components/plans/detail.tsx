@@ -16,13 +16,13 @@ import PreflightResults, {
   ErrorIcon,
   WarningIcon,
 } from '@/components/plans/preflightResults';
-import SpinOrg from '@/components/plans/spinOrg';
 import StepsTable from '@/components/plans/stepsTable';
 import Toasts from '@/components/plans/toasts';
 import UserInfo from '@/components/plans/userInfo';
 import PlanNotAllowed from '@/components/products/notAllowed';
 import OldVersionWarning from '@/components/products/oldVersionWarning';
 import ProductNotFound from '@/components/products/product404';
+import SpinOrg from '@/components/scratchOrgs/spin';
 import {
   getLoadingOrNotFound,
   shouldFetchPlan,
