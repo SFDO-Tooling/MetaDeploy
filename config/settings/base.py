@@ -382,6 +382,7 @@ CHANNEL_LAYERS = {
         "CONFIG": {"hosts": [REDIS_LOCATION]},
     }
 }
+MAX_QUEUE_LENGTH = env("MAX_QUEUE_LENGTH", default=3, type_=int)
 
 # Rest Framework settings:
 REST_FRAMEWORK = {

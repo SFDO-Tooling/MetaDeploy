@@ -608,6 +608,18 @@ class TestPlanView:
         )
         assert response.status_code == 400
 
+    def test_create_scratch_org__queue_full(self, client, plan_factory, settings):
+        settings.DEVHUB_USERNAME = "devhub@username"
+        plan = plan_factory(supported_orgs=SUPPORTED_ORG_TYPES.Scratch)
+        with patch("metadeploy.api.views.django_rq") as django_rq:
+            # Return something longer than the max queue length:
+            django_rq.get_queue.return_value = [None] * 5
+            response = client.post(
+                reverse("plan-create-scratch-org", kwargs={"pk": str(plan.id)}),
+                {"email": "test@example.com"},
+            )
+            assert response.status_code == 503
+
     def test_create_scratch_org__good(self, client, plan_factory, settings):
         settings.DEVHUB_USERNAME = "devhub@username"
         plan = plan_factory(supported_orgs=SUPPORTED_ORG_TYPES.Scratch)

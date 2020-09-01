@@ -1,3 +1,4 @@
+import django_rq
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core import exceptions
@@ -240,6 +241,14 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
 
         email = serializer.validated_data["email"]
         org_name = plan.org_name
+        # Check queue status
+        # If overfull, return 503
+        queue = django_rq.get_queue("default")
+        if len(queue) > settings.MAX_QUEUE_LENGTH:
+            return Response(
+                {"error": "Queue is overfull. Try again later."},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
         job = create_scratch_org_job.delay(
             plan_id=str(plan.id), email=email, org_name=org_name
         )
