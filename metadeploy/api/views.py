@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, mixins, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from .constants import REDIS_JOB_CANCEL_KEY
@@ -218,7 +218,7 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
         if request.method == "POST":
             return self.preflight_post(request)
 
-    @action(detail=True, methods=["post"])
+    @action(detail=True, methods=["post"], permission_classes=(AllowAny,))
     def create_scratch_org(self, request, pk=None):
         devhub_enabled = settings.DEVHUB_USERNAME
         if not devhub_enabled:

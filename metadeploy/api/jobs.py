@@ -284,7 +284,7 @@ def create_scratch_org(*, plan_id, email, org_name):
             )
     except Exception as e:
         async_to_sync(notify_org_finished)(job_id, error=e)
-    finally:
+    else:
         async_to_sync(notify_org_finished)(job_id)
 
 
