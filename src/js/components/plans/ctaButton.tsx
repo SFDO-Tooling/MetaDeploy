@@ -409,16 +409,8 @@ class CtaButton extends React.Component<
         plan.supported_orgs === SUPPORTED_ORGS.Both);
     return (
       <div className="slds-grid slds-grid_vertical">
-        <div className="slds-col">
-          {this.getLoginOrActionBtn(
-            i18n.t('Install'),
-            i18n.t('Log In to Install'),
-            action,
-          )}
-          {this.getClickThroughAgreementModal()}
-        </div>
         <div className="slds-col slds-m-top_large">
-          {planCanSpinScratchOrg && (
+          {planCanSpinScratchOrg ? (
             <SpinOrg
               clickThroughAgreement={clickThroughAgreement}
               doSpinOrg={doSpinOrg}
@@ -426,6 +418,15 @@ class CtaButton extends React.Component<
               isSpinningOrg={isSpinningOrg}
               isRunningInstall={isRunningInstall}
             />
+          ) : (
+            <div className="slds-col">
+              {this.getLoginOrActionBtn(
+                i18n.t('Install'),
+                i18n.t('Log In to Install'),
+                action,
+              )}
+              {this.getClickThroughAgreementModal()}
+            </div>
           )}
         </div>
       </div>

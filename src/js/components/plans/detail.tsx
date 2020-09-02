@@ -50,6 +50,7 @@ import {
 } from '@/store/products/selectors';
 import { spinOrg } from '@/store/scratchOrgs/actions';
 import { selectUserState } from '@/store/user/selectors';
+import { SUPPORTED_ORGS } from '@/utils/constants';
 import routes from '@/utils/routes';
 
 export type SelectedSteps = Set<string>;
@@ -296,7 +297,11 @@ class PlanDetail extends React.Component<Props, State> {
     if (!product || !version || !plan) {
       return null;
     }
-    if (user && !user.org_type) {
+    if (
+      user &&
+      !user.org_type &&
+      plan.supported_orgs !== SUPPORTED_ORGS.Scratch
+    ) {
       return (
         <LoginBtn
           id="org-not-allowed-login"
