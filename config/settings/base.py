@@ -500,3 +500,6 @@ SENTRY_DSN = env("SENTRY_DSN", default="")
 
 if SENTRY_DSN:
     sentry_sdk.init(dsn=SENTRY_DSN, integrations=[DjangoIntegration()])
+
+# MetaDeploy
+METADEPLOY_FAST_FORWARD = False
