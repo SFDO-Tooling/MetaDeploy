@@ -208,7 +208,8 @@ def run_flows(*, user, plan, skip_steps, organization_url, result_class, result_
             for step in plan.steps.all()
         ]
         org = ctx.keychain.get_org(current_org)
-        result.run(ctx, plan, steps, org)
+        if not settings.METADEPLOY_FAST_FORWARD:
+            result.run(ctx, plan, steps, org)
 
 
 run_flows_job = job(run_flows)

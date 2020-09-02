@@ -264,6 +264,7 @@ LANGUAGES = [
     ("hr", "Croatian"),
     ("hu", "Hungarian"),
     ("id", "Indonesian"),
+    ("in", "Hindi"),
     ("it", "Italian"),
     ("ja", "Japanese"),
     ("ko", "Korean"),
@@ -281,12 +282,14 @@ LANGUAGES = [
     ("tr", "Turkish"),
     ("uk", "Ukrainian"),
     ("vi", "Vietnamese"),
-    ("zh-hans", "Simplified Chinese"),
-    ("zh-hant", "Traditional Chinese"),
+    ("zh-cn", "Simplified Chinese"),
+    ("zh-tw", "Traditional Chinese"),
 ]
 
 PARLER_LANGUAGES = {
     1: (
+        {"code": "en-us"},  # default for admin
+        # the others are only here to specify fallbacks
         {"code": "es-mx", "fallbacks": ["es", "en-us"]},
         {"code": "fr-ca", "fallbacks": ["fr", "en-us"]},
         {"code": "pt-br", "fallbacks": ["pt", "en-us"]},
