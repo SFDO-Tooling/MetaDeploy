@@ -613,7 +613,7 @@ class TestPlanView:
         plan = plan_factory(supported_orgs=SUPPORTED_ORG_TYPES.Scratch)
         with patch("metadeploy.api.views.django_rq") as django_rq:
             # Return something longer than the max queue length:
-            django_rq.get_queue.return_value = [None] * 5
+            django_rq.get_queue.return_value = [None] * 20
             response = client.post(
                 reverse("plan-create-scratch-org", kwargs={"pk": str(plan.id)}),
                 {"email": "test@example.com"},

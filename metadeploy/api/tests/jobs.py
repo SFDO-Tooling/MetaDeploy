@@ -259,6 +259,19 @@ def test_finalize_result_mdapi_error(job_factory):
 
 
 @pytest.mark.django_db
+class MockDict(dict):
+    namespaced = False
+
+    @property
+    def config(self):
+        return self
+
+    @property
+    def instance_url(self):
+        return self["instance_url"]
+
+
+@pytest.mark.django_db
 class TestCreateScratchOrg:
     def test_create_scratch_org(self, settings, plan_factory):
         settings.DEVHUB_USERNAME = "test@example.com"
@@ -281,12 +294,31 @@ class TestCreateScratchOrg:
                     )
                 }
             )
-            stack.enter_context(patch("metadeploy.api.salesforce.SimpleSalesforce"))
+            SimpleSalesforce = stack.enter_context(
+                patch("metadeploy.api.salesforce.SimpleSalesforce")
+            )
+            SimpleSalesforce.return_value = MagicMock(
+                **{
+                    "ScratchOrgInfo.get.return_value": {
+                        "LoginUrl": "https://sample.salesforce.org/",
+                        "ScratchOrg": "abc123",
+                        "SignupUsername": "test",
+                        "AuthCode": "abc123",
+                    }
+                }
+            )
             stack.enter_context(patch("metadeploy.api.salesforce.SalesforceOAuth2"))
             BaseCumulusCI = stack.enter_context(
                 patch("metadeploy.api.salesforce.BaseCumulusCI")
             )
-            BaseCumulusCI.return_value = MagicMock(**{"project_config.repo_root": "/"})
+            org_config = MockDict()
+            org_config.config_file = "/"
+            BaseCumulusCI.return_value = MagicMock(
+                **{
+                    "project_config.repo_root": "/",
+                    "keychain.get_org.return_value": org_config,
+                }
+            )
             stack.enter_context(patch("metadeploy.api.salesforce.DeployOrgSettings"))
             create_scratch_org(
                 plan_id=plan.id, email="test@example.com", org_name=plan.org_name,

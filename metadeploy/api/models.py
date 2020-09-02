@@ -621,7 +621,9 @@ class Job(HashIdMixin, models.Model):
     Status = Choices("started", "complete", "failed", "canceled")
     tracker = FieldTracker(fields=("results", "status"))
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True
+    )
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
     steps = models.ManyToManyField(Step)
     organization_url = models.URLField(blank=True)
