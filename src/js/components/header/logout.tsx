@@ -17,7 +17,7 @@ const Logout = ({
   doLogout: () => Promise<FetchProductsSucceeded>;
 }) => (
   <UNSAFE_DirectionSettings.Consumer>
-    {(direction) => {
+    {(direction: string) => {
       const nubbinPosition = direction === 'ltr' ? 'top right' : 'top left';
       return (
         <Dropdown

@@ -7,6 +7,13 @@ declare module '@salesforce/design-system-react/components/*' {
   export default value;
 }
 
+declare module '@salesforce/design-system-react/components/utilities/UNSAFE_direction' {
+  import { ContextType } from 'react';
+
+  const UNSAFE_DirectionSettings: ContextType<any>;
+  export default UNSAFE_DirectionSettings;
+}
+
 declare module '@salesforce/design-system-react/components/settings' {
   const settings: {
     setAssetsPaths: (path: string) => void;
