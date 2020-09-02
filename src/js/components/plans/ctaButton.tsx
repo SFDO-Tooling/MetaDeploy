@@ -230,7 +230,7 @@ class CtaButton extends React.Component<
     onClick: () => void,
     startPreflightAfterLogin = false,
   ) {
-    const { user, preventAction } = this.props;
+    const { user, preventAction, plan } = this.props;
     const hasValidToken = Boolean(user?.valid_token_for);
     if (hasValidToken) {
       return (
@@ -241,15 +241,18 @@ class CtaButton extends React.Component<
         />
       );
     }
-    // Require login first...
-    return (
-      <LoginBtn
-        label={loginLabel}
-        redirectParams={
-          startPreflightAfterLogin ? { [AUTO_START_PREFLIGHT]: true } : {}
-        }
-      />
-    );
+    // If plan only supports scratchOrg, no required to login first...
+    else if (plan.supported_orgs !== SUPPORTED_ORGS.Scratch) {
+      return (
+        <LoginBtn
+          label={loginLabel}
+          redirectParams={
+            startPreflightAfterLogin ? { [AUTO_START_PREFLIGHT]: true } : {}
+          }
+        />
+      );
+    }
+    return null;
   }
 
   getClickThroughAgreementModal() {
@@ -290,7 +293,7 @@ class CtaButton extends React.Component<
       doSpinOrg,
     } = this.props;
     if (plan.requires_preflight) {
-      if (!user) {
+      if (!user && plan.supported_orgs !== SUPPORTED_ORGS.Scratch) {
         // Require login first...
         return (
           <LoginBtn
@@ -410,7 +413,15 @@ class CtaButton extends React.Component<
     return (
       <div className="slds-grid slds-grid_vertical">
         <div className="slds-col slds-m-top_large">
-          {planCanSpinScratchOrg ? (
+          {this.getLoginOrActionBtn(
+            i18n.t('Install'),
+            i18n.t('Log In to Install'),
+            action,
+          )}
+          {this.getClickThroughAgreementModal()}
+        </div>
+        {planCanSpinScratchOrg ? (
+          <div className="slds-col slds-m-top_large">
             <SpinOrg
               clickThroughAgreement={clickThroughAgreement}
               doSpinOrg={doSpinOrg}
@@ -418,17 +429,8 @@ class CtaButton extends React.Component<
               isSpinningOrg={isSpinningOrg}
               isRunningInstall={isRunningInstall}
             />
-          ) : (
-            <div className="slds-col">
-              {this.getLoginOrActionBtn(
-                i18n.t('Install'),
-                i18n.t('Log In to Install'),
-                action,
-              )}
-              {this.getClickThroughAgreementModal()}
-            </div>
-          )}
-        </div>
+          </div>
+        ) : null}
       </div>
     );
   }

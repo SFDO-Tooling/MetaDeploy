@@ -339,7 +339,6 @@ class PlanDetail extends React.Component<Props, State> {
       plan,
       planSlug,
       preflight,
-      doSpinOrg,
       history,
     } = this.props;
     const loadingOrNotFound = getLoadingOrNotFound({
