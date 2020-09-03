@@ -514,7 +514,7 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
 
 
 class DottedArray(Func):
-    """ Turns a step number into an array of ints for sorting.
+    """Turns a step number into an array of ints for sorting.
 
     The step number must be a string including positive integers separated by / and .
 

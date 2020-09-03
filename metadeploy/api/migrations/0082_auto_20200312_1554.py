@@ -11,6 +11,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterUniqueTogether(
-            name="translation", unique_together={("context", "slug", "lang")},
+            name="translation",
+            unique_together={("context", "slug", "lang")},
         ),
     ]
