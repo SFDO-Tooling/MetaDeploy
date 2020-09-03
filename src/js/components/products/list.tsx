@@ -21,6 +21,19 @@ import {
 } from '@/store/products/selectors';
 import { prettyUrlHash } from '@/utils/helpers';
 
+const select = (appState: AppState) => ({
+  productCategories: selectProductCategories(appState),
+  productsByCategory: selectProductsByCategory(appState),
+});
+
+const actions = {
+  doFetchMoreProducts: fetchMoreProducts,
+};
+
+const connector = connect(select, actions);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
 type Props = {
   x: number;
   y: number;
@@ -225,19 +238,6 @@ class ProductsList extends React.Component<Props, State> {
     );
   }
 }
-
-const select = (appState: AppState) => ({
-  productCategories: selectProductCategories(appState),
-  productsByCategory: selectProductsByCategory(appState),
-});
-
-const actions = {
-  doFetchMoreProducts: fetchMoreProducts,
-};
-
-const connector = connect(select, actions);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
 
 const WrappedProductsList = connector(withScroll(withRouter(ProductsList)));
 

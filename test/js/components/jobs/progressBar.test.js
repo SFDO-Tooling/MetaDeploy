@@ -6,7 +6,7 @@ import ProgressBar from '@/components/jobs/progressBar';
 const defaultJob = {
   id: 'job-1',
   steps: ['1', '2', '3', '4'],
-  results: { '1': { status: 'ok' } },
+  results: { 1: { status: 'ok' } },
   status: 'started',
 };
 
@@ -66,10 +66,10 @@ describe('<ProgressBar />', () => {
         job: {
           ...defaultJob,
           results: {
-            '1': { status: 'ok' },
-            '2': { status: 'ok' },
-            '3': { status: 'ok' },
-            '4': { status: 'ok' },
+            1: { status: 'ok' },
+            2: { status: 'ok' },
+            3: { status: 'ok' },
+            4: { status: 'ok' },
           },
           status: 'complete',
         },
@@ -85,8 +85,8 @@ describe('<ProgressBar />', () => {
         job: {
           ...defaultJob,
           results: {
-            '1': { status: 'ok' },
-            '2': { status: 'error' },
+            1: { status: 'ok' },
+            2: { status: 'error' },
           },
           status: 'failed',
         },
@@ -103,8 +103,8 @@ describe('<ProgressBar />', () => {
         job: {
           ...defaultJob,
           results: {
-            '1': { status: 'ok' },
-            '2': { status: 'error' },
+            1: { status: 'ok' },
+            2: { status: 'error' },
           },
           status: 'canceled',
         },
