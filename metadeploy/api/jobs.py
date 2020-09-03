@@ -177,6 +177,8 @@ def run_flows(*, user, plan, skip_steps, organization_url, result_class, result_
         # There's a lot of setup to make configs and keychains, link
         # them properly, and then eventually pass them into a flow,
         # which we then run:
+        ctx = MetaDeployCCI(repo_root=tmpdirname, plan=plan)
+
         current_org = "current_org"
         org_config = OrgConfig(
             {
@@ -185,11 +187,9 @@ def run_flows(*, user, plan, skip_steps, organization_url, result_class, result_
                 "refresh_token": token_secret,
             },
             current_org,
+            keychain=ctx.keychain,
         )
-
-        ctx = MetaDeployCCI(repo_root=tmpdirname, plan=plan)
-
-        ctx.keychain.set_org(org_config)
+        org_config.save()
 
         # Set up the connected_app:
         connected_app = ServiceConfig(

@@ -21,6 +21,7 @@
     "lextudio.restructuredtext",
     "ms-azuretools.vscode-docker",
     "ms-python.python",
+    "ms-python.vscode-pylance",
     "ms-vscode.sublime-keybindings",
     "naumovs.color-highlight",
     "prettier.prettier-vscode",
@@ -41,18 +42,20 @@
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": true
     },
-    "editor.tabSize": 2,
-    "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2,
     "files.insertFinalNewline": true,
     "files.trimFinalNewlines": true,
     "files.trimTrailingWhitespace": true,
     "javascript.suggestionActions.enabled": false,
     "typescript.preferences.quoteStyle": "single",
+    "python.formatting.provider": "black",
+    "python.languageServer": "Pylance",
     "python.linting.flake8Enabled": true,
     "python.linting.pylintEnabled": false,
-    "python.formatting.provider": "black",
     "python.pythonPath": "/usr/local/bin/python",
+    "python.showStartPage": false,
     "remote.extensionKind": {
       "ms-azuretools.vscode-docker": "workspace"
     },

@@ -21,10 +21,7 @@ const JobResults = ({
     return null;
   }
 
-  const { message } = getErrorInfo({
-    job,
-    label: i18n.t('Installation'),
-  });
+  const { message } = getErrorInfo({ job });
   if (message !== null) {
     const title = i18n.t('View Installation Error Details & Link');
     return (
