@@ -41,7 +41,9 @@ urlpatterns = [
     path("api/", include("metadeploy.api.urls")),
     # These paths render the frontend SPA
     re_path(
-        r"^products", TemplateView.as_view(template_name="index.html"), name="frontend",
+        r"^products",
+        TemplateView.as_view(template_name="index.html"),
+        name="frontend",
     ),
     path("", TemplateView.as_view(template_name="index.html"), name="home"),
     # Add WebSocket routes so that non-HTTP paths can be accessible by
