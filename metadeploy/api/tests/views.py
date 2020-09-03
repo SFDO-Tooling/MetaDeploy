@@ -1,5 +1,7 @@
+from datetime import datetime
 from unittest.mock import MagicMock, patch
 
+import django_rq
 import pytest
 from django.urls import reverse
 
@@ -593,7 +595,7 @@ class TestPlanView:
         assert response.status_code == 501
 
     def test_create_scratch_org__invalid_plan(self, client, plan_factory, settings):
-        settings.DEVHUB_USERNAME = "devhub@username"
+        settings.DEVHUB_USERNAME = "devhub@example.com"
         plan = plan_factory()
         response = client.post(
             reverse("plan-create-scratch-org", kwargs={"pk": str(plan.id)})
@@ -601,7 +603,7 @@ class TestPlanView:
         assert response.status_code == 409
 
     def test_create_scratch_org__bad_data(self, client, plan_factory, settings):
-        settings.DEVHUB_USERNAME = "devhub@username"
+        settings.DEVHUB_USERNAME = "devhub@example.com"
         plan = plan_factory(supported_orgs=SUPPORTED_ORG_TYPES.Scratch)
         response = client.post(
             reverse("plan-create-scratch-org", kwargs={"pk": str(plan.id)})
@@ -609,11 +611,13 @@ class TestPlanView:
         assert response.status_code == 400
 
     def test_create_scratch_org__queue_full(self, client, plan_factory, settings):
-        settings.DEVHUB_USERNAME = "devhub@username"
+        queue = django_rq.get_queue("default")
+        queue.empty()
+        settings.DEVHUB_USERNAME = "devhub@example.com"
         plan = plan_factory(supported_orgs=SUPPORTED_ORG_TYPES.Scratch)
-        with patch("metadeploy.api.views.django_rq") as django_rq:
+        with patch("metadeploy.api.views.django_rq") as djq:
             # Return something longer than the max queue length:
-            django_rq.get_queue.return_value = [None] * 5
+            djq.get_queue.return_value = [None] * 100
             response = client.post(
                 reverse("plan-create-scratch-org", kwargs={"pk": str(plan.id)}),
                 {"email": "test@example.com"},
@@ -621,12 +625,17 @@ class TestPlanView:
             assert response.status_code == 503
 
     def test_create_scratch_org__good(self, client, plan_factory, settings):
-        settings.DEVHUB_USERNAME = "devhub@username"
+        queue = django_rq.get_queue("default")
+        queue.empty()
+        settings.DEVHUB_USERNAME = "devhub@example.com"
         plan = plan_factory(supported_orgs=SUPPORTED_ORG_TYPES.Scratch)
         with patch(
-            "metadeploy.api.views.create_scratch_org_job"
+            "metadeploy.api.jobs.create_scratch_org_job"
         ) as create_scratch_org_job:
-            create_scratch_org_job.delay.return_value = MagicMock(id="abc123")
+            uuid = "00000000-0000-0000-0000-000000000000"
+            create_scratch_org_job.delay.return_value = MagicMock(
+                id=uuid, enqueued_at=datetime(2020, 9, 3, 14, 0)
+            )
             response = client.post(
                 reverse("plan-create-scratch-org", kwargs={"pk": str(plan.id)}),
                 {"email": "test@example.com"},

@@ -13,7 +13,7 @@ from rest_framework.response import Response
 
 from .constants import REDIS_JOB_CANCEL_KEY
 from .filters import PlanFilter, ProductFilter, VersionFilter
-from .jobs import create_scratch_org_job, preflight_job
+from .jobs import preflight_job
 from .models import (
     SUPPORTED_ORG_TYPES,
     Job,
@@ -26,7 +26,6 @@ from .models import (
 from .paginators import ProductPaginator
 from .permissions import OnlyOwnerOrSuperuserCanDelete
 from .serializers import (
-    CreateScratchOrgSerializer,
     FullUserSerializer,
     JobSerializer,
     OrgSerializer,
@@ -34,6 +33,7 @@ from .serializers import (
     PreflightResultSerializer,
     ProductCategorySerializer,
     ProductSerializer,
+    ScratchOrgJobSerializer,
     VersionSerializer,
 )
 
@@ -235,12 +235,12 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
                 status=status.HTTP_409_CONFLICT,
             )
 
-        serializer = CreateScratchOrgSerializer(data=request.data)
+        new_data = request.data.copy()
+        new_data["plan"] = str(plan.pk)
+        serializer = ScratchOrgJobSerializer(data=new_data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        email = serializer.validated_data["email"]
-        org_name = plan.org_name
         # Check queue status
         # If overfull, return 503
         queue = django_rq.get_queue("default")
@@ -249,10 +249,10 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
                 {"error": "Queue is overfull. Try again later."},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
-        job = create_scratch_org_job.delay(
-            plan_id=str(plan.id), email=email, org_name=org_name
-        )
-        return Response({"job_id": job.id}, status=status.HTTP_202_ACCEPTED)
+
+        scratch_org = serializer.save()
+        serializer = ScratchOrgJobSerializer(instance=scratch_org)
+        return Response(serializer.data, status=status.HTTP_202_ACCEPTED,)
 
 
 class OrgViewSet(viewsets.ViewSet):

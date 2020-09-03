@@ -854,6 +854,40 @@ class PreflightResult(models.Model):
         flow_coordinator.run(org)
 
 
+class ScratchOrgJob(HashIdMixin, models.Model):
+    Status = Choices("started", "complete", "failed", "canceled")
+
+    plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
+    email = models.EmailField()
+
+    enqueued_at = models.DateTimeField(null=True)
+    job_id = models.UUIDField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    edited_at = models.DateTimeField(auto_now=True)
+    status = models.CharField(choices=Status, max_length=64, default=Status.started)
+    canceled_at = models.DateTimeField(
+        null=True,
+        help_text=(
+            "The time at which the Job canceled itself, likely just a bit after it was "
+            "told to cancel itself."
+        ),
+    )
+
+    def save(self, *args, **kwargs):
+        if not self.enqueued_at:
+            from .jobs import create_scratch_org_job
+
+            job = create_scratch_org_job.delay(
+                plan_id=str(self.plan.id), email=self.email, org_name=self.plan.org_name
+            )
+            self.job_id = job.id
+            self.enqueued_at = job.enqueued_at
+        return super().save(*args, **kwargs)
+
+    def subscribable_by(self, user):  # pragma: nocover
+        return True
+
+
 class SiteProfile(TranslatableModel):
     site = models.OneToOneField(Site, on_delete=models.CASCADE)
 

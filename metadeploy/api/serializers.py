@@ -16,6 +16,7 @@ from .models import (
     PreflightResult,
     Product,
     ProductCategory,
+    ScratchOrgJob,
     SiteProfile,
     Step,
     Version,
@@ -25,9 +26,16 @@ from .paginators import ProductPaginator
 User = get_user_model()
 
 
-class IdOnlyField(serializers.CharField):
+class IdOnlyField(serializers.Field):
+    def __init__(self, *args, model=None, **kwargs):
+        self.model = model
+        return super().__init__(*args, **kwargs)
+
     def to_representation(self, value):
         return str(value.id)
+
+    def to_internal_value(self, data):
+        return self.model.objects.get(pk=data)
 
 
 class ErrorWarningCountMixin:
@@ -606,5 +614,20 @@ class SiteSerializer(serializers.ModelSerializer):
         )
 
 
-class CreateScratchOrgSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+class ScratchOrgJobSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ScratchOrgJob
+        fields = (
+            "id",
+            "plan",
+            "email",
+            "enqueued_at",
+            "job_id",
+            "created_at",
+            "edited_at",
+            "status",
+            "canceled_at",
+        )
+
+    id = serializers.CharField(read_only=True)
+    plan = IdOnlyField(model=Plan)
