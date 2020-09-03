@@ -1,4 +1,4 @@
-/* eslint-disable one-var */
+/* eslint-disable one-var, import/no-duplicates */
 
 declare module '@salesforce/design-system-react/components/*' {
   import { ComponentType } from 'react';
@@ -8,10 +8,19 @@ declare module '@salesforce/design-system-react/components/*' {
 }
 
 declare module '@salesforce/design-system-react/components/utilities/UNSAFE_direction' {
-  import { ContextType } from 'react';
+  import { Context } from 'react';
 
-  const UNSAFE_DirectionSettings: ContextType<any>;
+  const UNSAFE_DirectionSettings: Context<string>;
   export default UNSAFE_DirectionSettings;
+}
+
+declare module '@salesforce/design-system-react/components/utilities/UNSAFE_direction/private/language-direction' {
+  import { ComponentClass, ComponentType } from 'react';
+
+  const withLanguageDirection: (
+    component: ComponentType<any>,
+  ) => ComponentClass<any>;
+  export default withLanguageDirection;
 }
 
 declare module '@salesforce/design-system-react/components/settings' {

@@ -35,6 +35,7 @@ module.exports = {
     'src/js/index.tsx',
     'src/js/sentry.ts',
     'src/js/i18n.ts',
+    'src/js/@types/',
     '/node_modules/',
   ],
 
