@@ -34,6 +34,7 @@ from .belvedere_utils import convert_to_18
 from .constants import ERROR, HIDE, OPTIONAL, ORGANIZATION_DETAILS
 from .flows import JobFlowCallback, PreflightFlowCallback
 from .push import (
+    notify_org_finished,
     notify_org_result_changed,
     notify_post_job,
     notify_post_task,
@@ -874,18 +875,34 @@ class ScratchOrgJob(HashIdMixin, models.Model):
     )
 
     def save(self, *args, **kwargs):
+        ret = super().save(*args, **kwargs)
         if not self.enqueued_at:
             from .jobs import create_scratch_org_job
 
             job = create_scratch_org_job.delay(
-                plan_id=str(self.plan.id), email=self.email, org_name=self.plan.org_name
+                plan_id=str(self.plan.id),
+                email=self.email,
+                org_name=self.plan.org_name,
+                result_id=self.id,
             )
             self.job_id = job.id
             self.enqueued_at = job.enqueued_at
-        return super().save(*args, **kwargs)
+            # Yes, this bounces two saves:
+            self.save()
+        return ret
 
     def subscribable_by(self, user):  # pragma: nocover
         return True
+
+    def fail(self, error):
+        self.status = ScratchOrgJob.Status.failed
+        self.save()
+        async_to_sync(notify_org_finished)(self.job_id, error=error)
+
+    def complete(self):
+        self.status = ScratchOrgJob.Status.complete
+        self.save()
+        async_to_sync(notify_org_finished)(self.job_id)
 
 
 class SiteProfile(TranslatableModel):

@@ -18,6 +18,7 @@ from metadeploy.api.models import (
     Product,
     ProductCategory,
     ProductSlug,
+    ScratchOrgJob,
     Step,
     Version,
 )
@@ -214,6 +215,15 @@ class JobFactory(factory.django.DjangoModelFactory):
             # A list of steps was passed in, use it
             for step in extracted:
                 self.steps.add(step)
+
+
+@register
+class ScratchOrgJobFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = ScratchOrgJob
+
+    email = "test@example.com"
+    plan = factory.SubFactory(PlanFactory)
 
 
 @register

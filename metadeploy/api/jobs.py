@@ -25,15 +25,14 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django_rq import job
-from rq import get_current_job
 from rq.exceptions import ShutDownImminentException
 from rq.worker import StopRequested
 
 from .cci_configs import MetaDeployCCI, extract_user_and_repo
 from .flows import StopFlowException
 from .github import local_github_checkout
-from .models import Job, Plan, PreflightResult
-from .push import notify_org_finished, report_error, user_token_expired
+from .models import Job, Plan, PreflightResult, ScratchOrgJob
+from .push import report_error, user_token_expired
 from .salesforce import create_scratch_org as create_scratch_org_on_sf
 
 logger = logging.getLogger(__name__)
@@ -263,12 +262,12 @@ def expire_preflights():
 expire_preflights_job = job(expire_preflights)
 
 
-def create_scratch_org(*, plan_id, email, org_name):
+def create_scratch_org(*, plan_id, email, org_name, result_id):
     plan = Plan.objects.get(id=plan_id)
+    result = ScratchOrgJob.objects.get(id=result_id)
     repo_url = plan.version.product.repo_url
     repo_owner, repo_name = extract_user_and_repo(repo_url)
     commit_ish = plan.commit_ish
-    job_id = getattr(get_current_job(), "id", None)
     try:
         with local_github_checkout(
             repo_owner, repo_name, commit_ish=commit_ish
@@ -283,9 +282,9 @@ def create_scratch_org(*, plan_id, email, org_name):
                 org_name=org_name,
             )
     except Exception as e:
-        async_to_sync(notify_org_finished)(job_id, error=e)
+        result.fail(e)
     else:
-        async_to_sync(notify_org_finished)(job_id)
+        result.complete()
 
 
 create_scratch_org_job = job(create_scratch_org)
