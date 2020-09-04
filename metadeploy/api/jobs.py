@@ -126,12 +126,13 @@ def run_flows(*, user, plan, skip_steps, organization_url, result_class, result_
 
     with contextlib.ExitStack() as stack:
         stack.enter_context(finalize_result(result))
-        stack.enter_context(report_errors_to(user))
+        if user:
+            stack.enter_context(report_errors_to(user))
 
         # Let's clone the repo locally:
-        user, repo_name = extract_user_and_repo(repo_url)
+        repo_user, repo_name = extract_user_and_repo(repo_url)
         repo_root = stack.enter_context(
-            local_github_checkout(user, repo_name, commit_ish)
+            local_github_checkout(repo_user, repo_name, commit_ish)
         )
 
         # Get cwd into Python path, so that the tasks below can import
@@ -262,6 +263,14 @@ def expire_preflights():
 expire_preflights_job = job(expire_preflights)
 
 
+class FakeUser:
+    def __init__(self, token):
+        self.token = token
+
+    def __bool__(self):  # pragma: nocover
+        return False
+
+
 def create_scratch_org(*, plan_id, email, org_name, result_id):
     plan = Plan.objects.get(id=plan_id)
     result = ScratchOrgJob.objects.get(id=result_id)
@@ -272,7 +281,7 @@ def create_scratch_org(*, plan_id, email, org_name, result_id):
         with local_github_checkout(
             repo_owner, repo_name, commit_ish=commit_ish
         ) as repo_root:
-            create_scratch_org_on_sf(
+            scratch_org_config, _, org_config = create_scratch_org_on_sf(
                 repo_owner=repo_owner,
                 repo_name=repo_name,
                 repo_url=repo_url,
@@ -283,8 +292,30 @@ def create_scratch_org(*, plan_id, email, org_name, result_id):
             )
     except Exception as e:
         result.fail(e)
-    else:
-        result.complete()
+        return
+
+    result.complete()
+    fake_user = FakeUser(token=(org_config.access_token, org_config.refresh_token),)
+
+    job = Job.objects.create(
+        user=None,
+        plan=plan,
+        organization_url=org_config.instance_url,
+        is_public=True,
+        org_id=scratch_org_config["org_id"],
+    )
+
+    rq_job = run_flows.delay(
+        user=fake_user,
+        plan=plan,
+        skip_steps=[],
+        organization_url=org_config.instance_url,
+        result_class=Job,
+        result_id=job.id,
+    )
+    job.job_id = rq_job.id
+    job.enqueued_at = rq_job.enqueued_at
+    job.save()
 
 
 create_scratch_org_job = job(create_scratch_org)
