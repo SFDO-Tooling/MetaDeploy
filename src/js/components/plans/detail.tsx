@@ -308,7 +308,10 @@ class PlanDetail extends React.Component<Props, State> {
           label={i18n.t('Log in with a different org')}
         />
       );
-    } else if (plan.steps?.length) {
+    } else if (
+      plan.steps?.length &&
+      plan.supported_orgs === SUPPORTED_ORGS.Both
+    ) {
       return (
         <CtaButton
           history={history}

@@ -1,6 +1,7 @@
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import * as React from 'react';
 import { Link } from 'react-router-dom';
+import { SupportedOrgs } from 'src/js/utils/constants';
 
 import JobProgressIndicator from '@/components/jobs/progressIndicator';
 import PlanProgressIndicator from '@/components/plans/progressIndicator';
@@ -20,6 +21,7 @@ const Header = ({
   preflightStatus,
   preflightIsValid,
   preflightIsReady,
+  supportedOrg,
 }: {
   product: Product;
   version: Version;
@@ -30,6 +32,7 @@ const Header = ({
   preflightStatus?: string | null | undefined;
   preflightIsValid?: boolean;
   preflightIsReady?: boolean;
+  supportedOrg?: SupportedOrgs;
 }) => (
   <>
     <PageHeader
@@ -55,6 +58,7 @@ const Header = ({
         preflightStatus={preflightStatus}
         preflightIsValid={preflightIsValid}
         preflightIsReady={preflightIsReady}
+        supportedOrg={supportedOrg}
       />
     )}
   </>
