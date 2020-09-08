@@ -22,16 +22,21 @@ import routes from '@/utils/routes';
 type Props = {
   history?: RouteComponentProps['history'];
   jobId?: string | null;
+  hide?: boolean;
 };
 
 class Header extends React.Component<Props & PropsFromRedux> {
   controls = () => {
-    const { user, doLogout } = this.props;
-    return (
-      <PageHeaderControl>
-        {user ? <Logout user={user} doLogout={doLogout} /> : <Login />}
-      </PageHeaderControl>
-    );
+    const { user, doLogout, hide } = this.props;
+    const getHeader = () => {
+      if (user) {
+        return <Logout user={user} doLogout={doLogout} />;
+      } else if (hide) {
+        return null;
+      }
+      return <Login />;
+    };
+    return <PageHeaderControl>{getHeader()}</PageHeaderControl>;
   };
 
   componentWillUnmount() {

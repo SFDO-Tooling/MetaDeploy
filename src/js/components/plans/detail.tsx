@@ -374,7 +374,10 @@ class PlanDetail extends React.Component<Props, State> {
         title={`${plan.title} | ${product.title} | ${window.SITE_NAME}`}
       >
         <>
-          <Header history={history} />
+          <Header
+            history={history}
+            hide={plan.supported_orgs === SUPPORTED_ORGS.Scratch}
+          />
           <PageHeader
             product={product}
             version={version}
@@ -383,6 +386,7 @@ class PlanDetail extends React.Component<Props, State> {
             preflightStatus={preflight?.status}
             preflightIsValid={Boolean(preflight?.is_valid)}
             preflightIsReady={Boolean(preflight?.is_ready)}
+            supportedOrg={plan?.supported_orgs}
           />
           {product.is_allowed && plan.is_allowed ? (
             <BodyContainer>
