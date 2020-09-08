@@ -33,8 +33,10 @@ async def test_notify_org_job_changed(mocker, user_factory, job_factory, plan_fa
     gcl.assert_called()
 
 
+@pytest.mark.django_db
 @pytest.mark.asyncio
-async def test_notify_org_finished(mocker):
+async def test_notify_org_finished(mocker, scratch_org_job_factory):
+    soj = scratch_org_job_factory()
     gcl = mocker.patch("metadeploy.api.push.get_channel_layer", wraps=get_channel_layer)
-    await notify_org_finished("abc123", "error!")
+    await notify_org_finished(soj, "error!")
     gcl.assert_called()

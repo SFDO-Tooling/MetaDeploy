@@ -294,8 +294,8 @@ def create_scratch_org(*, plan_id, email, org_name, result_id):
         result.fail(e)
         return
 
-    result.complete()
-    fake_user = FakeUser(token=(org_config.access_token, org_config.refresh_token),)
+    result.complete(scratch_org_config)
+    fake_user = FakeUser(token=(org_config.access_token, org_config.refresh_token))
 
     job = Job.objects.create(
         user=None,

@@ -18,6 +18,7 @@ from django.contrib.auth.models import UserManager as BaseUserManager
 from django.contrib.postgres.fields import ArrayField, JSONField
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
+from django.core.serializers.json import DjangoJSONEncoder
 from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import Count, F, Func, Q
@@ -875,6 +876,7 @@ class ScratchOrgJob(HashIdMixin, models.Model):
             "told to cancel itself."
         ),
     )
+    config = JSONField(null=True, blank=True, encoder=DjangoJSONEncoder)
 
     def save(self, *args, **kwargs):
         ret = super().save(*args, **kwargs)
@@ -899,12 +901,14 @@ class ScratchOrgJob(HashIdMixin, models.Model):
     def fail(self, error):
         self.status = ScratchOrgJob.Status.failed
         self.save()
-        async_to_sync(notify_org_finished)(self.job_id, error=error)
+        async_to_sync(notify_org_finished)(self, error=error)
 
-    def complete(self):
+    def complete(self, config):
         self.status = ScratchOrgJob.Status.complete
+        self.config = config
         self.save()
-        async_to_sync(notify_org_finished)(self.job_id)
+        self.refresh_from_db()
+        async_to_sync(notify_org_finished)(self)
 
 
 class SiteProfile(TranslatableModel):

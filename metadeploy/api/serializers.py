@@ -627,6 +627,7 @@ class ScratchOrgJobSerializer(serializers.ModelSerializer):
             "edited_at",
             "status",
             "canceled_at",
+            "config",
         )
 
     id = serializers.CharField(read_only=True)
