@@ -18,6 +18,7 @@ const Logout = ({
 }) => (
   <UNSAFE_DirectionSettings.Consumer>
     {(direction: string) => {
+      /* istanbul ignore next */
       const nubbinPosition = direction === 'ltr' ? 'top right' : 'top left';
       return (
         <Dropdown

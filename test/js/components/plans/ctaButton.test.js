@@ -4,7 +4,7 @@ import React from 'react';
 import CtaButton from '@/components/plans/ctaButton';
 import { getUrlParam, removeUrlParam } from '@/utils/api';
 
-import { render } from './../../utils';
+import { render, rerenderWithI18n } from './../../utils';
 
 jest.mock('@/utils/api');
 
@@ -64,7 +64,7 @@ describe('<CtaButton />', () => {
       selectedSteps,
     };
     const opts = { ...defaults, ...options };
-    const renderFn = opts.rerenderFn || render;
+    const renderFn = opts.rerenderFn ? rerenderWithI18n : render;
     return renderFn(
       <CtaButton
         history={opts.history}
@@ -79,6 +79,7 @@ describe('<CtaButton />', () => {
         doStartPreflight={opts.doStartPreflight}
         doStartJob={opts.doStartJob}
       />,
+      opts.rerenderFn,
     );
   };
 

@@ -1,5 +1,5 @@
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
-import LanguageDirection from '@salesforce/design-system-react/components/utilities/UNSAFE_direction/private/language-direction';
+import withLanguageDirection from '@salesforce/design-system-react/components/utilities/UNSAFE_direction/private/language-direction';
 import i18n from 'i18next';
 import * as React from 'react';
 
@@ -91,12 +91,13 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
       buttonClassName,
       buttonVariant,
       disabled,
+      direction,
       menuPosition,
       redirectParams,
     } = this.props;
     const { modalOpen } = this.state;
-    const nubbinPosition =
-      this.props.direction === 'ltr' ? 'top right' : 'top left';
+    /* istanbul ignore next */
+    const nubbinPosition = direction === 'ltr' ? 'top right' : 'top left';
 
     return (
       <>
@@ -126,4 +127,4 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
   }
 }
 
-export default LanguageDirection(Login);
+export default withLanguageDirection(Login);
