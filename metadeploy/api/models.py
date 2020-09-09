@@ -841,7 +841,7 @@ class PreflightResult(models.Model):
             self.push_if_failed()
             self.push_if_canceled()
             self.push_if_invalidated()
-        except RuntimeError as error:
+        except RuntimeError as error:  # pragma: nocover
             logger.warn(f"RuntimeError: {error}")
 
         return ret

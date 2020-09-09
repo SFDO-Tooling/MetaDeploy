@@ -1,8 +1,9 @@
 from uuid import uuid4
-from unittest.mock import MagicMock
+
 import pytest
-from channels.testing import WebsocketCommunicator
 from channels.db import database_sync_to_async
+from channels.testing import WebsocketCommunicator
+from django.utils import timezone
 
 from ..api.models import Job, PreflightResult
 from ..api.push import (
@@ -19,6 +20,33 @@ from ..consumers import PushNotificationConsumer, user_context
 @database_sync_to_async
 def generate_model(model_factory, **kwargs):
     return model_factory(**kwargs)
+
+
+@pytest.mark.django_db
+@pytest.mark.asyncio
+async def test_push_notification_consumer__subscribe_scratch_org(
+    user_factory, scratch_org_job_factory
+):
+    job_id = str(uuid4())
+    user = await generate_model(user_factory)
+    soj = await generate_model(
+        scratch_org_job_factory, job_id=job_id, enqueued_at=timezone.now()
+    )
+
+    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator.scope["user"] = user
+    connected, _ = await communicator.connect()
+    assert connected
+
+    await communicator.send_json_to({"model": "scratch_org", "id": job_id})
+    response = await communicator.receive_json_from()
+    assert "ok" in response
+
+    await notify_org_finished(soj)
+    response = await communicator.receive_json_from()
+    assert response["type"] == "SCRATCH_ORG_CREATED"
+
+    await communicator.disconnect()
 
 
 @pytest.mark.django_db
@@ -84,7 +112,9 @@ async def test_push_notification_consumer__subscribe_preflight(
 @pytest.mark.asyncio
 async def test_push_notification_consumer__subscribe_job(user_factory, job_factory):
     user = await generate_model(user_factory)
-    job = await generate_model(job_factory, user=user, status=Job.Status.complete, org_id=user.org_id)
+    job = await generate_model(
+        job_factory, user=user, status=Job.Status.complete, org_id=user.org_id
+    )
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
     communicator.scope["user"] = user
@@ -111,7 +141,9 @@ async def test_push_notification_consumer__subscribe_job__bad(
     user_factory, job_factory
 ):
     user = await generate_model(user_factory)
-    job = await generate_model(job_factory, status=Job.Status.complete, org_id="00Dxxxxxxxxxxxxxxx")
+    job = await generate_model(
+        job_factory, status=Job.Status.complete, org_id="00Dxxxxxxxxxxxxxxx"
+    )
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
     communicator.scope["user"] = user
@@ -188,33 +220,6 @@ async def test_push_notification_consumer__subscribe_org(
     assert response == {
         "type": "ORG_CHANGED",
         "payload": OrgSerializer({"current_job": job, "current_preflight": None}).data,
-    }
-
-    await communicator.disconnect()
-
-
-@pytest.mark.django_db
-@pytest.mark.asyncio
-async def test_push_notification_consumer__subscribe_scratch_org(user_factory, scratch_org_job_factory):
-    job_id = str(uuid4())
-    user = await generate_model(user_factory)
-    soj = await generate_model(scratch_org_job_factory, job_id=job_id)
-
-    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
-    communicator.scope["user"] = user
-    connected, _ = await communicator.connect()
-    assert connected
-
-    await communicator.send_json_to({"model": "scratch_org", "id": job_id})
-    response = await communicator.receive_json_from()
-    assert "ok" in response
-
-    await notify_org_finished(soj)
-    breakpoint()
-    response = await communicator.receive_json_from()
-    assert response == {
-        "type": "SCRATCH_ORG_CREATED",
-        "payload": {},
     }
 
     await communicator.disconnect()
