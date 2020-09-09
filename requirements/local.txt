@@ -2,7 +2,7 @@
 
 -r test.txt
 
-django-extensions==3.0.7
+django-extensions==3.0.8
 ipython==7.18.1
 
 # Transitive dependencies
@@ -16,4 +16,4 @@ pexpect==4.8.0
 pickleshare==0.7.5
 prompt-toolkit==3.0.7
 ptyprocess==0.6.0
-traitlets==5.0.0
+traitlets==5.0.4
