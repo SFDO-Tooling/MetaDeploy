@@ -27,6 +27,7 @@ type Props = {
   preflight: Preflight | null | undefined;
   selectedSteps: SelectedSteps;
   preventAction: boolean;
+  isSpinningOrg: boolean;
   doStartPreflight: (planId: string) => Promise<PreflightStarted>;
   doStartJob: (data: JobData) => Promise<JobStarted>;
   doSpinOrg: (plan: Plan, email: string) => void;
@@ -99,6 +100,7 @@ class CtaButton extends React.Component<
     preflightModalOpen: boolean;
     clickThroughModal: boolean;
     startPreflight: boolean;
+    isSpinningOrg: boolean;
   }
 > {
   constructor(props: Props) {
@@ -107,6 +109,7 @@ class CtaButton extends React.Component<
       preflightModalOpen: false,
       clickThroughModal: false,
       startPreflight: false,
+      isSpinningOrg: false,
     };
   }
 
@@ -291,6 +294,7 @@ class CtaButton extends React.Component<
       preflight,
       selectedSteps,
       doSpinOrg,
+      isSpinningOrg,
     } = this.props;
     if (plan.requires_preflight) {
       if (!user && plan.supported_orgs !== SUPPORTED_ORGS.Scratch) {
@@ -404,12 +408,13 @@ class CtaButton extends React.Component<
 
     // todo...
     const isRunningInstall = false;
-    const isSpinningOrg = false;
     const devhubSet = Boolean(window.GLOBALS.DEVHUB_USERNAME);
+    console.log(devhubSet);
     const planCanSpinScratchOrg =
       devhubSet &&
       (plan.supported_orgs === SUPPORTED_ORGS.Scratch ||
         plan.supported_orgs === SUPPORTED_ORGS.Both);
+
     return (
       <div className="slds-grid slds-grid_vertical">
         <div className="slds-col slds-m-top_large">

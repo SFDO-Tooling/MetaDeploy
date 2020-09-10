@@ -48,9 +48,10 @@ import {
   selectVersion,
   selectVersionLabel,
 } from '@/store/products/selectors';
-import { spinOrg } from '@/store/scratchOrgs/actions';
+import { fetchScratchOrg, spinOrg } from '@/store/scratchOrgs/actions';
+import { selectScratchOrgsByPlan } from '@/store/scratchOrgs/selectors';
 import { selectUserState } from '@/store/user/selectors';
-import { SUPPORTED_ORGS } from '@/utils/constants';
+import { SCRATCH_ORG_STATUSES, SUPPORTED_ORGS } from '@/utils/constants';
 import routes from '@/utils/routes';
 
 export type SelectedSteps = Set<string>;
@@ -112,11 +113,20 @@ class PlanDetail extends React.Component<Props, State> {
     }
   }
 
+  fetchScratchOrgIfMissing() {
+    const { plan, doFetchScratchOrg } = this.props;
+    if (plan && plan.supported_orgs !== SUPPORTED_ORGS.Persistent) {
+      console.log('fetching...');
+      // doFetchScratchOrg();
+    }
+  }
+
   componentDidMount() {
     this.fetchProductIfMissing();
     this.fetchVersionIfMissing();
     this.fetchPlanIfMissing();
     this.fetchPreflightIfMissing();
+    this.fetchScratchOrgIfMissing();
   }
 
   componentDidUpdate(prevProps: Props) {
@@ -291,6 +301,7 @@ class PlanDetail extends React.Component<Props, State> {
       doStartPreflight,
       doStartJob,
       doSpinOrg,
+      scratchOrg,
     } = this.props;
 
     /* istanbul ignore if */
@@ -308,10 +319,7 @@ class PlanDetail extends React.Component<Props, State> {
           label={i18n.t('Log in with a different org')}
         />
       );
-    } else if (
-      plan.steps?.length &&
-      plan.supported_orgs === SUPPORTED_ORGS.Both
-    ) {
+    } else if (plan.steps?.length) {
       return (
         <CtaButton
           history={history}
@@ -326,6 +334,7 @@ class PlanDetail extends React.Component<Props, State> {
           doStartPreflight={doStartPreflight}
           doStartJob={doStartJob}
           doSpinOrg={doSpinOrg}
+          isSpinningOrg={scratchOrg?.status === SCRATCH_ORG_STATUSES.started}
         />
       );
     }
@@ -475,6 +484,7 @@ const select = (appState: AppState, props: RouteComponentProps) => ({
   planSlug: selectPlanSlug(appState, props),
   preflight: selectPreflight(appState, props),
   org: selectOrg(appState),
+  scratchOrg: selectScratchOrgsByPlan(appState, props),
 });
 
 const actions = {
@@ -485,6 +495,7 @@ const actions = {
   doStartPreflight: startPreflight,
   doStartJob: startJob,
   doSpinOrg: spinOrg,
+  doFetchScratchOrg: fetchScratchOrg,
 };
 
 const connector = connect(select, actions);

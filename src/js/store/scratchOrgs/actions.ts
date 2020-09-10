@@ -53,6 +53,10 @@ export const spinOrg = (
   }
 };
 
+export const fetchScratchOrg = () => {
+  console.log('fetching here...');
+};
+
 export const createScratchOrg = (payload: ScratchOrg): ScratchOrgCreated => ({
   type: 'SCRATCH_ORG_CREATED' as const,
   payload,

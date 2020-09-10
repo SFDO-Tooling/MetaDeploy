@@ -6,6 +6,7 @@ import jobs, { JobsState } from '@/store/jobs/reducer';
 import org, { Org } from '@/store/org/reducer';
 import preflights, { PreflightsState } from '@/store/plans/reducer';
 import products, { ProductsState } from '@/store/products/reducer';
+import scratchOrgs, { ScratchOrgState } from '@/store/scratchOrgs/reducer';
 import socket, { Socket } from '@/store/socket/reducer';
 import user, { User } from '@/store/user/reducer';
 
@@ -17,6 +18,7 @@ export type AppState = {
   readonly org: Org;
   readonly socket: Socket;
   readonly errors: ErrorType[];
+  readonly scratchOrgs: ScratchOrgState;
 };
 
 export type ThunkResult<A = AnyAction | Promise<AnyAction>> = ThunkAction<
@@ -35,6 +37,7 @@ const reducer: Reducer<AppState> = combineReducers({
   org,
   socket,
   errors,
+  scratchOrgs,
 });
 
 export default reducer;
