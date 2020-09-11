@@ -24,6 +24,23 @@ type Props = {
   jobId?: string | null;
 };
 
+const select = (appState: AppState) => ({
+  user: selectUserState(appState),
+  socket: selectSocketState(appState),
+  org: selectOrg(appState),
+  errors: selectErrors(appState),
+});
+
+const actions = {
+  doLogout: logout,
+  doClearErrors: clearErrors,
+  doRemoveError: removeError,
+};
+
+const connector = connect(select, actions);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
 class Header extends React.Component<Props & PropsFromRedux> {
   controls = () => {
     const { user, doLogout } = this.props;
@@ -74,22 +91,5 @@ class Header extends React.Component<Props & PropsFromRedux> {
     );
   }
 }
-
-const select = (appState: AppState) => ({
-  user: selectUserState(appState),
-  socket: selectSocketState(appState),
-  org: selectOrg(appState),
-  errors: selectErrors(appState),
-});
-
-const actions = {
-  doLogout: logout,
-  doClearErrors: clearErrors,
-  doRemoveError: removeError,
-};
-
-const connector = connect(select, actions);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
 
 export default connector(Header);

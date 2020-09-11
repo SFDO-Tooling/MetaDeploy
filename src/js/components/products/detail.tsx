@@ -32,8 +32,43 @@ import {
 import { selectUserState } from '@/store/user/selectors';
 import routes from '@/utils/routes';
 
-type ProductDetailProps = ProductPropsFromRedux;
+const selectProductDetail = (
+  appState: AppState,
+  props: RouteComponentProps,
+) => ({
+  product: selectProduct(appState, props),
+  productSlug: selectProductSlug(appState, props),
+});
 
+const selectVersionDetail = (
+  appState: AppState,
+  props: RouteComponentProps,
+) => ({
+  user: selectUserState(appState),
+  product: selectProduct(appState, props),
+  productSlug: selectProductSlug(appState, props),
+  version: selectVersion(appState, props),
+  versionLabelAndPlanSlug: selectVersionLabelOrPlanSlug(appState, props),
+});
+
+const productActions = {
+  doFetchProduct: fetchProduct,
+};
+
+const versionActions = {
+  doFetchProduct: fetchProduct,
+  doFetchVersion: fetchVersion,
+  doFetchAdditionalPlans: fetchAdditionalPlans,
+  doFetchPlan: fetchPlan,
+};
+
+const productConnector = connect(selectProductDetail, productActions);
+const versionConnector = connect(selectVersionDetail, versionActions);
+
+type ProductPropsFromRedux = ConnectedProps<typeof productConnector>;
+type VersionPropsFromRedux = ConnectedProps<typeof versionConnector>;
+
+type ProductDetailProps = ProductPropsFromRedux;
 type VersionDetailProps = VersionPropsFromRedux & RouteComponentProps;
 
 class ProductDetail extends React.Component<ProductDetailProps> {
@@ -350,42 +385,6 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     );
   }
 }
-
-const selectProductDetail = (
-  appState: AppState,
-  props: RouteComponentProps,
-) => ({
-  product: selectProduct(appState, props),
-  productSlug: selectProductSlug(appState, props),
-});
-
-const selectVersionDetail = (
-  appState: AppState,
-  props: RouteComponentProps,
-) => ({
-  user: selectUserState(appState),
-  product: selectProduct(appState, props),
-  productSlug: selectProductSlug(appState, props),
-  version: selectVersion(appState, props),
-  versionLabelAndPlanSlug: selectVersionLabelOrPlanSlug(appState, props),
-});
-
-const productActions = {
-  doFetchProduct: fetchProduct,
-};
-
-const versionActions = {
-  doFetchProduct: fetchProduct,
-  doFetchVersion: fetchVersion,
-  doFetchAdditionalPlans: fetchAdditionalPlans,
-  doFetchPlan: fetchPlan,
-};
-
-const productConnector = connect(selectProductDetail, productActions);
-const versionConnector = connect(selectVersionDetail, versionActions);
-
-type ProductPropsFromRedux = ConnectedProps<typeof productConnector>;
-type VersionPropsFromRedux = ConnectedProps<typeof versionConnector>;
 
 const WrappedProductDetail = productConnector(ProductDetail);
 const WrappedVersionDetail = versionConnector(withRouter(VersionDetail));
