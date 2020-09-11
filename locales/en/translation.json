@@ -147,6 +147,7 @@
   "preflightValidTime_plural": "Pre-install validation will expire if install is not run within <2>{{preflight_minutes}}</2> minutes, and you will need to run pre-install validation again.",
   "productNotAllowed": "Try the <2>list of all products</2>",
   "productNotFound": "We can’t find the product you’re looking for. Try the <2>list of all products</2>?",
+  "productWithVersion": "<0>{{product}}</0>, <2>{{version}}</2>",
   "recommended": "recommended",
   "reload the page.": "reload the page.",
   "required": "required",
