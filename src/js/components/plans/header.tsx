@@ -42,7 +42,7 @@ const Header = ({
           key={product.slug}
         >
           <Trans i18nKey="productWithVersion">
-            {{ product: product.title }}, {{ version: version.label }}
+            {{ product: product.title }} {{ version: version.label }}
           </Trans>
         </Link>,
       ]}
