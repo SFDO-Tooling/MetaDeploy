@@ -292,6 +292,14 @@ AWS_DEFAULT_ACL = None
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
+if all([AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_STORAGE_BUCKET_NAME]):
+    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+else:
+    DEFAULT_FILE_STORAGE = "binary_database_files.storage.DatabaseStorage"
+    INSTALLED_APPS += ["binary_database_files"]
+    DB_FILES_AUTO_EXPORT_DB_TO_FS = False
+    DATABASE_FILES_URL_METHOD = "URL_METHOD_2"
+
 # This gets overridden in settings.production:
 STATICFILES_DIRS = [str(PROJECT_ROOT / "dist"), str(PROJECT_ROOT / "locales")]
 STATIC_URL = "/static/"
