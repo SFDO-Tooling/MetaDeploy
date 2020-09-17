@@ -180,7 +180,6 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
             "average_duration",
             "requires_preflight",
             "supported_orgs",
-            "org_name",
         )
         circumspect_fields = ("steps", "preflight_message")
 
@@ -627,7 +626,6 @@ class ScratchOrgJobSerializer(serializers.ModelSerializer):
             "edited_at",
             "status",
             "canceled_at",
-            "config",
         )
 
     id = serializers.CharField(read_only=True)

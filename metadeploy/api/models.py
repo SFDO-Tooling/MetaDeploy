@@ -892,7 +892,7 @@ class ScratchOrgJob(HashIdMixin, models.Model):
             self.job_id = job.id
             self.enqueued_at = job.enqueued_at
             # Yes, this bounces two saves:
-            self.save()
+            super().save()
         return ret
 
     def subscribable_by(self, user):  # pragma: nocover

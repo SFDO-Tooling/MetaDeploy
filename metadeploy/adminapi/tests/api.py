@@ -156,6 +156,7 @@ class TestPlanViewSet:
                 ],
                 "version": f"http://testserver/admin/rest/versions/{version.id}",
                 "supported_orgs": "Persistent",
+                "org_name": "release",
             },
             format="json",
         )
