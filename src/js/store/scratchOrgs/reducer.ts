@@ -15,37 +15,23 @@ export type ScratchOrg = {
 export type ScratchOrgState = {
   [key: string]: ScratchOrg;
 };
-// todo
-// const reducer = (scratchOrgs: any = {}, action: ScratchOrgsAction) => {
-//   switch (action.type) {
-// case 'SCRATCH_ORG_SPINNING':
-// case 'SCRATCH_ORG_CREATED':
-// case 'SCRATCH_ORG_ERROR': {
-//       const org = action.payload as ScratchOrg;
 
-//       const existingOrg = scratchOrgs[org];
-//       return {
-//         ...scratchOrgs,
-//         [org.plan]: action.payload,
-//       };
-//     }
-//   }
-//   return scratchOrgs;
-// };
 const reducer = (
   scratchOrgs: ScratchOrgState = {},
   action: ScratchOrgsAction,
 ): ScratchOrgState => {
   switch (action.type) {
-    case 'SCRATCH_ORG_ERROR':
     case 'SCRATCH_ORG_SPINNING':
     case 'SCRATCH_ORG_CREATED': {
       const org = action.payload;
-      const existingorg = scratchOrgs[org.plan];
+      const existingorg = org[org.plan];
       if (!existingorg) {
         return { [org.plan]: org };
       }
       return scratchOrgs;
+    }
+    case 'SCRATCH_ORG_ERROR': {
+      return {};
     }
   }
   return scratchOrgs;
