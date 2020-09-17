@@ -5,7 +5,7 @@ import apiFetch from '@/utils/api';
 
 export type ScratchOrgSpinning = {
   type: 'SCRATCH_ORG_SPINNING';
-  payload: string;
+  payload: ScratchOrg;
 };
 
 export type ScratchOrgCreated = {
