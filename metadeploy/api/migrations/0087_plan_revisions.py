@@ -44,10 +44,12 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RemoveConstraint(
-            model_name="plan", name="unique_version_plan_template",
+            model_name="plan",
+            name="unique_version_plan_template",
         ),
         migrations.RemoveConstraint(
-            model_name="plan", name="unique_version_primary_plan",
+            model_name="plan",
+            name="unique_version_primary_plan",
         ),
         migrations.AddField(
             model_name="plan",

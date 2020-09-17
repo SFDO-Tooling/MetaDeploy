@@ -149,7 +149,9 @@ class TranslationViewSet(viewsets.ViewSet):
         for context, messages in request.data.items():
             for slug, message in messages.items():
                 record, created = models.Translation.objects.get_or_create(
-                    lang=lang, context=context, slug=slug,
+                    lang=lang,
+                    context=context,
+                    slug=slug,
                 )
                 record.text = message["message"]
                 record.save()
