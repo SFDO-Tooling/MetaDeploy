@@ -36,15 +36,15 @@
       "value": "config.settings.production"
     },
     "AWS_ACCESS_KEY_ID": {
-      "description": "The AWS Access Key ID for S3 storages (if not using Heroku Bucketeer buildpack).",
+      "description": "The AWS Access Key ID for S3 storages (optional).",
       "required": false
     },
     "AWS_SECRET_ACCESS_KEY": {
-      "description": "The AWS Secret Access Key for S3 storages (if not using Heroku Bucketeer buildpack).",
+      "description": "The AWS Secret Access Key for S3 storages (optional)",
       "required": false
     },
     "AWS_BUCKET_NAME": {
-      "description": "The S3 bucket name to use for S3 storages (if not using Heroku Bucketeer buildpack).",
+      "description": "The S3 bucket name to use for S3 storages (optional)",
       "required": false
     },
     "SENTRY_DSN": {
