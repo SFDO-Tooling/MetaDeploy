@@ -412,7 +412,7 @@ describe('<JobDetail />', () => {
     test('renders job detail', () => {
       const { getByText, queryByText } = setup();
 
-      expect(getByText('Product 1, 1.0.0')).toBeVisible();
+      expect(getByText('Product 1 1.0.0')).toBeVisible();
       expect(getByText('My Plan')).toBeVisible();
       expect(getByText('Installation Progress')).toBeVisible();
       expect(getByText('Congrats!')).toBeVisible();

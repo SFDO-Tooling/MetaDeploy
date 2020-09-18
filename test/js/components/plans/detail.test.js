@@ -382,7 +382,7 @@ describe('<PlanDetail />', () => {
   test('renders primary_plan detail', () => {
     const { getByText } = setup();
 
-    expect(getByText('Product 1, 1.0.0')).toBeVisible();
+    expect(getByText('Product 1 1.0.0')).toBeVisible();
     expect(getByText('My Plan')).toBeVisible();
     expect(getByText('Preflight text…')).toBeVisible();
     expect(getByText('Step 1')).toBeVisible();
@@ -434,7 +434,7 @@ describe('<PlanDetail />', () => {
       planSlug: 'other-plan',
     });
 
-    expect(getByText('Product 1, 1.0.0')).toBeVisible();
+    expect(getByText('Product 1 1.0.0')).toBeVisible();
     expect(getByText('My Other Plan')).toBeVisible();
     expect(getByText('My Other Step')).toBeVisible();
   });
@@ -444,7 +444,7 @@ describe('<PlanDetail />', () => {
       planSlug: 'third-plan',
     });
 
-    expect(getByText('Product 1, 1.0.0')).toBeVisible();
+    expect(getByText('Product 1 1.0.0')).toBeVisible();
     expect(getByText('Third preflight text…')).toBeVisible();
   });
 
