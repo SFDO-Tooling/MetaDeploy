@@ -547,7 +547,7 @@ describe('<VersionDetail />', () => {
         versionLabel: '2.0.0',
       });
 
-      expect(getByText('Product 1, 2.0.0')).toBeVisible();
+      expect(getByText('Product 1 2.0.0')).toBeVisible();
       expect(getByText('This is another test product version.')).toBeVisible();
       expect(getByText('My Plan 4 - View Details')).toBeVisible();
     });
