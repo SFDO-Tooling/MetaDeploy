@@ -1,6 +1,5 @@
 from allauth.socialaccount.admin import SocialTokenAdmin
 from allauth.socialaccount.models import SocialToken
-from binary_database_files.models import File
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.postgres.fields import ArrayField
@@ -231,4 +230,5 @@ class CustomSocialTokenAdmin(SocialTokenAdmin):
 
 
 if "binary_database_files" in settings.INSTALLED_APPS:  # pragma: no cover
+    from binary_database_files.models import File
     admin.site.register(File)
