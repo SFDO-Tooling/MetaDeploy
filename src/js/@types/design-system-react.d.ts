@@ -15,10 +15,11 @@ declare module '@salesforce/design-system-react/components/utilities/UNSAFE_dire
 }
 
 declare module '@salesforce/design-system-react/components/utilities/UNSAFE_direction/private/language-direction' {
-  import { ComponentClass, ComponentType } from 'react';
+  // workaround for babel bug where it doesn't like the duplicated import
+  import { ComponentClass, ComponentType as ComponentType2 } from 'react';
 
   const withLanguageDirection: (
-    component: ComponentType<any>,
+    component: ComponentType2<any>,
   ) => ComponentClass<any>;
   export default withLanguageDirection;
 }
