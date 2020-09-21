@@ -15,7 +15,10 @@ export type ScratchOrgCreated = {
 
 export type ScratchOrgError = {
   type: 'SCRATCH_ORG_ERROR';
-  payload: ScratchOrg;
+  payload: {
+    message: string;
+    id: string;
+  };
 };
 
 export type ScratchOrgsAction =
@@ -26,7 +29,7 @@ export const spinOrg = (
   plan: Plan,
   email: string,
 ): ThunkResult<Promise<ScratchOrgSpinning>> => async (dispatch) => {
-  dispatch({ type: 'SCRATCH_ORG_SPINNING', payload: plan.id });
+  // dispatch({ type: 'SCRATCH_ORG_SPINNING', payload: plan.id });
   const url = window.api_urls.plan_create_scratch_org(plan.id);
   try {
     const response = await apiFetch(url, dispatch, {
@@ -48,7 +51,13 @@ export const spinOrg = (
       payload: response,
     });
   } catch (error) {
-    dispatch({ type: 'SCRATCH_ORG_ERROR' as const, payload: error });
+    dispatch({
+      type: 'SCRATCH_ORG_ERROR' as const,
+      payload: {
+        message: error,
+        id: plan.id,
+      },
+    });
     throw error;
   }
 };
@@ -62,7 +71,9 @@ export const createScratchOrg = (payload: ScratchOrg): ScratchOrgCreated => ({
   payload,
 });
 
-export const errorScratchOrg = (payload: ScratchOrg): ScratchOrgError => ({
+export const errorScratchOrg = (
+  payload: ScratchOrgError['payload'],
+): ScratchOrgError => ({
   type: 'SCRATCH_ORG_ERROR' as const,
   payload,
 });

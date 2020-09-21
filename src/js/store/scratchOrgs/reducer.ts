@@ -13,7 +13,7 @@ export type ScratchOrg = {
   status: string;
 };
 export type ScratchOrgState = {
-  [key: string]: ScratchOrg;
+  [key: string]: ScratchOrg | null;
 };
 
 const reducer = (
@@ -24,14 +24,11 @@ const reducer = (
     case 'SCRATCH_ORG_SPINNING':
     case 'SCRATCH_ORG_CREATED': {
       const org = action.payload;
-      const existingorg = org[org.plan];
-      if (!existingorg) {
-        return { [org.plan]: org };
-      }
-      return scratchOrgs;
+      return { ...scratchOrgs, [org.plan]: org };
     }
     case 'SCRATCH_ORG_ERROR': {
-      return {};
+      const { id } = action.payload;
+      return { ...scratchOrgs, [id]: null };
     }
   }
   return scratchOrgs;
