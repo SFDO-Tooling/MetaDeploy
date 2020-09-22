@@ -907,7 +907,6 @@ class ScratchOrgJob(HashIdMixin, models.Model):
         self.status = ScratchOrgJob.Status.complete
         self.config = config
         self.save()
-        self.refresh_from_db()
         async_to_sync(notify_org_finished)(self)
 
 
