@@ -160,7 +160,7 @@ async def notify_org_finished(scratch_org_job, error=None):
 
     if error:
         type_ = "SCRATCH_ORG_ERROR"
-        payload = {"message": str(error), "id": scratch_org_job.plan},
+        payload = ({"message": str(error), "id": str(scratch_org_job.plan_id)},)
     else:
         type_ = "SCRATCH_ORG_CREATED"
         payload = ScratchOrgJobSerializer(scratch_org_job).data
