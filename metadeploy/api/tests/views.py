@@ -600,30 +600,22 @@ class TestUnlisted:
 
 @pytest.mark.django_db
 class TestPlanView:
-    def test_scratch_org_post__no_devhub_username(
-        self, client, plan_factory, settings
-    ):
+    def test_scratch_org_post__no_devhub_username(self, client, plan_factory, settings):
         settings.DEVHUB_USERNAME = None
         plan = plan_factory()
-        response = client.post(
-            reverse("plan-scratch-org", kwargs={"pk": str(plan.id)})
-        )
+        response = client.post(reverse("plan-scratch-org", kwargs={"pk": str(plan.id)}))
         assert response.status_code == 501
 
     def test_scratch_org_post__invalid_plan(self, client, plan_factory, settings):
         settings.DEVHUB_USERNAME = "devhub@example.com"
         plan = plan_factory()
-        response = client.post(
-            reverse("plan-scratch-org", kwargs={"pk": str(plan.id)})
-        )
+        response = client.post(reverse("plan-scratch-org", kwargs={"pk": str(plan.id)}))
         assert response.status_code == 409
 
     def test_scratch_org_post__bad_data(self, client, plan_factory, settings):
         settings.DEVHUB_USERNAME = "devhub@example.com"
         plan = plan_factory(supported_orgs=SUPPORTED_ORG_TYPES.Scratch)
-        response = client.post(
-            reverse("plan-scratch-org", kwargs={"pk": str(plan.id)})
-        )
+        response = client.post(reverse("plan-scratch-org", kwargs={"pk": str(plan.id)}))
         assert response.status_code == 400
 
     def test_scratch_org_post__queue_full(self, client, plan_factory, settings):
