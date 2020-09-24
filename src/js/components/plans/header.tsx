@@ -1,7 +1,6 @@
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { SupportedOrgs } from 'src/js/utils/constants';
 
 import JobProgressIndicator from '@/components/jobs/progressIndicator';
 import PlanProgressIndicator from '@/components/plans/progressIndicator';
@@ -18,10 +17,10 @@ const Header = ({
   onRenderActions,
   job,
   userLoggedIn,
+  scratchOrgCreated,
   preflightStatus,
   preflightIsValid,
   preflightIsReady,
-  supportedOrg,
 }: {
   product: Product;
   version: Version;
@@ -29,10 +28,10 @@ const Header = ({
   onRenderActions?: () => React.ReactNode;
   job?: Job;
   userLoggedIn?: boolean;
+  scratchOrgCreated?: boolean;
   preflightStatus?: string | null | undefined;
   preflightIsValid?: boolean;
   preflightIsReady?: boolean;
-  supportedOrg?: SupportedOrgs;
 }) => (
   <>
     <PageHeader
@@ -51,14 +50,15 @@ const Header = ({
       variant="object-home"
     />
     {job ? (
-      <JobProgressIndicator job={job} />
+      <JobProgressIndicator job={job} supportedOrgs={plan.supported_orgs} />
     ) : (
       <PlanProgressIndicator
         userLoggedIn={userLoggedIn}
+        scratchOrgCreated={scratchOrgCreated}
         preflightStatus={preflightStatus}
         preflightIsValid={preflightIsValid}
         preflightIsReady={preflightIsReady}
-        supportedOrg={supportedOrg}
+        supportedOrgs={plan.supported_orgs}
       />
     )}
   </>

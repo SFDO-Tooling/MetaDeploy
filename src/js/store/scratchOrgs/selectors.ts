@@ -2,18 +2,19 @@ import { createSelector } from 'reselect';
 
 import { AppState } from '@/store';
 import { selectPlan } from '@/store/plans/selectors';
-import { ScratchOrgState } from '@/store/scratchOrgs/reducer';
+import { ScratchOrg, ScratchOrgState } from '@/store/scratchOrgs/reducer';
 
 export const selectScratchOrgState = (appState: AppState): ScratchOrgState =>
   appState.scratchOrgs;
 
-export const selectScratchOrgsByPlan = createSelector(
+export const selectScratchOrg = createSelector(
   [selectScratchOrgState, selectPlan],
-  (orgs, plan) => {
-    /* istanbul ignore else */
-    if (plan) {
-      return orgs[plan.id];
+  (orgs, plan): ScratchOrg | null | undefined => {
+    if (!plan) {
+      return null;
     }
-    return undefined;
+    // A `null` org means we already fetched and no prior org exists
+    // An `undefined` org means we don't know whether an org exists
+    return orgs[plan.id];
   },
 );

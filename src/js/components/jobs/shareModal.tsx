@@ -139,6 +139,7 @@ class ShareModal extends React.Component<WrappedProps> {
             i18n.t('Share Link to Installation Job')
           )
         }
+        size="medium"
         onRequestClose={this.handleClose}
       >
         <div

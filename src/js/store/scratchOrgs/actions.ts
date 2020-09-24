@@ -1,8 +1,20 @@
 import { ThunkResult } from '@/store';
-import { Plan } from '@/store/plans/reducer';
+import { addError } from '@/store/errors/actions';
 import { ScratchOrg } from '@/store/scratchOrgs/reducer';
 import apiFetch from '@/utils/api';
 
+type FetchScratchOrgStarted = {
+  type: 'FETCH_SCRATCH_ORG_STARTED';
+  payload: string;
+};
+type FetchScratchOrgSucceeded = {
+  type: 'FETCH_SCRATCH_ORG_SUCCEEDED';
+  payload: { plan: string; org: ScratchOrg | null };
+};
+type FetchScratchOrgFailed = {
+  type: 'FETCH_SCRATCH_ORG_FAILED';
+  payload: string;
+};
 export type ScratchOrgSpinning = {
   type: 'SCRATCH_ORG_SPINNING';
   payload: ScratchOrg;
@@ -13,28 +25,61 @@ export type ScratchOrgCreated = {
   payload: ScratchOrg;
 };
 
+export type ScratchOrgFailed = {
+  type: 'SCRATCH_ORG_FAILED';
+  payload: ScratchOrg;
+};
+
 export type ScratchOrgError = {
   type: 'SCRATCH_ORG_ERROR';
-  payload: {
-    message: string;
-    id: string;
-  };
+  payload: string;
 };
 
 export type ScratchOrgsAction =
+  | FetchScratchOrgStarted
+  | FetchScratchOrgSucceeded
+  | FetchScratchOrgFailed
   | ScratchOrgSpinning
   | ScratchOrgCreated
+  | ScratchOrgFailed
   | ScratchOrgError;
-export const spinOrg = (
-  plan: Plan,
+
+export const fetchScratchOrg = (
+  planId: string,
+): ThunkResult<Promise<FetchScratchOrgSucceeded>> => async (dispatch) => {
+  dispatch({ type: 'FETCH_SCRATCH_ORG_STARTED' as const, payload: planId });
+  try {
+    const response = await Promise.resolve(null);
+    // @@@ mock out until API exists
+    // const response = await apiFetch(
+    //   window.api_urls.plan_scratch_org(planId),
+    //   dispatch,
+    // );
+    // if (response && window.socket) {
+    //   window.socket.subscribe({
+    //     model: 'scratch_org',
+    //     id: response.job_id,
+    //   });
+    // }
+    return dispatch({
+      type: 'FETCH_SCRATCH_ORG_SUCCEEDED' as const,
+      payload: { plan: planId, org: response },
+    });
+  } catch (err) {
+    dispatch({ type: 'FETCH_SCRATCH_ORG_FAILED' as const, payload: planId });
+    throw err;
+  }
+};
+
+export const spinScratchOrg = (
+  planId: string,
   email: string,
 ): ThunkResult<Promise<ScratchOrgSpinning>> => async (dispatch) => {
-  // dispatch({ type: 'SCRATCH_ORG_SPINNING', payload: plan.id });
-  const url = window.api_urls.plan_create_scratch_org(plan.id);
+  const url = window.api_urls.plan_scratch_org(planId);
   try {
     const response = await apiFetch(url, dispatch, {
       method: 'POST',
-      body: JSON.stringify({ email, plan }),
+      body: JSON.stringify({ email }),
       headers: {
         'Content-Type': 'application/json',
       },
@@ -53,17 +98,10 @@ export const spinOrg = (
   } catch (error) {
     dispatch({
       type: 'SCRATCH_ORG_ERROR' as const,
-      payload: {
-        message: error,
-        id: plan.id,
-      },
+      payload: planId,
     });
     throw error;
   }
-};
-
-export const fetchScratchOrg = () => {
-  console.log('fetching here...');
 };
 
 export const createScratchOrg = (payload: ScratchOrg): ScratchOrgCreated => ({
@@ -71,9 +109,16 @@ export const createScratchOrg = (payload: ScratchOrg): ScratchOrgCreated => ({
   payload,
 });
 
-export const errorScratchOrg = (
-  payload: ScratchOrgError['payload'],
-): ScratchOrgError => ({
-  type: 'SCRATCH_ORG_ERROR' as const,
-  payload,
-});
+export const failScratchOrg = ({
+  message,
+  org,
+}: {
+  message: string;
+  org: ScratchOrg;
+}): ThunkResult<ScratchOrgFailed> => (dispatch) => {
+  dispatch(addError(message));
+  return dispatch({
+    type: 'SCRATCH_ORG_FAILED' as const,
+    payload: org,
+  });
+};

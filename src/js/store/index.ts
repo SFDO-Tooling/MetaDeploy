@@ -16,9 +16,9 @@ export type AppState = {
   readonly preflights: PreflightsState;
   readonly jobs: JobsState;
   readonly org: Org;
+  readonly scratchOrgs: ScratchOrgState;
   readonly socket: Socket;
   readonly errors: ErrorType[];
-  readonly scratchOrgs: ScratchOrgState;
 };
 
 export type ThunkResult<A = AnyAction | Promise<AnyAction>> = ThunkAction<
@@ -35,9 +35,9 @@ const reducer: Reducer<AppState> = combineReducers({
   preflights,
   jobs,
   org,
+  scratchOrgs,
   socket,
   errors,
-  scratchOrgs,
 });
 
 export default reducer;

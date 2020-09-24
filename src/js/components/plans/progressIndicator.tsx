@@ -5,29 +5,9 @@ import * as React from 'react';
 import { CONSTANTS } from '@/store/plans/reducer';
 import { SUPPORTED_ORGS, SupportedOrgs } from '@/utils/constants';
 
-const ProgressIndicator = ({
-  userLoggedIn,
-  preflightStatus,
-  preflightIsValid,
-  preflightIsReady,
-  supportedOrg,
-}: {
-  userLoggedIn?: boolean;
-  preflightStatus?: string | null | undefined;
-  preflightIsValid?: boolean;
-  preflightIsReady?: boolean;
-  supportedOrg?: SupportedOrgs;
-}) => {
-  let activeStep = 0;
-  if (userLoggedIn) {
-    activeStep = 1;
-    if (preflightIsReady) {
-      activeStep = 2;
-    }
-  }
-
-  let initialLabel;
-  switch (supportedOrg) {
+export const getSteps = (supportedOrgs: SupportedOrgs) => {
+  let initialLabel = i18n.t('Log in');
+  switch (supportedOrgs) {
     case SUPPORTED_ORGS.Scratch: {
       initialLabel = i18n.t('Create Scratch Org');
       break;
@@ -36,12 +16,9 @@ const ProgressIndicator = ({
       initialLabel = i18n.t('Log In or Create Scratch Org');
       break;
     }
-    case SUPPORTED_ORGS.Persistent: {
-      initialLabel = i18n.t('Log in');
-      break;
-    }
   }
-  const steps = [
+
+  return [
     {
       id: 0,
       label: initialLabel,
@@ -55,10 +32,47 @@ const ProgressIndicator = ({
       label: i18n.t('Install'),
     },
   ];
+};
+
+const ProgressIndicator = ({
+  userLoggedIn,
+  scratchOrgCreated,
+  preflightStatus,
+  preflightIsValid,
+  preflightIsReady,
+  supportedOrgs,
+}: {
+  userLoggedIn?: boolean;
+  scratchOrgCreated?: boolean;
+  preflightStatus?: string | null | undefined;
+  preflightIsValid?: boolean;
+  preflightIsReady?: boolean;
+  supportedOrgs: SupportedOrgs;
+}) => {
+  let activeStep = 0;
+  let initialActionComplete = userLoggedIn;
+  switch (supportedOrgs) {
+    case SUPPORTED_ORGS.Scratch: {
+      initialActionComplete = scratchOrgCreated;
+      break;
+    }
+    case SUPPORTED_ORGS.Both: {
+      initialActionComplete = userLoggedIn || scratchOrgCreated;
+      break;
+    }
+  }
+  if (initialActionComplete) {
+    activeStep = 1;
+    if (preflightIsReady) {
+      activeStep = 2;
+    }
+  }
+
+  const steps = getSteps(supportedOrgs);
 
   const completedSteps = steps.slice(0, activeStep);
   const errorSteps =
-    userLoggedIn &&
+    initialActionComplete &&
     preflightIsValid &&
     preflightStatus !== CONSTANTS.STATUS.STARTED &&
     !preflightIsReady
@@ -72,7 +86,6 @@ const ProgressIndicator = ({
       completedSteps={completedSteps}
       selectedStep={selectedStep}
       errorSteps={errorSteps}
-      supportedOrg={supportedOrg}
     />
   );
 };

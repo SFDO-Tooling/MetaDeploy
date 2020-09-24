@@ -101,6 +101,7 @@ class PreflightWarningModal extends React.Component<Props, State> {
         isOpen={isOpen}
         heading={i18n.t('Potential Issues')}
         tagline={i18n.t('(confirm to continue)')}
+        size="medium"
         onRequestClose={this.handleClose}
         footer={footer}
       >

@@ -158,12 +158,13 @@ async def notify_org_result_changed(result):
 async def notify_org_finished(scratch_org_job, error=None):
     from .serializers import ScratchOrgJobSerializer
 
+    data = ScratchOrgJobSerializer(scratch_org_job).data
     if error:
         type_ = "SCRATCH_ORG_ERROR"
-        payload = ({"message": str(error), "id": str(scratch_org_job.plan_id)},)
+        payload = {"message": str(error), "org": data}
     else:
         type_ = "SCRATCH_ORG_CREATED"
-        payload = ScratchOrgJobSerializer(scratch_org_job).data
+        payload = data
 
     message = {
         "type": type_,

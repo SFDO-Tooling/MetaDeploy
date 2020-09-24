@@ -220,8 +220,7 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
         if request.method == "POST":
             return self.preflight_post(request)
 
-    @action(detail=True, methods=["post"], permission_classes=(AllowAny,))
-    def create_scratch_org(self, request, pk=None):
+    def scratch_org_post(self, request, pk=None):
         devhub_enabled = settings.DEVHUB_USERNAME
         if not devhub_enabled:
             return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
@@ -233,7 +232,7 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
         )
         if not valid_plan_type:
             return Response(
-                {"error": "This plan does not support creating a scratch org."},
+                {"detail": "This plan does not support creating a scratch org."},
                 status=status.HTTP_409_CONFLICT,
             )
 
@@ -248,7 +247,7 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
         queue = django_rq.get_queue("default")
         if len(queue) > settings.MAX_QUEUE_LENGTH:
             return Response(
-                {"error": "Queue is overfull. Try again later."},
+                {"detail": "Queue is overfull. Try again later."},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
 
@@ -258,6 +257,14 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
 
         serializer = ScratchOrgJobSerializer(instance=scratch_org)
         return Response(serializer.data, status=status.HTTP_202_ACCEPTED,)
+
+    @action(detail=True, methods=["post", "get"], permission_classes=(AllowAny,))
+    def scratch_org(self, request, pk=None):
+        if request.method == "GET":
+            pass
+            # @@@ return self.scratch_org_get(request)
+        if request.method == "POST":
+            return self.scratch_org_post(request)
 
 
 class OrgViewSet(viewsets.ViewSet):

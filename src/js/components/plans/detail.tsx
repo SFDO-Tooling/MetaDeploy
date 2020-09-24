@@ -48,8 +48,8 @@ import {
   selectVersion,
   selectVersionLabel,
 } from '@/store/products/selectors';
-import { fetchScratchOrg, spinOrg } from '@/store/scratchOrgs/actions';
-import { selectScratchOrgsByPlan } from '@/store/scratchOrgs/selectors';
+import { fetchScratchOrg, spinScratchOrg } from '@/store/scratchOrgs/actions';
+import { selectScratchOrg } from '@/store/scratchOrgs/selectors';
 import { selectUserState } from '@/store/user/selectors';
 import { SCRATCH_ORG_STATUSES, SUPPORTED_ORGS } from '@/utils/constants';
 import routes from '@/utils/routes';
@@ -114,10 +114,14 @@ class PlanDetail extends React.Component<Props, State> {
   }
 
   fetchScratchOrgIfMissing() {
-    const { plan, doFetchScratchOrg } = this.props;
-    if (plan && plan.supported_orgs !== SUPPORTED_ORGS.Persistent) {
-      console.log('fetching...');
-      // doFetchScratchOrg();
+    const { plan, scratchOrg, doFetchScratchOrg } = this.props;
+    if (
+      plan &&
+      plan.supported_orgs !== SUPPORTED_ORGS.Persistent &&
+      scratchOrg === undefined
+    ) {
+      // console.log('fetching...');
+      doFetchScratchOrg(plan.id);
     }
   }
 
@@ -139,6 +143,7 @@ class PlanDetail extends React.Component<Props, State> {
       plan,
       planSlug,
       preflight,
+      scratchOrg,
     } = this.props;
     const productChanged =
       product !== prevProps.product || productSlug !== prevProps.productSlug;
@@ -152,6 +157,7 @@ class PlanDetail extends React.Component<Props, State> {
       plan !== prevProps.plan ||
       planSlug !== prevProps.planSlug;
     const preflightChanged = preflight !== prevProps.preflight;
+    const scratchOrgChanged = scratchOrg !== prevProps.scratchOrg;
     if (productChanged) {
       this.fetchProductIfMissing();
     }
@@ -160,6 +166,9 @@ class PlanDetail extends React.Component<Props, State> {
     }
     if (userChanged || planChanged || preflightChanged) {
       this.fetchPreflightIfMissing();
+    }
+    if (planChanged || scratchOrgChanged) {
+      this.fetchScratchOrgIfMissing();
     }
     if (planChanged) {
       this.fetchPlanIfMissing();
@@ -298,28 +307,17 @@ class PlanDetail extends React.Component<Props, State> {
       plan,
       preflight,
       org,
+      scratchOrg,
       doStartPreflight,
       doStartJob,
-      doSpinOrg,
-      scratchOrg,
+      doSpinScratchOrg,
     } = this.props;
 
     /* istanbul ignore if */
     if (!product || !version || !plan) {
       return null;
     }
-    if (
-      user &&
-      !user.org_type &&
-      plan.supported_orgs !== SUPPORTED_ORGS.Scratch
-    ) {
-      return (
-        <LoginBtn
-          id="org-not-allowed-login"
-          label={i18n.t('Log in with a different org')}
-        />
-      );
-    } else if (plan.steps?.length) {
+    if (plan.steps?.length) {
       return (
         <CtaButton
           history={history}
@@ -330,11 +328,15 @@ class PlanDetail extends React.Component<Props, State> {
           plan={plan}
           preflight={preflight}
           selectedSteps={selectedSteps}
-          preventAction={Boolean(org?.current_job || org?.current_preflight)}
+          scratchOrg={scratchOrg}
+          preventAction={Boolean(
+            org?.current_job ||
+              org?.current_preflight ||
+              scratchOrg?.status === SCRATCH_ORG_STATUSES.started,
+          )}
           doStartPreflight={doStartPreflight}
           doStartJob={doStartJob}
-          doSpinOrg={doSpinOrg}
-          isSpinningOrg={scratchOrg?.status === SCRATCH_ORG_STATUSES.started}
+          doSpinScratchOrg={doSpinScratchOrg}
         />
       );
     }
@@ -351,6 +353,7 @@ class PlanDetail extends React.Component<Props, State> {
       plan,
       planSlug,
       preflight,
+      scratchOrg,
       history,
     } = this.props;
     const loadingOrNotFound = getLoadingOrNotFound({
@@ -388,17 +391,19 @@ class PlanDetail extends React.Component<Props, State> {
         <>
           <Header
             history={history}
-            hide={plan.supported_orgs === SUPPORTED_ORGS.Scratch}
+            hideLogin={plan.supported_orgs === SUPPORTED_ORGS.Scratch}
           />
           <PageHeader
             product={product}
             version={version}
             plan={plan}
             userLoggedIn={Boolean(user?.valid_token_for)}
+            scratchOrgCreated={Boolean(
+              scratchOrg?.status === SCRATCH_ORG_STATUSES.complete,
+            )}
             preflightStatus={preflight?.status}
             preflightIsValid={Boolean(preflight?.is_valid)}
             preflightIsReady={Boolean(preflight?.is_ready)}
-            supportedOrg={plan?.supported_orgs}
           />
           {product.is_allowed && plan.is_allowed ? (
             <BodyContainer>
@@ -484,7 +489,7 @@ const select = (appState: AppState, props: RouteComponentProps) => ({
   planSlug: selectPlanSlug(appState, props),
   preflight: selectPreflight(appState, props),
   org: selectOrg(appState),
-  scratchOrg: selectScratchOrgsByPlan(appState, props),
+  scratchOrg: selectScratchOrg(appState, props),
 });
 
 const actions = {
@@ -494,7 +499,7 @@ const actions = {
   doFetchPreflight: fetchPreflight,
   doStartPreflight: startPreflight,
   doStartJob: startJob,
-  doSpinOrg: spinOrg,
+  doSpinScratchOrg: spinScratchOrg,
   doFetchScratchOrg: fetchScratchOrg,
 };
 

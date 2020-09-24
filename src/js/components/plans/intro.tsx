@@ -1,6 +1,6 @@
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import i18n from 'i18next';
-import React from 'react';
+import * as React from 'react';
 
 import { getDuration } from '@/utils/dates';
 
@@ -17,13 +17,11 @@ const Intro = ({
   isProductionOrg: boolean;
   results: React.ReactNode;
   cta: React.ReactNode;
-  clickThroughAgreement?: string | null;
   preMessage?: React.ReactNode;
   postMessage?: React.ReactNode;
   backLink?: React.ReactNode;
 }) => {
   const duration = getDuration(averageDuration);
-
   return (
     <div
       className="slds-p-around_medium

@@ -48,7 +48,7 @@ export type Preflight = {
   is_ready: boolean;
 };
 export type PreflightsState = {
-  [key: string]: Preflight;
+  [key: string]: Preflight | null;
 };
 
 type Constants = {

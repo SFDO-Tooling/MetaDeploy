@@ -1,6 +1,7 @@
 import { ThunkDispatch } from 'redux-thunk';
 import Sockette from 'sockette';
 
+import { ThunkResult } from '@/store';
 import {
   cancelJob,
   completeJob,
@@ -27,8 +28,9 @@ import {
 import { Preflight } from '@/store/plans/reducer';
 import {
   createScratchOrg,
-  errorScratchOrg,
-  ScratchOrgsAction,
+  failScratchOrg,
+  ScratchOrgCreated,
+  ScratchOrgFailed,
 } from '@/store/scratchOrgs/actions';
 import { ScratchOrg } from '@/store/scratchOrgs/reducer';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
@@ -73,13 +75,27 @@ interface OrgEvent {
   payload: Org;
 }
 
-interface ScratchOrgEvent {
-  type: 'SCRATCH_ORG_CREATED' | 'SCRATCH_ORG_ERROR';
+interface ScratchOrgCreatedEvent {
+  type: 'SCRATCH_ORG_CREATED';
   payload: ScratchOrg;
 }
 
-type ModelEvent = UserEvent | PreflightEvent | JobEvent | OrgEvent;
-type EventType = SubscriptionEvent | ErrorEvent | ModelEvent | ScratchOrgEvent;
+interface ScratchOrgErrorEvent {
+  type: 'SCRATCH_ORG_ERROR';
+  payload: {
+    message: string;
+    org: ScratchOrg;
+  };
+}
+
+type ModelEvent =
+  | UserEvent
+  | PreflightEvent
+  | JobEvent
+  | OrgEvent
+  | ScratchOrgCreatedEvent
+  | ScratchOrgErrorEvent;
+type EventType = SubscriptionEvent | ErrorEvent | ModelEvent;
 
 type Action =
   | TokenInvalidAction
@@ -92,7 +108,8 @@ type Action =
   | JobFailed
   | JobCanceled
   | OrgChanged
-  | ScratchOrgsAction;
+  | ScratchOrgCreated
+  | ThunkResult<ScratchOrgFailed>;
 
 const isSubscriptionEvent = (event: EventType): event is SubscriptionEvent =>
   (event as ModelEvent).type === undefined;
@@ -125,7 +142,7 @@ export const getAction = (event: EventType): Action | null => {
     case 'SCRATCH_ORG_CREATED':
       return createScratchOrg(event.payload);
     case 'SCRATCH_ORG_ERROR':
-      return errorScratchOrg(event.payload);
+      return failScratchOrg(event.payload);
   }
   return null;
 };
