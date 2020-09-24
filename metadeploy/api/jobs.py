@@ -228,12 +228,12 @@ def expire_user_tokens():
 expire_user_tokens_job = job(expire_user_tokens)
 
 
-def preflight(preflight_result_id):
+def preflight(preflight_result_id, forced_user=None):
     # Because the FieldTracker interferes with transparently serializing models across
     # the Redis boundary, we have to pass a primitive value to this function,
     preflight_result = PreflightResult.objects.get(pk=preflight_result_id)
     run_flows(
-        user=preflight_result.user,
+        user=forced_user if forced_user is not None else preflight_result.user,
         plan=preflight_result.plan,
         skip_steps=[],
         organization_url=preflight_result.organization_url,
@@ -298,6 +298,14 @@ def create_scratch_org(*, plan_id, email, org_name, result_id):
     fake_user = FakeUser(token=(org_config.access_token, org_config.refresh_token))
 
     # @@@ TODO: run a preflight if exists.
+    if plan.requires_preflight:
+        preflight_result = PreflightResult.objects.create(
+            user=None,
+            plan=plan,
+            organization_url=org_config.instance_url,
+            org_id=scratch_org_config["org_id"],
+        )
+        preflight(preflight_result.pk, forced_user=fake_user)
 
     job = Job.objects.create(
         user=None,

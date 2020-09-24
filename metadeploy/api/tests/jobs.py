@@ -275,7 +275,7 @@ class MockDict(dict):
 class TestCreateScratchOrg:
     def test_create_scratch_org(self, settings, plan_factory, scratch_org_job_factory):
         settings.DEVHUB_USERNAME = "test@example.com"
-        plan = plan_factory()
+        plan = plan_factory(preflight_checks=[{"when": "True", "action": "error"}])
         with ExitStack() as stack:
             stack.enter_context(patch("metadeploy.api.jobs.local_github_checkout"))
             jwt_session = stack.enter_context(
@@ -320,6 +320,9 @@ class TestCreateScratchOrg:
                 }
             )
             stack.enter_context(patch("metadeploy.api.salesforce.DeployOrgSettings"))
+            stack.enter_context(
+                patch("cumulusci.core.flowrunner.PreflightFlowCoordinator.run")
+            )
             # Cheat the auto-triggering of the job by adding a fake
             # enqueued_at:
             scratch_org_job = scratch_org_job_factory(

@@ -752,7 +752,9 @@ class PreflightResult(models.Model):
 
     organization_url = models.URLField()
     org_id = models.CharField(null=True, blank=True, max_length=18)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True
+    )
     # For our user-less pseudo-auth:
     uuid = models.UUIDField(null=True, blank=True)
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
