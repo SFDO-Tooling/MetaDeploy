@@ -1,5 +1,6 @@
 from datetime import datetime
 from unittest.mock import MagicMock, patch
+from uuid import uuid4
 
 import django_rq
 import pytest
@@ -400,6 +401,26 @@ class TestPreflight:
 
 @pytest.mark.django_db
 class TestOrgViewset:
+    def test_get_job__anonymous(self, anon_client, job_factory, plan_factory):
+        uuid = str(uuid4())
+        plan = plan_factory()
+        job_factory(plan=plan, uuid=uuid)
+        response = anon_client.get(reverse("org-list"))
+
+        assert response.status_code == 403
+
+    def test_get_job__uuid(self, anon_client, job_factory, plan_factory):
+        uuid = str(uuid4())
+        plan = plan_factory()
+        job = job_factory(plan=plan, uuid=uuid)
+        session = anon_client.session
+        session["scratch_org_id"] = uuid
+        session.save()
+        response = anon_client.get(reverse("org-list"))
+
+        assert response.json()["current_job"]["id"] == str(job.id)
+        assert response.json()["current_preflight"] is None
+
     def test_get_job(self, client, job_factory, plan_factory):
         plan = plan_factory()
         job = job_factory(

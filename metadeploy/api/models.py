@@ -626,6 +626,8 @@ class Job(HashIdMixin, models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True
     )
+    # For our user-less pseudo-auth:
+    uuid = models.UUIDField(null=True, blank=True)
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
     steps = models.ManyToManyField(Step)
     organization_url = models.URLField(blank=True)
@@ -751,6 +753,8 @@ class PreflightResult(models.Model):
     organization_url = models.URLField()
     org_id = models.CharField(null=True, blank=True, max_length=18)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    # For our user-less pseudo-auth:
+    uuid = models.UUIDField(null=True, blank=True)
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True)
     edited_at = models.DateTimeField(auto_now=True)
@@ -866,6 +870,9 @@ class ScratchOrgJob(HashIdMixin, models.Model):
 
     enqueued_at = models.DateTimeField(null=True)
     job_id = models.UUIDField(null=True)
+    # This is set in a user's session to let them continue to access
+    # this job, without being otherwise auth'd:
+    uuid = models.UUIDField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     edited_at = models.DateTimeField(auto_now=True)
     status = models.CharField(choices=Status, max_length=64, default=Status.started)

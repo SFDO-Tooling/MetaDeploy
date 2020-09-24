@@ -297,12 +297,15 @@ def create_scratch_org(*, plan_id, email, org_name, result_id):
     result.complete(scratch_org_config)
     fake_user = FakeUser(token=(org_config.access_token, org_config.refresh_token))
 
+    # @@@ TODO: run a preflight if exists.
+
     job = Job.objects.create(
         user=None,
         plan=plan,
         organization_url=org_config.instance_url,
         is_public=True,
         org_id=scratch_org_config["org_id"],
+        uuid=result.uuid,
     )
 
     rq_job = run_flows.delay(

@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 import django_rq
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -250,24 +252,41 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
 
-        scratch_org = serializer.save()
+        uuid = str(uuid4())
+        scratch_org = serializer.save(uuid=uuid)
+        request.session["scratch_org_id"] = uuid
+
         serializer = ScratchOrgJobSerializer(instance=scratch_org)
         return Response(serializer.data, status=status.HTTP_202_ACCEPTED,)
 
 
 class OrgViewSet(viewsets.ViewSet):
+    permission_classes = (AllowAny,)
+
     def list(self, request):
         """
         This will return data on the user's current org. It is not a
         list endpoint, but does not take a pk, so we have to implement
         it this way.
         """
-        current_job = Job.objects.filter(
-            org_id=request.user.org_id, status=Job.Status.started
-        ).first()
-        current_preflight = PreflightResult.objects.filter(
-            org_id=request.user.org_id, status=PreflightResult.Status.started
-        ).first()
+        if "scratch_org_id" in request.session:
+            uuid = request.session["scratch_org_id"]
+            current_job = Job.objects.filter(
+                uuid=uuid, status=Job.Status.started
+            ).first()
+            current_preflight = PreflightResult.objects.filter(
+                uuid=uuid, status=PreflightResult.Status.started
+            ).first()
+        elif request.user.is_authenticated:
+            current_job = Job.objects.filter(
+                org_id=request.user.org_id, status=Job.Status.started
+            ).first()
+            current_preflight = PreflightResult.objects.filter(
+                org_id=request.user.org_id, status=PreflightResult.Status.started
+            ).first()
+        else:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
         serializer = OrgSerializer(
             {"current_job": current_job, "current_preflight": current_preflight}
         )
