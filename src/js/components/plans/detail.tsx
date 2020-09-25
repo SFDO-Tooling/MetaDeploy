@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 import BackLink from '@/components/backLink';
 import BodyContainer from '@/components/bodyContainer';
 import Header from '@/components/header';
-import CtaButton, { LoginBtn } from '@/components/plans/ctaButton';
+import CtaButton from '@/components/plans/ctaButton';
 import PageHeader from '@/components/plans/header';
 import Intro from '@/components/plans/intro';
 import PreflightResults, {
@@ -106,8 +106,8 @@ class PlanDetail extends React.Component<Props, State> {
   }
 
   fetchPreflightIfMissing() {
-    const { user, plan, preflight, doFetchPreflight } = this.props;
-    if (user && preflight === undefined && plan?.requires_preflight) {
+    const { plan, preflight, doFetchPreflight } = this.props;
+    if (preflight === undefined && plan?.requires_preflight) {
       // Fetch most recent preflight result (if any exists)
       doFetchPreflight(plan.id);
     }
@@ -115,12 +115,11 @@ class PlanDetail extends React.Component<Props, State> {
 
   fetchScratchOrgIfMissing() {
     const { plan, scratchOrg, doFetchScratchOrg } = this.props;
-    if (
-      plan &&
-      plan.supported_orgs !== SUPPORTED_ORGS.Persistent &&
-      scratchOrg === undefined
-    ) {
-      // console.log('fetching...');
+    const canCreateOrg = Boolean(
+      window.GLOBALS.DEVHUB_USERNAME &&
+        plan?.supported_orgs !== SUPPORTED_ORGS.Persistent,
+    );
+    if (plan && canCreateOrg && scratchOrg === undefined) {
       doFetchScratchOrg(plan.id);
     }
   }
@@ -139,7 +138,6 @@ class PlanDetail extends React.Component<Props, State> {
       productSlug,
       version,
       versionLabel,
-      user,
       plan,
       planSlug,
       preflight,
@@ -151,7 +149,6 @@ class PlanDetail extends React.Component<Props, State> {
       productChanged ||
       version !== prevProps.version ||
       versionLabel !== prevProps.versionLabel;
-    const userChanged = user !== prevProps.user;
     const planChanged =
       versionChanged ||
       plan !== prevProps.plan ||
@@ -164,7 +161,7 @@ class PlanDetail extends React.Component<Props, State> {
     if (versionChanged) {
       this.fetchVersionIfMissing();
     }
-    if (userChanged || planChanged || preflightChanged) {
+    if (planChanged || preflightChanged) {
       this.fetchPreflightIfMissing();
     }
     if (planChanged || scratchOrgChanged) {
@@ -239,7 +236,9 @@ class PlanDetail extends React.Component<Props, State> {
     if (!product || !version || !plan) {
       return null;
     }
-    if (user && !user.org_type) {
+
+    const canLogin = plan.supported_orgs !== SUPPORTED_ORGS.Scratch;
+    if (canLogin && user && !user.org_type) {
       return (
         <>
           <div className="slds-p-bottom_xx-small">
@@ -266,7 +265,7 @@ class PlanDetail extends React.Component<Props, State> {
             <WarningIcon />
             <span>
               <Trans i18nKey="installationCurrentlyRunning">
-                An installation is currently running on this org.{' '}
+                An installation is currently running on your org.{' '}
                 <Link
                   to={routes.job_detail(
                     product_slug,
@@ -288,7 +287,7 @@ class PlanDetail extends React.Component<Props, State> {
             <WarningIcon />
             <span>
               {i18n.t(
-                'A pre-install validation is currently running on this org.',
+                'A pre-install validation is currently running on your org.',
               )}
             </span>
           </p>
@@ -446,7 +445,9 @@ class PlanDetail extends React.Component<Props, State> {
                   />
                 }
               />
-              <UserInfo user={user} />
+              {plan.supported_orgs !== SUPPORTED_ORGS.Scratch && (
+                <UserInfo user={user} />
+              )}
               {plan.steps?.length ? (
                 <StepsTable
                   user={user}

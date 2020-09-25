@@ -230,7 +230,7 @@ describe('<PlanDetail />', () => {
       });
 
       expect(
-        getByText('A pre-install validation is currently running on this org.'),
+        getByText('A pre-install validation is currently running on your org.'),
       ).toBeVisible();
       expect(getAllByText('Install')[0]).toBeDisabled();
     });
