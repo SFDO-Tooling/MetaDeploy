@@ -84,15 +84,13 @@ GITHUB_TOKEN:
     https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line
 
 CONNECTED_APP_CLIENT_ID:
-    This represents the client id of the connected app that MetaDeploy will use for authenticating to any persistent org.
+    This represents the consumer key of the connected app that MetaDeploy will use for authenticating to any persistent org.
 
 CONNECTED_APP_CLIENT_SECRET:
     This represents the consumer secret of the connected app.
 
-
 CONNECTED_APP_CALLBACK_URL:
     This represents the callback url of the connected app.
-
 
 CONNECTED_APP_CLIENT_KEY:
     This represents the private key part of the keypair used to make the Salesforce connected app.
