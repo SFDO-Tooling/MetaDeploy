@@ -95,8 +95,7 @@ CONNECTED_APP_CALLBACK_URL:
 
 
 CONNECTED_APP_CLIENT_KEY:
-    This is the private key part of the keypair used to make the
-    Salesforce connected app. You can find it in Keybase.
+    This represents the private key part of the keypair used to make the Salesforce connected app.
 
 
 

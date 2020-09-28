@@ -133,7 +133,7 @@ def _get_org_result(
         # optional fields from the scratch org definition file,
         # but this will work for a start
     }
-    if SFDX_SIGNUP_INSTANCE:
+    if SFDX_SIGNUP_INSTANCE:  # pragma: nocover
         create_args["Instance"] = SFDX_SIGNUP_INSTANCE
     response = devhub_api.ScratchOrgInfo.create(create_args)
 

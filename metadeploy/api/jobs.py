@@ -297,7 +297,6 @@ def create_scratch_org(*, plan_id, email, org_name, result_id):
     result.complete(scratch_org_config)
     fake_user = FakeUser(token=(org_config.access_token, org_config.refresh_token))
 
-    # @@@ TODO: run a preflight if exists.
     if plan.requires_preflight:
         preflight_result = PreflightResult.objects.create(
             user=None,
@@ -307,26 +306,29 @@ def create_scratch_org(*, plan_id, email, org_name, result_id):
         )
         preflight(preflight_result.pk, forced_user=fake_user)
 
-    job = Job.objects.create(
-        user=None,
-        plan=plan,
-        organization_url=org_config.instance_url,
-        is_public=True,
-        org_id=scratch_org_config["org_id"],
-        uuid=result.uuid,
-    )
+    # @@@ TODO: start installation job automatically if:
+    #   - Plan has no preflight
+    #   - Plan has no optional steps
+    # job = Job.objects.create(
+    #     user=None,
+    #     plan=plan,
+    #     organization_url=org_config.instance_url,
+    #     is_public=True,
+    #     org_id=scratch_org_config["org_id"],
+    #     uuid=result.uuid,
+    # )
 
-    rq_job = run_flows.delay(
-        user=fake_user,
-        plan=plan,
-        skip_steps=[],
-        organization_url=org_config.instance_url,
-        result_class=Job,
-        result_id=job.id,
-    )
-    job.job_id = rq_job.id
-    job.enqueued_at = rq_job.enqueued_at
-    job.save()
+    # rq_job = run_flows.delay(
+    #     user=fake_user,
+    #     plan=plan,
+    #     skip_steps=[],
+    #     organization_url=org_config.instance_url,
+    #     result_class=Job,
+    #     result_id=job.id,
+    # )
+    # job.job_id = rq_job.id
+    # job.enqueued_at = rq_job.enqueued_at
+    # job.save()
 
 
 create_scratch_org_job = job(create_scratch_org)
