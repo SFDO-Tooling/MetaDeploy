@@ -40,3 +40,30 @@ async def test_notify_org_finished(mocker, scratch_org_job_factory):
     gcl = mocker.patch("metadeploy.api.push.get_channel_layer", wraps=get_channel_layer)
     await notify_org_finished(soj, "error!")
     gcl.assert_called()
+
+
+@pytest.mark.django_db
+@pytest.mark.asyncio
+async def test_notify_org_finished__attribute_error(mocker, scratch_org_job_factory):
+    soj = scratch_org_job_factory()
+    gcl = mocker.patch("metadeploy.api.push.get_channel_layer", wraps=get_channel_layer)
+    await notify_org_finished(soj, error="fake error")
+    gcl.assert_called()
+
+
+@pytest.mark.django_db
+@pytest.mark.asyncio
+async def test_notify_org_finished__list(mocker, scratch_org_job_factory):
+    soj = scratch_org_job_factory()
+    gcl = mocker.patch("metadeploy.api.push.get_channel_layer", wraps=get_channel_layer)
+    await notify_org_finished(soj, error=MagicMock(content=["fake error"]))
+    gcl.assert_called()
+
+
+@pytest.mark.django_db
+@pytest.mark.asyncio
+async def test_notify_org_finished__dict(mocker, scratch_org_job_factory):
+    soj = scratch_org_job_factory()
+    gcl = mocker.patch("metadeploy.api.push.get_channel_layer", wraps=get_channel_layer)
+    await notify_org_finished(soj, error=MagicMock(content={"message": "fake error"}))
+    gcl.assert_called()

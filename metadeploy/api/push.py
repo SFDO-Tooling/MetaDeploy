@@ -161,7 +161,18 @@ async def notify_org_finished(scratch_org_job, error=None):
     data = ScratchOrgJobSerializer(scratch_org_job).data
     if error:
         type_ = "SCRATCH_ORG_ERROR"
-        payload = {"message": str(error), "org": data}
+        # unwrap the error in the case that there's only one,
+        # which is the most common case:
+        try:
+            prepared_message = error.content
+            if isinstance(prepared_message, list) and len(prepared_message) == 1:
+                prepared_message = prepared_message[0]
+            if isinstance(prepared_message, dict):
+                prepared_message = prepared_message.get("message", prepared_message)
+            prepared_message = str(prepared_message)
+        except AttributeError:
+            prepared_message = str(error)
+        payload = {"message": prepared_message, "org": data}
     else:
         type_ = "SCRATCH_ORG_CREATED"
         payload = data

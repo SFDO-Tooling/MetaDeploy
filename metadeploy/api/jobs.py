@@ -273,7 +273,7 @@ class FakeUser:
 
 def create_scratch_org(*, plan_id, email, org_name, result_id):
     plan = Plan.objects.get(id=plan_id)
-    result = ScratchOrgJob.objects.get(id=result_id)
+    org = ScratchOrgJob.objects.get(id=result_id)
     repo_url = plan.version.product.repo_url
     repo_owner, repo_name = extract_user_and_repo(repo_url)
     commit_ish = plan.commit_ish
@@ -291,10 +291,10 @@ def create_scratch_org(*, plan_id, email, org_name, result_id):
                 org_name=org_name,
             )
     except Exception as e:
-        result.fail(e)
+        org.fail(e)
         return
 
-    result.complete(scratch_org_config)
+    org.complete(scratch_org_config.config)
     fake_user = FakeUser(token=(org_config.access_token, org_config.refresh_token))
 
     if plan.requires_preflight:
