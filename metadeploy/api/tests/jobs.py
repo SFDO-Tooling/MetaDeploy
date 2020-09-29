@@ -326,7 +326,8 @@ class TestCreateScratchOrg:
             # Cheat the auto-triggering of the job by adding a fake
             # enqueued_at:
             scratch_org_job = scratch_org_job_factory(
-                plan=plan, enqueued_at=datetime(2020, 9, 4, 12),
+                plan=plan,
+                enqueued_at=datetime(2020, 9, 4, 12),
             )
             create_scratch_org(
                 plan_id=plan.id,
@@ -371,7 +372,8 @@ class TestCreateScratchOrg:
             # Cheat the auto-triggering of the job by adding a fake
             # enqueued_at:
             scratch_org_job = scratch_org_job_factory(
-                plan=plan, enqueued_at=datetime(2020, 9, 4, 12),
+                plan=plan,
+                enqueued_at=datetime(2020, 9, 4, 12),
             )
             create_scratch_org(
                 plan_id=plan.id,

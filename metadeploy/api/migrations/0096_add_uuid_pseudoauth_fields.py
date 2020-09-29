@@ -21,6 +21,8 @@ class Migration(migrations.Migration):
             field=models.UUIDField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name="scratchorgjob", name="uuid", field=models.UUIDField(null=True),
+            model_name="scratchorgjob",
+            name="uuid",
+            field=models.UUIDField(null=True),
         ),
     ]

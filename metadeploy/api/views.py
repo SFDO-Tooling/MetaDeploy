@@ -256,7 +256,10 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
         request.session["scratch_org_id"] = uuid
 
         serializer = ScratchOrgJobSerializer(instance=scratch_org)
-        return Response(serializer.data, status=status.HTTP_202_ACCEPTED,)
+        return Response(
+            serializer.data,
+            status=status.HTTP_202_ACCEPTED,
+        )
 
     @action(detail=True, methods=["post", "get"], permission_classes=(AllowAny,))
     def scratch_org(self, request, pk=None):

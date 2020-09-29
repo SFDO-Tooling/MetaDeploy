@@ -231,4 +231,5 @@ class CustomSocialTokenAdmin(SocialTokenAdmin):
 
 if "binary_database_files" in settings.INSTALLED_APPS:  # pragma: no cover
     from binary_database_files.models import File
+
     admin.site.register(File)
