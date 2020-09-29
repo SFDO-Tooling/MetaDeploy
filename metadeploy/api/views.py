@@ -189,7 +189,10 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
     def preflight_get(self, request):
         plan = get_object_or_404(Plan.objects, id=self.kwargs["pk"])
         preflight = PreflightResult.objects.most_recent(
-            user=request.user, plan=plan, is_valid_and_complete=False
+            scratch_org_id=request.session.get("scratch_org_id", None),
+            user=request.user,
+            plan=plan,
+            is_valid_and_complete=False,
         )
         if preflight is None:
             return Response("", status=status.HTTP_404_NOT_FOUND)
@@ -198,9 +201,11 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
 
     def preflight_post(self, request):
         plan = get_object_or_404(Plan.objects, id=self.kwargs["pk"])
-        is_visible_to = plan.is_visible_to(
-            request.user
-        ) and plan.version.product.is_visible_to(request.user)
+        is_visible_to = (
+            request.user.is_authenticated
+            and plan.is_visible_to(request.user)
+            and plan.version.product.is_visible_to(request.user)
+        )
         if not is_visible_to:
             return Response("", status=status.HTTP_403_FORBIDDEN)
         preflight_result = PreflightResult.objects.create(
@@ -213,7 +218,7 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
         serializer = PreflightResultSerializer(instance=preflight_result)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @action(detail=True, methods=["post", "get"])
+    @action(detail=True, methods=["post", "get"], permission_classes=(AllowAny,))
     def preflight(self, request, pk=None):
         if request.method == "GET":
             return self.preflight_get(request)
@@ -295,7 +300,7 @@ class OrgViewSet(viewsets.ViewSet):
                 org_id=request.user.org_id, status=PreflightResult.Status.started
             ).first()
         else:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+            return Response({"current_job": None, "current_preflight": None})
 
         serializer = OrgSerializer(
             {"current_job": current_job, "current_preflight": current_preflight}

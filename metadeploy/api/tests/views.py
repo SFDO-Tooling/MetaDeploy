@@ -407,7 +407,8 @@ class TestOrgViewset:
         job_factory(plan=plan, uuid=uuid)
         response = anon_client.get(reverse("org-list"))
 
-        assert response.status_code == 403
+        assert response.status_code == 200
+        assert response.json() == {"current_job": None, "current_preflight": None}
 
     def test_get_job__uuid(self, anon_client, job_factory, plan_factory):
         uuid = str(uuid4())

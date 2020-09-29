@@ -736,11 +736,14 @@ class Job(HashIdMixin, models.Model):
 
 
 class PreflightResultQuerySet(models.QuerySet):
-    def most_recent(self, *, user, plan, is_valid_and_complete=True):
-        kwargs = {"plan": plan, "user": user}
+    def most_recent(
+        self, *, user, plan, is_valid_and_complete=True, scratch_org_id=None
+    ):
+        args = (Q(user=user) | Q(uuid=scratch_org_id),)
+        kwargs = {"plan": plan}
         if is_valid_and_complete:
             kwargs.update({"is_valid": True, "status": PreflightResult.Status.complete})
-        return self.filter(**kwargs).order_by("-created_at").first()
+        return self.filter(*args, **kwargs).distinct().order_by("-created_at").first()
 
 
 class PreflightResult(models.Model):
