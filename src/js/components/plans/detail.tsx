@@ -54,6 +54,34 @@ import { selectUserState } from '@/store/user/selectors';
 import { SCRATCH_ORG_STATUSES, SUPPORTED_ORGS } from '@/utils/constants';
 import routes from '@/utils/routes';
 
+const select = (appState: AppState, props: RouteComponentProps) => ({
+  user: selectUserState(appState),
+  product: selectProduct(appState, props),
+  productSlug: selectProductSlug(appState, props),
+  version: selectVersion(appState, props),
+  versionLabel: selectVersionLabel(appState, props),
+  plan: selectPlan(appState, props),
+  planSlug: selectPlanSlug(appState, props),
+  preflight: selectPreflight(appState, props),
+  org: selectOrg(appState),
+  scratchOrg: selectScratchOrg(appState, props),
+});
+
+const actions = {
+  doFetchProduct: fetchProduct,
+  doFetchVersion: fetchVersion,
+  doFetchPlan: fetchPlan,
+  doFetchPreflight: fetchPreflight,
+  doStartPreflight: startPreflight,
+  doStartJob: startJob,
+  doSpinScratchOrg: spinScratchOrg,
+  doFetchScratchOrg: fetchScratchOrg,
+};
+
+const connector = connect(select, actions);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
 export type SelectedSteps = Set<string>;
 type Props = PropsFromRedux & RouteComponentProps;
 type State = {
@@ -479,34 +507,6 @@ class PlanDetail extends React.Component<Props, State> {
     );
   }
 }
-
-const select = (appState: AppState, props: RouteComponentProps) => ({
-  user: selectUserState(appState),
-  product: selectProduct(appState, props),
-  productSlug: selectProductSlug(appState, props),
-  version: selectVersion(appState, props),
-  versionLabel: selectVersionLabel(appState, props),
-  plan: selectPlan(appState, props),
-  planSlug: selectPlanSlug(appState, props),
-  preflight: selectPreflight(appState, props),
-  org: selectOrg(appState),
-  scratchOrg: selectScratchOrg(appState, props),
-});
-
-const actions = {
-  doFetchProduct: fetchProduct,
-  doFetchVersion: fetchVersion,
-  doFetchPlan: fetchPlan,
-  doFetchPreflight: fetchPreflight,
-  doStartPreflight: startPreflight,
-  doStartJob: startJob,
-  doSpinScratchOrg: spinScratchOrg,
-  doFetchScratchOrg: fetchScratchOrg,
-};
-
-const connector = connect(select, actions);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
 
 const WrappedPlanDetail = connector(withRouter(PlanDetail));
 

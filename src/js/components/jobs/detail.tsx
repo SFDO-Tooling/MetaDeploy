@@ -45,6 +45,31 @@ import {
 import { selectUserState } from '@/store/user/selectors';
 import routes from '@/utils/routes';
 
+const select = (appState: AppState, props: RouteComponentProps) => ({
+  user: selectUserState(appState),
+  product: selectProduct(appState, props),
+  productSlug: selectProductSlug(appState, props),
+  version: selectVersion(appState, props),
+  versionLabel: selectVersionLabel(appState, props),
+  plan: selectPlan(appState, props),
+  planSlug: selectPlanSlug(appState, props),
+  job: selectJob(appState, props),
+  jobId: selectJobId(appState, props),
+});
+
+const actions = {
+  doFetchProduct: fetchProduct,
+  doFetchVersion: fetchVersion,
+  doFetchPlan: fetchPlan,
+  doFetchJob: fetchJob,
+  doUpdateJob: updateJob,
+  doRequestCancelJob: requestCancelJob,
+};
+
+const connector = connect(select, actions);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
 type Props = PropsFromRedux & RouteComponentProps;
 
 type State = {
@@ -353,31 +378,6 @@ class JobDetail extends React.Component<Props, State> {
     );
   }
 }
-
-const select = (appState: AppState, props: RouteComponentProps) => ({
-  user: selectUserState(appState),
-  product: selectProduct(appState, props),
-  productSlug: selectProductSlug(appState, props),
-  version: selectVersion(appState, props),
-  versionLabel: selectVersionLabel(appState, props),
-  plan: selectPlan(appState, props),
-  planSlug: selectPlanSlug(appState, props),
-  job: selectJob(appState, props),
-  jobId: selectJobId(appState, props),
-});
-
-const actions = {
-  doFetchProduct: fetchProduct,
-  doFetchVersion: fetchVersion,
-  doFetchPlan: fetchPlan,
-  doFetchJob: fetchJob,
-  doUpdateJob: updateJob,
-  doRequestCancelJob: requestCancelJob,
-};
-
-const connector = connect(select, actions);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
 
 const WrappedJobDetail = connector(withRouter(JobDetail));
 
