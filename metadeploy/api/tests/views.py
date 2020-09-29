@@ -332,6 +332,26 @@ class TestBasicGetViews:
 
 @pytest.mark.django_db
 class TestPreflight:
+    def test_post__anon(self, anon_client, plan_factory, scratch_org_job_factory):
+        uuid = str(uuid4())
+        scratch_org_job_factory(
+            uuid=uuid,
+            config={
+                "instance_url": "instance_url",
+                "org_id": "org_id",
+                "username": "username",
+                "access_token": "token",
+                "refresh_token": "refresh token",
+            },
+        )
+        session = anon_client.session
+        session["scratch_org_id"] = uuid
+        session.save()
+        plan = plan_factory()
+        response = anon_client.post(reverse("plan-preflight", kwargs={"pk": plan.id}))
+
+        assert response.status_code == 201
+
     def test_post(self, client, plan_factory):
         plan = plan_factory()
         response = client.post(reverse("plan-preflight", kwargs={"pk": plan.id}))

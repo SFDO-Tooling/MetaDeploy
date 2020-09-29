@@ -27,6 +27,14 @@ SFDX_SIGNUP_INSTANCE = settings.SFDX_SIGNUP_INSTANCE
 DURATION_DAYS = 30
 
 
+class FakeUser:
+    def __init__(self, token):
+        self.token = token
+
+    def __bool__(self):  # pragma: nocover
+        return False
+
+
 def _get_devhub_api():
     """Get an access token.
 

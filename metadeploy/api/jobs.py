@@ -33,6 +33,7 @@ from .flows import StopFlowException
 from .github import local_github_checkout
 from .models import Job, Plan, PreflightResult, ScratchOrgJob
 from .push import report_error, user_token_expired
+from .salesforce import FakeUser
 from .salesforce import create_scratch_org as create_scratch_org_on_sf
 
 logger = logging.getLogger(__name__)
@@ -261,14 +262,6 @@ def expire_preflights():
 
 
 expire_preflights_job = job(expire_preflights)
-
-
-class FakeUser:
-    def __init__(self, token):
-        self.token = token
-
-    def __bool__(self):  # pragma: nocover
-        return False
 
 
 def create_scratch_org(*, plan_id, email, org_name, result_id):

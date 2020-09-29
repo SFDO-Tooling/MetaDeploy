@@ -23,10 +23,12 @@ from .models import (
     PreflightResult,
     Product,
     ProductCategory,
+    ScratchOrgJob,
     Version,
 )
 from .paginators import ProductPaginator
 from .permissions import OnlyOwnerOrSuperuserCanDelete
+from .salesforce import FakeUser
 from .serializers import (
     FullUserSerializer,
     JobSerializer,
@@ -200,23 +202,47 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
         return Response(serializer.data)
 
     def preflight_post(self, request):
+        scratch_org_id = request.session.get("scratch_org_id", None)
         plan = get_object_or_404(Plan.objects, id=self.kwargs["pk"])
         is_visible_to = plan.is_visible_to(
             request.user
         ) and plan.version.product.is_visible_to(request.user)
         user_kwargs = {
             "user": request.user if request.user.is_authenticated else None,
-            "uuid": request.session.get("scratch_org_id", None),
+            "uuid": scratch_org_id,
         }
         if not is_visible_to or not any(user_kwargs.values()):
             return Response("", status=status.HTTP_403_FORBIDDEN)
+
+        forced_user_kwargs = {}
+        try:
+            scratch_org_job = ScratchOrgJob.objects.get(uuid=scratch_org_id)
+            config = scratch_org_job.config
+            org_kwargs = {
+                "organization_url": config["instance_url"],
+                "org_id": config["org_id"],
+                # @davisagli suspected we'd need this, but it's not
+                # currently used anywhere in jobs.py, so I am not sure
+                # why we would:
+                # "username": config["username"],
+            }
+            # Are these values in the config? In jobs.py they're a bit
+            # different.
+            forced_user_kwargs["forced_user"] = FakeUser(
+                token=(config["access_token"], config["refresh_token"]),
+            )
+        except (ScratchOrgJob.DoesNotExist, ScratchOrgJob.MultipleObjectsReturned):
+            org_kwargs = {
+                "organization_url": request.user.instance_url,
+                "org_id": request.user.org_id,
+            }
+
         preflight_result = PreflightResult.objects.create(
             plan=plan,
-            organization_url=request.user.instance_url,
-            org_id=request.user.org_id,
+            **org_kwargs,
             **user_kwargs,
         )
-        preflight_job.delay(preflight_result.pk)
+        preflight_job.delay(preflight_result.pk, **forced_user_kwargs)
         serializer = PreflightResultSerializer(instance=preflight_result)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
