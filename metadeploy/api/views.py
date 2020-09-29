@@ -201,18 +201,20 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
 
     def preflight_post(self, request):
         plan = get_object_or_404(Plan.objects, id=self.kwargs["pk"])
-        is_visible_to = (
-            request.user.is_authenticated
-            and plan.is_visible_to(request.user)
-            and plan.version.product.is_visible_to(request.user)
-        )
-        if not is_visible_to:
+        is_visible_to = plan.is_visible_to(
+            request.user
+        ) and plan.version.product.is_visible_to(request.user)
+        user_kwargs = {
+            "user": request.user if request.user.is_authenticated else None,
+            "uuid": request.session.get("scratch_org_id", None),
+        }
+        if not is_visible_to or not any(user_kwargs.values()):
             return Response("", status=status.HTTP_403_FORBIDDEN)
         preflight_result = PreflightResult.objects.create(
-            user=request.user,
             plan=plan,
             organization_url=request.user.instance_url,
             org_id=request.user.org_id,
+            **user_kwargs,
         )
         preflight_job.delay(preflight_result.pk)
         serializer = PreflightResultSerializer(instance=preflight_result)
