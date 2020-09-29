@@ -41,7 +41,9 @@ urlpatterns = [
     path("api/", include("metadeploy.api.urls")),
     # These paths render the frontend SPA
     re_path(
-        r"^products", TemplateView.as_view(template_name="index.html"), name="frontend",
+        r"^products",
+        TemplateView.as_view(template_name="index.html"),
+        name="frontend",
     ),
     path("", TemplateView.as_view(template_name="index.html"), name="home"),
     # Add WebSocket routes so that non-HTTP paths can be accessible by
@@ -49,3 +51,8 @@ urlpatterns = [
     # usually only be the path component, not a full URL, and so the caller
     # will have to build them with the right scheme and authority sections.
 ] + websockets.routes
+
+if "binary_database_files" in settings.INSTALLED_APPS:  # pragma: no cover
+    from binary_database_files.views import serve_mixed
+
+    urlpatterns += [re_path(r"^files/(?P<name>.+)$", serve_mixed, name="database_file")]

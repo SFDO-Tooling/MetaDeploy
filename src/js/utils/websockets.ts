@@ -29,14 +29,14 @@ import { connectSocket, disconnectSocket } from '@/store/socket/actions';
 import { invalidateToken, TokenInvalidAction } from '@/store/user/actions';
 import { log } from '@/utils/logging';
 
-export interface Socket {
-  subscribe: (payload: Subscription) => void;
-  reconnect: () => void;
-}
-
 interface Subscription {
   model: string;
   id: string;
+}
+
+export interface Socket {
+  subscribe: (payload: Subscription) => void;
+  reconnect: () => void;
 }
 
 interface SubscriptionEvent {
