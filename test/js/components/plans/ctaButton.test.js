@@ -3,12 +3,13 @@ import React from 'react';
 
 import CtaButton from '@/components/plans/ctaButton';
 import { getUrlParam, removeUrlParam } from '@/utils/api';
+import { SCRATCH_ORG_STATUSES, SUPPORTED_ORGS } from '@/utils/constants';
 
 jest.mock('@/utils/api');
 
 afterEach(() => {
-  getUrlParam.mockClear();
-  removeUrlParam.mockClear();
+  getUrlParam.mockReset();
+  removeUrlParam.mockReset();
 });
 
 const defaultPlan = {
@@ -37,6 +38,7 @@ const defaultPlan = {
     },
   ],
   requires_preflight: true,
+  supported_orgs: 'Persistent',
 };
 
 const selectedSteps = new Set(['step-1']);
@@ -55,11 +57,12 @@ describe('<CtaButton />', () => {
   const setup = (options) => {
     const defaults = {
       plan: defaultPlan,
-      user: { valid_token_for: 'foo' },
+      user: { valid_token_for: 'foo', org_type: 'Developer Edition' },
       preflight: defaultPreflight,
       preventAction: false,
       clickThroughAgreement: null,
       selectedSteps,
+      scratchOrg: null,
     };
     const opts = { ...defaults, ...options };
     const renderFn = opts.rerenderFn || render;
@@ -73,9 +76,11 @@ describe('<CtaButton />', () => {
         plan={opts.plan}
         preflight={opts.preflight}
         selectedSteps={opts.selectedSteps}
+        scratchOrg={opts.scratchOrg}
         preventAction={opts.preventAction}
         doStartPreflight={opts.doStartPreflight}
         doStartJob={opts.doStartJob}
+        doSpinScratchOrg={opts.doSpinScratchOrg}
       />,
     );
   };
@@ -116,7 +121,7 @@ describe('<CtaButton />', () => {
       test('renders login btn', () => {
         const { getByText } = setup({
           preflight: null,
-          user: { valid_token_for: null },
+          user: { valid_token_for: null, org_type: 'Developer Edition' },
         });
 
         expect(
@@ -144,7 +149,7 @@ describe('<CtaButton />', () => {
     describe('no valid token', () => {
       test('renders login btn', () => {
         const { getByText } = setup({
-          user: { valid_token_for: null },
+          user: { valid_token_for: null, org_type: 'Developer Edition' },
         });
 
         expect(getByText('Log In to Install')).toBeVisible();
@@ -165,7 +170,7 @@ describe('<CtaButton />', () => {
       test('renders login btn', () => {
         const { getByText } = setup({
           preflight: { status: 'complete', is_valid: true, error_count: 1 },
-          user: { valid_token_for: null },
+          user: { valid_token_for: null, org_type: 'Developer Edition' },
         });
 
         expect(
@@ -198,21 +203,13 @@ describe('<CtaButton />', () => {
       test('renders login btn', () => {
         const { getByText } = setup({
           preflight: { status: 'failed', is_valid: true, error_count: 0 },
-          user: { valid_token_for: null },
+          user: { valid_token_for: null, org_type: 'Developer Edition' },
         });
 
         expect(
           getByText('Log In to Re-Run Pre-Install Validation'),
         ).toBeVisible();
       });
-    });
-  });
-
-  describe('unknown preflight status', () => {
-    test('renders nothing', () => {
-      const { container } = setup({ preflight: { status: 'foo' } });
-
-      expect(container.children).toHaveLength(0);
     });
   });
 
@@ -517,5 +514,162 @@ describe('<CtaButton />', () => {
         expect(doStartPreflight).toHaveBeenCalledWith('plan-1');
       });
     });
+  });
+
+  describe('can create scratch orgs', () => {
+    const scratchOrgPlan = {
+      ...defaultPlan,
+      supported_orgs: SUPPORTED_ORGS.Scratch,
+      requires_preflight: false,
+    };
+    beforeAll(() => {
+      window.GLOBALS.DEVHUB_USERNAME = 'foo@bar.buz';
+    });
+
+    afterAll(() => {
+      window.GLOBALS = {};
+    });
+
+    describe('scratch org spinning', () => {
+      test('renders loading btn', () => {
+        const { getByText } = setup({
+          plan: scratchOrgPlan,
+          scratchOrg: { status: SCRATCH_ORG_STATUSES.started },
+        });
+
+        expect(getByText('Creating Scratch Org…')).toBeVisible();
+      });
+    });
+
+    // describe('no preflight', () => {
+    //   test('renders start-preflight btn', () => {
+    //     const { getByText } = setup({ preflight: null });
+
+    //     expect(getByText('Start Pre-Install Validation')).toBeVisible();
+    //   });
+
+    //   describe('no valid token', () => {
+    //     test('renders login btn', () => {
+    //       const { getByText } = setup({
+    //         preflight: null,
+    //         user: { valid_token_for: null, org_type: 'Developer Edition' },
+    //       });
+
+    //       expect(
+    //         getByText('Log In to Start Pre-Install Validation'),
+    //       ).toBeVisible();
+    //     });
+    //   });
+    // });
+
+    // describe('started preflight', () => {
+    //   test('renders progress btn', () => {
+    //     const { getByText } = setup({ preflight: { status: 'started' } });
+
+    //     expect(getByText('Pre-Install Validation In Progress…')).toBeVisible();
+    //   });
+    // });
+
+    // describe('complete preflight, no errors', () => {
+    //   test('renders install btn', () => {
+    //     const { getByText } = setup();
+
+    //     expect(getByText('Install')).toBeVisible();
+    //   });
+
+    //   describe('no valid token', () => {
+    //     test('renders login btn', () => {
+    //       const { getByText } = setup({
+    //         user: { valid_token_for: null, org_type: 'Developer Edition' },
+    //       });
+
+    //       expect(getByText('Log In to Install')).toBeVisible();
+    //     });
+    //   });
+    // });
+
+    // describe('complete preflight, with errors', () => {
+    //   test('renders re-run-preflight btn', () => {
+    //     const { getByText } = setup({
+    //       preflight: { status: 'complete', is_valid: true, error_count: 1 },
+    //     });
+
+    //     expect(getByText('Re-Run Pre-Install Validation')).toBeVisible();
+    //   });
+
+    //   describe('no valid token', () => {
+    //     test('renders login btn', () => {
+    //       const { getByText } = setup({
+    //         preflight: { status: 'complete', is_valid: true, error_count: 1 },
+    //         user: { valid_token_for: null, org_type: 'Developer Edition' },
+    //       });
+
+    //       expect(
+    //         getByText('Log In to Re-Run Pre-Install Validation'),
+    //       ).toBeVisible();
+    //     });
+    //   });
+    // });
+
+    // describe('canceled preflight', () => {
+    //   test('renders re-run-preflight btn', () => {
+    //     const { getByText } = setup({
+    //       preflight: { status: 'canceled', is_valid: true, error_count: 0 },
+    //     });
+
+    //     expect(getByText('Re-Run Pre-Install Validation')).toBeVisible();
+    //   });
+    // });
+
+    // describe('failed preflight', () => {
+    //   test('renders re-run-preflight btn', () => {
+    //     const { getByText } = setup({
+    //       preflight: { status: 'failed', is_valid: true, error_count: 0 },
+    //     });
+
+    //     expect(getByText('Re-Run Pre-Install Validation')).toBeVisible();
+    //   });
+
+    //   describe('no valid token', () => {
+    //     test('renders login btn', () => {
+    //       const { getByText } = setup({
+    //         preflight: { status: 'failed', is_valid: true, error_count: 0 },
+    //         user: { valid_token_for: null, org_type: 'Developer Edition' },
+    //       });
+
+    //       expect(
+    //         getByText('Log In to Re-Run Pre-Install Validation'),
+    //       ).toBeVisible();
+    //     });
+    //   });
+    // });
+
+    // describe('no preflight required', () => {
+    //   test('renders install btn', () => {
+    //     const { getByText } = setup({
+    //       plan: { ...defaultPlan, requires_preflight: false },
+    //       preflight: undefined,
+    //     });
+
+    //     expect(getByText('Install')).toBeVisible();
+    //   });
+
+    //   describe('start-install (with click-through agreement) click', () => {
+    //     test('opens modal', () => {
+    //       const { getByText, getByLabelText } = setup({
+    //         plan: { ...defaultPlan, requires_preflight: false },
+    //         preflight: undefined,
+    //         clickThroughAgreement: '<p>Please and thank you.</p>',
+    //       });
+    //       fireEvent.click(getByText('Install'));
+
+    //       expect(getByText('Product Terms of Use and Licenses')).toBeVisible();
+    //       expect(getByText('Please and thank you.')).toBeVisible();
+    //       expect(
+    //         getByLabelText('confirm I have read and agree to', { exact: false }),
+    //       ).toBeVisible();
+    //     });
+    //   });
+    // });
   });
 });

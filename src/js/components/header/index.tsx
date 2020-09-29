@@ -45,13 +45,13 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 class Header extends React.Component<Props & PropsFromRedux> {
   controls = () => {
     const { user, doLogout, hideLogin } = this.props;
-    const getHeader = () => {
-      if (user) {
-        return <Logout user={user} doLogout={doLogout} />;
-      }
-      return hideLogin ? null : <Login />;
-    };
-    return <PageHeaderControl>{getHeader()}</PageHeaderControl>;
+    let header: React.ReactNode = null;
+    if (user) {
+      header = <Logout user={user} doLogout={doLogout} />;
+    } else if (!hideLogin) {
+      header = <Login />;
+    }
+    return <PageHeaderControl>{header}</PageHeaderControl>;
   };
 
   componentWillUnmount() {

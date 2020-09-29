@@ -271,7 +271,6 @@ class CtaButton extends React.Component<
         }
       />
     );
-    return null;
   }
 
   getClickThroughAgreementModal() {

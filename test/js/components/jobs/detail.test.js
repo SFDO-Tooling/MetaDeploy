@@ -81,6 +81,7 @@ const defaultState = {
           },
           secondary_plan: null,
           requires_preflight: true,
+          supported_orgs: 'Persistent',
         },
       },
     ],

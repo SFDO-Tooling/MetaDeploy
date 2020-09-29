@@ -44,6 +44,7 @@ const defaultPlan = {
     },
   ],
   requires_preflight: true,
+  supported_orgs: 'Persistent',
 };
 const selectedSteps = new Set(['step-1', 'step-2', 'step-3']);
 

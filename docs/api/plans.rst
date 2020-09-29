@@ -31,7 +31,8 @@ List
        "is_listed": true,
        "not_allowed_instructions": null,
        "requires_preflight": true,
-       "order_key" 0
+       "order_key" 0,
+       "supported_orgs": "Persistent"
      },
      ...
    ]
@@ -60,7 +61,8 @@ Retrieve
      "is_listed": true,
      "not_allowed_instructions": null,
      "requires_preflight": true,
-     "order_key" 0
+     "order_key" 0,
+     "supported_orgs": "Persistent"
    }
 
 Create
@@ -80,7 +82,8 @@ Create
      "is_listed": true,
      "not_allowed_instructions": null,
      "requires_preflight": true,
-     "order_key" 0
+     "order_key" 0,
+     "supported_orgs": "Persistent"
    }
 
 .. sourcecode:: http
@@ -115,7 +118,8 @@ Update
      "is_listed": true,
      "not_allowed_instructions": null,
      "requires_preflight": true,
-     "order_key" 0
+     "order_key" 0,
+     "supported_orgs": "Persistent"
    }
 
 Destroy

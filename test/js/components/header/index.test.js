@@ -7,9 +7,10 @@ import Header from '@/components/header';
 import { renderWithRedux } from './../../utils';
 
 describe('<Header />', () => {
-  const setup = (
-    initialState = { user: null, socket: false, org: null, errors: [] },
-  ) => {
+  const setup = (state, props) => {
+    const defaultState = { user: null, socket: false, org: null, errors: [] };
+    const initialState = { ...defaultState, ...state };
+    const initialProps = props || {};
     const {
       container,
       getByLabelText,
@@ -18,7 +19,7 @@ describe('<Header />', () => {
       queryByText,
     } = renderWithRedux(
       <MemoryRouter>
-        <Header />
+        <Header {...initialProps} />
       </MemoryRouter>,
       initialState,
     );
@@ -70,6 +71,22 @@ describe('<Header />', () => {
       fireEvent.click(btn);
 
       expect(getByText('Log Out')).toBeVisible();
+    });
+  });
+
+  describe('logged out, hideLogin: true', () => {
+    test('renders no header controls', () => {
+      const { container, queryByText } = setup(
+        {},
+        {
+          hideLogin: true,
+        },
+      );
+      const login = queryByText('Log In');
+      const logout = container.querySelector('#logout');
+
+      expect(login).toBeNull();
+      expect(logout).toBeNull();
     });
   });
 

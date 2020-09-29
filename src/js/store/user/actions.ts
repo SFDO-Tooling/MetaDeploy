@@ -15,9 +15,7 @@ export type RefetchDataAction = {
     | 'REFETCH_DATA_FAILED';
 };
 
-export const login = (payload: User): ThunkResult<LoginAction> => (
-  dispatch,
-) => {
+export const login = (payload: User): LoginAction => {
   if (window.Sentry) {
     window.Sentry.setUser(payload);
   }
@@ -35,10 +33,10 @@ export const login = (payload: User): ThunkResult<LoginAction> => (
       });
     }
   }
-  return dispatch({
+  return {
     type: 'USER_LOGGED_IN' as const,
     payload,
-  });
+  };
 };
 
 export const logout = (): ThunkResult<Promise<FetchOrgJobsSucceeded>> => (

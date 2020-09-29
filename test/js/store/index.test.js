@@ -10,6 +10,7 @@ describe('reducer', () => {
       'preflights',
       'jobs',
       'org',
+      'scratchOrgs',
       'socket',
       'errors',
     ]);

@@ -5,14 +5,7 @@ import * as actions from '@/store/user/actions';
 import { storeWithApi } from './../../utils';
 
 describe('login', () => {
-  let store;
-
   beforeEach(() => {
-    store = storeWithApi({});
-    fetchMock.getOnce(window.api_urls.org_list(), {
-      current_job: null,
-      current_preflight: null,
-    });
     window.socket = { subscribe: jest.fn() };
   });
 
@@ -29,18 +22,8 @@ describe('login', () => {
       type: 'USER_LOGGED_IN',
       payload: user,
     };
-    const fetchingOrg = {
-      type: 'FETCH_ORG_JOBS_STARTED',
-    };
-    const fetchedOrg = {
-      type: 'FETCH_ORG_JOBS_SUCCEEDED',
-      payload: { current_job: null, current_preflight: null },
-    };
 
-    expect.assertions(1);
-    return store.dispatch(actions.login(user)).then(() => {
-      expect(store.getActions()).toEqual([loggedIn, fetchingOrg, fetchedOrg]);
-    });
+    expect(actions.login(user)).toEqual(loggedIn);
   });
 
   test('subscribes to user/org ws events', () => {
@@ -58,12 +41,10 @@ describe('login', () => {
       model: 'org',
       id: 'org-id',
     };
+    actions.login(user);
 
-    expect.assertions(2);
-    return store.dispatch(actions.login(user)).then(() => {
-      expect(window.socket.subscribe).toHaveBeenCalledWith(userSubscription);
-      expect(window.socket.subscribe).toHaveBeenCalledWith(orgSubscription);
-    });
+    expect(window.socket.subscribe).toHaveBeenCalledWith(userSubscription);
+    expect(window.socket.subscribe).toHaveBeenCalledWith(orgSubscription);
   });
 
   describe('with Sentry', () => {
@@ -82,11 +63,9 @@ describe('login', () => {
         username: 'Test User',
         email: 'test@foo.bar',
       };
+      actions.login(user);
 
-      expect.assertions(1);
-      return store.dispatch(actions.login(user)).then(() => {
-        expect(window.Sentry.setUser).toHaveBeenCalledWith(user);
-      });
+      expect(window.Sentry.setUser).toHaveBeenCalledWith(user);
     });
   });
 });
@@ -101,6 +80,11 @@ describe('logout', () => {
       status: 204,
       body: {},
     });
+    fetchMock.getOnce(window.api_urls.org_list(), {
+      current_job: null,
+      current_preflight: null,
+    });
+
     window.socket = { reconnect: jest.fn() };
   });
 
@@ -108,21 +92,34 @@ describe('logout', () => {
     Reflect.deleteProperty(window, 'socket');
   });
 
-  test('dispatches LogoutAction and fetches product', () => {
+  test('dispatches LogoutAction and fetches products and org-jobs', () => {
     const loggedOut = {
       type: 'USER_LOGGED_OUT',
     };
-    const started = {
+    const fetchingProducts = {
       type: 'FETCH_PRODUCTS_STARTED',
     };
-    const succeeded = {
+    const fetchedProducts = {
       type: 'FETCH_PRODUCTS_SUCCEEDED',
       payload: { products: [], categories: [] },
+    };
+    const fetchingOrg = {
+      type: 'FETCH_ORG_JOBS_STARTED',
+    };
+    const fetchedOrg = {
+      type: 'FETCH_ORG_JOBS_SUCCEEDED',
+      payload: { current_job: null, current_preflight: null },
     };
 
     expect.assertions(1);
     return store.dispatch(actions.logout()).then(() => {
-      expect(store.getActions()).toEqual([loggedOut, started, succeeded]);
+      expect(store.getActions()).toEqual([
+        loggedOut,
+        fetchingProducts,
+        fetchingOrg,
+        fetchedProducts,
+        fetchedOrg,
+      ]);
     });
   });
 
@@ -184,13 +181,6 @@ describe('refetchAllData', () => {
         current_preflight: null,
       };
       fetchMock.getOnce(window.api_urls.org_list(), org);
-      const fetchingOrg = {
-        type: 'FETCH_ORG_JOBS_STARTED',
-      };
-      const fetchedOrg = {
-        type: 'FETCH_ORG_JOBS_SUCCEEDED',
-        payload: org,
-      };
 
       expect.assertions(1);
       return store.dispatch(actions.refetchAllData()).then(() => {
@@ -199,8 +189,6 @@ describe('refetchAllData', () => {
           succeeded,
           loggedOut,
           loggedIn,
-          fetchingOrg,
-          fetchedOrg,
         ]);
       });
     });
