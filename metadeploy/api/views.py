@@ -221,10 +221,6 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
             org_kwargs = {
                 "organization_url": config["instance_url"],
                 "org_id": config["org_id"],
-                # @davisagli suspected we'd need this, but it's not
-                # currently used anywhere in jobs.py, so I am not sure
-                # why we would:
-                # "username": config["username"],
             }
             # Are these values in the config? In jobs.py they're a bit
             # different.
@@ -252,6 +248,15 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
             return self.preflight_get(request)
         if request.method == "POST":
             return self.preflight_post(request)
+
+    def scratch_org_get(self, request):
+        scratch_org_id = request.session.get("scratch_org_id", None)
+        plan = self.get_object()
+        scratch_org = ScratchOrgJob.objects.filter(
+            uuid=scratch_org_id, plan=plan
+        ).first()
+        serializer = ScratchOrgJobSerializer(instance=scratch_org)
+        return Response(serializer.data)
 
     def scratch_org_post(self, request, pk=None):
         devhub_enabled = settings.DEVHUB_USERNAME
@@ -297,8 +302,7 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
     @action(detail=True, methods=["post", "get"], permission_classes=(AllowAny,))
     def scratch_org(self, request, pk=None):
         if request.method == "GET":
-            pass
-            # @@@ return self.scratch_org_get(request)
+            return self.scratch_org_get(request)
         if request.method == "POST":
             return self.scratch_org_post(request)
 

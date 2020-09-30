@@ -55,23 +55,21 @@ export const fetchScratchOrg = (
 ): ThunkResult<Promise<FetchScratchOrgSucceeded>> => async (dispatch) => {
   dispatch({ type: 'FETCH_SCRATCH_ORG_STARTED' as const, payload: planId });
   try {
-    const response = await Promise.resolve(null);
-    // @@@ mock out until API exists
-    // const response = await apiFetch(
-    //   window.api_urls.plan_scratch_org(planId),
-    //   dispatch,
-    // );
-    // if (response && window.socket) {
-    //   window.socket.subscribe({
-    //     model: 'scratch_org',
-    //     id: response.job_id,
-    //   });
-    // }
+    const response = await apiFetch(
+      window.api_urls.plan_scratch_org(planId),
+      dispatch,
+    );
+    if (response && window.socket) {
+      window.socket.subscribe({
+        model: 'scratch_org',
+        id: response.job_id,
+      });
+    }
     return dispatch({
       type: 'FETCH_SCRATCH_ORG_SUCCEEDED' as const,
       payload: { plan: planId, org: response },
     });
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     dispatch({ type: 'FETCH_SCRATCH_ORG_FAILED' as const, payload: planId });
     throw err;
   }
