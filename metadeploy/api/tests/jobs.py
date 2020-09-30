@@ -258,7 +258,6 @@ def test_finalize_result_mdapi_error(job_factory):
     assert job.exception == "MDAPI error\ntext"
 
 
-@pytest.mark.django_db
 class MockDict(dict):
     namespaced = False
 

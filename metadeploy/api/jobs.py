@@ -32,7 +32,7 @@ from .cci_configs import MetaDeployCCI, extract_user_and_repo
 from .flows import StopFlowException
 from .github import local_github_checkout
 from .models import Job, Plan, PreflightResult, ScratchOrgJob
-from .push import report_error, user_token_expired
+from .push import preflight_started, report_error, user_token_expired
 from .salesforce import FakeUser
 from .salesforce import create_scratch_org as create_scratch_org_on_sf
 
@@ -296,9 +296,9 @@ def create_scratch_org(*, plan_id, email, org_name, result_id):
             plan=plan,
             organization_url=org_config.instance_url,
             org_id=scratch_org_config.config["org_id"],
-            uuid=org.uuid,
         )
         preflight(preflight_result.pk, forced_user=fake_user)
+        async_to_sync(preflight_started)(org, preflight_result)
 
     # @@@ TODO: start installation job automatically if:
     #   - Plan has no preflight
