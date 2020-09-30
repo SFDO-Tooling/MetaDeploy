@@ -4,7 +4,6 @@ import { LogoutAction } from '@/store/user/actions';
 export type ScratchOrg = {
   id: string;
   plan: string;
-  job_id: string | null;
   status: 'started' | 'complete' | 'failed' | 'canceled';
   email: string;
   enqueued_at: string | null;

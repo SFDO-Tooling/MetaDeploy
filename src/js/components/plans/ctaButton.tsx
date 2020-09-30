@@ -71,6 +71,7 @@ export const LoginBtn = ({
 }) => (
   <Login
     id={id || 'plan-detail-login'}
+    triggerClassName="slds-button"
     buttonClassName={btnClasses}
     buttonVariant="brand"
     label={label}

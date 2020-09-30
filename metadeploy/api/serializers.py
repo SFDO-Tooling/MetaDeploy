@@ -621,7 +621,6 @@ class ScratchOrgJobSerializer(serializers.ModelSerializer):
             "plan",
             "email",
             "enqueued_at",
-            "job_id",
             "created_at",
             "edited_at",
             "status",

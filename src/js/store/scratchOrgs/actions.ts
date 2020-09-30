@@ -62,7 +62,7 @@ export const fetchScratchOrg = (
     if (response && window.socket) {
       window.socket.subscribe({
         model: 'scratch_org',
-        id: response.job_id,
+        id: response.id,
       });
     }
     return dispatch({
@@ -96,7 +96,7 @@ export const spinScratchOrg = (
     if (response && window.socket) {
       window.socket.subscribe({
         model: 'scratch_org',
-        id: response.job_id,
+        id: response.id,
       });
     }
     return dispatch({

@@ -14,9 +14,9 @@ Websocket notifications you can subscribe to:
         JOB_COMPLETED
         JOB_FAILED
         JOB_CANCELED
-    org.:org_url
+    org.:org_id
         ORG_CHANGED
-    scratch_org.:job_id
+    scratch_org.:id
         SCRATCH_ORG_CREATED
         SCRATCH_ORG_ERROR
 """
@@ -181,9 +181,7 @@ async def notify_org_finished(scratch_org_job, error=None):
         "type": type_,
         "payload": payload,
     }
-    group_name = CHANNELS_GROUP_NAME.format(
-        model="scratch_org", id=scratch_org_job.job_id
-    )
+    group_name = CHANNELS_GROUP_NAME.format(model="scratch_org", id=scratch_org_job.id)
     channel_layer = get_channel_layer()
     sent_message = {"type": "notify", "group": group_name, "content": message}
     if await get_set_message_semaphore(channel_layer, sent_message):

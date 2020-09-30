@@ -38,7 +38,7 @@ async def test_push_notification_consumer__subscribe_scratch_org(
     connected, _ = await communicator.connect()
     assert connected
 
-    await communicator.send_json_to({"model": "scratch_org", "id": job_id})
+    await communicator.send_json_to({"model": "scratch_org", "id": str(soj.id)})
     response = await communicator.receive_json_from()
     assert "ok" in response
 

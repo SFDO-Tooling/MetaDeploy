@@ -18,7 +18,6 @@ describe('fetchScratchOrg', () => {
       const store = storeWithApi({});
       const org = {
         id: 'org-1',
-        job_id: 'org-job-id',
         plan: 'plan-1',
       };
       fetchMock.getOnce(window.api_urls.plan_scratch_org('plan-1'), org);
@@ -32,7 +31,7 @@ describe('fetchScratchOrg', () => {
       };
       const expected = {
         model: 'scratch_org',
-        id: 'org-job-id',
+        id: 'org-1',
       };
 
       expect.assertions(2);
@@ -103,7 +102,6 @@ describe('spinScratchOrg', () => {
       const store = storeWithApi({});
       const response = {
         id: 'org-1',
-        job_id: 'org-job-id',
         plan: 'plan-1',
       };
       fetchMock.postOnce(window.api_urls.plan_scratch_org('plan-1'), {
@@ -123,7 +121,7 @@ describe('spinScratchOrg', () => {
       };
       const expected = {
         model: 'scratch_org',
-        id: 'org-job-id',
+        id: 'org-1',
       };
 
       expect.assertions(2);
