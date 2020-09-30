@@ -309,7 +309,6 @@ def create_scratch_org(*, plan_id, email, org_name, result_id):
     #     organization_url=org_config.instance_url,
     #     is_public=True,
     #     org_id=scratch_org_config.config["org_id"],
-    #     uuid=org.uuid,
     # )
 
     # rq_job = run_flows.delay(

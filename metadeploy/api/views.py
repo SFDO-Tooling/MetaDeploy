@@ -190,9 +190,20 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
 
     def preflight_get(self, request):
         plan = get_object_or_404(Plan.objects, id=self.kwargs["pk"])
+        scratch_org_id = request.session.get("scratch_org_id", None)
+        scratch_org = None
+        if scratch_org_id:
+            scratch_org = ScratchOrgJob.objects.filter(
+                uuid=scratch_org_id, status=ScratchOrgJob.Status.complete
+            ).first()
+        if scratch_org:
+            org_id = scratch_org.org_id
+        elif request.user.is_authenticated:
+            org_id = request.user.org_id
+        else:
+            return Response("", status=status.HTTP_404_NOT_FOUND)
         preflight = PreflightResult.objects.most_recent(
-            scratch_org_id=request.session.get("scratch_org_id", None),
-            user=request.user,
+            org_id=org_id,
             plan=plan,
             is_valid_and_complete=False,
         )
@@ -207,18 +218,16 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
         is_visible_to = plan.is_visible_to(
             request.user
         ) and plan.version.product.is_visible_to(request.user)
-        user_kwargs = {
-            "user": request.user if request.user.is_authenticated else None,
-            "uuid": scratch_org_id,
-        }
-        if not is_visible_to or not any(user_kwargs.values()):
+        if not (is_visible_to or scratch_org_id):
             return Response("", status=status.HTTP_403_FORBIDDEN)
 
         forced_user_kwargs = {}
         try:
-            scratch_org_job = ScratchOrgJob.objects.get(uuid=scratch_org_id)
+            scratch_org_job = ScratchOrgJob.objects.get(
+                uuid=scratch_org_id, plan=plan, status=ScratchOrgJob.Status.complete
+            )
             config = scratch_org_job.config
-            org_kwargs = {
+            kwargs = {
                 "organization_url": config["instance_url"],
                 "org_id": config["org_id"],
             }
@@ -228,15 +237,15 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
                 token=(config["access_token"], config["refresh_token"]),
             )
         except (ScratchOrgJob.DoesNotExist, ScratchOrgJob.MultipleObjectsReturned):
-            org_kwargs = {
+            kwargs = {
+                "user": request.user,
                 "organization_url": request.user.instance_url,
                 "org_id": request.user.org_id,
             }
 
         preflight_result = PreflightResult.objects.create(
             plan=plan,
-            **org_kwargs,
-            **user_kwargs,
+            **kwargs,
         )
         preflight_job.delay(preflight_result.pk, **forced_user_kwargs)
         serializer = PreflightResultSerializer(instance=preflight_result)
@@ -252,9 +261,12 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
     def scratch_org_get(self, request):
         scratch_org_id = request.session.get("scratch_org_id", None)
         plan = get_object_or_404(Plan.objects, id=self.kwargs["pk"])
-        scratch_org = ScratchOrgJob.objects.filter(
-            uuid=scratch_org_id, plan=plan
-        ).first()
+        args = (
+            Q(status=ScratchOrgJob.Status.started)
+            | Q(status=ScratchOrgJob.Status.complete),
+        )
+        kwargs = {"uuid": scratch_org_id, "plan": plan}
+        scratch_org = ScratchOrgJob.objects.filter(*args, **kwargs).distinct().first()
         if scratch_org is None:
             return Response("", status=status.HTTP_404_NOT_FOUND)
         serializer = ScratchOrgJobSerializer(instance=scratch_org)
@@ -318,31 +330,35 @@ class OrgViewSet(viewsets.ViewSet):
         list endpoint, but does not take a pk, so we have to implement
         it this way.
         """
-        # TODO: make the ScratchOrgJob:uuid channel get events from
-        # related Jobs and PreflightResults
         response = {}
 
         if "scratch_org_id" in request.session:
             uuid = request.session["scratch_org_id"]
-            current_job = Job.objects.filter(
-                uuid=uuid, status=Job.Status.started
+            scratch_org = ScratchOrgJob.objects.filter(
+                uuid=uuid, status=ScratchOrgJob.Status.complete
             ).first()
-            current_preflight = PreflightResult.objects.filter(
-                uuid=uuid, status=PreflightResult.Status.started
-            ).first()
-            response[uuid] = OrgSerializer(
-                {"current_job": current_job, "current_preflight": current_preflight}
-            ).data
+            if scratch_org:
+                org_id = scratch_org.org_id
+                current_job = Job.objects.filter(
+                    org_id=org_id, status=Job.Status.started
+                ).first()
+                current_preflight = PreflightResult.objects.filter(
+                    org_id=org_id, status=PreflightResult.Status.started
+                ).first()
+                response[org_id] = OrgSerializer(
+                    {"current_job": current_job, "current_preflight": current_preflight}
+                ).data
 
         if request.user.is_authenticated:
+            org_id = request.user.org_id
             current_job = Job.objects.filter(
-                org_id=request.user.org_id, status=Job.Status.started
+                org_id=org_id, status=Job.Status.started
             ).first()
             current_preflight = PreflightResult.objects.filter(
-                org_id=request.user.org_id, status=PreflightResult.Status.started
+                org_id=org_id, status=PreflightResult.Status.started
             ).first()
             if current_job or current_preflight:
-                response[request.user.org_id] = OrgSerializer(
+                response[org_id] = OrgSerializer(
                     {"current_job": current_job, "current_preflight": current_preflight}
                 ).data
 

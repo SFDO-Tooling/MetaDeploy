@@ -626,8 +626,6 @@ class Job(HashIdMixin, models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True
     )
-    # For our user-less pseudo-auth:
-    uuid = models.UUIDField(null=True, blank=True)
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
     steps = models.ManyToManyField(Step)
     organization_url = models.URLField(blank=True)
@@ -638,7 +636,7 @@ class Job(HashIdMixin, models.Model):
     enqueued_at = models.DateTimeField(null=True)
     job_id = models.UUIDField(null=True)
     status = models.CharField(choices=Status, max_length=64, default=Status.started)
-    org_id = models.CharField(null=True, blank=True, max_length=18)
+    org_id = models.CharField(max_length=18)
     org_name = models.CharField(blank=True, max_length=256)
     org_type = models.CharField(blank=True, max_length=256)
     full_org_type = models.CharField(null=True, blank=True, max_length=256)
@@ -736,14 +734,11 @@ class Job(HashIdMixin, models.Model):
 
 
 class PreflightResultQuerySet(models.QuerySet):
-    def most_recent(
-        self, *, user, plan, is_valid_and_complete=True, scratch_org_id=None
-    ):
-        args = (Q(user=user) | Q(uuid=scratch_org_id),)
-        kwargs = {"plan": plan}
+    def most_recent(self, *, org_id, plan, is_valid_and_complete=True):
+        kwargs = {"org_id": org_id, "plan": plan}
         if is_valid_and_complete:
             kwargs.update({"is_valid": True, "status": PreflightResult.Status.complete})
-        return self.filter(*args, **kwargs).distinct().order_by("-created_at").first()
+        return self.filter(**kwargs).order_by("-created_at").first()
 
 
 class PreflightResult(models.Model):
@@ -754,12 +749,10 @@ class PreflightResult(models.Model):
     objects = PreflightResultQuerySet.as_manager()
 
     organization_url = models.URLField()
-    org_id = models.CharField(null=True, blank=True, max_length=18)
+    org_id = models.CharField(max_length=18)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True
     )
-    # For our user-less pseudo-auth:
-    uuid = models.UUIDField(null=True, blank=True)
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True)
     edited_at = models.DateTimeField(auto_now=True)
@@ -881,14 +874,8 @@ class ScratchOrgJob(HashIdMixin, models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     edited_at = models.DateTimeField(auto_now=True)
     status = models.CharField(choices=Status, max_length=64, default=Status.started)
-    canceled_at = models.DateTimeField(
-        null=True,
-        help_text=(
-            "The time at which the Job canceled itself, likely just a bit after it was "
-            "told to cancel itself."
-        ),
-    )
     config = JSONField(null=True, blank=True, encoder=DjangoJSONEncoder)
+    org_id = models.CharField(null=True, blank=True, max_length=18)
 
     def save(self, *args, **kwargs):
         ret = super().save(*args, **kwargs)
@@ -918,6 +905,7 @@ class ScratchOrgJob(HashIdMixin, models.Model):
     def complete(self, config):
         self.status = ScratchOrgJob.Status.complete
         self.config = config
+        self.org_id = config["org_id"]
         self.save()
         async_to_sync(notify_org_finished)(self)
 

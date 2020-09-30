@@ -456,8 +456,8 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             return value.all()
         return value
 
-    def _pending_job_exists(self, *, user):
-        return Job.objects.filter(status=Job.Status.started, org_id=user.org_id).first()
+    def _pending_job_exists(self, *, org_id):
+        return Job.objects.filter(status=Job.Status.started, org_id=org_id).first()
 
     def validate_plan(self, value):
         if not value.is_visible_to(self.context["request"].user):
@@ -481,11 +481,12 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
 
     def validate(self, data):
         user = self._get_from_data_or_instance(data, "user")
+        org_id = self._get_from_data_or_instance(data, "org_id")
         plan = self._get_from_data_or_instance(data, "plan")
         steps = self._get_from_data_or_instance(data, "steps", default=[])
 
         most_recent_preflight = PreflightResult.objects.most_recent(
-            user=user, plan=plan
+            org_id=org_id, plan=plan
         )
         no_valid_preflight = not self.instance and not self._has_valid_preflight(
             most_recent_preflight, plan=plan
@@ -494,7 +495,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             raise serializers.ValidationError(_("No valid preflight."))
 
         invalid_steps = not self.instance and not self._has_valid_steps(
-            user=user, plan=plan, steps=steps, preflight=most_recent_preflight
+            plan=plan, steps=steps, preflight=most_recent_preflight
         )
         if invalid_steps:
             raise serializers.ValidationError(_("Invalid steps for plan."))
@@ -502,7 +503,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         if "results" in data:
             self._validate_results(data)
 
-        pending_job = not self.instance and self._pending_job_exists(user=user)
+        pending_job = not self.instance and self._pending_job_exists(org_id=org_id)
         if pending_job:
             raise serializers.ValidationError(
                 _(
@@ -511,17 +512,21 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
                 )
             )
 
-        user_has_valid_token = all(user.token)
-        if not user_has_valid_token:
-            raise serializers.ValidationError(
-                _("The connection to your org has been lost. Please log in again.")
-            )
+        # @@@ TODO: What to do with this in the case of a Scratch Org?
+        if user:
+            user_has_valid_token = all(user.token)
+            if not user_has_valid_token:
+                raise serializers.ValidationError(
+                    _("The connection to your org has been lost. Please log in again.")
+                )
 
-        data["org_name"] = user.org_name
-        data["org_type"] = user.org_type
-        data["full_org_type"] = user.full_org_type
-        data["organization_url"] = user.instance_url
-        data["org_id"] = user.org_id
+        # @@@ TODO: What to do with this in the case of a Scratch Org?
+        data["org_name"] = user.org_name if user else None
+        data["org_type"] = user.org_type if user else None
+        data["full_org_type"] = user.full_org_type if user else None
+        data["organization_url"] = user.instance_url if user else None
+        # @@@ TODO: Why is this needed?
+        # data["org_id"] = user.org_id
         return data
 
 
@@ -624,7 +629,6 @@ class ScratchOrgJobSerializer(serializers.ModelSerializer):
             "created_at",
             "edited_at",
             "status",
-            "canceled_at",
         )
 
     id = serializers.CharField(read_only=True)

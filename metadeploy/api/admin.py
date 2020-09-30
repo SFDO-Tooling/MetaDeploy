@@ -21,6 +21,7 @@ from .models import (
     Product,
     ProductCategory,
     ProductSlug,
+    ScratchOrgJob,
     SiteProfile,
     Step,
     Translation,
@@ -91,6 +92,22 @@ class JobAdmin(admin.ModelAdmin, PlanMixin):
     )
     list_select_related = ("user", "plan", "plan__version", "plan__version__product")
     search_fields = ("user__username", "org_name", "org_id", "exception")
+
+
+@admin.register(ScratchOrgJob)
+class ScratchOrgJobAdmin(admin.ModelAdmin, PlanMixin):
+    autocomplete_fields = ("plan",)
+    list_filter = ("status", "plan__version__product")
+    list_display = (
+        "email",
+        "plan_title",
+        "product",
+        "version",
+        "status",
+        "enqueued_at",
+    )
+    list_select_related = ("plan", "plan__version", "plan__version__product")
+    search_fields = ("email", "org_id")
 
 
 @admin.register(PlanTemplate)

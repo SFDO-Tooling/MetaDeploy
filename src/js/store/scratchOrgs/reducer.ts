@@ -7,7 +7,6 @@ export type ScratchOrg = {
   status: 'started' | 'complete' | 'failed' | 'canceled';
   email: string;
   enqueued_at: string | null;
-  canceled_at: string | null;
   created_at: string;
   edited_at: string;
 };
