@@ -318,6 +318,11 @@ class OrgViewSet(viewsets.ViewSet):
         list endpoint, but does not take a pk, so we have to implement
         it this way.
         """
+        # TODO: make this return { anonymous: {}, nonymous: {} }
+        # TODO: make the ScratchOrgJob:uuid channel get events from
+        # related Jobs and PreflightResults
+        response = {}
+
         if "scratch_org_id" in request.session:
             uuid = request.session["scratch_org_id"]
             current_job = Job.objects.filter(
@@ -326,17 +331,20 @@ class OrgViewSet(viewsets.ViewSet):
             current_preflight = PreflightResult.objects.filter(
                 uuid=uuid, status=PreflightResult.Status.started
             ).first()
-        elif request.user.is_authenticated:
+            response[uuid] = OrgSerializer(
+                {"current_job": current_job, "current_preflight": current_preflight}
+            ).data
+
+        if request.user.is_authenticated:
             current_job = Job.objects.filter(
                 org_id=request.user.org_id, status=Job.Status.started
             ).first()
             current_preflight = PreflightResult.objects.filter(
                 org_id=request.user.org_id, status=PreflightResult.Status.started
             ).first()
-        else:
-            return Response({"current_job": None, "current_preflight": None})
+            if current_job or current_preflight:
+                response[request.user.org_id] = OrgSerializer(
+                    {"current_job": current_job, "current_preflight": current_preflight}
+                ).data
 
-        serializer = OrgSerializer(
-            {"current_job": current_job, "current_preflight": current_preflight}
-        )
-        return Response(serializer.data)
+        return Response(response)

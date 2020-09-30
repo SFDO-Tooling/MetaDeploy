@@ -428,7 +428,7 @@ class TestOrgViewset:
         response = anon_client.get(reverse("org-list"))
 
         assert response.status_code == 200
-        assert response.json() == {"current_job": None, "current_preflight": None}
+        assert response.json() == {}
 
     def test_get_job__uuid(self, anon_client, job_factory, plan_factory):
         uuid = str(uuid4())
@@ -439,8 +439,8 @@ class TestOrgViewset:
         session.save()
         response = anon_client.get(reverse("org-list"))
 
-        assert response.json()["current_job"]["id"] == str(job.id)
-        assert response.json()["current_preflight"] is None
+        assert response.json()[uuid]["current_job"]["id"] == str(job.id)
+        assert response.json()[uuid]["current_preflight"] is None
 
     def test_get_job(self, client, job_factory, plan_factory):
         plan = plan_factory()
@@ -452,8 +452,8 @@ class TestOrgViewset:
         )
         response = client.get(reverse("org-list"))
 
-        assert response.json()["current_job"]["id"] == str(job.id)
-        assert response.json()["current_preflight"] is None
+        assert response.json()[client.user.org_id]["current_job"]["id"] == str(job.id)
+        assert response.json()[client.user.org_id]["current_preflight"] is None
 
     def test_get_preflight(self, client, preflight_result_factory, plan_factory):
         plan = plan_factory()
@@ -465,13 +465,15 @@ class TestOrgViewset:
         )
         response = client.get(reverse("org-list"))
 
-        assert response.json()["current_job"] is None
-        assert response.json()["current_preflight"] == str(preflight.id)
+        assert response.json()[client.user.org_id]["current_job"] is None
+        assert response.json()[client.user.org_id]["current_preflight"] == str(
+            preflight.id
+        )
 
     def test_get_none(self, client):
         response = client.get(reverse("org-list"))
 
-        assert response.json() == {"current_job": None, "current_preflight": None}
+        assert response.json() == {}
 
 
 @pytest.mark.django_db
@@ -621,6 +623,49 @@ class TestUnlisted:
 
 @pytest.mark.django_db
 class TestPlanView:
+    def test_scratch_org_get(self, client, plan_factory, scratch_org_job_factory):
+        plan = plan_factory()
+        uuid = str(uuid4())
+        scratch_org_job_factory(
+            uuid=uuid,
+            plan=plan,
+            config={
+                "instance_url": "instance_url",
+                "org_id": "org_id",
+                "username": "username",
+                "access_token": "token",
+                "refresh_token": "refresh token",
+            },
+        )
+        session = client.session
+        session["scratch_org_id"] = uuid
+        session.save()
+
+        response = client.get(reverse("plan-scratch-org", kwargs={"pk": str(plan.id)}))
+        assert response.status_code == 200
+
+    def test_scratch_org_get__missing(
+        self, client, plan_factory, scratch_org_job_factory
+    ):
+        plan = plan_factory()
+        uuid = str(uuid4())
+        scratch_org_job_factory(
+            uuid=uuid,
+            config={
+                "instance_url": "instance_url",
+                "org_id": "org_id",
+                "username": "username",
+                "access_token": "token",
+                "refresh_token": "refresh token",
+            },
+        )
+        session = client.session
+        session["scratch_org_id"] = uuid
+        session.save()
+
+        response = client.get(reverse("plan-scratch-org", kwargs={"pk": str(plan.id)}))
+        assert response.status_code == 404
+
     def test_scratch_org_post__no_devhub_username(self, client, plan_factory, settings):
         settings.DEVHUB_USERNAME = None
         plan = plan_factory()
