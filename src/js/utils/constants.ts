@@ -3,7 +3,6 @@ export const SUPPORTED_ORGS = {
   Persistent: 'Persistent' as const,
   Both: 'Both' as const,
 };
-
 export type SupportedOrgs = 'Persistent' | 'Scratch' | 'Both';
 
 export const SCRATCH_ORG_STATUSES = {

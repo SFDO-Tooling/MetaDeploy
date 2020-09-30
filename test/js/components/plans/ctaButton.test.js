@@ -530,6 +530,17 @@ describe('<CtaButton />', () => {
       window.GLOBALS = {};
     });
 
+    describe('unknown scratch org', () => {
+      test('renders loading btn', () => {
+        const { getByText } = setup({
+          plan: scratchOrgPlan,
+          scratchOrg: undefined,
+        });
+
+        expect(getByText('Loading…')).toBeVisible();
+      });
+    });
+
     describe('scratch org spinning', () => {
       test('renders loading btn', () => {
         const { getByText } = setup({
@@ -541,135 +552,183 @@ describe('<CtaButton />', () => {
       });
     });
 
-    // describe('no preflight', () => {
-    //   test('renders start-preflight btn', () => {
-    //     const { getByText } = setup({ preflight: null });
+    describe('no scratch org', () => {
+      test('renders create-org btn', () => {
+        const { getByText } = setup({
+          plan: scratchOrgPlan,
+          scratchOrg: null,
+        });
 
-    //     expect(getByText('Start Pre-Install Validation')).toBeVisible();
-    //   });
+        expect(getByText('Create Scratch Org')).toBeVisible();
+      });
 
-    //   describe('no valid token', () => {
-    //     test('renders login btn', () => {
-    //       const { getByText } = setup({
-    //         preflight: null,
-    //         user: { valid_token_for: null, org_type: 'Developer Edition' },
-    //       });
+      describe('create-org click', () => {
+        test('opens modal', () => {
+          const { getByText, getByLabelText } = setup({
+            plan: scratchOrgPlan,
+            scratchOrg: null,
+            clickThroughAgreement: '<p>Please and thank you.</p>',
+          });
+          fireEvent.click(getByText('Create Scratch Org'));
 
-    //       expect(
-    //         getByText('Log In to Start Pre-Install Validation'),
-    //       ).toBeVisible();
-    //     });
-    //   });
-    // });
+          expect(getByText('Product Terms of Use and Licenses')).toBeVisible();
+          expect(getByText('Please and thank you.')).toBeVisible();
+          expect(
+            getByLabelText('I confirm I have read', { exact: false }),
+          ).toBeVisible();
+          expect(getByText('Confirm & Next')).toBeVisible();
+        });
 
-    // describe('started preflight', () => {
-    //   test('renders progress btn', () => {
-    //     const { getByText } = setup({ preflight: { status: 'started' } });
+        test('spins up scratch org', () => {
+          const doSpinScratchOrg = jest.fn();
+          const { getByText, getByLabelText } = setup({
+            plan: scratchOrgPlan,
+            scratchOrg: null,
+            clickThroughAgreement: '<p>Please and thank you.</p>',
+            doSpinScratchOrg,
+          });
+          fireEvent.click(getByText('Create Scratch Org'));
+          fireEvent.click(
+            getByLabelText('I confirm I have read', { exact: false }),
+          );
+          fireEvent.click(getByText('Confirm & Next'));
+          fireEvent.change(getByLabelText('*Email'), {
+            target: { value: 'foo@bar.buz' },
+          });
+          fireEvent.click(getByText('Confirm'));
 
-    //     expect(getByText('Pre-Install Validation In Progress…')).toBeVisible();
-    //   });
-    // });
+          expect(doSpinScratchOrg).toHaveBeenCalledWith(
+            'plan-1',
+            'foo@bar.buz',
+          );
+        });
 
-    // describe('complete preflight, no errors', () => {
-    //   test('renders install btn', () => {
-    //     const { getByText } = setup();
+        describe('no click-through-agreement', () => {
+          test('opens modal to email page', () => {
+            const { getByText, queryByText } = setup({
+              plan: scratchOrgPlan,
+              scratchOrg: null,
+            });
+            fireEvent.click(getByText('Create Scratch Org'));
 
-    //     expect(getByText('Install')).toBeVisible();
-    //   });
+            expect(queryByText('Product Terms of Use and Licenses')).toBeNull();
+            expect(getByText('Confirm')).toBeVisible();
+          });
+        });
 
-    //   describe('no valid token', () => {
-    //     test('renders login btn', () => {
-    //       const { getByText } = setup({
-    //         user: { valid_token_for: null, org_type: 'Developer Edition' },
-    //       });
+        describe('cancel click', () => {
+          test('closes modal', () => {
+            const { getByText, queryByText } = setup({
+              plan: scratchOrgPlan,
+              scratchOrg: null,
+            });
+            fireEvent.click(getByText('Create Scratch Org'));
 
-    //       expect(getByText('Log In to Install')).toBeVisible();
-    //     });
-    //   });
-    // });
+            expect(getByText('Confirm')).toBeVisible();
 
-    // describe('complete preflight, with errors', () => {
-    //   test('renders re-run-preflight btn', () => {
-    //     const { getByText } = setup({
-    //       preflight: { status: 'complete', is_valid: true, error_count: 1 },
-    //     });
+            fireEvent.click(getByText('Cancel'));
 
-    //     expect(getByText('Re-Run Pre-Install Validation')).toBeVisible();
-    //   });
+            expect(queryByText('Confirm')).toBeNull();
+          });
+        });
+      });
+    });
 
-    //   describe('no valid token', () => {
-    //     test('renders login btn', () => {
-    //       const { getByText } = setup({
-    //         preflight: { status: 'complete', is_valid: true, error_count: 1 },
-    //         user: { valid_token_for: null, org_type: 'Developer Edition' },
-    //       });
+    describe('no preflight', () => {
+      test('renders start-preflight btn', () => {
+        const { getByText } = setup({
+          plan: { ...scratchOrgPlan, requires_preflight: true },
+          scratchOrg: { status: SCRATCH_ORG_STATUSES.complete },
+          preflight: null,
+        });
 
-    //       expect(
-    //         getByText('Log In to Re-Run Pre-Install Validation'),
-    //       ).toBeVisible();
-    //     });
-    //   });
-    // });
+        expect(getByText('Start Pre-Install Validation')).toBeVisible();
+      });
+    });
 
-    // describe('canceled preflight', () => {
-    //   test('renders re-run-preflight btn', () => {
-    //     const { getByText } = setup({
-    //       preflight: { status: 'canceled', is_valid: true, error_count: 0 },
-    //     });
+    describe('complete preflight, no errors', () => {
+      test('renders install btn', () => {
+        const { getByText } = setup({
+          plan: { ...scratchOrgPlan, requires_preflight: true },
+          scratchOrg: { status: SCRATCH_ORG_STATUSES.complete },
+        });
 
-    //     expect(getByText('Re-Run Pre-Install Validation')).toBeVisible();
-    //   });
-    // });
+        expect(getByText('Install')).toBeVisible();
+      });
+    });
 
-    // describe('failed preflight', () => {
-    //   test('renders re-run-preflight btn', () => {
-    //     const { getByText } = setup({
-    //       preflight: { status: 'failed', is_valid: true, error_count: 0 },
-    //     });
+    describe('complete preflight, with errors', () => {
+      test('renders re-run-preflight btn', () => {
+        const { getByText } = setup({
+          plan: { ...scratchOrgPlan, requires_preflight: true },
+          scratchOrg: { status: SCRATCH_ORG_STATUSES.complete },
+          preflight: { status: 'complete', is_valid: true, error_count: 1 },
+        });
 
-    //     expect(getByText('Re-Run Pre-Install Validation')).toBeVisible();
-    //   });
+        expect(getByText('Re-Run Pre-Install Validation')).toBeVisible();
+      });
+    });
 
-    //   describe('no valid token', () => {
-    //     test('renders login btn', () => {
-    //       const { getByText } = setup({
-    //         preflight: { status: 'failed', is_valid: true, error_count: 0 },
-    //         user: { valid_token_for: null, org_type: 'Developer Edition' },
-    //       });
+    describe('canceled preflight', () => {
+      test('renders re-run-preflight btn', () => {
+        const { getByText } = setup({
+          plan: { ...scratchOrgPlan, requires_preflight: true },
+          scratchOrg: { status: SCRATCH_ORG_STATUSES.complete },
+          preflight: { status: 'canceled', is_valid: true, error_count: 0 },
+        });
 
-    //       expect(
-    //         getByText('Log In to Re-Run Pre-Install Validation'),
-    //       ).toBeVisible();
-    //     });
-    //   });
-    // });
+        expect(getByText('Re-Run Pre-Install Validation')).toBeVisible();
+      });
+    });
 
-    // describe('no preflight required', () => {
-    //   test('renders install btn', () => {
-    //     const { getByText } = setup({
-    //       plan: { ...defaultPlan, requires_preflight: false },
-    //       preflight: undefined,
-    //     });
+    describe('failed preflight', () => {
+      test('renders re-run-preflight btn', () => {
+        const { getByText } = setup({
+          plan: { ...scratchOrgPlan, requires_preflight: true },
+          scratchOrg: { status: SCRATCH_ORG_STATUSES.complete },
+          preflight: { status: 'failed', is_valid: true, error_count: 0 },
+        });
 
-    //     expect(getByText('Install')).toBeVisible();
-    //   });
+        expect(getByText('Re-Run Pre-Install Validation')).toBeVisible();
+      });
+    });
 
-    //   describe('start-install (with click-through agreement) click', () => {
-    //     test('opens modal', () => {
-    //       const { getByText, getByLabelText } = setup({
-    //         plan: { ...defaultPlan, requires_preflight: false },
-    //         preflight: undefined,
-    //         clickThroughAgreement: '<p>Please and thank you.</p>',
-    //       });
-    //       fireEvent.click(getByText('Install'));
+    describe('no preflight required', () => {
+      test('renders install btn', () => {
+        const { getByText } = setup({
+          plan: scratchOrgPlan,
+          scratchOrg: { status: SCRATCH_ORG_STATUSES.complete },
+        });
 
-    //       expect(getByText('Product Terms of Use and Licenses')).toBeVisible();
-    //       expect(getByText('Please and thank you.')).toBeVisible();
-    //       expect(
-    //         getByLabelText('confirm I have read and agree to', { exact: false }),
-    //       ).toBeVisible();
-    //     });
-    //   });
-    // });
+        expect(getByText('Install')).toBeVisible();
+      });
+    });
+
+    describe('start-install (with preflight warnings) click', () => {
+      test('opens modal', () => {
+        const { getByText, getByLabelText } = setup({
+          plan: { ...scratchOrgPlan, requires_preflight: true },
+          scratchOrg: { status: SCRATCH_ORG_STATUSES.complete },
+          preflight: {
+            plan: 'plan-1',
+            status: 'complete',
+            results: {
+              'step-1': { status: 'warn', message: 'This is a warning.' },
+            },
+            is_valid: true,
+            error_count: 0,
+            warning_count: 1,
+            is_ready: true,
+          },
+        });
+        fireEvent.click(getByText('View Warnings to Continue Installation'));
+
+        expect(getByText('Potential Issues')).toBeVisible();
+        expect(getByText('This is a warning.')).toBeVisible();
+        expect(
+          getByLabelText('I understand these warnings', { exact: false }),
+        ).toBeVisible();
+      });
+    });
   });
 });

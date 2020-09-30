@@ -96,7 +96,7 @@ const defaultState = {
             ],
             is_allowed: true,
             requires_preflight: true,
-            supported_orgs: 'Persistent',
+            supported_orgs: 'Both',
           },
           secondary_plan: {
             id: 'plan-2',
@@ -107,7 +107,7 @@ const defaultState = {
             steps: [{ id: 'step-5', name: 'My Other Step' }],
             requires_preflight: true,
             is_allowed: true,
-            supported_orgs: 'Persistent',
+            supported_orgs: 'Both',
           },
           additional_plans: {
             'third-plan': {
@@ -157,7 +157,9 @@ const defaultState = {
   user: { valid_token_for: 'foo', org_type: 'an org' },
   jobs: {},
   org: null,
-  scratchOrgs: {},
+  scratchOrgs: {
+    'plan-1': null,
+  },
 };
 
 describe('<PlanDetail />', () => {
@@ -192,6 +194,14 @@ describe('<PlanDetail />', () => {
     return { ...renderWithRedux(ui, initialState, customStore), context };
   };
 
+  beforeAll(() => {
+    window.GLOBALS.DEVHUB_USERNAME = 'foo@bar.buz';
+  });
+
+  afterAll(() => {
+    window.GLOBALS = {};
+  });
+
   describe('insufficient permissions for user', () => {
     test('renders login button', () => {
       const { getByText } = setup({
@@ -201,7 +211,9 @@ describe('<PlanDetail />', () => {
         },
       });
 
-      expect(getByText('Log in with a different org')).toBeVisible();
+      expect(
+        getByText('you don’t have permissions', { exact: false }),
+      ).toBeVisible();
     });
   });
 
@@ -374,7 +386,7 @@ describe('<PlanDetail />', () => {
       });
     });
 
-    describe('preflight is removed', () => {
+    describe('plan changes', () => {
       test('fetches preflight', () => {
         const { rerender, store } = setup();
 
@@ -387,6 +399,20 @@ describe('<PlanDetail />', () => {
         });
 
         expect(fetchPreflight).toHaveBeenCalledWith('plan-2');
+      });
+
+      test('fetches scratch org', () => {
+        const { rerender, store } = setup();
+
+        expect(fetchScratchOrg).not.toHaveBeenCalled();
+
+        setup({
+          planSlug: 'other-plan',
+          rerenderFn: rerender,
+          customStore: store,
+        });
+
+        expect(fetchScratchOrg).toHaveBeenCalledWith('plan-2');
       });
     });
   });
@@ -552,45 +578,4 @@ describe('<PlanDetail />', () => {
       expect(checkbox4.checked).toBe(true);
     });
   });
-
-  // describe('creating new org', () => {
-  //   let queries;
-  //   beforeEach(() => {
-  //     queries = setup();
-  //     const { getByText, getByLabelText } = queries;
-
-  //     fireEvent.click(getByText('Create Scratch Org'));
-  //     fireEvent.click(
-  //       getByLabelText(
-  //         'I confirm I have read and agree to these product terms of use and licenses.',
-  //       ),
-  //     );
-  //     fireEvent.click(getByText('Confirm'));
-  //   });
-
-  //   test('closes spin org modal', () => {
-  //     const { getByText, queryByText } = queries;
-
-  //     fireEvent.click(getByText('Close'));
-
-  //     expect(queryByText('Product Terms of Use & Licenses')).toBeNull();
-  //   });
-
-  //   test('spins new scratch org', () => {
-  //     const { getByText, getByLabelText } = queries;
-  //     const plan =
-  //       defaultState.products.products[0].most_recent_version.primary_plan;
-  //     const input = getByLabelText('Email');
-
-  //     expect(getByText('Enter Your Email Address')).toBeVisible();
-
-  //     fireEvent.change(input, { target: { value: 'foo@bar.com' } });
-
-  //     expect(input.value).toEqual('foo@bar.com');
-
-  //     fireEvent.click(getByText('Confirm'));
-
-  //     expect(spinScratchOrg).toHaveBeenCalledWith(plan, 'foo@bar.com');
-  //   });
-  // });
 });

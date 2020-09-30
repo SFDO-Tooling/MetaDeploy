@@ -499,7 +499,7 @@ class CtaButton extends React.Component<
                     toggleModal={this.togglePreflightModal}
                     startJob={this.startJob}
                     results={preflight.results}
-                    steps={plan.steps || []}
+                    steps={/* istanbul ignore next */ plan.steps || []}
                     selectedSteps={selectedSteps}
                   />
                 ) : null}

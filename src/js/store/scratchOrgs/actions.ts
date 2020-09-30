@@ -71,7 +71,7 @@ export const fetchScratchOrg = (
       type: 'FETCH_SCRATCH_ORG_SUCCEEDED' as const,
       payload: { plan: planId, org: response },
     });
-  } catch (err) {
+  } catch (err) /* istanbul ignore next */ {
     dispatch({ type: 'FETCH_SCRATCH_ORG_FAILED' as const, payload: planId });
     throw err;
   }

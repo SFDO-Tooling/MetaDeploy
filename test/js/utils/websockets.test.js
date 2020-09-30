@@ -3,6 +3,7 @@ import Sockette from 'sockette';
 import * as jobActions from '@/store/jobs/actions';
 import { updateOrg } from '@/store/org/actions';
 import * as preflightActions from '@/store/plans/actions';
+import * as scratchOrgActions from '@/store/scratchOrgs/actions';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
 import { invalidateToken } from '@/store/user/actions';
 import * as sockets from '@/utils/websockets';
@@ -86,6 +87,25 @@ describe('getAction', () => {
       const msg = { type: 'ORG_CHANGED', payload };
       const expected = updateOrg(payload);
       const actual = sockets.getAction(msg);
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  [
+    { type: 'SCRATCH_ORG_CREATED', action: 'createScratchOrg', thunk: false },
+    { type: 'SCRATCH_ORG_ERROR', action: 'failScratchOrg', thunk: true },
+  ].forEach(({ type, action, thunk }) => {
+    test(`handles msg: ${type}`, () => {
+      const payload = { foo: 'bar' };
+      const msg = { type, payload };
+      // eslint-disable-next-line import/namespace
+      let expected = scratchOrgActions[action](payload);
+      let actual = sockets.getAction(msg);
+      if (thunk) {
+        expected = expected((arg) => arg);
+        actual = actual((arg) => arg);
+      }
 
       expect(actual).toEqual(expected);
     });
