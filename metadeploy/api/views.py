@@ -318,7 +318,6 @@ class OrgViewSet(viewsets.ViewSet):
         list endpoint, but does not take a pk, so we have to implement
         it this way.
         """
-        # TODO: make this return { anonymous: {}, nonymous: {} }
         # TODO: make the ScratchOrgJob:uuid channel get events from
         # related Jobs and PreflightResults
         response = {}

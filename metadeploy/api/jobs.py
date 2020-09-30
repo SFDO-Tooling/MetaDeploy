@@ -296,6 +296,7 @@ def create_scratch_org(*, plan_id, email, org_name, result_id):
             plan=plan,
             organization_url=org_config.instance_url,
             org_id=scratch_org_config.config["org_id"],
+            uuid=result.uuid,
         )
         preflight(preflight_result.pk, forced_user=fake_user)
 
