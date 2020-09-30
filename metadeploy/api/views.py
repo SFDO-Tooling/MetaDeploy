@@ -251,10 +251,12 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
 
     def scratch_org_get(self, request):
         scratch_org_id = request.session.get("scratch_org_id", None)
-        plan = self.get_object()
+        plan = get_object_or_404(Plan.objects, id=self.kwargs["pk"])
         scratch_org = ScratchOrgJob.objects.filter(
             uuid=scratch_org_id, plan=plan
         ).first()
+        if scratch_org is None:
+            return Response("", status=status.HTTP_404_NOT_FOUND)
         serializer = ScratchOrgJobSerializer(instance=scratch_org)
         return Response(serializer.data)
 
