@@ -272,7 +272,7 @@ class MockDict(dict):
 
 @pytest.mark.django_db
 class TestCreateScratchOrg:
-    def test_create_scratch_org(self, settings, plan_factory, scratch_org_job_factory):
+    def test_create_scratch_org(self, settings, plan_factory, scratch_org_factory):
         settings.DEVHUB_USERNAME = "test@example.com"
         plan = plan_factory(preflight_checks=[{"when": "True", "action": "error"}])
         with ExitStack() as stack:
@@ -324,7 +324,7 @@ class TestCreateScratchOrg:
             )
             # Cheat the auto-triggering of the job by adding a fake
             # enqueued_at:
-            scratch_org_job = scratch_org_job_factory(
+            scratch_org = scratch_org_factory(
                 plan=plan,
                 enqueued_at=datetime(2020, 9, 4, 12),
             )
@@ -332,11 +332,11 @@ class TestCreateScratchOrg:
                 plan_id=plan.id,
                 email="test@example.com",
                 org_name=plan.org_name,
-                result_id=str(scratch_org_job.pk),
+                result_id=str(scratch_org.pk),
             )
 
     def test_create_scratch_org__error(
-        self, settings, plan_factory, scratch_org_job_factory
+        self, settings, plan_factory, scratch_org_factory
     ):
         settings.DEVHUB_USERNAME = "test@example.com"
         plan = plan_factory()
@@ -370,7 +370,7 @@ class TestCreateScratchOrg:
             stack.enter_context(patch("metadeploy.api.salesforce.DeployOrgSettings"))
             # Cheat the auto-triggering of the job by adding a fake
             # enqueued_at:
-            scratch_org_job = scratch_org_job_factory(
+            scratch_org = scratch_org_factory(
                 plan=plan,
                 enqueued_at=datetime(2020, 9, 4, 12),
             )
@@ -378,5 +378,5 @@ class TestCreateScratchOrg:
                 plan_id=plan.id,
                 email="test@example.com",
                 org_name=plan.org_name,
-                result_id=str(scratch_org_job.pk),
+                result_id=str(scratch_org.pk),
             )

@@ -16,7 +16,7 @@ from .models import (
     PreflightResult,
     Product,
     ProductCategory,
-    ScratchOrgJob,
+    ScratchOrg,
     SiteProfile,
     Step,
     Version,
@@ -439,7 +439,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         return not most_recent_preflight.has_any_errors()
 
     @staticmethod
-    def _has_valid_steps(*, user, plan, steps, preflight):
+    def _has_valid_steps(*, plan, steps, preflight):
         """
         Every set in this method is a set of numeric Step PKs, from the
         local database.
@@ -481,7 +481,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
 
     def validate(self, data):
         user = self._get_from_data_or_instance(data, "user")
-        org_id = self._get_from_data_or_instance(data, "org_id")
+        org_id = self._get_from_data_or_instance(data, "org_id") or user.org_id
         plan = self._get_from_data_or_instance(data, "plan")
         steps = self._get_from_data_or_instance(data, "steps", default=[])
 
@@ -597,6 +597,7 @@ class JobSummarySerializer(serializers.ModelSerializer):
 
 
 class OrgSerializer(serializers.Serializer):
+    org_id = serializers.CharField()
     current_job = JobSummarySerializer()
     current_preflight = IdOnlyField()
 
@@ -618,9 +619,9 @@ class SiteSerializer(serializers.ModelSerializer):
         )
 
 
-class ScratchOrgJobSerializer(serializers.ModelSerializer):
+class ScratchOrgSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ScratchOrgJob
+        model = ScratchOrg
         fields = (
             "id",
             "plan",
@@ -629,6 +630,7 @@ class ScratchOrgJobSerializer(serializers.ModelSerializer):
             "created_at",
             "edited_at",
             "status",
+            "org_id",
         )
 
     id = serializers.CharField(read_only=True)

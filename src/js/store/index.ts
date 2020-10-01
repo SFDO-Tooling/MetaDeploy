@@ -3,7 +3,7 @@ import { ThunkAction, ThunkDispatch as ReduxThunkDispatch } from 'redux-thunk';
 
 import errors, { ErrorType } from '@/store/errors/reducer';
 import jobs, { JobsState } from '@/store/jobs/reducer';
-import org, { Org } from '@/store/org/reducer';
+import orgs, { Orgs } from '@/store/org/reducer';
 import preflights, { PreflightsState } from '@/store/plans/reducer';
 import products, { ProductsState } from '@/store/products/reducer';
 import scratchOrgs, { ScratchOrgState } from '@/store/scratchOrgs/reducer';
@@ -15,7 +15,7 @@ export type AppState = {
   readonly products: ProductsState;
   readonly preflights: PreflightsState;
   readonly jobs: JobsState;
-  readonly org: Org;
+  readonly orgs: Orgs;
   readonly scratchOrgs: ScratchOrgState;
   readonly socket: Socket;
   readonly errors: ErrorType[];
@@ -34,7 +34,7 @@ const reducer: Reducer<AppState> = combineReducers({
   products,
   preflights,
   jobs,
-  org,
+  orgs,
   scratchOrgs,
   socket,
   errors,

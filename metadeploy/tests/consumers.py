@@ -25,12 +25,12 @@ def generate_model(model_factory, **kwargs):
 @pytest.mark.django_db
 @pytest.mark.asyncio
 async def test_push_notification_consumer__subscribe_scratch_org(
-    user_factory, scratch_org_job_factory
+    user_factory, scratch_org_factory
 ):
     job_id = str(uuid4())
     user = await generate_model(user_factory)
     soj = await generate_model(
-        scratch_org_job_factory, job_id=job_id, enqueued_at=timezone.now()
+        scratch_org_factory, job_id=job_id, enqueued_at=timezone.now()
     )
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
@@ -219,7 +219,13 @@ async def test_push_notification_consumer__subscribe_org(
     response = await communicator.receive_json_from()
     assert response == {
         "type": "ORG_CHANGED",
-        "payload": OrgSerializer({"current_job": job, "current_preflight": None}).data,
+        "payload": OrgSerializer(
+            {
+                "org_id": "00Dxxxxxxxxxxxxxxx",
+                "current_job": job,
+                "current_preflight": None,
+            }
+        ).data,
     }
 
     await communicator.disconnect()

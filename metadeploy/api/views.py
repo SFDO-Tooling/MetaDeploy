@@ -23,7 +23,7 @@ from .models import (
     PreflightResult,
     Product,
     ProductCategory,
-    ScratchOrgJob,
+    ScratchOrg,
     Version,
 )
 from .paginators import ProductPaginator
@@ -37,7 +37,7 @@ from .serializers import (
     PreflightResultSerializer,
     ProductCategorySerializer,
     ProductSerializer,
-    ScratchOrgJobSerializer,
+    ScratchOrgSerializer,
     VersionSerializer,
 )
 
@@ -193,8 +193,8 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
         scratch_org_id = request.session.get("scratch_org_id", None)
         scratch_org = None
         if scratch_org_id:
-            scratch_org = ScratchOrgJob.objects.filter(
-                uuid=scratch_org_id, status=ScratchOrgJob.Status.complete
+            scratch_org = ScratchOrg.objects.filter(
+                uuid=scratch_org_id, status=ScratchOrg.Status.complete
             ).first()
         if scratch_org:
             org_id = scratch_org.org_id
@@ -218,30 +218,42 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
         is_visible_to = plan.is_visible_to(
             request.user
         ) and plan.version.product.is_visible_to(request.user)
-        if not (is_visible_to or scratch_org_id):
+        is_visible_to_scratch_org = (
+            plan.is_visible_to_scratch_org()
+            and plan.version.product.is_visible_to_scratch_org()
+        )
+        if not (is_visible_to or (scratch_org_id and is_visible_to_scratch_org)):
             return Response("", status=status.HTTP_403_FORBIDDEN)
 
         forced_user_kwargs = {}
-        try:
-            scratch_org_job = ScratchOrgJob.objects.get(
-                uuid=scratch_org_id, plan=plan, status=ScratchOrgJob.Status.complete
-            )
-            config = scratch_org_job.config
-            kwargs = {
-                "organization_url": config["instance_url"],
-                "org_id": config["org_id"],
-            }
-            # Are these values in the config? In jobs.py they're a bit
-            # different.
-            forced_user_kwargs["forced_user"] = FakeUser(
-                token=(config["access_token"], config["refresh_token"]),
-            )
-        except (ScratchOrgJob.DoesNotExist, ScratchOrgJob.MultipleObjectsReturned):
+        kwargs = None
+        if scratch_org_id:
+            try:
+                scratch_org = ScratchOrg.objects.get(
+                    uuid=scratch_org_id, plan=plan, status=ScratchOrg.Status.complete
+                )
+                config = scratch_org.config
+                kwargs = {
+                    "organization_url": config["instance_url"],
+                    "org_id": config["org_id"],
+                }
+                # Are these values in the config? In jobs.py they're a bit
+                # different.
+                forced_user_kwargs["forced_user"] = FakeUser(
+                    token=(config["access_token"], config["refresh_token"]),
+                )
+            except (ScratchOrg.DoesNotExist, ScratchOrg.MultipleObjectsReturned):
+                pass
+
+        if request.user.is_authenticated:
             kwargs = {
                 "user": request.user,
                 "organization_url": request.user.instance_url,
                 "org_id": request.user.org_id,
             }
+
+        if not kwargs:
+            return Response("", status=status.HTTP_403_FORBIDDEN)
 
         preflight_result = PreflightResult.objects.create(
             plan=plan,
@@ -262,14 +274,13 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
         scratch_org_id = request.session.get("scratch_org_id", None)
         plan = get_object_or_404(Plan.objects, id=self.kwargs["pk"])
         args = (
-            Q(status=ScratchOrgJob.Status.started)
-            | Q(status=ScratchOrgJob.Status.complete),
+            Q(status=ScratchOrg.Status.started) | Q(status=ScratchOrg.Status.complete),
         )
         kwargs = {"uuid": scratch_org_id, "plan": plan}
-        scratch_org = ScratchOrgJob.objects.filter(*args, **kwargs).distinct().first()
+        scratch_org = ScratchOrg.objects.filter(*args, **kwargs).distinct().first()
         if scratch_org is None:
             return Response("", status=status.HTTP_404_NOT_FOUND)
-        serializer = ScratchOrgJobSerializer(instance=scratch_org)
+        serializer = ScratchOrgSerializer(instance=scratch_org)
         return Response(serializer.data)
 
     def scratch_org_post(self, request, pk=None):
@@ -290,7 +301,7 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
 
         new_data = request.data.copy()
         new_data["plan"] = str(plan.pk)
-        serializer = ScratchOrgJobSerializer(data=new_data)
+        serializer = ScratchOrgSerializer(data=new_data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -307,7 +318,7 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
         scratch_org = serializer.save(uuid=uuid)
         request.session["scratch_org_id"] = uuid
 
-        serializer = ScratchOrgJobSerializer(instance=scratch_org)
+        serializer = ScratchOrgSerializer(instance=scratch_org)
         return Response(
             serializer.data,
             status=status.HTTP_202_ACCEPTED,
@@ -326,7 +337,7 @@ class OrgViewSet(viewsets.ViewSet):
 
     def list(self, request):
         """
-        This will return data on the user's current org. It is not a
+        This will return data on the user's current org(s). It is not a
         list endpoint, but does not take a pk, so we have to implement
         it this way.
         """
@@ -334,8 +345,8 @@ class OrgViewSet(viewsets.ViewSet):
 
         if "scratch_org_id" in request.session:
             uuid = request.session["scratch_org_id"]
-            scratch_org = ScratchOrgJob.objects.filter(
-                uuid=uuid, status=ScratchOrgJob.Status.complete
+            scratch_org = ScratchOrg.objects.filter(
+                uuid=uuid, status=ScratchOrg.Status.complete
             ).first()
             if scratch_org:
                 org_id = scratch_org.org_id
@@ -346,7 +357,11 @@ class OrgViewSet(viewsets.ViewSet):
                     org_id=org_id, status=PreflightResult.Status.started
                 ).first()
                 response[org_id] = OrgSerializer(
-                    {"current_job": current_job, "current_preflight": current_preflight}
+                    {
+                        "org_id": org_id,
+                        "current_job": current_job,
+                        "current_preflight": current_preflight,
+                    }
                 ).data
 
         if request.user.is_authenticated:
@@ -357,9 +372,12 @@ class OrgViewSet(viewsets.ViewSet):
             current_preflight = PreflightResult.objects.filter(
                 org_id=org_id, status=PreflightResult.Status.started
             ).first()
-            if current_job or current_preflight:
-                response[org_id] = OrgSerializer(
-                    {"current_job": current_job, "current_preflight": current_preflight}
-                ).data
+            response[org_id] = OrgSerializer(
+                {
+                    "org_id": org_id,
+                    "current_job": current_job,
+                    "current_preflight": current_preflight,
+                }
+            ).data
 
         return Response(response)

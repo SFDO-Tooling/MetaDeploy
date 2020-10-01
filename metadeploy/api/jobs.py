@@ -31,7 +31,7 @@ from rq.worker import StopRequested
 from .cci_configs import MetaDeployCCI, extract_user_and_repo
 from .flows import StopFlowException
 from .github import local_github_checkout
-from .models import Job, Plan, PreflightResult, ScratchOrgJob
+from .models import Job, Plan, PreflightResult, ScratchOrg
 from .push import preflight_started, report_error, user_token_expired
 from .salesforce import FakeUser
 from .salesforce import create_scratch_org as create_scratch_org_on_sf
@@ -266,7 +266,7 @@ expire_preflights_job = job(expire_preflights)
 
 def create_scratch_org(*, plan_id, email, org_name, result_id):
     plan = Plan.objects.get(id=plan_id)
-    org = ScratchOrgJob.objects.get(id=result_id)
+    org = ScratchOrg.objects.get(id=result_id)
     repo_url = plan.version.product.repo_url
     repo_owner, repo_name = extract_user_and_repo(repo_url)
     commit_ish = plan.commit_ish

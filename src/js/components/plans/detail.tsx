@@ -1,4 +1,5 @@
 import i18n from 'i18next';
+import { find } from 'lodash';
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
 import { Trans } from 'react-i18next';
@@ -29,7 +30,7 @@ import {
 } from '@/components/utils';
 import { AppState } from '@/store';
 import { startJob } from '@/store/jobs/actions';
-import { selectOrg } from '@/store/org/selectors';
+import { selectOrgs } from '@/store/org/selectors';
 import { fetchPreflight, startPreflight } from '@/store/plans/actions';
 import { CONSTANTS, Step } from '@/store/plans/reducer';
 import {
@@ -63,7 +64,7 @@ const select = (appState: AppState, props: RouteComponentProps) => ({
   plan: selectPlan(appState, props),
   planSlug: selectPlanSlug(appState, props),
   preflight: selectPreflight(appState, props),
-  org: selectOrg(appState),
+  orgs: selectOrgs(appState),
   scratchOrg: selectScratchOrg(appState, props),
 });
 
@@ -258,7 +259,7 @@ class PlanDetail extends React.Component<Props, State> {
   }
 
   getPostMessage() {
-    const { user, product, version, plan, org } = this.props;
+    const { user, product, version, plan, orgs } = this.props;
 
     /* istanbul ignore if */
     if (!product || !version || !plan) {
@@ -285,42 +286,45 @@ class PlanDetail extends React.Component<Props, State> {
         </>
       );
     }
-    if (org) {
-      if (org.current_job) {
-        const { product_slug, version_label, plan_slug, id } = org.current_job;
-        return (
-          <p>
-            <WarningIcon />
-            <span>
-              <Trans i18nKey="installationCurrentlyRunning">
-                An installation is currently running on your org.{' '}
-                <Link
-                  to={routes.job_detail(
-                    product_slug,
-                    version_label,
-                    plan_slug,
-                    id,
-                  )}
-                >
-                  View the running installation.
-                </Link>
-              </Trans>
-            </span>
-          </p>
-        );
-      }
-      if (org.current_preflight) {
-        return (
-          <p>
-            <WarningIcon />
-            <span>
-              {i18n.t(
-                'A pre-install validation is currently running on your org.',
-              )}
-            </span>
-          </p>
-        );
-      }
+
+    const currentJob = find(orgs, (org) => org.current_job !== null)
+      ?.current_job;
+    const currentPreflight = find(orgs, (org) => org.current_preflight !== null)
+      ?.current_preflight;
+    if (currentJob) {
+      const { product_slug, version_label, plan_slug, id } = currentJob;
+      return (
+        <p>
+          <WarningIcon />
+          <span>
+            <Trans i18nKey="installationCurrentlyRunning">
+              An installation is currently running on your org.{' '}
+              <Link
+                to={routes.job_detail(
+                  product_slug,
+                  version_label,
+                  plan_slug,
+                  id,
+                )}
+              >
+                View the running installation.
+              </Link>
+            </Trans>
+          </span>
+        </p>
+      );
+    }
+    if (currentPreflight) {
+      return (
+        <p>
+          <WarningIcon />
+          <span>
+            {i18n.t(
+              'A pre-install validation is currently running on your org.',
+            )}
+          </span>
+        </p>
+      );
     }
     return null;
   }
@@ -333,7 +337,7 @@ class PlanDetail extends React.Component<Props, State> {
       version,
       plan,
       preflight,
-      org,
+      orgs,
       scratchOrg,
       doStartPreflight,
       doStartJob,
@@ -345,6 +349,12 @@ class PlanDetail extends React.Component<Props, State> {
       return null;
     }
     if (plan.steps?.length) {
+      const hasCurrentJob = Boolean(
+        find(orgs, (org) => org.current_job !== null),
+      );
+      const hasCurrentPreflight = Boolean(
+        find(orgs, (org) => org.current_preflight !== null),
+      );
       return (
         <CtaButton
           history={history}
@@ -357,8 +367,8 @@ class PlanDetail extends React.Component<Props, State> {
           selectedSteps={selectedSteps}
           scratchOrg={scratchOrg}
           preventAction={Boolean(
-            org?.current_job ||
-              org?.current_preflight ||
+            hasCurrentJob ||
+              hasCurrentPreflight ||
               scratchOrg?.status === SCRATCH_ORG_STATUSES.started,
           )}
           doStartPreflight={doStartPreflight}

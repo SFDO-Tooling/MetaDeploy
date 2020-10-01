@@ -90,7 +90,7 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
     def has_good_permissions(self, content):
         if self.handle_org_special_case(content):
             return True
-        if self.handle_scratch_org_job_special_case(content):
+        if self.handle_scratch_org_special_case(content):
             return True
         possible_exceptions = (
             AttributeError,
@@ -113,5 +113,5 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
             return True
         return False
 
-    def handle_scratch_org_job_special_case(self, content):
+    def handle_scratch_org_special_case(self, content):
         return content["model"] == "scratch_org"

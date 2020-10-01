@@ -26,12 +26,6 @@ export const login = (payload: User): LoginAction => {
       model: 'user',
       id: payload.id,
     });
-    if (payload.valid_token_for) {
-      window.socket.subscribe({
-        model: 'org',
-        id: payload.valid_token_for,
-      });
-    }
   }
   return {
     type: 'USER_LOGGED_IN' as const,
@@ -73,6 +67,7 @@ export const refetchAllData = (): ThunkResult<
     ]);
     dispatch({ type: 'REFETCH_DATA_SUCCEEDED' as const });
     dispatch({ type: 'USER_LOGGED_OUT' as const });
+    dispatch(fetchOrgJobs());
     if (!payload) {
       return null;
     }

@@ -8,7 +8,7 @@ from django.urls import reverse
 
 from metadeploy.conftest import format_timestamp
 
-from ..models import SUPPORTED_ORG_TYPES, Job, Plan, PreflightResult
+from ..models import SUPPORTED_ORG_TYPES, Job, Plan, PreflightResult, ScratchOrg
 
 
 @pytest.mark.django_db
@@ -332,10 +332,13 @@ class TestBasicGetViews:
 
 @pytest.mark.django_db
 class TestPreflight:
-    def test_post__anon(self, anon_client, plan_factory, scratch_org_job_factory):
+    def test_post__anon(self, anon_client, plan_factory, scratch_org_factory):
         uuid = str(uuid4())
-        scratch_org_job_factory(
+        plan = plan_factory()
+        scratch_org_factory(
             uuid=uuid,
+            plan=plan,
+            status=ScratchOrg.Status.complete,
             config={
                 "instance_url": "instance_url",
                 "org_id": "org_id",
@@ -347,7 +350,6 @@ class TestPreflight:
         session = anon_client.session
         session["scratch_org_id"] = uuid
         session.save()
-        plan = plan_factory()
         response = anon_client.post(reverse("plan-preflight", kwargs={"pk": plan.id}))
 
         assert response.status_code == 201
@@ -422,31 +424,36 @@ class TestPreflight:
 @pytest.mark.django_db
 class TestOrgViewset:
     def test_get_job__anonymous(self, anon_client, job_factory, plan_factory):
-        uuid = str(uuid4())
         plan = plan_factory()
-        job_factory(plan=plan, uuid=uuid)
+        job_factory(plan=plan)
         response = anon_client.get(reverse("org-list"))
 
         assert response.status_code == 200
         assert response.json() == {}
 
-    def test_get_job__uuid(self, anon_client, job_factory, plan_factory):
+    def test_get_job__uuid(
+        self, anon_client, job_factory, plan_factory, scratch_org_factory
+    ):
         uuid = str(uuid4())
         plan = plan_factory()
-        job = job_factory(plan=plan, uuid=uuid)
+        org = scratch_org_factory(
+            plan=plan,
+            uuid=uuid,
+            org_id="00Dxxxxxxxxxxxxxxx",
+            status=ScratchOrg.Status.complete,
+        )
+        job = job_factory(plan=plan, org_id=org.org_id)
         session = anon_client.session
         session["scratch_org_id"] = uuid
         session.save()
         response = anon_client.get(reverse("org-list"))
 
-        assert response.json()[uuid]["current_job"]["id"] == str(job.id)
-        assert response.json()[uuid]["current_preflight"] is None
+        assert response.json()[org.org_id]["current_job"]["id"] == str(job.id)
+        assert response.json()[org.org_id]["current_preflight"] is None
 
     def test_get_job(self, client, job_factory, plan_factory):
         plan = plan_factory()
         job = job_factory(
-            organization_url=client.user.instance_url,
-            user=client.user,
             plan=plan,
             org_id=client.user.org_id,
         )
@@ -458,8 +465,6 @@ class TestOrgViewset:
     def test_get_preflight(self, client, preflight_result_factory, plan_factory):
         plan = plan_factory()
         preflight = preflight_result_factory(
-            organization_url=client.user.instance_url,
-            user=client.user,
             plan=plan,
             org_id=client.user.org_id,
         )
@@ -470,8 +475,8 @@ class TestOrgViewset:
             preflight.id
         )
 
-    def test_get_none(self, client):
-        response = client.get(reverse("org-list"))
+    def test_get_none(self, anon_client):
+        response = anon_client.get(reverse("org-list"))
 
         assert response.json() == {}
 
@@ -623,10 +628,10 @@ class TestUnlisted:
 
 @pytest.mark.django_db
 class TestPlanView:
-    def test_scratch_org_get(self, client, plan_factory, scratch_org_job_factory):
+    def test_scratch_org_get(self, client, plan_factory, scratch_org_factory):
         plan = plan_factory()
         uuid = str(uuid4())
-        scratch_org_job_factory(
+        scratch_org_factory(
             uuid=uuid,
             plan=plan,
             config={
@@ -644,12 +649,10 @@ class TestPlanView:
         response = client.get(reverse("plan-scratch-org", kwargs={"pk": str(plan.id)}))
         assert response.status_code == 200
 
-    def test_scratch_org_get__missing(
-        self, client, plan_factory, scratch_org_job_factory
-    ):
+    def test_scratch_org_get__missing(self, client, plan_factory, scratch_org_factory):
         plan = plan_factory()
         uuid = str(uuid4())
-        scratch_org_job_factory(
+        scratch_org_factory(
             uuid=uuid,
             config={
                 "instance_url": "instance_url",

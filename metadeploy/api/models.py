@@ -120,6 +120,9 @@ class AllowedListAccessMixin(models.Model):
             )
         )
 
+    def is_visible_to_scratch_org(self):
+        return not self.visible_to or ORG_TYPES.Scratch in self.visible_to.org_type
+
     def is_listed_by_org_only(self, user):
         """
         Are we only seeing this because we're in an allowed org type?
@@ -860,7 +863,7 @@ class PreflightResult(models.Model):
         flow_coordinator.run(org)
 
 
-class ScratchOrgJob(HashIdMixin, models.Model):
+class ScratchOrg(HashIdMixin, models.Model):
     Status = Choices("started", "complete", "failed", "canceled")
 
     plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
@@ -898,12 +901,12 @@ class ScratchOrgJob(HashIdMixin, models.Model):
         return True
 
     def fail(self, error):
-        self.status = ScratchOrgJob.Status.failed
+        self.status = ScratchOrg.Status.failed
         self.save()
         async_to_sync(notify_org_finished)(self, error=error)
 
     def complete(self, config):
-        self.status = ScratchOrgJob.Status.complete
+        self.status = ScratchOrg.Status.complete
         self.config = config
         self.org_id = config["org_id"]
         self.save()

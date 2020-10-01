@@ -112,10 +112,18 @@ export const spinScratchOrg = (
   }
 };
 
-export const createScratchOrg = (payload: ScratchOrg): ScratchOrgCreated => ({
-  type: 'SCRATCH_ORG_CREATED' as const,
-  payload,
-});
+export const createScratchOrg = (payload: ScratchOrg): ScratchOrgCreated => {
+  if (window.socket && payload.org_id) {
+    window.socket.subscribe({
+      model: 'org',
+      id: payload.org_id,
+    });
+  }
+  return {
+    type: 'SCRATCH_ORG_CREATED' as const,
+    payload,
+  };
+};
 
 export const failScratchOrg = ({
   message,

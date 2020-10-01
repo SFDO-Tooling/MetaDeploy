@@ -18,7 +18,7 @@ from metadeploy.api.models import (
     Product,
     ProductCategory,
     ProductSlug,
-    ScratchOrgJob,
+    ScratchOrg,
     Step,
     Version,
 )
@@ -219,9 +219,9 @@ class JobFactory(factory.django.DjangoModelFactory):
 
 
 @register
-class ScratchOrgJobFactory(factory.django.DjangoModelFactory):
+class ScratchOrgFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = ScratchOrgJob
+        model = ScratchOrg
 
     email = "test@example.com"
     plan = factory.SubFactory(PlanFactory)

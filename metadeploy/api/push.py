@@ -140,7 +140,11 @@ async def notify_org_result_changed(result):
         org_id=org_id, status=PreflightResult.Status.started
     ).first()
     serializer = OrgSerializer(
-        {"current_job": current_job, "current_preflight": current_preflight}
+        {
+            "org_id": org_id,
+            "current_job": current_job,
+            "current_preflight": current_preflight,
+        }
     )
     group_name = CHANNELS_GROUP_NAME.format(
         model="org", id=convert_org_id_to_key(org_id)
@@ -156,10 +160,10 @@ async def notify_org_result_changed(result):
         await channel_layer.group_send(group_name, message)
 
 
-async def notify_org_finished(scratch_org_job, error=None):
-    from .serializers import ScratchOrgJobSerializer
+async def notify_org_finished(scratch_org, error=None):
+    from .serializers import ScratchOrgSerializer
 
-    data = ScratchOrgJobSerializer(scratch_org_job).data
+    data = ScratchOrgSerializer(scratch_org).data
     if error:
         type_ = "SCRATCH_ORG_ERROR"
         # unwrap the error in the case that there's only one,
@@ -182,7 +186,7 @@ async def notify_org_finished(scratch_org_job, error=None):
         "type": type_,
         "payload": payload,
     }
-    group_name = CHANNELS_GROUP_NAME.format(model="scratch_org", id=scratch_org_job.id)
+    group_name = CHANNELS_GROUP_NAME.format(model="scratch_org", id=scratch_org.id)
     channel_layer = get_channel_layer()
     sent_message = {"type": "notify", "group": group_name, "content": message}
     if await get_set_message_semaphore(channel_layer, sent_message):
@@ -190,10 +194,10 @@ async def notify_org_finished(scratch_org_job, error=None):
         await channel_layer.group_send(group_name, sent_message)
 
 
-async def preflight_started(scratch_org_job, preflight):
+async def preflight_started(scratch_org, preflight):
     from .serializers import PreflightResultSerializer
 
     payload = PreflightResultSerializer(instance=preflight).data
     message = {"type": "PREFLIGHT_STARTED", "payload": payload}
-    group_name = CHANNELS_GROUP_NAME.format(model="scratch_org", id=scratch_org_job.id)
+    group_name = CHANNELS_GROUP_NAME.format(model="scratch_org", id=scratch_org.id)
     await push_message_about_instance(preflight, message, group_name=group_name)
