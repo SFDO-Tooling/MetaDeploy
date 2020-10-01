@@ -1,7 +1,8 @@
-import { render } from '@testing-library/react';
 import React from 'react';
 
 import ProgressBar from '@/components/jobs/progressBar';
+
+import { render, rerenderWithI18n } from './../../utils';
 
 const defaultJob = {
   id: 'job-1',
@@ -48,12 +49,12 @@ describe('<ProgressBar />', () => {
       expect(getByText('45% Complete')).toBeVisible();
 
       job.results['2'] = { status: 'ok' };
-      rerender(<ProgressBar job={job} />);
+      rerenderWithI18n(<ProgressBar job={job} />, rerender);
 
       expect(getByText('50% Complete')).toBeVisible();
 
       job.status = 'failed';
-      rerender(<ProgressBar job={job} />);
+      rerenderWithI18n(<ProgressBar job={job} />, rerender);
 
       expect(clearInterval).toHaveBeenCalledTimes(2);
       expect(queryByText('50% Complete')).toBeNull();

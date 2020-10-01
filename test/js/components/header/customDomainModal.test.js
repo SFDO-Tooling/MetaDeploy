@@ -1,8 +1,10 @@
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
 import CustomDomainModal from '@/components/header/customDomainModal';
 import { addUrlParams } from '@/utils/api';
+
+import { render } from './../../utils';
 
 describe('<CustomDomainModal />', () => {
   const toggleModal = jest.fn();

@@ -5,6 +5,7 @@ import standardSprite from '@salesforce-ux/design-system/assets/icons/standard-s
 import utilitySprite from '@salesforce-ux/design-system/assets/icons/utility-sprite/svg/symbols.svg';
 import IconSettings from '@salesforce/design-system-react/components/icon-settings';
 import settings from '@salesforce/design-system-react/components/settings';
+import UNSAFE_DirectionSettings from '@salesforce/design-system-react/components/utilities/UNSAFE_direction';
 import i18n from 'i18next';
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
@@ -160,15 +161,17 @@ init_i18n((i18nError?: string) => {
       ReactDOM.render(
         <Provider store={appStore}>
           <BrowserRouter>
-            <IconSettings
-              actionSprite={actionSprite}
-              customSprite={customSprite}
-              doctypeSprite={doctypeSprite}
-              standardSprite={standardSprite}
-              utilitySprite={utilitySprite}
-            >
-              <App />
-            </IconSettings>
+            <UNSAFE_DirectionSettings.Provider value={document.dir || 'ltr'}>
+              <IconSettings
+                actionSprite={actionSprite}
+                customSprite={customSprite}
+                doctypeSprite={doctypeSprite}
+                standardSprite={standardSprite}
+                utilitySprite={utilitySprite}
+              >
+                <App />
+              </IconSettings>
+            </UNSAFE_DirectionSettings.Provider>
           </BrowserRouter>
         </Provider>,
         el,

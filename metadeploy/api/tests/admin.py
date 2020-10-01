@@ -5,6 +5,7 @@ from django.test import RequestFactory
 from ..admin import (
     AllowedListOrgAdmin,
     ArrayFieldCheckboxSelectMultiple,
+    MetadeployTranslatableAdmin,
     PlanAdmin,
     PlanMixin,
 )
@@ -48,6 +49,13 @@ class TestPlanMixin:
         obj.plan.version.label = "A Version"
         mixin = PlanMixin()
         assert mixin.version(obj) == obj.plan.version.label
+
+
+class TestMetadeployTranslatableAdmin:
+    def test_get_language_tabs(self):
+        admin = MetadeployTranslatableAdmin(Plan, None)
+        tabs = admin.get_language_tabs(None, Plan(), ())
+        assert len(tabs) == 0
 
 
 @pytest.mark.django_db
