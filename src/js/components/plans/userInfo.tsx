@@ -21,15 +21,15 @@ const LoggedOut = () => (
 );
 
 const Footer = () => (
-  <>
-    {i18n.t('Is this the correct org? If not, please')}{' '}
+  <Trans i18nKey="switchOrg">
+    {'Is this the correct org? If not, please '}
     <Login
       id="user-info-login"
       label={i18n.t('log in with a different org')}
       buttonClassName="slds-p-horizontal_xxx-small"
       buttonVariant="base"
     />
-  </>
+  </Trans>
 );
 
 const UserInfo = ({ user }: { user: User }) => {

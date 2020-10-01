@@ -7,6 +7,7 @@ from django.forms.widgets import CheckboxSelectMultiple
 from django.shortcuts import redirect
 from django.urls import reverse
 from parler.admin import TranslatableAdmin
+from parler.utils.views import TabsList
 
 from .models import (
     ORG_TYPES,
@@ -54,6 +55,16 @@ class PlanMixin:
     version.admin_order_field = "plan__version__label"
 
 
+class MetadeployTranslatableAdmin(TranslatableAdmin):
+    def get_language_tabs(self, request, obj, available_languages, css_class=None):
+        # Prevent showing other language tabs"""
+        tabs = TabsList(css_class=css_class)
+        current_language = self.get_form_language(request, obj)
+        tabs.current_is_translated = current_language in available_languages
+        tabs.allow_deletion = False
+        return tabs
+
+
 @admin.register(AllowedList)
 class AllowedListAdmin(admin.ModelAdmin):
     list_display = ("title", "description")
@@ -94,12 +105,12 @@ class JobAdmin(admin.ModelAdmin, PlanMixin):
 
 
 @admin.register(PlanTemplate)
-class PlanTemplateAdmin(TranslatableAdmin):
+class PlanTemplateAdmin(MetadeployTranslatableAdmin):
     pass
 
 
 @admin.register(Plan)
-class PlanAdmin(TranslatableAdmin):
+class PlanAdmin(MetadeployTranslatableAdmin):
     autocomplete_fields = ("version",)
     list_filter = ("version__product", "tier", "is_listed")
     list_display = (
@@ -149,7 +160,7 @@ class PreflightResult(admin.ModelAdmin, PlanMixin):
 
 
 @admin.register(Product)
-class ProductAdmin(TranslatableAdmin):
+class ProductAdmin(MetadeployTranslatableAdmin):
     list_display = ("title", "category", "order_key")
     search_fields = ("translations__title", "translations__description")
 
@@ -165,7 +176,7 @@ class ProductSlugAdmin(admin.ModelAdmin):
 
 
 @admin.register(Step)
-class StepAdmin(TranslatableAdmin, PlanMixin):
+class StepAdmin(MetadeployTranslatableAdmin, PlanMixin):
     autocomplete_fields = ("plan",)
     list_display = (
         "name",
@@ -207,7 +218,7 @@ class ClickThroughAgreementAdmin(admin.ModelAdmin):
 
 
 @admin.register(SiteProfile)
-class SiteProfileAdmin(TranslatableAdmin):
+class SiteProfileAdmin(MetadeployTranslatableAdmin):
     list_display = ("name", "site")
 
 

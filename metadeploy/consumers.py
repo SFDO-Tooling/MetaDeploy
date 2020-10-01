@@ -3,8 +3,14 @@ from importlib import import_module
 
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.apps import apps
+from django.conf import settings
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
-from django.utils.translation import gettext as _
+from django.utils import translation
+from django.utils.translation import get_supported_language_variant, gettext as _
+from django.utils.translation.trans_real import (
+    language_code_re,
+    parse_accept_lang_header,
+)
 
 from .api.constants import CHANNELS_GROUP_NAME
 from .api.hash_url import convert_org_id_to_key
@@ -20,7 +26,36 @@ def user_context(user):
     return {"request": Request(user)}
 
 
+def get_language_from_scope(scope):
+    """Get language from ASGI scope.
+
+    Based on django.utils.translation.get_language_from_request
+    """
+    accept = ""
+    for k, v in scope["headers"]:
+        if k == b"accept-language":
+            accept = v.decode("latin1")
+
+    for accept_lang, unused in parse_accept_lang_header(accept):
+        if accept_lang == "*":
+            break
+        if not language_code_re.search(accept_lang):  # pragma: no cover
+            continue
+        try:
+            return get_supported_language_variant(accept_lang)
+        except LookupError:  # pragma: no cover
+            continue
+    try:
+        return get_supported_language_variant(settings.LANGUAGE_CODE)
+    except LookupError:  # pragma: no cover
+        return settings.LANGUAGE_CODE
+
+
 class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
+    def __init__(self, *args, **kw):
+        super().__init__(*args, **kw)
+        self.lang = get_language_from_scope(self.scope)
+
     async def connect(self):
         await self.accept()
 
@@ -41,13 +76,14 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
             return
         if "serializer" in event and "instance" in event and "inner_type" in event:
             instance = self.get_instance(**event["instance"])
-            serializer = self.get_serializer(event["serializer"])
-            payload = {
-                "payload": serializer(
-                    instance=instance, context=user_context(self.scope["user"])
-                ).data,
-                "type": event["inner_type"],
-            }
+            with translation.override(self.lang):
+                serializer = self.get_serializer(event["serializer"])
+                payload = {
+                    "payload": serializer(
+                        instance=instance, context=user_context(self.scope["user"])
+                    ).data,
+                    "type": event["inner_type"],
+                }
             await self.send_json(payload)
             return
 

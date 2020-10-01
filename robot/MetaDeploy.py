@@ -22,9 +22,8 @@ class MetaDeploy:
         self.lang = lang
 
         # Load translations for the target language from the locales folder
-        langfam = lang.split("-")[0]
         trans_path = (
-            pathlib.Path(__file__).parent.parent / f"locales/{langfam}/translation.json"
+            pathlib.Path(__file__).parent.parent / f"locales/{lang}/translation.json"
         ).absolute()
         with open(trans_path, "r") as f:
             self.translations = json.load(f)

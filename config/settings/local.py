@@ -10,3 +10,5 @@ INSTALLED_APPS = INSTALLED_APPS + ["django_extensions"]  # NOQA
 # DEFAULT_FILE_STORAGE = "metadeploy.redis_storage.RedisStorage"
 
 # REDIS_STORAGE_CONFIG = {"USE_REDIS_CACHE": "default"}
+
+METADEPLOY_FAST_FORWARD = env("METADEPLOY_FAST_FORWARD", type_=bool, default=False)
