@@ -33,7 +33,6 @@ from .flows import StopFlowException
 from .github import local_github_checkout
 from .models import Job, Plan, PreflightResult, ScratchOrg
 from .push import preflight_started, report_error, user_token_expired
-from .salesforce import FakeUser
 from .salesforce import create_scratch_org as create_scratch_org_on_sf
 
 logger = logging.getLogger(__name__)
@@ -101,14 +100,13 @@ def prepend_python_path(path):
         sys.path = prev_path
 
 
-def run_flows(*, user, plan, skip_steps, organization_url, result_class, result_id):
+def run_flows(*, plan, skip_steps, organization_url, result_class, result_id):
     """
     This operates with side effects; it changes things in a Salesforce
     org, and then records the results of those operations on to a
     `result`.
 
     Args:
-        user (User): The User requesting this flow be run.
         plan (Plan): The Plan instance for the flow you're running.
         skip_steps (List[str]): The strings in the list should be valid
             step_num values for steps in this flow.
@@ -121,14 +119,21 @@ def run_flows(*, user, plan, skip_steps, organization_url, result_class, result_
         result_id (int): the PK of the result instance to get.
     """
     result = result_class.objects.get(pk=result_id)
-    token, token_secret = user.token
+    if result.user:
+        token, token_secret = result.user.token
+    else:
+        # This means we're in a ScratchOrg.
+        scratch_org = ScratchOrg.objects.get(org_id=result.org_id)
+        token = scratch_org.config["access_token"]
+        token_secret = scratch_org.config["refresh_token"]
+
     repo_url = plan.version.product.repo_url
     commit_ish = plan.commit_ish or plan.version.commit_ish
 
     with contextlib.ExitStack() as stack:
         stack.enter_context(finalize_result(result))
-        if user:
-            stack.enter_context(report_errors_to(user))
+        if result.user:
+            stack.enter_context(report_errors_to(result.user))
 
         # Let's clone the repo locally:
         repo_user, repo_name = extract_user_and_repo(repo_url)
@@ -185,7 +190,6 @@ def enqueuer():
     for j in Job.objects.filter(enqueued_at=None):
         j.invalidate_related_preflight()
         rq_job = run_flows_job.delay(
-            user=j.user,
             plan=j.plan,
             skip_steps=j.skip_steps(),
             organization_url=j.organization_url,
@@ -229,12 +233,11 @@ def expire_user_tokens():
 expire_user_tokens_job = job(expire_user_tokens)
 
 
-def preflight(preflight_result_id, forced_user=None):
+def preflight(preflight_result_id):
     # Because the FieldTracker interferes with transparently serializing models across
     # the Redis boundary, we have to pass a primitive value to this function,
     preflight_result = PreflightResult.objects.get(pk=preflight_result_id)
     run_flows(
-        user=forced_user if forced_user is not None else preflight_result.user,
         plan=preflight_result.plan,
         skip_steps=[],
         organization_url=preflight_result.organization_url,
@@ -288,7 +291,6 @@ def create_scratch_org(*, plan_id, email, org_name, result_id):
         return
 
     org.complete(scratch_org_config.config)
-    fake_user = FakeUser(token=(org_config.access_token, org_config.refresh_token))
 
     if plan.requires_preflight:
         preflight_result = PreflightResult.objects.create(
@@ -298,7 +300,7 @@ def create_scratch_org(*, plan_id, email, org_name, result_id):
             org_id=scratch_org_config.config["org_id"],
         )
         async_to_sync(preflight_started)(org, preflight_result)
-        preflight(preflight_result.pk, forced_user=fake_user)
+        preflight(preflight_result.pk)
 
     # @@@ TODO: start installation job automatically if:
     #   - Plan has no preflight
@@ -312,7 +314,6 @@ def create_scratch_org(*, plan_id, email, org_name, result_id):
     # )
 
     # rq_job = run_flows.delay(
-    #     user=fake_user,
     #     plan=plan,
     #     skip_steps=[],
     #     organization_url=org_config.instance_url,

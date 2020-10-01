@@ -27,14 +27,6 @@ SFDX_SIGNUP_INSTANCE = settings.SFDX_SIGNUP_INSTANCE
 DURATION_DAYS = 30
 
 
-class FakeUser:
-    def __init__(self, token):
-        self.token = token
-
-    def __bool__(self):  # pragma: nocover
-        return False
-
-
 def _get_devhub_api():
     """Get an access token.
 
@@ -188,6 +180,9 @@ def _get_access_token(*, org_result, scratch_org_config):
     scratch_org_config.config["access_token"] = scratch_org_config._scratch_info[
         "access_token"
     ] = auth_result["access_token"]
+    scratch_org_config.config["refresh_token"] = scratch_org_config._scratch_info[
+        "refresh_token"
+    ] = auth_result["refresh_token"]
 
 
 def create_scratch_org(

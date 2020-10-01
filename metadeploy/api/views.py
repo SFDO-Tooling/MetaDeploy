@@ -28,7 +28,6 @@ from .models import (
 )
 from .paginators import ProductPaginator
 from .permissions import OnlyOwnerOrSuperuserCanDelete
-from .salesforce import FakeUser
 from .serializers import (
     FullUserSerializer,
     JobSerializer,
@@ -224,7 +223,6 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
         if not (is_visible_to or scratch_org_id):
             return Response("", status=status.HTTP_403_FORBIDDEN)
 
-        forced_user_kwargs = {}
         kwargs = None
         if scratch_org_id:
             try:
@@ -236,11 +234,6 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
                     "organization_url": config["instance_url"],
                     "org_id": config["org_id"],
                 }
-                # Are these values in the config? In jobs.py they're a bit
-                # different.
-                forced_user_kwargs["forced_user"] = FakeUser(
-                    token=(config["access_token"], config["refresh_token"]),
-                )
             except (ScratchOrg.DoesNotExist, ScratchOrg.MultipleObjectsReturned):
                 pass
 
@@ -258,7 +251,7 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
             plan=plan,
             **kwargs,
         )
-        preflight_job.delay(preflight_result.pk, **forced_user_kwargs)
+        preflight_job.delay(preflight_result.pk)
         serializer = PreflightResultSerializer(instance=preflight_result)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

@@ -35,7 +35,6 @@ def test_report_error(mocker, job_factory, user_factory, plan_factory, step_fact
 
     with pytest.raises(Exception):
         run_flows(
-            user=user,
             plan=plan,
             skip_steps=[],
             organization_url=job.organization_url,
@@ -59,7 +58,6 @@ def test_run_flows(mocker, job_factory, user_factory, plan_factory, step_factory
     job = job_factory(user=user, plan=plan, org_id=user.org_id)
 
     run_flows(
-        user=user,
         plan=plan,
         skip_steps=[],
         organization_url=job.organization_url,
@@ -85,7 +83,6 @@ def test_run_flows__preflight(
     )
 
     run_flows(
-        user=user,
         plan=plan,
         skip_steps=[],
         organization_url=preflight_result.organization_url,
@@ -283,6 +280,7 @@ class TestCreateScratchOrg:
             jwt_session.return_value = {
                 "instance_url": "https://sample.salesforce.org/",
                 "access_token": "abc123",
+                "refresh_token": "abc123",
             }
             open = stack.enter_context(patch("metadeploy.api.salesforce.open"))
             fake_json = json.dumps({"edition": ""})
@@ -306,7 +304,21 @@ class TestCreateScratchOrg:
                     }
                 }
             )
-            stack.enter_context(patch("metadeploy.api.salesforce.SalesforceOAuth2"))
+            SalesforceOAuth2 = stack.enter_context(
+                patch("metadeploy.api.salesforce.SalesforceOAuth2")
+            )
+            SalesforceOAuth2.return_value = MagicMock(
+                **{
+                    "get_token.return_value": MagicMock(
+                        **{
+                            "json.return_value": {
+                                "access_token": "abc123",
+                                "refresh_token": "abc123",
+                            }
+                        }
+                    )
+                }
+            )
             BaseCumulusCI = stack.enter_context(
                 patch("metadeploy.api.salesforce.BaseCumulusCI")
             )
@@ -351,6 +363,7 @@ class TestCreateScratchOrg:
             jwt_session.return_value = {
                 "instance_url": "https://sample.salesforce.org/",
                 "access_token": "abc123",
+                "refresh_token": "abc123",
             }
             open = stack.enter_context(patch("metadeploy.api.salesforce.open"))
             fake_json = json.dumps({"edition": ""})
