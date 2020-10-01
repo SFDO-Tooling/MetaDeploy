@@ -191,17 +191,20 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
     def preflight_get(self, request):
         plan = get_object_or_404(Plan.objects, id=self.kwargs["pk"])
         scratch_org_id = request.session.get("scratch_org_id", None)
+
         scratch_org = None
         if scratch_org_id:
             scratch_org = ScratchOrg.objects.filter(
                 uuid=scratch_org_id, status=ScratchOrg.Status.complete
             ).first()
+
         if scratch_org:
             org_id = scratch_org.org_id
         elif request.user.is_authenticated:
             org_id = request.user.org_id
         else:
             return Response("", status=status.HTTP_404_NOT_FOUND)
+
         preflight = PreflightResult.objects.most_recent(
             org_id=org_id,
             plan=plan,
@@ -331,6 +334,22 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
 class OrgViewSet(viewsets.ViewSet):
     permission_classes = (AllowAny,)
 
+    @staticmethod
+    def _prepare_org_serialization(org_id):
+        current_job = Job.objects.filter(
+            org_id=org_id, status=Job.Status.started
+        ).first()
+        current_preflight = PreflightResult.objects.filter(
+            org_id=org_id, status=PreflightResult.Status.started
+        ).first()
+        return OrgSerializer(
+            {
+                "org_id": org_id,
+                "current_job": current_job,
+                "current_preflight": current_preflight,
+            }
+        ).data
+
     def list(self, request):
         """
         This will return data on the user's current org(s). It is not a
@@ -346,34 +365,10 @@ class OrgViewSet(viewsets.ViewSet):
             ).first()
             if scratch_org:
                 org_id = scratch_org.org_id
-                current_job = Job.objects.filter(
-                    org_id=org_id, status=Job.Status.started
-                ).first()
-                current_preflight = PreflightResult.objects.filter(
-                    org_id=org_id, status=PreflightResult.Status.started
-                ).first()
-                response[org_id] = OrgSerializer(
-                    {
-                        "org_id": org_id,
-                        "current_job": current_job,
-                        "current_preflight": current_preflight,
-                    }
-                ).data
+                response[org_id] = self._prepare_org_serialization(org_id)
 
         if request.user.is_authenticated:
             org_id = request.user.org_id
-            current_job = Job.objects.filter(
-                org_id=org_id, status=Job.Status.started
-            ).first()
-            current_preflight = PreflightResult.objects.filter(
-                org_id=org_id, status=PreflightResult.Status.started
-            ).first()
-            response[org_id] = OrgSerializer(
-                {
-                    "org_id": org_id,
-                    "current_job": current_job,
-                    "current_preflight": current_preflight,
-                }
-            ).data
+            response[org_id] = self._prepare_org_serialization(org_id)
 
         return Response(response)
