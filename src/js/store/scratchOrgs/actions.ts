@@ -1,5 +1,7 @@
 import { ThunkResult } from '@/store';
 import { addError } from '@/store/errors/actions';
+import { PreflightStarted } from '@/store/plans/actions';
+import { Preflight } from '@/store/plans/reducer';
 import { ScratchOrg } from '@/store/scratchOrgs/reducer';
 import apiFetch from '@/utils/api';
 
@@ -137,4 +139,17 @@ export const failScratchOrg = ({
     type: 'SCRATCH_ORG_FAILED' as const,
     payload: org,
   });
+};
+
+export const createPreflight = (payload: Preflight): PreflightStarted => {
+  if (payload && window.socket) {
+    window.socket.subscribe({
+      model: 'preflightresult',
+      id: payload.id,
+    });
+  }
+  return {
+    type: 'PREFLIGHT_STARTED' as const,
+    payload,
+  };
 };

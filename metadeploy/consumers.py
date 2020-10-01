@@ -109,7 +109,7 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
 
     def handle_org_special_case(self, content):
         if content["model"] == "org":
-            content["id"] = convert_org_id_to_key(self.scope["user"].org_id)
+            content["id"] = convert_org_id_to_key(content["id"])
             return True
         return False
 

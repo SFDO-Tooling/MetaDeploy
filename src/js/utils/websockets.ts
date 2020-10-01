@@ -24,9 +24,11 @@ import {
   PreflightCompleted,
   PreflightFailed,
   PreflightInvalid,
+  PreflightStarted,
 } from '@/store/plans/actions';
 import { Preflight } from '@/store/plans/reducer';
 import {
+  createPreflight,
   createScratchOrg,
   failScratchOrg,
   ScratchOrgCreated,
@@ -60,6 +62,7 @@ interface UserEvent {
 }
 interface PreflightEvent {
   type:
+    | 'PREFLIGHT_STARTED'
     | 'PREFLIGHT_COMPLETED'
     | 'PREFLIGHT_FAILED'
     | 'PREFLIGHT_CANCELED'
@@ -99,6 +102,7 @@ type EventType = SubscriptionEvent | ErrorEvent | ModelEvent;
 
 type Action =
   | TokenInvalidAction
+  | PreflightStarted
   | PreflightCompleted
   | PreflightFailed
   | PreflightCanceled
@@ -143,6 +147,8 @@ export const getAction = (event: EventType): Action | null => {
       return createScratchOrg(event.payload);
     case 'SCRATCH_ORG_ERROR':
       return failScratchOrg(event.payload);
+    case 'PREFLIGHT_STARTED':
+      return createPreflight(event.payload);
   }
   return null;
 };

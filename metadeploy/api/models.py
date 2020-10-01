@@ -779,7 +779,8 @@ class PreflightResult(models.Model):
     # }
 
     def subscribable_by(self, user):
-        return self.user == user
+        # TODO: Is this what we want?
+        return not self.user or self.user == user
 
     def has_any_errors(self):
         return any(

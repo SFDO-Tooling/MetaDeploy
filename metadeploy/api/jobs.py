@@ -297,8 +297,8 @@ def create_scratch_org(*, plan_id, email, org_name, result_id):
             organization_url=org_config.instance_url,
             org_id=scratch_org_config.config["org_id"],
         )
-        preflight(preflight_result.pk, forced_user=fake_user)
         async_to_sync(preflight_started)(org, preflight_result)
+        preflight(preflight_result.pk, forced_user=fake_user)
 
     # @@@ TODO: start installation job automatically if:
     #   - Plan has no preflight
