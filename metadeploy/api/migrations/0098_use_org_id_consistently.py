@@ -27,16 +27,4 @@ class Migration(migrations.Migration):
             name="org_id",
             field=models.CharField(blank=True, max_length=18, null=True),
         ),
-        migrations.AlterField(
-            model_name="job",
-            name="org_id",
-            field=models.CharField(default="", max_length=18),
-            preserve_default=False,
-        ),
-        migrations.AlterField(
-            model_name="preflightresult",
-            name="org_id",
-            field=models.CharField(default="", max_length=18),
-            preserve_default=False,
-        ),
     ]

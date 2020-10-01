@@ -636,7 +636,7 @@ class Job(HashIdMixin, models.Model):
     enqueued_at = models.DateTimeField(null=True)
     job_id = models.UUIDField(null=True)
     status = models.CharField(choices=Status, max_length=64, default=Status.started)
-    org_id = models.CharField(max_length=18)
+    org_id = models.CharField(null=True, blank=True, max_length=18)
     org_name = models.CharField(blank=True, max_length=256)
     org_type = models.CharField(blank=True, max_length=256)
     full_org_type = models.CharField(null=True, blank=True, max_length=256)
@@ -661,7 +661,8 @@ class Job(HashIdMixin, models.Model):
     )
 
     def subscribable_by(self, user):
-        return self.is_public or user.is_staff or user == self.user
+        # TODO: Is this what we want?
+        return self.is_public or user.is_staff or user == self.user or not self.user
 
     def skip_steps(self):
         return [
@@ -749,7 +750,7 @@ class PreflightResult(models.Model):
     objects = PreflightResultQuerySet.as_manager()
 
     organization_url = models.URLField()
-    org_id = models.CharField(max_length=18)
+    org_id = models.CharField(null=True, blank=True, max_length=18)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True
     )

@@ -354,6 +354,16 @@ class TestPreflight:
 
         assert response.status_code == 201
 
+    def test_post__anon__bad(self, anon_client, plan_factory):
+        uuid = str(uuid4())
+        plan = plan_factory()
+        session = anon_client.session
+        session["scratch_org_id"] = uuid
+        session.save()
+        response = anon_client.post(reverse("plan-preflight", kwargs={"pk": plan.id}))
+
+        assert response.status_code == 403
+
     def test_post(self, client, plan_factory):
         plan = plan_factory()
         response = client.post(reverse("plan-preflight", kwargs={"pk": plan.id}))
@@ -387,7 +397,43 @@ class TestPreflight:
             "edited_at": format_timestamp(preflight.edited_at),
         }
 
-    def test_get__bad(self, client, plan_factory):
+    def test_get__anon(
+        self, anon_client, plan_factory, scratch_org_factory, preflight_result_factory
+    ):
+        uuid = str(uuid4())
+        plan = plan_factory()
+        org = scratch_org_factory(
+            uuid=uuid,
+            plan=plan,
+            status=ScratchOrg.Status.complete,
+            org_id="org_id",
+            config={
+                "instance_url": "instance_url",
+                "org_id": "org_id",
+                "username": "username",
+                "access_token": "token",
+                "refresh_token": "refresh token",
+            },
+        )
+        preflight = preflight_result_factory(
+            plan=plan,
+            org_id=org.org_id,
+        )
+        session = anon_client.session
+        session["scratch_org_id"] = uuid
+        session.save()
+        response = anon_client.get(reverse("plan-preflight", kwargs={"pk": plan.id}))
+
+        assert response.status_code == 200
+        assert response.json()["id"] == str(preflight.id)
+
+    def test_get__bad(self, anon_client, plan_factory):
+        plan = plan_factory()
+        response = anon_client.get(reverse("plan-preflight", kwargs={"pk": plan.id}))
+
+        assert response.status_code == 404
+
+    def test_get__bad__anon(self, client, plan_factory):
         plan = plan_factory()
         response = client.get(reverse("plan-preflight", kwargs={"pk": plan.id}))
 
