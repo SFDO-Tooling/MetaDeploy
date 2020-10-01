@@ -95,6 +95,7 @@ describe('getAction', () => {
   [
     { type: 'SCRATCH_ORG_CREATED', action: 'createScratchOrg', thunk: false },
     { type: 'SCRATCH_ORG_ERROR', action: 'failScratchOrg', thunk: true },
+    { type: 'PREFLIGHT_STARTED', action: 'createPreflight', thunk: false },
   ].forEach(({ type, action, thunk }) => {
     test(`handles msg: ${type}`, () => {
       const payload = { foo: 'bar' };

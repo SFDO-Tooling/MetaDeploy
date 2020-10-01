@@ -46,7 +46,7 @@ export const fetchOrgJobs = (): ThunkResult<
   }
 };
 
-export const updateOrg = (payload: OrgChanged['payload']): OrgChanged => ({
+export const updateOrg = (payload: Org): OrgChanged => ({
   type: 'ORG_CHANGED' as const,
   payload,
 });

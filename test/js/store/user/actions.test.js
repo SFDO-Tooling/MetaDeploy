@@ -26,7 +26,7 @@ describe('login', () => {
     expect(actions.login(user)).toEqual(loggedIn);
   });
 
-  test('subscribes to user/org ws events', () => {
+  test('subscribes to user ws events', () => {
     const user = {
       id: 'user-id',
       username: 'Test User',
@@ -37,14 +37,9 @@ describe('login', () => {
       model: 'user',
       id: 'user-id',
     };
-    const orgSubscription = {
-      model: 'org',
-      id: 'org-id',
-    };
     actions.login(user);
 
     expect(window.socket.subscribe).toHaveBeenCalledWith(userSubscription);
-    expect(window.socket.subscribe).toHaveBeenCalledWith(orgSubscription);
   });
 
   describe('with Sentry', () => {
@@ -85,7 +80,7 @@ describe('logout', () => {
       current_preflight: null,
     });
 
-    window.socket = { reconnect: jest.fn() };
+    window.socket = { subscribe: jest.fn(), reconnect: jest.fn() };
   });
 
   afterEach(() => {
@@ -172,15 +167,19 @@ describe('refetchAllData', () => {
       const started = { type: 'REFETCH_DATA_STARTED' };
       const succeeded = { type: 'REFETCH_DATA_SUCCEEDED' };
       const loggedOut = { type: 'USER_LOGGED_OUT' };
+      const fetchingOrgs = { type: 'FETCH_ORG_JOBS_STARTED' };
       const loggedIn = {
         type: 'USER_LOGGED_IN',
         payload: user,
       };
-      const org = {
-        current_job: null,
-        current_preflight: null,
+      const orgs = {
+        'org-id': {
+          org_id: 'org-id',
+          current_job: null,
+          current_preflight: null,
+        },
       };
-      fetchMock.getOnce(window.api_urls.org_list(), org);
+      fetchMock.getOnce(window.api_urls.org_list(), orgs);
 
       expect.assertions(1);
       return store.dispatch(actions.refetchAllData()).then(() => {
@@ -188,6 +187,7 @@ describe('refetchAllData', () => {
           started,
           succeeded,
           loggedOut,
+          fetchingOrgs,
           loggedIn,
         ]);
       });
@@ -199,10 +199,24 @@ describe('refetchAllData', () => {
       const started = { type: 'REFETCH_DATA_STARTED' };
       const succeeded = { type: 'REFETCH_DATA_SUCCEEDED' };
       const loggedOut = { type: 'USER_LOGGED_OUT' };
+      const fetchingOrgs = { type: 'FETCH_ORG_JOBS_STARTED' };
+      const orgs = {
+        'org-id': {
+          org_id: 'org-id',
+          current_job: null,
+          current_preflight: null,
+        },
+      };
+      fetchMock.getOnce(window.api_urls.org_list(), orgs);
 
       expect.assertions(1);
       return store.dispatch(actions.refetchAllData()).then(() => {
-        expect(store.getActions()).toEqual([started, succeeded, loggedOut]);
+        expect(store.getActions()).toEqual([
+          started,
+          succeeded,
+          loggedOut,
+          fetchingOrgs,
+        ]);
       });
     });
   });

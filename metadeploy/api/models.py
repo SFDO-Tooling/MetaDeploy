@@ -120,9 +120,6 @@ class AllowedListAccessMixin(models.Model):
             )
         )
 
-    def is_visible_to_scratch_org(self):
-        return not self.visible_to or ORG_TYPES.Scratch in self.visible_to.org_type
-
     def is_listed_by_org_only(self, user):
         """
         Are we only seeing this because we're in an allowed org type?

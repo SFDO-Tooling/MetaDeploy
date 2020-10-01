@@ -109,13 +109,16 @@ describe('<Header />', () => {
     test('renders CurrentJobAlert', () => {
       const initialState = {
         user: { username: 'Test User' },
-        org: {
-          current_job: {
-            id: 'my-job',
-            product_slug: 'my-product',
-            version_label: 'my-version',
-            plan_slug: 'my-plan',
-            plan_average_duration: '119.999',
+        orgs: {
+          'org-id': {
+            org_id: 'org-id',
+            current_job: {
+              id: 'my-job',
+              product_slug: 'my-product',
+              version_label: 'my-version',
+              plan_slug: 'my-plan',
+              plan_average_duration: '119.999',
+            },
           },
         },
       };

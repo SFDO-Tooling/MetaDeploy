@@ -13,11 +13,9 @@ import RequiredDataCell from '@/components/plans/stepsTable/requiredDataCell';
 import ToggleLogsDataColumnLabel from '@/components/plans/stepsTable/toggleLogsDataColumnLabel';
 import { Job } from '@/store/jobs/reducer';
 import { CONSTANTS, Plan, Preflight, Step } from '@/store/plans/reducer';
-import { User } from '@/store/user/reducer';
 
 export type DataCellProps = {
   item?: Step;
-  user?: User;
   preflight?: Preflight | null | undefined;
   className?: string;
   selectedSteps?: SelectedSteps;
@@ -27,11 +25,11 @@ export type DataCellProps = {
 };
 
 type Props = {
-  user?: User;
   plan: Plan;
   preflight?: Preflight | null | undefined;
   steps: Step[] | null;
   selectedSteps?: SelectedSteps;
+  canInstall?: boolean;
   job?: Job;
   handleStepsChange?: (id: string, checked: boolean) => void;
 };
@@ -167,18 +165,17 @@ class StepsTable extends React.Component<Props, State> {
 
   render() {
     const {
-      user,
       plan,
       preflight,
       steps,
       selectedSteps,
+      canInstall,
       job,
       handleStepsChange,
     } = this.props;
     const { expandedPanels } = this.state;
     const activeJobStepId = this.getActiveStep(job);
 
-    const hasValidToken = Boolean(user?.valid_token_for);
     const hasReadyPreflight = !plan.requires_preflight || preflight?.is_ready;
     const logsExpanded = expandedPanels.size > 0;
     return (
@@ -205,7 +202,7 @@ class StepsTable extends React.Component<Props, State> {
                 preflight={preflight}
                 job={job}
                 selectedSteps={
-                  hasValidToken && hasReadyPreflight ? selectedSteps : undefined
+                  canInstall && hasReadyPreflight ? selectedSteps : undefined
                 }
                 activeJobStep={activeJobStepId}
                 togglePanel={this.togglePanel}
@@ -222,7 +219,7 @@ class StepsTable extends React.Component<Props, State> {
                 activeJobStep={activeJobStepId}
               />
             </DataTableColumn>
-            {job || (hasValidToken && hasReadyPreflight) ? (
+            {job || (canInstall && hasReadyPreflight) ? (
               <DataTableColumn
                 key="is_recommended"
                 label={job ? i18n.t('Install') : <InstallDataColumnLabel />}

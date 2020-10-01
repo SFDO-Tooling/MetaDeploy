@@ -168,17 +168,26 @@ describe('spinScratchOrg', () => {
   });
 });
 
-[{ type: 'SCRATCH_ORG_CREATED', action: 'createScratchOrg' }].forEach(
-  ({ type, action }) => {
-    test(`${action} returns action object: ${type}`, () => {
-      const payload = { foo: 'bar' };
-      const expected = { type, payload };
+describe('createScratchOrg', () => {
+  beforeEach(() => {
+    window.socket = { subscribe: jest.fn() };
+  });
 
-      // eslint-disable-next-line import/namespace
-      expect(actions[action](payload)).toEqual(expected);
+  afterEach(() => {
+    Reflect.deleteProperty(window, 'socket');
+  });
+
+  test('returns action object: SCRATCH_ORG_CREATED', () => {
+    const payload = { org_id: 'org-id' };
+    const expected = { type: 'SCRATCH_ORG_CREATED', payload };
+
+    expect(actions.createScratchOrg(payload)).toEqual(expected);
+    expect(window.socket.subscribe).toHaveBeenCalledWith({
+      model: 'org',
+      id: 'org-id',
     });
-  },
-);
+  });
+});
 
 describe('failScratchOrg', () => {
   test('adds message and dispatches SCRATCH_ORG_FAILED action', () => {
@@ -192,5 +201,26 @@ describe('failScratchOrg', () => {
     expect(allActions[0].type).toEqual('ERROR_ADDED');
     expect(allActions[0].payload.message).toEqual('Nope.');
     expect(allActions[1]).toEqual(failed);
+  });
+});
+
+describe('createPreflight', () => {
+  beforeEach(() => {
+    window.socket = { subscribe: jest.fn() };
+  });
+
+  afterEach(() => {
+    Reflect.deleteProperty(window, 'socket');
+  });
+
+  test('returns action object: PREFLIGHT_STARTED', () => {
+    const payload = { id: 'preflight-id' };
+    const expected = { type: 'PREFLIGHT_STARTED', payload };
+
+    expect(actions.createPreflight(payload)).toEqual(expected);
+    expect(window.socket.subscribe).toHaveBeenCalledWith({
+      model: 'preflightresult',
+      id: 'preflight-id',
+    });
   });
 });

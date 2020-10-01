@@ -525,8 +525,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         data["org_type"] = user.org_type if user else None
         data["full_org_type"] = user.full_org_type if user else None
         data["organization_url"] = user.instance_url if user else None
-        # @@@ TODO: Why is this needed?
-        # data["org_id"] = user.org_id
+        data["org_id"] = user.org_id
         return data
 
 

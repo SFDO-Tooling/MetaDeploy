@@ -420,6 +420,10 @@ class PlanDetail extends React.Component<Props, State> {
       product.most_recent_version &&
       new Date(version.created_at) >=
         new Date(product.most_recent_version.created_at);
+    const canInstall = Boolean(
+      scratchOrg?.status === SCRATCH_ORG_STATUSES.complete ||
+        user?.valid_token_for,
+    );
 
     return (
       <DocumentTitle
@@ -488,11 +492,11 @@ class PlanDetail extends React.Component<Props, State> {
               )}
               {plan.steps?.length ? (
                 <StepsTable
-                  user={user}
                   plan={plan}
                   preflight={preflight}
                   steps={steps}
                   selectedSteps={selectedSteps}
+                  canInstall={canInstall}
                   handleStepsChange={this.handleStepsChange}
                 />
               ) : null}

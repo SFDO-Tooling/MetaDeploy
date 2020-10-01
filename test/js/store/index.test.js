@@ -9,7 +9,7 @@ describe('reducer', () => {
       'products',
       'preflights',
       'jobs',
-      'org',
+      'orgs',
       'scratchOrgs',
       'socket',
       'errors',

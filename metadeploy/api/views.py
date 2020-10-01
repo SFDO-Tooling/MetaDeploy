@@ -218,11 +218,7 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
         is_visible_to = plan.is_visible_to(
             request.user
         ) and plan.version.product.is_visible_to(request.user)
-        is_visible_to_scratch_org = (
-            plan.is_visible_to_scratch_org()
-            and plan.version.product.is_visible_to_scratch_org()
-        )
-        if not (is_visible_to or (scratch_org_id and is_visible_to_scratch_org)):
+        if not (is_visible_to or scratch_org_id):
             return Response("", status=status.HTTP_403_FORBIDDEN)
 
         forced_user_kwargs = {}

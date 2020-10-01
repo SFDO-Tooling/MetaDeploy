@@ -222,14 +222,17 @@ describe('<PlanDetail />', () => {
       const { getByText, getAllByText } = setup({
         initialState: {
           ...defaultState,
-          org: {
-            current_job: {
-              id: '1',
-              product_slug: 'product-1',
-              version_label: '1.0.0',
-              plan_slug: 'my-plan',
+          orgs: {
+            'org-id': {
+              org_id: 'org-id',
+              current_job: {
+                id: '1',
+                product_slug: 'product-1',
+                version_label: '1.0.0',
+                plan_slug: 'my-plan',
+              },
+              current_preflight: null,
             },
-            current_preflight: null,
           },
         },
       });
@@ -244,7 +247,13 @@ describe('<PlanDetail />', () => {
       const { getByText, getAllByText } = setup({
         initialState: {
           ...defaultState,
-          org: { current_job: null, current_preflight: '1' },
+          orgs: {
+            'org-id': {
+              org_id: 'org-id',
+              current_job: null,
+              current_preflight: '1',
+            },
+          },
         },
       });
 
@@ -457,7 +466,13 @@ describe('<PlanDetail />', () => {
     const { getByText } = setup({
       initialState: {
         ...defaultState,
-        org: { current_job: null, current_preflight: null },
+        orgs: {
+          'org-id': {
+            org_id: 'org-id',
+            current_job: null,
+            current_preflight: null,
+          },
+        },
       },
     });
 
