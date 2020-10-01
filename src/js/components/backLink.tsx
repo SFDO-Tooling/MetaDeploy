@@ -14,6 +14,7 @@ const BackLink = ({
 }) => (
   <UNSAFE_DirectionSettings.Consumer>
     {(direction: string) => {
+      /* istanbul ignore next */
       const name = direction === 'ltr' ? 'back' : 'forward';
       return (
         <p className={className}>
