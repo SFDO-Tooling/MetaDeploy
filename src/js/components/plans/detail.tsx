@@ -456,7 +456,7 @@ class PlanDetail extends React.Component<Props, State> {
                   )}
                 />
               ) : null}
-              {preflight && user ? (
+              {preflight && (scratchOrg || user) ? (
                 <Toasts preflight={preflight} label="Pre-install validation" />
               ) : null}
               <Intro
@@ -473,7 +473,7 @@ class PlanDetail extends React.Component<Props, State> {
                   ) : null
                 }
                 results={
-                  preflight && user ? (
+                  preflight && (scratchOrg || user) ? (
                     <PreflightResults preflight={preflight} />
                   ) : null
                 }

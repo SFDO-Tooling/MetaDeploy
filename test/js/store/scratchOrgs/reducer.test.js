@@ -20,10 +20,21 @@ describe('reducer', () => {
 
   test('handles FETCH_SCRATCH_ORG_SUCCEEDED action', () => {
     const initial = {};
-    const expected = { 'plan-1': null };
+    const expected = { 'plan-1': { plan: 'plan-1' } };
     const actual = reducer(initial, {
       type: 'FETCH_SCRATCH_ORG_SUCCEEDED',
-      payload: { plan: 'plan-1', org: null },
+      payload: { plan: 'plan-1', org: { plan: 'plan-1' } },
+    });
+
+    expect(actual).toEqual(expected);
+  });
+
+  test('handles FETCH_SCRATCH_ORG_SUCCEEDED action with no org', () => {
+    const initial = { 'plan-1': { plan: 'plan-1' } };
+    const expected = { 'plan-1': { plan: 'plan-1' }, 'plan-2': null };
+    const actual = reducer(initial, {
+      type: 'FETCH_SCRATCH_ORG_SUCCEEDED',
+      payload: { plan: 'plan-2', org: null },
     });
 
     expect(actual).toEqual(expected);
@@ -36,11 +47,9 @@ describe('reducer', () => {
   ].forEach(({ type }) => {
     test(`handles ${type} action`, () => {
       const initial = {
-        'plan-1': null,
         'plan-2': { status: 'started', edited_at: '1' },
       };
       const expected = {
-        'plan-1': null,
         'plan-2': { plan: 'plan-2', status: 'complete', edited_at: '2' },
       };
       const actual = reducer(initial, {
@@ -55,12 +64,10 @@ describe('reducer', () => {
   describe('with existing scratch org', () => {
     test('updates with newer scratch org', () => {
       const initial = {
-        'plan-1': null,
         'plan-2': { plan: 'plan-2', foo: 'bar', edited_at: '1' },
       };
       const incoming = { plan: 'plan-2', foo: 'changed', edited_at: '2' };
       const expected = {
-        'plan-1': null,
         'plan-2': incoming,
       };
       const actual = reducer(initial, {
@@ -73,7 +80,6 @@ describe('reducer', () => {
 
     test('ignores older scratch org', () => {
       const initial = {
-        'plan-1': null,
         'plan-2': { plan: 'plan-2', foo: 'bar', edited_at: '2' },
       };
       const incoming = { plan: 'plan-2', foo: 'changed', edited_at: '1' };

@@ -25,7 +25,10 @@ const reducer = (
       return {};
     case 'FETCH_SCRATCH_ORG_SUCCEEDED': {
       const { plan, org } = action.payload;
-      return { ...scratchOrgs, [plan]: org };
+      if (org) {
+        return { [plan]: org };
+      }
+      return { ...scratchOrgs, [plan]: null };
     }
     case 'SCRATCH_ORG_SPINNING':
     case 'SCRATCH_ORG_CREATED':
@@ -33,10 +36,10 @@ const reducer = (
       const org = action.payload;
       const { plan } = org;
       const existingOrg = scratchOrgs[plan];
-      if (!existingOrg || org.edited_at > existingOrg.edited_at) {
-        return { ...scratchOrgs, [plan]: org };
+      if (existingOrg && existingOrg.edited_at > org.edited_at) {
+        return scratchOrgs;
       }
-      return scratchOrgs;
+      return { [plan]: org };
     }
     case 'SCRATCH_ORG_ERROR': {
       const plan = action.payload;
