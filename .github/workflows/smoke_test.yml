@@ -49,7 +49,7 @@ jobs:
       - name: Delete scratch org
         if: always()
         run: |
-          cci org scratch_delete dev
+          cci org scratch_delete enterprise
       - name: Store robot results
         if: failure()
         uses: actions/upload-artifact@v1
