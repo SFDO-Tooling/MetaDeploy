@@ -29,15 +29,24 @@ from .hash_url import convert_org_id_to_key
 logger = logging.getLogger("metadeploy.api.push")
 
 
+async def push_message(group_name, message):
+    """Send a message to a group using the default channel layer.
+
+    Checks a semaphore to see if the same message was sent very recently; if so, don't send.
+    """
+    channel_layer = get_channel_layer()
+    action_type = message.get("content", {}).get("type")
+    if await get_set_message_semaphore(channel_layer, message):
+        logger.info(f"Push message: group={group_name} type={action_type}")
+        await channel_layer.group_send(group_name, message)
+
+
 async def push_message_about_instance(instance, message):
     model_name = instance._meta.model_name
     id = str(instance.id)
     group_name = CHANNELS_GROUP_NAME.format(model=model_name, id=id)
-    channel_layer = get_channel_layer()
     sent_message = {"type": "notify", "group": group_name, "content": message}
-    if await get_set_message_semaphore(channel_layer, sent_message):
-        logger.info(f"Sending message {sent_message}")
-        await channel_layer.group_send(group_name, sent_message)
+    await push_message(group_name, sent_message)
 
 
 async def push_serializable(instance, serializer, type_):
@@ -52,10 +61,7 @@ async def push_serializable(instance, serializer, type_):
         "serializer": serializer_name,
         "inner_type": type_,
     }
-    channel_layer = get_channel_layer()
-    if await get_set_message_semaphore(channel_layer, message):
-        logger.info(f"Sending message {message}")
-        await channel_layer.group_send(group_name, message)
+    await push_message(group_name, message)
 
 
 async def user_token_expired(user):
@@ -146,7 +152,4 @@ async def notify_org_result_changed(result):
         "group": group_name,
         "content": {"type": type_, "payload": serializer.data},
     }
-    channel_layer = get_channel_layer()
-    if await get_set_message_semaphore(channel_layer, message):
-        logger.info(f"Sending message {message}")
-        await channel_layer.group_send(group_name, message)
+    await push_message(group_name, message)
