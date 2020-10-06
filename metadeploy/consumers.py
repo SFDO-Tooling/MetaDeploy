@@ -121,7 +121,7 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
                 session = self.scope["session"]
                 scratch_org_id = session.get("scratch_org_id", None)
                 scratch_org = self.get_scratch_org(scratch_org_id)
-                ret = scratch_org.org_id == content["id"] if scratch_org else True
+                ret = scratch_org.org_id == content["id"] if scratch_org else False
             content["id"] = convert_org_id_to_key(content["id"])
             return ret
         return False

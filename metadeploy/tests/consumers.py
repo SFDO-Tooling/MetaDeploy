@@ -5,7 +5,7 @@ from channels.db import database_sync_to_async
 from channels.testing import WebsocketCommunicator
 from django.utils import timezone
 
-from ..api.models import Job, PreflightResult
+from ..api.models import Job, PreflightResult, ScratchOrg
 from ..api.push import (
     notify_org_finished,
     notify_org_result_changed,
@@ -242,7 +242,9 @@ async def test_push_notification_consumer__anon_subscribe_org(
 ):
     uuid = str(uuid4())
     org_id = "00Dyyyyyyyyyyyyyyy"
-    await generate_model(scratch_org_factory, uuid=uuid, org_id=org_id)
+    await generate_model(
+        scratch_org_factory, uuid=uuid, org_id=org_id, status=ScratchOrg.Status.complete
+    )
     user = await generate_model(user_factory, socialaccount_set=[])
     await generate_model(
         social_account_factory,
