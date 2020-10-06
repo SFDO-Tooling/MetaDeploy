@@ -671,11 +671,7 @@ class Job(HashIdMixin, models.Model):
         valid_session_uuid = scratch_org and scratch_org.org_id == self.org_id
         # TODO: Is this what we want?
         return (
-            self.is_public
-            or user.is_staff
-            or user == self.user
-            or not self.user
-            or valid_session_uuid
+            self.is_public or user.is_staff or user == self.user or valid_session_uuid
         )
 
     def skip_steps(self):
@@ -800,7 +796,7 @@ class PreflightResult(models.Model):
         )
         valid_session_uuid = scratch_org and scratch_org.org_id == self.org_id
         # TODO: Is this what we want?
-        return not self.user or self.user == user or valid_session_uuid
+        return self.user == user or valid_session_uuid
 
     def has_any_errors(self):
         return any(
