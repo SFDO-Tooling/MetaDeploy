@@ -904,7 +904,6 @@ class ScratchOrg(HashIdMixin, models.Model):
 
             job = create_scratch_org_job.delay(
                 plan_id=str(self.plan.id),
-                email=self.email,
                 org_name=self.plan.org_name,
                 result_id=self.id,
             )

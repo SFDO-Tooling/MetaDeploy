@@ -342,7 +342,6 @@ class TestCreateScratchOrg:
             )
             create_scratch_org(
                 plan_id=plan.id,
-                email="test@example.com",
                 org_name=plan.org_name,
                 result_id=str(scratch_org.pk),
             )
@@ -389,7 +388,6 @@ class TestCreateScratchOrg:
             )
             create_scratch_org(
                 plan_id=plan.id,
-                email="test@example.com",
                 org_name=plan.org_name,
                 result_id=str(scratch_org.pk),
             )
