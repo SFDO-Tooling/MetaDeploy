@@ -56,6 +56,7 @@ async def test_push_notification_consumer__user_token_invalid(user_factory):
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
     communicator.scope["user"] = user
+    communicator.scope["session"] = {}
     connected, _ = await communicator.connect()
     assert connected
 
@@ -87,6 +88,7 @@ async def test_push_notification_consumer__subscribe_preflight(
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
     communicator.scope["user"] = user
+    communicator.scope["session"] = {}
     connected, _ = await communicator.connect()
     assert connected
 
@@ -118,6 +120,7 @@ async def test_push_notification_consumer__subscribe_job(user_factory, job_facto
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
     communicator.scope["user"] = user
+    communicator.scope["session"] = {}
     connected, _ = await communicator.connect()
     assert connected
 

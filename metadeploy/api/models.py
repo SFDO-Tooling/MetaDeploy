@@ -138,7 +138,7 @@ class UserManager(BaseUserManager):
 class User(HashIdMixin, AbstractUser):
     objects = UserManager()
 
-    def subscribable_by(self, user):
+    def subscribable_by(self, user, session):
         return self == user
 
     def _get_org_property(self, key):
@@ -660,9 +660,23 @@ class Job(HashIdMixin, models.Model):
         ClickThroughAgreement, on_delete=models.PROTECT, null=True
     )
 
-    def subscribable_by(self, user):
+    def subscribable_by(self, user, session):
+        scratch_org_id = session.get("scratch_org_id", None)
+        scratch_org = (
+            scratch_org_id
+            and ScratchOrg.objects.filter(
+                uuid=scratch_org_id, status=ScratchOrg.Status.complete
+            ).first()
+        )
+        valid_session_uuid = scratch_org and scratch_org.org_id == self.org_id
         # TODO: Is this what we want?
-        return self.is_public or user.is_staff or user == self.user or not self.user
+        return (
+            self.is_public
+            or user.is_staff
+            or user == self.user
+            or not self.user
+            or valid_session_uuid
+        )
 
     def skip_steps(self):
         return [
@@ -776,9 +790,17 @@ class PreflightResult(models.Model):
     #   ...
     # }
 
-    def subscribable_by(self, user):
+    def subscribable_by(self, user, session):
+        scratch_org_id = session.get("scratch_org_id", None)
+        scratch_org = (
+            scratch_org_id
+            and ScratchOrg.objects.filter(
+                uuid=scratch_org_id, status=ScratchOrg.Status.complete
+            ).first()
+        )
+        valid_session_uuid = scratch_org and scratch_org.org_id == self.org_id
         # TODO: Is this what we want?
-        return not self.user or self.user == user
+        return not self.user or self.user == user or valid_session_uuid
 
     def has_any_errors(self):
         return any(
@@ -896,7 +918,7 @@ class ScratchOrg(HashIdMixin, models.Model):
             super().save()
         return ret
 
-    def subscribable_by(self, user):  # pragma: nocover
+    def subscribable_by(self, user, session):  # pragma: nocover
         return True
 
     def fail(self, error):

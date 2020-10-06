@@ -109,7 +109,7 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         )
         try:
             obj = self.get_instance(**content)
-            return obj.subscribable_by(self.scope["user"])
+            return obj.subscribable_by(self.scope["user"], self.scope["session"])
         except possible_exceptions:
             return False
 
