@@ -9,7 +9,7 @@ name: Production Smoke Test
 on:
   push:
     branches:
-      - feature/**
+      - feature/smoke-test
 
 production_smoke_test:
     name: "Production Post-Deploy Smoke Test"
