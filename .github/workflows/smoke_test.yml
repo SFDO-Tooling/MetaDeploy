@@ -1,0 +1,56 @@
+name: Production Smoke Test
+
+# on:
+#     repository_dispatch:
+#         types: [production-smoke-test]
+
+
+# just for testing
+on:
+  push:
+    branches:
+      - feature/**
+
+production_smoke_test:
+    name: "Production Post-Deploy Smoke Test"
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.8
+    - name: Install sfdx
+      run: |
+        mkdir sfdx
+        wget -qO- https://developer.salesforce.com/media/salesforce-cli/sfdx-linux-amd64.tar.xz | tar xJ -C sfdx --strip-components 1
+        ./sfdx/install
+        echo $SFDX_HUB_KEY_BASE64 | base64 --decode > sfdx.key
+        sfdx force:auth:jwt:grant --clientid $SFDX_CLIENT_ID --jwtkeyfile sfdx.key --username $SFDX_HUB_USERNAME --setdefaultdevhubusername -a hub
+      env:
+        SFDX_HUB_KEY_BASE64: ${{ secrets.SFDX_HUB_KEY_BASE64 }}
+        SFDX_CLIENT_ID: ${{ secrets.SFDX_CLIENT_ID }}
+        SFDX_HUB_USERNAME: ${{ secrets.SFDX_HUB_USERNAME }}
+    - name: Install CumulusCI
+      run: |
+        pip install cumulusci
+    - name: Create test org
+        $(which cci) org info enterprise
+    - name: Run robot test
+      run: |
+        coverage run --append $(which cci) task run robot \
+          --org enterprise \
+          -o suites robot/tasks/run_plan.robot \
+          -o vars BROWSER:headlesschrome,LANG:$lang,BASE_URL:https://install.salesforce.org,PRODUCT:caseman,PLAN:install
+    - name: Delete scratch org
+      if: always()
+      run: |
+        cci org scratch_delete dev
+    - name: Report coverage
+      run: coveralls
+    - name: Store robot results
+      if: failure()
+      uses: actions/upload-artifact@v1
+      with:
+        name: robot
+        path: robot/CumulusCI/results
