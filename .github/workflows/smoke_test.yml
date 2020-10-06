@@ -4,12 +4,14 @@ name: Production Smoke Test
 #     repository_dispatch:
 #         types: [production-smoke-test]
 
-
 # just for testing
 on:
   push:
     branches:
       - feature/smoke-test
+
+env:
+  CUMULUSCI_KEY: ${{ secrets.CUMULUSCI_KEY }} 
 
 jobs:
   production_smoke_test:
