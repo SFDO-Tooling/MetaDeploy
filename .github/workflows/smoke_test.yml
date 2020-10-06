@@ -45,7 +45,7 @@ jobs:
           $(which cci) task run robot \
             --org enterprise \
             -o suites robot/tasks/run_plan.robot \
-            -o vars BROWSER:headlesschrome,LANG:$lang,BASE_URL:https://install.salesforce.org,PRODUCT:caseman,PLAN:install
+            -o vars BROWSER:headlesschrome,LANG:en,BASE_URL:https://install.salesforce.org,PRODUCT:pmm,PLAN:install
       - name: Delete scratch org
         if: always()
         run: |
