@@ -8,6 +8,7 @@ from django.utils.translation import gettext as _
 
 from .api.constants import CHANNELS_GROUP_NAME
 from .api.hash_url import convert_org_id_to_key
+from .api.models import ScratchOrg
 from .consumer_utils import clear_message_semaphore
 
 Request = namedtuple("Request", "user")
@@ -54,6 +55,11 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
     def get_instance(self, *, model, id):
         Model = apps.get_model("api", model)
         return Model.objects.get(pk=id)
+
+    def get_scratch_org(self, scratch_org_id):
+        return ScratchOrg.objects.filter(
+            uuid=scratch_org_id, status=ScratchOrg.Status.complete
+        ).first()
 
     def get_serializer(self, serializer_path):
         mod, serializer = serializer_path.rsplit(".", 1)
@@ -109,8 +115,15 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
 
     def handle_org_special_case(self, content):
         if content["model"] == "org":
+            if "user" in self.scope and self.scope["user"].is_authenticated:
+                ret = self.scope["user"].org_id == content["id"]
+            else:
+                session = self.scope["session"]
+                scratch_org_id = session.get("scratch_org_id", None)
+                scratch_org = self.get_scratch_org(scratch_org_id)
+                ret = scratch_org.org_id == content["id"] if scratch_org else True
             content["id"] = convert_org_id_to_key(content["id"])
-            return True
+            return ret
         return False
 
     def handle_scratch_org_special_case(self, content):

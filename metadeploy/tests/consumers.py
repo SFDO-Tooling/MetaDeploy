@@ -182,6 +182,7 @@ async def test_push_notification_consumer__subscribe_job__missing(user_factory):
 async def test_push_notification_consumer__subscribe_org(
     social_account_factory, user_factory, job_factory, plan_factory
 ):
+    org_id = "00Dxxxxxxxxxxxxxxx"
     user = await generate_model(user_factory, socialaccount_set=[])
     await generate_model(
         social_account_factory,
@@ -189,7 +190,7 @@ async def test_push_notification_consumer__subscribe_org(
         extra_data={
             # instance_url is the important part here:
             "instance_url": "https://example.com/",
-            "organization_id": "00Dxxxxxxxxxxxxxxx",
+            "organization_id": org_id,
             "organization_details": {
                 "Name": "Sample Org",
                 "OrganizationType": "Developer Edition",
@@ -211,7 +212,7 @@ async def test_push_notification_consumer__subscribe_org(
     connected, _ = await communicator.connect()
     assert connected
 
-    await communicator.send_json_to({"model": "org", "id": "00Dxxxxxxxxxxxxxxx"})
+    await communicator.send_json_to({"model": "org", "id": org_id})
     response = await communicator.receive_json_from()
     assert "ok" in response
 
@@ -221,11 +222,70 @@ async def test_push_notification_consumer__subscribe_org(
         "type": "ORG_CHANGED",
         "payload": OrgSerializer(
             {
-                "org_id": "00Dxxxxxxxxxxxxxxx",
+                "org_id": org_id,
                 "current_job": job,
                 "current_preflight": None,
             }
         ).data,
     }
+
+    await communicator.disconnect()
+
+
+@pytest.mark.django_db
+@pytest.mark.asyncio
+async def test_push_notification_consumer__anon_subscribe_org(
+    social_account_factory, user_factory, job_factory, plan_factory, scratch_org_factory
+):
+    uuid = str(uuid4())
+    org_id = "00Dyyyyyyyyyyyyyyy"
+    await generate_model(scratch_org_factory, uuid=uuid, org_id=org_id)
+    user = await generate_model(user_factory, socialaccount_set=[])
+    await generate_model(
+        social_account_factory,
+        user=user,
+        extra_data={
+            # instance_url is the important part here:
+            "instance_url": "https://example.com/",
+            "organization_id": org_id,
+            "organization_details": {
+                "Name": "Sample Org",
+                "OrganizationType": "Developer Edition",
+            },
+        },
+    )
+    plan = await generate_model(plan_factory)
+    job = await generate_model(
+        job_factory,
+        status=Job.Status.started,
+        user=user,
+        plan=plan,
+        organization_url="https://example.com/",
+        org_id=user.org_id,
+    )
+
+    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator.scope["session"] = {
+        "scratch_org_id": uuid,
+    }
+    connected, _ = await communicator.connect()
+    assert connected
+
+    await communicator.send_json_to({"model": "org", "id": org_id})
+    response = await communicator.receive_json_from()
+    assert "ok" in response
+
+    await notify_org_result_changed(job)
+    response = await communicator.receive_json_from()
+    assert response == {
+        "type": "ORG_CHANGED",
+        "payload": OrgSerializer(
+            {
+                "org_id": org_id,
+                "current_job": job,
+                "current_preflight": None,
+            }
+        ).data,
+    }, response
 
     await communicator.disconnect()
