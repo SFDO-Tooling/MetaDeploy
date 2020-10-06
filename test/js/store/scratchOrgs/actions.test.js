@@ -30,7 +30,7 @@ describe('fetchScratchOrg', () => {
         payload: { plan: 'plan-1', org },
       };
       const expected = {
-        model: 'scratch_org',
+        model: 'scratchorg',
         id: 'org-1',
       };
 
@@ -120,7 +120,7 @@ describe('spinScratchOrg', () => {
         payload: response,
       };
       const expected = {
-        model: 'scratch_org',
+        model: 'scratchorg',
         id: 'org-1',
       };
 

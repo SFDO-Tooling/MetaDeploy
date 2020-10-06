@@ -16,7 +16,7 @@ Websocket notifications you can subscribe to:
         JOB_CANCELED
     org.:org_id
         ORG_CHANGED
-    scratch_org.:id
+    scratchorg.:id
         SCRATCH_ORG_CREATED
         SCRATCH_ORG_ERROR
         PREFLIGHT_STARTED
@@ -186,7 +186,7 @@ async def notify_org_finished(scratch_org, error=None):
         "type": type_,
         "payload": payload,
     }
-    group_name = CHANNELS_GROUP_NAME.format(model="scratch_org", id=scratch_org.id)
+    group_name = CHANNELS_GROUP_NAME.format(model="scratchorg", id=scratch_org.id)
     channel_layer = get_channel_layer()
     sent_message = {"type": "notify", "group": group_name, "content": message}
     if await get_set_message_semaphore(channel_layer, sent_message):
@@ -199,5 +199,5 @@ async def preflight_started(scratch_org, preflight):
 
     payload = PreflightResultSerializer(instance=preflight).data
     message = {"type": "PREFLIGHT_STARTED", "payload": payload}
-    group_name = CHANNELS_GROUP_NAME.format(model="scratch_org", id=scratch_org.id)
+    group_name = CHANNELS_GROUP_NAME.format(model="scratchorg", id=scratch_org.id)
     await push_message_about_instance(preflight, message, group_name=group_name)

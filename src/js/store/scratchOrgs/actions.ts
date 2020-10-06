@@ -63,7 +63,7 @@ export const fetchScratchOrg = (
     );
     if (response && window.socket) {
       window.socket.subscribe({
-        model: 'scratch_org',
+        model: 'scratchorg',
         id: response.id,
       });
     }
@@ -97,7 +97,7 @@ export const spinScratchOrg = (
     /* istanbul ignore else */
     if (response && window.socket) {
       window.socket.subscribe({
-        model: 'scratch_org',
+        model: 'scratchorg',
         id: response.id,
       });
     }

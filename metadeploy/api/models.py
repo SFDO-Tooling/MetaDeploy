@@ -669,7 +669,6 @@ class Job(HashIdMixin, models.Model):
             ).first()
         )
         valid_session_uuid = scratch_org and scratch_org.org_id == self.org_id
-        # TODO: Is this what we want?
         return (
             self.is_public or user.is_staff or user == self.user or valid_session_uuid
         )
@@ -795,7 +794,6 @@ class PreflightResult(models.Model):
             ).first()
         )
         valid_session_uuid = scratch_org and scratch_org.org_id == self.org_id
-        # TODO: Is this what we want?
         return self.user == user or valid_session_uuid
 
     def has_any_errors(self):
@@ -913,8 +911,9 @@ class ScratchOrg(HashIdMixin, models.Model):
             super().save()
         return ret
 
-    def subscribable_by(self, user, session):  # pragma: nocover
-        return True
+    def subscribable_by(self, user, session):
+        scratch_org_id = session.get("scratch_org_id", None)
+        return scratch_org_id and scratch_org_id == str(self.uuid)
 
     def fail(self, error):
         self.status = ScratchOrg.Status.failed

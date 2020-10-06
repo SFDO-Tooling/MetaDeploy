@@ -24,25 +24,24 @@ def generate_model(model_factory, **kwargs):
 
 @pytest.mark.django_db
 @pytest.mark.asyncio
-async def test_push_notification_consumer__subscribe_scratch_org(
-    user_factory, scratch_org_factory
-):
-    job_id = str(uuid4())
-    user = await generate_model(user_factory)
-    soj = await generate_model(
-        scratch_org_factory, job_id=job_id, enqueued_at=timezone.now()
+async def test_push_notification_consumer__subscribe_scratch_org(scratch_org_factory):
+    uuid = str(uuid4())
+    scratch_org = await generate_model(
+        scratch_org_factory, uuid=uuid, enqueued_at=timezone.now()
     )
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
-    communicator.scope["user"] = user
+    communicator.scope["session"] = {
+        "scratch_org_id": uuid,
+    }
     connected, _ = await communicator.connect()
     assert connected
 
-    await communicator.send_json_to({"model": "scratch_org", "id": str(soj.id)})
+    await communicator.send_json_to({"model": "scratchorg", "id": str(scratch_org.id)})
     response = await communicator.receive_json_from()
     assert "ok" in response
 
-    await notify_org_finished(soj)
+    await notify_org_finished(scratch_org)
     response = await communicator.receive_json_from()
     assert response["type"] == "SCRATCH_ORG_CREATED"
 

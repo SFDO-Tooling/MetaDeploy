@@ -14,7 +14,7 @@ from .consumer_utils import clear_message_semaphore
 Request = namedtuple("Request", "user")
 
 
-KNOWN_MODELS = {"user", "preflightresult", "job", "org", "scratch_org"}
+KNOWN_MODELS = {"user", "preflightresult", "job", "org", "scratchorg"}
 
 
 def user_context(user):
@@ -94,10 +94,8 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         return model in KNOWN_MODELS
 
     def has_good_permissions(self, content):
-        if self.handle_org_special_case(content):
-            return True
-        if self.handle_scratch_org_special_case(content):
-            return True
+        if content["model"] == "org":
+            return self.handle_org_special_case(content)
         possible_exceptions = (
             AttributeError,
             KeyError,
@@ -114,17 +112,12 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
             return False
 
     def handle_org_special_case(self, content):
-        if content["model"] == "org":
-            if "user" in self.scope and self.scope["user"].is_authenticated:
-                ret = self.scope["user"].org_id == content["id"]
-            else:
-                session = self.scope["session"]
-                scratch_org_id = session.get("scratch_org_id", None)
-                scratch_org = self.get_scratch_org(scratch_org_id)
-                ret = scratch_org.org_id == content["id"] if scratch_org else False
-            content["id"] = convert_org_id_to_key(content["id"])
-            return ret
-        return False
-
-    def handle_scratch_org_special_case(self, content):
-        return content["model"] == "scratch_org"
+        if "user" in self.scope and self.scope["user"].is_authenticated:
+            ret = self.scope["user"].org_id == content["id"]
+        else:
+            session = self.scope["session"]
+            scratch_org_id = session.get("scratch_org_id", None)
+            scratch_org = self.get_scratch_org(scratch_org_id)
+            ret = scratch_org.org_id == content["id"] if scratch_org else False
+        content["id"] = convert_org_id_to_key(content["id"])
+        return ret
