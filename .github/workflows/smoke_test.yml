@@ -42,7 +42,7 @@ jobs:
           $(which cci) org info enterprise
       - name: Run robot test
         run: |
-          coverage run --append $(which cci) task run robot \
+          $(which cci) task run robot \
             --org enterprise \
             -o suites robot/tasks/run_plan.robot \
             -o vars BROWSER:headlesschrome,LANG:$lang,BASE_URL:https://install.salesforce.org,PRODUCT:caseman,PLAN:install
