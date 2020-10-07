@@ -52,4 +52,4 @@ toml==0.10.1
 wcwidth==0.2.5
 wrapt==1.12.1
 yarl==1.6.0
-zipp==3.2.0
+zipp==3.3.0
