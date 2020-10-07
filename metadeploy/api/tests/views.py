@@ -32,7 +32,7 @@ class TestJobViewset:
         assert response.status_code == 200
         assert response.json() == {
             "id": str(job.id),
-            "creator": {"username": job.user.username, "is_staff": False},
+            "creator": {"username": job.user.sf_username, "is_staff": False},
             "plan": str(job.plan.id),
             "steps": [],
             "organization_url": "",
@@ -63,7 +63,7 @@ class TestJobViewset:
         assert response.status_code == 200
         assert response.json() == {
             "id": str(job.id),
-            "creator": {"username": job.user.username, "is_staff": False},
+            "creator": {"username": job.user.sf_username, "is_staff": False},
             "plan": str(job.plan.id),
             "steps": [],
             "organization_url": "",

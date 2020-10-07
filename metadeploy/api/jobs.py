@@ -22,7 +22,6 @@ import zipfile
 from datetime import timedelta
 from glob import glob
 
-from allauth.socialaccount.models import SocialToken
 from asgiref.sync import async_to_sync
 from cumulusci.core.config import OrgConfig, ServiceConfig
 from cumulusci.core.github import get_github_api_for_repo
@@ -35,9 +34,10 @@ from rq.exceptions import ShutDownImminentException
 from rq.worker import StopRequested
 
 from .cci_configs import MetaDeployCCI, extract_user_and_repo
+from .cleanup import cleanup_user_data
 from .flows import StopFlowException
 from .models import Job, PreflightResult
-from .push import report_error, user_token_expired
+from .push import report_error
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -235,33 +235,8 @@ def enqueuer():
 enqueuer_job = job(enqueuer)
 
 
-def expire_user_tokens():
-    """Expire (delete) any SocialTokens older than TOKEN_LIFETIME_MINUTES.
-
-    Exception: if there is a job or preflight that started in the last day.
-    """
-    token_lifetime_ago = timezone.now() - timedelta(
-        minutes=settings.TOKEN_LIFETIME_MINUTES
-    )
-    day_ago = timezone.now() - timedelta(days=1)
-    for token in SocialToken.objects.filter(
-        account__last_login__lte=token_lifetime_ago
-    ):
-        user = token.account.user
-        has_running_jobs = (
-            user.job_set.filter(
-                status=Job.Status.started, created_at__gt=day_ago
-            ).exists()
-            or user.preflightresult_set.filter(
-                status=PreflightResult.Status.started, created_at__gt=day_ago
-            ).exists()
-        )
-        if not has_running_jobs:
-            token.delete()
-            async_to_sync(user_token_expired)(user)
-
-
-expire_user_tokens_job = job(expire_user_tokens)
+# Aliased to expire_user_tokens_job for backwards compatibility
+expire_user_tokens_job = job(cleanup_user_data)
 
 
 def preflight(preflight_result_id):

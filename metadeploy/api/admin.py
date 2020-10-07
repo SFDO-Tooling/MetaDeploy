@@ -107,17 +107,17 @@ class JobAdmin(admin.ModelAdmin, PlanMixin):
     autocomplete_fields = ("plan", "steps", "user")
     list_filter = ("status", "plan__version__product")
     list_display = (
-        "user",
+        "id",
+        "org_id",
         "plan_title",
         "product",
         "version",
         "status",
         "org_type",
-        "org_name",
         "enqueued_at",
     )
     list_select_related = ("user", "plan", "plan__version", "plan__version__product")
-    search_fields = ("user__username", "org_name", "org_id", "exception")
+    search_fields = ("org_id", "exception")
 
 
 @admin.register(PlanTemplate)
@@ -163,7 +163,8 @@ class PreflightResult(admin.ModelAdmin, PlanMixin):
     autocomplete_fields = ("plan", "user")
     list_filter = ("status", "is_valid", "plan__version__product")
     list_display = (
-        "user",
+        "id",
+        "org_id",
         "status",
         "is_valid",
         "plan_title",
@@ -171,8 +172,8 @@ class PreflightResult(admin.ModelAdmin, PlanMixin):
         "version",
         "created_at",
     )
-    list_select_related = ("user", "plan", "plan__version", "plan__version__product")
-    search_fields = ("user", "plan", "exception")
+    list_select_related = ("plan", "plan__version", "plan__version__product")
+    search_fields = ("org_id", "plan", "exception")
 
 
 @admin.register(Product)

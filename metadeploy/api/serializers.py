@@ -99,6 +99,7 @@ class CircumspectSerializerMixin:
 class FullUserSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     is_production_org = serializers.SerializerMethodField()
+    username = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -116,11 +117,19 @@ class FullUserSerializer(serializers.ModelSerializer):
     def get_is_production_org(self, obj):
         return obj.full_org_type == ORG_TYPES.Production
 
+    def get_username(self, obj):
+        return obj.sf_username
+
 
 class LimitedUserSerializer(serializers.ModelSerializer):
+    username = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = ("username", "is_staff")
+
+    def get_username(self, obj):
+        return obj.sf_username
 
 
 class StepSerializer(serializers.ModelSerializer):

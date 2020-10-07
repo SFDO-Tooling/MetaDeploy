@@ -61,15 +61,22 @@ class SocialAccountFactory(factory.django.DjangoModelFactory):
     provider = "salesforce"
     uid = factory.Sequence("https://example.com/{}".format)
     socialtoken_set = factory.RelatedFactory(SocialTokenFactory, "account")
-    extra_data = {
-        "organization_id": "00Dxxxxxxxxxxxxxxx",
-        "instance_url": "https://example.com",
-        "organization_details": {
-            "Name": "Sample Org",
-            "OrganizationType": "Developer Edition",
-            "IsSandbox": False,
-        },
-    }
+
+    class Params:
+        sf_username = factory.Sequence("user_{}@example.com".format)
+
+    @factory.lazy_attribute
+    def extra_data(self):
+        return {
+            "preferred_username": self.sf_username,
+            "organization_id": "00Dxxxxxxxxxxxxxxx",
+            "instance_url": "https://example.com",
+            "organization_details": {
+                "Name": "Sample Org",
+                "OrganizationType": "Developer Edition",
+                "IsSandbox": False,
+            },
+        }
 
 
 @register
@@ -78,9 +85,14 @@ class UserFactory(factory.django.DjangoModelFactory):
         model = User
 
     email = factory.Sequence("user_{}@example.com".format)
-    username = factory.Sequence("user_{}@example.com".format)
+    username = factory.Sequence("user{}".format)
     password = factory.PostGenerationMethodCall("set_password", "foobar")
-    socialaccount_set = factory.RelatedFactory(SocialAccountFactory, "user")
+    socialaccount_set = factory.RelatedFactory(
+        SocialAccountFactory, "user", sf_username=factory.SelfAttribute("..sf_username")
+    )
+
+    class Params:
+        sf_username = factory.Sequence("user_{}@example.com".format)
 
 
 @register

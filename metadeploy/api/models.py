@@ -138,6 +138,11 @@ class User(HashIdMixin, AbstractUser):
     def subscribable_by(self, user):
         return self == user
 
+    @property
+    def sf_username(self):
+        if self.social_account:
+            return self.social_account.extra_data["preferred_username"]
+
     def _get_org_property(self, key):
         try:
             return self.social_account.extra_data[ORGANIZATION_DETAILS][key]
@@ -613,7 +618,9 @@ class Job(HashIdMixin, models.Model):
     Status = Choices("started", "complete", "failed", "canceled")
     tracker = FieldTracker(fields=("results", "status"))
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True
+    )
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
     steps = models.ManyToManyField(Step)
     organization_url = models.URLField(blank=True)
@@ -738,7 +745,9 @@ class PreflightResult(models.Model):
 
     organization_url = models.URLField()
     org_id = models.CharField(null=True, blank=True, max_length=18)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True
+    )
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True)
     edited_at = models.DateTimeField(auto_now=True)

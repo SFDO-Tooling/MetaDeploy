@@ -12,7 +12,6 @@ from ..flows import StopFlowException
 from ..jobs import (
     enqueuer,
     expire_preflights,
-    expire_user_tokens,
     finalize_result,
     preflight,
     run_flows,
@@ -146,32 +145,6 @@ def test_malicious_zip_file(
     )
 
     assert not job_flow.called
-
-
-@pytest.mark.django_db
-def test_expire_user_tokens(user_factory):
-    user1 = user_factory()
-    user1.socialaccount_set.update(last_login=timezone.now())
-    user2 = user_factory()
-    user2.socialaccount_set.update(last_login=timezone.now() - timedelta(minutes=30))
-
-    expire_user_tokens()
-
-    user1.refresh_from_db()
-    user2.refresh_from_db()
-
-    assert user1.valid_token_for == "00Dxxxxxxxxxxxxxxx"
-    assert user2.valid_token_for is None
-
-
-@pytest.mark.django_db
-def test_expire_user_tokens_with_started_job(job_factory):
-    job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
-    job.user.socialaccount_set.update(last_login=timezone.now() - timedelta(minutes=30))
-
-    expire_user_tokens()
-
-    assert job.user.valid_token_for is not None
 
 
 @pytest.mark.django_db
