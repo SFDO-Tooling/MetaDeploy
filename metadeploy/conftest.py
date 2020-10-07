@@ -220,6 +220,7 @@ class JobFactory(factory.django.DjangoModelFactory):
     plan = factory.SubFactory(PlanFactory)
     enqueued_at = None
     job_id = None
+    org_id = "00Dxxxxxxxxxxxxxxx"
 
     @factory.post_generation
     def steps(self, create, extracted, **kwargs):  # pragma: nocover

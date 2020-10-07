@@ -17,6 +17,9 @@ def cleanup_user_data():
     # remove users after 30 days
     delete_old_users()
 
+    # remove job exceptions after 90 days
+    clear_old_exceptions()
+
 
 def expire_user_tokens():
     """Expire (delete) any SocialTokens older than TOKEN_LIFETIME_MINUTES.
@@ -51,3 +54,17 @@ def delete_old_users():
     """
     month_ago = timezone.now() - timedelta(days=30)
     User.objects.filter(is_staff=False, last_login__lte=month_ago).delete()
+
+
+def clear_old_exceptions():
+    """Update Job and PreflightRecords over 90 days old to clear the exception field.
+
+    (This field may contain customer metadata such as custom schema names from the org.)
+    """
+    ninety_days_ago = timezone.now() - timedelta(days=90)
+    Job.objects.filter(created_at__lte=ninety_days_ago, exception__isnull=False).update(
+        exception=None
+    )
+    PreflightResult.objects.filter(
+        created_at__lte=ninety_days_ago, exception__isnull=False
+    ).update(exception=None)

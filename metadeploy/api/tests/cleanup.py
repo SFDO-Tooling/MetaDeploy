@@ -3,7 +3,12 @@ from datetime import timedelta
 from django.utils import timezone
 import pytest
 
-from ..cleanup import cleanup_user_data, delete_old_users, expire_user_tokens
+from ..cleanup import (
+    cleanup_user_data,
+    clear_old_exceptions,
+    delete_old_users,
+    expire_user_tokens,
+)
 from ..models import User
 
 
@@ -47,3 +52,19 @@ def test_delete_old_users(user_factory):
     staff_user.refresh_from_db()
     with pytest.raises(User.DoesNotExist):
         old_user.refresh_from_db()
+
+
+@pytest.mark.django_db
+def test_clear_old_exceptions(job_factory):
+    half_year_ago = timezone.now() - timedelta(days=180)
+    old_job = job_factory(exception="Danger!")
+    old_job.created_at = half_year_ago
+    old_job.save()
+    new_job = job_factory(exception="Danger!")
+
+    clear_old_exceptions()
+
+    old_job.refresh_from_db()
+    assert old_job.exception is None
+    new_job.refresh_from_db()
+    assert new_job.exception == "Danger!"
