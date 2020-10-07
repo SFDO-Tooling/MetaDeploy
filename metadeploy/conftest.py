@@ -63,6 +63,7 @@ class SocialAccountFactory(factory.django.DjangoModelFactory):
     socialtoken_set = factory.RelatedFactory(SocialTokenFactory, "account")
 
     class Params:
+        org_name = "Sample Org"
         sf_username = factory.Sequence("user_{}@example.com".format)
 
     @factory.lazy_attribute
@@ -72,7 +73,7 @@ class SocialAccountFactory(factory.django.DjangoModelFactory):
             "organization_id": "00Dxxxxxxxxxxxxxxx",
             "instance_url": "https://example.com",
             "organization_details": {
-                "Name": "Sample Org",
+                "Name": self.org_name,
                 "OrganizationType": "Developer Edition",
                 "IsSandbox": False,
             },
@@ -88,11 +89,15 @@ class UserFactory(factory.django.DjangoModelFactory):
     username = factory.Sequence("user{}".format)
     password = factory.PostGenerationMethodCall("set_password", "foobar")
     socialaccount_set = factory.RelatedFactory(
-        SocialAccountFactory, "user", sf_username=factory.SelfAttribute("..sf_username")
+        SocialAccountFactory,
+        "user",
+        org_name=factory.SelfAttribute("..org_name"),
+        sf_username=factory.SelfAttribute("..sf_username"),
     )
 
     class Params:
         sf_username = factory.Sequence("user_{}@example.com".format)
+        org_name = "Sample Org"
 
 
 @register

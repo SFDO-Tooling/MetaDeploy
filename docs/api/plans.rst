@@ -149,7 +149,7 @@ Preflight Get
 
    {
      "id": "107",
-     "organization_url": "https://foo.salesforce.com",
+     "instance_url": "https://foo.salesforce.com",
      "user": "3Lw7OwK",
      "plan": "olNjglg",
      "created_at": "2019-05-03T18:30:18.240128Z",

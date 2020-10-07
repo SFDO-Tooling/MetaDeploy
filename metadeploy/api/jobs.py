@@ -112,7 +112,7 @@ def zip_file_is_safe(zip_file):
     return all(is_safe_path(info.filename) for info in zip_file.infolist())
 
 
-def run_flows(*, user, plan, skip_steps, organization_url, result_class, result_id):
+def run_flows(*, user, plan, skip_steps, result_class, result_id):
     """
     This operates with side effects; it changes things in a Salesforce
     org, and then records the results of those operations on to a
@@ -123,8 +123,6 @@ def run_flows(*, user, plan, skip_steps, organization_url, result_class, result_
         plan (Plan): The Plan instance for the flow you're running.
         skip_steps (List[str]): The strings in the list should be valid
             step_num values for steps in this flow.
-        organization_url (str): The URL of the organization, required by
-            the OrgConfig.
         result_class (Union[Type[Job], Type[PreflightResult]]): The type
             of the instance onto which to record the results of running
             steps in the flow. Either a PreflightResult or a Job, as
@@ -183,7 +181,7 @@ def run_flows(*, user, plan, skip_steps, organization_url, result_class, result_
         org_config = OrgConfig(
             {
                 "access_token": token,
-                "instance_url": organization_url,
+                "instance_url": result.instance_url,
                 "refresh_token": token_secret,
             },
             current_org,
@@ -223,7 +221,6 @@ def enqueuer():
             user=j.user,
             plan=j.plan,
             skip_steps=j.skip_steps(),
-            organization_url=j.organization_url,
             result_class=Job,
             result_id=j.id,
         )
@@ -247,7 +244,6 @@ def preflight(preflight_result_id):
         user=preflight_result.user,
         plan=preflight_result.plan,
         skip_steps=[],
-        organization_url=preflight_result.organization_url,
         result_class=PreflightResult,
         result_id=preflight_result.id,
     )

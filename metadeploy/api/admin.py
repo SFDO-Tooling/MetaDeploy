@@ -103,7 +103,12 @@ class AllowedListOrgAdmin(admin.ModelAdmin):
 
 
 @admin.register(Job)
-class JobAdmin(admin.ModelAdmin, PlanMixin):
+class JobAdmin(AdminHelpTextMixin, admin.ModelAdmin, PlanMixin):
+    help_text = (
+        "GDPR reminder: Any information in the log or exception which came from the org "
+        "must be used for support/debugging purposes only, and not exported from this system."
+    )
+
     autocomplete_fields = ("plan", "steps", "user")
     list_filter = ("status", "plan__version__product")
     list_display = (
@@ -159,7 +164,11 @@ class PlanSlugAdmin(admin.ModelAdmin):
 
 
 @admin.register(PreflightResult)
-class PreflightResult(admin.ModelAdmin, PlanMixin):
+class PreflightResult(AdminHelpTextMixin, admin.ModelAdmin, PlanMixin):
+    help_text = (
+        "GDPR reminder: Any information in the log or exception which came from the org "
+        "must be used for support/debugging purposes only, and not exported from this system."
+    )
     autocomplete_fields = ("plan", "user")
     list_filter = ("status", "is_valid", "plan__version__product")
     list_display = (

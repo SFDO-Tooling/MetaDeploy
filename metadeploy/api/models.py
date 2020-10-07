@@ -623,7 +623,6 @@ class Job(HashIdMixin, models.Model):
     )
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
     steps = models.ManyToManyField(Step)
-    organization_url = models.URLField(blank=True)
     # This should be a list of step names:
     results = JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -632,7 +631,6 @@ class Job(HashIdMixin, models.Model):
     job_id = models.UUIDField(null=True)
     status = models.CharField(choices=Status, max_length=64, default=Status.started)
     org_id = models.CharField(null=True, blank=True, max_length=18)
-    org_name = models.CharField(blank=True, max_length=256)
     org_type = models.CharField(blank=True, max_length=256)
     full_org_type = models.CharField(null=True, blank=True, max_length=256)
     is_public = models.BooleanField(default=False)
@@ -654,6 +652,16 @@ class Job(HashIdMixin, models.Model):
     click_through_agreement = models.ForeignKey(
         ClickThroughAgreement, on_delete=models.PROTECT, null=True
     )
+
+    @property
+    def org_name(self):
+        if self.user:
+            return self.user.org_name
+
+    @property
+    def instance_url(self):
+        if self.user:
+            return self.user.instance_url
 
     def subscribable_by(self, user):
         return self.is_public or user.is_staff or user == self.user
@@ -743,7 +751,6 @@ class PreflightResult(models.Model):
 
     objects = PreflightResultQuerySet.as_manager()
 
-    organization_url = models.URLField()
     org_id = models.CharField(null=True, blank=True, max_length=18)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True
@@ -769,6 +776,11 @@ class PreflightResult(models.Model):
     #   <definitive name>: [... errors],
     #   ...
     # }
+
+    @property
+    def instance_url(self):
+        if self.user:
+            return self.user.instance_url
 
     def subscribable_by(self, user):
         return self.user == user
