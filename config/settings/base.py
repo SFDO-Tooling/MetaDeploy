@@ -418,7 +418,7 @@ LOG_REQUEST_ID_HEADER = "HTTP_X_REQUEST_ID"
 GENERATE_REQUEST_ID_IF_NOT_IN_HEADER = True
 REQUEST_ID_RESPONSE_HEADER = "X-Request-ID"
 
-# Salesforce integration settings:
+# Settings needed for creating scratch orgs
 DEVHUB_USERNAME = env("DEVHUB_USERNAME", default=None)
 
 LOGGING = {
