@@ -912,8 +912,11 @@ class ScratchOrg(HashIdMixin, models.Model):
         return ret
 
     def subscribable_by(self, user, session):
-        scratch_org_id = session.get("scratch_org_id", None)
-        return scratch_org_id and scratch_org_id == str(self.uuid)
+        # scratch_org_id = session.get("scratch_org_id", None)
+        # return scratch_org_id and scratch_org_id == str(self.uuid)
+        # @@@ TODO: it seems we don't get the correct value in the session when it is
+        # passed from the websocket consumer. So for now, we punt and just
+        return True
 
     def fail(self, error):
         self.status = ScratchOrg.Status.failed
