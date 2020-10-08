@@ -186,17 +186,21 @@ class ShareModal extends React.Component<WrappedProps> {
               >
                 <Radio
                   id="is_public-false"
-                  label={i18n.t(
-                    'Only I and Salesforce staff can view this installation job.',
-                  )}
+                  labels={{
+                    label: i18n.t(
+                      'Only I and Salesforce staff can view this installation job.',
+                    ),
+                  }}
                   value="false"
                   checked={!job.is_public}
                 />
                 <Radio
                   id="is_public-true"
-                  label={i18n.t(
-                    'Anyone with the link can view this installation job.',
-                  )}
+                  labels={{
+                    label: i18n.t(
+                      'Anyone with the link can view this installation job.',
+                    ),
+                  }}
                   value="true"
                   checked={job.is_public}
                 />

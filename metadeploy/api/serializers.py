@@ -481,9 +481,23 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
 
     def validate(self, data):
         user = self._get_from_data_or_instance(data, "user")
-        org_id = self._get_from_data_or_instance(data, "org_id") or user.org_id
+        org_id = self._get_from_data_or_instance(data, "org_id") or getattr(
+            user, "org_id", None
+        )
         plan = self._get_from_data_or_instance(data, "plan")
         steps = self._get_from_data_or_instance(data, "steps", default=[])
+
+        if not org_id:
+            scratch_org_id = self.context["request"].session.get("scratch_org_id", None)
+            if scratch_org_id:
+                scratch_org = ScratchOrg.objects.filter(
+                    uuid=scratch_org_id, status=ScratchOrg.Status.complete
+                ).first()
+                if scratch_org:
+                    org_id = scratch_org.org_id
+
+        if not org_id:
+            raise serializers.ValidationError(_("No valid org."))
 
         most_recent_preflight = PreflightResult.objects.most_recent(
             org_id=org_id, plan=plan
@@ -512,20 +526,20 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
                 )
             )
 
-        # @@@ TODO: What to do with this in the case of a Scratch Org?
-        if user:
+        if user.is_authenticated:
             user_has_valid_token = all(user.token)
             if not user_has_valid_token:
                 raise serializers.ValidationError(
                     _("The connection to your org has been lost. Please log in again.")
                 )
-
-        # @@@ TODO: What to do with this in the case of a Scratch Org?
-        data["org_name"] = user.org_name if user else None
-        data["org_type"] = user.org_type if user else None
-        data["full_org_type"] = user.full_org_type if user else None
-        data["organization_url"] = user.instance_url if user else None
-        data["org_id"] = user.org_id
+            data["org_name"] = user.org_name
+            data["org_type"] = user.org_type
+            data["full_org_type"] = user.full_org_type
+            data["organization_url"] = user.instance_url
+        else:
+            data["user"] = None
+            data["full_org_type"] = ORG_TYPES.Scratch
+        data["org_id"] = org_id
         return data
 
 
