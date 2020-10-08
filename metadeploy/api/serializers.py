@@ -512,7 +512,6 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
                 )
             )
 
-        # @@@ TODO: What to do with this in the case of a Scratch Org?
         if user:
             user_has_valid_token = all(user.token)
             if not user_has_valid_token:
@@ -520,7 +519,6 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
                     _("The connection to your org has been lost. Please log in again.")
                 )
 
-        # @@@ TODO: What to do with this in the case of a Scratch Org?
         data["org_name"] = user.org_name if user else None
         data["org_type"] = user.org_type if user else None
         data["full_org_type"] = user.full_org_type if user else None
@@ -631,6 +629,13 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "status",
             "org_id",
         )
+        extra_kwargs = {
+            "enqueued_at": {"read_only": True},
+            "created_at": {"read_only": True},
+            "edited_at": {"read_only": True},
+            "status": {"read_only": True},
+            "org_id": {"read_only": True},
+        }
 
     id = serializers.CharField(read_only=True)
     plan = IdOnlyField(model=Plan)

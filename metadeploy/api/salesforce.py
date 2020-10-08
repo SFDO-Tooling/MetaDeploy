@@ -41,7 +41,7 @@ def _get_devhub_api():
         instance_url=jwt["instance_url"],
         session_id=jwt["access_token"],
         client_id="MetaDeploy",
-        version="47.0",
+        version="49.0",
     )
 
 
@@ -180,9 +180,7 @@ def _get_access_token(*, org_result, scratch_org_config):
     scratch_org_config.config["access_token"] = scratch_org_config._scratch_info[
         "access_token"
     ] = auth_result["access_token"]
-    scratch_org_config.config["refresh_token"] = scratch_org_config._scratch_info[
-        "refresh_token"
-    ] = auth_result["refresh_token"]
+    scratch_org_config.config["refresh_token"] = auth_result["refresh_token"]
 
 
 def create_scratch_org(
