@@ -342,7 +342,7 @@ class TestCreateScratchOrg:
             )
             create_scratch_org(
                 plan_id=plan.id,
-                org_name=plan.org_name,
+                org_name=plan.org_config_name,
                 result_id=str(scratch_org.pk),
             )
 
@@ -388,6 +388,6 @@ class TestCreateScratchOrg:
             )
             create_scratch_org(
                 plan_id=plan.id,
-                org_name=plan.org_name,
+                org_name=plan.org_config_name,
                 result_id=str(scratch_org.pk),
             )

@@ -450,7 +450,7 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
         choices=SUPPORTED_ORG_TYPES,
         default=SUPPORTED_ORG_TYPES.Persistent,
     )
-    org_name = models.CharField(max_length=64, default="release", blank=True)
+    org_config_name = models.CharField(max_length=64, default="release", blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -902,7 +902,7 @@ class ScratchOrg(HashIdMixin, models.Model):
 
             job = create_scratch_org_job.delay(
                 plan_id=str(self.plan.id),
-                org_name=self.plan.org_name,
+                org_name=self.plan.org_config_name,
                 result_id=self.id,
             )
             self.job_id = job.id
