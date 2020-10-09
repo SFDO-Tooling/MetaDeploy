@@ -450,7 +450,7 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
         choices=SUPPORTED_ORG_TYPES,
         default=SUPPORTED_ORG_TYPES.Persistent,
     )
-    org_name = models.CharField(max_length=64, default="release", blank=True)
+    org_config_name = models.CharField(max_length=64, default="release", blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -661,17 +661,24 @@ class Job(HashIdMixin, models.Model):
     )
 
     def subscribable_by(self, user, session):
-        scratch_org_id = session.get("scratch_org_id", None)
-        scratch_org = (
-            scratch_org_id
-            and ScratchOrg.objects.filter(
-                uuid=scratch_org_id, status=ScratchOrg.Status.complete
-            ).first()
-        )
-        valid_session_uuid = scratch_org and scratch_org.org_id == self.org_id
-        return (
-            self.is_public or user.is_staff or user == self.user or valid_session_uuid
-        )
+        # TODO: It seems we don't get the correct value in the session when it is passed
+        # from the websocket consumer. Ideally we would restrict this to only users who
+        # have a valid scratch_org `uuid` in their session:
+        #
+        # scratch_org_id = session.get("scratch_org_id", None)
+        # scratch_org = (
+        #     scratch_org_id
+        #     and ScratchOrg.objects.filter(
+        #         uuid=scratch_org_id, status=ScratchOrg.Status.complete
+        #     ).first()
+        # )
+        # valid_session_uuid = scratch_org and scratch_org.org_id == self.org_id
+        # return (
+        #     self.is_public or user.is_staff or user == self.user or valid_session_uuid
+        # )
+        #
+        # But instead we allow any user to subscribe to scratch_org (user-less) jobs:
+        return self.is_public or user.is_staff or user == self.user or not self.user
 
     def skip_steps(self):
         return [
@@ -786,15 +793,23 @@ class PreflightResult(models.Model):
     # }
 
     def subscribable_by(self, user, session):
-        scratch_org_id = session.get("scratch_org_id", None)
-        scratch_org = (
-            scratch_org_id
-            and ScratchOrg.objects.filter(
-                uuid=scratch_org_id, status=ScratchOrg.Status.complete
-            ).first()
-        )
-        valid_session_uuid = scratch_org and scratch_org.org_id == self.org_id
-        return self.user == user or valid_session_uuid
+        # TODO: It seems we don't get the correct value in the session when it is passed
+        # from the websocket consumer. Ideally we would restrict this to only users who
+        # have a valid scratch_org `uuid` in their session:
+        #
+        # scratch_org_id = session.get("scratch_org_id", None)
+        # scratch_org = (
+        #     scratch_org_id
+        #     and ScratchOrg.objects.filter(
+        #         uuid=scratch_org_id, status=ScratchOrg.Status.complete
+        #     ).first()
+        # )
+        # valid_session_uuid = scratch_org and scratch_org.org_id == self.org_id
+        # return self.user == user or valid_session_uuid
+        #
+        # But instead we allow any user to subscribe to scratch_org (user-less)
+        # preflights:
+        return self.user == user or not self.user
 
     def has_any_errors(self):
         return any(
@@ -902,7 +917,7 @@ class ScratchOrg(HashIdMixin, models.Model):
 
             job = create_scratch_org_job.delay(
                 plan_id=str(self.plan.id),
-                org_name=self.plan.org_name,
+                org_name=self.plan.org_config_name,
                 result_id=self.id,
             )
             self.job_id = job.id
@@ -912,8 +927,15 @@ class ScratchOrg(HashIdMixin, models.Model):
         return ret
 
     def subscribable_by(self, user, session):
-        scratch_org_id = session.get("scratch_org_id", None)
-        return scratch_org_id and scratch_org_id == str(self.uuid)
+        # TODO: It seems we don't get the correct value in the session when it is passed
+        # from the websocket consumer. Ideally we would restrict this to only users who
+        # have a valid scratch_org `uuid` in their session:
+        #
+        # scratch_org_id = session.get("scratch_org_id", None)
+        # return scratch_org_id and scratch_org_id == str(self.uuid)
+        #
+        # But instead we allow any user to subscribe to scratch_orgs:
+        return True
 
     def fail(self, error):
         self.status = ScratchOrg.Status.failed

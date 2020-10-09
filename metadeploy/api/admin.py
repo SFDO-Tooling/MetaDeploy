@@ -99,7 +99,7 @@ class ScratchOrgAdmin(admin.ModelAdmin, PlanMixin):
     autocomplete_fields = ("plan",)
     list_filter = ("status", "plan__version__product")
     list_display = (
-        "email",
+        "uuid",
         "plan_title",
         "product",
         "version",
@@ -107,7 +107,7 @@ class ScratchOrgAdmin(admin.ModelAdmin, PlanMixin):
         "enqueued_at",
     )
     list_select_related = ("plan", "plan__version", "plan__version__product")
-    search_fields = ("email", "org_id")
+    search_fields = ("uuid", "org_id")
 
 
 @admin.register(PlanTemplate)

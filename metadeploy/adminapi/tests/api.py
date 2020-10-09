@@ -75,7 +75,7 @@ class TestPlanViewSet:
                     "version": version_url,
                     "visible_to": None,
                     "supported_orgs": "Persistent",
-                    "org_name": "release",
+                    "org_config_name": "release",
                 }
             ],
             "links": {"next": None, "previous": None},
@@ -123,7 +123,7 @@ class TestPlanViewSet:
             "version": f"http://testserver/admin/rest/versions/{plan.version.id}",
             "visible_to": None,
             "supported_orgs": "Persistent",
-            "org_name": "release",
+            "org_config_name": "release",
         }
 
     def test_create(self, admin_api_client, version_factory, plan_template_factory):
@@ -156,7 +156,7 @@ class TestPlanViewSet:
                 ],
                 "version": f"http://testserver/admin/rest/versions/{version.id}",
                 "supported_orgs": "Persistent",
-                "org_name": "release",
+                "org_config_name": "release",
             },
             format="json",
         )
@@ -209,7 +209,7 @@ class TestPlanViewSet:
             "version": f"http://testserver/admin/rest/versions/{version.id}",
             "visible_to": None,
             "supported_orgs": "Persistent",
-            "org_name": "release",
+            "org_config_name": "release",
         }
         assert response.json() == expected
 

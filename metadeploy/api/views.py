@@ -334,8 +334,6 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
         uuid = str(uuid4())
         scratch_org = serializer.save(uuid=uuid)
         request.session["scratch_org_id"] = uuid
-        # @@@ TODO: This doesn't seem to persist immediately; race condition?
-        request.session.save()
 
         serializer = ScratchOrgSerializer(instance=scratch_org)
         return Response(

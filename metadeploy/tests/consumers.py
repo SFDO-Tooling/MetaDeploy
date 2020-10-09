@@ -31,6 +31,7 @@ async def test_push_notification_consumer__subscribe_scratch_org(scratch_org_fac
     )
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator.scope["user"] = None
     communicator.scope["session"] = {
         "scratch_org_id": uuid,
     }

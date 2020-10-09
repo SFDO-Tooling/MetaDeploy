@@ -126,7 +126,7 @@ describe('<Header />', () => {
 
       expect(
         getByText(
-          'An installation is currently running on your org. Average install time is 2 minutes.',
+          'An installation is currently running on this org. Average install time is 2 minutes.',
         ),
       ).toBeVisible();
     });

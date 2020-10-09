@@ -523,7 +523,7 @@ describe('<CtaButton />', () => {
       requires_preflight: false,
     };
     beforeAll(() => {
-      window.GLOBALS.DEVHUB_USERNAME = 'foo@bar.buz';
+      window.GLOBALS.SCRATCH_ORGS_AVAILABLE = 'foo@bar.buz';
     });
 
     afterAll(() => {

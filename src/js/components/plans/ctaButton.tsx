@@ -544,7 +544,7 @@ class CtaButton extends React.Component<
     const { plan, preflight, scratchOrg } = this.props;
     const canLogin = plan.supported_orgs !== SUPPORTED_ORGS.Scratch;
     const canCreateOrg = Boolean(
-      window.GLOBALS.DEVHUB_USERNAME &&
+      window.GLOBALS.SCRATCH_ORGS_AVAILABLE &&
         plan.supported_orgs !== SUPPORTED_ORGS.Persistent,
     );
 

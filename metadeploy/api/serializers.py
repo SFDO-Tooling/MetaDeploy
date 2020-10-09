@@ -645,6 +645,13 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "status",
             "org_id",
         )
+        extra_kwargs = {
+            "enqueued_at": {"read_only": True},
+            "created_at": {"read_only": True},
+            "edited_at": {"read_only": True},
+            "status": {"read_only": True},
+            "org_id": {"read_only": True},
+        }
 
     id = serializers.CharField(read_only=True)
     plan = IdOnlyField(model=Plan)

@@ -195,7 +195,7 @@ describe('<PlanDetail />', () => {
   };
 
   beforeAll(() => {
-    window.GLOBALS.DEVHUB_USERNAME = 'foo@bar.buz';
+    window.GLOBALS.SCRATCH_ORGS_AVAILABLE = 'foo@bar.buz';
   });
 
   afterAll(() => {
@@ -258,7 +258,7 @@ describe('<PlanDetail />', () => {
       });
 
       expect(
-        getByText('A pre-install validation is currently running on your org.'),
+        getByText('A pre-install validation is currently running on this org.'),
       ).toBeVisible();
       expect(getAllByText('Install')[0]).toBeDisabled();
     });
