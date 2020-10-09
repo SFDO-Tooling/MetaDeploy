@@ -145,7 +145,7 @@ class PlanDetail extends React.Component<Props, State> {
   fetchScratchOrgIfMissing() {
     const { plan, scratchOrg, doFetchScratchOrg } = this.props;
     const canCreateOrg = Boolean(
-      window.GLOBALS.DEVHUB_USERNAME &&
+      window.GLOBALS.SCRATCH_ORGS_AVAILABLE &&
         plan?.supported_orgs !== SUPPORTED_ORGS.Persistent,
     );
     if (plan && canCreateOrg && scratchOrg === undefined) {
@@ -298,7 +298,7 @@ class PlanDetail extends React.Component<Props, State> {
           <WarningIcon />
           <span>
             <Trans i18nKey="installationCurrentlyRunning">
-              An installation is currently running on your org.{' '}
+              An installation is currently running on this org.{' '}
               <Link
                 to={routes.job_detail(
                   product_slug,
@@ -320,7 +320,7 @@ class PlanDetail extends React.Component<Props, State> {
           <WarningIcon />
           <span>
             {i18n.t(
-              'A pre-install validation is currently running on your org.',
+              'A pre-install validation is currently running on this org.',
             )}
           </span>
         </p>

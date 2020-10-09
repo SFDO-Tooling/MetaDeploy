@@ -177,6 +177,8 @@ def _get_access_token(*, org_result, scratch_org_config):
         SF_CLIENT_ID, SF_CLIENT_SECRET, SF_CALLBACK_URL, scratch_org_config.instance_url
     )
     auth_result = oauth.get_token(org_result["AuthCode"]).json()
+    # TODO: This needs to be updated to `_sfdx_info` instead of `_scratch_info` when
+    # MetaDeploy gets updated to cumulusci 3.20.1
     scratch_org_config.config["access_token"] = scratch_org_config._scratch_info[
         "access_token"
     ] = auth_result["access_token"]

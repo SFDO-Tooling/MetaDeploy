@@ -661,17 +661,24 @@ class Job(HashIdMixin, models.Model):
     )
 
     def subscribable_by(self, user, session):
-        scratch_org_id = session.get("scratch_org_id", None)
-        scratch_org = (
-            scratch_org_id
-            and ScratchOrg.objects.filter(
-                uuid=scratch_org_id, status=ScratchOrg.Status.complete
-            ).first()
-        )
-        valid_session_uuid = scratch_org and scratch_org.org_id == self.org_id
-        return (
-            self.is_public or user.is_staff or user == self.user or valid_session_uuid
-        )
+        # TODO: It seems we don't get the correct value in the session when it is passed
+        # from the websocket consumer. Ideally we would restrict this to only users who
+        # have a valid scratch_org `uuid` in their session:
+        #
+        # scratch_org_id = session.get("scratch_org_id", None)
+        # scratch_org = (
+        #     scratch_org_id
+        #     and ScratchOrg.objects.filter(
+        #         uuid=scratch_org_id, status=ScratchOrg.Status.complete
+        #     ).first()
+        # )
+        # valid_session_uuid = scratch_org and scratch_org.org_id == self.org_id
+        # return (
+        #     self.is_public or user.is_staff or user == self.user or valid_session_uuid
+        # )
+        #
+        # But instead we allow any user to subscribe to scratch_org (user-less) jobs:
+        return self.is_public or user.is_staff or user == self.user or not self.user
 
     def skip_steps(self):
         return [
@@ -786,15 +793,23 @@ class PreflightResult(models.Model):
     # }
 
     def subscribable_by(self, user, session):
-        scratch_org_id = session.get("scratch_org_id", None)
-        scratch_org = (
-            scratch_org_id
-            and ScratchOrg.objects.filter(
-                uuid=scratch_org_id, status=ScratchOrg.Status.complete
-            ).first()
-        )
-        valid_session_uuid = scratch_org and scratch_org.org_id == self.org_id
-        return self.user == user or valid_session_uuid
+        # TODO: It seems we don't get the correct value in the session when it is passed
+        # from the websocket consumer. Ideally we would restrict this to only users who
+        # have a valid scratch_org `uuid` in their session:
+        #
+        # scratch_org_id = session.get("scratch_org_id", None)
+        # scratch_org = (
+        #     scratch_org_id
+        #     and ScratchOrg.objects.filter(
+        #         uuid=scratch_org_id, status=ScratchOrg.Status.complete
+        #     ).first()
+        # )
+        # valid_session_uuid = scratch_org and scratch_org.org_id == self.org_id
+        # return self.user == user or valid_session_uuid
+        #
+        # But instead we allow any user to subscribe to scratch_org (user-less)
+        # preflights:
+        return self.user == user or not self.user
 
     def has_any_errors(self):
         return any(
@@ -912,10 +927,14 @@ class ScratchOrg(HashIdMixin, models.Model):
         return ret
 
     def subscribable_by(self, user, session):
+        # TODO: It seems we don't get the correct value in the session when it is passed
+        # from the websocket consumer. Ideally we would restrict this to only users who
+        # have a valid scratch_org `uuid` in their session:
+        #
         # scratch_org_id = session.get("scratch_org_id", None)
         # return scratch_org_id and scratch_org_id == str(self.uuid)
-        # @@@ TODO: it seems we don't get the correct value in the session when it is
-        # passed from the websocket consumer. So for now, we punt and just
+        #
+        # But instead we allow any user to subscribe to scratch_orgs:
         return True
 
     def fail(self, error):
