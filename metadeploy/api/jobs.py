@@ -301,17 +301,16 @@ def create_scratch_org(*, plan_id, org_name, result_id):
         )
         async_to_sync(preflight_started)(org, preflight_result)
         preflight(preflight_result.pk)
-
-    # @@@ TODO: start installation job automatically if:
-    #   - Plan has no preflight
-    #   - Plan has no optional steps
-    # job = Job.objects.create(
-    #     user=None,
-    #     plan=plan,
-    #     organization_url=org_config.instance_url,
-    #     is_public=True,
-    #     org_id=scratch_org_config.config["org_id"],
-    # )
+    elif plan.required_step_ids.count() == plan.steps.count():
+        # Start installation job automatically if both:
+        # - Plan has no preflight
+        # - All plan steps are required
+        Job.objects.create(
+            user=None,
+            plan=plan,
+            organization_url=org_config.instance_url,
+            org_id=scratch_org_config.config["org_id"],
+        )
 
     # rq_job = run_flows.delay(
     #     plan=plan,
