@@ -897,7 +897,7 @@ class ScratchOrg(HashIdMixin, models.Model):
     Status = Choices("started", "complete", "failed", "canceled")
 
     plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
-    email = models.EmailField()
+    email = models.EmailField(null=True)
 
     enqueued_at = models.DateTimeField(null=True)
     job_id = models.UUIDField(null=True)

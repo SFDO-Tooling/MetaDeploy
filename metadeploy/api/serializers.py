@@ -630,6 +630,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "org_id",
         )
         extra_kwargs = {
+            "email": {"required": True},
             "enqueued_at": {"read_only": True},
             "created_at": {"read_only": True},
             "edited_at": {"read_only": True},
