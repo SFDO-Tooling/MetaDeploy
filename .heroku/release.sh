@@ -14,11 +14,6 @@ curl -X POST \
 
      https://api.github.com/repos/$repo/dispatches \
 
-     -d '{"event_type":"production-smoke-test",
-       "client_payload":{
-        "review_app_url": "https://$app.herokuapp.com",
-        "PR_NUM": "$pr"
-       }
-      }'
+     -d '{"event_type":"production-release"}'
 
 echo "Done."

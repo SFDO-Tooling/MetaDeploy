@@ -40,7 +40,7 @@ jobs:
       - name: Create test org
         run: |
           $(which cci) org info enterprise
-      - name: Set Trusted IP Ranges 
+      - name: Deploy Trusted IP Ranges 
         run: |
           $(which cci) task run deploy --org enterprise -o path robot/trusted_ip_ranges
       - name: Run robot test
