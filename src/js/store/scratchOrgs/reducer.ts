@@ -5,7 +5,6 @@ export type ScratchOrg = {
   id: string;
   plan: string;
   status: 'started' | 'complete' | 'failed' | 'canceled';
-  email: string;
   org_id: string | null;
   enqueued_at: string | null;
   created_at: string;

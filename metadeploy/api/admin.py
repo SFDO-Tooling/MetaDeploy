@@ -108,6 +108,15 @@ class ScratchOrgAdmin(admin.ModelAdmin, PlanMixin):
     )
     list_select_related = ("plan", "plan__version", "plan__version__product")
     search_fields = ("uuid", "org_id")
+    fields = (
+        "plan",
+        "enqueued_at",
+        "job_id",
+        "uuid",
+        "status",
+        "config",
+        "org_id",
+    )
 
 
 @admin.register(PlanTemplate)

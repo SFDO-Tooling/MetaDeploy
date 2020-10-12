@@ -270,6 +270,9 @@ expire_preflights_job = job(expire_preflights)
 def create_scratch_org(*, plan_id, org_name, result_id):
     plan = Plan.objects.get(id=plan_id)
     org = ScratchOrg.objects.get(id=result_id)
+    email = org.email
+    org.email = None
+    org.save()
     repo_url = plan.version.product.repo_url
     repo_owner, repo_name = extract_user_and_repo(repo_url)
     commit_ish = plan.commit_ish
@@ -282,7 +285,7 @@ def create_scratch_org(*, plan_id, org_name, result_id):
                 repo_name=repo_name,
                 repo_url=repo_url,
                 repo_branch=commit_ish,
-                email=org.email,
+                email=email,
                 project_path=repo_root,
                 org_name=org_name,
             )
