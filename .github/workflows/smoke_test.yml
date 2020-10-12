@@ -40,6 +40,9 @@ jobs:
       - name: Create test org
         run: |
           $(which cci) org info enterprise
+      - name: Assign Skip Identity Verification Permission
+        run: |
+          $(which cci) task run create_permission_set --org dev -o api_name skip_login_verification -o user_permissions 'PermissionsSkipIdentityConfirmation'
       - name: Run robot test
         run: |
           $(which cci) task run robot \
