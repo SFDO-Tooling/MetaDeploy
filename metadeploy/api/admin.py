@@ -113,8 +113,6 @@ class ScratchOrgAdmin(admin.ModelAdmin, PlanMixin):
         "enqueued_at",
         "job_id",
         "uuid",
-        "created_at",
-        "edited_at",
         "status",
         "config",
         "org_id",
