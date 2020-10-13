@@ -18,6 +18,7 @@ from metadeploy.api.models import (
     Product,
     ProductCategory,
     ProductSlug,
+    ScratchOrg,
     Step,
     Version,
 )
@@ -203,6 +204,7 @@ class JobFactory(factory.django.DjangoModelFactory):
     plan = factory.SubFactory(PlanFactory)
     enqueued_at = None
     job_id = None
+    org_id = factory.fuzzy.FuzzyText(length=15, prefix="00D")
 
     @factory.post_generation
     def steps(self, create, extracted, **kwargs):  # pragma: nocover
@@ -214,6 +216,15 @@ class JobFactory(factory.django.DjangoModelFactory):
             # A list of steps was passed in, use it
             for step in extracted:
                 self.steps.add(step)
+
+
+@register
+class ScratchOrgFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = ScratchOrg
+
+    email = "test@example.com"
+    plan = factory.SubFactory(PlanFactory)
 
 
 @register

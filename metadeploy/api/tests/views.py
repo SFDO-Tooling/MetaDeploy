@@ -1,9 +1,14 @@
+from datetime import datetime
+from unittest.mock import MagicMock, patch
+from uuid import uuid4
+
+import django_rq
 import pytest
 from django.urls import reverse
 
 from metadeploy.conftest import format_timestamp
 
-from ..models import Job, Plan, PreflightResult
+from ..models import SUPPORTED_ORG_TYPES, Job, Plan, PreflightResult, ScratchOrg
 
 
 @pytest.mark.django_db
@@ -232,6 +237,7 @@ class TestBasicGetViews:
             "is_listed": True,
             "not_allowed_instructions": None,
             "average_duration": None,
+            "supported_orgs": "Persistent",
         }
 
     def test_plan__not_visible(self, client, allowed_list_factory, plan_factory):
@@ -255,6 +261,7 @@ class TestBasicGetViews:
             "is_listed": True,
             "not_allowed_instructions": "<p>Sample instructions.</p>",
             "average_duration": None,
+            "supported_orgs": "Persistent",
         }
 
     def test_plan__visible(
@@ -291,6 +298,7 @@ class TestBasicGetViews:
             "is_listed": True,
             "not_allowed_instructions": "<p>Sample instructions.</p>",
             "average_duration": None,
+            "supported_orgs": "Persistent",
         }
 
     def test_plan__visible_superuser(
@@ -318,11 +326,44 @@ class TestBasicGetViews:
             "is_listed": True,
             "not_allowed_instructions": "<p>Sample instructions.</p>",
             "average_duration": None,
+            "supported_orgs": "Persistent",
         }
 
 
 @pytest.mark.django_db
 class TestPreflight:
+    def test_post__anon(self, anon_client, plan_factory, scratch_org_factory):
+        uuid = str(uuid4())
+        plan = plan_factory()
+        scratch_org_factory(
+            uuid=uuid,
+            plan=plan,
+            status=ScratchOrg.Status.complete,
+            config={
+                "instance_url": "instance_url",
+                "org_id": "org_id",
+                "username": "username",
+                "access_token": "token",
+                "refresh_token": "refresh token",
+            },
+        )
+        session = anon_client.session
+        session["scratch_org_id"] = uuid
+        session.save()
+        response = anon_client.post(reverse("plan-preflight", kwargs={"pk": plan.id}))
+
+        assert response.status_code == 201
+
+    def test_post__anon__bad(self, anon_client, plan_factory):
+        uuid = str(uuid4())
+        plan = plan_factory()
+        session = anon_client.session
+        session["scratch_org_id"] = uuid
+        session.save()
+        response = anon_client.post(reverse("plan-preflight", kwargs={"pk": plan.id}))
+
+        assert response.status_code == 403
+
     def test_post(self, client, plan_factory):
         plan = plan_factory()
         response = client.post(reverse("plan-preflight", kwargs={"pk": plan.id}))
@@ -356,7 +397,43 @@ class TestPreflight:
             "edited_at": format_timestamp(preflight.edited_at),
         }
 
-    def test_get__bad(self, client, plan_factory):
+    def test_get__anon(
+        self, anon_client, plan_factory, scratch_org_factory, preflight_result_factory
+    ):
+        uuid = str(uuid4())
+        plan = plan_factory()
+        org = scratch_org_factory(
+            uuid=uuid,
+            plan=plan,
+            status=ScratchOrg.Status.complete,
+            org_id="org_id",
+            config={
+                "instance_url": "instance_url",
+                "org_id": "org_id",
+                "username": "username",
+                "access_token": "token",
+                "refresh_token": "refresh token",
+            },
+        )
+        preflight = preflight_result_factory(
+            plan=plan,
+            org_id=org.org_id,
+        )
+        session = anon_client.session
+        session["scratch_org_id"] = uuid
+        session.save()
+        response = anon_client.get(reverse("plan-preflight", kwargs={"pk": plan.id}))
+
+        assert response.status_code == 200
+        assert response.json()["id"] == str(preflight.id)
+
+    def test_get__bad(self, anon_client, plan_factory):
+        plan = plan_factory()
+        response = anon_client.get(reverse("plan-preflight", kwargs={"pk": plan.id}))
+
+        assert response.status_code == 404
+
+    def test_get__bad__anon(self, client, plan_factory):
         plan = plan_factory()
         response = client.get(reverse("plan-preflight", kwargs={"pk": plan.id}))
 
@@ -392,36 +469,62 @@ class TestPreflight:
 
 @pytest.mark.django_db
 class TestOrgViewset:
+    def test_get_job__anonymous(self, anon_client, job_factory, plan_factory):
+        plan = plan_factory()
+        job_factory(plan=plan)
+        response = anon_client.get(reverse("org-list"))
+
+        assert response.status_code == 200
+        assert response.json() == {}
+
+    def test_get_job__uuid(
+        self, anon_client, job_factory, plan_factory, scratch_org_factory
+    ):
+        uuid = str(uuid4())
+        plan = plan_factory()
+        org = scratch_org_factory(
+            plan=plan,
+            uuid=uuid,
+            org_id="00Dxxxxxxxxxxxxxxx",
+            status=ScratchOrg.Status.complete,
+        )
+        job = job_factory(plan=plan, org_id=org.org_id)
+        session = anon_client.session
+        session["scratch_org_id"] = uuid
+        session.save()
+        response = anon_client.get(reverse("org-list"))
+
+        assert response.json()[org.org_id]["current_job"]["id"] == str(job.id)
+        assert response.json()[org.org_id]["current_preflight"] is None
+
     def test_get_job(self, client, job_factory, plan_factory):
         plan = plan_factory()
         job = job_factory(
-            organization_url=client.user.instance_url,
-            user=client.user,
             plan=plan,
             org_id=client.user.org_id,
         )
         response = client.get(reverse("org-list"))
 
-        assert response.json()["current_job"]["id"] == str(job.id)
-        assert response.json()["current_preflight"] is None
+        assert response.json()[client.user.org_id]["current_job"]["id"] == str(job.id)
+        assert response.json()[client.user.org_id]["current_preflight"] is None
 
     def test_get_preflight(self, client, preflight_result_factory, plan_factory):
         plan = plan_factory()
         preflight = preflight_result_factory(
-            organization_url=client.user.instance_url,
-            user=client.user,
             plan=plan,
             org_id=client.user.org_id,
         )
         response = client.get(reverse("org-list"))
 
-        assert response.json()["current_job"] is None
-        assert response.json()["current_preflight"] == str(preflight.id)
+        assert response.json()[client.user.org_id]["current_job"] is None
+        assert response.json()[client.user.org_id]["current_preflight"] == str(
+            preflight.id
+        )
 
-    def test_get_none(self, client):
-        response = client.get(reverse("org-list"))
+    def test_get_none(self, anon_client):
+        response = anon_client.get(reverse("org-list"))
 
-        assert response.json() == {"current_job": None, "current_preflight": None}
+        assert response.json() == {}
 
 
 @pytest.mark.django_db
@@ -449,6 +552,7 @@ class TestVersionAdditionalPlans:
                 "not_allowed_instructions": None,
                 "requires_preflight": False,
                 "average_duration": None,
+                "supported_orgs": "Persistent",
             }
         ]
 
@@ -566,3 +670,98 @@ class TestUnlisted:
 
         assert response.status_code == 200
         assert response.json()["id"] == plan.id
+
+
+@pytest.mark.django_db
+class TestPlanView:
+    def test_scratch_org_get(self, client, plan_factory, scratch_org_factory):
+        plan = plan_factory()
+        uuid = str(uuid4())
+        scratch_org_factory(
+            uuid=uuid,
+            plan=plan,
+            config={
+                "instance_url": "instance_url",
+                "org_id": "org_id",
+                "username": "username",
+                "access_token": "token",
+                "refresh_token": "refresh token",
+            },
+        )
+        session = client.session
+        session["scratch_org_id"] = uuid
+        session.save()
+
+        response = client.get(reverse("plan-scratch-org", kwargs={"pk": str(plan.id)}))
+        assert response.status_code == 200
+
+    def test_scratch_org_get__missing(self, client, plan_factory, scratch_org_factory):
+        plan = plan_factory()
+        uuid = str(uuid4())
+        scratch_org_factory(
+            uuid=uuid,
+            config={
+                "instance_url": "instance_url",
+                "org_id": "org_id",
+                "username": "username",
+                "access_token": "token",
+                "refresh_token": "refresh token",
+            },
+        )
+        session = client.session
+        session["scratch_org_id"] = uuid
+        session.save()
+
+        response = client.get(reverse("plan-scratch-org", kwargs={"pk": str(plan.id)}))
+        assert response.status_code == 404
+
+    def test_scratch_org_post__no_devhub_username(self, client, plan_factory, settings):
+        settings.DEVHUB_USERNAME = None
+        plan = plan_factory()
+        response = client.post(reverse("plan-scratch-org", kwargs={"pk": str(plan.id)}))
+        assert response.status_code == 501
+
+    def test_scratch_org_post__invalid_plan(self, client, plan_factory, settings):
+        settings.DEVHUB_USERNAME = "devhub@example.com"
+        plan = plan_factory()
+        response = client.post(reverse("plan-scratch-org", kwargs={"pk": str(plan.id)}))
+        assert response.status_code == 409
+
+    def test_scratch_org_post__bad_data(self, client, plan_factory, settings):
+        settings.DEVHUB_USERNAME = "devhub@example.com"
+        plan = plan_factory(supported_orgs=SUPPORTED_ORG_TYPES.Scratch)
+        response = client.post(reverse("plan-scratch-org", kwargs={"pk": str(plan.id)}))
+        assert response.status_code == 400
+
+    def test_scratch_org_post__queue_full(self, client, plan_factory, settings):
+        queue = django_rq.get_queue("default")
+        queue.empty()
+        settings.DEVHUB_USERNAME = "devhub@example.com"
+        plan = plan_factory(supported_orgs=SUPPORTED_ORG_TYPES.Scratch)
+        with patch("metadeploy.api.views.django_rq") as djq:
+            # Return something longer than the max queue length:
+            djq.get_queue.return_value = [None] * 20
+            response = client.post(
+                reverse("plan-scratch-org", kwargs={"pk": str(plan.id)}),
+                {"email": "test@example.com"},
+            )
+            assert response.status_code == 503
+
+    def test_scratch_org_post__good(self, client, plan_factory, settings):
+        queue = django_rq.get_queue("default")
+        queue.empty()
+        settings.DEVHUB_USERNAME = "devhub@example.com"
+        plan = plan_factory(supported_orgs=SUPPORTED_ORG_TYPES.Scratch)
+        with patch(
+            "metadeploy.api.jobs.create_scratch_org_job"
+        ) as create_scratch_org_job:
+            uuid = "00000000-0000-0000-0000-000000000000"
+            create_scratch_org_job.delay.return_value = MagicMock(
+                id=uuid, enqueued_at=datetime(2020, 9, 3, 14, 0)
+            )
+            response = client.post(
+                reverse("plan-scratch-org", kwargs={"pk": str(plan.id)}),
+                {"email": "test@example.com"},
+            )
+            assert response.status_code == 202
+            assert create_scratch_org_job.delay.called

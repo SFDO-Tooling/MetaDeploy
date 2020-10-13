@@ -6,11 +6,22 @@ import { storeWithApi } from './../../utils';
 
 describe('fetchOrgJobs', () => {
   describe('success', () => {
+    beforeEach(() => {
+      window.socket = { subscribe: jest.fn() };
+    });
+
+    afterEach(() => {
+      Reflect.deleteProperty(window, 'socket');
+    });
+
     test('GETs org from api', () => {
       const store = storeWithApi({});
       const response = {
-        current_job: null,
-        current_preflight: null,
+        'org-id': {
+          org_id: 'org-id',
+          current_job: null,
+          current_preflight: null,
+        },
       };
       fetchMock.getOnce(window.api_urls.org_list(), response);
       const started = {
@@ -21,9 +32,13 @@ describe('fetchOrgJobs', () => {
         payload: response,
       };
 
-      expect.assertions(1);
+      expect.assertions(2);
       return store.dispatch(actions.fetchOrgJobs()).then(() => {
         expect(store.getActions()).toEqual([started, succeeded]);
+        expect(window.socket.subscribe).toHaveBeenCalledWith({
+          model: 'org',
+          id: 'org-id',
+        });
       });
     });
   });

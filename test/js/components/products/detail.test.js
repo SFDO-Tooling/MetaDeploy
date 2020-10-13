@@ -51,6 +51,7 @@ const defaultState = {
             is_listed: true,
             is_allowed: true,
             requires_preflight: true,
+            supported_orgs: 'Persistent',
           },
           secondary_plan: {
             id: 'plan-2',
@@ -60,6 +61,7 @@ const defaultState = {
             is_listed: true,
             is_allowed: true,
             requires_preflight: true,
+            supported_orgs: 'Persistent',
           },
           additional_plans: {
             'my-additional-plan': {
@@ -71,6 +73,7 @@ const defaultState = {
               is_allowed: true,
               requires_preflight: true,
               order_key: 2,
+              supported_orgs: 'Persistent',
             },
             'another-additional-plan': {
               id: 'plan-3',
@@ -81,6 +84,7 @@ const defaultState = {
               is_allowed: true,
               requires_preflight: true,
               order_key: 1,
+              supported_orgs: 'Persistent',
             },
           },
           is_listed: true,
@@ -471,6 +475,7 @@ describe('<VersionDetail />', () => {
             is_listed: true,
             is_allowed: true,
             requires_preflight: true,
+            supported_orgs: 'Persistent',
           },
           secondary_plan: null,
           is_listed: true,
@@ -513,6 +518,7 @@ describe('<VersionDetail />', () => {
               is_listed: true,
               is_allowed: true,
               requires_preflight: true,
+              supported_orgs: 'Persistent',
             },
           },
           is_listed: true,
@@ -546,6 +552,7 @@ describe('<VersionDetail />', () => {
         is_listed: true,
         is_allowed: true,
         requires_preflight: true,
+        supported_orgs: 'Persistent',
       },
       secondary_plan: null,
       is_listed: true,

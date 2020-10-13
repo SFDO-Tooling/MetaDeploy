@@ -59,6 +59,7 @@ class ClickThroughAgreementModal extends React.Component<Props, State> {
       <Modal
         isOpen={isOpen}
         heading={i18n.t('Product Terms of Use and Licenses')}
+        size="medium"
         onRequestClose={this.handleClose}
         footer={footer}
       >
@@ -75,6 +76,7 @@ class ClickThroughAgreementModal extends React.Component<Props, State> {
             id="click-through-confirm"
             className="slds-p-top_medium"
             checked={this.state.confirmed}
+            required
             labels={{
               label: i18n.t(
                 'I confirm I have read and agree to these product terms of use and licenses.',

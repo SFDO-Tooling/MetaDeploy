@@ -1,6 +1,7 @@
 import { ThunkDispatch } from 'redux-thunk';
 import Sockette from 'sockette';
 
+import { ThunkResult } from '@/store';
 import {
   cancelJob,
   completeJob,
@@ -23,8 +24,17 @@ import {
   PreflightCompleted,
   PreflightFailed,
   PreflightInvalid,
+  PreflightStarted,
 } from '@/store/plans/actions';
 import { Preflight } from '@/store/plans/reducer';
+import {
+  createPreflight,
+  createScratchOrg,
+  failScratchOrg,
+  ScratchOrgCreated,
+  ScratchOrgFailed,
+} from '@/store/scratchOrgs/actions';
+import { ScratchOrg } from '@/store/scratchOrgs/reducer';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
 import { invalidateToken, TokenInvalidAction } from '@/store/user/actions';
 import { log } from '@/utils/logging';
@@ -52,6 +62,7 @@ interface UserEvent {
 }
 interface PreflightEvent {
   type:
+    | 'PREFLIGHT_STARTED'
     | 'PREFLIGHT_COMPLETED'
     | 'PREFLIGHT_FAILED'
     | 'PREFLIGHT_CANCELED'
@@ -66,11 +77,32 @@ interface OrgEvent {
   type: 'ORG_CHANGED';
   payload: Org;
 }
-type ModelEvent = UserEvent | PreflightEvent | JobEvent | OrgEvent;
+
+interface ScratchOrgCreatedEvent {
+  type: 'SCRATCH_ORG_CREATED';
+  payload: ScratchOrg;
+}
+
+interface ScratchOrgErrorEvent {
+  type: 'SCRATCH_ORG_ERROR';
+  payload: {
+    message: string;
+    org: ScratchOrg;
+  };
+}
+
+type ModelEvent =
+  | UserEvent
+  | PreflightEvent
+  | JobEvent
+  | OrgEvent
+  | ScratchOrgCreatedEvent
+  | ScratchOrgErrorEvent;
 type EventType = SubscriptionEvent | ErrorEvent | ModelEvent;
 
 type Action =
   | TokenInvalidAction
+  | PreflightStarted
   | PreflightCompleted
   | PreflightFailed
   | PreflightCanceled
@@ -79,7 +111,9 @@ type Action =
   | JobCompleted
   | JobFailed
   | JobCanceled
-  | OrgChanged;
+  | OrgChanged
+  | ScratchOrgCreated
+  | ThunkResult<ScratchOrgFailed>;
 
 const isSubscriptionEvent = (event: EventType): event is SubscriptionEvent =>
   (event as ModelEvent).type === undefined;
@@ -109,6 +143,12 @@ export const getAction = (event: EventType): Action | null => {
       return failJob(event.payload);
     case 'ORG_CHANGED':
       return updateOrg(event.payload);
+    case 'SCRATCH_ORG_CREATED':
+      return createScratchOrg(event.payload);
+    case 'SCRATCH_ORG_ERROR':
+      return failScratchOrg(event.payload);
+    case 'PREFLIGHT_STARTED':
+      return createPreflight(event.payload);
   }
   return null;
 };

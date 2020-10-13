@@ -5,7 +5,7 @@ import DropdownTrigger from '@salesforce/design-system-react/components/menu-dro
 import i18n from 'i18next';
 import * as React from 'react';
 
-import { FetchProductsSucceeded } from '@/store/products/actions';
+import { FetchOrgJobsSucceeded } from '@/store/org/actions';
 import { User } from '@/store/user/reducer';
 
 const Logout = ({
@@ -13,7 +13,7 @@ const Logout = ({
   doLogout,
 }: {
   user: User;
-  doLogout: () => Promise<FetchProductsSucceeded>;
+  doLogout: () => Promise<FetchOrgJobsSucceeded>;
 }) => (
   <Dropdown
     id="logout"

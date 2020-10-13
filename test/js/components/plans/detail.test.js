@@ -9,6 +9,7 @@ import {
   fetchProduct,
   fetchVersion,
 } from '@/store/products/actions';
+import { fetchScratchOrg, spinScratchOrg } from '@/store/scratchOrgs/actions';
 import routes from '@/utils/routes';
 
 import {
@@ -19,17 +20,22 @@ import {
 
 jest.mock('@/store/products/actions');
 jest.mock('@/store/plans/actions');
+jest.mock('@/store/scratchOrgs/actions');
 
 fetchPlan.mockReturnValue({ type: 'TEST' });
 fetchPreflight.mockReturnValue({ type: 'TEST' });
 fetchProduct.mockReturnValue({ type: 'TEST' });
 fetchVersion.mockReturnValue({ type: 'TEST' });
+fetchScratchOrg.mockReturnValue({ type: 'TEST' });
+spinScratchOrg.mockReturnValue({ type: 'TEST', payload: 'abc123' });
 
 afterEach(() => {
   fetchPlan.mockClear();
   fetchPreflight.mockClear();
   fetchProduct.mockClear();
   fetchVersion.mockClear();
+  fetchScratchOrg.mockClear();
+  spinScratchOrg.mockClear();
 });
 
 const defaultState = {
@@ -43,6 +49,7 @@ const defaultState = {
         description: 'This is a test product.',
         category: 'salesforce',
         image: null,
+        click_through_agreement: '<p>Accept these terms, please</p>',
         most_recent_version: {
           id: 'v1',
           product: 'p1',
@@ -89,6 +96,7 @@ const defaultState = {
             ],
             is_allowed: true,
             requires_preflight: true,
+            supported_orgs: 'Both',
           },
           secondary_plan: {
             id: 'plan-2',
@@ -99,6 +107,7 @@ const defaultState = {
             steps: [{ id: 'step-5', name: 'My Other Step' }],
             requires_preflight: true,
             is_allowed: true,
+            supported_orgs: 'Both',
           },
           additional_plans: {
             'third-plan': {
@@ -110,6 +119,7 @@ const defaultState = {
               steps: [],
               is_allowed: true,
               requires_preflight: true,
+              supported_orgs: 'Persistent',
             },
             'fourth-plan': {
               id: 'plan-4',
@@ -121,6 +131,7 @@ const defaultState = {
               is_allowed: false,
               requires_preflight: true,
               not_allowed_instructions: 'plan restricted',
+              supported_orgs: 'Persistent',
             },
           },
         },
@@ -146,6 +157,9 @@ const defaultState = {
   user: { valid_token_for: 'foo', org_type: 'an org' },
   jobs: {},
   org: null,
+  scratchOrgs: {
+    'plan-1': null,
+  },
 };
 
 describe('<PlanDetail />', () => {
@@ -180,6 +194,14 @@ describe('<PlanDetail />', () => {
     return { ...renderWithRedux(ui, initialState, customStore), context };
   };
 
+  beforeAll(() => {
+    window.GLOBALS.SCRATCH_ORGS_AVAILABLE = 'foo@bar.buz';
+  });
+
+  afterAll(() => {
+    window.GLOBALS = {};
+  });
+
   describe('insufficient permissions for user', () => {
     test('renders login button', () => {
       const { getByText } = setup({
@@ -189,7 +211,9 @@ describe('<PlanDetail />', () => {
         },
       });
 
-      expect(getByText('Log in with a different org')).toBeVisible();
+      expect(
+        getByText('you don’t have permissions', { exact: false }),
+      ).toBeVisible();
     });
   });
 
@@ -198,14 +222,17 @@ describe('<PlanDetail />', () => {
       const { getByText, getAllByText } = setup({
         initialState: {
           ...defaultState,
-          org: {
-            current_job: {
-              id: '1',
-              product_slug: 'product-1',
-              version_label: '1.0.0',
-              plan_slug: 'my-plan',
+          orgs: {
+            'org-id': {
+              org_id: 'org-id',
+              current_job: {
+                id: '1',
+                product_slug: 'product-1',
+                version_label: '1.0.0',
+                plan_slug: 'my-plan',
+              },
+              current_preflight: null,
             },
-            current_preflight: null,
           },
         },
       });
@@ -220,7 +247,13 @@ describe('<PlanDetail />', () => {
       const { getByText, getAllByText } = setup({
         initialState: {
           ...defaultState,
-          org: { current_job: null, current_preflight: '1' },
+          orgs: {
+            'org-id': {
+              org_id: 'org-id',
+              current_job: null,
+              current_preflight: '1',
+            },
+          },
         },
       });
 
@@ -362,7 +395,7 @@ describe('<PlanDetail />', () => {
       });
     });
 
-    describe('preflight is removed', () => {
+    describe('plan changes', () => {
       test('fetches preflight', () => {
         const { rerender, store } = setup();
 
@@ -375,6 +408,20 @@ describe('<PlanDetail />', () => {
         });
 
         expect(fetchPreflight).toHaveBeenCalledWith('plan-2');
+      });
+
+      test('fetches scratch org', () => {
+        const { rerender, store } = setup();
+
+        expect(fetchScratchOrg).not.toHaveBeenCalled();
+
+        setup({
+          planSlug: 'other-plan',
+          rerenderFn: rerender,
+          customStore: store,
+        });
+
+        expect(fetchScratchOrg).toHaveBeenCalledWith('plan-2');
       });
     });
   });
@@ -419,7 +466,13 @@ describe('<PlanDetail />', () => {
     const { getByText } = setup({
       initialState: {
         ...defaultState,
-        org: { current_job: null, current_preflight: null },
+        orgs: {
+          'org-id': {
+            org_id: 'org-id',
+            current_job: null,
+            current_preflight: null,
+          },
+        },
       },
     });
 

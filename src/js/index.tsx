@@ -26,6 +26,7 @@ import { ProductDetail, VersionDetail } from '@/components/products/detail';
 import ProductsList from '@/components/products/list';
 import init_i18n from '@/i18n';
 import reducer from '@/store';
+import { fetchOrgJobs } from '@/store/org/actions';
 import { fetchProducts } from '@/store/products/actions';
 import { login, refetchAllData } from '@/store/user/actions';
 import { User } from '@/store/user/reducer';
@@ -157,6 +158,9 @@ init_i18n((i18nError?: string) => {
     (appStore.dispatch as ThunkDispatch<any, void, AnyAction>)(
       fetchProducts(),
     ).finally(() => {
+      (appStore.dispatch as ThunkDispatch<any, void, AnyAction>)(
+        fetchOrgJobs(),
+      );
       ReactDOM.render(
         <Provider store={appStore}>
           <BrowserRouter>
