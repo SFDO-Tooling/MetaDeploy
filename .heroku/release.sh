@@ -1,8 +1,7 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bash 
+set -e
 
 python manage.py migrate --noinput
-
-set -e
 
 repo=$GITHUB_REPO
 token=$GITHUB_TOKEN
