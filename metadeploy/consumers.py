@@ -106,21 +106,22 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
             return False
 
     def handle_org_special_case(self, content):
-        if "user" in self.scope and self.scope["user"].is_authenticated:
-            ret = self.scope["user"].org_id == content["id"]
-        else:
-            # TODO: It seems we don't get the correct value in the session here in the
-            # websocket consumer. Ideally we would restrict this to only users who have
-            # a valid scratch_org `uuid` in their session, matching the requested org:
-            #
-            # session = self.scope["session"]
-            # scratch_org_id = session.get("scratch_org_id", None)
-            # scratch_org = ScratchOrg.objects.filter(
-            #     uuid=scratch_org_id, status=ScratchOrg.Status.complete
-            # ).first()
-            # ret = scratch_org.org_id == content["id"] if scratch_org else False
-            #
-            # But instead we allow any unauthenticated user to subscribe to org changes:
-            ret = True
         content["id"] = convert_org_id_to_key(content["id"])
-        return ret
+        # TODO: It seems we don't get the correct value in the session here in the
+        # websocket consumer. Ideally we would restrict this to only authenticated
+        # users, or users who have a valid scratch_org `uuid` in their session, matching
+        # the requested org:
+        #
+        # if "user" in self.scope and self.scope["user"].is_authenticated:
+        #     ret = self.scope["user"].org_id == content["id"]
+        # else:
+        #     session = self.scope["session"]
+        #     scratch_org_id = session.get("scratch_org_id", None)
+        #     scratch_org = ScratchOrg.objects.filter(
+        #         uuid=scratch_org_id, status=ScratchOrg.Status.complete
+        #     ).first()
+        #     ret = scratch_org.org_id == content["id"] if scratch_org else False
+        # return ret
+        #
+        # But instead we allow any user to subscribe to org changes:
+        return True
