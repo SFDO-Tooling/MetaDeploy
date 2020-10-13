@@ -481,8 +481,8 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
 
     def validate(self, data):
         user = self._get_from_data_or_instance(data, "user")
-        org_id = self._get_from_data_or_instance(data, "org_id") or getattr(
-            user, "org_id", None
+        org_id = self._get_from_data_or_instance(
+            data, "org_id", default=getattr(user, "org_id", None)
         )
         plan = self._get_from_data_or_instance(data, "plan")
         steps = self._get_from_data_or_instance(data, "steps", default=[])
