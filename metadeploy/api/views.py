@@ -1,3 +1,4 @@
+from functools import reduce
 from uuid import uuid4
 
 import django_rq
@@ -140,18 +141,13 @@ class JobViewSet(
                 uuid=scratch_org_id, status=ScratchOrg.Status.complete
             ).first()
 
-        if user.is_authenticated:
-            if scratch_org:
-                filters = (
-                    Q(is_public=True) | Q(user=user) | Q(org_id=scratch_org.org_id)
-                )
-            else:
-                filters = Q(is_public=True) | Q(user=user)
-        else:
-            if scratch_org:
-                filters = Q(is_public=True) | Q(org_id=scratch_org.org_id)
-            else:
-                filters = Q(is_public=True)
+        filters = [
+            Q(is_public=True),
+            Q(user=user) if user.is_authenticated else None,
+            Q(org_id=scratch_org.org_id) if scratch_org else None,
+        ]
+        filters = reduce(lambda a, b: a | b, (f for f in filters if f))
+
         return Job.objects.filter(filters)
 
     def perform_destroy(self, instance):

@@ -489,14 +489,19 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
 
         scratch_org = None
         if not org_id:
-            scratch_org_id = self.context["request"].session.get("scratch_org_id", None)
-            if scratch_org_id:
-                scratch_org = ScratchOrg.objects.filter(
-                    uuid=scratch_org_id, status=ScratchOrg.Status.complete
-                ).first()
-
-        if scratch_org:
-            org_id = scratch_org.org_id
+            org_id = (
+                (
+                    scratch_org_id := self.context["request"].session.get(
+                        "scratch_org_id", None
+                    )
+                )
+                and (
+                    scratch_org := ScratchOrg.objects.filter(
+                        uuid=scratch_org_id, status=ScratchOrg.Status.complete
+                    ).first()
+                )
+                and getattr(scratch_org, "org_id", None)
+            )
 
         if not org_id:
             raise serializers.ValidationError(_("No valid org."))

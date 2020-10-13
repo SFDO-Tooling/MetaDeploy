@@ -23,6 +23,7 @@ from asgiref.sync import async_to_sync
 from cumulusci.core.config import OrgConfig, ServiceConfig
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from django.utils import timezone
 from django_rq import job
 from rq.exceptions import ShutDownImminentException
@@ -308,12 +309,14 @@ def create_scratch_org(*, plan_id, org_name, result_id):
         # Start installation job automatically if both:
         # - Plan has no preflight
         # - All plan steps are required
-        Job.objects.create(
-            user=None,
-            plan=plan,
-            organization_url=org_config.instance_url,
-            org_id=scratch_org_config.config["org_id"],
-        )
+        with transaction.atomic():
+            job = Job.objects.create(
+                user=None,
+                plan=plan,
+                organization_url=org_config.instance_url,
+                org_id=scratch_org_config.config["org_id"],
+            )
+            job.steps.set(plan.steps.all())
 
     # rq_job = run_flows.delay(
     #     plan=plan,
