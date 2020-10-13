@@ -17,6 +17,7 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: 3.8
+
       - name: Install sfdx
         run: |
           mkdir sfdx
@@ -28,25 +29,27 @@ jobs:
           SFDX_HUB_KEY_BASE64: ${{ secrets.SFDX_HUB_KEY_BASE64 }}
           SFDX_CLIENT_ID: ${{ secrets.SFDX_CLIENT_ID }}
           SFDX_HUB_USERNAME: ${{ secrets.SFDX_HUB_USERNAME }}
+
       - name: Install CumulusCI
-        run: |
-          pip install cumulusci
+        run: pip install cumulusci
+
       - name: Create test org
-        run: |
-          $(which cci) org info enterprise
+        run: cci org info enterprise
+
       - name: Deploy Trusted IP Ranges 
-        run: |
-          $(which cci) task run deploy --org enterprise -o path robot/trusted_ip_ranges
+        run: cci task run deploy --org enterprise -o path robot/trusted_ip_ranges
+
       - name: Run robot test
         run: |
-          $(which cci) task run robot \
+          cci task run robot \
             --org enterprise \
-            -o suites robot/tasks/run_plan.robot \
+            -o suites robot/tasks/run_plan_doesnt_exist.robot \
             -o vars BROWSER:headlesschrome,LANG:en,PRODUCT:program-management,PLAN:install,BASE_URL:https://install.salesforce.org
+
       - name: Delete scratch org
         if: always()
-        run: |
-          cci org scratch_delete enterprise
+        run: cci org scratch_delete enterprise
+
       - name: Store robot results
         if: failure()
         uses: actions/upload-artifact@v1
