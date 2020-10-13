@@ -39,6 +39,9 @@ jobs:
       - name: Deploy Trusted IP Ranges 
         run: cci task run deploy --org enterprise -o path robot/trusted_ip_ranges
 
+      - name: Wait for Heroku Dynos to Restart
+        run: sleep 5m 
+
       - name: Run robot test
         run: |
           cci task run robot \
