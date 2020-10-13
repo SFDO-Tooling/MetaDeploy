@@ -8,6 +8,7 @@ from ..cleanup import (
     clear_old_exceptions,
     delete_old_users,
     expire_oauth_accounts,
+    fix_dead_jobs_status,
 )
 from ..models import User
 
@@ -68,3 +69,16 @@ def test_clear_old_exceptions(job_factory):
     assert old_job.exception is None
     new_job.refresh_from_db()
     assert new_job.exception == "Danger!"
+
+
+@pytest.mark.django_db
+def test_fix_dead_jobs_status(job_factory):
+    two_hours_ago = timezone.now() - timedelta(hours=2)
+    old_job = job_factory(status="started")
+    old_job.enqueued_at = two_hours_ago
+    old_job.save()
+
+    fix_dead_jobs_status()
+
+    old_job.refresh_from_db()
+    assert old_job.status == "canceled"

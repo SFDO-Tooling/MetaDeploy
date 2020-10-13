@@ -11,6 +11,9 @@ from .push import user_token_expired
 
 def cleanup_user_data():
     """Remove old records with PII and other sensitive data."""
+    # fix status of dead jobs that got left as started
+    fix_dead_jobs_status()
+
     # remove oauth tokens after 10 minutes of inactivity
     expire_oauth_accounts()
 
@@ -66,3 +69,21 @@ def clear_old_exceptions():
     PreflightResult.objects.filter(
         created_at__lte=ninety_days_ago, exception__isnull=False
     ).update(exception=None)
+
+
+def fix_dead_jobs_status():
+    """Fix the status of any jobs which were started but are past their timeout.
+
+    Jobs are supposed to get their status updated if they die, but that can fail.
+    """
+    now = timezone.now()
+    timeout_seconds = settings.RQ_QUEUES["default"]["DEFAULT_TIMEOUT"] + 120
+    timeout_ago = now - timedelta(seconds=timeout_seconds)
+    canceled_values = {
+        "status": "canceled",
+        "canceled_at": now,
+        "exception": "The installation job was interrupted. Please retry the installation.",
+    }
+    Job.objects.filter(status="started", enqueued_at__lte=timeout_ago).update(
+        **canceled_values
+    )
