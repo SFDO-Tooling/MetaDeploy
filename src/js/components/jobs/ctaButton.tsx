@@ -13,10 +13,12 @@ const CtaButton = ({
   job,
   linkToPlan,
   canceling,
+  preflightRequired,
 }: {
   job: Job;
   linkToPlan: string;
   canceling: boolean;
+  preflightRequired: boolean;
 }) => {
   switch (job.status) {
     case STATUS.STARTED:
@@ -69,7 +71,9 @@ const CtaButton = ({
             slds-size_full
             slds-p-vertical_xx-small"
         >
-          {i18n.t('Return to Pre-Install Validation')}
+          {preflightRequired
+            ? i18n.t('Return to Pre-Install Validation')
+            : i18n.t('Return to Plan')}
         </Link>
       );
     }

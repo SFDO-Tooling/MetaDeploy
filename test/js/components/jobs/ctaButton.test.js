@@ -15,15 +15,13 @@ describe('<CtaButton />', () => {
     const defaults = {
       job: defaultJob,
       canceling: false,
+      linkToPlan: '/my/plan/',
+      preflightRequired: true,
     };
     const opts = { ...defaults, ...options };
     const { getByText, container } = render(
       <MemoryRouter>
-        <CtaButton
-          job={opts.job}
-          linkToPlan="/my/plan/"
-          canceling={opts.canceling}
-        />
+        <CtaButton {...opts} />
       </MemoryRouter>,
     );
     return { getByText, container };

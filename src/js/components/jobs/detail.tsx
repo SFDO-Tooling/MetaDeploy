@@ -354,6 +354,7 @@ class JobDetail extends React.Component<Props, State> {
                   job={job}
                   linkToPlan={linkToPlan}
                   canceling={canceling}
+                  preflightRequired={plan.requires_preflight}
                 />
               }
               postMessage={<JobMessage job={job} />}

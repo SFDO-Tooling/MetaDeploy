@@ -32,7 +32,7 @@ from rq.worker import StopRequested
 from .cci_configs import MetaDeployCCI, extract_user_and_repo
 from .flows import StopFlowException
 from .github import local_github_checkout
-from .models import Job, Plan, PreflightResult, ScratchOrg
+from .models import ORG_TYPES, Job, Plan, PreflightResult, ScratchOrg
 from .push import preflight_started, report_error, user_token_expired
 from .salesforce import create_scratch_org as create_scratch_org_on_sf
 
@@ -315,19 +315,9 @@ def create_scratch_org(*, plan_id, org_name, result_id):
                 plan=plan,
                 organization_url=org_config.instance_url,
                 org_id=scratch_org_config.config["org_id"],
+                full_org_type=ORG_TYPES.Scratch,
             )
             job.steps.set(plan.steps.all())
-
-    # rq_job = run_flows.delay(
-    #     plan=plan,
-    #     skip_steps=[],
-    #     organization_url=org_config.instance_url,
-    #     result_class=Job,
-    #     result_id=job.id,
-    # )
-    # job.job_id = rq_job.id
-    # job.enqueued_at = rq_job.enqueued_at
-    # job.save()
 
 
 create_scratch_org_job = job(create_scratch_org)
