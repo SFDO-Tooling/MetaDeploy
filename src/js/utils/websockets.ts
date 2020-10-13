@@ -6,10 +6,12 @@ import {
   cancelJob,
   completeJob,
   completeJobStep,
+  createJob,
   failJob,
   JobCanceled,
   JobCompleted,
   JobFailed,
+  JobStarted,
   JobStepCompleted,
 } from '@/store/jobs/actions';
 import { Job } from '@/store/jobs/reducer';
@@ -73,6 +75,15 @@ interface JobEvent {
   type: 'TASK_COMPLETED' | 'JOB_COMPLETED' | 'JOB_FAILED' | 'JOB_CANCELED';
   payload: Job;
 }
+interface JobStartedEvent {
+  type: 'JOB_STARTED';
+  payload: {
+    job: Job;
+    product_slug: string;
+    version_label: string;
+    plan_slug: string;
+  };
+}
 interface OrgEvent {
   type: 'ORG_CHANGED';
   payload: Org;
@@ -97,7 +108,8 @@ type ModelEvent =
   | JobEvent
   | OrgEvent
   | ScratchOrgCreatedEvent
-  | ScratchOrgErrorEvent;
+  | ScratchOrgErrorEvent
+  | JobStartedEvent;
 type EventType = SubscriptionEvent | ErrorEvent | ModelEvent;
 
 type Action =
@@ -113,6 +125,7 @@ type Action =
   | JobCanceled
   | OrgChanged
   | ScratchOrgCreated
+  | ThunkResult<JobStarted>
   | ThunkResult<ScratchOrgFailed>;
 
 const isSubscriptionEvent = (event: EventType): event is SubscriptionEvent =>
@@ -149,6 +162,8 @@ export const getAction = (event: EventType): Action | null => {
       return failScratchOrg(event.payload);
     case 'PREFLIGHT_STARTED':
       return createPreflight(event.payload);
+    case 'JOB_STARTED':
+      return createJob(event.payload);
   }
   return null;
 };

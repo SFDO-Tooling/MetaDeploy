@@ -5,6 +5,7 @@ describe('reducer', () => {
     const actual = reducer(undefined, {});
 
     expect(Object.keys(actual)).toEqual([
+      'router',
       'user',
       'products',
       'preflights',

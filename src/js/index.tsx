@@ -5,12 +5,14 @@ import standardSprite from '@salesforce-ux/design-system/assets/icons/standard-s
 import utilitySprite from '@salesforce-ux/design-system/assets/icons/utility-sprite/svg/symbols.svg';
 import IconSettings from '@salesforce/design-system-react/components/icon-settings';
 import settings from '@salesforce/design-system-react/components/settings';
+import { ConnectedRouter, routerMiddleware } from 'connected-react-router';
+import { createBrowserHistory } from 'history';
 import i18n from 'i18next';
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
 import * as ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
 import { AnyAction, applyMiddleware, createStore } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import logger from 'redux-logger';
@@ -25,7 +27,7 @@ import PlanDetail from '@/components/plans/detail';
 import { ProductDetail, VersionDetail } from '@/components/products/detail';
 import ProductsList from '@/components/products/list';
 import init_i18n from '@/i18n';
-import reducer from '@/store';
+import createRootReducer from '@/store';
 import { fetchOrgJobs } from '@/store/org/actions';
 import { fetchProducts } from '@/store/products/actions';
 import { login, refetchAllData } from '@/store/user/actions';
@@ -33,6 +35,8 @@ import { User } from '@/store/user/reducer';
 import { log, logError } from '@/utils/logging';
 import { routePatterns } from '@/utils/routes';
 import { createSocket } from '@/utils/websockets';
+
+const history = createBrowserHistory();
 
 const App = () => (
   <DocumentTitle title={window.SITE_NAME}>
@@ -90,9 +94,11 @@ init_i18n((i18nError?: string) => {
   if (el) {
     // Create store
     const appStore = createStore(
-      reducer,
+      createRootReducer(history),
       undefined,
-      composeWithDevTools(applyMiddleware(thunk, logger)),
+      composeWithDevTools(
+        applyMiddleware(thunk, routerMiddleware(history), logger),
+      ),
     );
 
     // Connect to WebSocket server
@@ -163,7 +169,7 @@ init_i18n((i18nError?: string) => {
       );
       ReactDOM.render(
         <Provider store={appStore}>
-          <BrowserRouter>
+          <ConnectedRouter history={history} noInitialPop>
             <IconSettings
               actionSprite={actionSprite}
               customSprite={customSprite}
@@ -173,7 +179,7 @@ init_i18n((i18nError?: string) => {
             >
               <App />
             </IconSettings>
-          </BrowserRouter>
+          </ConnectedRouter>
         </Provider>,
         el,
       );

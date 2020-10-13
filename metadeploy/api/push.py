@@ -20,6 +20,7 @@ Websocket notifications you can subscribe to:
         SCRATCH_ORG_CREATED
         SCRATCH_ORG_ERROR
         PREFLIGHT_STARTED
+        JOB_STARTED
 """
 import logging
 
@@ -201,3 +202,21 @@ async def preflight_started(scratch_org, preflight):
     message = {"type": "PREFLIGHT_STARTED", "payload": payload}
     group_name = CHANNELS_GROUP_NAME.format(model="scratchorg", id=scratch_org.id)
     await push_message_about_instance(preflight, message, group_name=group_name)
+
+
+async def job_started(scratch_org, job):
+    from .serializers import JobSerializer
+
+    plan = job.plan
+    version = plan.version
+    product = version.product
+
+    payload = {
+        "job": JobSerializer(instance=job).data,
+        "product_slug": product.slug,
+        "version_label": version.label,
+        "plan_slug": plan.slug,
+    }
+    message = {"type": "JOB_STARTED", "payload": payload}
+    group_name = CHANNELS_GROUP_NAME.format(model="scratchorg", id=scratch_org.id)
+    await push_message_about_instance(job, message, group_name=group_name)

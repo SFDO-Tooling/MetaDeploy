@@ -33,7 +33,7 @@ from .cci_configs import MetaDeployCCI, extract_user_and_repo
 from .flows import StopFlowException
 from .github import local_github_checkout
 from .models import ORG_TYPES, Job, Plan, PreflightResult, ScratchOrg
-from .push import preflight_started, report_error, user_token_expired
+from .push import job_started, preflight_started, report_error, user_token_expired
 from .salesforce import create_scratch_org as create_scratch_org_on_sf
 
 logger = logging.getLogger(__name__)
@@ -318,6 +318,10 @@ def create_scratch_org(*, plan_id, org_name, result_id):
                 full_org_type=ORG_TYPES.Scratch,
             )
             job.steps.set(plan.steps.all())
+        # TODO: This is already called on `save()`, but the new Job isn't in the
+        # database yet because it's in an atomic transaction.
+        job.push_to_org_subscribers(is_new=True)
+        async_to_sync(job_started)(org, job)
 
 
 create_scratch_org_job = job(create_scratch_org)
