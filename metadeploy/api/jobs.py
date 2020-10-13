@@ -29,7 +29,7 @@ from cumulusci.utils import temporary_dir
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-from django_rq import job
+from django_rq import job as django_rq_job
 from rq.exceptions import ShutDownImminentException
 from rq.worker import StopRequested
 
@@ -42,6 +42,12 @@ from .push import report_error
 logger = logging.getLogger(__name__)
 User = get_user_model()
 sync_report_error = async_to_sync(report_error)
+
+
+def job(*args, **kw):
+    # keep failed jobs for 7 days
+    kw["failure_ttl"] = 7 * 3600 * 24
+    return django_rq_job(*args, **kw)
 
 
 @contextlib.contextmanager
@@ -233,7 +239,7 @@ enqueuer_job = job(enqueuer)
 
 
 # Aliased to expire_user_tokens_job for backwards compatibility
-expire_user_tokens_job = job(cleanup_user_data)
+expire_user_tokens_job = cleanup_user_data_job = job(cleanup_user_data)
 
 
 def preflight(preflight_result_id):

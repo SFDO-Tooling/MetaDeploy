@@ -1,10 +1,10 @@
 import logging
 
 from django.conf import settings
-from django_rq import job
 from parler.models import TranslatableModel
 
 from metadeploy.api.models import Translation
+from metadeploy.api.jobs import job
 
 logger = logging.getLogger(__name__)
 
