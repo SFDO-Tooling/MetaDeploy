@@ -3,8 +3,7 @@ set -e
 
 python manage.py migrate --noinput
 
-if [ -n "$test_on_release" ] ;
-then
+if [ -n "$test_on_release" ] ; then
      echo "Dispatching heroku-release-phase event."
      repo=$GITHUB_REPO
      token=$GITHUB_TOKEN
@@ -16,8 +15,6 @@ then
           https://api.github.com/repos/$repo/dispatches \
 
           -d '{"event_type":"heroku-release-phase"}'
-else
-     echo "Environment variable test_on_release not set."
 fi
 
 echo "Done."
