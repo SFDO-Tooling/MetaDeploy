@@ -3,7 +3,7 @@ set -e
 
 python manage.py migrate --noinput
 
-if [ -n "$test_on_release" ] ; then
+if [ -n "$NOTIFY_REPO_OF_RELEASE" ] ; then
      echo "Dispatching heroku-release-phase event."
      repo=$GITHUB_REPO
      token=$GITHUB_TOKEN
