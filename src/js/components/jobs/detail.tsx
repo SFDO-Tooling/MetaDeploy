@@ -308,6 +308,7 @@ class JobDetail extends React.Component<Props, State> {
     if (!product || !version || !plan || !job) {
       return <ProductNotFound />;
     }
+    const isScratchOrg = !job.creator;
     const linkToPlan = routes.plan_detail(
       product.slug,
       version.label,
@@ -328,7 +329,7 @@ class JobDetail extends React.Component<Props, State> {
         } | ${window.SITE_NAME}`}
       >
         <>
-          <Header history={history} jobId={jobId} />
+          <Header history={history} jobId={jobId} hideLogin={isScratchOrg} />
           <PageHeader
             product={product}
             version={version}

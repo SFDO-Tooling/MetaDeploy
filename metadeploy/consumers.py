@@ -10,14 +10,16 @@ from .api.constants import CHANNELS_GROUP_NAME
 from .api.hash_url import convert_org_id_to_key
 from .consumer_utils import clear_message_semaphore
 
-Request = namedtuple("Request", "user")
+Request = namedtuple("Request", ["user", "session"])
 
 
 KNOWN_MODELS = {"user", "preflightresult", "job", "org", "scratchorg"}
 
 
-def user_context(user):
-    return {"request": Request(user)}
+def user_context(user, session):
+    return {
+        "request": Request(user, session),
+    }
 
 
 class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
@@ -42,13 +44,18 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         if "serializer" in event and "instance" in event and "inner_type" in event:
             instance = self.get_instance(**event["instance"])
             serializer = self.get_serializer(event["serializer"])
-            payload = {
-                "payload": serializer(
-                    instance=instance, context=user_context(self.scope["user"])
-                ).data,
+            data = serializer(
+                instance=instance,
+                context=user_context(self.scope["user"], self.scope["session"]),
+            ).data
+            payload = data
+            if "extra_payload" in event and event["extra_payload"]:
+                payload = {**event["extra_payload"], "model": data}
+            message = {
+                "payload": payload,
                 "type": event["inner_type"],
             }
-            await self.send_json(payload)
+            await self.send_json(message)
             return
 
     def get_instance(self, *, model, id):
@@ -63,6 +70,16 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         # Just used to subscribe to notification channels.
         is_valid = self.is_valid(content)
         is_known_model = self.is_known_model(content.get("model", None))
+
+        # It seems we don't get the correct (updated) value in the session here in the
+        # websocket consumer, after it is set by the scratch_org view in PlanViewSet,
+        # so we accept a value from the user to update the session:
+        uuid = content.get("uuid", None)
+        scratch_org_id = self.scope["session"].get("scratch_org_id", None)
+        if uuid and uuid != scratch_org_id:
+            self.scope["session"]["scratch_org_id"] = uuid
+            self.scope["session"].save()
+
         has_good_permissions = self.has_good_permissions(content)
         all_good = is_valid and is_known_model and has_good_permissions
         if not all_good:
@@ -82,7 +99,11 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         )
 
     def is_valid(self, content):
-        return content.keys() == {"model", "id"}
+        return content.keys() == {"model", "id"} or content.keys() == {
+            "model",
+            "id",
+            "uuid",
+        }
 
     def is_known_model(self, model):
         return model in KNOWN_MODELS
@@ -100,7 +121,7 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
             TypeError,
         )
         try:
-            obj = self.get_instance(**content)
+            obj = self.get_instance(model=content["model"], id=content["id"])
             return obj.subscribable_by(self.scope["user"], self.scope["session"])
         except possible_exceptions:
             return False

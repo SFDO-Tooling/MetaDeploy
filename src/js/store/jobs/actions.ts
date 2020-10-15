@@ -137,25 +137,25 @@ export const startJob = (
 };
 
 export const createJob = ({
-  job,
+  model,
   product_slug,
   version_label,
   plan_slug,
 }: {
-  job: Job;
+  model: Job;
   product_slug: string;
   version_label: string;
   plan_slug: string;
 }): ThunkResult<JobStarted> => (dispatch, getState) => {
-  if (job && window.socket) {
+  if (model && window.socket) {
     window.socket.subscribe({
       model: 'job',
-      id: job.id,
+      id: model.id,
     });
   }
   const jobStartedAction = dispatch({
     type: 'JOB_STARTED' as const,
-    payload: job,
+    payload: model,
   });
   const state = getState();
   const { pathname } = state.router.location;
@@ -166,7 +166,7 @@ export const createJob = ({
       product_slug,
       version_label,
       plan_slug,
-      job.id,
+      model.id,
     );
     dispatch(push(url));
   }

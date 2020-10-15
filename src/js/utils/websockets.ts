@@ -44,6 +44,7 @@ import { log } from '@/utils/logging';
 interface Subscription {
   model: string;
   id: string;
+  uuid?: string;
 }
 
 export interface Socket {
@@ -78,7 +79,7 @@ interface JobEvent {
 interface JobStartedEvent {
   type: 'JOB_STARTED';
   payload: {
-    job: Job;
+    model: Job;
     product_slug: string;
     version_label: string;
     plan_slug: string;
