@@ -8,6 +8,7 @@ from django.utils.translation import gettext as _
 
 from .api.constants import CHANNELS_GROUP_NAME
 from .api.hash_url import convert_org_id_to_key
+from .api.models import ScratchOrg
 from .consumer_utils import clear_message_semaphore
 
 Request = namedtuple("Request", ["user", "session"])
@@ -127,22 +128,17 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
             return False
 
     def handle_org_special_case(self, content):
+        # Restrict this to only authenticated users, or users who have a valid
+        # scratch_org `uuid` in their session, matching the requested org:
+        org_id = content["id"]
         content["id"] = convert_org_id_to_key(content["id"])
-        # TODO: It seems we don't get the correct value in the session here in the
-        # websocket consumer. Ideally we would restrict this to only authenticated
-        # users, or users who have a valid scratch_org `uuid` in their session, matching
-        # the requested org:
-        #
-        # if "user" in self.scope and self.scope["user"].is_authenticated:
-        #     ret = self.scope["user"].org_id == content["id"]
-        # else:
-        #     session = self.scope["session"]
-        #     scratch_org_id = session.get("scratch_org_id", None)
-        #     scratch_org = ScratchOrg.objects.filter(
-        #         uuid=scratch_org_id, status=ScratchOrg.Status.complete
-        #     ).first()
-        #     ret = scratch_org.org_id == content["id"] if scratch_org else False
-        # return ret
-        #
-        # But instead we allow any user to subscribe to org changes:
-        return True
+        if "user" in self.scope and self.scope["user"].is_authenticated:
+            if self.scope["user"].org_id == org_id:
+                return True
+        scratch_org_id = self.scope["session"].get("scratch_org_id", None)
+        if scratch_org_id:
+            scratch_org = ScratchOrg.objects.filter(
+                uuid=scratch_org_id, status=ScratchOrg.Status.complete
+            ).first()
+            return scratch_org.org_id == org_id if scratch_org else False
+        return False
