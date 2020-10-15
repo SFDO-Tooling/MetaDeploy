@@ -46,7 +46,7 @@ jobs:
         run: |
           cci task run robot \
             --org enterprise \
-            -o suites robot/tasks/FAIL_ON_PURPOSE.robot \
+            -o suites robot/tasks/run_plan.robot \
             -o vars BROWSER:headlesschrome,LANG:en,PRODUCT:program-management,PLAN:install,BASE_URL:https://install.salesforce.org
 
       - name: Delete scratch org
