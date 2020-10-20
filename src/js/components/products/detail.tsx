@@ -1,3 +1,4 @@
+import Card from '@salesforce/design-system-react/components/card';
 import i18n from 'i18next';
 import { sortBy } from 'lodash';
 import * as React from 'react';
@@ -7,7 +8,6 @@ import { connect, ConnectedProps } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { Link, Redirect } from 'react-router-dom';
 
-import BackLink from '@/components/backLink';
 import BodyContainer from '@/components/bodyContainer';
 import Header from '@/components/header';
 import PageHeader from '@/components/products/header';
@@ -284,65 +284,6 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                 />
               ) : null}
               <BodySection>
-                <p>{version.description}</p>
-                {primary_plan && visiblePrimaryPlan ? (
-                  <p>
-                    <Link
-                      to={routes.plan_detail(
-                        product.slug,
-                        version.label,
-                        primary_plan.slug,
-                      )}
-                      className="slds-button slds-button_brand slds-size_full"
-                    >
-                      {primary_plan.title} - {i18n.t('View Details')}
-                    </Link>
-                  </p>
-                ) : null}
-                {secondary_plan && visibleSecondaryPlan ? (
-                  <p>
-                    <Link
-                      to={routes.plan_detail(
-                        product.slug,
-                        version.label,
-                        secondary_plan.slug,
-                      )}
-                      className="slds-button
-                        slds-button_outline-brand
-                        slds-size_full"
-                    >
-                      {secondary_plan.title} - {i18n.t('View Details')}
-                    </Link>
-                  </p>
-                ) : null}
-                <BackLink
-                  label={i18n.t('Select a different product')}
-                  url={routes.product_list()}
-                />
-                {additionalPlansSorted.length ? (
-                  <div className="slds-p-top_x-large">
-                    {visiblePrimaryPlan || visibleSecondaryPlan ? (
-                      <h2 className="slds-text-heading_small">
-                        {i18n.t('Additional Plans')}
-                      </h2>
-                    ) : null}
-                    {additionalPlansSorted.map((plan) => (
-                      <p key={plan.id}>
-                        <Link
-                          to={routes.plan_detail(
-                            product.slug,
-                            version.label,
-                            plan.slug,
-                          )}
-                        >
-                          {plan.title}
-                        </Link>
-                      </p>
-                    ))}
-                  </div>
-                ) : null}
-              </BodySection>
-              <BodySection>
                 {!productDescriptionHasTitle && (
                   <h2 className="slds-text-heading_small">
                     {i18n.t('About')} {product.title}
@@ -365,6 +306,112 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                   />
                 )}
               </BodySection>
+              {primary_plan && visiblePrimaryPlan ? (
+                <div
+                  className="slds-text-longform
+                slds-p-around_medium
+                slds-size_1-of-3
+                slds-medium-size_1-of-2"
+                >
+                  <Card
+                    bodyClassName="slds-card__body_inner"
+                    heading={primary_plan.title}
+                  >
+                    {primary_plan.preflight_message ? ( // These messages are pre-cleaned by the API
+                      <div
+                        className="markdown"
+                        dangerouslySetInnerHTML={{
+                          __html: primary_plan.preflight_message,
+                        }}
+                      />
+                    ) : null}
+                    <Link
+                      to={routes.plan_detail(
+                        product.slug,
+                        version.label,
+                        primary_plan.slug,
+                      )}
+                      className="slds-button slds-button_brand"
+                    >
+                      {i18n.t('View Plan Details')}
+                    </Link>
+                  </Card>
+                </div>
+              ) : null}
+              {secondary_plan && visibleSecondaryPlan ? (
+                <div
+                  className="slds-text-longform
+                slds-p-around_medium
+                slds-size_1-of-1
+                slds-medium-size_1-of-2"
+                >
+                  <Card
+                    bodyClassName="slds-card__body_inner"
+                    heading={secondary_plan.title}
+                  >
+                    {secondary_plan.preflight_message ? ( // These messages are pre-cleaned by the API
+                      <div
+                        className="markdown"
+                        dangerouslySetInnerHTML={{
+                          __html: secondary_plan.preflight_message,
+                        }}
+                      />
+                    ) : null}
+                    <Link
+                      to={routes.plan_detail(
+                        product.slug,
+                        version.label,
+                        secondary_plan.slug,
+                      )}
+                      className="slds-button slds-button_brand"
+                    >
+                      {i18n.t('View Plan Details')}
+                    </Link>
+                  </Card>
+                </div>
+              ) : null}
+              {/* <BackLink
+                  label={i18n.t('Select a different product')}
+                  url={routes.product_list()}
+                /> */}
+              {additionalPlansSorted.length ? (
+                <>
+                  {additionalPlansSorted.map((plan) => (
+                    <div
+                      key={plan.id}
+                      className="slds-text-longform
+                    slds-p-around_medium
+                    slds-size_1-of-1
+                    slds-medium-size_1-of-2"
+                    >
+                      <Card
+                        bodyClassName="slds-card__body_inner"
+                        heading={plan.title}
+                        key={plan.id}
+                      >
+                        {plan.preflight_message ? ( // These messages are pre-cleaned by the API
+                          <div
+                            className="markdown"
+                            dangerouslySetInnerHTML={{
+                              __html: plan.preflight_message,
+                            }}
+                          />
+                        ) : null}
+                        <Link
+                          to={routes.plan_detail(
+                            product.slug,
+                            version.label,
+                            plan.slug,
+                          )}
+                          className="slds-button slds-button_brand"
+                        >
+                          {i18n.t('View Plan Details')}
+                        </Link>
+                      </Card>
+                    </div>
+                  ))}
+                </>
+              ) : null}
             </BodyContainer>
           ) : (
             <ProductNotAllowed
