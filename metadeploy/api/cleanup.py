@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from allauth.socialaccount.models import SocialAccount
+from allauth.socialaccount.models import SocialToken
 from asgiref.sync import async_to_sync
 from django.conf import settings
 from django.utils import timezone
@@ -15,7 +15,7 @@ def cleanup_user_data():
     fix_dead_jobs_status()
 
     # remove oauth tokens after 10 minutes of inactivity
-    expire_oauth_accounts()
+    expire_oauth_tokens()
 
     # remove users after 30 days
     delete_old_users()
@@ -24,8 +24,10 @@ def cleanup_user_data():
     clear_old_exceptions()
 
 
-def expire_oauth_accounts():
-    """Expire (delete) any SocialAccounts older than TOKEN_LIFETIME_MINUTES.
+def expire_oauth_tokens():
+    """Expire (delete) any SocialTokens older than TOKEN_LIFETIME_MINUTES.
+
+    Also clear the extra_data of the associated SocialAccount, unless it's a staff user.
 
     Exception: if there is a job or preflight that started in the last day.
     """
@@ -33,8 +35,10 @@ def expire_oauth_accounts():
         minutes=settings.TOKEN_LIFETIME_MINUTES
     )
     day_ago = timezone.now() - timedelta(days=1)
-    for account in SocialAccount.objects.filter(last_login__lte=token_lifetime_ago):
-        user = account.user
+    for token in SocialToken.objects.filter(
+        account__last_login__lte=token_lifetime_ago
+    ):
+        user = token.account.user
         has_running_jobs = (
             user.job_set.filter(
                 status=Job.Status.started, created_at__gt=day_ago
@@ -44,7 +48,10 @@ def expire_oauth_accounts():
             ).exists()
         )
         if not has_running_jobs:
-            account.delete()
+            token.delete()
+            if not user.is_staff:
+                token.account.extra_data = {}
+                token.account.save()
             async_to_sync(user_token_expired)(user)
 
 
