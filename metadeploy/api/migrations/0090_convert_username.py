@@ -9,9 +9,10 @@ def forwards(apps, schema_editor):
     # convert username from SF username to orgid_userid
     for account in SocialAccount.objects.iterator():
         data = account.extra_data
-        username = f"{data['organization_id']}_{data['user_id']}"
-        account.user.username = username
-        account.user.save()
+        if not account.user.is_staff:
+            username = f"{data['organization_id']}_{data['user_id']}"
+            account.user.username = username
+            account.user.save()
 
 
 def backwards(apps, schema_editor):
