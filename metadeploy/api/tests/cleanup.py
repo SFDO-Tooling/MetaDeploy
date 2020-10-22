@@ -7,14 +7,14 @@ from ..cleanup import (
     cleanup_user_data,
     clear_old_exceptions,
     delete_old_users,
-    expire_oauth_accounts,
+    expire_oauth_tokens,
     fix_dead_jobs_status,
 )
 from ..models import User
 
 
 @pytest.mark.django_db
-def test_expire_oauth_accounts(user_factory):
+def test_expire_oauth_tokens(user_factory):
     user1 = user_factory()
     user1.socialaccount_set.update(last_login=timezone.now())
     user2 = user_factory()
@@ -27,16 +27,18 @@ def test_expire_oauth_accounts(user_factory):
 
     assert user1.valid_token_for == "00Dxxxxxxxxxxxxxxx"
     assert user2.valid_token_for is None
+    assert user2.social_account.extra_data == {}
 
 
 @pytest.mark.django_db
-def test_expire_oauth_accounts_with_started_job(job_factory):
+def test_expire_oauth_tokens_with_started_job(job_factory):
     job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
     job.user.socialaccount_set.update(last_login=timezone.now() - timedelta(minutes=30))
 
-    expire_oauth_accounts()
+    expire_oauth_tokens()
 
     assert job.user.valid_token_for is not None
+    assert job.user.social_account.extra_data != {}
 
 
 @pytest.mark.django_db
