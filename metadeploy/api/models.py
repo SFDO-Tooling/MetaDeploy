@@ -141,7 +141,7 @@ class User(HashIdMixin, AbstractUser):
     @property
     def sf_username(self):
         if self.social_account:
-            return self.social_account.extra_data["preferred_username"]
+            return self.social_account.extra_data.get("preferred_username")
 
     def _get_org_property(self, key):
         try:
@@ -152,7 +152,7 @@ class User(HashIdMixin, AbstractUser):
     @property
     def org_id(self):
         if self.social_account:
-            return self.social_account.extra_data["organization_id"]
+            return self.social_account.extra_data.get("organization_id")
 
     @property
     def org_name(self):
