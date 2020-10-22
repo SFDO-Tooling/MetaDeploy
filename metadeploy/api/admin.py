@@ -55,6 +55,22 @@ class PlanMixin:
     version.admin_order_field = "plan__version__label"
 
 
+class AdminHelpTextMixin:
+    """Renders help text at the top of the list and edit views."""
+
+    help_text = None
+
+    def render_change_form(self, request, context, **kw):  # pragma: no cover
+        context["help_text"] = self.help_text
+        return super().render_change_form(request, context, **kw)
+
+    def changelist_view(self, request, extra_context=None):  # pragma: no cover
+        if extra_context is None:
+            extra_context = {}
+        extra_context["help_text"] = self.help_text
+        return super().changelist_view(request, extra_context)
+
+
 class MetadeployTranslatableAdmin(TranslatableAdmin):
     def get_language_tabs(self, request, obj, available_languages, css_class=None):
         # Prevent showing other language tabs"""
@@ -87,21 +103,26 @@ class AllowedListOrgAdmin(admin.ModelAdmin):
 
 
 @admin.register(Job)
-class JobAdmin(admin.ModelAdmin, PlanMixin):
+class JobAdmin(AdminHelpTextMixin, admin.ModelAdmin, PlanMixin):
+    help_text = (
+        "GDPR reminder: Any information in the log or exception which came from the org "
+        "must be used for support/debugging purposes only, and not exported from this system."
+    )
+
     autocomplete_fields = ("plan", "steps", "user")
     list_filter = ("status", "plan__version__product")
     list_display = (
-        "user",
+        "id",
+        "org_id",
         "plan_title",
         "product",
         "version",
         "status",
         "org_type",
-        "org_name",
         "enqueued_at",
     )
     list_select_related = ("user", "plan", "plan__version", "plan__version__product")
-    search_fields = ("user__username", "org_name", "org_id", "exception")
+    search_fields = ("org_id", "exception")
 
 
 @admin.register(PlanTemplate)
@@ -143,11 +164,16 @@ class PlanSlugAdmin(admin.ModelAdmin):
 
 
 @admin.register(PreflightResult)
-class PreflightResult(admin.ModelAdmin, PlanMixin):
+class PreflightResult(AdminHelpTextMixin, admin.ModelAdmin, PlanMixin):
+    help_text = (
+        "GDPR reminder: Any information in the log or exception which came from the org "
+        "must be used for support/debugging purposes only, and not exported from this system."
+    )
     autocomplete_fields = ("plan", "user")
     list_filter = ("status", "is_valid", "plan__version__product")
     list_display = (
-        "user",
+        "id",
+        "org_id",
         "status",
         "is_valid",
         "plan_title",
@@ -155,8 +181,8 @@ class PreflightResult(admin.ModelAdmin, PlanMixin):
         "version",
         "created_at",
     )
-    list_select_related = ("user", "plan", "plan__version", "plan__version__product")
-    search_fields = ("user", "plan", "exception")
+    list_select_related = ("plan", "plan__version", "plan__version__product")
+    search_fields = ("org_id", "plan", "exception")
 
 
 @admin.register(Product)
@@ -200,7 +226,11 @@ class StepAdmin(MetadeployTranslatableAdmin, PlanMixin):
 
 
 @admin.register(User)
-class UserAdmin(admin.ModelAdmin):
+class UserAdmin(AdminHelpTextMixin, admin.ModelAdmin):
+    help_text = (
+        "GDPR reminder: The username, name, and email are personally identifiable information. "
+        "They must be used for support/debugging purposes only, and not exported from this system."
+    )
     list_display = ("username", "is_active", "is_staff", "is_superuser", "date_joined")
     search_fields = ("username",)
 
@@ -242,4 +272,5 @@ class CustomSocialTokenAdmin(SocialTokenAdmin):
 
 if "binary_database_files" in settings.INSTALLED_APPS:  # pragma: no cover
     from binary_database_files.models import File
+
     admin.site.register(File)

@@ -22,7 +22,6 @@ import zipfile
 from datetime import timedelta
 from glob import glob
 
-from allauth.socialaccount.models import SocialToken
 from asgiref.sync import async_to_sync
 from cumulusci.core.config import OrgConfig, ServiceConfig
 from cumulusci.core.github import get_github_api_for_repo
@@ -30,18 +29,25 @@ from cumulusci.utils import temporary_dir
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-from django_rq import job
+from django_rq import job as django_rq_job
 from rq.exceptions import ShutDownImminentException
 from rq.worker import StopRequested
 
 from .cci_configs import MetaDeployCCI, extract_user_and_repo
+from .cleanup import cleanup_user_data
 from .flows import StopFlowException
 from .models import Job, PreflightResult
-from .push import report_error, user_token_expired
+from .push import report_error
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
 sync_report_error = async_to_sync(report_error)
+
+
+def job(*args, **kw):
+    # keep failed jobs for 7 days
+    kw["failure_ttl"] = 7 * 3600 * 24
+    return django_rq_job(*args, **kw)
 
 
 @contextlib.contextmanager
@@ -112,7 +118,7 @@ def zip_file_is_safe(zip_file):
     return all(is_safe_path(info.filename) for info in zip_file.infolist())
 
 
-def run_flows(*, user, plan, skip_steps, organization_url, result_class, result_id):
+def run_flows(*, user, plan, skip_steps, result_class, result_id):
     """
     This operates with side effects; it changes things in a Salesforce
     org, and then records the results of those operations on to a
@@ -123,8 +129,6 @@ def run_flows(*, user, plan, skip_steps, organization_url, result_class, result_
         plan (Plan): The Plan instance for the flow you're running.
         skip_steps (List[str]): The strings in the list should be valid
             step_num values for steps in this flow.
-        organization_url (str): The URL of the organization, required by
-            the OrgConfig.
         result_class (Union[Type[Job], Type[PreflightResult]]): The type
             of the instance onto which to record the results of running
             steps in the flow. Either a PreflightResult or a Job, as
@@ -183,7 +187,7 @@ def run_flows(*, user, plan, skip_steps, organization_url, result_class, result_
         org_config = OrgConfig(
             {
                 "access_token": token,
-                "instance_url": organization_url,
+                "instance_url": result.instance_url,
                 "refresh_token": token_secret,
             },
             current_org,
@@ -223,7 +227,6 @@ def enqueuer():
             user=j.user,
             plan=j.plan,
             skip_steps=j.skip_steps(),
-            organization_url=j.organization_url,
             result_class=Job,
             result_id=j.id,
         )
@@ -235,33 +238,8 @@ def enqueuer():
 enqueuer_job = job(enqueuer)
 
 
-def expire_user_tokens():
-    """Expire (delete) any SocialTokens older than TOKEN_LIFETIME_MINUTES.
-
-    Exception: if there is a job or preflight that started in the last day.
-    """
-    token_lifetime_ago = timezone.now() - timedelta(
-        minutes=settings.TOKEN_LIFETIME_MINUTES
-    )
-    day_ago = timezone.now() - timedelta(days=1)
-    for token in SocialToken.objects.filter(
-        account__last_login__lte=token_lifetime_ago
-    ):
-        user = token.account.user
-        has_running_jobs = (
-            user.job_set.filter(
-                status=Job.Status.started, created_at__gt=day_ago
-            ).exists()
-            or user.preflightresult_set.filter(
-                status=PreflightResult.Status.started, created_at__gt=day_ago
-            ).exists()
-        )
-        if not has_running_jobs:
-            token.delete()
-            async_to_sync(user_token_expired)(user)
-
-
-expire_user_tokens_job = job(expire_user_tokens)
+# Aliased to expire_user_tokens_job for backwards compatibility
+expire_user_tokens_job = cleanup_user_data_job = job(cleanup_user_data)
 
 
 def preflight(preflight_result_id):
@@ -272,7 +250,6 @@ def preflight(preflight_result_id):
         user=preflight_result.user,
         plan=preflight_result.plan,
         skip_steps=[],
-        organization_url=preflight_result.organization_url,
         result_class=PreflightResult,
         result_id=preflight_result.id,
     )

@@ -170,7 +170,6 @@ async def test_push_notification_consumer__subscribe_org(
         status=Job.Status.started,
         user=user,
         plan=plan,
-        organization_url="https://example.com/",
         org_id=user.org_id,
     )
 

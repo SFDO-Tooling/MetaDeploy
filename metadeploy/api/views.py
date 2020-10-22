@@ -99,7 +99,6 @@ class JobViewSet(
         "plan_id",
         "user_id",
         "status",
-        "organization_url",
         "plan__plan_template__planslug__slug",
         "plan__version__label",
         "plan__version__product__productslug__slug",
@@ -193,7 +192,6 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
         preflight_result = PreflightResult.objects.create(
             user=request.user,
             plan=plan,
-            organization_url=request.user.instance_url,
             org_id=request.user.org_id,
         )
         preflight_job.delay(preflight_result.pk)
