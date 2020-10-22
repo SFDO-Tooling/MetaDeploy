@@ -14,7 +14,6 @@ const Header = ({
 }) => (
   <PageHeader
     className="page-header slds-p-around_x-large"
-    title={i18n.t('Select a Plan')}
     trail={[
       <>
         {product.title}, {versionLabel}

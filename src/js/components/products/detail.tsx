@@ -118,18 +118,6 @@ class ProductDetail extends React.Component<ProductDetailProps> {
     return <Redirect to={routes.version_detail(product.slug, version.label)} />;
   }
 }
-
-const BodySection = ({ children }: { children?: React.ReactNode }) => (
-  <div
-    className="slds-text-longform
-      slds-p-around_medium
-      slds-size_1-of-1
-      slds-medium-size_1-of-2"
-  >
-    {children}
-  </div>
-);
-
 class VersionDetail extends React.Component<VersionDetailProps> {
   fetchProductIfMissing() {
     const { product, productSlug, doFetchProduct } = this.props;
@@ -260,9 +248,6 @@ class VersionDetail extends React.Component<VersionDetailProps> {
       primary_plan?.is_listed && primary_plan?.is_allowed;
     const visibleSecondaryPlan =
       secondary_plan?.is_listed && secondary_plan?.is_allowed;
-    const productDescriptionHasTitle =
-      product.description?.startsWith('<h1>') ||
-      product.description?.startsWith('<h2>');
     const isMostRecent =
       product.most_recent_version &&
       new Date(version.created_at) >=
@@ -283,12 +268,11 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                   )}
                 />
               ) : null}
-              <BodySection>
-                {!productDescriptionHasTitle && (
-                  <h2 className="slds-text-heading_small">
-                    {i18n.t('About')} {product.title}
-                  </h2>
-                )}
+              <div
+                className="slds-text-longform
+      slds-p-around_medium
+      slds-size_3-of-4"
+              >
                 {product.image ? (
                   <img
                     className="slds-size_full"
@@ -305,13 +289,12 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                     }}
                   />
                 )}
-              </BodySection>
+              </div>
+              <div className="slds-size_1-of-4"></div>
               {primary_plan && visiblePrimaryPlan ? (
                 <div
                   className="slds-text-longform
-                slds-p-around_medium
-                slds-size_1-of-3
-                slds-medium-size_1-of-2"
+                 slds-medium-size_1-of-3 slds-small-size_1-of-2 slds-size_1-of-1"
                 >
                   <Card
                     bodyClassName="slds-card__body_inner"
@@ -341,9 +324,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
               {secondary_plan && visibleSecondaryPlan ? (
                 <div
                   className="slds-text-longform
-                slds-p-around_medium
-                slds-size_1-of-1
-                slds-medium-size_1-of-2"
+                slds-medium-size_1-of-3 slds-small-size_1-of-2 slds-size_1-of-1"
                 >
                   <Card
                     bodyClassName="slds-card__body_inner"
@@ -370,19 +351,12 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                   </Card>
                 </div>
               ) : null}
-              {/* <BackLink
-                  label={i18n.t('Select a different product')}
-                  url={routes.product_list()}
-                /> */}
               {additionalPlansSorted.length ? (
                 <>
                   {additionalPlansSorted.map((plan) => (
                     <div
                       key={plan.id}
-                      className="slds-text-longform
-                    slds-p-around_medium
-                    slds-size_1-of-1
-                    slds-medium-size_1-of-2"
+                      className="slds-text-longform slds-medium-size_1-of-3 slds-small-size_1-of-2 slds-size_1-of-1"
                     >
                       <Card
                         bodyClassName="slds-card__body_inner"
