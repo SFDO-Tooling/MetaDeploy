@@ -127,11 +127,13 @@ def run_flows(*, plan, skip_steps, result_class, result_id):
     result = result_class.objects.get(pk=result_id)
     if result.user:
         token, token_secret = result.user.token
+        instance_url = result.user.instance_url
     else:
         # This means we're in a ScratchOrg.
         scratch_org = ScratchOrg.objects.get(org_id=result.org_id)
         token = scratch_org.config["access_token"]
         token_secret = scratch_org.config["refresh_token"]
+        instance_url = scratch_org.config["instance_url"]
 
     repo_url = plan.version.product.repo_url
     commit_ish = plan.commit_ish or plan.version.commit_ish
@@ -160,7 +162,7 @@ def run_flows(*, plan, skip_steps, result_class, result_id):
         org_config = OrgConfig(
             {
                 "access_token": token,
-                "instance_url": result.instance_url,
+                "instance_url": instance_url,
                 "refresh_token": token_secret,
             },
             current_org,
@@ -279,7 +281,6 @@ def create_scratch_org(*, plan_id, org_name, result_id):
         preflight_result = PreflightResult.objects.create(
             user=None,
             plan=plan,
-            organization_url=org_config.instance_url,
             org_id=scratch_org_config.config["org_id"],
         )
         async_to_sync(preflight_started)(org, preflight_result)
@@ -291,7 +292,6 @@ def create_scratch_org(*, plan_id, org_name, result_id):
     # job = Job.objects.create(
     #     user=None,
     #     plan=plan,
-    #     organization_url=org_config.instance_url,
     #     is_public=True,
     #     org_id=scratch_org_config.config["org_id"],
     # )
@@ -299,7 +299,6 @@ def create_scratch_org(*, plan_id, org_name, result_id):
     # rq_job = run_flows.delay(
     #     plan=plan,
     #     skip_steps=[],
-    #     organization_url=org_config.instance_url,
     #     result_class=Job,
     #     result_id=job.id,
     # )
