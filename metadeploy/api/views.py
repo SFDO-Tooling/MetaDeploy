@@ -113,7 +113,6 @@ class JobViewSet(
         "plan_id",
         "user_id",
         "status",
-        "organization_url",
         "plan__plan_template__planslug__slug",
         "plan__version__label",
         "plan__version__product__productslug__slug",

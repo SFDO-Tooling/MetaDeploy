@@ -107,6 +107,7 @@ class CircumspectSerializerMixin:
 class FullUserSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     is_production_org = serializers.SerializerMethodField()
+    username = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -124,11 +125,19 @@ class FullUserSerializer(serializers.ModelSerializer):
     def get_is_production_org(self, obj):
         return obj.full_org_type == ORG_TYPES.Production
 
+    def get_username(self, obj):
+        return obj.sf_username
+
 
 class LimitedUserSerializer(serializers.ModelSerializer):
+    username = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = ("username", "is_staff")
+
+    def get_username(self, obj):
+        return obj.sf_username
 
 
 class StepSerializer(serializers.ModelSerializer):
@@ -328,7 +337,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     org_name = serializers.SerializerMethodField()
-    organization_url = serializers.SerializerMethodField()
+    instance_url = serializers.SerializerMethodField()
     org_id = serializers.SerializerMethodField()
     is_production_org = serializers.SerializerMethodField()
 
@@ -354,7 +363,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             "creator",
             "plan",
             "steps",
-            "organization_url",
+            "instance_url",
             "org_id",
             "results",
             "created_at",
@@ -420,9 +429,9 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             return obj.org_name
         return None
 
-    def get_organization_url(self, obj):
+    def get_instance_url(self, obj):
         if self.requesting_user_has_rights():
-            return obj.organization_url
+            return obj.instance_url
         return None
 
     def get_is_production_org(self, obj):
@@ -519,10 +528,8 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
                     _("The connection to your org has been lost. Please log in again.")
                 )
 
-        data["org_name"] = user.org_name if user else None
         data["org_type"] = user.org_type if user else None
         data["full_org_type"] = user.full_org_type if user else None
-        data["organization_url"] = user.instance_url if user else None
         data["org_id"] = user.org_id
         return data
 
@@ -546,7 +553,7 @@ class PreflightResultSerializer(ErrorWarningCountMixin, serializers.ModelSeriali
         model = PreflightResult
         fields = (
             "id",
-            "organization_url",
+            "instance_url",
             "org_id",
             "user",
             "plan",
@@ -560,7 +567,7 @@ class PreflightResultSerializer(ErrorWarningCountMixin, serializers.ModelSeriali
             "is_ready",
         )
         extra_kwargs = {
-            "organization_url": {"read_only": True},
+            "instance_url": {"read_only": True},
             "org_id": {"read_only": True},
             "created_at": {"read_only": True},
             "edited_at": {"read_only": True},

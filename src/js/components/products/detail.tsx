@@ -295,7 +295,9 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                       )}
                       className="slds-button slds-button_brand slds-size_full"
                     >
-                      {primary_plan.title} - {i18n.t('View Details')}
+                      {i18n.t('{{title}} - View Details', {
+                        title: primary_plan.title,
+                      })}
                     </Link>
                   </p>
                 ) : null}
@@ -311,7 +313,9 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                         slds-button_outline-brand
                         slds-size_full"
                     >
-                      {secondary_plan.title} - {i18n.t('View Details')}
+                      {i18n.t('{{title}} - View Details', {
+                        title: secondary_plan.title,
+                      })}
                     </Link>
                   </p>
                 ) : null}
@@ -345,7 +349,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
               <BodySection>
                 {!productDescriptionHasTitle && (
                   <h2 className="slds-text-heading_small">
-                    {i18n.t('About')} {product.title}
+                    {i18n.t('About {{title}}', { title: product.title })}
                   </h2>
                 )}
                 {product.image ? (

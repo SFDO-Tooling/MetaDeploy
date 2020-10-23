@@ -414,7 +414,7 @@ describe('<VersionDetail />', () => {
     test('renders version detail', () => {
       const { getByText, getByAltText } = setup();
 
-      expect(getByText('Product 1, 1.0.0')).toBeVisible();
+      expect(getByText('Product 1 1.0.0')).toBeVisible();
       expect(getByText('This is a test product version.')).toBeVisible();
       expect(getByText('My Plan - View Details')).toBeVisible();
       expect(getByText('My Secondary Plan - View Details')).toBeVisible();
@@ -447,7 +447,7 @@ describe('<VersionDetail />', () => {
         },
       });
 
-      expect(getByText('Product 1, 1.0.0')).toBeVisible();
+      expect(getByText('Product 1 1.0.0')).toBeVisible();
       expect(getByText('This is a test product version.')).toBeVisible();
       expect(queryByText('My Plan - View Details')).toBeNull();
       expect(getByText('My Secondary Plan - View Details')).toBeVisible();
@@ -487,7 +487,7 @@ describe('<VersionDetail />', () => {
         initialState: { products: { products: [product], notFound: [] } },
       });
 
-      expect(getByText('Product 1, 1.0.0')).toBeVisible();
+      expect(getByText('Product 1 1.0.0')).toBeVisible();
       expect(getByText('This is a test product version.')).toBeVisible();
       expect(getByText('My Plan - View Details')).toBeVisible();
       expect(queryByText('My Secondary Plan - View Details')).toBeNull();
@@ -530,7 +530,7 @@ describe('<VersionDetail />', () => {
         initialState: { products: { products: [product], notFound: [] } },
       });
 
-      expect(getByText('Product 1, 1.0.0')).toBeVisible();
+      expect(getByText('Product 1 1.0.0')).toBeVisible();
       expect(getByText('This is a test product version.')).toBeVisible();
       expect(getByText('My Plan')).toBeVisible();
       expect(queryByText('Additional Plans')).toBeNull();
@@ -565,7 +565,7 @@ describe('<VersionDetail />', () => {
         versionLabel: '2.0.0',
       });
 
-      expect(getByText('Product 1, 2.0.0')).toBeVisible();
+      expect(getByText('Product 1 2.0.0')).toBeVisible();
       expect(getByText('This is another test product version.')).toBeVisible();
       expect(getByText('My Plan 4 - View Details')).toBeVisible();
     });

@@ -1,7 +1,9 @@
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
 import StepsTable from '@/components/plans/stepsTable';
+
+import { render, rerenderWithI18n } from './../../utils';
 
 const defaultPlan = {
   id: 'plan-1',
@@ -105,7 +107,7 @@ describe('<StepsTable />', () => {
             'step-1': { logs: 'Test log 1 and more' },
           },
         };
-        rerender(
+        rerenderWithI18n(
           <StepsTable
             plan={defaultPlan}
             steps={defaultPlan.steps}
@@ -113,6 +115,7 @@ describe('<StepsTable />', () => {
             job={job}
             handleStepsChange={handleStepsChange}
           />,
+          rerender,
         );
         activeLog = container.querySelector('[aria-hidden="false"] code');
 
@@ -127,7 +130,7 @@ describe('<StepsTable />', () => {
             'step-2': { logs: 'Test log 2' },
           },
         };
-        rerender(
+        rerenderWithI18n(
           <StepsTable
             plan={defaultPlan}
             steps={defaultPlan.steps}
@@ -135,6 +138,7 @@ describe('<StepsTable />', () => {
             job={job}
             handleStepsChange={handleStepsChange}
           />,
+          rerender,
         );
         activeLog = container.querySelector('[aria-hidden="false"] code');
 
@@ -179,7 +183,7 @@ describe('<StepsTable />', () => {
             'step-3': { status: 'ok', logs: 'Test log 3' },
           },
         };
-        rerender(
+        rerenderWithI18n(
           <StepsTable
             plan={defaultPlan}
             steps={defaultPlan.steps}
@@ -187,6 +191,7 @@ describe('<StepsTable />', () => {
             job={changedJob}
             handleStepsChange={handleStepsChange}
           />,
+          rerender,
         );
         log = container.querySelector('[aria-hidden="false"] code');
 
@@ -372,7 +377,7 @@ describe('<StepsTable />', () => {
           'step-2': { status: 'ok', logs: 'Test log 2' },
         },
       };
-      rerender(
+      rerenderWithI18n(
         <StepsTable
           plan={defaultPlan}
           steps={defaultPlan.steps}
@@ -380,6 +385,7 @@ describe('<StepsTable />', () => {
           job={job}
           handleStepsChange={handleStepsChange}
         />,
+        rerender,
       );
       activeLog = container.querySelector('[aria-hidden="false"] code');
 

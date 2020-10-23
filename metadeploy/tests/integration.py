@@ -65,7 +65,6 @@ def test_can_reach_salesforce(
         user=user,
         plan=plan,
         skip_steps=[],
-        organization_url=INSTANCE_URL,
         result_class=Job,
         result_id=job.id,
     )

@@ -194,13 +194,13 @@ class PreflightCell extends React.Component<DataCellProps> {
     } else if (required) {
       title = i18n.t('required');
     } else if (recommended) {
-      title = i18n.t('recommended');
+      title = i18n.t('recommended', 'Recommended');
     }
     let label = '';
     if (skipped?.message) {
       label = skipped.message;
     } else if (recommended) {
-      label = i18n.t('recommended');
+      label = i18n.t('recommended', 'Recommended');
     }
     if (skipped || required) {
       content = (

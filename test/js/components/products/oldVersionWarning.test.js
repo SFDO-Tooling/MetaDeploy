@@ -1,8 +1,10 @@
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
 import OldVersionWarning from '@/components/products/oldVersionWarning';
+
+import { render } from './../../utils';
 
 describe('<OldVersionWarning/>', () => {
   const setup = (options) => {

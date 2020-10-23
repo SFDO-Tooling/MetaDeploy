@@ -13,8 +13,7 @@ describe('getDuration', () => {
     { input: '31632768', output: '1 year' },
   ].forEach(({ input, output }) => {
     test(`returns formatted duration with input: ${input}`, () => {
-      const t = (key, msg) => msg;
-      expect(getDuration(input, t)).toEqual(output);
+      expect(getDuration(input)).toEqual(output);
     });
   });
 });
