@@ -1,5 +1,3 @@
-import Card from '@salesforce/design-system-react/components/card';
-import i18n from 'i18next';
 import { sortBy } from 'lodash';
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
@@ -10,6 +8,7 @@ import { Link, Redirect } from 'react-router-dom';
 
 import BodyContainer from '@/components/bodyContainer';
 import Header from '@/components/header';
+import PlanCard from '@/components/plans/card';
 import PageHeader from '@/components/products/header';
 import ProductNotAllowed from '@/components/products/notAllowed';
 import OldVersionWarning from '@/components/products/oldVersionWarning';
@@ -292,63 +291,29 @@ class VersionDetail extends React.Component<VersionDetailProps> {
               </div>
               <div className="slds-size_1-of-4"></div>
               {primary_plan && visiblePrimaryPlan ? (
-                <div
-                  className="slds-text-longform
-                 slds-medium-size_1-of-3 slds-small-size_1-of-2 slds-size_1-of-1"
-                >
-                  <Card
-                    bodyClassName="slds-card__body_inner"
-                    heading={primary_plan.title}
-                  >
-                    {primary_plan.preflight_message ? ( // These messages are pre-cleaned by the API
-                      <div
-                        className="markdown"
-                        dangerouslySetInnerHTML={{
-                          __html: primary_plan.preflight_message,
-                        }}
-                      />
-                    ) : null}
-                    <Link
-                      to={routes.plan_detail(
-                        product.slug,
-                        version.label,
-                        primary_plan.slug,
-                      )}
-                      className="slds-button slds-button_brand"
-                    >
-                      {i18n.t('View Plan Details')}
-                    </Link>
-                  </Card>
+                <div className=" slds-text-longform slds-medium-size_1-of-3 slds-small-size_1-of-2 slds-size_1-of-1">
+                  <PlanCard
+                    title={primary_plan.title}
+                    details={primary_plan.preflight_message}
+                    detailUrl={routes.plan_detail(
+                      product.slug,
+                      version.label,
+                      primary_plan.slug,
+                    )}
+                  />
                 </div>
               ) : null}
               {secondary_plan && visibleSecondaryPlan ? (
-                <div
-                  className="slds-text-longform
-                slds-medium-size_1-of-3 slds-small-size_1-of-2 slds-size_1-of-1"
-                >
-                  <Card
-                    bodyClassName="slds-card__body_inner"
-                    heading={secondary_plan.title}
-                  >
-                    {secondary_plan.preflight_message ? ( // These messages are pre-cleaned by the API
-                      <div
-                        className="markdown"
-                        dangerouslySetInnerHTML={{
-                          __html: secondary_plan.preflight_message,
-                        }}
-                      />
-                    ) : null}
-                    <Link
-                      to={routes.plan_detail(
-                        product.slug,
-                        version.label,
-                        secondary_plan.slug,
-                      )}
-                      className="slds-button slds-button_brand"
-                    >
-                      {i18n.t('View Plan Details')}
-                    </Link>
-                  </Card>
+                <div className=" slds-text-longform slds-medium-size_1-of-3 slds-small-size_1-of-2 slds-size_1-of-1">
+                  <PlanCard
+                    title={secondary_plan.title}
+                    details={secondary_plan.preflight_message}
+                    detailUrl={routes.plan_detail(
+                      product.slug,
+                      version.label,
+                      secondary_plan.slug,
+                    )}
+                  />
                 </div>
               ) : null}
               {additionalPlansSorted.length ? (
@@ -358,30 +323,15 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                       key={plan.id}
                       className="slds-text-longform slds-medium-size_1-of-3 slds-small-size_1-of-2 slds-size_1-of-1"
                     >
-                      <Card
-                        bodyClassName="slds-card__body_inner"
-                        heading={plan.title}
-                        key={plan.id}
-                      >
-                        {plan.preflight_message ? ( // These messages are pre-cleaned by the API
-                          <div
-                            className="markdown"
-                            dangerouslySetInnerHTML={{
-                              __html: plan.preflight_message,
-                            }}
-                          />
-                        ) : null}
-                        <Link
-                          to={routes.plan_detail(
-                            product.slug,
-                            version.label,
-                            plan.slug,
-                          )}
-                          className="slds-button slds-button_brand"
-                        >
-                          {i18n.t('View Plan Details')}
-                        </Link>
-                      </Card>
+                      <PlanCard
+                        title={plan.title}
+                        details={plan.preflight_message}
+                        detailUrl={routes.plan_detail(
+                          product.slug,
+                          version.label,
+                          plan.slug,
+                        )}
+                      />
                     </div>
                   ))}
                 </>

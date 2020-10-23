@@ -52,6 +52,7 @@ const defaultState = {
             is_allowed: true,
             requires_preflight: true,
             supported_orgs: 'Persistent',
+            preflight_message: '<p>This is a sample message.',
           },
           secondary_plan: {
             id: 'plan-2',
@@ -62,6 +63,7 @@ const defaultState = {
             is_allowed: true,
             requires_preflight: true,
             supported_orgs: 'Persistent',
+            preflight_message: '<p>This is a sample message.',
           },
           additional_plans: {
             'my-additional-plan': {
@@ -74,6 +76,7 @@ const defaultState = {
               requires_preflight: true,
               order_key: 2,
               supported_orgs: 'Persistent',
+              preflight_message: '<p>This is a sample message.',
             },
             'another-additional-plan': {
               id: 'plan-3',
@@ -85,6 +88,7 @@ const defaultState = {
               requires_preflight: true,
               order_key: 1,
               supported_orgs: 'Persistent',
+              preflight_message: '<p>This is a sample message.',
             },
           },
           is_listed: true,
@@ -415,9 +419,6 @@ describe('<VersionDetail />', () => {
       const { getByText, getByAltText } = setup();
 
       expect(getByText('Product 1, 1.0.0')).toBeVisible();
-      expect(getByText('This is a test product version.')).toBeVisible();
-      expect(getByText('My Plan - View Details')).toBeVisible();
-      expect(getByText('My Secondary Plan - View Details')).toBeVisible();
       expect(getByText('My Additional Plan')).toBeVisible();
       expect(getByAltText('Product 1')).toHaveAttribute(
         'src',
@@ -427,7 +428,7 @@ describe('<VersionDetail />', () => {
 
     test('handles missing primary plan', () => {
       const product = defaultState.products.products[0];
-      const { getByText, queryByText } = setup({
+      const { getByText } = setup({
         initialState: {
           products: {
             ...defaultState.products,
@@ -448,9 +449,6 @@ describe('<VersionDetail />', () => {
       });
 
       expect(getByText('Product 1, 1.0.0')).toBeVisible();
-      expect(getByText('This is a test product version.')).toBeVisible();
-      expect(queryByText('My Plan - View Details')).toBeNull();
-      expect(getByText('My Secondary Plan - View Details')).toBeVisible();
       expect(getByText('My Additional Plan')).toBeVisible();
     });
 
@@ -488,9 +486,6 @@ describe('<VersionDetail />', () => {
       });
 
       expect(getByText('Product 1, 1.0.0')).toBeVisible();
-      expect(getByText('This is a test product version.')).toBeVisible();
-      expect(getByText('My Plan - View Details')).toBeVisible();
-      expect(queryByText('My Secondary Plan - View Details')).toBeNull();
       expect(queryByText('My Additional Plan')).toBeNull();
     });
 
@@ -531,7 +526,6 @@ describe('<VersionDetail />', () => {
       });
 
       expect(getByText('Product 1, 1.0.0')).toBeVisible();
-      expect(getByText('This is a test product version.')).toBeVisible();
       expect(getByText('My Plan')).toBeVisible();
       expect(queryByText('Additional Plans')).toBeNull();
     });
@@ -566,8 +560,7 @@ describe('<VersionDetail />', () => {
       });
 
       expect(getByText('Product 1, 2.0.0')).toBeVisible();
-      expect(getByText('This is another test product version.')).toBeVisible();
-      expect(getByText('My Plan 4 - View Details')).toBeVisible();
+      expect(getByText('View Plan Details')).toBeVisible();
     });
   });
 
