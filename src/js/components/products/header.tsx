@@ -1,5 +1,4 @@
 import PageHeader from '@salesforce/design-system-react/components/page-header';
-import i18n from 'i18next';
 import * as React from 'react';
 
 import ProductIcon from '@/components/products/icon';
