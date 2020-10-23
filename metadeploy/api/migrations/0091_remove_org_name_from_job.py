@@ -6,20 +6,20 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0090_convert_username'),
+        ("api", "0090_convert_username"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='job',
-            name='org_name',
+            model_name="job",
+            name="org_name",
         ),
         migrations.RemoveField(
-            model_name='job',
-            name='organization_url',
+            model_name="job",
+            name="organization_url",
         ),
         migrations.RemoveField(
-            model_name='preflightresult',
-            name='organization_url',
+            model_name="preflightresult",
+            name="organization_url",
         ),
     ]

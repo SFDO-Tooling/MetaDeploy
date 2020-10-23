@@ -5,13 +5,13 @@ on:
     types: [heroku-release-phase]
 
 env:
-  CUMULUSCI_KEY: ${{ secrets.CUMULUSCI_KEY }} 
+  CUMULUSCI_KEY: ${{ secrets.CUMULUSCI_KEY }}
 
 jobs:
   production_smoke_test:
-      name: "Production Post-Deploy Smoke Test"
-      runs-on: ubuntu-latest
-      steps:
+    name: 'Production Post-Deploy Smoke Test'
+    runs-on: ubuntu-latest
+    steps:
       - uses: actions/checkout@v2
       - name: Set up Python 3.8
         uses: actions/setup-python@v1
@@ -36,11 +36,11 @@ jobs:
       - name: Create test org
         run: cci org info enterprise
 
-      - name: Deploy Trusted IP Ranges 
+      - name: Deploy Trusted IP Ranges
         run: cci task run deploy --org enterprise -o path robot/trusted_ip_ranges
 
       - name: Wait for Heroku Dynos to Restart
-        run: sleep 5m 
+        run: sleep 5m
 
       - name: Run robot test
         run: |

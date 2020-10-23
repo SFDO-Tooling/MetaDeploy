@@ -1,7 +1,7 @@
 from datetime import timedelta
 
-from django.utils import timezone
 import pytest
+from django.utils import timezone
 
 from ..cleanup import (
     cleanup_user_data,

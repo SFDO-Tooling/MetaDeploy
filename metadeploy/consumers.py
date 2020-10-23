@@ -6,7 +6,8 @@ from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.utils import translation
-from django.utils.translation import get_supported_language_variant, gettext as _
+from django.utils.translation import get_supported_language_variant
+from django.utils.translation import gettext as _
 from django.utils.translation.trans_real import (
     language_code_re,
     parse_accept_lang_header,

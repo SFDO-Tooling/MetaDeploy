@@ -32,10 +32,8 @@ from .cleanup import cleanup_user_data
 from .flows import StopFlowException
 from .github import local_github_checkout
 from .models import Job, Plan, PreflightResult, ScratchOrg
-from .push import preflight_started, report_error, user_token_expired
+from .push import preflight_started, report_error
 from .salesforce import create_scratch_org as create_scratch_org_on_sf
-from .models import Job, PreflightResult
-from .push import report_error
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
