@@ -5,10 +5,10 @@ import Footer from '@/components/footer';
 import { render } from './../utils';
 
 describe('<Footer />', () => {
-  describe('logo', () => {
+  describe('wordmark', () => {
     beforeAll(() => {
       window.GLOBALS.SITE = {
-        product_logo: 'my/logo.png',
+        show_metadeploy_wordmark: true,
       };
     });
 
@@ -16,11 +16,9 @@ describe('<Footer />', () => {
       window.GLOBALS = {};
     });
 
-    test('renders logo with `backgroundImage` set to product logo', () => {
-      const { getByTestId } = render(<Footer />);
-      expect(getByTestId('footer-logo')).toHaveStyle(
-        'background-image: url(my/logo.png)',
-      );
+    test('renders wordmark', () => {
+      const { getByText } = render(<Footer />);
+      expect(getByText('meta')).toBeVisible();
     });
   });
 
