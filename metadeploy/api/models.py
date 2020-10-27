@@ -877,7 +877,7 @@ class SiteProfile(TranslatableModel):
         copyright_notice=MarkdownField(property_suffix="_markdown", blank=True),
     )
 
-    product_logo = models.ImageField(blank=True)
+    show_metadeploy_wordmark = models.BooleanField(default=True)
     company_logo = models.ImageField(blank=True)
     favicon = models.ImageField(blank=True)
 

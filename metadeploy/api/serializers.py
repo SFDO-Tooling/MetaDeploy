@@ -604,7 +604,7 @@ class SiteSerializer(serializers.ModelSerializer):
             "company_name",
             "welcome_text",
             "copyright_notice",
-            "product_logo",
+            "show_metadeploy_wordmark",
             "company_logo",
             "favicon",
         )
