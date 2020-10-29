@@ -88,15 +88,17 @@ export const ActionBtn = ({
   label,
   disabled,
   onClick,
+  btnVariant,
 }: {
   label: string | React.ReactNode;
   disabled?: boolean;
   onClick?: () => void;
+  btnVariant?: string;
 }) => (
   <Button
     className={btnClasses}
     label={label}
-    variant="brand"
+    variant={btnVariant || 'brand'}
     onClick={onClick}
     disabled={disabled}
   />
@@ -451,6 +453,8 @@ class CtaButton extends React.Component<
     } = this.props;
     const { spinOrgModalOpen } = this.state;
     const usesBothOrgTypes = plan.supported_orgs === SUPPORTED_ORGS.Both;
+    const btnVariant =
+      usesBothOrgTypes && !scratchOrg ? 'outline-brand' : 'brand';
 
     if (scratchOrg?.status === SCRATCH_ORG_STATUSES.started) {
       // Scratch org is being created
@@ -458,6 +462,7 @@ class CtaButton extends React.Component<
         <ActionBtn
           label={<LabelWithSpinner label={i18n.t('Creating Scratch Org…')} />}
           disabled
+          btnVariant={btnVariant}
         />
       );
     }
@@ -469,6 +474,7 @@ class CtaButton extends React.Component<
           <ActionBtn
             label={i18n.t('Log Out to Create Scratch Org')}
             onClick={doLogout}
+            btnVariant={btnVariant}
           />
         );
       }
@@ -478,6 +484,7 @@ class CtaButton extends React.Component<
             label={i18n.t('Create Scratch Org')}
             onClick={this.openSpinOrgModal}
             disabled={preventAction}
+            btnVariant={btnVariant}
           />
           <SpinOrgModal
             isOpen={spinOrgModalOpen}
@@ -494,6 +501,7 @@ class CtaButton extends React.Component<
         <ActionBtn
           label={i18n.t('Log Out to Use Scratch Org')}
           onClick={doLogout}
+          btnVariant={btnVariant}
         />
       );
     }
@@ -511,6 +519,7 @@ class CtaButton extends React.Component<
             }
             onClick={this.startPreflight}
             disabled={preventAction}
+            btnVariant={btnVariant}
           />
         );
       }
@@ -532,6 +541,7 @@ class CtaButton extends React.Component<
                 }
                 onClick={this.openPreflightModal}
                 disabled={preventAction}
+                btnVariant={btnVariant}
               />
             ) : (
               <ActionBtn
@@ -542,6 +552,7 @@ class CtaButton extends React.Component<
                 }
                 onClick={this.startJob}
                 disabled={preventAction}
+                btnVariant={btnVariant}
               />
             );
             return (
@@ -570,6 +581,7 @@ class CtaButton extends React.Component<
               }
               onClick={this.startPreflight}
               disabled={preventAction}
+              btnVariant={btnVariant}
             />
           );
         }
@@ -585,6 +597,7 @@ class CtaButton extends React.Component<
               }
               onClick={this.startPreflight}
               disabled={preventAction}
+              btnVariant={btnVariant}
             />
           );
         }
@@ -601,6 +614,7 @@ class CtaButton extends React.Component<
         }
         onClick={this.startJob}
         disabled={preventAction}
+        btnVariant={btnVariant}
       />
     );
   }
@@ -612,6 +626,10 @@ class CtaButton extends React.Component<
       window.GLOBALS.SCRATCH_ORGS_AVAILABLE &&
         plan.supported_orgs !== SUPPORTED_ORGS.Persistent,
     );
+    const hasScratchOrg =
+      canUseScratchOrg &&
+      (scratchOrg?.status === SCRATCH_ORG_STATUSES.started ||
+        scratchOrg?.status === SCRATCH_ORG_STATUSES.complete);
 
     if (canUseScratchOrg && scratchOrg === undefined) {
       // An `undefined` org means we don't know whether the org exists
@@ -651,7 +669,9 @@ class CtaButton extends React.Component<
 
     return (
       <>
-        {canUsePersistentOrg ? this.getPersistentOrgCTA() : null}
+        {canUsePersistentOrg && !hasScratchOrg
+          ? this.getPersistentOrgCTA()
+          : null}
         {canUseScratchOrg ? this.getScratchOrgCTA() : null}
       </>
     );
