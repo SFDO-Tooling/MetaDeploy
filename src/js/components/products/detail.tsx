@@ -291,7 +291,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
               </div>
               <div className="slds-size_1-of-4"></div>
               {primary_plan && visiblePrimaryPlan ? (
-                <div className=" slds-text-longform slds-medium-size_1-of-3 slds-small-size_1-of-2 slds-size_1-of-1">
+                <div className=" slds-text-longform slds-medium-size_1-of-3 slds-small-size_1-of-2 slds-size_1-of-1 slds-p-around_small">
                   <PlanCard
                     title={primary_plan.title}
                     details={primary_plan.preflight_message}
@@ -304,7 +304,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                 </div>
               ) : null}
               {secondary_plan && visibleSecondaryPlan ? (
-                <div className=" slds-text-longform slds-medium-size_1-of-3 slds-small-size_1-of-2 slds-size_1-of-1">
+                <div className=" slds-text-longform slds-medium-size_1-of-3 slds-small-size_1-of-2 slds-size_1-of-1 slds-p-around_small">
                   <PlanCard
                     title={secondary_plan.title}
                     details={secondary_plan.preflight_message}
@@ -321,7 +321,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                   {additionalPlansSorted.map((plan) => (
                     <div
                       key={plan.id}
-                      className="slds-text-longform slds-medium-size_1-of-3 slds-small-size_1-of-2 slds-size_1-of-1"
+                      className="slds-text-longform slds-medium-size_1-of-3 slds-small-size_1-of-2 slds-size_1-of-1 slds-p-around_small"
                     >
                       <PlanCard
                         title={plan.title}
