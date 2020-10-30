@@ -382,6 +382,26 @@ class TestJob:
 
         assert serializer.is_valid(), serializer.errors
 
+    def test_user_can_edit_scratch_org(self, rf, job_factory, scratch_org_factory):
+        org_id = "00Dxxxxxxxxxxxxxxx"
+        uuid = str(uuid4())
+        request = rf.get("/")
+        request.user = AnonymousUser()
+        request.session = {"scratch_org_id": uuid}
+        scratch_org_factory(
+            uuid=uuid,
+            status=ScratchOrg.Status.complete,
+            org_id=org_id,
+        )
+        job = job_factory(
+            user=None,
+            status=Job.Status.complete,
+            org_id=org_id,
+        )
+        serializer = JobSerializer(instance=job, context=dict(request=request))
+
+        assert serializer.data["user_can_edit"]
+
     def test_no_context(self, job_factory):
         job = job_factory(
             status=Job.Status.complete,
