@@ -8,17 +8,22 @@ import { Job } from '@/store/jobs/reducer';
 import { CONSTANTS } from '@/store/plans/reducer';
 
 const { STATUS } = CONSTANTS;
+const btnClasses = 'slds-button slds-button_brand slds-p-vertical_xx-small';
 
 const CtaButton = ({
   job,
+  isScratchOrg,
   linkToPlan,
   canceling,
   preflightRequired,
+  openModal,
 }: {
   job: Job;
+  isScratchOrg: boolean;
   linkToPlan: string;
   canceling: boolean;
   preflightRequired: boolean;
+  openModal: () => void;
 }) => {
   switch (job.status) {
     case STATUS.STARTED:
@@ -37,16 +42,18 @@ const CtaButton = ({
         />
       );
     case STATUS.COMPLETE: {
+      if (isScratchOrg) {
+        return (
+          <ActionBtn label={i18n.t('View Scratch Org')} onClick={openModal} />
+        );
+      }
       if (job.organization_url) {
         return (
           <a
             href={job.organization_url}
             target="_blank"
             rel="noreferrer noopener"
-            className="slds-button
-              slds-button_brand
-              slds-size_full
-              slds-p-vertical_xx-small"
+            className={btnClasses}
           >
             <Icon
               containerClassName="slds-p-right_x-small"
@@ -64,13 +71,7 @@ const CtaButton = ({
     case STATUS.CANCELED:
     case STATUS.FAILED: {
       return (
-        <Link
-          to={linkToPlan}
-          className="slds-button
-            slds-button_brand
-            slds-size_full
-            slds-p-vertical_xx-small"
-        >
+        <Link to={linkToPlan} className={btnClasses}>
           {preflightRequired
             ? i18n.t('Return to Pre-Install Validation')
             : i18n.t('Return to Plan')}

@@ -89,14 +89,16 @@ export const ActionBtn = ({
   disabled,
   onClick,
   btnVariant,
+  className,
 }: {
   label: string | React.ReactNode;
   disabled?: boolean;
   onClick?: () => void;
   btnVariant?: string;
+  className?: string;
 }) => (
   <Button
-    className={btnClasses}
+    className={className || btnClasses}
     label={label}
     variant={btnVariant || 'brand'}
     onClick={onClick}
