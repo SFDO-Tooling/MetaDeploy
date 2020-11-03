@@ -171,7 +171,7 @@
   "recommended": "recommended",
   "reload the page.": "reload the page.",
   "required": "required",
-  "scratchOrgInfo": "<0>To view your org right away, click the “View Scratch Org” button below. To view your org later, copy this link.<1></1><2>You have also been sent an email to reset the password on your new org.</2></0>",
+  "scratchOrgInfo": "To view your org right away, click the “View Scratch Org” button below. To view your org later, copy this link.<1></1><2>You have also been sent an email to reset the password on your new org.</2>",
   "skipped": "skipped",
   "versionNotFound": "We can’t find the version you’re looking for. Try the <2>list of all products</2>?",
   "versionNotFoundMostRecent": "We can’t find the version you’re looking for. Try the <2>most recent version</2> of that product, or the <6>list of all products</6>?",

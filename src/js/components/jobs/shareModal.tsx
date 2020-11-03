@@ -142,8 +142,8 @@ class ShareModal extends React.Component<WrappedProps> {
             {i18n.t('Installation completed successfully.')}
           </p>
           <JobMessage job={job} />
-          <Trans i18nKey="scratchOrgInfo">
-            <p>
+          <p>
+            <Trans i18nKey="scratchOrgInfo">
               To view your org right away, click the “View Scratch Org” button
               below. To view your org later, copy this link.
               <br />
@@ -151,8 +151,8 @@ class ShareModal extends React.Component<WrappedProps> {
                 You have also been sent an email to reset the password on your
                 new org.
               </strong>
-            </p>
-          </Trans>
+            </Trans>
+          </p>
         </div>
       );
     }
@@ -220,7 +220,7 @@ class ShareModal extends React.Component<WrappedProps> {
           </div>
         </Input>
 
-        {!isScratchOrg && job.user_can_edit ? (
+        {!isScratchOrg && job.user_can_edit && (
           <div className="slds-p-top_small">
             <RadioGroup
               labels={{ label: i18n.t('Who can access this shared link?') }}
@@ -254,7 +254,7 @@ class ShareModal extends React.Component<WrappedProps> {
               )}
             </p>
           </div>
-        ) : null}
+        )}
       </>
     );
   }

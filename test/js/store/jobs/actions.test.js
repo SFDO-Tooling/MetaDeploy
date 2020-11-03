@@ -1,9 +1,15 @@
+import { push } from 'connected-react-router';
 import fetchMock from 'fetch-mock';
 
 import * as actions from '@/store/jobs/actions';
 import { addUrlParams } from '@/utils/api';
+import routes from '@/utils/routes';
 
 import { storeWithApi } from './../../utils';
+
+jest.mock('connected-react-router');
+
+push.mockReturnValue({ type: 'TEST' });
 
 describe('fetchJob', () => {
   let args, params, url;
@@ -173,6 +179,54 @@ describe('startJob', () => {
       return store.dispatch(actions.startJob(data)).catch(() => {
         expect(store.getActions()).toEqual([started, failed]);
       });
+    });
+  });
+});
+
+describe('createJob', () => {
+  describe('success', () => {
+    beforeEach(() => {
+      window.socket = { subscribe: jest.fn() };
+    });
+
+    afterEach(() => {
+      Reflect.deleteProperty(window, 'socket');
+    });
+
+    test('dispatches JOB_STARTED action and subscribes to ws events', () => {
+      const store = storeWithApi({
+        router: {
+          location: {
+            pathname: routes.plan_detail('product-1', 'version-1', 'plan-1'),
+          },
+        },
+      });
+      const job = {
+        id: 'job-1',
+        plan: 'plan-1',
+        steps: ['step-1'],
+      };
+      const data = {
+        model: job,
+        product_slug: 'product-1',
+        version_label: 'version-1',
+        plan_slug: 'plan-1',
+      };
+      const started = {
+        type: 'JOB_STARTED',
+        payload: job,
+      };
+      const expected = {
+        model: 'job',
+        id: job.id,
+      };
+      const url = routes.job_detail('product-1', 'version-1', 'plan-1', job.id);
+
+      store.dispatch(actions.createJob(data));
+
+      expect(store.getActions()).toEqual([started, { type: 'TEST' }]);
+      expect(window.socket.subscribe).toHaveBeenCalledWith(expected);
+      expect(push).toHaveBeenCalledWith(url);
     });
   });
 });

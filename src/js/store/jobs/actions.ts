@@ -147,6 +147,7 @@ export const createJob = ({
   version_label: string;
   plan_slug: string;
 }): ThunkResult<JobStarted> => (dispatch, getState) => {
+  /* istanbul ignore else */
   if (model && window.socket) {
     window.socket.subscribe({
       model: 'job',
@@ -160,6 +161,7 @@ export const createJob = ({
   const state = getState();
   const { pathname } = state.router.location;
   const planUrl = routes.plan_detail(product_slug, version_label, plan_slug);
+  /* istanbul ignore else */
   if (planUrl === pathname) {
     // redirect to job page, if still on plan-detail page
     const url = routes.job_detail(
