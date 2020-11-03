@@ -6,6 +6,7 @@ export type Job = {
   id: string;
   edited_at: string;
   job_id: string;
+  org_id: string | null;
   creator: {
     username: string;
     is_staff: boolean;

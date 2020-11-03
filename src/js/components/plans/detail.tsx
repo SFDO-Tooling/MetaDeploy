@@ -51,6 +51,7 @@ import {
 } from '@/store/products/selectors';
 import { fetchScratchOrg, spinScratchOrg } from '@/store/scratchOrgs/actions';
 import { selectScratchOrg } from '@/store/scratchOrgs/selectors';
+import { logout } from '@/store/user/actions';
 import { selectUserState } from '@/store/user/selectors';
 import { SCRATCH_ORG_STATUSES, SUPPORTED_ORGS } from '@/utils/constants';
 import routes from '@/utils/routes';
@@ -77,6 +78,7 @@ const actions = {
   doStartJob: startJob,
   doSpinScratchOrg: spinScratchOrg,
   doFetchScratchOrg: fetchScratchOrg,
+  doLogout: logout,
 };
 
 const connector = connect(select, actions);
@@ -342,6 +344,7 @@ class PlanDetail extends React.Component<Props, State> {
       doStartPreflight,
       doStartJob,
       doSpinScratchOrg,
+      doLogout,
     } = this.props;
 
     /* istanbul ignore if */
@@ -374,6 +377,7 @@ class PlanDetail extends React.Component<Props, State> {
           doStartPreflight={doStartPreflight}
           doStartJob={doStartJob}
           doSpinScratchOrg={doSpinScratchOrg}
+          doLogout={doLogout}
         />
       );
     }

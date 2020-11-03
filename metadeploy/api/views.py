@@ -1,3 +1,4 @@
+from functools import reduce
 from uuid import uuid4
 
 import django_rq
@@ -27,7 +28,7 @@ from .models import (
     Version,
 )
 from .paginators import ProductPaginator
-from .permissions import OnlyOwnerOrSuperuserCanDelete
+from .permissions import OnlyOwnerOrSuperuser, OnlyUserWithOrg
 from .serializers import (
     FullUserSerializer,
     JobSerializer,
@@ -118,15 +119,35 @@ class JobViewSet(
         "plan__version__label",
         "plan__version__product__productslug__slug",
     )
-    permission_classes = (OnlyOwnerOrSuperuserCanDelete,)
+
+    def get_permissions(self):
+        permission_classes = [AllowAny]
+        if self.action in ["update", "partial_update", "destroy"]:
+            permission_classes = [OnlyOwnerOrSuperuser]
+        elif self.action == "create":
+            permission_classes = [OnlyUserWithOrg]
+        return [permission() for permission in permission_classes]
 
     def get_queryset(self):
-        if self.request.user.is_staff:
+        user = self.request.user
+        scratch_org_id = self.request.session.get("scratch_org_id", None)
+
+        if user.is_staff:
             return Job.objects.all()
-        if self.request.user.is_anonymous:
-            filters = Q(is_public=True)
-        else:
-            filters = Q(is_public=True) | Q(user=self.request.user)
+
+        scratch_org = None
+        if scratch_org_id:
+            scratch_org = ScratchOrg.objects.filter(
+                uuid=scratch_org_id, status=ScratchOrg.Status.complete
+            ).first()
+
+        filters = [
+            Q(is_public=True),
+            Q(user=user) if user.is_authenticated else None,
+            Q(org_id=scratch_org.org_id) if scratch_org else None,
+        ]
+        filters = reduce(lambda a, b: a | b, (f for f in filters if f))
+
         return Job.objects.filter(filters)
 
     def perform_destroy(self, instance):

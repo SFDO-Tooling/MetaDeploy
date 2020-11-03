@@ -20,6 +20,7 @@ Websocket notifications you can subscribe to:
         SCRATCH_ORG_CREATED
         SCRATCH_ORG_ERROR
         PREFLIGHT_STARTED
+        JOB_STARTED
 """
 import logging
 
@@ -33,21 +34,27 @@ from .hash_url import convert_org_id_to_key
 logger = logging.getLogger("metadeploy.api.push")
 
 
+# Events sent via this method are serialized manually,
+# and therefore may not have access to user/session context in the serializer
 async def push_message_about_instance(instance, message, group_name=None):
     model_name = instance._meta.model_name
     id = str(instance.id)
     group_name = group_name or CHANNELS_GROUP_NAME.format(model=model_name, id=id)
     channel_layer = get_channel_layer()
-    sent_message = {"type": "notify", "group": group_name, "content": message}
-    if await get_set_message_semaphore(channel_layer, sent_message):
-        logger.info(f"Sending message {sent_message}")
-        await channel_layer.group_send(group_name, sent_message)
+    message = {"type": "notify", "group": group_name, "content": message}
+    if await get_set_message_semaphore(channel_layer, message):
+        logger.info(f"Sending message {message}")
+        await channel_layer.group_send(group_name, message)
 
 
-async def push_serializable(instance, serializer, type_):
+# Objects serialized via this method will have access to user/session context
+async def push_serializable(
+    instance, serializer, type_, group_name=None, extra_payload=None
+):
     model_name = instance._meta.model_name
     id = str(instance.id)
-    group_name = CHANNELS_GROUP_NAME.format(model=model_name, id=id)
+    group_name = group_name or CHANNELS_GROUP_NAME.format(model=model_name, id=id)
+    channel_layer = get_channel_layer()
     serializer_name = f"{serializer.__module__}.{serializer.__name__}"
     message = {
         "type": "notify",
@@ -55,8 +62,8 @@ async def push_serializable(instance, serializer, type_):
         "instance": {"model": model_name, "id": id},
         "serializer": serializer_name,
         "inner_type": type_,
+        "extra_payload": extra_payload,
     }
-    channel_layer = get_channel_layer()
     if await get_set_message_semaphore(channel_layer, message):
         logger.info(f"Sending message {message}")
         await channel_layer.group_send(group_name, message)
@@ -201,3 +208,25 @@ async def preflight_started(scratch_org, preflight):
     message = {"type": "PREFLIGHT_STARTED", "payload": payload}
     group_name = CHANNELS_GROUP_NAME.format(model="scratchorg", id=scratch_org.id)
     await push_message_about_instance(preflight, message, group_name=group_name)
+
+
+async def job_started(scratch_org, job):
+    from .serializers import JobSerializer
+
+    plan = job.plan
+    version = plan.version
+    product = version.product
+
+    extra_payload = {
+        "product_slug": product.slug,
+        "version_label": version.label,
+        "plan_slug": plan.slug,
+    }
+    group_name = CHANNELS_GROUP_NAME.format(model="scratchorg", id=scratch_org.id)
+    await push_serializable(
+        job,
+        JobSerializer,
+        "JOB_STARTED",
+        group_name=group_name,
+        extra_payload=extra_payload,
+    )

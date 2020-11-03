@@ -103,6 +103,7 @@ describe('spinScratchOrg', () => {
       const response = {
         id: 'org-1',
         plan: 'plan-1',
+        uuid: 'uuid',
       };
       fetchMock.postOnce(window.api_urls.plan_scratch_org('plan-1'), {
         status: 201,
@@ -122,6 +123,7 @@ describe('spinScratchOrg', () => {
       const expected = {
         model: 'scratchorg',
         id: 'org-1',
+        uuid: 'uuid',
       };
 
       expect.assertions(2);

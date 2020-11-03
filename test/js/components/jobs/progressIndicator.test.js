@@ -21,9 +21,10 @@ describe('<ProgressIndicator />', () => {
   const setup = (options) => {
     const defaults = {
       job: defaultJob,
+      preflightRequired: true,
     };
     const opts = { ...defaults, ...options };
-    const { getByText } = render(<ProgressIndicator job={opts.job} />);
+    const { getByText } = render(<ProgressIndicator {...opts} />);
     return { getByText };
   };
 

@@ -182,6 +182,52 @@ class TestJobViewset:
         assert response.status_code == 403
         assert Job.objects.filter(id=job.id).exists()
 
+    def test_queryset_anonymous_scratch_org(
+        self, anon_client, job_factory, scratch_org_factory
+    ):
+        org_id = "00Dyyyyyyyyyyyyyyy"
+        uuid = str(uuid4())
+        job = job_factory(
+            is_public=False,
+            org_name="Secret Org",
+            org_id=org_id,
+        )
+        scratch_org_factory(
+            status=ScratchOrg.Status.complete,
+            org_id=org_id,
+            uuid=uuid,
+        )
+        url = reverse("job-detail", kwargs={"pk": job.id})
+        session = anon_client.session
+        session["scratch_org_id"] = uuid
+        session.save()
+        response = anon_client.get(url)
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "id": str(job.id),
+            "creator": None,
+            "plan": str(job.plan.id),
+            "organization_url": None,
+            "org_id": None,
+            "steps": [],
+            "results": {},
+            "error_count": 0,
+            "warning_count": 0,
+            "created_at": format_timestamp(job.created_at),
+            "enqueued_at": None,
+            "job_id": None,
+            "status": "started",
+            "org_name": None,
+            "org_type": "",
+            "is_production_org": False,
+            "is_public": False,
+            "user_can_edit": False,
+            "message": "",
+            "error_message": "",
+            "edited_at": format_timestamp(job.edited_at),
+        }
+
 
 @pytest.mark.django_db
 class TestBasicGetViews:

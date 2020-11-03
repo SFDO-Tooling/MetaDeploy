@@ -1,11 +1,14 @@
 import Button from '@salesforce/design-system-react/components/button';
+import Icon from '@salesforce/design-system-react/components/icon';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import Radio from '@salesforce/design-system-react/components/radio-group/radio';
 import i18n from 'i18next';
 import * as React from 'react';
+import { Trans } from 'react-i18next';
 
+import JobMessage from '@/components/jobs/jobMessage';
 import {
   TransientMessageProps,
   withTransientMessage,
@@ -13,11 +16,13 @@ import {
 import { JobUpdated } from '@/store/jobs/actions';
 import { Job } from '@/store/jobs/reducer';
 import { CONSTANTS, Plan } from '@/store/plans/reducer';
+import { ScratchOrg } from '@/store/scratchOrgs/reducer';
 
 type Props = {
   isOpen: boolean;
   job: Job;
   plan: Plan;
+  scratchOrg?: ScratchOrg | null;
   toggleModal: (open: boolean) => void;
   updateJob: (payload: {
     [key: string]: unknown;
@@ -124,22 +129,156 @@ class ShareModal extends React.Component<WrappedProps> {
     return null;
   }
 
+  getScratchOrgInfo() {
+    const { job, scratchOrg } = this.props;
+    if (scratchOrg && job.status === CONSTANTS.STATUS.COMPLETE) {
+      return (
+        <div
+          className="slds-text-longform
+            slds-text-align_center
+            slds-p-bottom_medium"
+        >
+          <p className="slds-text-color_success">
+            {i18n.t('Installation completed successfully.')}
+          </p>
+          <JobMessage job={job} />
+          <p>
+            <Trans i18nKey="scratchOrgInfo">
+              To view your org right away, click the “View Scratch Org” button
+              below. To view your org later, copy this link.
+              <br />
+              <strong>
+                You have also been sent an email to reset the password on your
+                new org.
+              </strong>
+            </Trans>
+          </p>
+        </div>
+      );
+    }
+    return null;
+  }
+
+  getFooter() {
+    const { job, scratchOrg } = this.props;
+    if (scratchOrg && job.status === CONSTANTS.STATUS.COMPLETE) {
+      return [
+        <Button
+          key="cancel"
+          label={i18n.t('Cancel')}
+          onClick={this.handleClose}
+        />,
+        <Button
+          key="submit"
+          label={
+            <>
+              <Icon
+                containerClassName="slds-p-right_x-small"
+                category="utility"
+                name="new_window"
+                size="x-small"
+                inverse
+              />
+              {i18n.t('View Scratch Org')}
+            </>
+          }
+          variant="brand"
+        />,
+      ];
+    }
+    return [];
+  }
+
+  getShareForm() {
+    const { job, transientMessageVisible, scratchOrg } = this.props;
+    const isScratchOrg = Boolean(
+      scratchOrg && job.status === CONSTANTS.STATUS.COMPLETE,
+    );
+
+    return (
+      <>
+        <Input
+          id="share-job-link"
+          value={window.location.href}
+          type="url"
+          readOnly
+          fixedTextRight={
+            <Button
+              label={i18n.t('Copy Link')}
+              variant="brand"
+              onClick={this.handleCopy}
+              style={{ whiteSpace: 'nowrap' }}
+            />
+          }
+          inputRef={this.storeInputRef}
+          onFocus={this.handleFocus}
+        >
+          <div className="slds-form-element__help slds-text-color_success">
+            {transientMessageVisible ? i18n.t('Copied to clipboard') : ''}
+            {/* Space added to preserve height even when empty. */}
+            &nbsp;
+          </div>
+        </Input>
+
+        {!isScratchOrg && job.user_can_edit && (
+          <div className="slds-p-top_small">
+            <RadioGroup
+              labels={{ label: i18n.t('Who can access this shared link?') }}
+              name="is_public"
+              onChange={this.handleChange}
+            >
+              <Radio
+                id="is_public-false"
+                labels={{
+                  label: i18n.t(
+                    'Only I and Salesforce staff can view this installation job.',
+                  ),
+                }}
+                value="false"
+                checked={!job.is_public}
+              />
+              <Radio
+                id="is_public-true"
+                labels={{
+                  label: i18n.t(
+                    'Anyone with the link can view this installation job.',
+                  ),
+                }}
+                value="true"
+                checked={job.is_public}
+              />
+            </RadioGroup>
+            <p className="slds-text-body_small slds-p-top_small">
+              {i18n.t(
+                'Access to view the installation job does not provide access to your Salesforce org.',
+              )}
+            </p>
+          </div>
+        )}
+      </>
+    );
+  }
+
   render() {
-    const { job, transientMessageVisible } = this.props;
+    const { scratchOrg } = this.props;
     const errorMsg = this.getErrorMessage();
+    const heading = scratchOrg
+      ? i18n.t('Access Your Scratch Org')
+      : i18n.t('Share Link to Installation Job');
     return (
       <Modal
         isOpen={this.props.isOpen}
+        size="medium"
         heading={
           errorMsg ? (
             <span className="slds-text-color_error">
               {i18n.t('Resolve Installation Error')}
             </span>
           ) : (
-            i18n.t('Share Link to Installation Job')
+            heading
           )
         }
-        size="medium"
+        footer={this.getFooter()}
         onRequestClose={this.handleClose}
       >
         <div
@@ -153,61 +292,8 @@ class ShareModal extends React.Component<WrappedProps> {
               <hr />
             </>
           ) : null}
-          <Input
-            className="slds-p-bottom_small"
-            id="share-job-link"
-            value={window.location.href}
-            type="url"
-            readOnly
-            fixedTextRight={
-              <Button
-                label={i18n.t('Copy Link')}
-                variant="brand"
-                onClick={this.handleCopy}
-                style={{ whiteSpace: 'nowrap' }}
-              />
-            }
-            inputRef={this.storeInputRef}
-            onFocus={this.handleFocus}
-          >
-            <div className="slds-form-element__help slds-text-color_success">
-              {transientMessageVisible ? i18n.t('Copied to clipboard') : ''}
-              {/* Space added to preserve height even when empty. */}
-              &nbsp;
-            </div>
-          </Input>
-
-          {job.user_can_edit ? (
-            <>
-              <RadioGroup
-                labels={{ label: i18n.t('Who can access this shared link?') }}
-                name="is_public"
-                onChange={this.handleChange}
-              >
-                <Radio
-                  id="is_public-false"
-                  label={i18n.t(
-                    'Only I and Salesforce staff can view this installation job.',
-                  )}
-                  value="false"
-                  checked={!job.is_public}
-                />
-                <Radio
-                  id="is_public-true"
-                  label={i18n.t(
-                    'Anyone with the link can view this installation job.',
-                  )}
-                  value="true"
-                  checked={job.is_public}
-                />
-              </RadioGroup>
-              <p className="slds-text-body_small slds-p-top_small">
-                {i18n.t(
-                  'Access to view the installation job does not provide access to your Salesforce org.',
-                )}
-              </p>
-            </>
-          ) : null}
+          {this.getScratchOrgInfo()}
+          {this.getShareForm()}
         </div>
       </Modal>
     );

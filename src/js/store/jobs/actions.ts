@@ -1,7 +1,10 @@
+import { push } from 'connected-react-router';
+
 import { ThunkResult } from '@/store';
 import { Job } from '@/store/jobs/reducer';
 import { StepResult } from '@/store/plans/reducer';
 import apiFetch, { addUrlParams } from '@/utils/api';
+import routes from '@/utils/routes';
 
 export type JobData = {
   plan: string;
@@ -131,6 +134,45 @@ export const startJob = (
     dispatch({ type: 'JOB_REJECTED' as const, payload: data });
     throw err;
   }
+};
+
+export const createJob = ({
+  model,
+  product_slug,
+  version_label,
+  plan_slug,
+}: {
+  model: Job;
+  product_slug: string;
+  version_label: string;
+  plan_slug: string;
+}): ThunkResult<JobStarted> => (dispatch, getState) => {
+  /* istanbul ignore else */
+  if (model && window.socket) {
+    window.socket.subscribe({
+      model: 'job',
+      id: model.id,
+    });
+  }
+  const jobStartedAction = dispatch({
+    type: 'JOB_STARTED' as const,
+    payload: model,
+  });
+  const state = getState();
+  const { pathname } = state.router.location;
+  const planUrl = routes.plan_detail(product_slug, version_label, plan_slug);
+  /* istanbul ignore else */
+  if (planUrl === pathname) {
+    // redirect to job page, if still on plan-detail page
+    const url = routes.job_detail(
+      product_slug,
+      version_label,
+      plan_slug,
+      model.id,
+    );
+    dispatch(push(url));
+  }
+  return jobStartedAction;
 };
 
 export const completeJobStep = (payload: Job): JobStepCompleted => ({
