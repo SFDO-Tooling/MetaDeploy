@@ -383,12 +383,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                   </div>
                 ) : null}
               </BodySection>
-              {!isCardLayout && (
-                <BodySection>
-                  {VersionDetail.getProductDescription(product)}
-                </BodySection>
-              )}
-              {isCardLayout && (
+              {isCardLayout ? (
                 <div
                   className="slds-text-longform
                     slds-p-around_medium
@@ -400,6 +395,10 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                     additionalPlans={additionalPlansSorted}
                   />
                 </div>
+              ) : (
+                <BodySection>
+                  {VersionDetail.getProductDescription(product)}
+                </BodySection>
               )}
             </BodyContainer>
           ) : (
