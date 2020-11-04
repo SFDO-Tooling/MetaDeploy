@@ -267,7 +267,7 @@ class MockDict(dict):
         return self["instance_url"]
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 class TestCreateScratchOrg:
     def test_create_scratch_org(self, settings, plan_factory, scratch_org_factory):
         settings.DEVHUB_USERNAME = "test@example.com"
@@ -419,7 +419,6 @@ class TestCreateScratchOrg:
                 plan=plan,
                 enqueued_at=datetime(2020, 9, 4, 12),
             )
-            stack.enter_context(patch("metadeploy.api.jobs.job_started"))
             create_scratch_org(
                 plan_id=plan.id,
                 org_name=plan.org_config_name,

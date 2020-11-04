@@ -41,10 +41,10 @@ async def push_message_about_instance(instance, message, group_name=None):
     id = str(instance.id)
     group_name = group_name or CHANNELS_GROUP_NAME.format(model=model_name, id=id)
     channel_layer = get_channel_layer()
-    message = {"type": "notify", "group": group_name, "content": message}
-    if await get_set_message_semaphore(channel_layer, message):
-        logger.info(f"Sending message {message}")
-        await channel_layer.group_send(group_name, message)
+    sent_message = {"type": "notify", "group": group_name, "content": message}
+    if await get_set_message_semaphore(channel_layer, sent_message):
+        logger.info(f"Sending message {sent_message}")
+        await channel_layer.group_send(group_name, sent_message)
 
 
 # Objects serialized via this method will have access to user/session context

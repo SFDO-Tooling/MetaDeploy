@@ -451,16 +451,11 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         return not set(required_steps) - set(s.id for s in steps)
 
     def _get_scratch_org_from_session(self):
-        scratch_org = (
-            scratch_org_id := self.context["request"].session.get(
-                "scratch_org_id", None
-            )
-        ) and (
-            scratch_org := ScratchOrg.objects.filter(
+        scratch_org_id = self.context["request"].session.get("scratch_org_id", None)
+        if scratch_org_id:
+            return ScratchOrg.objects.filter(
                 uuid=scratch_org_id, status=ScratchOrg.Status.complete
             ).first()
-        )
-        return scratch_org
 
     def _get_from_data_or_instance(self, data, name, default=None):
         value = data.get(name, getattr(self.instance, name, default))

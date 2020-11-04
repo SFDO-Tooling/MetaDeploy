@@ -4,6 +4,13 @@ from .models import ScratchOrg
 
 
 class OnlyOwnerOrSuperuser(permissions.BasePermission):
+    """
+    This limits access to only authenticated superusers,
+    the owner/creator of the object,
+    or (for scratch orgs) anonymous users who have the `uuid`
+    from the scratch org in their session.
+    """
+
     def has_object_permission(self, request, view, obj):
         if request.user.is_superuser or (
             request.user.is_authenticated and request.user == obj.user
@@ -19,6 +26,12 @@ class OnlyOwnerOrSuperuser(permissions.BasePermission):
 
 
 class OnlyUserWithOrg(permissions.BasePermission):
+    """
+    This limits access to only authenticated users,
+    or (for scratch orgs) anonymous users who have a `uuid`
+    for a valid (complete) scratch org in their session.
+    """
+
     def has_permission(self, request, view):
         if request.user.is_authenticated:
             return True
