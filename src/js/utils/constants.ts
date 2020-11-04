@@ -12,3 +12,9 @@ export const SCRATCH_ORG_STATUSES = {
   canceled: 'canceled' as const,
 };
 export type ScratchOrgStatuses = 'started' | 'complete' | 'failed' | 'canceled';
+
+export const PRODUCT_LAYOUTS = {
+  Default: 'Default' as const,
+  Card: 'Card' as const,
+};
+export type ProductLayouts = 'Default' | 'Card';

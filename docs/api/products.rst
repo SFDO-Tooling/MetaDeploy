@@ -94,7 +94,8 @@ List
          "is_allowed": true,
          "is_listed": true,
          "order_key": 0,
-         "not_allowed_instructions": null
+         "not_allowed_instructions": null,
+         "layout": "Default"
        },
        ...
      ]
@@ -184,7 +185,8 @@ Retrieve
      "is_allowed": true,
      "is_listed": true,
      "order_key": 0,
-     "not_allowed_instructions": null
+     "not_allowed_instructions": null,
+     "layout": "Default"
    }
 
 Create
