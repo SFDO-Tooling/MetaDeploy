@@ -1,3 +1,4 @@
+import i18n from 'i18next';
 import { sortBy } from 'lodash';
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
@@ -6,12 +7,13 @@ import { connect, ConnectedProps } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { Link, Redirect } from 'react-router-dom';
 
+import BackLink from '@/components/backLink';
 import BodyContainer from '@/components/bodyContainer';
 import Header from '@/components/header';
-import PlanCard from '@/components/plans/card';
 import PageHeader from '@/components/products/header';
 import ProductNotAllowed from '@/components/products/notAllowed';
 import OldVersionWarning from '@/components/products/oldVersionWarning';
+import PlanCards from '@/components/products/planCards';
 import ProductNotFound from '@/components/products/product404';
 import VersionNotFound from '@/components/products/version404';
 import { getLoadingOrNotFound, shouldFetchVersion } from '@/components/utils';
@@ -23,6 +25,7 @@ import {
   fetchProduct,
   fetchVersion,
 } from '@/store/products/actions';
+import { Product } from '@/store/products/reducer';
 import {
   selectProduct,
   selectProductSlug,
@@ -30,6 +33,7 @@ import {
   selectVersionLabelOrPlanSlug,
 } from '@/store/products/selectors';
 import { selectUserState } from '@/store/user/selectors';
+import { PRODUCT_LAYOUTS } from '@/utils/constants';
 import routes from '@/utils/routes';
 
 const selectProductDetail = (
@@ -117,6 +121,18 @@ class ProductDetail extends React.Component<ProductDetailProps> {
     return <Redirect to={routes.version_detail(product.slug, version.label)} />;
   }
 }
+
+const BodySection = ({ children }: { children?: React.ReactNode }) => (
+  <div
+    className="slds-text-longform
+      slds-p-around_medium
+      slds-size_1-of-1
+      slds-medium-size_1-of-2"
+  >
+    {children}
+  </div>
+);
+
 class VersionDetail extends React.Component<VersionDetailProps> {
   fetchProductIfMissing() {
     const { product, productSlug, doFetchProduct } = this.props;
@@ -202,6 +218,39 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     }
   }
 
+  static getProductDescription(product: Product) {
+    const isCardLayout = product.layout === PRODUCT_LAYOUTS.Card;
+    const productDescriptionHasTitle =
+      product.description?.startsWith('<h1>') ||
+      product.description?.startsWith('<h2>');
+
+    return (
+      <>
+        {!productDescriptionHasTitle && !isCardLayout && (
+          <h2 className="slds-text-heading_small">
+            {i18n.t('About')} {product.title}
+          </h2>
+        )}
+        {product.image ? (
+          <img
+            className="slds-size_full"
+            src={product.image}
+            alt={product.title}
+          />
+        ) : null}
+        {/* This description is pre-cleaned by the API */}
+        {product.description && (
+          <div
+            className="markdown"
+            dangerouslySetInnerHTML={{
+              __html: product.description,
+            }}
+          />
+        )}
+      </>
+    );
+  }
+
   render() {
     const {
       user,
@@ -251,6 +300,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
       product.most_recent_version &&
       new Date(version.created_at) >=
         new Date(product.most_recent_version.created_at);
+    const isCardLayout = product.layout === PRODUCT_LAYOUTS.Card;
 
     return (
       <DocumentTitle title={`${product.title} | ${window.SITE_NAME}`}>
@@ -267,75 +317,89 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                   )}
                 />
               ) : null}
-              <div
-                className="slds-text-longform
-      slds-p-around_medium
-      slds-size_3-of-4"
-              >
-                {product.image ? (
-                  <img
-                    className="slds-size_full"
-                    src={product.image}
-                    alt={product.title}
-                  />
-                ) : null}
-                {/* This description is pre-cleaned by the API */}
-                {product.description && (
-                  <div
-                    className="markdown"
-                    dangerouslySetInnerHTML={{
-                      __html: product.description,
-                    }}
-                  />
+              <BodySection>
+                {isCardLayout && VersionDetail.getProductDescription(product)}
+                <p>{version.description}</p>
+                {!isCardLayout && (
+                  <>
+                    {primary_plan && visiblePrimaryPlan ? (
+                      <p>
+                        <Link
+                          to={routes.plan_detail(
+                            product.slug,
+                            version.label,
+                            primary_plan.slug,
+                          )}
+                          className="slds-button
+                            slds-button_brand
+                            slds-size_full"
+                        >
+                          {primary_plan.title} - {i18n.t('View Details')}
+                        </Link>
+                      </p>
+                    ) : null}
+                    {secondary_plan && visibleSecondaryPlan ? (
+                      <p>
+                        <Link
+                          to={routes.plan_detail(
+                            product.slug,
+                            version.label,
+                            secondary_plan.slug,
+                          )}
+                          className="slds-button
+                            slds-button_outline-brand
+                            slds-size_full"
+                        >
+                          {secondary_plan.title} - {i18n.t('View Details')}
+                        </Link>
+                      </p>
+                    ) : null}
+                  </>
                 )}
-              </div>
-              <div className="slds-size_1-of-4"></div>
-              {primary_plan && visiblePrimaryPlan ? (
-                <div className=" slds-text-longform slds-medium-size_1-of-3 slds-small-size_1-of-2 slds-size_1-of-1 slds-p-around_small">
-                  <PlanCard
-                    title={primary_plan.title}
-                    details={primary_plan.preflight_message}
-                    detailUrl={routes.plan_detail(
-                      product.slug,
-                      version.label,
-                      primary_plan.slug,
-                    )}
+                <BackLink
+                  label={i18n.t('Select a different product')}
+                  url={routes.product_list()}
+                />
+                {!isCardLayout && additionalPlansSorted.length ? (
+                  <div className="slds-p-top_x-large">
+                    {visiblePrimaryPlan || visibleSecondaryPlan ? (
+                      <h2 className="slds-text-heading_small">
+                        {i18n.t('Additional Plans')}
+                      </h2>
+                    ) : null}
+                    {additionalPlansSorted.map((plan) => (
+                      <p key={plan.id}>
+                        <Link
+                          to={routes.plan_detail(
+                            product.slug,
+                            version.label,
+                            plan.slug,
+                          )}
+                        >
+                          {plan.title}
+                        </Link>
+                      </p>
+                    ))}
+                  </div>
+                ) : null}
+              </BodySection>
+              {isCardLayout ? (
+                <div
+                  className="slds-text-longform
+                    slds-p-around_medium
+                    slds-size_1-of-1"
+                >
+                  <PlanCards
+                    product={product}
+                    version={version}
+                    additionalPlans={additionalPlansSorted}
                   />
                 </div>
-              ) : null}
-              {secondary_plan && visibleSecondaryPlan ? (
-                <div className=" slds-text-longform slds-medium-size_1-of-3 slds-small-size_1-of-2 slds-size_1-of-1 slds-p-around_small">
-                  <PlanCard
-                    title={secondary_plan.title}
-                    details={secondary_plan.preflight_message}
-                    detailUrl={routes.plan_detail(
-                      product.slug,
-                      version.label,
-                      secondary_plan.slug,
-                    )}
-                  />
-                </div>
-              ) : null}
-              {additionalPlansSorted.length ? (
-                <>
-                  {additionalPlansSorted.map((plan) => (
-                    <div
-                      key={plan.id}
-                      className="slds-text-longform slds-medium-size_1-of-3 slds-small-size_1-of-2 slds-size_1-of-1 slds-p-around_small"
-                    >
-                      <PlanCard
-                        title={plan.title}
-                        details={plan.preflight_message}
-                        detailUrl={routes.plan_detail(
-                          product.slug,
-                          version.label,
-                          plan.slug,
-                        )}
-                      />
-                    </div>
-                  ))}
-                </>
-              ) : null}
+              ) : (
+                <BodySection>
+                  {VersionDetail.getProductDescription(product)}
+                </BodySection>
+              )}
             </BodyContainer>
           ) : (
             <ProductNotAllowed
