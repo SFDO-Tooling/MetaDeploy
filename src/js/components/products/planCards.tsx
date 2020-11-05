@@ -36,7 +36,7 @@ const PlanCard = ({
         to={routes.plan_detail(productSlug, versionLabel, plan.slug)}
         className="slds-button slds-button_brand"
       >
-        {i18n.t('View Plan Details')}
+        {i18n.t('View Details')}
       </Link>
     </Card>
   </div>

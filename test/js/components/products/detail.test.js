@@ -671,7 +671,7 @@ describe('<VersionDetail />', () => {
       expect(getByText('My Plan')).toBeVisible();
       expect(getByText('My Secondary Plan')).toBeVisible();
       expect(getByText('My Additional Plan')).toBeVisible();
-      expect(getAllByText('View Plan Details')).toHaveLength(4);
+      expect(getAllByText('View Details')).toHaveLength(4);
       expect(getByText('Preflight text…')).toBeVisible();
     });
 
@@ -702,7 +702,7 @@ describe('<VersionDetail />', () => {
       expect(queryByText('My Plan')).toBeNull();
       expect(queryByText('My Secondary Plan')).toBeNull();
       expect(getByText('My Additional Plan')).toBeVisible();
-      expect(getAllByText('View Plan Details')).toHaveLength(2);
+      expect(getAllByText('View Details')).toHaveLength(2);
     });
   });
 });
