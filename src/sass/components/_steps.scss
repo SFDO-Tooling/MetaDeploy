@@ -44,6 +44,10 @@ $step-ending-columns-min: $step-type-min + $step-badge-min + $step-install-min;
     }
   }
 
+  thead {
+    background-color: $color-gray-2;
+  }
+
   .slds-accordion__section {
     padding: 0;
   }

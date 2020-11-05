@@ -13,6 +13,7 @@ import Header from '@/components/header';
 import PageHeader from '@/components/products/header';
 import ProductNotAllowed from '@/components/products/notAllowed';
 import OldVersionWarning from '@/components/products/oldVersionWarning';
+import PlanCards from '@/components/products/planCards';
 import ProductNotFound from '@/components/products/product404';
 import VersionNotFound from '@/components/products/version404';
 import { getLoadingOrNotFound, shouldFetchVersion } from '@/components/utils';
@@ -24,6 +25,7 @@ import {
   fetchProduct,
   fetchVersion,
 } from '@/store/products/actions';
+import { Product } from '@/store/products/reducer';
 import {
   selectProduct,
   selectProductSlug,
@@ -31,6 +33,7 @@ import {
   selectVersionLabelOrPlanSlug,
 } from '@/store/products/selectors';
 import { selectUserState } from '@/store/user/selectors';
+import { PRODUCT_LAYOUTS } from '@/utils/constants';
 import routes from '@/utils/routes';
 
 const selectProductDetail = (
@@ -215,6 +218,39 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     }
   }
 
+  static getProductDescription(product: Product) {
+    const isCardLayout = product.layout === PRODUCT_LAYOUTS.Card;
+    const productDescriptionHasTitle =
+      product.description?.startsWith('<h1>') ||
+      product.description?.startsWith('<h2>');
+
+    return (
+      <>
+        {!productDescriptionHasTitle && !isCardLayout && (
+          <h2 className="slds-text-heading_small">
+            {i18n.t('About')} {product.title}
+          </h2>
+        )}
+        {product.image ? (
+          <img
+            className="slds-size_full"
+            src={product.image}
+            alt={product.title}
+          />
+        ) : null}
+        {/* This description is pre-cleaned by the API */}
+        {product.description && (
+          <div
+            className="markdown"
+            dangerouslySetInnerHTML={{
+              __html: product.description,
+            }}
+          />
+        )}
+      </>
+    );
+  }
+
   render() {
     const {
       user,
@@ -260,13 +296,11 @@ class VersionDetail extends React.Component<VersionDetailProps> {
       primary_plan?.is_listed && primary_plan?.is_allowed;
     const visibleSecondaryPlan =
       secondary_plan?.is_listed && secondary_plan?.is_allowed;
-    const productDescriptionHasTitle =
-      product.description?.startsWith('<h1>') ||
-      product.description?.startsWith('<h2>');
     const isMostRecent =
       product.most_recent_version &&
       new Date(version.created_at) >=
         new Date(product.most_recent_version.created_at);
+    const isCardLayout = product.layout === PRODUCT_LAYOUTS.Card;
 
     return (
       <DocumentTitle title={`${product.title} | ${window.SITE_NAME}`}>
@@ -284,42 +318,49 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                 />
               ) : null}
               <BodySection>
+                {isCardLayout && VersionDetail.getProductDescription(product)}
                 <p>{version.description}</p>
-                {primary_plan && visiblePrimaryPlan ? (
-                  <p>
-                    <Link
-                      to={routes.plan_detail(
-                        product.slug,
-                        version.label,
-                        primary_plan.slug,
-                      )}
-                      className="slds-button slds-button_brand slds-size_full"
-                    >
-                      {primary_plan.title} - {i18n.t('View Details')}
-                    </Link>
-                  </p>
-                ) : null}
-                {secondary_plan && visibleSecondaryPlan ? (
-                  <p>
-                    <Link
-                      to={routes.plan_detail(
-                        product.slug,
-                        version.label,
-                        secondary_plan.slug,
-                      )}
-                      className="slds-button
-                        slds-button_outline-brand
-                        slds-size_full"
-                    >
-                      {secondary_plan.title} - {i18n.t('View Details')}
-                    </Link>
-                  </p>
-                ) : null}
+                {!isCardLayout && (
+                  <>
+                    {primary_plan && visiblePrimaryPlan ? (
+                      <p>
+                        <Link
+                          to={routes.plan_detail(
+                            product.slug,
+                            version.label,
+                            primary_plan.slug,
+                          )}
+                          className="slds-button
+                            slds-button_brand
+                            slds-size_full"
+                        >
+                          {primary_plan.title} - {i18n.t('View Details')}
+                        </Link>
+                      </p>
+                    ) : null}
+                    {secondary_plan && visibleSecondaryPlan ? (
+                      <p>
+                        <Link
+                          to={routes.plan_detail(
+                            product.slug,
+                            version.label,
+                            secondary_plan.slug,
+                          )}
+                          className="slds-button
+                            slds-button_outline-brand
+                            slds-size_full"
+                        >
+                          {secondary_plan.title} - {i18n.t('View Details')}
+                        </Link>
+                      </p>
+                    ) : null}
+                  </>
+                )}
                 <BackLink
                   label={i18n.t('Select a different product')}
                   url={routes.product_list()}
                 />
-                {additionalPlansSorted.length ? (
+                {!isCardLayout && additionalPlansSorted.length ? (
                   <div className="slds-p-top_x-large">
                     {visiblePrimaryPlan || visibleSecondaryPlan ? (
                       <h2 className="slds-text-heading_small">
@@ -342,29 +383,22 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                   </div>
                 ) : null}
               </BodySection>
-              <BodySection>
-                {!productDescriptionHasTitle && (
-                  <h2 className="slds-text-heading_small">
-                    {i18n.t('About')} {product.title}
-                  </h2>
-                )}
-                {product.image ? (
-                  <img
-                    className="slds-size_full"
-                    src={product.image}
-                    alt={product.title}
+              {isCardLayout ? (
+                <div
+                  className="slds-text-longform
+                    slds-size_1-of-1"
+                >
+                  <PlanCards
+                    product={product}
+                    version={version}
+                    additionalPlans={additionalPlansSorted}
                   />
-                ) : null}
-                {/* This description is pre-cleaned by the API */}
-                {product.description && (
-                  <div
-                    className="markdown"
-                    dangerouslySetInnerHTML={{
-                      __html: product.description,
-                    }}
-                  />
-                )}
-              </BodySection>
+                </div>
+              ) : (
+                <BodySection>
+                  {VersionDetail.getProductDescription(product)}
+                </BodySection>
+              )}
             </BodyContainer>
           ) : (
             <ProductNotAllowed

@@ -665,6 +665,7 @@ class TestProductCategorySerializer:
                 "is_listed": True,
                 "order_key": 0,
                 "not_allowed_instructions": None,
+                "layout": "Default",
             }
         ]
         assert results == expected
