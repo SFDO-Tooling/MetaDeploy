@@ -45,13 +45,10 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         if "serializer" in event and "instance" in event and "inner_type" in event:
             instance = self.get_instance(**event["instance"])
             serializer = self.get_serializer(event["serializer"])
-            data = serializer(
+            payload = serializer(
                 instance=instance,
                 context=user_context(self.scope["user"], self.scope["session"]),
             ).data
-            payload = data
-            if "extra_payload" in event and event["extra_payload"]:
-                payload = {**event["extra_payload"], "model": data}
             message = {
                 "payload": payload,
                 "type": event["inner_type"],

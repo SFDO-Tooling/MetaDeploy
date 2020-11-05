@@ -28,7 +28,7 @@ from .models import (
     Version,
 )
 from .paginators import ProductPaginator
-from .permissions import OnlyOwnerOrSuperuser, OnlyUserWithOrg
+from .permissions import HasOrgOrReadOnly
 from .serializers import (
     FullUserSerializer,
     JobSerializer,
@@ -42,6 +42,10 @@ from .serializers import (
 )
 
 User = get_user_model()
+
+
+def combine_filters(filters=[]):
+    return reduce(lambda a, b: a | b, (f for f in filters if f))
 
 
 class InvalidFields(Exception):
@@ -119,14 +123,7 @@ class JobViewSet(
         "plan__version__label",
         "plan__version__product__productslug__slug",
     )
-
-    def get_permissions(self):
-        permission_classes = [AllowAny]
-        if self.action in ["update", "partial_update", "destroy"]:
-            permission_classes = [OnlyOwnerOrSuperuser]
-        elif self.action == "create":
-            permission_classes = [OnlyUserWithOrg]
-        return [permission() for permission in permission_classes]
+    permission_classes = (HasOrgOrReadOnly,)
 
     def get_queryset(self):
         user = self.request.user
@@ -141,12 +138,13 @@ class JobViewSet(
                 uuid=scratch_org_id, status=ScratchOrg.Status.complete
             ).first()
 
-        filters = [
-            Q(is_public=True),
-            Q(user=user) if user.is_authenticated else None,
-            Q(org_id=scratch_org.org_id) if scratch_org else None,
-        ]
-        filters = reduce(lambda a, b: a | b, (f for f in filters if f))
+        filters = combine_filters(
+            [
+                Q(is_public=True),
+                Q(user=user) if user.is_authenticated else None,
+                Q(org_id=scratch_org.org_id) if scratch_org else None,
+            ]
+        )
 
         return Job.objects.filter(filters)
 

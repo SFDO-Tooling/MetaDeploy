@@ -48,9 +48,7 @@ async def push_message_about_instance(instance, message, group_name=None):
 
 
 # Objects serialized via this method will have access to user/session context
-async def push_serializable(
-    instance, serializer, type_, group_name=None, extra_payload=None
-):
+async def push_serializable(instance, serializer, type_, group_name=None):
     model_name = instance._meta.model_name
     id = str(instance.id)
     group_name = group_name or CHANNELS_GROUP_NAME.format(model=model_name, id=id)
@@ -62,7 +60,6 @@ async def push_serializable(
         "instance": {"model": model_name, "id": id},
         "serializer": serializer_name,
         "inner_type": type_,
-        "extra_payload": extra_payload,
     }
     if await get_set_message_semaphore(channel_layer, message):
         logger.info(f"Sending message {message}")
@@ -77,33 +74,41 @@ async def user_token_expired(user):
 async def preflight_completed(preflight):
     from .serializers import PreflightResultSerializer
 
-    payload = PreflightResultSerializer(instance=preflight).data
-    message = {"type": "PREFLIGHT_COMPLETED", "payload": payload}
-    await push_message_about_instance(preflight, message)
+    await push_serializable(
+        preflight,
+        PreflightResultSerializer,
+        "PREFLIGHT_COMPLETED",
+    )
 
 
 async def preflight_failed(preflight):
     from .serializers import PreflightResultSerializer
 
-    payload = PreflightResultSerializer(instance=preflight).data
-    message = {"type": "PREFLIGHT_FAILED", "payload": payload}
-    await push_message_about_instance(preflight, message)
+    await push_serializable(
+        preflight,
+        PreflightResultSerializer,
+        "PREFLIGHT_FAILED",
+    )
 
 
 async def preflight_canceled(preflight):
     from .serializers import PreflightResultSerializer
 
-    payload = PreflightResultSerializer(instance=preflight).data
-    message = {"type": "PREFLIGHT_CANCELED", "payload": payload}
-    await push_message_about_instance(preflight, message)
+    await push_serializable(
+        preflight,
+        PreflightResultSerializer,
+        "PREFLIGHT_CANCELED",
+    )
 
 
 async def preflight_invalidated(preflight):
     from .serializers import PreflightResultSerializer
 
-    payload = PreflightResultSerializer(instance=preflight).data
-    message = {"type": "PREFLIGHT_INVALIDATED", "payload": payload}
-    await push_message_about_instance(preflight, message)
+    await push_serializable(
+        preflight,
+        PreflightResultSerializer,
+        "PREFLIGHT_INVALIDATED",
+    )
 
 
 async def report_error(user):
@@ -204,29 +209,19 @@ async def notify_org_finished(scratch_org, error=None):
 async def preflight_started(scratch_org, preflight):
     from .serializers import PreflightResultSerializer
 
-    payload = PreflightResultSerializer(instance=preflight).data
-    message = {"type": "PREFLIGHT_STARTED", "payload": payload}
     group_name = CHANNELS_GROUP_NAME.format(model="scratchorg", id=scratch_org.id)
-    await push_message_about_instance(preflight, message, group_name=group_name)
+    await push_serializable(
+        preflight, PreflightResultSerializer, "PREFLIGHT_STARTED", group_name=group_name
+    )
 
 
 async def job_started(scratch_org, job):
     from .serializers import JobSerializer
 
-    plan = job.plan
-    version = plan.version
-    product = version.product
-
-    extra_payload = {
-        "product_slug": product.slug,
-        "version_label": version.label,
-        "plan_slug": plan.slug,
-    }
     group_name = CHANNELS_GROUP_NAME.format(model="scratchorg", id=scratch_org.id)
     await push_serializable(
         job,
         JobSerializer,
         "JOB_STARTED",
         group_name=group_name,
-        extra_payload=extra_payload,
     )

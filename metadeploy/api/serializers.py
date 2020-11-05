@@ -331,6 +331,9 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
     organization_url = serializers.SerializerMethodField()
     org_id = serializers.SerializerMethodField()
     is_production_org = serializers.SerializerMethodField()
+    product_slug = serializers.SerializerMethodField()
+    version_label = serializers.SerializerMethodField()
+    plan_slug = serializers.SerializerMethodField()
 
     plan = serializers.PrimaryKeyRelatedField(
         queryset=Plan.objects.all(), pk_field=serializers.CharField()
@@ -365,6 +368,9 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             "org_name",
             "org_type",
             "is_production_org",
+            "product_slug",
+            "version_label",
+            "plan_slug",
             "error_count",
             "warning_count",
             "is_public",
@@ -429,6 +435,15 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
     def get_is_production_org(self, obj):
         return obj.full_org_type == ORG_TYPES.Production
 
+    def get_product_slug(self, obj):
+        return obj.plan.version.product.slug
+
+    def get_version_label(self, obj):
+        return obj.plan.version.label
+
+    def get_plan_slug(self, obj):
+        return obj.plan.slug
+
     @staticmethod
     def _has_valid_preflight(most_recent_preflight, plan):
         if not plan.requires_preflight:
@@ -489,9 +504,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
 
     def validate(self, data):
         user = self._get_from_data_or_instance(data, "user", default=None)
-        org_id = self._get_from_data_or_instance(
-            data, "org_id", default=getattr(user, "org_id", None)
-        )
+        org_id = getattr(self.instance, "org_id", getattr(user, "org_id", None))
         plan = self._get_from_data_or_instance(data, "plan")
         steps = self._get_from_data_or_instance(data, "steps", default=[])
 

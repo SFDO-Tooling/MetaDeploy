@@ -73,17 +73,13 @@ interface PreflightEvent {
   payload: Preflight;
 }
 interface JobEvent {
-  type: 'TASK_COMPLETED' | 'JOB_COMPLETED' | 'JOB_FAILED' | 'JOB_CANCELED';
+  type:
+    | 'TASK_COMPLETED'
+    | 'JOB_COMPLETED'
+    | 'JOB_FAILED'
+    | 'JOB_CANCELED'
+    | 'JOB_STARTED';
   payload: Job;
-}
-interface JobStartedEvent {
-  type: 'JOB_STARTED';
-  payload: {
-    model: Job;
-    product_slug: string;
-    version_label: string;
-    plan_slug: string;
-  };
 }
 interface OrgEvent {
   type: 'ORG_CHANGED';
@@ -109,8 +105,7 @@ type ModelEvent =
   | JobEvent
   | OrgEvent
   | ScratchOrgCreatedEvent
-  | ScratchOrgErrorEvent
-  | JobStartedEvent;
+  | ScratchOrgErrorEvent;
 type EventType = SubscriptionEvent | ErrorEvent | ModelEvent;
 
 type Action =
