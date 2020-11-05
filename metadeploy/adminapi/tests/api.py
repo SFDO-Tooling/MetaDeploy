@@ -34,6 +34,7 @@ class TestProductViewSet:
                     "title": "Sample Product 0",
                     "url": f"{url}/products/{product.id}",
                     "visible_to": None,
+                    "layout": "Default",
                 }
             ],
             "links": {"next": None, "previous": None},

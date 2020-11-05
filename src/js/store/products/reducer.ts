@@ -1,5 +1,6 @@
 import { Plan } from '@/store/plans/reducer';
 import { ProductsAction } from '@/store/products/actions';
+import { ProductLayouts } from '@/utils/constants';
 
 export type Version = {
   id: string;
@@ -39,6 +40,7 @@ export type Product = {
   is_allowed: boolean;
   not_allowed_instructions: string | null;
   click_through_agreement: string | null;
+  layout: ProductLayouts;
 };
 export type Category = {
   id: number;
