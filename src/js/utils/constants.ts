@@ -12,3 +12,5 @@ export const SCRATCH_ORG_STATUSES = {
   canceled: 'canceled' as const,
 };
 export type ScratchOrgStatuses = 'started' | 'complete' | 'failed' | 'canceled';
+
+export const SCRATCH_ORG_QS = 'scratch_org_id';

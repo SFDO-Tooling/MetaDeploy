@@ -32,6 +32,8 @@ import { fetchOrgJobs } from '@/store/org/actions';
 import { fetchProducts } from '@/store/products/actions';
 import { login, refetchAllData } from '@/store/user/actions';
 import { User } from '@/store/user/reducer';
+import { getUrlParam, removeUrlParam } from '@/utils/api';
+import { SCRATCH_ORG_QS } from '@/utils/constants';
 import { log, logError } from '@/utils/logging';
 import { routePatterns } from '@/utils/routes';
 import { createSocket } from '@/utils/websockets';
@@ -92,6 +94,12 @@ init_i18n((i18nError?: string) => {
   }
   const el = document.getElementById('app');
   if (el) {
+    // Remove scratch org UUID from URL
+    const scratchOrgUUID = getUrlParam(SCRATCH_ORG_QS);
+    if (scratchOrgUUID) {
+      history.push({ search: removeUrlParam(SCRATCH_ORG_QS) });
+    }
+
     // Create store
     const appStore = createStore(
       createRootReducer(history),
