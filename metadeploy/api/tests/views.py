@@ -57,6 +57,9 @@ class TestJobViewset:
             "message": "",
             "error_message": "",
             "edited_at": format_timestamp(job.edited_at),
+            "product_slug": str(job.plan.version.product.slug),
+            "version_label": str(job.plan.version.label),
+            "plan_slug": str(job.plan.slug),
         }
 
     def test_job__your_own(self, client, job_factory):
@@ -88,6 +91,9 @@ class TestJobViewset:
             "message": "",
             "error_message": "",
             "edited_at": format_timestamp(job.edited_at),
+            "product_slug": str(job.plan.version.product.slug),
+            "version_label": str(job.plan.version.label),
+            "plan_slug": str(job.plan.slug),
         }
 
     def test_job__is_public(self, client, job_factory):
@@ -119,6 +125,9 @@ class TestJobViewset:
             "message": "",
             "error_message": "",
             "edited_at": format_timestamp(job.edited_at),
+            "product_slug": str(job.plan.version.product.slug),
+            "version_label": str(job.plan.version.label),
+            "plan_slug": str(job.plan.slug),
         }
 
     def test_job__is_public_anon(self, anon_client, job_factory):
@@ -151,6 +160,9 @@ class TestJobViewset:
             "message": "",
             "error_message": "",
             "edited_at": format_timestamp(job.edited_at),
+            "product_slug": str(job.plan.version.product.slug),
+            "version_label": str(job.plan.version.label),
+            "plan_slug": str(job.plan.slug),
         }
 
     def test_create_job(self, client, plan_factory, preflight_result_factory):
@@ -226,6 +238,9 @@ class TestJobViewset:
             "message": "",
             "error_message": "",
             "edited_at": format_timestamp(job.edited_at),
+            "product_slug": str(job.plan.version.product.slug),
+            "version_label": str(job.plan.version.label),
+            "plan_slug": str(job.plan.slug),
         }
 
 

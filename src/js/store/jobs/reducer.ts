@@ -18,6 +18,9 @@ export type Job = {
   org_name: string | null;
   org_type: string | null;
   is_production_org: boolean;
+  product_slug: string;
+  version_label: string;
+  plan_slug: string;
   organization_url: string | null;
   error_count: number;
   warning_count: number;

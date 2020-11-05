@@ -64,6 +64,27 @@ async def test_push_notification_consumer__subscribe_scratch_org(scratch_org_fac
 
 @pytest.mark.django_db
 @pytest.mark.asyncio
+async def test_push_notification_consumer__subscribe_scratch_org_staff(
+    user_factory, scratch_org_factory
+):
+    user = await generate_model(user_factory, is_staff=True)
+    scratch_org = await generate_model(scratch_org_factory, enqueued_at=timezone.now())
+
+    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator.scope["user"] = user
+    communicator.scope["session"] = Session()
+    connected, _ = await communicator.connect()
+    assert connected
+
+    await communicator.send_json_to({"model": "scratchorg", "id": str(scratch_org.id)})
+    response = await communicator.receive_json_from()
+    assert "ok" in response
+
+    await communicator.disconnect()
+
+
+@pytest.mark.django_db
+@pytest.mark.asyncio
 async def test_push_notification_consumer__scratch_org_job_started(
     scratch_org_factory, job_factory
 ):
@@ -155,6 +176,44 @@ async def test_push_notification_consumer__subscribe_preflight(
             instance=preflight, context=user_context(user, session)
         ).data,
     }
+
+    await communicator.disconnect()
+
+
+@pytest.mark.django_db
+@pytest.mark.asyncio
+async def test_push_notification_consumer__subscribe_preflight_scratch_org(
+    scratch_org_factory, preflight_result_factory, plan_factory
+):
+    org_id = "00Dxxxxxxxxxxxxxxx"
+    uuid = str(uuid4())
+    plan = await generate_model(plan_factory)
+    await generate_model(
+        scratch_org_factory,
+        uuid=uuid,
+        status=ScratchOrg.Status.complete,
+        enqueued_at=timezone.now(),
+        org_id=org_id,
+    )
+    preflight = await generate_model(
+        preflight_result_factory,
+        user=None,
+        status=PreflightResult.Status.complete,
+        plan=plan,
+        org_id=org_id,
+    )
+
+    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator.scope["user"] = AnonymousUser()
+    communicator.scope["session"] = Session(scratch_org_id=uuid)
+    connected, _ = await communicator.connect()
+    assert connected
+
+    await communicator.send_json_to(
+        {"model": "preflightresult", "id": str(preflight.id)}
+    )
+    response = await communicator.receive_json_from()
+    assert "ok" in response
 
     await communicator.disconnect()
 

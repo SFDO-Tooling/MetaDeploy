@@ -205,9 +205,6 @@ describe('createJob', () => {
         id: 'job-1',
         plan: 'plan-1',
         steps: ['step-1'],
-      };
-      const data = {
-        model: job,
         product_slug: 'product-1',
         version_label: 'version-1',
         plan_slug: 'plan-1',
@@ -222,7 +219,7 @@ describe('createJob', () => {
       };
       const url = routes.job_detail('product-1', 'version-1', 'plan-1', job.id);
 
-      store.dispatch(actions.createJob(data));
+      store.dispatch(actions.createJob(job));
 
       expect(store.getActions()).toEqual([started, { type: 'TEST' }]);
       expect(window.socket.subscribe).toHaveBeenCalledWith(expected);

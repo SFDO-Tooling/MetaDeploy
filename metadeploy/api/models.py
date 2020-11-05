@@ -663,6 +663,8 @@ class Job(HashIdMixin, models.Model):
     def subscribable_by(self, user, session):
         # Restrict this to public Jobs, staff users, Job owners, or users who have a
         # valid scratch_org `uuid` in their session (matching this Job):
+        if self.is_public or user.is_staff or user == self.user:
+            return True
         scratch_org_id = session.get("scratch_org_id", None)
         scratch_org = (
             scratch_org_id
@@ -670,10 +672,7 @@ class Job(HashIdMixin, models.Model):
                 uuid=scratch_org_id, status=ScratchOrg.Status.complete
             ).first()
         )
-        valid_session_uuid = scratch_org and scratch_org.org_id == self.org_id
-        return (
-            self.is_public or user.is_staff or user == self.user or valid_session_uuid
-        )
+        return scratch_org and scratch_org.org_id == self.org_id
 
     def skip_steps(self):
         return [
@@ -790,6 +789,8 @@ class PreflightResult(models.Model):
     def subscribable_by(self, user, session):
         # Restrict this to staff users, Preflight owners and users who have a valid
         # scratch_org `uuid` in their session (matching this Preflight):
+        if user.is_staff or self.user == user:
+            return True
         scratch_org_id = session.get("scratch_org_id", None)
         scratch_org = (
             scratch_org_id
@@ -797,8 +798,7 @@ class PreflightResult(models.Model):
                 uuid=scratch_org_id, status=ScratchOrg.Status.complete
             ).first()
         )
-        valid_session_uuid = scratch_org and scratch_org.org_id == self.org_id
-        return user.is_staff or self.user == user or valid_session_uuid
+        return scratch_org and scratch_org.org_id == self.org_id
 
     def has_any_errors(self):
         return any(
@@ -918,8 +918,10 @@ class ScratchOrg(HashIdMixin, models.Model):
     def subscribable_by(self, user, session):
         # Restrict this to staff users or users who have a valid scratch_org `uuid` in
         # their session for this org:
+        if user.is_staff:
+            return True
         scratch_org_id = session.get("scratch_org_id", None)
-        return user.is_staff or scratch_org_id and scratch_org_id == str(self.uuid)
+        return scratch_org_id and scratch_org_id == str(self.uuid)
 
     def fail(self, error):
         self.status = ScratchOrg.Status.failed
