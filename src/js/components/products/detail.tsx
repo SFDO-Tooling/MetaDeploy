@@ -386,7 +386,6 @@ class VersionDetail extends React.Component<VersionDetailProps> {
               {isCardLayout ? (
                 <div
                   className="slds-text-longform
-                    slds-p-around_medium
                     slds-size_1-of-1"
                 >
                   <PlanCards

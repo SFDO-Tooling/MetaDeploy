@@ -17,7 +17,7 @@ const PlanCard = ({
   plan: Plan;
 }) => (
   <div
-    className="slds-p-around_small
+    className="slds-p-around_medium
       slds-size_1-of-1
       slds-medium-size_1-of-2
       slds-large-size_1-of-3"
