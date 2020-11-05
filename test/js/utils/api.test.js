@@ -110,6 +110,14 @@ describe('addUrlParams', () => {
 
     return expect(actual).toBe(expected);
   });
+
+  test('can include origin', () => {
+    const baseUrl = '/foobar?this=that';
+    const expected = `${window.location.origin}${baseUrl}&this=other`;
+    const actual = addUrlParams(baseUrl, { this: 'other' }, true);
+
+    return expect(actual).toBe(expected);
+  });
 });
 
 describe('getUrlParam', () => {

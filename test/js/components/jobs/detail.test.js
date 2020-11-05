@@ -107,6 +107,10 @@ const defaultState = {
       is_production_org: true,
       message: 'Congrats!',
       error_count: 0,
+      user_can_edit: true,
+      product_slug: 'product-1',
+      version_label: '1.0.0',
+      plan_slug: 'my-plan',
     },
   },
   user: null,
@@ -119,6 +123,7 @@ const scratchOrg = {
   plan: 'plan-1',
   org_id: '0x-org-id',
   status: 'complete',
+  uuid: 'org-uuid',
 };
 
 const scratchOrgJob = {
@@ -426,7 +431,7 @@ describe('<JobDetail />', () => {
             'plan-1': scratchOrg,
           },
         };
-        const { getByText, queryByText, rerender } = setup({
+        const { baseElement, getByText, queryByText, rerender } = setup({
           initialState: state,
         });
 
@@ -442,8 +447,14 @@ describe('<JobDetail />', () => {
           rerenderFn: rerender,
           customStore: false,
         });
+        const input = baseElement.querySelector('#share-job-link');
+        const url = routes.job_detail('product-1', '1.0.0', 'my-plan', 'job-1');
 
         expect(getByText('Access Your Scratch Org')).toBeVisible();
+        expect(input).toBeVisible();
+        expect(input.value).toEqual(
+          `${window.location.origin}${url}?scratch_org_id=${scratchOrg.uuid}`,
+        );
       });
     });
   });

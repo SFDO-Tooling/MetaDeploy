@@ -17,6 +17,8 @@ import { JobUpdated } from '@/store/jobs/actions';
 import { Job } from '@/store/jobs/reducer';
 import { CONSTANTS, Plan } from '@/store/plans/reducer';
 import { ScratchOrg } from '@/store/scratchOrgs/reducer';
+import { addUrlParams } from '@/utils/api';
+import routes from '@/utils/routes';
 
 type Props = {
   isOpen: boolean;
@@ -142,17 +144,19 @@ class ShareModal extends React.Component<WrappedProps> {
             {i18n.t('Installation completed successfully.')}
           </p>
           <JobMessage job={job} />
-          <p>
-            <Trans i18nKey="scratchOrgInfo">
-              To view your org right away, click the “View Scratch Org” button
-              below. To view your org later, copy this link.
-              <br />
-              <strong>
-                You have also been sent an email to reset the password on your
-                new org.
-              </strong>
-            </Trans>
-          </p>
+          {job.user_can_edit && (
+            <p>
+              <Trans i18nKey="scratchOrgInfo">
+                To view your org right away, click the “View Scratch Org” button
+                below. To view your org later, copy this link.
+                <br />
+                <strong>
+                  You have also been sent an email to reset the password on your
+                  new org.
+                </strong>
+              </Trans>
+            </p>
+          )}
         </div>
       );
     }
@@ -161,7 +165,11 @@ class ShareModal extends React.Component<WrappedProps> {
 
   getFooter() {
     const { job, scratchOrg } = this.props;
-    if (scratchOrg && job.status === CONSTANTS.STATUS.COMPLETE) {
+    if (
+      scratchOrg &&
+      job.status === CONSTANTS.STATUS.COMPLETE &&
+      job.user_can_edit
+    ) {
       return [
         <Button
           key="cancel"
@@ -186,20 +194,37 @@ class ShareModal extends React.Component<WrappedProps> {
         />,
       ];
     }
-    return [];
+    return null;
   }
 
   getShareForm() {
     const { job, transientMessageVisible, scratchOrg } = this.props;
-    const isScratchOrg = Boolean(
+    const isCompleteOnScratchOrg = Boolean(
       scratchOrg && job.status === CONSTANTS.STATUS.COMPLETE,
+    );
+    const { product_slug, version_label, plan_slug } = job;
+    const url = routes.job_detail(
+      product_slug,
+      version_label,
+      plan_slug,
+      job.id,
     );
 
     return (
       <>
         <Input
           id="share-job-link"
-          value={window.location.href}
+          value={
+            scratchOrg && isCompleteOnScratchOrg && job.user_can_edit
+              ? addUrlParams(
+                  url,
+                  {
+                    scratch_org_id: scratchOrg.uuid,
+                  },
+                  true,
+                )
+              : `${window.location.origin}${url}`
+          }
           type="url"
           readOnly
           fixedTextRight={
@@ -220,7 +245,7 @@ class ShareModal extends React.Component<WrappedProps> {
           </div>
         </Input>
 
-        {!isScratchOrg && job.user_can_edit && (
+        {!isCompleteOnScratchOrg && job.user_can_edit && (
           <div className="slds-p-top_small">
             <RadioGroup
               labels={{ label: i18n.t('Who can access this shared link?') }}
