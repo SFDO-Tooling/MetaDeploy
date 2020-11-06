@@ -1,3 +1,4 @@
+from contextlib import ExitStack
 from datetime import datetime
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
@@ -826,3 +827,34 @@ class TestPlanView:
             )
             assert response.status_code == 202
             assert create_scratch_org_job.delay.called
+
+
+@pytest.mark.django_db
+class TestScratchOrgView:
+    def test_redirect__good(self, anon_client, scratch_org_factory):
+        with ExitStack() as stack:
+            uuid = str(uuid4())
+            scratch_org = scratch_org_factory(
+                status=ScratchOrg.Status.complete,
+                uuid=uuid,
+            )
+            session = anon_client.session
+            session["scratch_org_id"] = uuid
+            session.save()
+
+            get_login_url = stack.enter_context(
+                patch("metadeploy.api.models.ScratchOrg.get_login_url")
+            )
+            get_login_url.return_value = "https://example.com"
+            url = reverse("scratch-org-redirect", kwargs={"pk": str(scratch_org.id)})
+            response = anon_client.get(url)
+
+            assert response.status_code == 302
+
+    def test_redirect__bad(self, anon_client, scratch_org_factory):
+        scratch_org = scratch_org_factory()
+
+        url = reverse("scratch-org-redirect", kwargs={"pk": str(scratch_org.id)})
+        response = anon_client.get(url)
+
+        assert response.status_code == 404
