@@ -51,6 +51,7 @@ STEP_NUM = r"^[\d\./]+$"
 WorkableModel = Union["Job", "PreflightResult"]
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
 SUPPORTED_ORG_TYPES = Choices("Persistent", "Scratch", "Both")
+PRODUCT_LAYOUTS = Choices("Default", "Card")
 
 
 class HashIdMixin(models.Model):
@@ -281,6 +282,9 @@ class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel)
     repo_url = models.URLField(blank=True)
     is_listed = models.BooleanField(default=True)
     order_key = models.PositiveIntegerField(default=0)
+    layout = models.CharField(
+        choices=PRODUCT_LAYOUTS, default=PRODUCT_LAYOUTS.Default, max_length=64
+    )
 
     slug_class = ProductSlug
     slug_field_name = "title"

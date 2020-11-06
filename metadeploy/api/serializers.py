@@ -315,6 +315,7 @@ class ProductSerializer(CircumspectSerializerMixin, serializers.ModelSerializer)
             "is_listed",
             "order_key",
             "not_allowed_instructions",
+            "layout",
         )
         circumspect_fields = ("description",)
 

@@ -8,6 +8,7 @@ import {
   fetchProduct,
   fetchVersion,
 } from '@/store/products/actions';
+import { PRODUCT_LAYOUTS } from '@/utils/constants';
 import routes from '@/utils/routes';
 
 import { renderWithRedux, reRenderWithRedux } from './../../utils';
@@ -48,6 +49,7 @@ const defaultState = {
             slug: 'my-plan',
             old_slugs: [],
             title: 'My Plan',
+            preflight_message: 'Preflight text…',
             is_listed: true,
             is_allowed: true,
             requires_preflight: true,
@@ -91,6 +93,7 @@ const defaultState = {
         },
         is_listed: true,
         is_allowed: true,
+        layout: PRODUCT_LAYOUTS.Default,
       },
     ],
     notFound: [],
@@ -642,6 +645,64 @@ describe('<VersionDetail />', () => {
 
       expect(getByText('list of all products')).toBeVisible();
       expect(getByText('log in')).toBeVisible();
+    });
+  });
+
+  describe('card-based layout', () => {
+    test('renders plan cards', () => {
+      const { getByText, getAllByText, queryByText } = setup({
+        initialState: {
+          products: {
+            ...defaultState.products,
+            products: [
+              {
+                ...defaultState.products.products[0],
+                layout: PRODUCT_LAYOUTS.Card,
+              },
+            ],
+          },
+        },
+      });
+
+      expect(queryByText('1.0.0')).toBeNull();
+      expect(queryByText('Select a Plan')).toBeNull();
+      expect(getByText('Product 1')).toBeVisible();
+      expect(getByText('This is a test product version.')).toBeVisible();
+      expect(getByText('My Plan')).toBeVisible();
+      expect(getByText('My Secondary Plan')).toBeVisible();
+      expect(getByText('My Additional Plan')).toBeVisible();
+      expect(getAllByText('View Details')).toHaveLength(4);
+      expect(getByText('Preflight text…')).toBeVisible();
+    });
+
+    test('handles missing plans', () => {
+      const product = defaultState.products.products[0];
+      const { getByText, getAllByText, queryByText } = setup({
+        initialState: {
+          products: {
+            ...defaultState.products,
+            products: [
+              {
+                ...product,
+                layout: PRODUCT_LAYOUTS.Card,
+                most_recent_version: {
+                  ...product.most_recent_version,
+                  primary_plan: {
+                    ...product.most_recent_version.primary_plan,
+                    is_listed: false,
+                  },
+                  secondary_plan: null,
+                },
+              },
+            ],
+          },
+        },
+      });
+
+      expect(queryByText('My Plan')).toBeNull();
+      expect(queryByText('My Secondary Plan')).toBeNull();
+      expect(getByText('My Additional Plan')).toBeVisible();
+      expect(getAllByText('View Details')).toHaveLength(2);
     });
   });
 });
