@@ -130,7 +130,7 @@ class CtaButton extends React.Component<
     if (startPreflight === 'true') {
       const { history, preflight, plan } = this.props;
       // Remove query-string from URL
-      history.push({ search: removeUrlParam(AUTO_START_PREFLIGHT) });
+      history.replace({ search: removeUrlParam(AUTO_START_PREFLIGHT) });
       // Bail if no preflight is required
       if (!plan.requires_preflight) {
         return;

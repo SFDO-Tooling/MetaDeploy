@@ -97,7 +97,7 @@ init_i18n((i18nError?: string) => {
     // Remove scratch org UUID from URL
     const scratchOrgUUID = getUrlParam(SCRATCH_ORG_QS);
     if (scratchOrgUUID) {
-      history.push({ search: removeUrlParam(SCRATCH_ORG_QS) });
+      history.replace({ search: removeUrlParam(SCRATCH_ORG_QS) });
     }
 
     // Create store
