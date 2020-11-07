@@ -100,10 +100,10 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
     } = this.props;
     const { modalOpen } = this.state;
     /* istanbul ignore next */
-    let nubbinPosition = direction === 'ltr' ? 'top right' : 'top left';
-    if (flipped) {
-      nubbinPosition = direction === 'ltr' ? 'top left' : 'top right';
-    }
+    const nubbinPosition =
+      direction === 'ltr'
+        ? `top ${flipped ? 'left' : 'right'}`
+        : `top ${flipped ? 'right' : 'left'}`;
 
     return (
       <>
