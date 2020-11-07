@@ -15,7 +15,6 @@ from ..jobs import (
     create_scratch_org,
     enqueuer,
     expire_preflights,
-    expire_user_tokens,
     finalize_result,
     preflight,
     run_flows,
@@ -37,7 +36,6 @@ def test_report_error(mocker, job_factory, user_factory, plan_factory, step_fact
         run_flows(
             plan=plan,
             skip_steps=[],
-            organization_url=job.organization_url,
             result_class=Job,
             result_id=job.id,
         )
@@ -60,7 +58,6 @@ def test_run_flows(mocker, job_factory, user_factory, plan_factory, step_factory
     run_flows(
         plan=plan,
         skip_steps=[],
-        organization_url=job.organization_url,
         result_class=Job,
         result_id=job.id,
     )
@@ -85,7 +82,6 @@ def test_run_flows__preflight(
     run_flows(
         plan=plan,
         skip_steps=[],
-        organization_url=preflight_result.organization_url,
         result_class=PreflightResult,
         result_id=preflight_result.id,
     )
@@ -110,39 +106,13 @@ def test_enqueuer(mocker, job_factory):
 
 
 @pytest.mark.django_db
-def test_expire_user_tokens(user_factory):
-    user1 = user_factory()
-    user1.socialaccount_set.update(last_login=timezone.now())
-    user2 = user_factory()
-    user2.socialaccount_set.update(last_login=timezone.now() - timedelta(minutes=30))
-
-    expire_user_tokens()
-
-    user1.refresh_from_db()
-    user2.refresh_from_db()
-
-    assert user1.valid_token_for == "00Dxxxxxxxxxxxxxxx"
-    assert user2.valid_token_for is None
-
-
-@pytest.mark.django_db
-def test_expire_user_tokens_with_started_job(job_factory):
-    job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
-    job.user.socialaccount_set.update(last_login=timezone.now() - timedelta(minutes=30))
-
-    expire_user_tokens()
-
-    assert job.user.valid_token_for is not None
-
-
-@pytest.mark.django_db
 def test_preflight(mocker, user_factory, plan_factory, preflight_result_factory):
     run_flows = mocker.patch("metadeploy.api.jobs.run_flows")
 
     user = user_factory()
     plan = plan_factory()
     preflight_result = preflight_result_factory(
-        user=user, plan=plan, organization_url=user.instance_url, org_id=user.org_id
+        user=user, plan=plan, org_id=user.org_id
     )
     preflight(preflight_result.pk)
 
@@ -159,7 +129,7 @@ def test_preflight_failure(
     user = user_factory()
     plan = plan_factory()
     preflight_result = preflight_result_factory(
-        user=user, plan=plan, organization_url=user.instance_url, org_id=user.org_id
+        user=user, plan=plan, org_id=user.org_id
     )
     with pytest.raises(Exception):
         preflight(preflight_result.pk)

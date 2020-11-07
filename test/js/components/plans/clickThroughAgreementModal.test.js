@@ -1,7 +1,9 @@
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
 import ClickThroughAgreementModal from '@/components/plans/clickThroughAgreementModal';
+
+import { render } from './../../utils';
 
 describe('<ClickThroughAgreementModal />', () => {
   const setup = (options) => {

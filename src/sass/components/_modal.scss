@@ -1,0 +1,8 @@
+/* fix direction for custom domain input in RTL languages */
+#login-custom-domain {
+  direction: ltr;
+}
+
+html[dir='rtl'] #login-custom-domain {
+  text-align: right;
+}

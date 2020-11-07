@@ -112,7 +112,10 @@ export const getErrorInfo = ({
       count: warningCount,
     });
     if (errorCount > 0 && warningCount > 0) {
-      msg = `${errorMsg} ${i18n.t('and')} ${warningMsg}`;
+      msg = i18n.t('{{item1}} and {{item2}}', {
+        item1: errorMsg,
+        item2: warningMsg,
+      });
     } else if (errorCount > 0) {
       msg = errorMsg;
     } else if (warningCount > 0) {
@@ -127,9 +130,13 @@ export const getErrorInfo = ({
       info.message =
         !preflight.is_valid && !failed
           ? i18n.t('Pre-install validation has expired; please run it again.')
-          : `${i18n.t('Pre-install validation encountered')} ${msg}.`;
+          : i18n.t('Pre-install validation encountered {{errorSummary}}.', {
+              errorSummary: msg,
+            });
     } else {
-      info.message = `${i18n.t('Installation encountered')} ${msg}.`;
+      info.message = i18n.t('Installation encountered {{errorSummary}}.', {
+        errorSummary: msg,
+      });
     }
   }
   return info;

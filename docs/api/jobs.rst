@@ -26,7 +26,7 @@ Retrieve
        "Lw7K5wK",
        ...
      ],
-     "organization_url": "https://na53.salesforce.com",
+     "instance_url": "https://na53.salesforce.com",
      "results": {
        "Lw7K5wK": [
          {

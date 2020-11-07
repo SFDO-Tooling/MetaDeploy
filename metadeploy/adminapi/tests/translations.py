@@ -45,3 +45,9 @@ class TestTranslationViewSet:
 
         step2.set_current_language("es")
         assert step2.name == "Instalar Example 1.0"
+
+    def test_partial_update__invalid_lang(self, admin_api_client):
+        response = admin_api_client.patch(
+            "http://testserver/admin/rest/translations/es-bogus", {}
+        )
+        assert response.status_code == 404

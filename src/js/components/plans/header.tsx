@@ -1,5 +1,6 @@
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import * as React from 'react';
+import { Trans } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 import JobProgressIndicator from '@/components/jobs/progressIndicator';
@@ -42,7 +43,9 @@ const Header = ({
           to={routes.version_detail(product.slug, version.label)}
           key={product.slug}
         >
-          {product.title}, {version.label}
+          <Trans i18nKey="productWithVersion">
+            {{ product: product.title }} {{ version: version.label }}
+          </Trans>
         </Link>,
       ]}
       onRenderActions={onRenderActions ? onRenderActions : null}
