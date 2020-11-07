@@ -5,6 +5,10 @@ import { Trans } from 'react-i18next';
 import svgPath from '!svg-inline-loader!images/no-access.svg';
 import Login from '@/components/header/login';
 
+// No-op wrapper because `Trans` components can contain other components,
+// but cannot contain nodes as dynamic content.
+const NotAllowedLink = ({ link }: { link: JSX.Element }) => link;
+
 const NotAllowed = ({
   isLoggedIn,
   message,
@@ -12,7 +16,7 @@ const NotAllowed = ({
 }: {
   isLoggedIn: boolean;
   message: string | null;
-  link: React.ReactNode;
+  link: JSX.Element;
 }) => (
   <>
     <div className="slds-illustration slds-illustration_large">
@@ -37,8 +41,10 @@ const NotAllowed = ({
     ) : null}
     <div className="slds-align_absolute-center">
       <Trans i18nKey="a_or_b">
-        <div className="slds-text-longform slds-text-body_regular">{link}</div>
-        {' or '}
+        <div className="slds-text-longform slds-text-body_regular">
+          <NotAllowedLink link={link} />
+          {' or '}
+        </div>
         <Login
           id="product-not-allowed-login"
           label={

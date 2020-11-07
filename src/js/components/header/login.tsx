@@ -15,6 +15,7 @@ type Props = {
   direction: string;
   disabled: boolean;
   menuPosition: string;
+  flipped: boolean;
   redirectParams: UrlParams;
 };
 type MenuOption = {
@@ -32,6 +33,7 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
     disabled: false,
     direction: 'ltr',
     menuPosition: 'overflowBoundaryElement',
+    flipped: false,
     redirectParams: {},
   };
 
@@ -93,11 +95,15 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
       disabled,
       direction,
       menuPosition,
+      flipped,
       redirectParams,
     } = this.props;
     const { modalOpen } = this.state;
     /* istanbul ignore next */
-    const nubbinPosition = direction === 'ltr' ? 'top right' : 'top left';
+    let nubbinPosition = direction === 'ltr' ? 'top right' : 'top left';
+    if (flipped) {
+      nubbinPosition = direction === 'ltr' ? 'top left' : 'top right';
+    }
 
     return (
       <>
