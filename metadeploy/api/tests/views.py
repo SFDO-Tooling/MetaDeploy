@@ -198,7 +198,6 @@ class TestJobViewset:
         uuid = str(uuid4())
         job = job_factory(
             is_public=False,
-            org_name="Secret Org",
             org_id=org_id,
         )
         scratch_org_factory(
@@ -217,7 +216,7 @@ class TestJobViewset:
             "id": str(job.id),
             "creator": None,
             "plan": str(job.plan.id),
-            "organization_url": None,
+            "instance_url": None,
             "org_id": None,
             "steps": [],
             "results": {},
