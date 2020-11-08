@@ -1,7 +1,8 @@
-import { render } from '@testing-library/react';
 import React from 'react';
 
 import ProductIcon from '@/components/products/icon';
+
+import { render } from './../../utils';
 
 describe('<ProductIcon />', () => {
   const setup = (item) => {

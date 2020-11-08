@@ -94,7 +94,7 @@ class AllowedListOrg(models.Model):
         help_text=("A description of the org for future reference",)
     )
     created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -143,6 +143,11 @@ class User(HashIdMixin, AbstractUser):
     def subscribable_by(self, user, session):
         return self == user
 
+    @property
+    def sf_username(self):
+        if self.social_account:
+            return self.social_account.extra_data.get("preferred_username")
+
     def _get_org_property(self, key):
         try:
             return self.social_account.extra_data[ORGANIZATION_DETAILS][key]
@@ -152,7 +157,7 @@ class User(HashIdMixin, AbstractUser):
     @property
     def org_id(self):
         if self.social_account:
-            return self.social_account.extra_data["organization_id"]
+            return self.social_account.extra_data.get("organization_id")
 
     @property
     def org_name(self):
@@ -629,11 +634,10 @@ class Job(HashIdMixin, models.Model):
     tracker = FieldTracker(fields=("results", "status"))
 
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True
     )
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
     steps = models.ManyToManyField(Step)
-    organization_url = models.URLField(blank=True)
     # This should be a list of step names:
     results = JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -642,7 +646,6 @@ class Job(HashIdMixin, models.Model):
     job_id = models.UUIDField(null=True)
     status = models.CharField(choices=Status, max_length=64, default=Status.started)
     org_id = models.CharField(null=True, blank=True, max_length=18)
-    org_name = models.CharField(blank=True, max_length=256)
     org_type = models.CharField(blank=True, max_length=256)
     full_org_type = models.CharField(null=True, blank=True, max_length=256)
     is_public = models.BooleanField(default=False)
@@ -664,6 +667,16 @@ class Job(HashIdMixin, models.Model):
     click_through_agreement = models.ForeignKey(
         ClickThroughAgreement, on_delete=models.PROTECT, null=True
     )
+
+    @property
+    def org_name(self):
+        if self.user:
+            return self.user.org_name
+
+    @property
+    def instance_url(self):
+        if self.user:
+            return self.user.instance_url
 
     def subscribable_by(self, user, session):
         # Restrict this to public Jobs, staff users, Job owners, or users who have a
@@ -764,10 +777,9 @@ class PreflightResult(models.Model):
 
     objects = PreflightResultQuerySet.as_manager()
 
-    organization_url = models.URLField()
     org_id = models.CharField(null=True, blank=True, max_length=18)
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True
     )
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -790,6 +802,11 @@ class PreflightResult(models.Model):
     #   <definitive name>: [... errors],
     #   ...
     # }
+
+    @property
+    def instance_url(self):
+        if self.user:
+            return self.user.instance_url
 
     def subscribable_by(self, user, session):
         # Restrict this to staff users, Preflight owners and users who have a valid
@@ -968,7 +985,7 @@ class SiteProfile(TranslatableModel):
         copyright_notice=MarkdownField(property_suffix="_markdown", blank=True),
     )
 
-    product_logo = models.ImageField(blank=True)
+    show_metadeploy_wordmark = models.BooleanField(default=True)
     company_logo = models.ImageField(blank=True)
     favicon = models.ImageField(blank=True)
 

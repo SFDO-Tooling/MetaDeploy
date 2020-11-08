@@ -1,9 +1,11 @@
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
 import CtaButton from '@/components/plans/ctaButton';
 import { getUrlParam, removeUrlParam } from '@/utils/api';
 import { SCRATCH_ORG_STATUSES, SUPPORTED_ORGS } from '@/utils/constants';
+
+import { render, rerenderWithI18n } from './../../utils';
 
 jest.mock('@/utils/api');
 
@@ -65,7 +67,7 @@ describe('<CtaButton />', () => {
       scratchOrg: null,
     };
     const opts = { ...defaults, ...options };
-    const renderFn = opts.rerenderFn || render;
+    const renderFn = opts.rerenderFn ? rerenderWithI18n : render;
     return renderFn(
       <CtaButton
         history={opts.history}
@@ -83,6 +85,7 @@ describe('<CtaButton />', () => {
         doSpinScratchOrg={opts.doSpinScratchOrg}
         doLogout={opts.doLogout}
       />,
+      opts.rerenderFn,
     );
   };
 

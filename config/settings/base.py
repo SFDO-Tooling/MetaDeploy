@@ -184,18 +184,6 @@ ASGI_APPLICATION = "metadeploy.routing.application"
 
 SITE_ID = 1
 
-PARLER_LANGUAGES = {
-    1: (
-        {"code": "en-us"},
-        {"code": "de"},
-        {"code": "es"},
-        {"code": "fr"},
-        {"code": "ja"},
-        {"code": "nl"},
-    ),
-    "default": {"fallback": "en-us"},
-}
-
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
@@ -258,14 +246,56 @@ SECURE_HSTS_PRELOAD = env("SECURE_HSTS_PRELOAD", default=False, type_=boolish)
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
-LANGUAGES = (
+LANGUAGES = [
     ("en-us", "English (US)"),
+    ("ar", "Arabic"),
+    ("bg", "Bulgarian"),
+    ("cs", "Czech"),
+    ("da", "Danish"),
     ("de", "German"),
+    ("el", "Greek"),
+    ("en-gb", "British English"),
     ("es", "Spanish"),
+    ("es-mx", "Mexican Spanish"),
+    ("fi", "Finnish"),
     ("fr", "French"),
+    ("fr-ca", "Canadian French"),
+    ("ga", "Irish"),
+    ("he", "Hebrew"),
+    ("hr", "Croatian"),
+    ("hu", "Hungarian"),
+    ("id", "Indonesian"),
+    ("in", "Hindi"),
+    ("it", "Italian"),
     ("ja", "Japanese"),
+    ("ko", "Korean"),
+    ("nb", "Norwegian Bokmål"),
     ("nl", "Dutch"),
-)
+    ("pl", "Polish"),
+    ("pt", "Portuguese"),
+    ("pt-br", "Brazilian Portuguese"),
+    ("ro", "Romanian"),
+    ("ru", "Russian"),
+    ("sk", "Slovak"),
+    ("sl", "Slovenian"),
+    ("sv", "Swedish"),
+    ("th", "Thai"),
+    ("tr", "Turkish"),
+    ("uk", "Ukrainian"),
+    ("vi", "Vietnamese"),
+    ("zh-cn", "Simplified Chinese"),
+    ("zh-tw", "Traditional Chinese"),
+]
+
+PARLER_LANGUAGES = {
+    1: (
+        {"code": "en-us"},  # default for admin
+        # the others are only here to specify fallbacks
+        {"code": "es-mx", "fallbacks": ["es", "en-us"]},
+        {"code": "fr-ca", "fallbacks": ["fr", "en-us"]},
+        {"code": "pt-br", "fallbacks": ["pt", "en-us"]},
+    )
+}
 
 TIME_ZONE = "UTC"
 
@@ -490,3 +520,6 @@ SENTRY_DSN = env("SENTRY_DSN", default="")
 
 if SENTRY_DSN:
     sentry_sdk.init(dsn=SENTRY_DSN, integrations=[DjangoIntegration()])
+
+# MetaDeploy
+METADEPLOY_FAST_FORWARD = False

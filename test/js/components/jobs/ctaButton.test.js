@@ -1,13 +1,14 @@
-import { render } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
 import CtaButton from '@/components/jobs/ctaButton';
 
+import { render } from './../../utils';
+
 const defaultJob = {
   id: 'job-1',
   status: 'complete',
-  organization_url: '/my/org/',
+  instance_url: '/my/org/',
 };
 
 describe('<CtaButton />', () => {
@@ -56,7 +57,7 @@ describe('<CtaButton />', () => {
     describe('no org', () => {
       test('renders nothing', () => {
         const { container } = setup({
-          job: { ...defaultJob, organization_url: null },
+          job: { ...defaultJob, instance_url: null },
         });
 
         expect(container.children).toHaveLength(0);

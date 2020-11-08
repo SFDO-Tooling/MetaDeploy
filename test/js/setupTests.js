@@ -3,6 +3,8 @@ import '@testing-library/jest-dom/extend-expect';
 
 import fetchMock from 'fetch-mock';
 
+import { initI18n } from './utils';
+
 let location;
 
 beforeAll(() => {
@@ -46,6 +48,8 @@ beforeAll(() => {
     assign: (href) => location.assign(href),
     reload: () => location.reload(),
   };
+
+  initI18n();
 });
 
 afterEach(fetchMock.reset);

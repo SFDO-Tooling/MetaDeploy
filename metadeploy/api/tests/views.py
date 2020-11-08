@@ -30,25 +30,25 @@ class TestJobViewset:
         assert response.json() == {"detail": "Not found."}
 
     def test_job__is_staff(self, client, user_factory, job_factory):
-        user = user_factory(is_staff=True)
-        client.force_login(user)
-        job = job_factory(org_name="Secret Org", org_id="00Dxxxxxxxxxxxxxxx")
+        staff_user = user_factory(is_staff=True)
+        client.force_login(staff_user)
+        job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
         response = client.get(reverse("job-detail", kwargs={"pk": job.id}))
 
         assert response.status_code == 200
         assert response.json() == {
             "id": str(job.id),
-            "creator": {"username": job.user.username, "is_staff": False},
+            "creator": {"username": job.user.sf_username, "is_staff": False},
             "plan": str(job.plan.id),
             "steps": [],
-            "organization_url": "",
+            "instance_url": "https://example.com",
             "org_id": "00Dxxxxxxxxxxxxxxx",
             "results": {},
             "created_at": format_timestamp(job.created_at),
             "enqueued_at": None,
             "job_id": None,
             "status": "started",
-            "org_name": "Secret Org",
+            "org_name": "Sample Org",
             "org_type": "",
             "is_production_org": False,
             "error_count": 0,
@@ -63,19 +63,19 @@ class TestJobViewset:
             "plan_slug": str(job.plan.slug),
         }
 
-    def test_job__your_own(self, client, job_factory):
-        job = job_factory(
-            user=client.user, org_name="Secret Org", org_id=client.user.org_id
-        )
+    def test_job__your_own(self, client, user_factory, job_factory):
+        user = user_factory(org_name="Secret Org")
+        client.force_login(user)
+        job = job_factory(user=user, org_id=client.user.org_id)
         response = client.get(reverse("job-detail", kwargs={"pk": job.id}))
 
         assert response.status_code == 200
         assert response.json() == {
             "id": str(job.id),
-            "creator": {"username": job.user.username, "is_staff": False},
+            "creator": {"username": job.user.sf_username, "is_staff": False},
             "plan": str(job.plan.id),
             "steps": [],
-            "organization_url": "",
+            "instance_url": "https://example.com",
             "org_id": "00Dxxxxxxxxxxxxxxx",
             "results": {},
             "created_at": format_timestamp(job.created_at),
@@ -98,9 +98,7 @@ class TestJobViewset:
         }
 
     def test_job__is_public(self, client, job_factory):
-        job = job_factory(
-            is_public=True, org_name="Secret Org", org_id="00Dxxxxxxxxxxxxxxx"
-        )
+        job = job_factory(is_public=True, org_id="00Dxxxxxxxxxxxxxxx")
         response = client.get(reverse("job-detail", kwargs={"pk": job.id}))
 
         assert response.status_code == 200
@@ -108,7 +106,7 @@ class TestJobViewset:
             "id": str(job.id),
             "creator": None,
             "plan": str(job.plan.id),
-            "organization_url": None,
+            "instance_url": None,
             "org_id": None,
             "steps": [],
             "results": {},
@@ -132,9 +130,7 @@ class TestJobViewset:
         }
 
     def test_job__is_public_anon(self, anon_client, job_factory):
-        job = job_factory(
-            is_public=True, org_name="Secret Org", org_id="00Dxxxxxxxxxxxxxxx"
-        )
+        job = job_factory(is_public=True, org_id="00Dxxxxxxxxxxxxxxx")
         url = reverse("job-detail", kwargs={"pk": job.id})
         response = anon_client.get(url)
 
@@ -143,7 +139,7 @@ class TestJobViewset:
             "id": str(job.id),
             "creator": None,
             "plan": str(job.plan.id),
-            "organization_url": None,
+            "instance_url": None,
             "org_id": None,
             "steps": [],
             "results": {},
@@ -437,7 +433,6 @@ class TestPreflight:
         preflight = preflight_result_factory(
             plan=plan,
             user=client.user,
-            organization_url=client.user.instance_url,
             org_id=client.user.org_id,
         )
         response = client.get(reverse("plan-preflight", kwargs={"pk": plan.id}))
@@ -445,7 +440,7 @@ class TestPreflight:
         assert response.status_code == 200
         assert response.json() == {
             "id": str(preflight.id),
-            "organization_url": client.user.instance_url,
+            "instance_url": client.user.instance_url,
             "org_id": "00Dxxxxxxxxxxxxxxx",
             "plan": str(plan.id),
             "created_at": format_timestamp(preflight.created_at),
@@ -518,7 +513,6 @@ class TestPreflight:
         preflight_result_factory(
             plan=plan,
             user=client.user,
-            organization_url=client.user.instance_url,
             org_id=client.user.org_id,
         )
 

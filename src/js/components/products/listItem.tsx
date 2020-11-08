@@ -27,7 +27,7 @@ const ProductItem = ({ item }: { item: Product }) => {
         bodyClassName="slds-card__body_inner"
       >
         <div className="slds-text-title">
-          {i18n.t('Version')} {label}
+          {i18n.t('Version {{version}}', { version: label })}
         </div>
         {item.short_description ? (
           <div className="slds-p-top_x-small">{item.short_description}</div>

@@ -483,14 +483,13 @@ describe('<JobDetail />', () => {
         },
       });
 
-      expect(getByText('Average Install Time:')).toBeVisible();
-      expect(getByText('2 minutes.')).toBeVisible();
+      expect(getByText('Average Install Time: 2 minutes.')).toBeVisible();
     });
 
     test('renders job detail', () => {
       const { getByText, queryByText } = setup();
 
-      expect(getByText('Product 1, 1.0.0')).toBeVisible();
+      expect(getByText('Product 1 1.0.0')).toBeVisible();
       expect(getByText('My Plan')).toBeVisible();
       expect(getByText('Installation Progress')).toBeVisible();
       expect(getByText('Congrats!')).toBeVisible();

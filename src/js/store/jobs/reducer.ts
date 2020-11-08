@@ -21,7 +21,7 @@ export type Job = {
   product_slug: string;
   version_label: string;
   plan_slug: string;
-  organization_url: string | null;
+  instance_url: string | null;
   error_count: number;
   warning_count: number;
   is_public: boolean;

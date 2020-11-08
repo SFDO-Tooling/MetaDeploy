@@ -15,7 +15,22 @@ from ..api.push import (
     user_token_expired,
 )
 from ..api.serializers import JobSerializer, OrgSerializer, PreflightResultSerializer
-from ..consumers import PushNotificationConsumer, user_context
+from ..consumers import PushNotificationConsumer, get_language_from_scope, user_context
+
+
+def test_get_language_from_scope():
+    scope = {"headers": ((b"accept-language", b"de"),)}
+    lang = get_language_from_scope(scope)
+    assert lang == "de"
+
+
+def test_get_language_from_scope__default():
+    assert (
+        get_language_from_scope({"headers": ((b"accept-language", b"*"),)}) == "en-us"
+    )
+    assert (
+        get_language_from_scope({"headers": ((b"accept-language", b"xx"),)}) == "en-us"
+    )
 
 
 class AnonymousUser:
@@ -319,7 +334,6 @@ async def test_push_notification_consumer__subscribe_org(
         status=Job.Status.started,
         user=user,
         plan=plan,
-        organization_url="https://example.com/",
         org_id=user.org_id,
     )
 
@@ -379,7 +393,6 @@ async def test_push_notification_consumer__anon_subscribe_org(
         status=Job.Status.started,
         user=user,
         plan=plan,
-        organization_url="https://example.com/",
         org_id=user.org_id,
     )
 
