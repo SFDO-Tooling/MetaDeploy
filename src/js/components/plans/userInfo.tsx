@@ -22,7 +22,7 @@ const LoggedOut = () => (
 
 const Footer = () => (
   <Trans i18nKey="switchOrg">
-    {'Is this the correct org? If not, please '}
+    Is this the correct org? If not, please{' '}
     <Login
       id="user-info-login"
       label={i18n.t('log in with a different org')}

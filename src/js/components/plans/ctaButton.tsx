@@ -76,7 +76,7 @@ export const LoginBtn = ({
     buttonVariant="brand"
     label={label}
     menuPosition="relative"
-    nubbinPosition="top left"
+    flipped
     redirectParams={redirectParams}
   />
 );
