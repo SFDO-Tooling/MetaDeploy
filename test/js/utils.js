@@ -1,10 +1,32 @@
-import { render } from '@testing-library/react';
+import { render as renderReact } from '@testing-library/react';
+import i18n from 'i18next';
 import React from 'react';
+import { I18nextProvider, initReactI18next } from 'react-i18next';
 import { Provider } from 'react-redux';
 import configureStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
 
 const mockStore = configureStore([]);
+
+export const initI18n = () => {
+  i18n.use(initReactI18next).init({
+    fallbackLng: 'en',
+    keySeparator: false,
+    nsSeparator: false,
+    returnNull: false,
+    returnEmptyString: false,
+    interpolation: {
+      escapeValue: false,
+    },
+  });
+};
+
+export const render = (ui) =>
+  renderReact(<I18nextProvider i18n={i18n}>{ui}</I18nextProvider>);
+
+export const rerenderWithI18n = (ui, rerender) => ({
+  ...rerender(<I18nextProvider i18n={i18n}>{ui}</I18nextProvider>),
+});
 
 export const renderWithRedux = (
   ui,
@@ -13,7 +35,11 @@ export const renderWithRedux = (
 ) => {
   const store = customStore(initialState);
   return {
-    ...render(<Provider store={store}>{ui}</Provider>),
+    ...renderReact(
+      <I18nextProvider i18n={i18n}>
+        <Provider store={store}>{ui}</Provider>
+      </I18nextProvider>,
+    ),
     // adding `store` to the returned utilities to allow us
     // to reference it in our tests (just try to avoid using
     // this to test implementation details).
@@ -22,7 +48,11 @@ export const renderWithRedux = (
 };
 
 export const reRenderWithRedux = (ui, store, rerender) => ({
-  ...rerender(<Provider store={store}>{ui}</Provider>),
+  ...rerender(
+    <I18nextProvider i18n={i18n}>
+      <Provider store={store}>{ui}</Provider>
+    </I18nextProvider>,
+  ),
 });
 
 export const storeWithApi = configureStore([thunk]);

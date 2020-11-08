@@ -1,9 +1,9 @@
 import logging
 
 from django.conf import settings
-from django_rq import job
 from parler.models import TranslatableModel
 
+from metadeploy.api.jobs import job
 from metadeploy.api.models import Translation
 
 logger = logging.getLogger(__name__)
@@ -25,7 +25,7 @@ def update_translations(obj, langs=None):
     assert obj.get_current_language() == settings.LANGUAGE_CODE
     strategy, context = obj.get_translation_strategy()
     if langs is None:
-        langs = [language["code"][:2] for language in settings.PARLER_LANGUAGES[1]]
+        langs = [code for code, label in settings.LANGUAGES]
     for lang in langs:
         values = {}
         if strategy == "fields":

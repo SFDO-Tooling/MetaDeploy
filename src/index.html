@@ -1,8 +1,9 @@
 {% load api_bootstrap %}
+{% load i18n %}
 {% load js_reverse %}
 
 <!DOCTYPE html>
-<html lang="en" dir="ltr" class="slds-theme_default">
+<html lang="en" {% get_current_language_bidi as LANGUAGE_BIDI %}{% if LANGUAGE_BIDI %}dir="rtl"{% endif %} class="slds-theme_default">
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="x-ua-compatible" content="ie=edge" />

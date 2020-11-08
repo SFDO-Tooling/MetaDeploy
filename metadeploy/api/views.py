@@ -118,7 +118,6 @@ class JobViewSet(
         "plan_id",
         "user_id",
         "status",
-        "organization_url",
         "plan__plan_template__planslug__slug",
         "plan__version__label",
         "plan__version__product__productslug__slug",
@@ -250,7 +249,6 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
                 )
                 config = scratch_org.config
                 kwargs = {
-                    "organization_url": config["instance_url"],
                     "org_id": config["org_id"],
                 }
             except (ScratchOrg.DoesNotExist, ScratchOrg.MultipleObjectsReturned):
@@ -259,7 +257,6 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
         if request.user.is_authenticated:
             kwargs = {
                 "user": request.user,
-                "organization_url": request.user.instance_url,
                 "org_id": request.user.org_id,
             }
 

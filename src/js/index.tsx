@@ -7,6 +7,7 @@ import IconSettings from '@salesforce/design-system-react/components/icon-settin
 import settings from '@salesforce/design-system-react/components/settings';
 import { ConnectedRouter, routerMiddleware } from 'connected-react-router';
 import { createBrowserHistory } from 'history';
+import UNSAFE_DirectionSettings from '@salesforce/design-system-react/components/utilities/UNSAFE_direction';
 import i18n from 'i18next';
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
@@ -178,15 +179,17 @@ init_i18n((i18nError?: string) => {
       ReactDOM.render(
         <Provider store={appStore}>
           <ConnectedRouter history={history} noInitialPop>
-            <IconSettings
-              actionSprite={actionSprite}
-              customSprite={customSprite}
-              doctypeSprite={doctypeSprite}
-              standardSprite={standardSprite}
-              utilitySprite={utilitySprite}
-            >
-              <App />
-            </IconSettings>
+            <UNSAFE_DirectionSettings.Provider value={document.dir || 'ltr'}>
+              <IconSettings
+                actionSprite={actionSprite}
+                customSprite={customSprite}
+                doctypeSprite={doctypeSprite}
+                standardSprite={standardSprite}
+                utilitySprite={utilitySprite}
+              >
+                <App />
+              </IconSettings>
+            </UNSAFE_DirectionSettings.Provider>
           </ConnectedRouter>
         </Provider>,
         el,

@@ -148,12 +148,12 @@ def _mutate_scratch_org(*, scratch_org_config, org_result, email):
     Update the org config for a new scratch org with details from its
     ScratchOrgInfo.
     """
-    scratch_org_config._scratch_info = {
+    scratch_org_config._sfdx_info = {
         "instance_url": org_result["LoginUrl"],
         "org_id": org_result["ScratchOrg"],
         "username": org_result["SignupUsername"],
     }
-    scratch_org_config.config.update(scratch_org_config._scratch_info)
+    scratch_org_config.config.update(scratch_org_config._sfdx_info)
     scratch_org_config.config.update(
         {
             "days": DURATION_DAYS,
@@ -177,9 +177,7 @@ def _get_access_token(*, org_result, scratch_org_config):
         SF_CLIENT_ID, SF_CLIENT_SECRET, SF_CALLBACK_URL, scratch_org_config.instance_url
     )
     auth_result = oauth.get_token(org_result["AuthCode"]).json()
-    # TODO: This needs to be updated to `_sfdx_info` instead of `_scratch_info` when
-    # MetaDeploy gets updated to cumulusci 3.20.1
-    scratch_org_config.config["access_token"] = scratch_org_config._scratch_info[
+    scratch_org_config.config["access_token"] = scratch_org_config._sfdx_info[
         "access_token"
     ] = auth_result["access_token"]
     scratch_org_config.config["refresh_token"] = auth_result["refresh_token"]

@@ -47,10 +47,10 @@ const CtaButton = ({
           <ActionBtn label={i18n.t('View Scratch Org')} onClick={openModal} />
         );
       }
-      if (job.organization_url) {
+      if (job.instance_url) {
         return (
           <a
-            href={job.organization_url}
+            href={job.instance_url}
             target="_blank"
             rel="noreferrer noopener"
             className={btnClasses}

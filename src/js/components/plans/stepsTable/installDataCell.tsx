@@ -56,7 +56,7 @@ const JobCell = (props: DataCellProps) => {
     error = result.status === RESULT_STATUS.ERROR;
   }
   if (!job.steps.includes(id)) {
-    title = i18n.t('skipped');
+    title = i18n.t('Skipped');
     contents = (
       <Icon
         category="utility"
@@ -70,7 +70,7 @@ const JobCell = (props: DataCellProps) => {
       />
     );
   } else if (complete) {
-    title = i18n.t('completed');
+    title = i18n.t('completed', 'Completed');
     contents = (
       <div className="is-completed">
         <Icon
@@ -85,7 +85,7 @@ const JobCell = (props: DataCellProps) => {
       </div>
     );
   } else if (error) {
-    title = i18n.t('error');
+    title = i18n.t('Error');
     contents = (
       <>
         <ErrorIcon
@@ -97,7 +97,7 @@ const JobCell = (props: DataCellProps) => {
     );
   } else if (job.status === STATUS.STARTED) {
     if (isActive) {
-      title = i18n.t('installing');
+      title = i18n.t('installing', 'Installing');
       contents = (
         <>
           <span
@@ -111,7 +111,7 @@ const JobCell = (props: DataCellProps) => {
         </>
       );
     } else {
-      title = i18n.t('waiting to install');
+      title = i18n.t('waiting to install', 'Waiting to install');
       contents = (
         <Icon
           category="utility"
@@ -126,7 +126,7 @@ const JobCell = (props: DataCellProps) => {
       );
     }
   } else {
-    title = i18n.t('not installed');
+    title = i18n.t('not installed', 'Not installed');
     contents = (
       <Icon
         category="utility"
@@ -188,19 +188,19 @@ class PreflightCell extends React.Component<DataCellProps> {
     }
     const required = item.is_required && !optional;
     const recommended = !required && item.is_recommended;
-    let title = i18n.t('optional');
+    let title = i18n.t('Optional');
     if (skipped) {
-      title = skipped.message || i18n.t('skipped');
+      title = skipped.message || i18n.t('Skipped');
     } else if (required) {
-      title = i18n.t('required');
+      title = i18n.t('Required');
     } else if (recommended) {
-      title = i18n.t('recommended');
+      title = i18n.t('recommended', 'Recommended');
     }
     let label = '';
     if (skipped?.message) {
       label = skipped.message;
     } else if (recommended) {
-      label = i18n.t('recommended');
+      label = i18n.t('recommended', 'Recommended');
     }
     if (skipped || required) {
       content = (

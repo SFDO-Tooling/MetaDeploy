@@ -107,7 +107,6 @@ class TestPreflightSerializer:
         plan = plan_factory()
         preflight = preflight_result_factory(
             user=user,
-            organization_url=user.instance_url,
             org_id=user.org_id,
             plan=plan,
             results={0: {"status": "error"}},
@@ -124,7 +123,6 @@ class TestPreflightSerializer:
         plan = plan_factory()
         preflight = preflight_result_factory(
             user=user,
-            organization_url=user.instance_url,
             org_id=user.org_id,
             plan=plan,
             results={0: {"status": "warn"}},
@@ -141,7 +139,6 @@ class TestPreflightSerializer:
         plan = plan_factory()
         preflight = preflight_result_factory(
             user=user,
-            organization_url=user.instance_url,
             org_id=user.org_id,
             plan=plan,
             results={0: {"status": "warn"}},
@@ -157,7 +154,6 @@ class TestPreflightSerializer:
         plan = plan_factory()
         preflight = preflight_result_factory(
             user=user,
-            organization_url=user.instance_url,
             org_id=user.org_id,
             plan=plan,
             results={0: {"status": "error"}},
@@ -412,7 +408,7 @@ class TestJob:
 
         assert serializer.data["error_count"] == 0
         assert serializer.data["org_name"] is None
-        assert serializer.data["organization_url"] is None
+        assert serializer.data["instance_url"] is None
 
     def test_patch(self, rf, job_factory, plan_factory, user_factory):
         plan = plan_factory()
@@ -464,7 +460,7 @@ class TestJob:
             "plan": str(plan.id),
             "steps": [str(step1.id), str(step2.id), str(step3.id)],
         }
-        job = job_factory(organization_url=user.instance_url, org_id=user.org_id)
+        job = job_factory(user=user, org_id=user.org_id)
         serializer = JobSerializer(data=data, context=dict(request=request))
 
         assert not serializer.is_valid()

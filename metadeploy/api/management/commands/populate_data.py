@@ -250,7 +250,7 @@ class Command(BaseCommand):
 
     def create_token_expiry_job(self):
         RepeatableJob.objects.get_or_create(
-            callable="metadeploy.api.jobs.expire_user_tokens_job",
+            callable="metadeploy.api.jobs.cleanup_user_data_job",
             defaults=dict(
                 name="Expire User Tokens",
                 interval=1,

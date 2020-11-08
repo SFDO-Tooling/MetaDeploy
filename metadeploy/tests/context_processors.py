@@ -10,8 +10,10 @@ from ..context_processors import env
 @override_settings(SENTRY_DSN="https://example.com")
 def test_env(rf):
     request = rf.get("/")
+    site_profile = SiteProfile(site_id=1)
+    site_profile.save()
     site = get_current_site(request)
-    site.siteprofile = SiteProfile()
+    site.siteprofile = site_profile
     result = env(request)
 
     assert "GLOBALS" in result
