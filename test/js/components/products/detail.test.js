@@ -8,6 +8,7 @@ import {
   fetchProduct,
   fetchVersion,
 } from '@/store/products/actions';
+import { PRODUCT_LAYOUTS } from '@/utils/constants';
 import routes from '@/utils/routes';
 
 import { renderWithRedux, reRenderWithRedux } from './../../utils';
@@ -48,9 +49,11 @@ const defaultState = {
             slug: 'my-plan',
             old_slugs: [],
             title: 'My Plan',
+            preflight_message: 'Preflight text…',
             is_listed: true,
             is_allowed: true,
             requires_preflight: true,
+            supported_orgs: 'Persistent',
           },
           secondary_plan: {
             id: 'plan-2',
@@ -60,6 +63,7 @@ const defaultState = {
             is_listed: true,
             is_allowed: true,
             requires_preflight: true,
+            supported_orgs: 'Persistent',
           },
           additional_plans: {
             'my-additional-plan': {
@@ -70,12 +74,26 @@ const defaultState = {
               is_listed: true,
               is_allowed: true,
               requires_preflight: true,
+              order_key: 2,
+              supported_orgs: 'Persistent',
+            },
+            'another-additional-plan': {
+              id: 'plan-3',
+              slug: 'another-additional-plan',
+              old_slugs: [],
+              title: 'Second Additional Plan',
+              is_listed: true,
+              is_allowed: true,
+              requires_preflight: true,
+              order_key: 1,
+              supported_orgs: 'Persistent',
             },
           },
           is_listed: true,
         },
         is_listed: true,
         is_allowed: true,
+        layout: PRODUCT_LAYOUTS.Default,
       },
     ],
     notFound: [],
@@ -460,6 +478,7 @@ describe('<VersionDetail />', () => {
             is_listed: true,
             is_allowed: true,
             requires_preflight: true,
+            supported_orgs: 'Persistent',
           },
           secondary_plan: null,
           is_listed: true,
@@ -502,6 +521,7 @@ describe('<VersionDetail />', () => {
               is_listed: true,
               is_allowed: true,
               requires_preflight: true,
+              supported_orgs: 'Persistent',
             },
           },
           is_listed: true,
@@ -535,6 +555,7 @@ describe('<VersionDetail />', () => {
         is_listed: true,
         is_allowed: true,
         requires_preflight: true,
+        supported_orgs: 'Persistent',
       },
       secondary_plan: null,
       is_listed: true,
@@ -624,6 +645,64 @@ describe('<VersionDetail />', () => {
 
       expect(getByText('list of all products')).toBeVisible();
       expect(getByText('log in')).toBeVisible();
+    });
+  });
+
+  describe('card-based layout', () => {
+    test('renders plan cards', () => {
+      const { getByText, getAllByText, queryByText } = setup({
+        initialState: {
+          products: {
+            ...defaultState.products,
+            products: [
+              {
+                ...defaultState.products.products[0],
+                layout: PRODUCT_LAYOUTS.Card,
+              },
+            ],
+          },
+        },
+      });
+
+      expect(queryByText('1.0.0')).toBeNull();
+      expect(queryByText('Select a Plan')).toBeNull();
+      expect(getByText('Product 1')).toBeVisible();
+      expect(getByText('This is a test product version.')).toBeVisible();
+      expect(getByText('My Plan')).toBeVisible();
+      expect(getByText('My Secondary Plan')).toBeVisible();
+      expect(getByText('My Additional Plan')).toBeVisible();
+      expect(getAllByText('View Details')).toHaveLength(4);
+      expect(getByText('Preflight text…')).toBeVisible();
+    });
+
+    test('handles missing plans', () => {
+      const product = defaultState.products.products[0];
+      const { getByText, getAllByText, queryByText } = setup({
+        initialState: {
+          products: {
+            ...defaultState.products,
+            products: [
+              {
+                ...product,
+                layout: PRODUCT_LAYOUTS.Card,
+                most_recent_version: {
+                  ...product.most_recent_version,
+                  primary_plan: {
+                    ...product.most_recent_version.primary_plan,
+                    is_listed: false,
+                  },
+                  secondary_plan: null,
+                },
+              },
+            ],
+          },
+        },
+      });
+
+      expect(queryByText('My Plan')).toBeNull();
+      expect(queryByText('My Secondary Plan')).toBeNull();
+      expect(getByText('My Additional Plan')).toBeVisible();
+      expect(getAllByText('View Details')).toHaveLength(2);
     });
   });
 });

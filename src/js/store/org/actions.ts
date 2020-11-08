@@ -1,5 +1,5 @@
 import { ThunkResult } from '@/store';
-import { Org } from '@/store/org/reducer';
+import { Org, Orgs } from '@/store/org/reducer';
 import apiFetch from '@/utils/api';
 
 type FetchOrgJobsStarted = {
@@ -7,7 +7,7 @@ type FetchOrgJobsStarted = {
 };
 export type FetchOrgJobsSucceeded = {
   type: 'FETCH_ORG_JOBS_SUCCEEDED';
-  payload: Org;
+  payload: Orgs;
 };
 type FetchOrgJobsFailed = {
   type: 'FETCH_ORG_JOBS_FAILED';
@@ -27,7 +27,15 @@ export const fetchOrgJobs = (): ThunkResult<
 > => async (dispatch) => {
   dispatch({ type: 'FETCH_ORG_JOBS_STARTED' as const });
   try {
-    const response = await apiFetch(window.api_urls.org_list(), dispatch);
+    const response: Orgs = await apiFetch(window.api_urls.org_list(), dispatch);
+    if (response && window.socket) {
+      for (const orgId of Object.keys(response)) {
+        window.socket.subscribe({
+          model: 'org',
+          id: orgId,
+        });
+      }
+    }
     return dispatch({
       type: 'FETCH_ORG_JOBS_SUCCEEDED' as const,
       payload: response,

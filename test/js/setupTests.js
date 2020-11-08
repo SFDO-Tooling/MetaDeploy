@@ -24,6 +24,7 @@ beforeAll(() => {
     plan_get_one: () => '/api/plans/get_one/',
     plan_list: () => '/api/plans/',
     plan_preflight: (id) => `/api/plans/${id}/preflight/`,
+    plan_scratch_org: (id) => `/api/plans/${id}/scratch_org/`,
     product_get_one: () => '/api/products/get_one/',
     product_list: () => '/api/products/',
     productcategory_list: () => '/api/categories/',

@@ -37,6 +37,7 @@ describe('<ShareModal />', () => {
       },
     ],
     requires_preflight: true,
+    supported_orgs: 'Persistent',
   };
 
   const setup = (options) => {

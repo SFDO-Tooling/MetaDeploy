@@ -14,8 +14,12 @@ Websocket notifications you can subscribe to:
         JOB_COMPLETED
         JOB_FAILED
         JOB_CANCELED
-    org.:org_url
+    org.:org_id
         ORG_CHANGED
+    scratchorg.:id
+        SCRATCH_ORG_CREATED
+        SCRATCH_ORG_ERROR
+        PREFLIGHT_STARTED
 """
 import logging
 
@@ -41,10 +45,10 @@ async def push_message(group_name, message):
         await channel_layer.group_send(group_name, message)
 
 
-async def push_message_about_instance(instance, message):
+async def push_message_about_instance(instance, message, group_name=None):
     model_name = instance._meta.model_name
     id = str(instance.id)
-    group_name = CHANNELS_GROUP_NAME.format(model=model_name, id=id)
+    group_name = group_name or CHANNELS_GROUP_NAME.format(model=model_name, id=id)
     sent_message = {"type": "notify", "group": group_name, "content": message}
     await push_message(group_name, sent_message)
 
@@ -142,7 +146,11 @@ async def notify_org_result_changed(result):
         org_id=org_id, status=PreflightResult.Status.started
     ).first()
     serializer = OrgSerializer(
-        {"current_job": current_job, "current_preflight": current_preflight}
+        {
+            "org_id": org_id,
+            "current_job": current_job,
+            "current_preflight": current_preflight,
+        }
     )
     group_name = CHANNELS_GROUP_NAME.format(
         model="org", id=convert_org_id_to_key(org_id)
@@ -153,3 +161,43 @@ async def notify_org_result_changed(result):
         "content": {"type": type_, "payload": serializer.data},
     }
     await push_message(group_name, message)
+
+
+async def notify_org_finished(scratch_org, error=None):
+    from .serializers import ScratchOrgSerializer
+
+    data = ScratchOrgSerializer(scratch_org).data
+    if error:
+        type_ = "SCRATCH_ORG_ERROR"
+        # unwrap the error in the case that there's only one,
+        # which is the most common case:
+        try:
+            prepared_message = error.content
+            if isinstance(prepared_message, list) and len(prepared_message) == 1:
+                prepared_message = prepared_message[0]
+            if isinstance(prepared_message, dict):
+                prepared_message = prepared_message.get("message", prepared_message)
+            prepared_message = str(prepared_message)
+        except AttributeError:
+            prepared_message = str(error)
+        payload = {"message": prepared_message, "org": data}
+    else:
+        type_ = "SCRATCH_ORG_CREATED"
+        payload = data
+
+    message = {
+        "type": type_,
+        "payload": payload,
+    }
+    group_name = CHANNELS_GROUP_NAME.format(model="scratchorg", id=scratch_org.id)
+    sent_message = {"type": "notify", "group": group_name, "content": message}
+    await push_message(group_name, sent_message)
+
+
+async def preflight_started(scratch_org, preflight):
+    from .serializers import PreflightResultSerializer
+
+    payload = PreflightResultSerializer(instance=preflight).data
+    message = {"type": "PREFLIGHT_STARTED", "payload": payload}
+    group_name = CHANNELS_GROUP_NAME.format(model="scratchorg", id=scratch_org.id)
+    await push_message_about_instance(preflight, message, group_name=group_name)

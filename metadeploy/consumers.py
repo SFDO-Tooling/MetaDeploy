@@ -6,7 +6,8 @@ from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.utils import translation
-from django.utils.translation import get_supported_language_variant, gettext as _
+from django.utils.translation import get_supported_language_variant
+from django.utils.translation import gettext as _
 from django.utils.translation.trans_real import (
     language_code_re,
     parse_accept_lang_header,
@@ -19,7 +20,7 @@ from .consumer_utils import clear_message_semaphore
 Request = namedtuple("Request", "user")
 
 
-KNOWN_MODELS = {"user", "preflightresult", "job", "org"}
+KNOWN_MODELS = {"user", "preflightresult", "job", "org", "scratchorg"}
 
 
 def user_context(user):
@@ -124,8 +125,8 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         return model in KNOWN_MODELS
 
     def has_good_permissions(self, content):
-        if self.handle_org_special_case(content):
-            return True
+        if content["model"] == "org":
+            return self.handle_org_special_case(content)
         possible_exceptions = (
             AttributeError,
             KeyError,
@@ -137,12 +138,26 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         )
         try:
             obj = self.get_instance(**content)
-            return obj.subscribable_by(self.scope["user"])
+            return obj.subscribable_by(self.scope["user"], self.scope["session"])
         except possible_exceptions:
             return False
 
     def handle_org_special_case(self, content):
-        if content["model"] == "org":
-            content["id"] = convert_org_id_to_key(self.scope["user"].org_id)
-            return True
-        return False
+        if "user" in self.scope and self.scope["user"].is_authenticated:
+            ret = self.scope["user"].org_id == content["id"]
+        else:
+            # TODO: It seems we don't get the correct value in the session here in the
+            # websocket consumer. Ideally we would restrict this to only users who have
+            # a valid scratch_org `uuid` in their session, matching the requested org:
+            #
+            # session = self.scope["session"]
+            # scratch_org_id = session.get("scratch_org_id", None)
+            # scratch_org = ScratchOrg.objects.filter(
+            #     uuid=scratch_org_id, status=ScratchOrg.Status.complete
+            # ).first()
+            # ret = scratch_org.org_id == content["id"] if scratch_org else False
+            #
+            # But instead we allow any unauthenticated user to subscribe to org changes:
+            ret = True
+        content["id"] = convert_org_id_to_key(content["id"])
+        return ret

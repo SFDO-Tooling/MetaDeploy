@@ -18,6 +18,7 @@ from django.contrib.auth.models import UserManager as BaseUserManager
 from django.contrib.postgres.fields import ArrayField, JSONField
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
+from django.core.serializers.json import DjangoJSONEncoder
 from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import Count, F, Func, Q
@@ -34,6 +35,7 @@ from .belvedere_utils import convert_to_18
 from .constants import ERROR, HIDE, OPTIONAL, ORGANIZATION_DETAILS
 from .flows import JobFlowCallback, PreflightFlowCallback
 from .push import (
+    notify_org_finished,
     notify_org_result_changed,
     notify_post_job,
     notify_post_task,
@@ -48,6 +50,8 @@ VERSION_STRING = r"^[a-zA-Z0-9._+-]+$"
 STEP_NUM = r"^[\d\./]+$"
 WorkableModel = Union["Job", "PreflightResult"]
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
+SUPPORTED_ORG_TYPES = Choices("Persistent", "Scratch", "Both")
+PRODUCT_LAYOUTS = Choices("Default", "Card")
 
 
 class HashIdMixin(models.Model):
@@ -135,7 +139,7 @@ class UserManager(BaseUserManager):
 class User(HashIdMixin, AbstractUser):
     objects = UserManager()
 
-    def subscribable_by(self, user):
+    def subscribable_by(self, user, session):
         return self == user
 
     @property
@@ -278,6 +282,9 @@ class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel)
     repo_url = models.URLField(blank=True)
     is_listed = models.BooleanField(default=True)
     order_key = models.PositiveIntegerField(default=0)
+    layout = models.CharField(
+        choices=PRODUCT_LAYOUTS, default=PRODUCT_LAYOUTS.Default, max_length=64
+    )
 
     slug_class = ProductSlug
     slug_field_name = "title"
@@ -360,7 +367,7 @@ class Version(HashIdMixin, TranslatableModel):
         # get the most recently created plan for each plan template
         return (
             self.plan_set.filter(tier=Plan.Tier.additional)
-            .order_by("plan_template_id", "-created_at")
+            .order_by("plan_template_id", "order_key", "-created_at")
             .distinct("plan_template_id")
         )
 
@@ -442,10 +449,17 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
             "Use this to optionally override the Version's commit_ish."
         ),
     )
+    order_key = models.PositiveIntegerField(default=0)
 
     tier = models.CharField(choices=Tier, default=Tier.primary, max_length=64)
     is_listed = models.BooleanField(default=True)
     preflight_checks = JSONField(default=list, blank=True)
+    supported_orgs = models.CharField(
+        max_length=32,
+        choices=SUPPORTED_ORG_TYPES,
+        default=SUPPORTED_ORG_TYPES.Persistent,
+    )
+    org_config_name = models.CharField(max_length=64, default="release", blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -663,8 +677,25 @@ class Job(HashIdMixin, models.Model):
         if self.user:
             return self.user.instance_url
 
-    def subscribable_by(self, user):
-        return self.is_public or user.is_staff or user == self.user
+    def subscribable_by(self, user, session):
+        # TODO: It seems we don't get the correct value in the session when it is passed
+        # from the websocket consumer. Ideally we would restrict this to only users who
+        # have a valid scratch_org `uuid` in their session:
+        #
+        # scratch_org_id = session.get("scratch_org_id", None)
+        # scratch_org = (
+        #     scratch_org_id
+        #     and ScratchOrg.objects.filter(
+        #         uuid=scratch_org_id, status=ScratchOrg.Status.complete
+        #     ).first()
+        # )
+        # valid_session_uuid = scratch_org and scratch_org.org_id == self.org_id
+        # return (
+        #     self.is_public or user.is_staff or user == self.user or valid_session_uuid
+        # )
+        #
+        # But instead we allow any user to subscribe to scratch_org (user-less) jobs:
+        return self.is_public or user.is_staff or user == self.user or not self.user
 
     def skip_steps(self):
         return [
@@ -737,8 +768,8 @@ class Job(HashIdMixin, models.Model):
 
 
 class PreflightResultQuerySet(models.QuerySet):
-    def most_recent(self, *, user, plan, is_valid_and_complete=True):
-        kwargs = {"plan": plan, "user": user}
+    def most_recent(self, *, org_id, plan, is_valid_and_complete=True):
+        kwargs = {"org_id": org_id, "plan": plan}
         if is_valid_and_complete:
             kwargs.update({"is_valid": True, "status": PreflightResult.Status.complete})
         return self.filter(**kwargs).order_by("-created_at").first()
@@ -782,8 +813,24 @@ class PreflightResult(models.Model):
         if self.user:
             return self.user.instance_url
 
-    def subscribable_by(self, user):
-        return self.user == user
+    def subscribable_by(self, user, session):
+        # TODO: It seems we don't get the correct value in the session when it is passed
+        # from the websocket consumer. Ideally we would restrict this to only users who
+        # have a valid scratch_org `uuid` in their session:
+        #
+        # scratch_org_id = session.get("scratch_org_id", None)
+        # scratch_org = (
+        #     scratch_org_id
+        #     and ScratchOrg.objects.filter(
+        #         uuid=scratch_org_id, status=ScratchOrg.Status.complete
+        #     ).first()
+        # )
+        # valid_session_uuid = scratch_org and scratch_org.org_id == self.org_id
+        # return self.user == user or valid_session_uuid
+        #
+        # But instead we allow any user to subscribe to scratch_org (user-less)
+        # preflights:
+        return self.user == user or not self.user
 
     def has_any_errors(self):
         return any(
@@ -850,7 +897,7 @@ class PreflightResult(models.Model):
             self.push_if_failed()
             self.push_if_canceled()
             self.push_if_invalidated()
-        except RuntimeError as error:
+        except RuntimeError as error:  # pragma: nocover
             logger.warn(f"RuntimeError: {error}")
 
         return ret
@@ -865,6 +912,63 @@ class PreflightResult(models.Model):
         )
         flow_coordinator.steps = steps
         flow_coordinator.run(org)
+
+
+class ScratchOrg(HashIdMixin, models.Model):
+    Status = Choices("started", "complete", "failed", "canceled")
+
+    plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
+    email = models.EmailField(null=True)
+
+    enqueued_at = models.DateTimeField(null=True)
+    job_id = models.UUIDField(null=True)
+    # This is set in a user's session to let them continue to access
+    # this job, without being otherwise auth'd:
+    uuid = models.UUIDField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    edited_at = models.DateTimeField(auto_now=True)
+    status = models.CharField(choices=Status, max_length=64, default=Status.started)
+    config = JSONField(null=True, blank=True, encoder=DjangoJSONEncoder)
+    org_id = models.CharField(null=True, blank=True, max_length=18)
+
+    def save(self, *args, **kwargs):
+        ret = super().save(*args, **kwargs)
+        if not self.enqueued_at:
+            from .jobs import create_scratch_org_job
+
+            job = create_scratch_org_job.delay(
+                plan_id=str(self.plan.id),
+                org_name=self.plan.org_config_name,
+                result_id=self.id,
+            )
+            self.job_id = job.id
+            self.enqueued_at = job.enqueued_at
+            # Yes, this bounces two saves:
+            super().save()
+        return ret
+
+    def subscribable_by(self, user, session):
+        # TODO: It seems we don't get the correct value in the session when it is passed
+        # from the websocket consumer. Ideally we would restrict this to only users who
+        # have a valid scratch_org `uuid` in their session:
+        #
+        # scratch_org_id = session.get("scratch_org_id", None)
+        # return scratch_org_id and scratch_org_id == str(self.uuid)
+        #
+        # But instead we allow any user to subscribe to scratch_orgs:
+        return True
+
+    def fail(self, error):
+        self.status = ScratchOrg.Status.failed
+        self.save()
+        async_to_sync(notify_org_finished)(self, error=error)
+
+    def complete(self, config):
+        self.status = ScratchOrg.Status.complete
+        self.config = config
+        self.org_id = config["org_id"]
+        self.save()
+        async_to_sync(notify_org_finished)(self)
 
 
 class SiteProfile(TranslatableModel):

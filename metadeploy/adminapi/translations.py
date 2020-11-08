@@ -3,8 +3,8 @@ import logging
 from django.conf import settings
 from parler.models import TranslatableModel
 
-from metadeploy.api.models import Translation
 from metadeploy.api.jobs import job
+from metadeploy.api.models import Translation
 
 logger = logging.getLogger(__name__)
 

@@ -3,14 +3,15 @@ import React from 'react';
 
 import CtaButton from '@/components/plans/ctaButton';
 import { getUrlParam, removeUrlParam } from '@/utils/api';
+import { SCRATCH_ORG_STATUSES, SUPPORTED_ORGS } from '@/utils/constants';
 
 import { render, rerenderWithI18n } from './../../utils';
 
 jest.mock('@/utils/api');
 
 afterEach(() => {
-  getUrlParam.mockClear();
-  removeUrlParam.mockClear();
+  getUrlParam.mockReset();
+  removeUrlParam.mockReset();
 });
 
 const defaultPlan = {
@@ -39,6 +40,7 @@ const defaultPlan = {
     },
   ],
   requires_preflight: true,
+  supported_orgs: 'Persistent',
 };
 
 const selectedSteps = new Set(['step-1']);
@@ -57,11 +59,12 @@ describe('<CtaButton />', () => {
   const setup = (options) => {
     const defaults = {
       plan: defaultPlan,
-      user: { valid_token_for: 'foo' },
+      user: { valid_token_for: 'foo', org_type: 'Developer Edition' },
       preflight: defaultPreflight,
       preventAction: false,
       clickThroughAgreement: null,
       selectedSteps,
+      scratchOrg: null,
     };
     const opts = { ...defaults, ...options };
     const renderFn = opts.rerenderFn ? rerenderWithI18n : render;
@@ -75,9 +78,11 @@ describe('<CtaButton />', () => {
         plan={opts.plan}
         preflight={opts.preflight}
         selectedSteps={opts.selectedSteps}
+        scratchOrg={opts.scratchOrg}
         preventAction={opts.preventAction}
         doStartPreflight={opts.doStartPreflight}
         doStartJob={opts.doStartJob}
+        doSpinScratchOrg={opts.doSpinScratchOrg}
       />,
       opts.rerenderFn,
     );
@@ -119,7 +124,7 @@ describe('<CtaButton />', () => {
       test('renders login btn', () => {
         const { getByText } = setup({
           preflight: null,
-          user: { valid_token_for: null },
+          user: { valid_token_for: null, org_type: 'Developer Edition' },
         });
 
         expect(
@@ -147,7 +152,7 @@ describe('<CtaButton />', () => {
     describe('no valid token', () => {
       test('renders login btn', () => {
         const { getByText } = setup({
-          user: { valid_token_for: null },
+          user: { valid_token_for: null, org_type: 'Developer Edition' },
         });
 
         expect(getByText('Log In to Install')).toBeVisible();
@@ -168,7 +173,7 @@ describe('<CtaButton />', () => {
       test('renders login btn', () => {
         const { getByText } = setup({
           preflight: { status: 'complete', is_valid: true, error_count: 1 },
-          user: { valid_token_for: null },
+          user: { valid_token_for: null, org_type: 'Developer Edition' },
         });
 
         expect(
@@ -201,21 +206,13 @@ describe('<CtaButton />', () => {
       test('renders login btn', () => {
         const { getByText } = setup({
           preflight: { status: 'failed', is_valid: true, error_count: 0 },
-          user: { valid_token_for: null },
+          user: { valid_token_for: null, org_type: 'Developer Edition' },
         });
 
         expect(
           getByText('Log In to Re-Run Pre-Install Validation'),
         ).toBeVisible();
       });
-    });
-  });
-
-  describe('unknown preflight status', () => {
-    test('renders nothing', () => {
-      const { container } = setup({ preflight: { status: 'foo' } });
-
-      expect(container.children).toHaveLength(0);
     });
   });
 
@@ -518,6 +515,222 @@ describe('<CtaButton />', () => {
         });
 
         expect(doStartPreflight).toHaveBeenCalledWith('plan-1');
+      });
+    });
+  });
+
+  describe('can create scratch orgs', () => {
+    const scratchOrgPlan = {
+      ...defaultPlan,
+      supported_orgs: SUPPORTED_ORGS.Scratch,
+      requires_preflight: false,
+    };
+    beforeAll(() => {
+      window.GLOBALS.SCRATCH_ORGS_AVAILABLE = 'foo@bar.buz';
+    });
+
+    afterAll(() => {
+      window.GLOBALS = {};
+    });
+
+    describe('unknown scratch org', () => {
+      test('renders loading btn', () => {
+        const { getByText } = setup({
+          plan: scratchOrgPlan,
+          scratchOrg: undefined,
+        });
+
+        expect(getByText('Loading…')).toBeVisible();
+      });
+    });
+
+    describe('scratch org spinning', () => {
+      test('renders loading btn', () => {
+        const { getByText } = setup({
+          plan: scratchOrgPlan,
+          scratchOrg: { status: SCRATCH_ORG_STATUSES.started },
+        });
+
+        expect(getByText('Creating Scratch Org…')).toBeVisible();
+      });
+    });
+
+    describe('no scratch org', () => {
+      test('renders create-org btn', () => {
+        const { getByText } = setup({
+          plan: scratchOrgPlan,
+          scratchOrg: null,
+        });
+
+        expect(getByText('Create Scratch Org')).toBeVisible();
+      });
+
+      describe('create-org click', () => {
+        test('opens modal', () => {
+          const { getByText, getByLabelText } = setup({
+            plan: scratchOrgPlan,
+            scratchOrg: null,
+            clickThroughAgreement: '<p>Please and thank you.</p>',
+          });
+          fireEvent.click(getByText('Create Scratch Org'));
+
+          expect(getByText('Product Terms of Use and Licenses')).toBeVisible();
+          expect(getByText('Please and thank you.')).toBeVisible();
+          expect(
+            getByLabelText('I confirm I have read', { exact: false }),
+          ).toBeVisible();
+          expect(getByText('Confirm & Next')).toBeVisible();
+        });
+
+        test('spins up scratch org', () => {
+          const doSpinScratchOrg = jest.fn();
+          const { getByText, getByLabelText } = setup({
+            plan: scratchOrgPlan,
+            scratchOrg: null,
+            clickThroughAgreement: '<p>Please and thank you.</p>',
+            doSpinScratchOrg,
+          });
+          fireEvent.click(getByText('Create Scratch Org'));
+          fireEvent.click(
+            getByLabelText('I confirm I have read', { exact: false }),
+          );
+          fireEvent.click(getByText('Confirm & Next'));
+          fireEvent.change(getByLabelText('*Email'), {
+            target: { value: 'foo@bar.buz' },
+          });
+          fireEvent.click(getByText('Confirm'));
+
+          expect(doSpinScratchOrg).toHaveBeenCalledWith(
+            'plan-1',
+            'foo@bar.buz',
+          );
+        });
+
+        describe('no click-through-agreement', () => {
+          test('opens modal to email page', () => {
+            const { getByText, queryByText } = setup({
+              plan: scratchOrgPlan,
+              scratchOrg: null,
+            });
+            fireEvent.click(getByText('Create Scratch Org'));
+
+            expect(queryByText('Product Terms of Use and Licenses')).toBeNull();
+            expect(getByText('Confirm')).toBeVisible();
+          });
+        });
+
+        describe('cancel click', () => {
+          test('closes modal', () => {
+            const { getByText, queryByText } = setup({
+              plan: scratchOrgPlan,
+              scratchOrg: null,
+            });
+            fireEvent.click(getByText('Create Scratch Org'));
+
+            expect(getByText('Confirm')).toBeVisible();
+
+            fireEvent.click(getByText('Cancel'));
+
+            expect(queryByText('Confirm')).toBeNull();
+          });
+        });
+      });
+    });
+
+    describe('no preflight', () => {
+      test('renders start-preflight btn', () => {
+        const { getByText } = setup({
+          plan: { ...scratchOrgPlan, requires_preflight: true },
+          scratchOrg: { status: SCRATCH_ORG_STATUSES.complete },
+          preflight: null,
+        });
+
+        expect(getByText('Start Pre-Install Validation')).toBeVisible();
+      });
+    });
+
+    describe('complete preflight, no errors', () => {
+      test('renders install btn', () => {
+        const { getByText } = setup({
+          plan: { ...scratchOrgPlan, requires_preflight: true },
+          scratchOrg: { status: SCRATCH_ORG_STATUSES.complete },
+        });
+
+        expect(getByText('Install')).toBeVisible();
+      });
+    });
+
+    describe('complete preflight, with errors', () => {
+      test('renders re-run-preflight btn', () => {
+        const { getByText } = setup({
+          plan: { ...scratchOrgPlan, requires_preflight: true },
+          scratchOrg: { status: SCRATCH_ORG_STATUSES.complete },
+          preflight: { status: 'complete', is_valid: true, error_count: 1 },
+        });
+
+        expect(getByText('Re-Run Pre-Install Validation')).toBeVisible();
+      });
+    });
+
+    describe('canceled preflight', () => {
+      test('renders re-run-preflight btn', () => {
+        const { getByText } = setup({
+          plan: { ...scratchOrgPlan, requires_preflight: true },
+          scratchOrg: { status: SCRATCH_ORG_STATUSES.complete },
+          preflight: { status: 'canceled', is_valid: true, error_count: 0 },
+        });
+
+        expect(getByText('Re-Run Pre-Install Validation')).toBeVisible();
+      });
+    });
+
+    describe('failed preflight', () => {
+      test('renders re-run-preflight btn', () => {
+        const { getByText } = setup({
+          plan: { ...scratchOrgPlan, requires_preflight: true },
+          scratchOrg: { status: SCRATCH_ORG_STATUSES.complete },
+          preflight: { status: 'failed', is_valid: true, error_count: 0 },
+        });
+
+        expect(getByText('Re-Run Pre-Install Validation')).toBeVisible();
+      });
+    });
+
+    describe('no preflight required', () => {
+      test('renders install btn', () => {
+        const { getByText } = setup({
+          plan: scratchOrgPlan,
+          scratchOrg: { status: SCRATCH_ORG_STATUSES.complete },
+        });
+
+        expect(getByText('Install')).toBeVisible();
+      });
+    });
+
+    describe('start-install (with preflight warnings) click', () => {
+      test('opens modal', () => {
+        const { getByText, getByLabelText } = setup({
+          plan: { ...scratchOrgPlan, requires_preflight: true },
+          scratchOrg: { status: SCRATCH_ORG_STATUSES.complete },
+          preflight: {
+            plan: 'plan-1',
+            status: 'complete',
+            results: {
+              'step-1': { status: 'warn', message: 'This is a warning.' },
+            },
+            is_valid: true,
+            error_count: 0,
+            warning_count: 1,
+            is_ready: true,
+          },
+        });
+        fireEvent.click(getByText('View Warnings to Continue Installation'));
+
+        expect(getByText('Potential Issues')).toBeVisible();
+        expect(getByText('This is a warning.')).toBeVisible();
+        expect(
+          getByLabelText('I understand these warnings', { exact: false }),
+        ).toBeVisible();
       });
     });
   });

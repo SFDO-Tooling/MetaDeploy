@@ -16,6 +16,7 @@ from .models import (
     PreflightResult,
     Product,
     ProductCategory,
+    ScratchOrg,
     SiteProfile,
     Step,
     Version,
@@ -25,9 +26,16 @@ from .paginators import ProductPaginator
 User = get_user_model()
 
 
-class IdOnlyField(serializers.CharField):
+class IdOnlyField(serializers.Field):
+    def __init__(self, *args, model=None, **kwargs):
+        self.model = model
+        return super().__init__(*args, **kwargs)
+
     def to_representation(self, value):
         return str(value.id)
+
+    def to_internal_value(self, data):
+        return self.model.objects.get(pk=data)
 
 
 class ErrorWarningCountMixin:
@@ -173,12 +181,14 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
             "tier",
             "slug",
             "old_slugs",
+            "order_key",
             "steps",
             "is_allowed",
             "is_listed",
             "not_allowed_instructions",
             "average_duration",
             "requires_preflight",
+            "supported_orgs",
         )
         circumspect_fields = ("steps", "preflight_message")
 
@@ -305,6 +315,7 @@ class ProductSerializer(CircumspectSerializerMixin, serializers.ModelSerializer)
             "is_listed",
             "order_key",
             "not_allowed_instructions",
+            "layout",
         )
         circumspect_fields = ("description",)
 
@@ -438,7 +449,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         return not most_recent_preflight.has_any_errors()
 
     @staticmethod
-    def _has_valid_steps(*, user, plan, steps, preflight):
+    def _has_valid_steps(*, plan, steps, preflight):
         """
         Every set in this method is a set of numeric Step PKs, from the
         local database.
@@ -455,8 +466,8 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             return value.all()
         return value
 
-    def _pending_job_exists(self, *, user):
-        return Job.objects.filter(status=Job.Status.started, org_id=user.org_id).first()
+    def _pending_job_exists(self, *, org_id):
+        return Job.objects.filter(status=Job.Status.started, org_id=org_id).first()
 
     def validate_plan(self, value):
         if not value.is_visible_to(self.context["request"].user):
@@ -480,11 +491,12 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
 
     def validate(self, data):
         user = self._get_from_data_or_instance(data, "user")
+        org_id = self._get_from_data_or_instance(data, "org_id") or user.org_id
         plan = self._get_from_data_or_instance(data, "plan")
         steps = self._get_from_data_or_instance(data, "steps", default=[])
 
         most_recent_preflight = PreflightResult.objects.most_recent(
-            user=user, plan=plan
+            org_id=org_id, plan=plan
         )
         no_valid_preflight = not self.instance and not self._has_valid_preflight(
             most_recent_preflight, plan=plan
@@ -493,7 +505,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             raise serializers.ValidationError(_("No valid preflight."))
 
         invalid_steps = not self.instance and not self._has_valid_steps(
-            user=user, plan=plan, steps=steps, preflight=most_recent_preflight
+            plan=plan, steps=steps, preflight=most_recent_preflight
         )
         if invalid_steps:
             raise serializers.ValidationError(_("Invalid steps for plan."))
@@ -501,7 +513,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         if "results" in data:
             self._validate_results(data)
 
-        pending_job = not self.instance and self._pending_job_exists(user=user)
+        pending_job = not self.instance and self._pending_job_exists(org_id=org_id)
         if pending_job:
             raise serializers.ValidationError(
                 _(
@@ -510,14 +522,15 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
                 )
             )
 
-        user_has_valid_token = all(user.token)
-        if not user_has_valid_token:
-            raise serializers.ValidationError(
-                _("The connection to your org has been lost. Please log in again.")
-            )
+        if user:
+            user_has_valid_token = all(user.token)
+            if not user_has_valid_token:
+                raise serializers.ValidationError(
+                    _("The connection to your org has been lost. Please log in again.")
+                )
 
-        data["org_type"] = user.org_type
-        data["full_org_type"] = user.full_org_type
+        data["org_type"] = user.org_type if user else None
+        data["full_org_type"] = user.full_org_type if user else None
         data["org_id"] = user.org_id
         return data
 
@@ -589,6 +602,7 @@ class JobSummarySerializer(serializers.ModelSerializer):
 
 
 class OrgSerializer(serializers.Serializer):
+    org_id = serializers.CharField()
     current_job = JobSummarySerializer()
     current_preflight = IdOnlyField()
 
@@ -608,3 +622,29 @@ class SiteSerializer(serializers.ModelSerializer):
             "company_logo",
             "favicon",
         )
+
+
+class ScratchOrgSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ScratchOrg
+        fields = (
+            "id",
+            "plan",
+            "email",
+            "enqueued_at",
+            "created_at",
+            "edited_at",
+            "status",
+            "org_id",
+        )
+        extra_kwargs = {
+            "email": {"required": True, "write_only": True},
+            "enqueued_at": {"read_only": True},
+            "created_at": {"read_only": True},
+            "edited_at": {"read_only": True},
+            "status": {"read_only": True},
+            "org_id": {"read_only": True},
+        }
+
+    id = serializers.CharField(read_only=True)
+    plan = IdOnlyField(model=Plan)

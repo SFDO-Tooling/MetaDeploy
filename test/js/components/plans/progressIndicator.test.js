@@ -8,19 +8,14 @@ describe('<ProgressIndicator />', () => {
   const setup = (options) => {
     const defaults = {
       userLoggedIn: true,
+      scratchOrgCreated: false,
       preflightStatus: null,
       preflightIsValid: false,
       preflightIsReady: false,
+      supportedOrgs: 'Persistent',
     };
     const opts = { ...defaults, ...options };
-    const { getByText } = render(
-      <ProgressIndicator
-        userLoggedIn={opts.userLoggedIn}
-        preflightStatus={opts.preflightStatus}
-        preflightIsValid={opts.preflightIsValid}
-        preflightIsReady={opts.preflightIsReady}
-      />,
-    );
+    const { getByText } = render(<ProgressIndicator {...opts} />);
     return { getByText };
   };
 
@@ -98,6 +93,34 @@ describe('<ProgressIndicator />', () => {
       expect(
         getByText('Step 2: Run pre-install validation - Error'),
       ).toBeVisible();
+      expect(getByText('Step 3: Install')).toBeVisible();
+    });
+  });
+
+  describe('only scratch orgs supported', () => {
+    test('shows "Create Scratch Org" as first step', () => {
+      const { getByText } = setup({
+        supportedOrgs: 'Scratch',
+      });
+
+      expect(getByText('Step 1: Create Scratch Org')).toBeVisible();
+      expect(getByText('Step 2: Run pre-install validation')).toBeVisible();
+      expect(getByText('Step 3: Install')).toBeVisible();
+    });
+  });
+
+  describe('both scratch orgs and persistent orgs supported', () => {
+    test('shows both options as first step', () => {
+      const { getByText } = setup({
+        userLoggedIn: false,
+        scratchOrgCreated: true,
+        supportedOrgs: 'Both',
+      });
+
+      expect(
+        getByText('Step 1: Log In or Create Scratch Org - Completed'),
+      ).toBeVisible();
+      expect(getByText('Step 2: Run pre-install validation')).toBeVisible();
       expect(getByText('Step 3: Install')).toBeVisible();
     });
   });

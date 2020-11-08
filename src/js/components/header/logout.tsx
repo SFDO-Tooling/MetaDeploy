@@ -6,7 +6,7 @@ import UNSAFE_DirectionSettings from '@salesforce/design-system-react/components
 import i18n from 'i18next';
 import * as React from 'react';
 
-import { FetchProductsSucceeded } from '@/store/products/actions';
+import { FetchOrgJobsSucceeded } from '@/store/org/actions';
 import { User } from '@/store/user/reducer';
 
 const Logout = ({
@@ -14,7 +14,7 @@ const Logout = ({
   doLogout,
 }: {
   user: User;
-  doLogout: () => Promise<FetchProductsSucceeded>;
+  doLogout: () => Promise<FetchOrgJobsSucceeded>;
 }) => (
   <UNSAFE_DirectionSettings.Consumer>
     {(direction: string) => {

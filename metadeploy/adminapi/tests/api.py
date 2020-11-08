@@ -34,6 +34,7 @@ class TestProductViewSet:
                     "title": "Sample Product 0",
                     "url": f"{url}/products/{product.id}",
                     "visible_to": None,
+                    "layout": "Default",
                 }
             ],
             "links": {"next": None, "previous": None},
@@ -60,6 +61,7 @@ class TestPlanViewSet:
                     "commit_ish": None,
                     "id": f"{plan.id}",
                     "is_listed": True,
+                    "order_key": 0,
                     "preflight_checks": [],
                     "preflight_message_additional": "",
                     "plan_template": (
@@ -73,6 +75,8 @@ class TestPlanViewSet:
                     "url": f"http://testserver/admin/rest/plans/{plan.id}",
                     "version": version_url,
                     "visible_to": None,
+                    "supported_orgs": "Persistent",
+                    "org_config_name": "release",
                 }
             ],
             "links": {"next": None, "previous": None},
@@ -93,6 +97,7 @@ class TestPlanViewSet:
             "commit_ish": None,
             "id": str(plan.id),
             "is_listed": True,
+            "order_key": 0,
             "preflight_checks": [],
             "preflight_message_additional": "",
             "plan_template": (
@@ -118,6 +123,8 @@ class TestPlanViewSet:
             "url": url,
             "version": f"http://testserver/admin/rest/versions/{plan.version.id}",
             "visible_to": None,
+            "supported_orgs": "Persistent",
+            "org_config_name": "release",
         }
 
     def test_create(self, admin_api_client, version_factory, plan_template_factory):
@@ -128,6 +135,7 @@ class TestPlanViewSet:
             url,
             {
                 "title": "Sample plan",
+                "order_key": 0,
                 "plan_template": (
                     f"http://testserver/admin/rest/plantemplates/{plan_template.id}"
                 ),
@@ -148,6 +156,8 @@ class TestPlanViewSet:
                     },
                 ],
                 "version": f"http://testserver/admin/rest/versions/{version.id}",
+                "supported_orgs": "Persistent",
+                "org_config_name": "release",
             },
             format="json",
         )
@@ -161,6 +171,7 @@ class TestPlanViewSet:
             "commit_ish": None,
             "id": plan_id,
             "is_listed": True,
+            "order_key": 0,
             "preflight_checks": [],
             "preflight_message_additional": "",
             "plan_template": (
@@ -198,6 +209,8 @@ class TestPlanViewSet:
             "url": f"http://testserver/admin/rest/plans/{plan_id}",
             "version": f"http://testserver/admin/rest/versions/{version.id}",
             "visible_to": None,
+            "supported_orgs": "Persistent",
+            "org_config_name": "release",
         }
         assert response.json() == expected
 
