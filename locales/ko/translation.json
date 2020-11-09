@@ -113,7 +113,7 @@
   "We couldn’t find any products. Try again later?": "제품을 찾을 수 없습니다. 나중에 다시 시도하시겠습니까?",
   "Who can access this shared link?": "이 공유 링크에 액세스할 수 있는 사람은 누구입니까?",
   "You are in offline mode. We are trying to reconnect, but you may need to": "현재 오프라인 모드입니다. 다시 연결하고 있지만 다음 조치를 취해야 할 수 있습니다.",
-  "a_or_b": "<0><0></0> 또는 </0><1></1>",
+  "a_or_b": "<0></0> 또는 <2></2>",
   "anErrorOccurred": "오류가 발생했습니다. <1>홈 페이지</1>를 사용하시겠습니까?",
   "completed": "완료됨",
   "credentialsHoldTime": "Salesforce 조직의 자격 증명이 <2>{{token_minutes}}</2>분 동안 또는 요청된 설치가 완료될 때까지 보류됩니다.",

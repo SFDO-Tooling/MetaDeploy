@@ -113,7 +113,7 @@
   "We couldn’t find any products. Try again later?": "製品が見つかりません。しばらくしてからもう一度試しますか?",
   "Who can access this shared link?": "この共有リンクには誰がアクセスできますか?",
   "You are in offline mode. We are trying to reconnect, but you may need to": "オフラインモードになっています。再接続を試行していますが、次のことを行う必要がある可能性があります:",
-  "a_or_b": "<0><0></0>または</0><1></1>",
+  "a_or_b": "<0></0>または<2></2>",
   "anErrorOccurred": "エラーが発生しました。<1>ホームページ</1>を試しますか?",
   "completed": "完了",
   "credentialsHoldTime": "Salesforce 組織へのログイン情報は、<2>{{token_minutes}}</2> 分間または要求したインストールが完了するまで保持されます。",

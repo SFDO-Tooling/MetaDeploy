@@ -113,7 +113,7 @@
   "We couldn’t find any products. Try again later?": "Nobenega izdelka ni mogoče najti. Ali želite znova poskusiti pozneje?",
   "Who can access this shared link?": "Kdo ima dostop do te povezave v skupni rabi?",
   "You are in offline mode. We are trying to reconnect, but you may need to": "Ste v načinu brez povezave. Poskušamo znova vzpostaviti povezavo, vendar boste morali morda",
-  "a_or_b": "<0><0></0> ali </0><1></1>",
+  "a_or_b": "<0></0> ali <2></2>",
   "anErrorOccurred": "Prišlo je do napake. Ali želite poizkusiti <1>domačo stran</1>?",
   "completed": "dokončano",
   "credentialsHoldTime": "Poverilnice do vaše organizacije Salesforce bodo zadržane le za <2>{{token_minutes}}</2> min. ali dokler zahtevana namestitev ne bo dokončana.",
