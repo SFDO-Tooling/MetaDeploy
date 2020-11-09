@@ -200,7 +200,7 @@
   "reload the page.": "znova naložite to stran.",
   "required": "obvezno",
   "skipped": "preskočeno",
-  "switchOrg": "Ali je to pravilna organizacija? Če ni, <1></1>",
+  "switchOrg": "Ali je to pravilna organizacija? Če ni, <2></2>",
   "versionNotFound": "Ne najdemo različice, ki jo iščete. Ali želite poizkusiti <2>seznam vseh izdelkov</2>?",
   "versionNotFoundMostRecent": "Ne najdemo različice, ki jo iščete. Ali želite poizkusiti <2>najnovejšo različico</2> tega izdelka ali <6>seznam vseh izdelkov</6>?",
   "waiting to install": "čakanje na namestitev",

@@ -200,7 +200,7 @@
   "reload the page.": "genindlæse siden.",
   "required": "krævet",
   "skipped": "ignoreret",
-  "switchOrg": "Er dette den korrekte organisation? Hvis ikke, skal du <1></1>",
+  "switchOrg": "Er dette den korrekte organisation? Hvis ikke, skal du <2></2>",
   "versionNotFound": "Vi kan ikke finde den version, du søger efter. Vil du prøve <2>listen over alle produkter</2>?",
   "versionNotFoundMostRecent": "Vi kan ikke finde den version, du søger efter. Vil du prøve <2>den seneste version</2> af produktet eller <6>listen over alle produkter</6>?",
   "waiting to install": "vente med at installere",

@@ -200,7 +200,7 @@
   "reload the page.": "tải lại trang.",
   "required": "bắt buộc",
   "skipped": "đã bỏ qua",
-  "switchOrg": "Có đúng là tổ chức này không? Nếu không, vui lòng <1></1>",
+  "switchOrg": "Có đúng là tổ chức này không? Nếu không, vui lòng <2></2>",
   "versionNotFound": "Chúng tôi không tìm được phiên bản mà bạn đang tìm kiếm. Thử <2>danh sách tất cả sản phẩm</2>?",
   "versionNotFoundMostRecent": "Chúng tôi không tìm được phiên bản mà bạn đang tìm kiếm. Thử <2>phiên bản mới nhất</2> của sản phẩm đó hoặc <6>danh sách tất cả sản phẩm</6>?",
   "waiting to install": "đang chờ cài đặt",

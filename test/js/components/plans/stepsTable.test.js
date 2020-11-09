@@ -442,9 +442,9 @@ describe('<StepsTable />', () => {
         });
 
         expect(getByText('Installing…')).toBeVisible();
-        expect(getByText('skipped')).toBeVisible();
-        expect(getByText('completed')).toBeVisible();
-        expect(getByText('waiting to install')).toBeVisible();
+        expect(getByText('Skipped')).toBeVisible();
+        expect(getByText('Completed')).toBeVisible();
+        expect(getByText('Waiting to install')).toBeVisible();
       });
 
       describe('failed', () => {
@@ -462,10 +462,9 @@ describe('<StepsTable />', () => {
             },
           });
 
-          expect(getByText('error')).toBeVisible();
           expect(getByText('totally failed')).toBeVisible();
           expect(queryByText('Installing…')).toBeNull();
-          expect(queryByText('waiting to install')).toBeNull();
+          expect(queryByText('Waiting to install')).toBeNull();
         });
       });
     });

@@ -200,7 +200,7 @@
   "reload the page.": "重新加载页面。",
   "required": "必填",
   "skipped": "已跳过",
-  "switchOrg": "这是否是正确组织？如果不是，请<1></1>",
+  "switchOrg": "这是否是正确组织？如果不是，请<2></2>",
   "versionNotFound": "我们未找到您正在查找的版本。请尝试<2>所有产品的列表</2>？",
   "versionNotFoundMostRecent": "我们未找到您正在查找的版本。请尝试该产品的<2>最新版本</2>，或<6>所有产品的列表</6>？",
   "waiting to install": "正在等待安装",

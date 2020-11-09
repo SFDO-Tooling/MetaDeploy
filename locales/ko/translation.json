@@ -200,7 +200,7 @@
   "reload the page.": "페이지를 다시 로드합니다.",
   "required": "필수",
   "skipped": "건너뜀",
-  "switchOrg": "올바른 조직입니까? 아닌 경우 <1></1>",
+  "switchOrg": "올바른 조직입니까? 아닌 경우 <2></2>",
   "versionNotFound": "원하는 버전을 찾을 수 없습니다. <2>모든 제품 목록</2>을 사용하시겠습니까?",
   "versionNotFoundMostRecent": "원하는 버전을 찾을 수 없습니다. 해당 제품의 <2>가장 최근 버전</2>이나 <6>모든 제품 목록</6>을 사용하시겠습니까?",
   "waiting to install": "설치 대기 중",

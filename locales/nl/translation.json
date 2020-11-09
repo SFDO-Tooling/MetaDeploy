@@ -200,7 +200,7 @@
   "reload the page.": "de pagina opnieuw laden.",
   "required": "verplicht",
   "skipped": "overgeslagen",
-  "switchOrg": "Is dit de juiste organisatie? Als dit niet het geval is:  <1></1>",
+  "switchOrg": "Is dit de juiste organisatie? Als dit niet het geval is:  <2></2>",
   "versionNotFound": "We kunnen de versie niet vinden, die u momenteel zoekt. De <2>lijst van alle producten</2> proberen>?",
   "versionNotFoundMostRecent": "We kunnen de versie niet vinden, die u momenteel zoekt. De <2>recentste versie</2> van dat product proberen of anders de <6>lijst van alle producten</6>?",
   "waiting to install": "wachten op installeren",

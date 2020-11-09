@@ -200,7 +200,7 @@
   "reload the page.": "znovu načíst stránku.",
   "required": "povinné",
   "skipped": "přeskočeno",
-  "switchOrg": "Je toto správná organizaci? Pokud ne, <1></1>",
+  "switchOrg": "Je toto správná organizaci? Pokud ne, <2></2>",
   "versionNotFound": "Nemůžeme najít verzi, kterou hledáte. Chcete zkusit <2>seznam všech produktů</2>?",
   "versionNotFoundMostRecent": "Nemůžeme najít verzi, kterou hledáte. Chcete zkusit <2>nejnovější verzi</2> tohoto produktu nebo <6>seznam všech produktů</6>?",
   "waiting to install": "čeká se na instalaci",
