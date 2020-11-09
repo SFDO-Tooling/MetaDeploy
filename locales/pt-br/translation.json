@@ -200,7 +200,7 @@
   "reload the page.": "recarregar a página.",
   "required": "obrigatório",
   "skipped": "ignorado",
-  "switchOrg": "Essa é a organização correta? Se não for, <1></1>",
+  "switchOrg": "Essa é a organização correta? Se não for, <2></2>",
   "versionNotFound": "Não conseguimos encontrar a versão que você está procurando. Tentar <2>a lista com todos os produtos</2>?",
   "versionNotFoundMostRecent": "Não conseguimos encontrar a versão que você está procurando. Tentar <2>a versão mais recente</2> desse produto, ou a <6>lista com todos os produtos</6>?",
   "waiting to install": "aguardando a instalação",

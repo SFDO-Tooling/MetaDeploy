@@ -200,7 +200,7 @@
   "reload the page.": "laddar om sidan.",
   "required": "obligatoriskt",
   "skipped": "överhoppad",
-  "switchOrg": "Är detta korrekt organisation? Om inte, <1></1>",
+  "switchOrg": "Är detta korrekt organisation? Om inte, <2></2>",
   "versionNotFound": "Vi kan inte hitta versionen du letar efter. Prova <2>listan över alla produkter</2>?",
   "versionNotFoundMostRecent": "Vi kan inte hitta versionen du letar efter. Prova <2>den senaste versionen</2>av denna produkt, eller <6>listan över alla produkter</6>?",
   "waiting to install": "Väntar på installation",

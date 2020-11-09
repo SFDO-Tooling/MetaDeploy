@@ -200,7 +200,7 @@
   "reload the page.": "lataa sivu.",
   "required": "pakollinen",
   "skipped": "ohitettu",
-  "switchOrg": "Onko tämä oikea organisaatio? Jos ei, <1></1>",
+  "switchOrg": "Onko tämä oikea organisaatio? Jos ei, <2></2>",
   "versionNotFound": "Emme löydä etsimääsi versiota. Kokeillaanko <2>kaikkien tuotteiden luetteloa</2>?",
   "versionNotFoundMostRecent": "Emme löydä etsimääsi versiota. Kokeillaanko <2>uusinta versiota</2> tästä tuotteesta tai <6>kaikkien tuotteiden luetteloa</6>?",
   "waiting to install": "odotetaan asennusta",

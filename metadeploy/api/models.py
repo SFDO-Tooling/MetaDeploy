@@ -93,7 +93,7 @@ class AllowedListOrg(models.Model):
         help_text=("A description of the org for future reference",)
     )
     created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -981,7 +981,7 @@ class SiteProfile(TranslatableModel):
         copyright_notice=MarkdownField(property_suffix="_markdown", blank=True),
     )
 
-    product_logo = models.ImageField(blank=True)
+    show_metadeploy_wordmark = models.BooleanField(default=True)
     company_logo = models.ImageField(blank=True)
     favicon = models.ImageField(blank=True)
 

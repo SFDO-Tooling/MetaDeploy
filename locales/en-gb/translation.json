@@ -200,7 +200,7 @@
   "reload the page.": "reload the page.",
   "required": "required",
   "skipped": "skipped",
-  "switchOrg": "Is this the correct org? If not, please <1></1>",
+  "switchOrg": "Is this the correct org? If not, please <2></2>",
   "versionNotFound": "We can’t find the version you’re looking for. Try the <2>list of all products</2>?",
   "versionNotFoundMostRecent": "We can’t find the version you’re looking for. Try the <2>most recent version</2> of that product, or the <6>list of all products</6>?",
   "waiting to install": "waiting to install",

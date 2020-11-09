@@ -200,7 +200,7 @@
   "reload the page.": "laste siden på nytt.",
   "required": "obligatorisk",
   "skipped": "hoppet over",
-  "switchOrg": "Er dette riktig organisasjon? Hvis ikke, <1></1>",
+  "switchOrg": "Er dette riktig organisasjon? Hvis ikke, <2></2>",
   "versionNotFound": "Vi finner ikke versjonen du ser etter. Vil du prøve <2>listen over alle produkter</2>?",
   "versionNotFoundMostRecent": "Vi finner ikke versjonen du ser etter. Vil du prøve <2>den nyeste versjonen</2> av produktet eller <6>listen over alle produkter</6>?",
   "waiting to install": "venter på å installere",

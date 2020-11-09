@@ -200,7 +200,7 @@
   "reload the page.": "重新載入頁面。",
   "required": "必要",
   "skipped": "已略過",
-  "switchOrg": "這是正確的組織嗎？如果不是，請<1></1>",
+  "switchOrg": "這是正確的組織嗎？如果不是，請<2></2>",
   "versionNotFound": "我們找不到您正在尋找的版本。嘗試<2>所有產品清單</2>？",
   "versionNotFoundMostRecent": "我們找不到您正在尋找的版本。嘗試該產品的<2>最新版本</2>，或嘗試<6>所有產品清單</6>？",
   "waiting to install": "等待安裝中",

@@ -11,6 +11,7 @@ def env(request):
     site_profile = getattr(get_current_site(request), "siteprofile", None)
     if site_profile:
         site_profile.set_current_language(get_language())
+        site_profile.refresh_from_db()
     site_serializer = SiteSerializer(site_profile)
     GLOBALS = {
         "PREFLIGHT_LIFETIME_MINUTES": settings.PREFLIGHT_LIFETIME_MINUTES,

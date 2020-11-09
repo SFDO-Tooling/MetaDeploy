@@ -200,7 +200,7 @@
   "reload the page.": "az oldal újbóli betöltése.",
   "required": "kötelező",
   "skipped": "kihagyva",
-  "switchOrg": "Ez a helyes szervezet? Ha nem, <1></1>",
+  "switchOrg": "Ez a helyes szervezet? Ha nem, <2></2>",
   "versionNotFound": "Nem találjuk a keresett verziót. Megpróbálkozik <2>az összes termék listájával</2>?",
   "versionNotFoundMostRecent": "Nem találjuk a keresett verziót. Megpróbálkozik ugyanezen termék <2>legújabb verziójával</2>, vagy <6>az összes termék listájával</6>?",
   "waiting to install": "várakozás a telepítésre",

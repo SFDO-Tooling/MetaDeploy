@@ -200,7 +200,7 @@
   "reload the page.": "reîncărcați pagina.",
   "required": "obligatoriu",
   "skipped": "ignorat",
-  "switchOrg": "Aceasta este organizația corectă? Dacă nu, vă rugăm să <1></1>",
+  "switchOrg": "Aceasta este organizația corectă? Dacă nu, vă rugăm să <2></2>",
   "versionNotFound": "Imposibil de găsit versiunea căutată. Încercați <2>lista tuturor produselor</2>?",
   "versionNotFoundMostRecent": "Imposibil de găsit versiunea căutată. Încercați </ 2>cea mai recentă versiune a produsului</2> sau <6>lista tuturor produselor</6>?",
   "waiting to install": "așteptarea instalării",

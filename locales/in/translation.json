@@ -200,7 +200,7 @@
   "reload the page.": "muat ulang halaman.",
   "required": "wajib diisi",
   "skipped": "dilewati",
-  "switchOrg": "Apakah ini adalah organisasi yang benar? Jika tidak, silakan <1></1>",
+  "switchOrg": "Apakah ini adalah organisasi yang benar? Jika tidak, silakan <2></2>",
   "versionNotFound": "Kami tidak dapat menemukan versi yang Anda cari. Coba <2>daftar semua produk</2>?",
   "versionNotFoundMostRecent": "Kami tidak dapat menemukan versi yang Anda cari. Coba <2>versi terbaru</2> dari produk tersebut, atau <6>daftar semua produk</6>?",
   "waiting to install": "menunggu untuk diinstal",
