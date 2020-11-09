@@ -113,7 +113,7 @@
   "We couldn’t find any products. Try again later?": "Emme löytäneet yhtään tuotetta. Yritetäänkö myöhemmin uudelleen?",
   "Who can access this shared link?": "Kuka saa käyttöönsä tämän jaetun linkin?",
   "You are in offline mode. We are trying to reconnect, but you may need to": "Olet offline-tilassa. Yritämme muodostaa yhteyttä uudelleen, mutta sinun pitää ehkä",
-  "a_or_b": "<0><0></0> tai </0><1></1>",
+  "a_or_b": "<0></0> tai <2></2>",
   "anErrorOccurred": "Tapahtui virhe. Kokeillaanko <1>kotisivua</1>?",
   "completed": "valmis",
   "credentialsHoldTime": "Salesforce-organisaation käyttöoikeustietoja säilytetään vain <2>{{token_minutes}}</2> minuutin tai kunnes pyytämäsi asennus on valmis.",

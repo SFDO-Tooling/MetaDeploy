@@ -40,22 +40,22 @@ const NotAllowed = ({
       </div>
     ) : null}
     <div className="slds-align_absolute-center">
-      <Trans i18nKey="a_or_b">
-        <div className="slds-text-longform slds-text-body_regular">
+      <div className="slds-text-longform slds-text-body_regular">
+        <Trans i18nKey="a_or_b">
           <NotAllowedLink link={link} />
           {' or '}
-        </div>
-        <Login
-          id="product-not-allowed-login"
-          label={
-            isLoggedIn
-              ? i18n.t('log in with a different org')
-              : i18n.t('log in')
-          }
-          buttonClassName="slds-p-horizontal_xxx-small"
-          buttonVariant="base"
-        />
-      </Trans>
+          <Login
+            id="product-not-allowed-login"
+            label={
+              isLoggedIn
+                ? i18n.t('log in with a different org')
+                : i18n.t('log in')
+            }
+            buttonClassName="slds-p-horizontal_xxx-small"
+            buttonVariant="base"
+          />
+        </Trans>
+      </div>
     </div>
   </>
 );
