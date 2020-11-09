@@ -67,7 +67,7 @@ export const LoginBtn = ({
     triggerClassName="slds-size_full"
     label={label}
     menuPosition="relative"
-    nubbinPosition="top"
+    flipped
     redirectParams={redirectParams}
   />
 );
