@@ -7,6 +7,7 @@ from django.contrib.auth import get_user_model
 from django.core import exceptions
 from django.core.cache import cache
 from django.db.models import Q
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, mixins, status, viewsets
@@ -381,3 +382,20 @@ class OrgViewSet(viewsets.ViewSet):
             response[org_id] = self._prepare_org_serialization(org_id)
 
         return Response(response)
+
+
+class ScratchOrgViewSet(viewsets.GenericViewSet):
+    permission_classes = (AllowAny,)
+    serializer_class = ScratchOrgSerializer
+
+    def get_queryset(self):
+        scratch_org_id = self.request.session.get("scratch_org_id", None)
+        return ScratchOrg.objects.filter(
+            uuid=scratch_org_id, status=ScratchOrg.Status.complete
+        )
+
+    @action(detail=True, methods=["GET"])
+    def redirect(self, request, pk=None):
+        scratch_org = self.get_object()
+        url = scratch_org.get_login_url()
+        return HttpResponseRedirect(redirect_to=url)

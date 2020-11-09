@@ -176,22 +176,22 @@ class ShareModal extends React.Component<WrappedProps> {
           label={i18n.t('Cancel')}
           onClick={this.handleClose}
         />,
-        <Button
-          key="submit"
-          label={
-            <>
-              <Icon
-                containerClassName="slds-p-right_x-small"
-                category="utility"
-                name="new_window"
-                size="x-small"
-                inverse
-              />
-              {i18n.t('View Scratch Org')}
-            </>
-          }
-          variant="brand"
-        />,
+        <a
+          key="view-org"
+          href={window.api_urls.scratch_org_redirect(scratchOrg.id)}
+          target="_blank"
+          rel="noreferrer noopener"
+          className="slds-button slds-button_brand"
+        >
+          <Icon
+            containerClassName="slds-p-right_x-small"
+            category="utility"
+            name="new_window"
+            size="x-small"
+            inverse
+          />
+          {i18n.t('View Scratch Org')}
+        </a>,
       ];
     }
     return null;

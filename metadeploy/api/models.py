@@ -4,7 +4,7 @@ from typing import Union
 
 from asgiref.sync import async_to_sync
 from colorfield.fields import ColorField
-from cumulusci.core.config import FlowConfig
+from cumulusci.core.config import FlowConfig, OrgConfig
 from cumulusci.core.flowrunner import (
     FlowCoordinator,
     PreflightFlowCoordinator,
@@ -12,6 +12,7 @@ from cumulusci.core.flowrunner import (
 )
 from cumulusci.core.tasks import BaseTask
 from cumulusci.core.utils import import_class
+from cumulusci.oauth.salesforce import jwt_session
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
@@ -955,6 +956,23 @@ class ScratchOrg(HashIdMixin, models.Model):
         self.org_id = config["org_id"]
         self.save()
         async_to_sync(notify_org_finished)(self)
+
+    def get_refreshed_org_config(self):
+        org_config = OrgConfig(self.config, self.plan.org_config_name)
+        info = jwt_session(
+            settings.CONNECTED_APP_CLIENT_ID,
+            settings.CONNECTED_APP_CLIENT_KEY,
+            org_config.username,
+            org_config.instance_url,
+        )
+        org_config.config.update(info)
+        org_config._load_userinfo()
+        org_config._load_orginfo()
+        return org_config
+
+    def get_login_url(self):
+        org_config = self.get_refreshed_org_config()
+        return org_config.start_url
 
 
 class SiteProfile(TranslatableModel):

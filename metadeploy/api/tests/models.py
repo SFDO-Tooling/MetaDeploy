@@ -1,3 +1,4 @@
+from contextlib import ExitStack
 from datetime import timedelta
 from unittest import mock
 
@@ -541,6 +542,23 @@ class TestJob:
 
         preflight.refresh_from_db()
         assert not preflight.is_valid
+
+
+@pytest.mark.django_db
+class TestScratchOrg:
+    def test_get_login_url(self, scratch_org_factory):
+        with ExitStack() as stack:
+            jwt_session = stack.enter_context(
+                mock.patch("metadeploy.api.models.jwt_session")
+            )
+            OrgConfig = stack.enter_context(
+                mock.patch("metadeploy.api.models.OrgConfig")
+            )
+            OrgConfig.return_value = mock.MagicMock(start_url="https://example.com")
+
+            scratch_org = scratch_org_factory()
+            assert scratch_org.get_login_url() == "https://example.com"
+            assert jwt_session.called
 
 
 @pytest.mark.django_db
