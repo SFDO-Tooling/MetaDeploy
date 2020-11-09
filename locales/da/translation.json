@@ -113,7 +113,7 @@
   "We couldn’t find any products. Try again later?": "Vi kunne ikke finde nogen produkter. Prøv igen senere?",
   "Who can access this shared link?": "Hvem har adgang til dette delte link?",
   "You are in offline mode. We are trying to reconnect, but you may need to": "Du er i offline tilstand. Vi forsøger at oprette forbindelse igen, med du skal muligvis",
-  "a_or_b": "<0><0></0> eller </0><1></1>",
+  "a_or_b": "<0></0> eller <2></2>",
   "anErrorOccurred": "Der opstod en fejl. Prøv <1>startsiden</1>?",
   "completed": "fuldført",
   "credentialsHoldTime": "Legitimationsoplysningerne til din Salesforce-organisation vil kun blive bevaret i <2>{{token_minutes}}</2> minut, eller indtil din ønskede installation er fuldført.",

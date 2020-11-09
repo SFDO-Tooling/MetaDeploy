@@ -113,7 +113,7 @@
   "We couldn’t find any products. Try again later?": "Nem találtunk termékeket. Megpróbálja újból később?",
   "Who can access this shared link?": "Ki férhet hozzá ehhez a megosztott hivatkozáshoz?",
   "You are in offline mode. We are trying to reconnect, but you may need to": "Ön offline módban van. Próbálunk újrakapcsolódni, azonban lehetséges, hogy a következőt kell tennie:",
-  "a_or_b": "<0><0></0> vagy </0><1></1>",
+  "a_or_b": "<0></0> vagy <2></2>",
   "anErrorOccurred": "Hiba történt. Megpróbálja a <1>kezdőoldalt</1>?",
   "completed": "befejezve",
   "credentialsHoldTime": "A Salesforce-szervezetéhez tartozó hitelesítő adatok csak <2>{{token_minutes}}</2> percig, vagy a kért telepítés befejezéséig lesznek megtartva.",

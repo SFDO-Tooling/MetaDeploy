@@ -113,7 +113,7 @@
   "We couldn’t find any products. Try again later?": "Nu am găsit niciun produs. Încercați mai târziu?",
   "Who can access this shared link?": "Cine are acces la acest link partajat?",
   "You are in offline mode. We are trying to reconnect, but you may need to": "Sunteți în modul offline. Încercăm să restabilim conexiunea dar poate fi necesar să",
-  "a_or_b": "<0><0></0> sau </0><1></1>",
+  "a_or_b": "<0></0> sau <2></2>",
   "anErrorOccurred": "A apărut o eroare. Încercați <1>pagina de pornire</1>?",
   "completed": "finalizat",
   "credentialsHoldTime": "Acreditările de acces la organizația Salesforce se păstrează timp de <2>{{token_minutes}}</2> minut sau până la terminarea instalării solicitate.",

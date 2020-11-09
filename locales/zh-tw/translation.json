@@ -113,7 +113,7 @@
   "We couldn’t find any products. Try again later?": "我們找不到任何產品。稍後再試一次？",
   "Who can access this shared link?": "誰能夠存取此共用連結？",
   "You are in offline mode. We are trying to reconnect, but you may need to": "您目前為離線模式。我們正嘗試重新連線，但您可能需要",
-  "a_or_b": "<0><0></0> 或 </0><1></1>",
+  "a_or_b": "<0></0> 或 <2></2>",
   "anErrorOccurred": "發生錯誤。嘗試<1>首頁</1>？",
   "completed": "已完成",
   "credentialsHoldTime": "您 Salesforce 組織的認證將保留 <2>{{token_minutes}}</2> 分鐘，或直到您要求的安裝完成為止。",
