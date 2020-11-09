@@ -93,7 +93,7 @@ CONNECTED_APP_CALLBACK_URL:
     If you're an OddBird, you can find the following values in the shared Keybase team folder -- ``metadeploy/env``
 
 CONNECTED_APP_CLIENT_ID:
-    Consumer key of the connected app that MetaDeploy will use for authenticating to any persistent org. If you're and OddBird you can retrieve this value
+    Consumer key of the connected app that MetaDeploy will use for authenticating to any persistent org.
 
 CONNECTED_APP_CLIENT_SECRET:
     Consumer secret of the connected app.
