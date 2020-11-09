@@ -113,7 +113,7 @@
   "We couldn’t find any products. Try again later?": "Herhangi bir ürün bulamadık. Tekrar denensin mi?",
   "Who can access this shared link?": "Bu paylaşılan bağlantıya kimler erişebilir?",
   "You are in offline mode. We are trying to reconnect, but you may need to": "Çevrim dışı moddasınız. Yeniden bağlantı kurmaya çalışıyoruz ancak şunları yapmanız gerekebilir",
-  "a_or_b": "<0><0></0> veya </0><1></1>",
+  "a_or_b": "<0></0> veya <2></2>",
   "anErrorOccurred": "Bir hata oluştu. <1>Ana sayfa</1> denensin mi?",
   "completed": "tamamlandı",
   "credentialsHoldTime": "Salesforce kuruluşunuz için kimlik bilgileri yalnızca <2>{{token_minutes}}</2> dakika boyunca ya da talep ettiğiniz yükleme işlemi tamamlanana kadar saklanacaktır.",

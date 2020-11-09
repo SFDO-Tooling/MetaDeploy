@@ -113,7 +113,7 @@
   "We couldn’t find any products. Try again later?": "Nie udało nam się znaleźć żadnych produktów. Czy spróbować ponownie później?",
   "Who can access this shared link?": "Kto może uzyskać dostęp do tego udostępnionego linku?",
   "You are in offline mode. We are trying to reconnect, but you may need to": "Jesteś w trybie offline. Próbujemy ponownie nawiązać połączenie, ale może być konieczne",
-  "a_or_b": "<0><0></0> lub </0><1></1>",
+  "a_or_b": "<0></0> lub <2></2>",
   "anErrorOccurred": "Wystąpił błąd. Przejść na <1>stronę główną</1>?",
   "completed": "ukończono",
   "credentialsHoldTime": "Dane uwierzytelniające Twojej organizacji Salesforce będą utrzymywane tylko przez <2>{{token_minutes}}</2> min. albo do momentu ukończenia Twojej instalacji.",
