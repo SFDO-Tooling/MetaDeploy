@@ -1,7 +1,9 @@
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
 import Toasts from '@/components/plans/toasts';
+
+import { render, rerenderWithI18n } from './../../utils';
 
 const defaultJob = {
   status: 'started',
@@ -43,7 +45,7 @@ describe('<Toasts />', () => {
     test('renders toast with message', () => {
       const { getByText, rerender } = setup();
       const job = { status: 'failed' };
-      rerender(<Toasts job={job} label={defaultLabel} />);
+      rerenderWithI18n(<Toasts job={job} label={defaultLabel} />, rerender);
 
       expect(getByText('Installation has failed.')).toBeVisible();
     });
@@ -53,7 +55,7 @@ describe('<Toasts />', () => {
     test('renders toast with message', () => {
       const { getByText, rerender } = setup();
       const job = { status: 'canceled' };
-      rerender(<Toasts job={job} label={defaultLabel} />);
+      rerenderWithI18n(<Toasts job={job} label={defaultLabel} />, rerender);
 
       expect(getByText('Installation has been canceled.')).toBeVisible();
     });
@@ -63,7 +65,10 @@ describe('<Toasts />', () => {
     test('renders toast with message', () => {
       const { getByText, rerender } = setup();
       const preflight = { status: 'canceled' };
-      rerender(<Toasts preflight={preflight} label="Pre-install validation" />);
+      rerenderWithI18n(
+        <Toasts preflight={preflight} label="Pre-install validation" />,
+        rerender,
+      );
 
       expect(getByText('Pre-install validation has failed.')).toBeVisible();
     });
@@ -73,7 +78,7 @@ describe('<Toasts />', () => {
     test('renders toast with message', () => {
       const { getByText, rerender } = setup();
       const job = { status: 'complete', error_count: 1 };
-      rerender(<Toasts job={job} label={defaultLabel} />);
+      rerenderWithI18n(<Toasts job={job} label={defaultLabel} />, rerender);
 
       expect(getByText('Installation completed with errors.')).toBeVisible();
     });
@@ -87,7 +92,7 @@ describe('<Toasts />', () => {
         error_count: 0,
         warning_count: 1,
       };
-      rerender(<Toasts job={job} label={defaultLabel} />);
+      rerenderWithI18n(<Toasts job={job} label={defaultLabel} />, rerender);
 
       expect(getByText('Installation completed with warnings.')).toBeVisible();
     });
@@ -97,7 +102,7 @@ describe('<Toasts />', () => {
     test('renders toast with message', () => {
       const { getByText, rerender } = setup();
       const job = { status: 'complete', error_count: 0 };
-      rerender(<Toasts job={job} label={defaultLabel} />);
+      rerenderWithI18n(<Toasts job={job} label={defaultLabel} />, rerender);
 
       expect(getByText('Installation completed successfully.')).toBeVisible();
     });
@@ -107,7 +112,7 @@ describe('<Toasts />', () => {
     test('removes toast', () => {
       const { getByText, container, rerender } = setup();
       const job = { status: 'complete', error_count: 0 };
-      rerender(<Toasts job={job} label={defaultLabel} />);
+      rerenderWithI18n(<Toasts job={job} label={defaultLabel} />, rerender);
       fireEvent.click(getByText('Close'));
 
       expect(

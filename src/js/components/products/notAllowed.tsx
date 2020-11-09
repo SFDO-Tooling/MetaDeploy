@@ -1,5 +1,6 @@
 import i18n from 'i18next';
 import * as React from 'react';
+import { Trans } from 'react-i18next';
 
 import svgPath from '!svg-inline-loader!images/no-access.svg';
 import Login from '@/components/header/login';
@@ -35,17 +36,20 @@ const NotAllowed = ({
       </div>
     ) : null}
     <div className="slds-align_absolute-center">
-      <div className="slds-text-longform slds-text-body_regular">
-        {link} {i18n.t('or')}{' '}
-      </div>
-      <Login
-        id="product-not-allowed-login"
-        label={
-          isLoggedIn ? i18n.t('log in with a different org') : i18n.t('log in')
-        }
-        buttonClassName="slds-p-horizontal_xxx-small"
-        buttonVariant="base"
-      />
+      <Trans i18nKey="a_or_b">
+        <div className="slds-text-longform slds-text-body_regular">{link}</div>
+        {' or '}
+        <Login
+          id="product-not-allowed-login"
+          label={
+            isLoggedIn
+              ? i18n.t('log in with a different org')
+              : i18n.t('log in')
+          }
+          buttonClassName="slds-p-horizontal_xxx-small"
+          buttonVariant="base"
+        />
+      </Trans>
     </div>
   </>
 );

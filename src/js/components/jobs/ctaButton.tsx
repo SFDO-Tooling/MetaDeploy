@@ -35,10 +35,10 @@ const CtaButton = ({
         />
       );
     case STATUS.COMPLETE: {
-      if (job.organization_url) {
+      if (job.instance_url) {
         return (
           <a
-            href={job.organization_url}
+            href={job.instance_url}
             target="_blank"
             rel="noreferrer noopener"
             className="slds-button

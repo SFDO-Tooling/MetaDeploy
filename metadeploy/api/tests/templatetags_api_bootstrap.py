@@ -9,7 +9,7 @@ from ..templatetags.api_bootstrap import serialize
 @pytest.mark.django_db
 def test_serialize(user_factory):
     user = user_factory(
-        email="template_tags@example.com", username="template_tags@example.com"
+        email="template_tags@example.com", sf_username="template_tags@example.com"
     )
     actual = serialize(user)
     expected = escape(
