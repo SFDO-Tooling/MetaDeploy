@@ -75,22 +75,28 @@ POSTGRES_DB:
     represents database. This variable has already been set to the proper
     value `metadeploy` for the user.
 
-MetaDeploy needs a connection to the GitHub API to fetch repositories for installation.
-This can be set up using a personal GitHub account by providing your personal access token.
+.. note::
+
+    MetaDeploy needs a connection to the GitHub API to fetch repositories for installation.
+    This can be set up using a personal GitHub account by providing your personal access token.
 
 GITHUB_TOKEN:
     This represents the users github personal access token which requires a scope of `repo`.
     If you need to generate a personal access token please visit the following:
     https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line
 
+CONNECTED_APP_CALLBACK_URL:
+    Callback url of the connected Salesforce app. The variable has already been set to the proper value for projects running under localhost.
+
+.. note::
+
+    If you're an OddBird, you can find the following values in the shared Keybase team folder -- ``metadeploy/env``
+
 CONNECTED_APP_CLIENT_ID:
-    This represents the consumer key of the connected app that MetaDeploy will use for authenticating to any persistent org.
+    Consumer key of the connected app that MetaDeploy will use for authenticating to any persistent org.
 
 CONNECTED_APP_CLIENT_SECRET:
-    This represents the consumer secret of the connected app.
-
-CONNECTED_APP_CALLBACK_URL:
-    This represents the callback url of the connected app.
+    Consumer secret of the connected app.
 
 CONNECTED_APP_CLIENT_KEY:
     This represents the private key corresponding to a certificate that was uploaded to the "Use digital signatures" setting of the Salesforce connected app. Only required if you enable scratch orgs for a plan.
@@ -150,6 +156,10 @@ ADMIN_API_ALLOWED_SUBNETS:
 
 Building Your Docker Containers
 -------------------------------
+
+.. note::
+
+    VS Code users: refer to `Docker development using VS Code`_.
 
 This next section assumes you have installed ``docker`` and ``docker-compose``.
 Additionally it assumes you have a ``.env`` file in the root directory of this
