@@ -70,9 +70,9 @@ describe('getAction', () => {
       let expected = jobActions[action](payload);
       let actual = sockets.getAction(msg);
       if (thunk) {
-        const getState = () => ({ router: { location: {} } });
-        expected = expected((arg) => arg, getState);
-        actual = actual((arg) => arg, getState);
+        const history = { location: {} };
+        expected = expected((arg) => arg, undefined, history);
+        actual = actual((arg) => arg, undefined, history);
       }
 
       expect(actual).toEqual(expected);

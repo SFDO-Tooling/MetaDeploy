@@ -2,7 +2,7 @@ import Button from '@salesforce/design-system-react/components/button';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import i18n from 'i18next';
 import * as React from 'react';
-import { RouteComponentProps } from 'react-router';
+import { RouteComponentProps } from 'react-router-dom';
 
 import Login from '@/components/header/login';
 import ClickThroughAgreementModal from '@/components/plans/clickThroughAgreementModal';

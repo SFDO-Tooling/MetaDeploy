@@ -1,4 +1,3 @@
-import { connectRouter, RouterState } from 'connected-react-router';
 import { History } from 'history';
 import { AnyAction, combineReducers } from 'redux';
 import { ThunkAction, ThunkDispatch as ReduxThunkDispatch } from 'redux-thunk';
@@ -13,7 +12,6 @@ import socket, { Socket } from '@/store/socket/reducer';
 import user, { User } from '@/store/user/reducer';
 
 export type AppState = {
-  readonly router: RouterState;
   readonly user: User;
   readonly products: ProductsState;
   readonly preflights: PreflightsState;
@@ -27,22 +25,20 @@ export type AppState = {
 export type ThunkResult<A = AnyAction | Promise<AnyAction>> = ThunkAction<
   A,
   AppState,
-  void,
+  History,
   AnyAction
 >;
-export type ThunkDispatch = ReduxThunkDispatch<AppState, void, AnyAction>;
+export type ThunkDispatch = ReduxThunkDispatch<AppState, History, AnyAction>;
 
-const createRootReducer = (history: History) =>
-  combineReducers({
-    router: connectRouter(history),
-    user,
-    products,
-    preflights,
-    jobs,
-    orgs,
-    scratchOrgs,
-    socket,
-    errors,
-  });
+const reducer = combineReducers({
+  user,
+  products,
+  preflights,
+  jobs,
+  orgs,
+  scratchOrgs,
+  socket,
+  errors,
+});
 
-export default createRootReducer;
+export default reducer;

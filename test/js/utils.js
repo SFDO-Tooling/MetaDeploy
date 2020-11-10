@@ -56,3 +56,5 @@ export const reRenderWithRedux = (ui, store, rerender) => ({
 });
 
 export const storeWithApi = configureStore([thunk]);
+export const getStoreWithHistory = (mockHistory = { location: {} }) =>
+  configureStore([thunk.withExtraArgument(mockHistory)]);

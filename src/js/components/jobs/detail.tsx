@@ -4,7 +4,7 @@ import i18n from 'i18next';
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
 import { connect, ConnectedProps } from 'react-redux';
-import { RouteComponentProps, withRouter } from 'react-router';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import BackLink from '@/components/backLink';
 import BodyContainer from '@/components/bodyContainer';

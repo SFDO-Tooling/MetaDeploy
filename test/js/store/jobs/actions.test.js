@@ -1,15 +1,10 @@
-import { push } from 'connected-react-router';
 import fetchMock from 'fetch-mock';
 
 import * as actions from '@/store/jobs/actions';
 import { addUrlParams } from '@/utils/api';
 import routes from '@/utils/routes';
 
-import { storeWithApi } from './../../utils';
-
-jest.mock('connected-react-router');
-
-push.mockReturnValue({ type: 'TEST' });
+import { getStoreWithHistory, storeWithApi } from './../../utils';
 
 describe('fetchJob', () => {
   let args, params, url;
@@ -194,13 +189,13 @@ describe('createJob', () => {
     });
 
     test('dispatches JOB_STARTED action and subscribes to ws events', () => {
-      const store = storeWithApi({
-        router: {
-          location: {
-            pathname: routes.plan_detail('product-1', 'version-1', 'plan-1'),
-          },
+      const push = jest.fn();
+      const store = getStoreWithHistory({
+        location: {
+          pathname: routes.plan_detail('product-1', 'version-1', 'plan-1'),
         },
-      });
+        push,
+      })({});
       const job = {
         id: 'job-1',
         plan: 'plan-1',
@@ -221,7 +216,7 @@ describe('createJob', () => {
 
       store.dispatch(actions.createJob(job));
 
-      expect(store.getActions()).toEqual([started, { type: 'TEST' }]);
+      expect(store.getActions()).toEqual([started]);
       expect(window.socket.subscribe).toHaveBeenCalledWith(expected);
       expect(push).toHaveBeenCalledWith(url);
     });

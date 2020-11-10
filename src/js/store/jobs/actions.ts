@@ -1,5 +1,3 @@
-import { push } from 'connected-react-router';
-
 import { ThunkResult } from '@/store';
 import { Job } from '@/store/jobs/reducer';
 import { StepResult } from '@/store/plans/reducer';
@@ -139,6 +137,7 @@ export const startJob = (
 export const createJob = (payload: Job): ThunkResult<JobStarted> => (
   dispatch,
   getState,
+  history,
 ) => {
   /* istanbul ignore else */
   if (payload && window.socket) {
@@ -151,8 +150,7 @@ export const createJob = (payload: Job): ThunkResult<JobStarted> => (
     type: 'JOB_STARTED' as const,
     payload,
   });
-  const state = getState();
-  const { pathname } = state.router.location;
+  const { pathname } = history.location;
   const { product_slug, version_label, plan_slug } = payload;
   const planUrl = routes.plan_detail(product_slug, version_label, plan_slug);
   /* istanbul ignore else */
@@ -164,7 +162,7 @@ export const createJob = (payload: Job): ThunkResult<JobStarted> => (
       plan_slug,
       payload.id,
     );
-    dispatch(push(url));
+    history.push(url);
   }
   return jobStartedAction;
 };

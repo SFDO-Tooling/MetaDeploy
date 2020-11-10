@@ -3,8 +3,7 @@ import PageHeaderControl from '@salesforce/design-system-react/components/page-h
 import { find } from 'lodash';
 import * as React from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-import { RouteComponentProps } from 'react-router';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps } from 'react-router-dom';
 
 import Errors from '@/components/apiErrors';
 import Login from '@/components/header/login';

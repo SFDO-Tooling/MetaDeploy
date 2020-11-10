@@ -4,8 +4,12 @@ import * as React from 'react';
 import DocumentTitle from 'react-document-title';
 import { Trans } from 'react-i18next';
 import { connect, ConnectedProps } from 'react-redux';
-import { RouteComponentProps, withRouter } from 'react-router';
-import { Link, Redirect } from 'react-router-dom';
+import {
+  Link,
+  Redirect,
+  RouteComponentProps,
+  withRouter,
+} from 'react-router-dom';
 
 import BackLink from '@/components/backLink';
 import BodyContainer from '@/components/bodyContainer';
