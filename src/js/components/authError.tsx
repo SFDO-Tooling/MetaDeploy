@@ -3,8 +3,7 @@ import * as React from 'react';
 import DocumentTitle from 'react-document-title';
 import { Trans } from 'react-i18next';
 import { connect } from 'react-redux';
-import { RouteComponentProps, withRouter } from 'react-router';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 
 import { EmptyIllustration } from '@/components/404';
 import Header from '@/components/header';

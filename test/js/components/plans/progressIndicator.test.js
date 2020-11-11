@@ -13,6 +13,7 @@ describe('<ProgressIndicator />', () => {
       preflightIsValid: false,
       preflightIsReady: false,
       supportedOrgs: 'Persistent',
+      preflightRequired: true,
     };
     const opts = { ...defaults, ...options };
     const { getByText } = render(<ProgressIndicator {...opts} />);

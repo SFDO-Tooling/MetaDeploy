@@ -237,11 +237,90 @@ class MockDict(dict):
         return self["instance_url"]
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 class TestCreateScratchOrg:
     def test_create_scratch_org(self, settings, plan_factory, scratch_org_factory):
         settings.DEVHUB_USERNAME = "test@example.com"
         plan = plan_factory(preflight_checks=[{"when": "True", "action": "error"}])
+        with ExitStack() as stack:
+            stack.enter_context(patch("metadeploy.api.jobs.local_github_checkout"))
+            jwt_session = stack.enter_context(
+                patch("metadeploy.api.salesforce.jwt_session")
+            )
+            jwt_session.return_value = {
+                "instance_url": "https://sample.salesforce.org/",
+                "access_token": "abc123",
+                "refresh_token": "abc123",
+            }
+            open = stack.enter_context(patch("metadeploy.api.salesforce.open"))
+            fake_json = json.dumps({"edition": ""})
+            open.return_value = MagicMock(
+                **{
+                    "__enter__.return_value": MagicMock(
+                        **{"read.return_value": fake_json}
+                    )
+                }
+            )
+            SimpleSalesforce = stack.enter_context(
+                patch("metadeploy.api.salesforce.SimpleSalesforce")
+            )
+            SimpleSalesforce.return_value = MagicMock(
+                **{
+                    "ScratchOrgInfo.get.return_value": {
+                        "LoginUrl": "https://sample.salesforce.org/",
+                        "ScratchOrg": "abc123",
+                        "SignupUsername": "test",
+                        "AuthCode": "abc123",
+                    }
+                }
+            )
+            SalesforceOAuth2 = stack.enter_context(
+                patch("metadeploy.api.salesforce.SalesforceOAuth2")
+            )
+            SalesforceOAuth2.return_value = MagicMock(
+                **{
+                    "get_token.return_value": MagicMock(
+                        **{
+                            "json.return_value": {
+                                "access_token": "abc123",
+                                "refresh_token": "abc123",
+                            }
+                        }
+                    )
+                }
+            )
+            BaseCumulusCI = stack.enter_context(
+                patch("metadeploy.api.salesforce.BaseCumulusCI")
+            )
+            org_config = MockDict()
+            org_config.config_file = "/"
+            BaseCumulusCI.return_value = MagicMock(
+                **{
+                    "project_config.repo_root": "/",
+                    "keychain.get_org.return_value": org_config,
+                }
+            )
+            stack.enter_context(patch("metadeploy.api.salesforce.DeployOrgSettings"))
+            stack.enter_context(
+                patch("cumulusci.core.flowrunner.PreflightFlowCoordinator.run")
+            )
+            # Cheat the auto-triggering of the job by adding a fake
+            # enqueued_at:
+            scratch_org = scratch_org_factory(
+                plan=plan,
+                enqueued_at=datetime(2020, 9, 4, 12),
+            )
+            create_scratch_org(
+                plan_id=plan.id,
+                org_name=plan.org_config_name,
+                result_id=str(scratch_org.pk),
+            )
+
+    def test_create_scratch_org__no_preflight(
+        self, settings, plan_factory, scratch_org_factory
+    ):
+        settings.DEVHUB_USERNAME = "test@example.com"
+        plan = plan_factory()
         with ExitStack() as stack:
             stack.enter_context(patch("metadeploy.api.jobs.local_github_checkout"))
             jwt_session = stack.enter_context(

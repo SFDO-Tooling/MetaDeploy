@@ -1,10 +1,11 @@
 import logging
+import uuid
 from statistics import median
 from typing import Union
 
 from asgiref.sync import async_to_sync
 from colorfield.fields import ColorField
-from cumulusci.core.config import FlowConfig
+from cumulusci.core.config import FlowConfig, OrgConfig
 from cumulusci.core.flowrunner import (
     FlowCoordinator,
     PreflightFlowCoordinator,
@@ -12,6 +13,7 @@ from cumulusci.core.flowrunner import (
 )
 from cumulusci.core.tasks import BaseTask
 from cumulusci.core.utils import import_class
+from cumulusci.oauth.salesforce import jwt_session
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
@@ -678,24 +680,12 @@ class Job(HashIdMixin, models.Model):
             return self.user.instance_url
 
     def subscribable_by(self, user, session):
-        # TODO: It seems we don't get the correct value in the session when it is passed
-        # from the websocket consumer. Ideally we would restrict this to only users who
-        # have a valid scratch_org `uuid` in their session:
-        #
-        # scratch_org_id = session.get("scratch_org_id", None)
-        # scratch_org = (
-        #     scratch_org_id
-        #     and ScratchOrg.objects.filter(
-        #         uuid=scratch_org_id, status=ScratchOrg.Status.complete
-        #     ).first()
-        # )
-        # valid_session_uuid = scratch_org and scratch_org.org_id == self.org_id
-        # return (
-        #     self.is_public or user.is_staff or user == self.user or valid_session_uuid
-        # )
-        #
-        # But instead we allow any user to subscribe to scratch_org (user-less) jobs:
-        return self.is_public or user.is_staff or user == self.user or not self.user
+        # Restrict this to public Jobs, staff users, Job owners, or users who have a
+        # valid scratch_org `uuid` in their session (matching this Job):
+        if self.is_public or user.is_staff or user == self.user:
+            return True
+        scratch_org = ScratchOrg.objects.get_from_session(session)
+        return scratch_org and scratch_org.org_id == self.org_id
 
     def skip_steps(self):
         return [
@@ -814,23 +804,12 @@ class PreflightResult(models.Model):
             return self.user.instance_url
 
     def subscribable_by(self, user, session):
-        # TODO: It seems we don't get the correct value in the session when it is passed
-        # from the websocket consumer. Ideally we would restrict this to only users who
-        # have a valid scratch_org `uuid` in their session:
-        #
-        # scratch_org_id = session.get("scratch_org_id", None)
-        # scratch_org = (
-        #     scratch_org_id
-        #     and ScratchOrg.objects.filter(
-        #         uuid=scratch_org_id, status=ScratchOrg.Status.complete
-        #     ).first()
-        # )
-        # valid_session_uuid = scratch_org and scratch_org.org_id == self.org_id
-        # return self.user == user or valid_session_uuid
-        #
-        # But instead we allow any user to subscribe to scratch_org (user-less)
-        # preflights:
-        return self.user == user or not self.user
+        # Restrict this to staff users, Preflight owners and users who have a valid
+        # scratch_org `uuid` in their session (matching this Preflight):
+        if user.is_staff or self.user == user:
+            return True
+        scratch_org = ScratchOrg.objects.get_from_session(session)
+        return scratch_org and scratch_org.org_id == self.org_id
 
     def has_any_errors(self):
         return any(
@@ -914,6 +893,21 @@ class PreflightResult(models.Model):
         flow_coordinator.run(org)
 
 
+class ScratchOrgQuerySet(models.QuerySet):
+    def get_from_session(self, session):
+        """
+        Retrieve a ScratchOrg from the session by its UUID.
+
+        The UUID is placed in the session when the org is created
+        (`scratch_org_post` method on `PlanViewSet`),
+        or from a URL query string (`GetScratchOrgIdFromQueryStringMiddleware`).
+        """
+        scratch_org_id = session.get("scratch_org_id", None)
+        return self.filter(
+            uuid=scratch_org_id, status=self.model.Status.complete
+        ).first()
+
+
 class ScratchOrg(HashIdMixin, models.Model):
     Status = Choices("started", "complete", "failed", "canceled")
 
@@ -924,12 +918,14 @@ class ScratchOrg(HashIdMixin, models.Model):
     job_id = models.UUIDField(null=True)
     # This is set in a user's session to let them continue to access
     # this job, without being otherwise auth'd:
-    uuid = models.UUIDField(null=True)
+    uuid = models.UUIDField(default=uuid.uuid4)
     created_at = models.DateTimeField(auto_now_add=True)
     edited_at = models.DateTimeField(auto_now=True)
     status = models.CharField(choices=Status, max_length=64, default=Status.started)
     config = JSONField(null=True, blank=True, encoder=DjangoJSONEncoder)
     org_id = models.CharField(null=True, blank=True, max_length=18)
+
+    objects = ScratchOrgQuerySet.as_manager()
 
     def save(self, *args, **kwargs):
         ret = super().save(*args, **kwargs)
@@ -948,15 +944,12 @@ class ScratchOrg(HashIdMixin, models.Model):
         return ret
 
     def subscribable_by(self, user, session):
-        # TODO: It seems we don't get the correct value in the session when it is passed
-        # from the websocket consumer. Ideally we would restrict this to only users who
-        # have a valid scratch_org `uuid` in their session:
-        #
-        # scratch_org_id = session.get("scratch_org_id", None)
-        # return scratch_org_id and scratch_org_id == str(self.uuid)
-        #
-        # But instead we allow any user to subscribe to scratch_orgs:
-        return True
+        # Restrict this to staff users or users who have a valid scratch_org `uuid` in
+        # their session for this org:
+        if user.is_staff:
+            return True
+        scratch_org_id = session.get("scratch_org_id", None)
+        return scratch_org_id and scratch_org_id == str(self.uuid)
 
     def fail(self, error):
         self.status = ScratchOrg.Status.failed
@@ -969,6 +962,23 @@ class ScratchOrg(HashIdMixin, models.Model):
         self.org_id = config["org_id"]
         self.save()
         async_to_sync(notify_org_finished)(self)
+
+    def get_refreshed_org_config(self):
+        org_config = OrgConfig(self.config, self.plan.org_config_name)
+        info = jwt_session(
+            settings.CONNECTED_APP_CLIENT_ID,
+            settings.CONNECTED_APP_CLIENT_KEY,
+            org_config.username,
+            org_config.instance_url,
+        )
+        org_config.config.update(info)
+        org_config._load_userinfo()
+        org_config._load_orginfo()
+        return org_config
+
+    def get_login_url(self):
+        org_config = self.get_refreshed_org_config()
+        return org_config.start_url
 
 
 class SiteProfile(TranslatableModel):

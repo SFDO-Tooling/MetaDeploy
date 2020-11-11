@@ -4,7 +4,7 @@ import i18n from 'i18next';
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
 import { connect, ConnectedProps } from 'react-redux';
-import { RouteComponentProps, withRouter } from 'react-router';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import BackLink from '@/components/backLink';
 import BodyContainer from '@/components/bodyContainer';
@@ -42,6 +42,8 @@ import {
   selectVersion,
   selectVersionLabel,
 } from '@/store/products/selectors';
+import { fetchScratchOrg } from '@/store/scratchOrgs/actions';
+import { selectScratchOrg } from '@/store/scratchOrgs/selectors';
 import { selectUserState } from '@/store/user/selectors';
 import routes from '@/utils/routes';
 
@@ -55,6 +57,7 @@ const select = (appState: AppState, props: RouteComponentProps) => ({
   planSlug: selectPlanSlug(appState, props),
   job: selectJob(appState, props),
   jobId: selectJobId(appState, props),
+  scratchOrg: selectScratchOrg(appState, props),
 });
 
 const actions = {
@@ -64,6 +67,7 @@ const actions = {
   doFetchJob: fetchJob,
   doUpdateJob: updateJob,
   doRequestCancelJob: requestCancelJob,
+  doFetchScratchOrg: fetchScratchOrg,
 };
 
 const connector = connect(select, actions);
@@ -138,11 +142,20 @@ class JobDetail extends React.Component<Props, State> {
     }
   }
 
+  fetchScratchOrgIfMissing() {
+    const { job, plan, scratchOrg, doFetchScratchOrg } = this.props;
+    const isScratchOrg = Boolean(job?.org_id && !job.creator);
+    if (plan && isScratchOrg && scratchOrg === undefined) {
+      doFetchScratchOrg(plan.id);
+    }
+  }
+
   componentDidMount() {
     this.fetchProductIfMissing();
     this.fetchVersionIfMissing();
     this.fetchPlanIfMissing();
     this.fetchJobIfMissing();
+    this.fetchScratchOrgIfMissing();
     this._isMounted = true;
   }
 
@@ -161,6 +174,7 @@ class JobDetail extends React.Component<Props, State> {
       planSlug,
       job,
       jobId,
+      scratchOrg,
     } = this.props;
     const prevJob = prevProps.job;
     const jobIdChanged = jobId !== prevProps.jobId;
@@ -175,6 +189,7 @@ class JobDetail extends React.Component<Props, State> {
       plan !== prevProps.plan ||
       planSlug !== prevProps.planSlug;
     const jobChanged = planChanged || job !== prevJob || jobIdChanged;
+    const scratchOrgChanged = jobChanged || scratchOrg !== prevProps.scratchOrg;
     if (productChanged) {
       this.fetchProductIfMissing();
     }
@@ -187,15 +202,24 @@ class JobDetail extends React.Component<Props, State> {
     if (jobChanged) {
       this.fetchJobIfMissing();
     }
-    // If the job has changed status and is failed, automatically open modal
+    if (scratchOrgChanged) {
+      this.fetchScratchOrgIfMissing();
+    }
+    // If the job has changed status and is failed (or complete on a scratch org
+    // job), automatically open modal
     if (job && !jobIdChanged) {
       const { modalOpen } = prevState;
       const statusChanged = prevJob && prevJob.status !== job.status;
       const hasError = job.error_count !== undefined && job.error_count > 0;
+      const isCompleteOnScratchOrg =
+        scratchOrg?.org_id === job.org_id &&
+        job.status === CONSTANTS.STATUS.COMPLETE;
       if (
         !modalOpen &&
         statusChanged &&
-        (hasError || job.status === CONSTANTS.STATUS.FAILED)
+        (hasError ||
+          job.status === CONSTANTS.STATUS.FAILED ||
+          isCompleteOnScratchOrg)
       ) {
         this.openModal();
       }
@@ -259,9 +283,9 @@ class JobDetail extends React.Component<Props, State> {
     return null;
   }
 
-  actions = () => (
-    <PageHeaderControl>
-      {this.getCancelBtn()}
+  getShareBtn() {
+    const { job } = this.props;
+    return job?.status === CONSTANTS.STATUS.COMPLETE ? null : (
       <Button
         label={i18n.t('Share Installation')}
         iconCategory="utility"
@@ -269,6 +293,13 @@ class JobDetail extends React.Component<Props, State> {
         iconPosition="left"
         onClick={this.openModal}
       />
+    );
+  }
+
+  actions = () => (
+    <PageHeaderControl>
+      {this.getCancelBtn()}
+      {this.getShareBtn()}
     </PageHeaderControl>
   );
 
@@ -283,6 +314,7 @@ class JobDetail extends React.Component<Props, State> {
       planSlug,
       job,
       jobId,
+      scratchOrg,
       history,
       doUpdateJob,
     } = this.props;
@@ -308,6 +340,7 @@ class JobDetail extends React.Component<Props, State> {
     if (!product || !version || !plan || !job) {
       return <ProductNotFound />;
     }
+    const isScratchOrg = Boolean(job.org_id && !job.creator);
     const linkToPlan = routes.plan_detail(
       product.slug,
       version.label,
@@ -328,7 +361,7 @@ class JobDetail extends React.Component<Props, State> {
         } | ${window.SITE_NAME}`}
       >
         <>
-          <Header history={history} jobId={jobId} />
+          <Header history={history} jobId={jobId} hideLogin={isScratchOrg} />
           <PageHeader
             product={product}
             version={version}
@@ -340,6 +373,7 @@ class JobDetail extends React.Component<Props, State> {
             isOpen={this.state.modalOpen}
             job={job}
             plan={plan}
+            scratchOrg={isScratchOrg ? scratchOrg : null}
             toggleModal={this.toggleModal}
             updateJob={doUpdateJob}
           />
@@ -352,8 +386,11 @@ class JobDetail extends React.Component<Props, State> {
               cta={
                 <CtaButton
                   job={job}
+                  isScratchOrg={isScratchOrg}
                   linkToPlan={linkToPlan}
                   canceling={canceling}
+                  preflightRequired={plan.requires_preflight}
+                  openModal={this.openModal}
                 />
               }
               postMessage={<JobMessage job={job} />}

@@ -22,6 +22,7 @@ from asgiref.sync import async_to_sync
 from cumulusci.core.config import OrgConfig, ServiceConfig
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from django.utils import timezone
 from django_rq import job as django_rq_job
 from rq.exceptions import ShutDownImminentException
@@ -31,8 +32,8 @@ from .cci_configs import MetaDeployCCI, extract_user_and_repo
 from .cleanup import cleanup_user_data
 from .flows import StopFlowException
 from .github import local_github_checkout
-from .models import Job, Plan, PreflightResult, ScratchOrg
-from .push import preflight_started, report_error
+from .models import ORG_TYPES, Job, Plan, PreflightResult, ScratchOrg
+from .push import job_started, preflight_started, report_error
 from .salesforce import create_scratch_org as create_scratch_org_on_sf
 
 logger = logging.getLogger(__name__)
@@ -283,26 +284,22 @@ def create_scratch_org(*, plan_id, org_name, result_id):
         )
         async_to_sync(preflight_started)(org, preflight_result)
         preflight(preflight_result.pk)
-
-    # @@@ TODO: start installation job automatically if:
-    #   - Plan has no preflight
-    #   - Plan has no optional steps
-    # job = Job.objects.create(
-    #     user=None,
-    #     plan=plan,
-    #     is_public=True,
-    #     org_id=scratch_org_config.config["org_id"],
-    # )
-
-    # rq_job = run_flows.delay(
-    #     plan=plan,
-    #     skip_steps=[],
-    #     result_class=Job,
-    #     result_id=job.id,
-    # )
-    # job.job_id = rq_job.id
-    # job.enqueued_at = rq_job.enqueued_at
-    # job.save()
+    elif plan.required_step_ids.count() == plan.steps.count():
+        # Start installation job automatically if both:
+        # - Plan has no preflight
+        # - All plan steps are required
+        with transaction.atomic():
+            job = Job.objects.create(
+                user=None,
+                plan=plan,
+                org_id=scratch_org_config.config["org_id"],
+                full_org_type=ORG_TYPES.Scratch,
+            )
+            job.steps.set(plan.steps.all())
+        # This is already called on `save()`, but the new Job isn't in the
+        # database yet because it's in an atomic transaction.
+        job.push_to_org_subscribers(is_new=True)
+        async_to_sync(job_started)(org, job)
 
 
 create_scratch_org_job = job(create_scratch_org)

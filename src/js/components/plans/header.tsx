@@ -53,7 +53,11 @@ const Header = ({
       variant="object-home"
     />
     {job ? (
-      <JobProgressIndicator job={job} supportedOrgs={plan.supported_orgs} />
+      <JobProgressIndicator
+        job={job}
+        supportedOrgs={plan.supported_orgs}
+        preflightRequired={plan.requires_preflight}
+      />
     ) : (
       <PlanProgressIndicator
         userLoggedIn={userLoggedIn}
@@ -62,6 +66,7 @@ const Header = ({
         preflightIsValid={preflightIsValid}
         preflightIsReady={preflightIsReady}
         supportedOrgs={plan.supported_orgs}
+        preflightRequired={plan.requires_preflight}
       />
     )}
   </>

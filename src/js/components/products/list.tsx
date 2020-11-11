@@ -6,7 +6,7 @@ import * as React from 'react';
 import DocumentTitle from 'react-document-title';
 import { withScroll } from 'react-fns';
 import { connect, ConnectedProps } from 'react-redux';
-import { RouteComponentProps, withRouter } from 'react-router';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import { EmptyIllustration } from '@/components/404';
 import Header from '@/components/header';

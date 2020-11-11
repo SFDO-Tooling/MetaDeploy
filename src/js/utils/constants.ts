@@ -13,6 +13,8 @@ export const SCRATCH_ORG_STATUSES = {
 };
 export type ScratchOrgStatuses = 'started' | 'complete' | 'failed' | 'canceled';
 
+export const SCRATCH_ORG_QS = 'scratch_org_id';
+
 export const PRODUCT_LAYOUTS = {
   Default: 'Default' as const,
   Card: 'Card' as const,

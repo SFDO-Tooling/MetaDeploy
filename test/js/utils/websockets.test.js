@@ -57,17 +57,23 @@ describe('getAction', () => {
   });
 
   [
-    { type: 'TASK_COMPLETED', action: 'completeJobStep' },
-    { type: 'JOB_COMPLETED', action: 'completeJob' },
-    { type: 'JOB_FAILED', action: 'failJob' },
-    { type: 'JOB_CANCELED', action: 'cancelJob' },
-  ].forEach(({ type, action }) => {
+    { type: 'TASK_COMPLETED', action: 'completeJobStep', thunk: false },
+    { type: 'JOB_COMPLETED', action: 'completeJob', thunk: false },
+    { type: 'JOB_FAILED', action: 'failJob', thunk: false },
+    { type: 'JOB_CANCELED', action: 'cancelJob', thunk: false },
+    { type: 'JOB_STARTED', action: 'createJob', thunk: true },
+  ].forEach(({ type, action, thunk }) => {
     test(`handles msg: ${type}`, () => {
       const payload = { foo: 'bar' };
       const msg = { type, payload };
       // eslint-disable-next-line import/namespace
-      const expected = jobActions[action](payload);
-      const actual = sockets.getAction(msg);
+      let expected = jobActions[action](payload);
+      let actual = sockets.getAction(msg);
+      if (thunk) {
+        const history = { location: {} };
+        expected = expected((arg) => arg, undefined, history);
+        actual = actual((arg) => arg, undefined, history);
+      }
 
       expect(actual).toEqual(expected);
     });

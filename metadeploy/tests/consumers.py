@@ -7,6 +7,7 @@ from django.utils import timezone
 
 from ..api.models import Job, PreflightResult, ScratchOrg
 from ..api.push import (
+    job_started,
     notify_org_finished,
     notify_org_result_changed,
     notify_post_job,
@@ -32,6 +33,20 @@ def test_get_language_from_scope__default():
     )
 
 
+class AnonymousUser:
+    is_authenticated = False
+    is_staff = False
+    is_superuser = False
+
+
+class Session(dict):
+    def __init__(self, **kwargs):
+        self.update(kwargs)
+
+    def save(self):
+        pass
+
+
 @database_sync_to_async
 def generate_model(model_factory, **kwargs):
     return model_factory(**kwargs)
@@ -46,10 +61,8 @@ async def test_push_notification_consumer__subscribe_scratch_org(scratch_org_fac
     )
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
-    communicator.scope["user"] = None
-    communicator.scope["session"] = {
-        "scratch_org_id": uuid,
-    }
+    communicator.scope["user"] = AnonymousUser()
+    communicator.scope["session"] = Session(scratch_org_id=uuid)
     connected, _ = await communicator.connect()
     assert connected
 
@@ -66,12 +79,68 @@ async def test_push_notification_consumer__subscribe_scratch_org(scratch_org_fac
 
 @pytest.mark.django_db
 @pytest.mark.asyncio
+async def test_push_notification_consumer__subscribe_scratch_org_staff(
+    user_factory, scratch_org_factory
+):
+    user = await generate_model(user_factory, is_staff=True)
+    scratch_org = await generate_model(scratch_org_factory, enqueued_at=timezone.now())
+
+    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator.scope["user"] = user
+    communicator.scope["session"] = Session()
+    connected, _ = await communicator.connect()
+    assert connected
+
+    await communicator.send_json_to({"model": "scratchorg", "id": str(scratch_org.id)})
+    response = await communicator.receive_json_from()
+    assert "ok" in response
+
+    await communicator.disconnect()
+
+
+@pytest.mark.django_db
+@pytest.mark.asyncio
+async def test_push_notification_consumer__scratch_org_job_started(
+    scratch_org_factory, job_factory
+):
+    org_id = "00Dxxxxxxxxxxxxxxx"
+    uuid = str(uuid4())
+    scratch_org = await generate_model(
+        scratch_org_factory,
+        uuid=uuid,
+        status=ScratchOrg.Status.complete,
+        enqueued_at=timezone.now(),
+        org_id=org_id,
+    )
+    job = await generate_model(
+        job_factory, user=None, status=Job.Status.complete, org_id=org_id
+    )
+
+    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator.scope["user"] = AnonymousUser()
+    communicator.scope["session"] = Session(scratch_org_id=uuid)
+    connected, _ = await communicator.connect()
+    assert connected
+
+    await communicator.send_json_to({"model": "scratchorg", "id": str(scratch_org.id)})
+    response = await communicator.receive_json_from()
+    assert "ok" in response
+
+    await job_started(scratch_org, job)
+    response = await communicator.receive_json_from()
+    assert response["type"] == "JOB_STARTED"
+
+    await communicator.disconnect()
+
+
+@pytest.mark.django_db
+@pytest.mark.asyncio
 async def test_push_notification_consumer__user_token_invalid(user_factory):
     user = await generate_model(user_factory)
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
     communicator.scope["user"] = user
-    communicator.scope["session"] = {}
+    communicator.scope["session"] = Session()
     connected, _ = await communicator.connect()
     assert connected
 
@@ -103,7 +172,8 @@ async def test_push_notification_consumer__subscribe_preflight(
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
     communicator.scope["user"] = user
-    communicator.scope["session"] = {}
+    session = Session()
+    communicator.scope["session"] = session
     connected, _ = await communicator.connect()
     assert connected
 
@@ -118,9 +188,47 @@ async def test_push_notification_consumer__subscribe_preflight(
     assert response == {
         "type": "PREFLIGHT_COMPLETED",
         "payload": PreflightResultSerializer(
-            instance=preflight, context=user_context(user)
+            instance=preflight, context=user_context(user, session)
         ).data,
     }
+
+    await communicator.disconnect()
+
+
+@pytest.mark.django_db
+@pytest.mark.asyncio
+async def test_push_notification_consumer__subscribe_preflight_scratch_org(
+    scratch_org_factory, preflight_result_factory, plan_factory
+):
+    org_id = "00Dxxxxxxxxxxxxxxx"
+    uuid = str(uuid4())
+    plan = await generate_model(plan_factory)
+    await generate_model(
+        scratch_org_factory,
+        uuid=uuid,
+        status=ScratchOrg.Status.complete,
+        enqueued_at=timezone.now(),
+        org_id=org_id,
+    )
+    preflight = await generate_model(
+        preflight_result_factory,
+        user=None,
+        status=PreflightResult.Status.complete,
+        plan=plan,
+        org_id=org_id,
+    )
+
+    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator.scope["user"] = AnonymousUser()
+    communicator.scope["session"] = Session(scratch_org_id=uuid)
+    connected, _ = await communicator.connect()
+    assert connected
+
+    await communicator.send_json_to(
+        {"model": "preflightresult", "id": str(preflight.id)}
+    )
+    response = await communicator.receive_json_from()
+    assert "ok" in response
 
     await communicator.disconnect()
 
@@ -135,7 +243,8 @@ async def test_push_notification_consumer__subscribe_job(user_factory, job_facto
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
     communicator.scope["user"] = user
-    communicator.scope["session"] = {}
+    session = Session()
+    communicator.scope["session"] = session
     connected, _ = await communicator.connect()
     assert connected
 
@@ -147,7 +256,9 @@ async def test_push_notification_consumer__subscribe_job(user_factory, job_facto
     response = await communicator.receive_json_from()
     assert response == {
         "type": "JOB_COMPLETED",
-        "payload": JobSerializer(instance=job, context=user_context(user)).data,
+        "payload": JobSerializer(
+            instance=job, context=user_context(user, session)
+        ).data,
     }
 
     await communicator.disconnect()
@@ -165,6 +276,7 @@ async def test_push_notification_consumer__subscribe_job__bad(
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
     communicator.scope["user"] = user
+    communicator.scope["session"] = Session()
     connected, _ = await communicator.connect()
     assert connected
 
@@ -185,6 +297,7 @@ async def test_push_notification_consumer__subscribe_job__missing(user_factory):
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
     communicator.scope["user"] = user
+    communicator.scope["session"] = Session()
     connected, _ = await communicator.connect()
     assert connected
 
@@ -226,6 +339,7 @@ async def test_push_notification_consumer__subscribe_org(
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
     communicator.scope["user"] = user
+    communicator.scope["session"] = Session()
     connected, _ = await communicator.connect()
     assert connected
 
@@ -283,13 +397,11 @@ async def test_push_notification_consumer__anon_subscribe_org(
     )
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
-    communicator.scope["session"] = {
-        "scratch_org_id": uuid,
-    }
+    communicator.scope["session"] = Session()
     connected, _ = await communicator.connect()
     assert connected
 
-    await communicator.send_json_to({"model": "org", "id": org_id})
+    await communicator.send_json_to({"model": "org", "id": org_id, "uuid": uuid})
     response = await communicator.receive_json_from()
     assert "ok" in response
 
@@ -305,5 +417,23 @@ async def test_push_notification_consumer__anon_subscribe_org(
             }
         ).data,
     }, response
+
+    await communicator.disconnect()
+
+
+@pytest.mark.django_db
+@pytest.mark.asyncio
+async def test_push_notification_consumer__subscribe_org_bad(user_factory):
+    user = await generate_model(user_factory)
+
+    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator.scope["user"] = user
+    communicator.scope["session"] = Session()
+    connected, _ = await communicator.connect()
+    assert connected
+
+    await communicator.send_json_to({"model": "org", "id": "missingorg"})
+    response = await communicator.receive_json_from()
+    assert "error" in response
 
     await communicator.disconnect()

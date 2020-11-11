@@ -341,6 +341,9 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
     instance_url = serializers.SerializerMethodField()
     org_id = serializers.SerializerMethodField()
     is_production_org = serializers.SerializerMethodField()
+    product_slug = serializers.SerializerMethodField()
+    version_label = serializers.SerializerMethodField()
+    plan_slug = serializers.SerializerMethodField()
 
     plan = serializers.PrimaryKeyRelatedField(
         queryset=Plan.objects.all(), pk_field=serializers.CharField()
@@ -375,6 +378,9 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             "org_name",
             "org_type",
             "is_production_org",
+            "product_slug",
+            "version_label",
+            "plan_slug",
             "error_count",
             "warning_count",
             "is_public",
@@ -391,15 +397,21 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             "org_type": {"read_only": True},
         }
 
-    def requesting_user_has_rights(self):
+    def requesting_user_has_rights(self, include_staff=True):
         """
         Does the user making the request have rights to see this object?
 
         The user is derived from the serializer context.
         """
         try:
-            user = self.context["request"].user
-            return user.is_staff or user == self.instance.user
+            if self.instance.user:
+                user = self.context["request"].user
+                is_owner = user == self.instance.user
+                return is_owner or user.is_staff if include_staff else is_owner
+            scratch_org = ScratchOrg.objects.get_from_session(
+                self.context["request"].session
+            )
+            return scratch_org and self.instance.org_id == scratch_org.org_id
         except (AttributeError, KeyError):
             return False
 
@@ -410,13 +422,10 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         )
 
     def get_user_can_edit(self, obj):
-        try:
-            return obj.user == self.context["request"].user
-        except (AttributeError, KeyError):
-            return False
+        return self.requesting_user_has_rights(include_staff=False)
 
     def get_creator(self, obj):
-        if self.requesting_user_has_rights():
+        if obj.user and self.requesting_user_has_rights():
             return LimitedUserSerializer(instance=obj.user).data
         return None
 
@@ -437,6 +446,15 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
 
     def get_is_production_org(self, obj):
         return obj.full_org_type == ORG_TYPES.Production
+
+    def get_product_slug(self, obj):
+        return obj.plan.version.product.slug
+
+    def get_version_label(self, obj):
+        return obj.plan.version.label
+
+    def get_plan_slug(self, obj):
+        return obj.plan.slug
 
     @staticmethod
     def _has_valid_preflight(most_recent_preflight, plan):
@@ -490,10 +508,21 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
                 raise serializers.ValidationError(_("Invalid initial results."))
 
     def validate(self, data):
-        user = self._get_from_data_or_instance(data, "user")
-        org_id = self._get_from_data_or_instance(data, "org_id") or user.org_id
+        user = self._get_from_data_or_instance(data, "user", default=None)
+        org_id = getattr(self.instance, "org_id", getattr(user, "org_id", None))
         plan = self._get_from_data_or_instance(data, "plan")
         steps = self._get_from_data_or_instance(data, "steps", default=[])
+
+        scratch_org = None
+        if not (user and user.is_authenticated):
+            scratch_org = ScratchOrg.objects.get_from_session(
+                self.context["request"].session
+            )
+            if not org_id:
+                org_id = getattr(scratch_org, "org_id", None)
+
+        if not org_id:
+            raise serializers.ValidationError(_("No valid org."))
 
         most_recent_preflight = PreflightResult.objects.most_recent(
             org_id=org_id, plan=plan
@@ -522,16 +551,24 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
                 )
             )
 
-        if user:
-            user_has_valid_token = all(user.token)
-            if not user_has_valid_token:
-                raise serializers.ValidationError(
-                    _("The connection to your org has been lost. Please log in again.")
-                )
+        data["org_id"] = org_id
+        user_has_valid_token = False
 
-        data["org_type"] = user.org_type if user else None
-        data["full_org_type"] = user.full_org_type if user else None
-        data["org_id"] = user.org_id
+        if user and user.is_authenticated:
+            user_has_valid_token = all(user.token)
+            data["org_type"] = user.org_type
+            data["full_org_type"] = user.full_org_type
+        elif scratch_org:
+            token = scratch_org.config["access_token"]
+            token_secret = scratch_org.config["refresh_token"]
+            user_has_valid_token = bool(token and token_secret)
+            data["user"] = None
+            data["full_org_type"] = ORG_TYPES.Scratch
+        if not user_has_valid_token:
+            raise serializers.ValidationError(
+                _("The connection to your org has been lost. Please log in again.")
+            )
+
         return data
 
 
@@ -636,6 +673,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "edited_at",
             "status",
             "org_id",
+            "uuid",
         )
         extra_kwargs = {
             "email": {"required": True, "write_only": True},
@@ -644,6 +682,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "edited_at": {"read_only": True},
             "status": {"read_only": True},
             "org_id": {"read_only": True},
+            "uuid": {"read_only": True},
         }
 
     id = serializers.CharField(read_only=True)

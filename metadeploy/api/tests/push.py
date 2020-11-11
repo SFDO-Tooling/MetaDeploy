@@ -3,7 +3,12 @@ from unittest.mock import MagicMock
 import pytest
 from channels.layers import get_channel_layer
 
-from ..push import notify_org_finished, notify_org_result_changed, report_error
+from ..push import (
+    job_started,
+    notify_org_finished,
+    notify_org_result_changed,
+    report_error,
+)
 
 
 class AsyncMock(MagicMock):
@@ -24,7 +29,9 @@ async def test_report_error(mocker, user_factory):
 
 @pytest.mark.django_db
 @pytest.mark.asyncio
-async def test_notify_org_job_changed(mocker, user_factory, job_factory, plan_factory):
+async def test_notify_org_result_changed(
+    mocker, user_factory, job_factory, plan_factory
+):
     gcl = mocker.patch("metadeploy.api.push.get_channel_layer", wraps=get_channel_layer)
     user = user_factory()
     plan = plan_factory()
@@ -66,4 +73,14 @@ async def test_notify_org_finished__dict(mocker, scratch_org_factory):
     soj = scratch_org_factory()
     gcl = mocker.patch("metadeploy.api.push.get_channel_layer", wraps=get_channel_layer)
     await notify_org_finished(soj, error=MagicMock(content={"message": "fake error"}))
+    gcl.assert_called()
+
+
+@pytest.mark.django_db
+@pytest.mark.asyncio
+async def test_job_started(mocker, scratch_org_factory, job_factory):
+    soj = scratch_org_factory()
+    job = job_factory()
+    gcl = mocker.patch("metadeploy.api.push.get_channel_layer", wraps=get_channel_layer)
+    await job_started(soj, job)
     gcl.assert_called()

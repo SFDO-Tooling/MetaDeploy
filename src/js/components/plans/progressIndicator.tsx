@@ -5,7 +5,10 @@ import * as React from 'react';
 import { CONSTANTS } from '@/store/plans/reducer';
 import { SUPPORTED_ORGS, SupportedOrgs } from '@/utils/constants';
 
-export const getSteps = (supportedOrgs: SupportedOrgs) => {
+export const getSteps = (
+  supportedOrgs: SupportedOrgs,
+  preflightRequired: boolean,
+) => {
   let initialLabel = i18n.t('Log in');
   switch (supportedOrgs) {
     case SUPPORTED_ORGS.Scratch: {
@@ -18,6 +21,22 @@ export const getSteps = (supportedOrgs: SupportedOrgs) => {
     }
   }
 
+  if (preflightRequired) {
+    return [
+      {
+        id: 0,
+        label: initialLabel,
+      },
+      {
+        id: 1,
+        label: i18n.t('Run pre-install validation'),
+      },
+      {
+        id: 2,
+        label: i18n.t('Install'),
+      },
+    ];
+  }
   return [
     {
       id: 0,
@@ -25,10 +44,6 @@ export const getSteps = (supportedOrgs: SupportedOrgs) => {
     },
     {
       id: 1,
-      label: i18n.t('Run pre-install validation'),
-    },
-    {
-      id: 2,
       label: i18n.t('Install'),
     },
   ];
@@ -41,6 +56,7 @@ const ProgressIndicator = ({
   preflightIsValid,
   preflightIsReady,
   supportedOrgs,
+  preflightRequired,
 }: {
   userLoggedIn?: boolean;
   scratchOrgCreated?: boolean;
@@ -48,6 +64,7 @@ const ProgressIndicator = ({
   preflightIsValid?: boolean;
   preflightIsReady?: boolean;
   supportedOrgs: SupportedOrgs;
+  preflightRequired: boolean;
 }) => {
   let activeStep = 0;
   let initialActionComplete = userLoggedIn;
@@ -63,16 +80,17 @@ const ProgressIndicator = ({
   }
   if (initialActionComplete) {
     activeStep = 1;
-    if (preflightIsReady) {
+    if (preflightRequired && preflightIsReady) {
       activeStep = 2;
     }
   }
 
-  const steps = getSteps(supportedOrgs);
+  const steps = getSteps(supportedOrgs, preflightRequired);
 
   const completedSteps = steps.slice(0, activeStep);
   const errorSteps =
     initialActionComplete &&
+    preflightRequired &&
     preflightIsValid &&
     preflightStatus !== CONSTANTS.STATUS.STARTED &&
     !preflightIsReady

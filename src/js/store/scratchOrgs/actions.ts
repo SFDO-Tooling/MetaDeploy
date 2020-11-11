@@ -99,6 +99,7 @@ export const spinScratchOrg = (
       window.socket.subscribe({
         model: 'scratchorg',
         id: response.id,
+        uuid: response.uuid,
       });
     }
     return dispatch({

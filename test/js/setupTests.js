@@ -29,6 +29,7 @@ beforeAll(() => {
     product_list: () => '/api/products/',
     productcategory_list: () => '/api/categories/',
     salesforce_login: () => '/accounts/salesforce/login/',
+    scratch_org_redirect: (id) => `/api/scratch-orgs/${id}/redirect/`,
     user: () => '/api/user/',
     version_additional_plans: (id) => `/api/versions/${id}/additional_plans/`,
     version_get_one: () => '/api/versions/get_one/',

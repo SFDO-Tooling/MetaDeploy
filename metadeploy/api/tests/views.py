@@ -1,3 +1,4 @@
+from contextlib import ExitStack
 from datetime import datetime
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
@@ -57,6 +58,9 @@ class TestJobViewset:
             "message": "",
             "error_message": "",
             "edited_at": format_timestamp(job.edited_at),
+            "product_slug": str(job.plan.version.product.slug),
+            "version_label": str(job.plan.version.label),
+            "plan_slug": str(job.plan.slug),
         }
 
     def test_job__your_own(self, client, user_factory, job_factory):
@@ -88,6 +92,9 @@ class TestJobViewset:
             "message": "",
             "error_message": "",
             "edited_at": format_timestamp(job.edited_at),
+            "product_slug": str(job.plan.version.product.slug),
+            "version_label": str(job.plan.version.label),
+            "plan_slug": str(job.plan.slug),
         }
 
     def test_job__is_public(self, client, job_factory):
@@ -117,6 +124,9 @@ class TestJobViewset:
             "message": "",
             "error_message": "",
             "edited_at": format_timestamp(job.edited_at),
+            "product_slug": str(job.plan.version.product.slug),
+            "version_label": str(job.plan.version.label),
+            "plan_slug": str(job.plan.slug),
         }
 
     def test_job__is_public_anon(self, anon_client, job_factory):
@@ -147,6 +157,9 @@ class TestJobViewset:
             "message": "",
             "error_message": "",
             "edited_at": format_timestamp(job.edited_at),
+            "product_slug": str(job.plan.version.product.slug),
+            "version_label": str(job.plan.version.label),
+            "plan_slug": str(job.plan.slug),
         }
 
     def test_create_job(self, client, plan_factory, preflight_result_factory):
@@ -177,6 +190,54 @@ class TestJobViewset:
 
         assert response.status_code == 403
         assert Job.objects.filter(id=job.id).exists()
+
+    def test_queryset_anonymous_scratch_org(
+        self, anon_client, job_factory, scratch_org_factory
+    ):
+        org_id = "00Dyyyyyyyyyyyyyyy"
+        uuid = str(uuid4())
+        job = job_factory(
+            is_public=False,
+            org_id=org_id,
+        )
+        scratch_org_factory(
+            status=ScratchOrg.Status.complete,
+            org_id=org_id,
+            uuid=uuid,
+        )
+        url = reverse("job-detail", kwargs={"pk": job.id})
+        session = anon_client.session
+        session["scratch_org_id"] = uuid
+        session.save()
+        response = anon_client.get(url)
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "id": str(job.id),
+            "creator": None,
+            "plan": str(job.plan.id),
+            "instance_url": None,
+            "org_id": None,
+            "steps": [],
+            "results": {},
+            "error_count": 0,
+            "warning_count": 0,
+            "created_at": format_timestamp(job.created_at),
+            "enqueued_at": None,
+            "job_id": None,
+            "status": "started",
+            "org_name": None,
+            "org_type": "",
+            "is_production_org": False,
+            "is_public": False,
+            "user_can_edit": False,
+            "message": "",
+            "error_message": "",
+            "edited_at": format_timestamp(job.edited_at),
+            "product_slug": str(job.plan.version.product.slug),
+            "version_label": str(job.plan.version.label),
+            "plan_slug": str(job.plan.slug),
+        }
 
 
 @pytest.mark.django_db
@@ -759,3 +820,34 @@ class TestPlanView:
             )
             assert response.status_code == 202
             assert create_scratch_org_job.delay.called
+
+
+@pytest.mark.django_db
+class TestScratchOrgView:
+    def test_redirect__good(self, anon_client, scratch_org_factory):
+        with ExitStack() as stack:
+            uuid = str(uuid4())
+            scratch_org = scratch_org_factory(
+                status=ScratchOrg.Status.complete,
+                uuid=uuid,
+            )
+            session = anon_client.session
+            session["scratch_org_id"] = uuid
+            session.save()
+
+            get_login_url = stack.enter_context(
+                patch("metadeploy.api.models.ScratchOrg.get_login_url")
+            )
+            get_login_url.return_value = "https://example.com"
+            url = reverse("scratch-org-redirect", kwargs={"pk": str(scratch_org.id)})
+            response = anon_client.get(url)
+
+            assert response.status_code == 302
+
+    def test_redirect__bad(self, anon_client, scratch_org_factory):
+        scratch_org = scratch_org_factory()
+
+        url = reverse("scratch-org-redirect", kwargs={"pk": str(scratch_org.id)})
+        response = anon_client.get(url)
+
+        assert response.status_code == 404

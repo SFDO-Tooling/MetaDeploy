@@ -9,6 +9,7 @@ import {
   fetchProduct,
   fetchVersion,
 } from '@/store/products/actions';
+import { fetchScratchOrg } from '@/store/scratchOrgs/actions';
 import routes from '@/utils/routes';
 
 import {
@@ -19,13 +20,16 @@ import {
 
 jest.mock('@/store/jobs/actions');
 jest.mock('@/store/products/actions');
+jest.mock('@/store/scratchOrgs/actions');
 
+fetchScratchOrg.mockReturnValue({ type: 'TEST' });
 fetchJob.mockReturnValue({ type: 'TEST' });
 fetchPlan.mockReturnValue({ type: 'TEST' });
 fetchProduct.mockReturnValue({ type: 'TEST' });
 fetchVersion.mockReturnValue({ type: 'TEST' });
 
 afterEach(() => {
+  fetchScratchOrg.mockClear();
   fetchJob.mockClear();
   fetchPlan.mockClear();
   fetchProduct.mockClear();
@@ -90,6 +94,7 @@ const defaultState = {
   jobs: {
     'job-1': {
       id: 'job-1',
+      org_id: '0x-org-id',
       creator: {
         username: 'test-user',
       },
@@ -102,9 +107,28 @@ const defaultState = {
       is_production_org: true,
       message: 'Congrats!',
       error_count: 0,
+      user_can_edit: true,
+      product_slug: 'product-1',
+      version_label: '1.0.0',
+      plan_slug: 'my-plan',
     },
   },
   user: null,
+  scratchOrgs: {
+    'plan-1': null,
+  },
+};
+
+const scratchOrg = {
+  plan: 'plan-1',
+  org_id: '0x-org-id',
+  status: 'complete',
+  uuid: 'org-uuid',
+};
+
+const scratchOrgJob = {
+  ...defaultState.jobs['job-1'],
+  creator: null,
 };
 
 describe('<JobDetail />', () => {
@@ -193,6 +217,20 @@ describe('<JobDetail />', () => {
         versionLabel: '1.0.0',
         planSlug: 'my-plan',
       });
+    });
+  });
+
+  describe('unknown scratch org', () => {
+    test('fetches org', () => {
+      setup({
+        initialState: {
+          ...defaultState,
+          jobs: { 'job-1': scratchOrgJob },
+          scratchOrgs: {},
+        },
+      });
+
+      expect(fetchScratchOrg).toHaveBeenCalledWith('plan-1');
     });
   });
 
@@ -381,6 +419,44 @@ describe('<JobDetail />', () => {
         expect(getByText('Resolve Installation Error')).toBeVisible();
       });
     });
+
+    describe('scratch org job completes', () => {
+      test('opens modal', () => {
+        const state = {
+          ...defaultState,
+          jobs: {
+            'job-1': { ...scratchOrgJob, status: 'started' },
+          },
+          scratchOrgs: {
+            'plan-1': scratchOrg,
+          },
+        };
+        const { baseElement, getByText, queryByText, rerender } = setup({
+          initialState: state,
+        });
+
+        expect(queryByText('Access Your Scratch Org')).toBeNull();
+
+        setup({
+          initialState: {
+            ...state,
+            jobs: {
+              'job-1': { ...scratchOrgJob, status: 'complete' },
+            },
+          },
+          rerenderFn: rerender,
+          customStore: false,
+        });
+        const input = baseElement.querySelector('#share-job-link');
+        const url = routes.job_detail('product-1', '1.0.0', 'my-plan', 'job-1');
+
+        expect(getByText('Access Your Scratch Org')).toBeVisible();
+        expect(input).toBeVisible();
+        expect(input.value).toEqual(
+          `${window.location.origin}${url}?scratch_org_id=${scratchOrg.uuid}`,
+        );
+      });
+    });
   });
 
   describe('job complete', () => {
@@ -520,7 +596,15 @@ describe('<JobDetail />', () => {
 
   describe('share button click', () => {
     test('opens modal', () => {
-      const { getByText } = setup();
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          jobs: {
+            ...defaultState.jobs,
+            'job-1': { ...defaultState.jobs['job-1'], status: 'started' },
+          },
+        },
+      });
       fireEvent.click(getByText('Share Installation'));
 
       expect(getByText('Share Link to Installation Job')).toBeVisible();

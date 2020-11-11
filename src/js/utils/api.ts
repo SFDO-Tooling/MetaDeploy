@@ -92,6 +92,7 @@ const apiFetch = (
 export const addUrlParams = (
   baseUrl: string,
   params: UrlParams = {},
+  includeOrigin = false,
 ): string => {
   const url = new URL(baseUrl, window.location.origin);
   Object.keys(params).forEach((key) => {
@@ -101,6 +102,9 @@ export const addUrlParams = (
       url.searchParams.append(key, value);
     }
   });
+  if (includeOrigin) {
+    return url.href;
+  }
   return url.pathname + url.search + url.hash;
 };
 

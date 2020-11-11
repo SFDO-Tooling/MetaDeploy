@@ -1,11 +1,12 @@
 from datetime import timedelta
+from uuid import uuid4
 
 import pytest
 from django.utils import timezone
 
 from metadeploy.conftest import format_timestamp
 
-from ..models import Job, PreflightResult
+from ..models import Job, PreflightResult, ScratchOrg
 from ..serializers import (
     JobSerializer,
     JobSummarySerializer,
@@ -14,6 +15,10 @@ from ..serializers import (
     ProductCategorySerializer,
     ProductSerializer,
 )
+
+
+class AnonymousUser:
+    is_authenticated = False
 
 
 @pytest.mark.django_db
@@ -196,6 +201,84 @@ class TestJob:
 
         assert serializer.is_valid(), serializer.errors
 
+    def test_create_good__anonymous(
+        self,
+        rf,
+        plan_factory,
+        step_factory,
+        preflight_result_factory,
+        scratch_org_factory,
+    ):
+        plan = plan_factory()
+        user = None
+        step1 = step_factory(plan=plan)
+        step2 = step_factory(plan=plan)
+        step3 = step_factory(plan=plan)
+        org_id = "00Dxxxxxxxxxxxxxxx"
+        uuid = str(uuid4())
+        request = rf.get("/")
+        request.user = AnonymousUser()
+        request.session = {"scratch_org_id": uuid}
+        scratch_org_factory(
+            uuid=uuid,
+            status=ScratchOrg.Status.complete,
+            org_id=org_id,
+            config={
+                "access_token": "abc123",
+                "refresh_token": "abc123",
+                "instance_url": "https://example.com/",
+            },
+        )
+        preflight_result_factory(
+            plan=plan,
+            user=user,
+            status=PreflightResult.Status.complete,
+            results={str(step2.id): [{"status": "error", "message": ""}]},
+            org_id=org_id,
+        )
+        preflight_result_factory(
+            plan=plan,
+            user=user,
+            status=PreflightResult.Status.complete,
+            results={
+                str(step1.id): {"status": "warn", "message": ""},
+                str(step2.id): {"status": "skip", "message": ""},
+                str(step3.id): {"status": "optional", "message": ""},
+            },
+            org_id=org_id,
+        )
+        data = {
+            "plan": str(plan.id),
+            "steps": [str(step1.id), str(step2.id), str(step3.id)],
+        }
+        serializer = JobSerializer(data=data, context=dict(request=request))
+
+        assert serializer.is_valid(), serializer.errors
+
+    def test_create_bad__anonymous(
+        self,
+        rf,
+        plan_factory,
+        step_factory,
+        preflight_result_factory,
+        scratch_org_factory,
+    ):
+        plan = plan_factory()
+        step1 = step_factory(plan=plan)
+        step2 = step_factory(plan=plan)
+        step3 = step_factory(plan=plan)
+        uuid = str(uuid4())
+        request = rf.get("/")
+        request.user = AnonymousUser()
+        request.session = {"scratch_org_id": uuid}
+        data = {
+            "plan": str(plan.id),
+            "steps": [str(step1.id), str(step2.id), str(step3.id)],
+        }
+        serializer = JobSerializer(data=data, context=dict(request=request))
+
+        assert not serializer.is_valid()
+
     def test_create_good_no_preflight(
         self, rf, user_factory, plan_factory, step_factory
     ):
@@ -294,6 +377,26 @@ class TestJob:
         serializer = JobSerializer(data=data, context=dict(request=request))
 
         assert serializer.is_valid(), serializer.errors
+
+    def test_user_can_edit_scratch_org(self, rf, job_factory, scratch_org_factory):
+        org_id = "00Dxxxxxxxxxxxxxxx"
+        uuid = str(uuid4())
+        request = rf.get("/")
+        request.user = AnonymousUser()
+        request.session = {"scratch_org_id": uuid}
+        scratch_org_factory(
+            uuid=uuid,
+            status=ScratchOrg.Status.complete,
+            org_id=org_id,
+        )
+        job = job_factory(
+            user=None,
+            status=Job.Status.complete,
+            org_id=org_id,
+        )
+        serializer = JobSerializer(instance=job, context=dict(request=request))
+
+        assert serializer.data["user_can_edit"]
 
     def test_no_context(self, job_factory):
         job = job_factory(

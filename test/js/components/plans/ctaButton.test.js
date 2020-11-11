@@ -83,6 +83,7 @@ describe('<CtaButton />', () => {
         doStartPreflight={opts.doStartPreflight}
         doStartJob={opts.doStartJob}
         doSpinScratchOrg={opts.doSpinScratchOrg}
+        doLogout={opts.doLogout}
       />,
       opts.rerenderFn,
     );
@@ -93,6 +94,15 @@ describe('<CtaButton />', () => {
       const { getByText } = setup({ user: null });
 
       expect(getByText('Log In to Start Pre-Install Validation')).toBeVisible();
+    });
+
+    test('renders login btn (supports scratch orgs)', () => {
+      const { getByText } = setup({
+        user: null,
+        plan: { ...defaultPlan, supported_orgs: 'Both' },
+      });
+
+      expect(getByText('Log In to Existing Org')).toBeVisible();
     });
   });
 
@@ -131,6 +141,16 @@ describe('<CtaButton />', () => {
           getByText('Log In to Start Pre-Install Validation'),
         ).toBeVisible();
       });
+
+      test('renders login btn (supports scratch orgs)', () => {
+        const { getByText } = setup({
+          preflight: null,
+          user: { valid_token_for: null, org_type: 'Developer Edition' },
+          plan: { ...defaultPlan, supported_orgs: 'Both' },
+        });
+
+        expect(getByText('Log In to Existing Org')).toBeVisible();
+      });
     });
   });
 
@@ -157,6 +177,15 @@ describe('<CtaButton />', () => {
 
         expect(getByText('Log In to Install')).toBeVisible();
       });
+
+      test('renders login btn (supports scratch orgs)', () => {
+        const { getByText } = setup({
+          user: { valid_token_for: null, org_type: 'Developer Edition' },
+          plan: { ...defaultPlan, supported_orgs: 'Both' },
+        });
+
+        expect(getByText('Log In to Existing Org')).toBeVisible();
+      });
     });
   });
 
@@ -179,6 +208,16 @@ describe('<CtaButton />', () => {
         expect(
           getByText('Log In to Re-Run Pre-Install Validation'),
         ).toBeVisible();
+      });
+
+      test('renders login btn (supports scratch orgs)', () => {
+        const { getByText } = setup({
+          preflight: { status: 'complete', is_valid: true, error_count: 1 },
+          user: { valid_token_for: null, org_type: 'Developer Edition' },
+          plan: { ...defaultPlan, supported_orgs: 'Both' },
+        });
+
+        expect(getByText('Log In to Existing Org')).toBeVisible();
       });
     });
   });
@@ -212,6 +251,16 @@ describe('<CtaButton />', () => {
         expect(
           getByText('Log In to Re-Run Pre-Install Validation'),
         ).toBeVisible();
+      });
+
+      test('renders login btn (supports scratch orgs)', () => {
+        const { getByText } = setup({
+          preflight: { status: 'failed', is_valid: true, error_count: 0 },
+          user: { valid_token_for: null, org_type: 'Developer Edition' },
+          plan: { ...defaultPlan, supported_orgs: 'Both' },
+        });
+
+        expect(getByText('Log In to Existing Org')).toBeVisible();
       });
     });
   });
@@ -427,10 +476,10 @@ describe('<CtaButton />', () => {
   });
 
   describe('auto-start preflight after login', () => {
-    const history = { push: jest.fn() };
+    const history = { replace: jest.fn() };
 
     beforeEach(() => {
-      history.push.mockClear();
+      history.replace.mockClear();
       removeUrlParam.mockReturnValue('');
       getUrlParam.mockReturnValue('true');
     });
@@ -439,7 +488,7 @@ describe('<CtaButton />', () => {
       setup({ preflight: undefined, history });
 
       expect(removeUrlParam).toHaveBeenCalledWith('start_preflight');
-      expect(history.push).toHaveBeenCalledWith({ search: '' });
+      expect(history.replace).toHaveBeenCalledWith({ search: '' });
     });
 
     describe('preflight not required', () => {
@@ -556,10 +605,20 @@ describe('<CtaButton />', () => {
     });
 
     describe('no scratch org', () => {
+      test('renders logout btn if logged in', () => {
+        const { getByText } = setup({
+          plan: scratchOrgPlan,
+          scratchOrg: null,
+        });
+
+        expect(getByText('Log Out to Create Scratch Org')).toBeVisible();
+      });
+
       test('renders create-org btn', () => {
         const { getByText } = setup({
           plan: scratchOrgPlan,
           scratchOrg: null,
+          user: null,
         });
 
         expect(getByText('Create Scratch Org')).toBeVisible();
@@ -571,6 +630,7 @@ describe('<CtaButton />', () => {
             plan: scratchOrgPlan,
             scratchOrg: null,
             clickThroughAgreement: '<p>Please and thank you.</p>',
+            user: null,
           });
           fireEvent.click(getByText('Create Scratch Org'));
 
@@ -589,6 +649,7 @@ describe('<CtaButton />', () => {
             scratchOrg: null,
             clickThroughAgreement: '<p>Please and thank you.</p>',
             doSpinScratchOrg,
+            user: null,
           });
           fireEvent.click(getByText('Create Scratch Org'));
           fireEvent.click(
@@ -611,6 +672,7 @@ describe('<CtaButton />', () => {
             const { getByText, queryByText } = setup({
               plan: scratchOrgPlan,
               scratchOrg: null,
+              user: null,
             });
             fireEvent.click(getByText('Create Scratch Org'));
 
@@ -624,6 +686,7 @@ describe('<CtaButton />', () => {
             const { getByText, queryByText } = setup({
               plan: scratchOrgPlan,
               scratchOrg: null,
+              user: null,
             });
             fireEvent.click(getByText('Create Scratch Org'));
 
@@ -643,6 +706,7 @@ describe('<CtaButton />', () => {
           plan: { ...scratchOrgPlan, requires_preflight: true },
           scratchOrg: { status: SCRATCH_ORG_STATUSES.complete },
           preflight: null,
+          user: null,
         });
 
         expect(getByText('Start Pre-Install Validation')).toBeVisible();
@@ -654,9 +718,19 @@ describe('<CtaButton />', () => {
         const { getByText } = setup({
           plan: { ...scratchOrgPlan, requires_preflight: true },
           scratchOrg: { status: SCRATCH_ORG_STATUSES.complete },
+          user: null,
         });
 
         expect(getByText('Install')).toBeVisible();
+      });
+
+      test('renders logout btn if logged in', () => {
+        const { getByText } = setup({
+          plan: { ...scratchOrgPlan, requires_preflight: true },
+          scratchOrg: { status: SCRATCH_ORG_STATUSES.complete },
+        });
+
+        expect(getByText('Log Out to Use Scratch Org')).toBeVisible();
       });
     });
 
@@ -666,6 +740,7 @@ describe('<CtaButton />', () => {
           plan: { ...scratchOrgPlan, requires_preflight: true },
           scratchOrg: { status: SCRATCH_ORG_STATUSES.complete },
           preflight: { status: 'complete', is_valid: true, error_count: 1 },
+          user: null,
         });
 
         expect(getByText('Re-Run Pre-Install Validation')).toBeVisible();
@@ -678,6 +753,7 @@ describe('<CtaButton />', () => {
           plan: { ...scratchOrgPlan, requires_preflight: true },
           scratchOrg: { status: SCRATCH_ORG_STATUSES.complete },
           preflight: { status: 'canceled', is_valid: true, error_count: 0 },
+          user: null,
         });
 
         expect(getByText('Re-Run Pre-Install Validation')).toBeVisible();
@@ -690,6 +766,7 @@ describe('<CtaButton />', () => {
           plan: { ...scratchOrgPlan, requires_preflight: true },
           scratchOrg: { status: SCRATCH_ORG_STATUSES.complete },
           preflight: { status: 'failed', is_valid: true, error_count: 0 },
+          user: null,
         });
 
         expect(getByText('Re-Run Pre-Install Validation')).toBeVisible();
@@ -701,6 +778,7 @@ describe('<CtaButton />', () => {
         const { getByText } = setup({
           plan: scratchOrgPlan,
           scratchOrg: { status: SCRATCH_ORG_STATUSES.complete },
+          user: null,
         });
 
         expect(getByText('Install')).toBeVisible();
@@ -723,6 +801,7 @@ describe('<CtaButton />', () => {
             warning_count: 1,
             is_ready: true,
           },
+          user: null,
         });
         fireEvent.click(getByText('View Warnings to Continue Installation'));
 

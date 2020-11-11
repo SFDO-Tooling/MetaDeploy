@@ -9,11 +9,13 @@ import { SupportedOrgs } from '@/utils/constants';
 const ProgressIndicator = ({
   job,
   supportedOrgs,
+  preflightRequired,
 }: {
   job: Job;
   supportedOrgs: SupportedOrgs;
+  preflightRequired: boolean;
 }) => {
-  const steps = getSteps(supportedOrgs);
+  const steps = getSteps(supportedOrgs, preflightRequired);
   const completedSteps =
     job.status === CONSTANTS.STATUS.COMPLETE
       ? steps.slice()
