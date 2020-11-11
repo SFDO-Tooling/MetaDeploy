@@ -895,8 +895,11 @@ class PreflightResult(models.Model):
 class ScratchOrgQuerySet(models.QuerySet):
     def get_from_session(self, session):
         """
-        Retrieve a ScratchOrg from the session by its ID.
-        The ID is placed in the session by GetScratchOrgIdFromQueryStringMiddleware.
+        Retrieve a ScratchOrg from the session by its UUID.
+
+        The UUID is placed in the session when the org is created
+        (`scratch_org_post` method on `PlanViewSet`),
+        or from a URL query string (`GetScratchOrgIdFromQueryStringMiddleware`).
         """
         scratch_org_id = session.get("scratch_org_id", None)
         return self.filter(
