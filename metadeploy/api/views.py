@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from django.core import exceptions
 from django.core.cache import cache
 from django.db.models import Q
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, mixins, status, viewsets
@@ -127,17 +127,10 @@ class JobViewSet(
 
     def get_queryset(self):
         user = self.request.user
-        scratch_org_id = self.request.session.get("scratch_org_id", None)
-
         if user.is_staff:
             return Job.objects.all()
 
-        scratch_org = None
-        if scratch_org_id:
-            scratch_org = ScratchOrg.objects.filter(
-                uuid=scratch_org_id, status=ScratchOrg.Status.complete
-            ).first()
-
+        scratch_org = ScratchOrg.objects.get_from_session(self.request.session)
         filters = combine_filters(
             [
                 Q(is_public=True),
@@ -208,13 +201,7 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
 
     def preflight_get(self, request):
         plan = get_object_or_404(Plan.objects, id=self.kwargs["pk"])
-        scratch_org_id = request.session.get("scratch_org_id", None)
-
-        scratch_org = None
-        if scratch_org_id:
-            scratch_org = ScratchOrg.objects.filter(
-                uuid=scratch_org_id, status=ScratchOrg.Status.complete
-            ).first()
+        scratch_org = ScratchOrg.objects.get_from_session(request.session)
 
         if scratch_org:
             org_id = scratch_org.org_id
@@ -234,26 +221,22 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
         return Response(serializer.data)
 
     def preflight_post(self, request):
-        scratch_org_id = request.session.get("scratch_org_id", None)
         plan = get_object_or_404(Plan.objects, id=self.kwargs["pk"])
+        scratch_org = ScratchOrg.objects.filter(plan=plan).get_from_session(
+            request.session
+        )
         is_visible_to = plan.is_visible_to(
             request.user
         ) and plan.version.product.is_visible_to(request.user)
-        if not (is_visible_to or scratch_org_id):
+        if not (is_visible_to or scratch_org):
             return Response("", status=status.HTTP_403_FORBIDDEN)
 
         kwargs = None
-        if scratch_org_id:
-            try:
-                scratch_org = ScratchOrg.objects.get(
-                    uuid=scratch_org_id, plan=plan, status=ScratchOrg.Status.complete
-                )
-                config = scratch_org.config
-                kwargs = {
-                    "org_id": config["org_id"],
-                }
-            except (ScratchOrg.DoesNotExist, ScratchOrg.MultipleObjectsReturned):
-                pass
+        if scratch_org:
+            config = scratch_org.config
+            kwargs = {
+                "org_id": config["org_id"],
+            }
 
         if request.user.is_authenticated:
             kwargs = {
@@ -286,6 +269,8 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
             Q(status=ScratchOrg.Status.started) | Q(status=ScratchOrg.Status.complete),
         )
         kwargs = {"uuid": scratch_org_id, "plan": plan}
+        # Can't use ScratchOrg.objects.get_from_session because we want to filter
+        # by multiple status
         scratch_org = ScratchOrg.objects.filter(*args, **kwargs).distinct().first()
         if scratch_org is None:
             return Response("", status=status.HTTP_404_NOT_FOUND)
@@ -368,14 +353,10 @@ class OrgViewSet(viewsets.ViewSet):
         """
         response = {}
 
-        if "scratch_org_id" in request.session:
-            uuid = request.session["scratch_org_id"]
-            scratch_org = ScratchOrg.objects.filter(
-                uuid=uuid, status=ScratchOrg.Status.complete
-            ).first()
-            if scratch_org:
-                org_id = scratch_org.org_id
-                response[org_id] = self._prepare_org_serialization(org_id)
+        scratch_org = ScratchOrg.objects.get_from_session(request.session)
+        if scratch_org:
+            org_id = scratch_org.org_id
+            response[org_id] = self._prepare_org_serialization(org_id)
 
         if request.user.is_authenticated:
             org_id = request.user.org_id
@@ -388,14 +369,10 @@ class ScratchOrgViewSet(viewsets.GenericViewSet):
     permission_classes = (AllowAny,)
     serializer_class = ScratchOrgSerializer
 
-    def get_queryset(self):
-        scratch_org_id = self.request.session.get("scratch_org_id", None)
-        return ScratchOrg.objects.filter(
-            uuid=scratch_org_id, status=ScratchOrg.Status.complete
-        )
-
     @action(detail=True, methods=["GET"])
     def redirect(self, request, pk=None):
-        scratch_org = self.get_object()
+        scratch_org = ScratchOrg.objects.get_from_session(request.session)
+        if not scratch_org:
+            raise Http404
         url = scratch_org.get_login_url()
         return HttpResponseRedirect(redirect_to=url)

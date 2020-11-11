@@ -169,10 +169,5 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         if "user" in self.scope and self.scope["user"].is_authenticated:
             if self.scope["user"].org_id == org_id:
                 return True
-        scratch_org_id = self.scope["session"].get("scratch_org_id", None)
-        if scratch_org_id:
-            scratch_org = ScratchOrg.objects.filter(
-                uuid=scratch_org_id, status=ScratchOrg.Status.complete
-            ).first()
-            return scratch_org.org_id == org_id if scratch_org else False
-        return False
+        scratch_org = ScratchOrg.objects.get_from_session(self.scope["session"])
+        return scratch_org and scratch_org.org_id == org_id

@@ -408,8 +408,10 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
                 user = self.context["request"].user
                 is_owner = user == self.instance.user
                 return is_owner or user.is_staff if include_staff else is_owner
-            org_id = getattr(self._get_scratch_org_from_session(), "org_id", None)
-            return org_id and self.instance.org_id == org_id
+            scratch_org = ScratchOrg.objects.get_from_session(
+                self.context["request"].session
+            )
+            return scratch_org and self.instance.org_id == scratch_org.org_id
         except (AttributeError, KeyError):
             return False
 
@@ -475,13 +477,6 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             required_steps -= set(preflight.optional_step_ids)
         return not set(required_steps) - set(s.id for s in steps)
 
-    def _get_scratch_org_from_session(self):
-        scratch_org_id = self.context["request"].session.get("scratch_org_id", None)
-        if scratch_org_id:
-            return ScratchOrg.objects.filter(
-                uuid=scratch_org_id, status=ScratchOrg.Status.complete
-            ).first()
-
     def _get_from_data_or_instance(self, data, name, default=None):
         value = data.get(name, getattr(self.instance, name, default))
         # Handle the case where value is a *RelatedManager:
@@ -520,7 +515,9 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
 
         scratch_org = None
         if not (user and user.is_authenticated):
-            scratch_org = self._get_scratch_org_from_session()
+            scratch_org = ScratchOrg.objects.get_from_session(
+                self.context["request"].session
+            )
             if not org_id:
                 org_id = getattr(scratch_org, "org_id", None)
 

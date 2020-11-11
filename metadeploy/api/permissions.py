@@ -21,14 +21,8 @@ class HasOrgOrReadOnly(permissions.BasePermission):
             and request.user.is_authenticated
         ):
             return True
-        scratch_org_id = request.session.get("scratch_org_id", None)
-        if scratch_org_id:
-            scratch_org = ScratchOrg.objects.filter(
-                uuid=scratch_org_id, status=ScratchOrg.Status.complete
-            ).first()
-            if scratch_org:
-                return True
-        return False
+        scratch_org = ScratchOrg.objects.get_from_session(request.session)
+        return True if scratch_org else False
 
     def has_object_permission(self, request, view, obj):
         is_superuser = request.user and request.user.is_superuser
@@ -37,10 +31,5 @@ class HasOrgOrReadOnly(permissions.BasePermission):
         )
         if request.method in permissions.SAFE_METHODS or is_superuser or is_owner:
             return True
-        scratch_org_id = request.session.get("scratch_org_id", None)
-        if scratch_org_id:
-            scratch_org = ScratchOrg.objects.filter(
-                uuid=scratch_org_id, status=ScratchOrg.Status.complete
-            ).first()
-            return scratch_org and scratch_org.org_id == obj.org_id
-        return False
+        scratch_org = ScratchOrg.objects.get_from_session(request.session)
+        return scratch_org and scratch_org.org_id == obj.org_id

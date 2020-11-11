@@ -683,13 +683,7 @@ class Job(HashIdMixin, models.Model):
         # valid scratch_org `uuid` in their session (matching this Job):
         if self.is_public or user.is_staff or user == self.user:
             return True
-        scratch_org_id = session.get("scratch_org_id", None)
-        scratch_org = (
-            scratch_org_id
-            and ScratchOrg.objects.filter(
-                uuid=scratch_org_id, status=ScratchOrg.Status.complete
-            ).first()
-        )
+        scratch_org = ScratchOrg.objects.get_from_session(session)
         return scratch_org and scratch_org.org_id == self.org_id
 
     def skip_steps(self):
@@ -813,13 +807,7 @@ class PreflightResult(models.Model):
         # scratch_org `uuid` in their session (matching this Preflight):
         if user.is_staff or self.user == user:
             return True
-        scratch_org_id = session.get("scratch_org_id", None)
-        scratch_org = (
-            scratch_org_id
-            and ScratchOrg.objects.filter(
-                uuid=scratch_org_id, status=ScratchOrg.Status.complete
-            ).first()
-        )
+        scratch_org = ScratchOrg.objects.get_from_session(session)
         return scratch_org and scratch_org.org_id == self.org_id
 
     def has_any_errors(self):
@@ -904,6 +892,18 @@ class PreflightResult(models.Model):
         flow_coordinator.run(org)
 
 
+class ScratchOrgQuerySet(models.QuerySet):
+    def get_from_session(self, session):
+        """
+        Retrieve a ScratchOrg from the session by its ID.
+        The ID is placed in the session by GetScratchOrgIdFromQueryStringMiddleware.
+        """
+        scratch_org_id = session.get("scratch_org_id", None)
+        return self.filter(
+            uuid=scratch_org_id, status=self.model.Status.complete
+        ).first()
+
+
 class ScratchOrg(HashIdMixin, models.Model):
     Status = Choices("started", "complete", "failed", "canceled")
 
@@ -920,6 +920,8 @@ class ScratchOrg(HashIdMixin, models.Model):
     status = models.CharField(choices=Status, max_length=64, default=Status.started)
     config = JSONField(null=True, blank=True, encoder=DjangoJSONEncoder)
     org_id = models.CharField(null=True, blank=True, max_length=18)
+
+    objects = ScratchOrgQuerySet.as_manager()
 
     def save(self, *args, **kwargs):
         ret = super().save(*args, **kwargs)
