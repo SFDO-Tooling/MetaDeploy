@@ -285,11 +285,15 @@ class ShareModal extends React.Component<WrappedProps> {
   }
 
   render() {
-    const { scratchOrg } = this.props;
+    const { scratchOrg, job } = this.props;
+    const isCompleteOnScratchOrg = Boolean(
+      scratchOrg && job.status === CONSTANTS.STATUS.COMPLETE,
+    );
+    const heading =
+      isCompleteOnScratchOrg && job.user_can_edit
+        ? i18n.t('Access Your Scratch Org')
+        : i18n.t('Share Link to Installation Job');
     const errorMsg = this.getErrorMessage();
-    const heading = scratchOrg
-      ? i18n.t('Access Your Scratch Org')
-      : i18n.t('Share Link to Installation Job');
     return (
       <Modal
         isOpen={this.props.isOpen}
