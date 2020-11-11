@@ -1,4 +1,5 @@
 import logging
+import uuid
 from statistics import median
 from typing import Union
 
@@ -917,7 +918,7 @@ class ScratchOrg(HashIdMixin, models.Model):
     job_id = models.UUIDField(null=True)
     # This is set in a user's session to let them continue to access
     # this job, without being otherwise auth'd:
-    uuid = models.UUIDField(null=True)
+    uuid = models.UUIDField(default=uuid.uuid4)
     created_at = models.DateTimeField(auto_now_add=True)
     edited_at = models.DateTimeField(auto_now=True)
     status = models.CharField(choices=Status, max_length=64, default=Status.started)

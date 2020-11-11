@@ -1,5 +1,4 @@
 from functools import reduce
-from uuid import uuid4
 
 import django_rq
 from django.conf import settings
@@ -308,9 +307,8 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
 
-        uuid = str(uuid4())
-        scratch_org = serializer.save(uuid=uuid)
-        request.session["scratch_org_id"] = uuid
+        scratch_org = serializer.save()
+        request.session["scratch_org_id"] = str(scratch_org.uuid)
 
         serializer = ScratchOrgSerializer(instance=scratch_org)
         return Response(
