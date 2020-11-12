@@ -218,8 +218,9 @@ class ProductAdmin(MetadeployTranslatableAdmin):
 
 
 @admin.register(ProductCategory)
-class ProductCategoryAdmin(admin.ModelAdmin):
+class ProductCategoryAdmin(MetadeployTranslatableAdmin):
     list_display = ("title", "order_key")
+    search_fields = ("translations__title", "translations__description")
 
 
 @admin.register(ProductSlug)

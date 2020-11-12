@@ -119,9 +119,14 @@ export const fetchProducts = (): ThunkResult<
     }
     let products: Product[] = [];
     let categories: Category[] = [];
-    response.forEach(({ id, title, first_page }) => {
+    response.forEach(({ id, title, description, first_page }) => {
       products = products.concat(first_page.results);
-      categories = categories.concat({ id, title, next: first_page.next });
+      categories = categories.concat({
+        id,
+        title,
+        description,
+        next: first_page.next,
+      });
     });
     return dispatch({
       type: 'FETCH_PRODUCTS_SUCCEEDED' as const,

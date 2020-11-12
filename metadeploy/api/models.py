@@ -210,16 +210,27 @@ class User(HashIdMixin, AbstractUser):
         return None
 
 
-class ProductCategory(models.Model):
-    title = models.CharField(max_length=256)
-    order_key = models.PositiveIntegerField(default=0)
-
+class ProductCategory(TranslatableModel):
     class Meta:
         verbose_name_plural = "product categories"
         ordering = ("order_key",)
 
+    order_key = models.PositiveIntegerField(default=0)
+
+    translations = TranslatedFields(
+        title=models.CharField(max_length=256),
+        description=MarkdownField(property_suffix="_markdown", blank=True),
+    )
+
+    @property
+    def description_markdown(self):
+        return self._get_translated_model(use_fallback=True).description_markdown
+
     def __str__(self):
         return self.title
+
+    def get_translation_strategy(self):
+        return "fields", f"{self.title}:product_category"
 
 
 class ProductSlug(AbstractSlug):

@@ -96,7 +96,14 @@ describe('<Products />', () => {
           },
         ],
         notFound: [],
-        categories: [{ id: 1, title: 'salesforce', next: null }],
+        categories: [
+          {
+            id: 1,
+            title: 'salesforce',
+            description: '<p>This is a category</p>',
+            next: null,
+          },
+        ],
       },
     };
     const { getByText, queryByText } = setup(initialState);
@@ -186,8 +193,13 @@ describe('<Products />', () => {
         ],
         notFound: [],
         categories: [
-          { id: 1, title: 'salesforce', next: null },
-          { id: 2, title: 'community', next: null },
+          { id: 1, title: 'salesforce', description: '', next: null },
+          {
+            id: 2,
+            title: 'community',
+            description: '<p>This is a category</p>',
+            next: null,
+          },
         ],
       },
     };

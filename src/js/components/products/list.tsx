@@ -75,13 +75,27 @@ class ProductsList extends React.Component<Props, State> {
     };
   }
 
-  static getProductsList(products: Product[]) {
+  static getProductsList(products: Product[], category?: Category) {
     return (
-      <div className="slds-grid slds-wrap">
-        {products.map((item) => (
-          <ProductItem item={item} key={item.id} />
-        ))}
-      </div>
+      <>
+        {category?.description && (
+          <div
+            className="slds-text-longform
+              slds-p-around_small
+              slds-size_1-of-1
+              slds-large-size_2-of-3
+              markdown"
+            dangerouslySetInnerHTML={{
+              __html: category.description,
+            }}
+          />
+        )}
+        <div className="slds-size_1-of-1 slds-grid slds-wrap">
+          {products.map((item) => (
+            <ProductItem item={item} key={item.id} />
+          ))}
+        </div>
+      </>
     );
   }
 
@@ -175,16 +189,23 @@ class ProductsList extends React.Component<Props, State> {
       case 1: {
         // Products are all in one category; no need for multicategory tabs
         const products = Array.from(productsByCategory.values())[0];
-        contents = ProductsList.getProductsList(products);
+        const category = productCategories[0];
+        contents = ProductsList.getProductsList(products, category);
         break;
       }
       default: {
         // Products are in multiple categories; divide into tabs
         const tabs = [];
-        for (const [category, products] of productsByCategory) {
+        for (const [categoryTitle, products] of productsByCategory) {
+          const category = productCategories.find(
+            (c) => c.title === categoryTitle,
+          );
           const panel = (
-            <TabsPanel label={category} key={category}>
-              {ProductsList.getProductsList(products)}
+            <TabsPanel
+              label={categoryTitle}
+              key={category?.id || /* istanbul ignore next */ categoryTitle}
+            >
+              {ProductsList.getProductsList(products, category)}
             </TabsPanel>
           );
           tabs.push(panel);
@@ -211,13 +232,14 @@ class ProductsList extends React.Component<Props, State> {
           <Header history={this.props.history} />
           <PageHeader />
           <div className="slds-p-around_x-large">
-            {window.GLOBALS.SITE?.welcome_text ? ( // These messages are pre-cleaned by the API
+            {window.GLOBALS.SITE?.welcome_text ? (
+              // These messages are pre-cleaned by the API
               <div
                 className="markdown
                   slds-p-bottom_medium
                   slds-text-longform
                   slds-size_1-of-1
-                  slds-medium-size_1-of-2"
+                  slds-large-size_2-of-3"
                 dangerouslySetInnerHTML={{
                   __html: window.GLOBALS.SITE.welcome_text,
                 }}

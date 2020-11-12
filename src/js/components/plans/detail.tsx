@@ -466,7 +466,8 @@ class PlanDetail extends React.Component<Props, State> {
                 averageDuration={plan.average_duration}
                 isProductionOrg={Boolean(user?.is_production_org)}
                 preMessage={
-                  plan.preflight_message ? ( // These messages are pre-cleaned by the API
+                  plan.preflight_message ? (
+                    // These messages are pre-cleaned by the API
                     <div
                       className="markdown"
                       dangerouslySetInnerHTML={{

@@ -21,7 +21,7 @@ export type Product = {
   slug: string;
   old_slugs: string[];
   title: string;
-  description: string | null;
+  description: string;
   short_description: string;
   category: string;
   color: string;
@@ -39,12 +39,13 @@ export type Product = {
   is_listed: boolean;
   is_allowed: boolean;
   not_allowed_instructions: string | null;
-  click_through_agreement: string | null;
+  click_through_agreement: string;
   layout: ProductLayouts;
 };
 export type Category = {
   id: number;
   title: string;
+  description: string;
   next: string | null;
 };
 export type ProductsState = {

@@ -272,8 +272,7 @@ class Command(BaseCommand):
             ),
         )
 
-    def create_eda(self):
-        sf_category = ProductCategory.objects.get(title="Salesforce.org Products")
+    def create_eda(self, category):
         product = Product.objects.create(
             title="Education Data Architecture (EDA)",
             description="## Welcome to the EDA installer!",
@@ -302,7 +301,7 @@ class Command(BaseCommand):
                 "LIABILITY AND INDEMNIFICATION OBLIGATIONS FOR ANY HARM OR DAMAGES "
                 "CAUSED BY ANY THIRD-PARTY HOSTING PROVIDERS."
             ),
-            category=sf_category,
+            category=category,
             color="#0088FF",
             slds_icon_category="custom",
             slds_icon_name="custom51",
@@ -565,4 +564,4 @@ class Command(BaseCommand):
             version = self.create_version(product)
             self.create_plan(version)
 
-        self.create_eda()
+        self.create_eda(category=sf_category)
