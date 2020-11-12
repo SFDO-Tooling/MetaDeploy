@@ -15,15 +15,11 @@ import ProductItem from '@/components/products/listItem';
 import { AppState } from '@/store';
 import { fetchMoreProducts } from '@/store/products/actions';
 import { Category, Product } from '@/store/products/reducer';
-import {
-  selectProductCategories,
-  selectProductsByCategory,
-} from '@/store/products/selectors';
+import { selectVisibleCategoriesWithProducts } from '@/store/products/selectors';
 import { prettyUrlHash } from '@/utils/helpers';
 
 const select = (appState: AppState) => ({
-  productCategories: selectProductCategories(appState),
-  productsByCategory: selectProductsByCategory(appState),
+  productCategories: selectVisibleCategoriesWithProducts(appState),
 });
 
 const actions = {
@@ -57,9 +53,9 @@ class ProductsList extends React.Component<Props, State> {
     try {
       if (window.location.hash) {
         hashTab = props.productCategories.find(
-          (category) =>
+          ({ category }) =>
             window.location.hash.substring(1) === prettyUrlHash(category.title),
-        );
+        )?.category;
       }
       if (hashTab) {
         activeProductsTab = hashTab.title;
@@ -111,7 +107,7 @@ class ProductsList extends React.Component<Props, State> {
   handleSelect = (index: number) => {
     const { history, productCategories } = this.props;
     try {
-      const category = productCategories[index];
+      const { category } = productCategories[index];
 
       /* istanbul ignore else */
       if (category) {
@@ -133,9 +129,9 @@ class ProductsList extends React.Component<Props, State> {
     const { productCategories, doFetchMoreProducts } = this.props;
     const activeCategory = activeProductsTab
       ? productCategories.find(
-          (category) => category.title === activeProductsTab,
-        )
-      : productCategories[0];
+          ({ category }) => category.title === activeProductsTab,
+        )?.category
+      : productCategories[0]?.category;
     const moreProductsUrl = activeCategory?.next;
 
     if (activeCategory && moreProductsUrl && !fetchingProducts) {
@@ -177,9 +173,9 @@ class ProductsList extends React.Component<Props, State> {
 
   render() {
     const { activeProductsTab, fetchingProducts } = this.state;
-    const { productsByCategory, productCategories } = this.props;
+    const { productCategories } = this.props;
     let contents;
-    switch (productsByCategory.size) {
+    switch (productCategories.length) {
       case 0: {
         // No products; show empty message
         const msg = i18n.t('We couldn’t find any products. Try again later?');
@@ -187,31 +183,24 @@ class ProductsList extends React.Component<Props, State> {
         break;
       }
       case 1: {
-        // Products are all in one category; no need for multicategory tabs
-        const products = Array.from(productsByCategory.values())[0];
-        const category = productCategories[0];
+        // Products are all in one category; no need for category tabs
+        const { category, products } = productCategories[0];
         contents = ProductsList.getProductsList(products, category);
         break;
       }
       default: {
         // Products are in multiple categories; divide into tabs
         const tabs = [];
-        for (const [categoryTitle, products] of productsByCategory) {
-          const category = productCategories.find(
-            (c) => c.title === categoryTitle,
-          );
+        for (const { category, products } of productCategories) {
           const panel = (
-            <TabsPanel
-              label={categoryTitle}
-              key={category?.id || /* istanbul ignore next */ categoryTitle}
-            >
+            <TabsPanel label={category.title} key={category.id}>
               {ProductsList.getProductsList(products, category)}
             </TabsPanel>
           );
           tabs.push(panel);
         }
         const savedTabIndex = productCategories.findIndex(
-          (category) => category.title === activeProductsTab,
+          ({ category }) => category.title === activeProductsTab,
         );
         contents = (
           <Tabs

@@ -216,6 +216,7 @@ class ProductCategory(TranslatableModel):
         ordering = ("order_key",)
 
     order_key = models.PositiveIntegerField(default=0)
+    is_listed = models.BooleanField(default=True)
 
     translations = TranslatedFields(
         title=models.CharField(max_length=256),

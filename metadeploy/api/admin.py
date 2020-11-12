@@ -213,13 +213,15 @@ class PreflightResult(AdminHelpTextMixin, admin.ModelAdmin, PlanMixin):
 
 @admin.register(Product)
 class ProductAdmin(MetadeployTranslatableAdmin):
-    list_display = ("title", "category", "order_key")
+    list_display = ("title", "category", "order_key", "is_listed")
+    list_filter = ("is_listed", "category")
     search_fields = ("translations__title", "translations__description")
 
 
 @admin.register(ProductCategory)
 class ProductCategoryAdmin(MetadeployTranslatableAdmin):
-    list_display = ("title", "order_key")
+    list_display = ("title", "order_key", "is_listed")
+    list_filter = ("is_listed",)
     search_fields = ("translations__title", "translations__description")
 
 

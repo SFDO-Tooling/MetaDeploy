@@ -1,6 +1,13 @@
+import { omit } from 'lodash';
+
 import { ThunkResult } from '@/store';
 import { Plan } from '@/store/plans/reducer';
-import { Category, Product, Version } from '@/store/products/reducer';
+import {
+  ApiCategory,
+  Category,
+  Product,
+  Version,
+} from '@/store/products/reducer';
 import apiFetch, { addUrlParams, ApiError } from '@/utils/api';
 
 type FetchProductsStarted = { type: 'FETCH_PRODUCTS_STARTED' };
@@ -119,12 +126,11 @@ export const fetchProducts = (): ThunkResult<
     }
     let products: Product[] = [];
     let categories: Category[] = [];
-    response.forEach(({ id, title, description, first_page }) => {
+    response.forEach((category: ApiCategory) => {
+      const { first_page } = category;
       products = products.concat(first_page.results);
       categories = categories.concat({
-        id,
-        title,
-        description,
+        ...omit(category, 'first_page'),
         next: first_page.next,
       });
     });

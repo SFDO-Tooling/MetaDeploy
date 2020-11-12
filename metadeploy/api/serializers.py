@@ -242,7 +242,7 @@ class ProductCategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductCategory
-        fields = ("id", "title", "description", "first_page")
+        fields = ("id", "title", "description", "is_listed", "first_page")
 
     def get_next_link(self, paginator, category_id):
         if not paginator.page.has_next():

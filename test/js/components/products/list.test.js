@@ -101,6 +101,7 @@ describe('<Products />', () => {
             id: 1,
             title: 'salesforce',
             description: '<p>This is a category</p>',
+            is_listed: true,
             next: null,
           },
         ],
@@ -193,11 +194,18 @@ describe('<Products />', () => {
         ],
         notFound: [],
         categories: [
-          { id: 1, title: 'salesforce', description: '', next: null },
+          {
+            id: 1,
+            title: 'salesforce',
+            description: '',
+            next: null,
+            is_listed: true,
+          },
           {
             id: 2,
             title: 'community',
             description: '<p>This is a category</p>',
+            is_listed: true,
             next: null,
           },
         ],
@@ -323,8 +331,13 @@ describe('<Products />', () => {
         ],
         notFound: [],
         categories: [
-          { id: 1, title: 'salesforce', next: 'sf-next-url' },
-          { id: 2, title: 'community', next: 'community-next-url' },
+          { id: 1, title: 'salesforce', next: 'sf-next-url', is_listed: true },
+          {
+            id: 2,
+            title: 'community',
+            next: 'community-next-url',
+            is_listed: true,
+          },
         ],
       },
     };
@@ -374,8 +387,13 @@ describe('<Products />', () => {
         products: {
           ...initialState.products,
           categories: [
-            { id: 1, title: 'salesforce', next: null },
-            { id: 2, title: 'community', next: 'community-next-url' },
+            { id: 1, title: 'salesforce', next: null, is_listed: true },
+            {
+              id: 2,
+              title: 'community',
+              next: 'community-next-url',
+              is_listed: false,
+            },
           ],
         },
       };

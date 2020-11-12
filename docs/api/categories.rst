@@ -20,6 +20,8 @@ List
          "id": 31,
          "title": "salesforce.org products",
          "description": "<p>This description is parsed from markdown.</p>",
+         "is_listed": true,
+         "order_key": 0,
          "first_page": {
             "count": 5,
             "next": null,
@@ -124,6 +126,8 @@ Retrieve
       "id": 31,
       "title": "salesforce.org products",
       "description": "<p>This description is parsed from markdown.</p>",
+      "is_listed": true,
+      "order_key": 0,
       "first_page": {
          "count": 5,
          "next": null,

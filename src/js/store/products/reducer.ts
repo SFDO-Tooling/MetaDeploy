@@ -46,8 +46,17 @@ export type Category = {
   id: number;
   title: string;
   description: string;
+  is_listed: boolean;
   next: string | null;
 };
+export interface ApiCategory extends Omit<Category, 'next'> {
+  first_page: {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: Product[];
+  };
+}
 export type ProductsState = {
   products: Product[];
   notFound: string[];
