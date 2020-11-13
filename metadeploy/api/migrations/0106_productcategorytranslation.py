@@ -75,7 +75,9 @@ class Migration(migrations.Migration):
                 (
                     "description",
                     sfdo_template_helpers.fields.markdown.MarkdownField(
-                        blank=True, property_suffix="_markdown"
+                        blank=True,
+                        property_suffix="_markdown",
+                        help_text="Markdown is supported",
                     ),
                 ),
                 (

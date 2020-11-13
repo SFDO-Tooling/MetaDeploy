@@ -439,7 +439,10 @@ class Command(BaseCommand):
         self.create_token_expiry_job()
         self.create_preflight_expiry_job()
         sf_category = ProductCategory.objects.create(
-            title="Salesforce.org Products", order_key=0
+            title="Salesforce.org Products",
+            order_key=0,
+            description="Official products from Salesforce.org. "
+            "**Descriptions support Markdown**.",
         )
         co_category = ProductCategory.objects.create(
             title="Community Products", order_key=1

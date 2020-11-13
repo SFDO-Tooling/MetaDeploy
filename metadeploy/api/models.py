@@ -220,7 +220,9 @@ class ProductCategory(TranslatableModel):
 
     translations = TranslatedFields(
         title=models.CharField(max_length=256),
-        description=MarkdownField(property_suffix="_markdown", blank=True),
+        description=MarkdownField(
+            property_suffix="_markdown", blank=True, help_text="Markdown is supported"
+        ),
     )
 
     @property
