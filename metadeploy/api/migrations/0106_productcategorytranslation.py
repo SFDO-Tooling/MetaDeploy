@@ -23,6 +23,11 @@ def get_translated_fields():
     return ["title", "description"]
 
 
+def get_translation(object, MyModelTranslation):
+    translations = MyModelTranslation.objects.filter(master_id=object.pk)
+    return translations.get(language_code="en-us")
+
+
 def forwards(apps, schema_editor):
     ProductCategory = apps.get_model("api", "ProductCategory")
     ProductCategoryTranslation = apps.get_model("api", "ProductCategoryTranslation")
@@ -43,7 +48,12 @@ def forwards(apps, schema_editor):
 
 
 def backwards(apps, schema_editor):
-    pass
+    ProductCategory = apps.get_model("api", "ProductCategory")
+    ProductCategoryTranslation = apps.get_model("api", "ProductCategoryTranslation")
+    for category in ProductCategory.objects.all():
+        translation = get_translation(category, ProductCategoryTranslation)
+        category.title = translation.title
+        category.save()
 
 
 class Migration(migrations.Migration):
@@ -101,7 +111,6 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.RunPython(forwards, backwards),
-        migrations.RemoveField(model_name="productcategory", name="title"),
         migrations.AlterUniqueTogether(
             name="productcategorytranslation",
             unique_together={("language_code", "master")},
@@ -117,4 +126,10 @@ class Migration(migrations.Migration):
                 to="api.ProductCategory",
             ),
         ),
+        migrations.AlterField(
+            model_name="productcategory",
+            name="title",
+            field=models.CharField(max_length=256, blank=True),
+        ),
+        migrations.RemoveField(model_name="productcategory", name="title"),
     ]
