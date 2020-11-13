@@ -30,7 +30,7 @@ from model_utils import Choices, FieldTracker
 from parler.managers import TranslatableQuerySet
 from parler.models import TranslatableModel, TranslatedFields
 from sfdo_template_helpers.crypto import fernet_decrypt
-from sfdo_template_helpers.fields import MarkdownField
+from sfdo_template_helpers.fields import MarkdownField as BaseMarkdownField
 from sfdo_template_helpers.slugs import AbstractSlug, SlugMixin
 
 from .belvedere_utils import convert_to_18
@@ -63,9 +63,17 @@ class HashIdMixin(models.Model):
     id = HashidAutoField(primary_key=True)
 
 
+class MarkdownField(BaseMarkdownField):
+    def __init__(self, *args, **kwargs):
+        kwargs["property_suffix"] = kwargs.get("property_suffix", "_markdown")
+        kwargs["blank"] = kwargs.get("blank", True)
+        kwargs["help_text"] = kwargs.get("help_text", "Markdown is supported")
+        super().__init__(*args, **kwargs)
+
+
 class AllowedList(models.Model):
     title = models.CharField(max_length=128, unique=True)
-    description = MarkdownField(blank=True, property_suffix="_markdown")
+    description = MarkdownField()
     org_type = ArrayField(
         models.CharField(max_length=64, choices=ORG_TYPES),
         blank=True,
@@ -220,9 +228,7 @@ class ProductCategory(TranslatableModel):
 
     translations = TranslatedFields(
         title=models.CharField(max_length=256),
-        description=MarkdownField(
-            property_suffix="_markdown", blank=True, help_text="Markdown is supported"
-        ),
+        description=MarkdownField(),
     )
 
     @property
@@ -265,9 +271,9 @@ class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel)
     translations = TranslatedFields(
         title=models.CharField(max_length=256),
         short_description=models.TextField(blank=True),
-        description=MarkdownField(property_suffix="_markdown", blank=True),
-        click_through_agreement=MarkdownField(blank=True, property_suffix="_markdown"),
-        error_message=MarkdownField(blank=True, property_suffix="_markdown"),
+        description=MarkdownField(),
+        click_through_agreement=MarkdownField(),
+        error_message=MarkdownField(),
     )
 
     @property
@@ -412,9 +418,9 @@ class PlanSlug(AbstractSlug):
 class PlanTemplate(SlugMixin, TranslatableModel):
     name = models.CharField(max_length=100, blank=True)
     translations = TranslatedFields(
-        preflight_message=MarkdownField(blank=True, property_suffix="_markdown"),
-        post_install_message=MarkdownField(blank=True, property_suffix="_markdown"),
-        error_message=MarkdownField(blank=True, property_suffix="_markdown"),
+        preflight_message=MarkdownField(),
+        post_install_message=MarkdownField(),
+        error_message=MarkdownField(),
     )
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
 
@@ -446,12 +452,8 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
 
     translations = TranslatedFields(
         title=models.CharField(max_length=128),
-        preflight_message_additional=MarkdownField(
-            blank=True, property_suffix="_markdown"
-        ),
-        post_install_message_additional=MarkdownField(
-            blank=True, property_suffix="_markdown"
-        ),
+        preflight_message_additional=MarkdownField(),
+        post_install_message_additional=MarkdownField(),
     )
 
     plan_template = models.ForeignKey(PlanTemplate, on_delete=models.PROTECT)
@@ -1001,8 +1003,8 @@ class SiteProfile(TranslatableModel):
     translations = TranslatedFields(
         name=models.CharField(max_length=64),
         company_name=models.CharField(max_length=64, blank=True),
-        welcome_text=MarkdownField(property_suffix="_markdown", blank=True),
-        copyright_notice=MarkdownField(property_suffix="_markdown", blank=True),
+        welcome_text=MarkdownField(),
+        copyright_notice=MarkdownField(),
     )
 
     show_metadeploy_wordmark = models.BooleanField(default=True)
