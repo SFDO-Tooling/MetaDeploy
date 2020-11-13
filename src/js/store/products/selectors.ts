@@ -10,7 +10,10 @@ import {
   Version,
 } from '@/store/products/reducer';
 
-export type ProductsMapType = Map<string, Product[]>;
+export type CategoryWithProducts = {
+  category: Category;
+  products: Product[];
+};
 
 export type VersionPlanType = {
   readonly label?: string | null;
@@ -32,26 +35,23 @@ const selectProductCategories = createSelector(
   (products: ProductsState): Category[] => products.categories,
 );
 
-const selectProductsByCategory: (
+const selectVisibleCategoriesWithProducts: (
   appState: AppState,
-) => ProductsMapType = createSelector(
+) => CategoryWithProducts[] = createSelector(
   [selectProducts, selectProductCategories],
-  (products: Product[], categories: Category[]): ProductsMapType => {
-    const productsByCategory = new Map();
-    for (const category of categories) {
-      productsByCategory.set(
-        category.title,
-        products.filter(
+  (products: Product[], categories: Category[]): CategoryWithProducts[] =>
+    categories
+      .filter((category) => category.is_listed)
+      .map((category) => ({
+        category,
+        products: products.filter(
           (product) =>
             product.is_allowed &&
             product.is_listed &&
             product.most_recent_version &&
             product.category === category.title,
         ),
-      );
-    }
-    return productsByCategory;
-  },
+      })),
 );
 
 const selectProductSlug = (
@@ -175,7 +175,7 @@ const selectVersionLabelOrPlanSlug = createSelector(
 
 export {
   selectProductCategories,
-  selectProductsByCategory,
+  selectVisibleCategoriesWithProducts,
   selectProductSlug,
   selectProduct,
   selectProductNotFound,

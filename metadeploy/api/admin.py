@@ -159,12 +159,14 @@ class PlanTemplateAdmin(MetadeployTranslatableAdmin):
 @admin.register(Plan)
 class PlanAdmin(MetadeployTranslatableAdmin):
     autocomplete_fields = ("version",)
-    list_filter = ("version__product", "tier", "is_listed")
+    list_filter = ("version__product", "tier", "order_key", "is_listed")
+    list_editable = ("is_listed", "order_key")
     list_display = (
         "title",
         "product",
         "version_label",
         "tier",
+        "order_key",
         "is_listed",
         "created_at",
     )
@@ -213,13 +215,18 @@ class PreflightResult(AdminHelpTextMixin, admin.ModelAdmin, PlanMixin):
 
 @admin.register(Product)
 class ProductAdmin(MetadeployTranslatableAdmin):
-    list_display = ("title", "category", "order_key")
+    list_display = ("title", "category", "order_key", "is_listed")
+    list_editable = ("is_listed", "order_key")
+    list_filter = ("is_listed", "category")
     search_fields = ("translations__title", "translations__description")
 
 
 @admin.register(ProductCategory)
-class ProductCategoryAdmin(admin.ModelAdmin):
-    list_display = ("title", "order_key")
+class ProductCategoryAdmin(MetadeployTranslatableAdmin):
+    list_display = ("title", "order_key", "is_listed")
+    list_editable = ("is_listed", "order_key")
+    list_filter = ("is_listed",)
+    search_fields = ("translations__title", "translations__description")
 
 
 @admin.register(ProductSlug)
@@ -264,6 +271,7 @@ class UserAdmin(AdminHelpTextMixin, admin.ModelAdmin):
 @admin.register(Version)
 class VersionAdmin(admin.ModelAdmin):
     list_filter = ("product", "is_production", "is_listed")
+    list_editable = ("is_production", "is_listed")
     list_display = ("label", "product", "is_production", "is_listed", "commit_ish")
     search_fields = ("label", "product")
 
