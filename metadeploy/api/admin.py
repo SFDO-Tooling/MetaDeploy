@@ -159,7 +159,7 @@ class PlanTemplateAdmin(MetadeployTranslatableAdmin):
 @admin.register(Plan)
 class PlanAdmin(MetadeployTranslatableAdmin):
     autocomplete_fields = ("version",)
-    list_filter = ("version__product", "tier", "order_key", "is_listed")
+    list_filter = ("version__product", "tier", "is_listed")
     list_editable = ("is_listed", "order_key")
     list_display = (
         "title",
