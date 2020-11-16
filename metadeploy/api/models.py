@@ -960,7 +960,7 @@ class ScratchOrg(HashIdMixin, models.Model):
         if not self.enqueued_at:
             from .jobs import create_scratch_org_job
 
-            job = create_scratch_org_job.delay(self)
+            job = create_scratch_org_job.delay(self.id)
             self.job_id = job.id
             self.enqueued_at = job.enqueued_at
             # Yes, this bounces two saves:

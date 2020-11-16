@@ -248,10 +248,11 @@ def expire_preflights():
 expire_preflights_job = job(expire_preflights)
 
 
-def create_scratch_org(org):
+def create_scratch_org(org_id):
     """
     Takes our local ScratchOrg model instance and creates the actual org on Salesforce
     """
+    org = ScratchOrg.objects.get(id=org_id)
     plan = org.plan
     email = org.email
     org.email = None
