@@ -238,11 +238,12 @@ class VersionSerializer(serializers.ModelSerializer):
 
 
 class ProductCategorySerializer(serializers.ModelSerializer):
+    description = serializers.CharField(source="description_markdown")
     first_page = serializers.SerializerMethodField()
 
     class Meta:
         model = ProductCategory
-        fields = ("id", "title", "first_page")
+        fields = ("id", "title", "description", "is_listed", "first_page")
 
     def get_next_link(self, paginator, category_id):
         if not paginator.page.has_next():
@@ -292,7 +293,7 @@ class ProductSerializer(CircumspectSerializerMixin, serializers.ModelSerializer)
     click_through_agreement = serializers.CharField(
         source="click_through_agreement_markdown"
     )
-    title = serializers.CharField
+    title = serializers.CharField()
     short_description = serializers.CharField()
     not_allowed_instructions = serializers.SerializerMethodField()
     is_listed = serializers.SerializerMethodField()
