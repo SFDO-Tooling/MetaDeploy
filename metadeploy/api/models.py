@@ -21,7 +21,7 @@ from django.contrib.postgres.fields import ArrayField, JSONField
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
-from django.core.validators import RegexValidator
+from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
 from django.db.models import Count, F, Func, Q
 from django.utils.translation import gettext_lazy as _
@@ -462,6 +462,14 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
         default=SUPPORTED_ORG_TYPES.Persistent,
     )
     org_config_name = models.CharField(max_length=64, default="release", blank=True)
+    scratch_org_duration_override = models.IntegerField(
+        "Scratch Org duration (days)",
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(1)],
+        help_text="Lifetime of Scratch Orgs created for this plan. Will inherit the "
+        "global default value if left blank.",
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -503,6 +511,10 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
         if len(durations) < settings.MINIMUM_JOBS_FOR_AVERAGE:
             return None
         return median(durations)
+
+    @property
+    def scratch_org_duration(self):
+        return self.scratch_org_duration_override or settings.SCRATCH_ORG_DURATION_DAYS
 
     def natural_key(self):
         return (self.version, self.title)

@@ -451,6 +451,7 @@ REQUEST_ID_RESPONSE_HEADER = "X-Request-ID"
 
 # Settings needed for creating scratch orgs
 DEVHUB_USERNAME = env("DEVHUB_USERNAME", default=None)
+SCRATCH_ORG_DURATION_DAYS = env("SCRATCH_ORG_DURATION_DAYS", type_=int, default=30)
 
 LOGGING = {
     "version": 1,

@@ -189,6 +189,7 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
             "average_duration",
             "requires_preflight",
             "supported_orgs",
+            "scratch_org_duration",
         )
         circumspect_fields = ("steps", "preflight_message")
 
