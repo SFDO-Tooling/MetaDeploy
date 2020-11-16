@@ -6,17 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0093_auto_20201026_1522'),
+        ("api", "0093_auto_20201026_1522"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='siteprofile',
-            name='product_logo',
+            model_name="siteprofile",
+            name="product_logo",
         ),
         migrations.AddField(
-            model_name='siteprofile',
-            name='show_metadeploy_wordmark',
+            model_name="siteprofile",
+            name="show_metadeploy_wordmark",
             field=models.BooleanField(default=True),
         ),
     ]

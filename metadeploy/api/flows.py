@@ -89,12 +89,25 @@ class JobFlowCallback(BasicFlowCallback):
 
 
 class PreflightFlowCallback(BasicFlowCallback):
+
+    def pre_flow(self, coordinator):
+        # capture cumulusci logs into buffer
+        self.logger = logging.getLogger("cumulusci")
+        self.string_buffer = StringIO()
+        self.handler = logging.StreamHandler(stream=self.string_buffer)
+        self.logger.addHandler(self.handler)
+        self.logger.setLevel(logging.DEBUG)
+
     def post_flow(self, coordinator):
         """
         Save check results to the result object in the database.
 
         Also sanitize them for display on the frontend.
         """
+        # stop capturing logs and store in the PreflightResult
+        self.logger.removeHandler(self.handler)
+        self.context.log = obscure_salesforce_log(self.string_buffer.getvalue())
+
         results = coordinator.preflight_results
         sanitized_results = {}
         for step_num, step_results in results.items():

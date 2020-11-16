@@ -767,15 +767,18 @@ class PreflightResult(models.Model):
             "told to cancel itself."
         ),
     )
+    log = models.TextField(blank=True)
+
     # Maybe we don't use foreign keys here because we want the result to
     # remain static even if steps are subsequently changed:
     results = JSONField(default=dict, blank=True)
-    exception = models.TextField(null=True)
     # It should take the shape of:
     # {
     #   <definitive name>: [... errors],
     #   ...
     # }
+
+    exception = models.TextField(null=True)
 
     @property
     def instance_url(self):

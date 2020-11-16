@@ -1,5 +1,6 @@
 from unittest.mock import MagicMock, sentinel
 
+import logging
 import pytest
 from django.core.cache import cache
 
@@ -94,6 +95,7 @@ class TestJobFlow:
 
         callbacks.pre_flow(sentinel.flow_coordinator)
         callbacks.post_task(step, step.result)
+        callbacks.post_flow(sentinel.flow_coordinator)
 
         assert job.results == {
             str(steps[0].id): {"status": "error", "message": "Some error"}
@@ -126,8 +128,11 @@ class TestPreflightFlow:
         flow_coordinator = MagicMock(preflight_results=results)
 
         callbacks = PreflightFlowCallback(pfr)
+        callbacks.pre_flow(flow_coordinator)
+        logging.getLogger("cumulusci.flows").info("test")
         callbacks.post_flow(flow_coordinator)
 
+        assert pfr.log == "test\n"
         assert pfr.results == {
             step1.id: {"status": "error", "message": "error 1"},
             step3.id: {"status": "warn", "message": "warn 1"},
