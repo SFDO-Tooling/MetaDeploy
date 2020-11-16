@@ -310,11 +310,7 @@ class TestCreateScratchOrg:
                 plan=plan,
                 enqueued_at=datetime(2020, 9, 4, 12),
             )
-            create_scratch_org(
-                plan_id=plan.id,
-                org_name=plan.org_config_name,
-                result_id=str(scratch_org.pk),
-            )
+            create_scratch_org(scratch_org)
 
     def test_create_scratch_org__no_preflight(
         self, settings, plan_factory, scratch_org_factory
@@ -389,11 +385,7 @@ class TestCreateScratchOrg:
                 plan=plan,
                 enqueued_at=datetime(2020, 9, 4, 12),
             )
-            create_scratch_org(
-                plan_id=plan.id,
-                org_name=plan.org_config_name,
-                result_id=str(scratch_org.pk),
-            )
+            create_scratch_org(scratch_org)
 
     def test_create_scratch_org__error(
         self, settings, plan_factory, scratch_org_factory
@@ -435,8 +427,4 @@ class TestCreateScratchOrg:
                 plan=plan,
                 enqueued_at=datetime(2020, 9, 4, 12),
             )
-            create_scratch_org(
-                plan_id=plan.id,
-                org_name=plan.org_config_name,
-                result_id=str(scratch_org.pk),
-            )
+            create_scratch_org(scratch_org)
