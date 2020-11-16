@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("api", "0105_scratchorg_default_uuid"),
+        ("api", "0108_markdownfield_helptext"),
     ]
 
     operations = [
