@@ -274,7 +274,7 @@ class TestBasicGetViews:
             "is_listed": True,
         }
 
-    def test_plan(self, client, plan_factory):
+    def test_plan(self, client, plan_factory, settings):
         plan = plan_factory()
         response = client.get(reverse("plan-detail", kwargs={"pk": plan.id}))
 
@@ -295,9 +295,12 @@ class TestBasicGetViews:
             "not_allowed_instructions": None,
             "average_duration": None,
             "supported_orgs": "Persistent",
+            "scratch_org_duration": settings.SCRATCH_ORG_DURATION_DAYS,
         }
 
-    def test_plan__not_visible(self, client, allowed_list_factory, plan_factory):
+    def test_plan__not_visible(
+        self, client, allowed_list_factory, plan_factory, settings
+    ):
         allowed_list = allowed_list_factory(description="Sample instructions.")
         plan = plan_factory(visible_to=allowed_list)
         response = client.get(reverse("plan-detail", kwargs={"pk": plan.id}))
@@ -319,6 +322,7 @@ class TestBasicGetViews:
             "not_allowed_instructions": "<p>Sample instructions.</p>",
             "average_duration": None,
             "supported_orgs": "Persistent",
+            "scratch_org_duration": settings.SCRATCH_ORG_DURATION_DAYS,
         }
 
     def test_plan__visible(
@@ -328,6 +332,7 @@ class TestBasicGetViews:
         allowed_list_org_factory,
         plan_factory,
         user_factory,
+        settings,
     ):
         allowed_list = allowed_list_factory(description="Sample instructions.")
         allowed_list_org = allowed_list_org_factory(allowed_list=allowed_list)
@@ -356,10 +361,11 @@ class TestBasicGetViews:
             "not_allowed_instructions": "<p>Sample instructions.</p>",
             "average_duration": None,
             "supported_orgs": "Persistent",
+            "scratch_org_duration": settings.SCRATCH_ORG_DURATION_DAYS,
         }
 
     def test_plan__visible_superuser(
-        self, client, allowed_list_factory, plan_factory, user_factory
+        self, client, allowed_list_factory, plan_factory, user_factory, settings
     ):
         allowed_list = allowed_list_factory(description="Sample instructions.")
         plan = plan_factory(visible_to=allowed_list)
@@ -384,6 +390,7 @@ class TestBasicGetViews:
             "not_allowed_instructions": "<p>Sample instructions.</p>",
             "average_duration": None,
             "supported_orgs": "Persistent",
+            "scratch_org_duration": settings.SCRATCH_ORG_DURATION_DAYS,
         }
 
 
@@ -584,7 +591,7 @@ class TestOrgViewset:
 
 @pytest.mark.django_db
 class TestVersionAdditionalPlans:
-    def test_get__good(self, client, plan_factory):
+    def test_get__good(self, client, plan_factory, settings):
         plan = plan_factory(tier=Plan.Tier.additional)
         response = client.get(
             reverse("version-additional-plans", kwargs={"pk": plan.version.id})
@@ -608,6 +615,7 @@ class TestVersionAdditionalPlans:
                 "requires_preflight": False,
                 "average_duration": None,
                 "supported_orgs": "Persistent",
+                "scratch_org_duration": settings.SCRATCH_ORG_DURATION_DAYS,
             }
         ]
 

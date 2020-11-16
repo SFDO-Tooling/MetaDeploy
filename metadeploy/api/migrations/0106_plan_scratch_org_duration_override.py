@@ -7,13 +7,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0105_scratchorg_default_uuid'),
+        ("api", "0105_scratchorg_default_uuid"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='plan',
-            name='scratch_org_duration_override',
-            field=models.IntegerField(blank=True, help_text='Lifetime of Scratch Orgs created for this plan. Will inherit the global default value if left blank.', null=True, validators=[django.core.validators.MinValueValidator(1)], verbose_name='Scratch Org duration (days)'),
+            model_name="plan",
+            name="scratch_org_duration_override",
+            field=models.IntegerField(
+                blank=True,
+                help_text="Lifetime of Scratch Orgs created for this plan. Will inherit the global default value if left blank.",
+                null=True,
+                validators=[django.core.validators.MinValueValidator(1)],
+                verbose_name="Scratch Org duration (days)",
+            ),
         ),
     ]
