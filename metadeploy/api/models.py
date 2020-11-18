@@ -21,7 +21,7 @@ from django.contrib.postgres.fields import ArrayField, JSONField
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
-from django.core.validators import MinValueValidator, RegexValidator
+from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
 from django.db.models import Count, F, Func, Q
 from django.utils.translation import gettext_lazy as _
@@ -482,7 +482,7 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
         "Scratch Org duration (days)",
         null=True,
         blank=True,
-        validators=[MinValueValidator(1)],
+        validators=[MinValueValidator(1), MaxValueValidator(30)],
         help_text="Lifetime of Scratch Orgs created for this plan. Will inherit the "
         "global default value if left blank.",
     )

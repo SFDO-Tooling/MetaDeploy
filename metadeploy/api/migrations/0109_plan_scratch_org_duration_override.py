@@ -18,7 +18,10 @@ class Migration(migrations.Migration):
                 blank=True,
                 help_text="Lifetime of Scratch Orgs created for this plan. Will inherit the global default value if left blank.",
                 null=True,
-                validators=[django.core.validators.MinValueValidator(1)],
+                validators=[
+                    django.core.validators.MinValueValidator(1),
+                    django.core.validators.MaxValueValidator(30),
+                ],
                 verbose_name="Scratch Org duration (days)",
             ),
         ),
