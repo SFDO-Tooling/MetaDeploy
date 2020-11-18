@@ -278,7 +278,7 @@ def create_scratch_org(org_id):
         org.fail(e)
         return
 
-    org.complete(scratch_org_config.config)
+    org.complete(scratch_org_config)
 
     if plan.requires_preflight:
         preflight_result = PreflightResult.objects.create(

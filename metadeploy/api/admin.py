@@ -148,6 +148,7 @@ class ScratchOrgAdmin(admin.ModelAdmin, PlanMixin):
         "status",
         "config",
         "org_id",
+        "expires_at",
     )
 
 

@@ -952,6 +952,7 @@ class ScratchOrg(HashIdMixin, models.Model):
     status = models.CharField(choices=Status, max_length=64, default=Status.started)
     config = JSONField(null=True, blank=True, encoder=DjangoJSONEncoder)
     org_id = models.CharField(null=True, blank=True, max_length=18)
+    expires_at = models.DateTimeField(null=True, blank=True)
 
     objects = ScratchOrgQuerySet.as_manager()
 
@@ -980,10 +981,11 @@ class ScratchOrg(HashIdMixin, models.Model):
         self.save()
         async_to_sync(notify_org_finished)(self, error=error)
 
-    def complete(self, config):
+    def complete(self, org_config):
         self.status = ScratchOrg.Status.complete
-        self.config = config
-        self.org_id = config["org_id"]
+        self.config = org_config.config
+        self.org_id = org_config.config["org_id"]
+        self.expires_at = org_config.expires
         self.save()
         async_to_sync(notify_org_finished)(self)
 

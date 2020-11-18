@@ -8,6 +8,7 @@ import pytz
 import vcr
 from cumulusci.salesforce_api.exceptions import MetadataParseError
 from django.utils import timezone
+from django.utils.timezone import make_aware
 from rq.worker import StopRequested
 
 from ..flows import StopFlowException
@@ -236,6 +237,10 @@ class MockDict(dict):
     def instance_url(self):
         return self["instance_url"]
 
+    @property
+    def expires(self):
+        return make_aware(datetime(2020, 11, 11))
+
 
 @pytest.mark.django_db(transaction=True)
 class TestCreateScratchOrg:
@@ -312,6 +317,9 @@ class TestCreateScratchOrg:
             )
             create_scratch_org(scratch_org.id)
 
+            scratch_org.refresh_from_db()
+            assert scratch_org.expires_at == org_config.expires
+
     def test_create_scratch_org__no_preflight(
         self, settings, plan_factory, scratch_org_factory
     ):
@@ -386,6 +394,9 @@ class TestCreateScratchOrg:
                 enqueued_at=datetime(2020, 9, 4, 12),
             )
             create_scratch_org(scratch_org.id)
+
+            scratch_org.refresh_from_db()
+            assert scratch_org.expires_at == org_config.expires
 
     def test_create_scratch_org__error(
         self, settings, plan_factory, scratch_org_factory
