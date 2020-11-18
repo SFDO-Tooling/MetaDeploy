@@ -441,7 +441,7 @@ class Command(BaseCommand):
         sf_category = ProductCategory.objects.create(
             title="Salesforce.org Products",
             order_key=0,
-            description="Official products from Salesforce.org. "
+            description="Sample products from Salesforce.org. "
             "**Descriptions support Markdown**.",
         )
         co_category = ProductCategory.objects.create(
