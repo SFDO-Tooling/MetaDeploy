@@ -575,7 +575,7 @@ describe('<CtaButton />', () => {
       requires_preflight: false,
     };
     beforeAll(() => {
-      window.GLOBALS.SCRATCH_ORGS_AVAILABLE = 'foo@bar.buz';
+      window.GLOBALS.SCRATCH_ORGS_AVAILABLE = true;
     });
 
     afterAll(() => {

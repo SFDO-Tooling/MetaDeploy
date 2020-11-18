@@ -10,6 +10,7 @@ export type ScratchOrg = {
   created_at: string;
   edited_at: string;
   uuid: string;
+  expires_at: string | null;
 };
 
 export type ScratchOrgState = {

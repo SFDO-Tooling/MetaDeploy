@@ -191,8 +191,8 @@ const PreflightResults = ({ preflight }: { preflight: Preflight }) => {
       <p>
         <Trans i18nKey="preflightValidTime" count={preflight_minutes}>
           Pre-install validation will expire if install is not run within{' '}
-          {{ preflight_minutes }} minutes, and you will need to run pre-install
-          validation again.
+          {{ count: preflight_minutes }} minutes, and you will need to run
+          pre-install validation again.
         </Trans>
       </p>
     </>

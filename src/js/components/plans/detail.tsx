@@ -491,9 +491,7 @@ class PlanDetail extends React.Component<Props, State> {
                   />
                 }
               />
-              {plan.supported_orgs !== SUPPORTED_ORGS.Scratch && (
-                <UserInfo user={user} />
-              )}
+              <UserInfo user={user} plan={plan} scratchOrg={scratchOrg} />
               {plan.steps?.length ? (
                 <StepsTable
                   plan={plan}
