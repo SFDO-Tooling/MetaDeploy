@@ -56,27 +56,49 @@ class TestJobFlow:
         callbacks.pre_task(None)
         assert callbacks.result_handler.current_key is None
 
-    def test_post_task(
-        self, mocker, user_factory, plan_factory, step_factory, job_factory
-    ):
+    def test_post_task__permanent_org(self, plan_factory, step_factory, job_factory):
+        """
+        Permanent orgs SHOULD NOT call the Salesforce API to reset the user password
+        """
         plan = plan_factory()
         steps = [step_factory(plan=plan, step_num=str(i)) for i in range(3)]
-
         job = job_factory(plan=plan, steps=steps, org_id="00Dxxxxxxxxxxxxxxx")
-
         callbacks = JobFlowCallback(job)
 
-        stepspecs = [MagicMock() for _ in range(3)]
-        for i, stepspec in enumerate(stepspecs):
-            stepspec.step_num = str(i)
+        stepspecs = [MagicMock(step_num=step.step_num) for step in steps]
         result = MagicMock(exception=None)
+        permanent_org_coordinator = MagicMock(
+            **{"org_config.config": {"scratch": False}}
+        )
 
-        callbacks.pre_flow(sentinel.flow_coordinator)
+        callbacks.pre_flow(permanent_org_coordinator)
         for stepspec in stepspecs:
             callbacks.post_task(stepspec, result)
-        callbacks.post_flow(sentinel.flow_coordinator)
+        callbacks.post_flow(permanent_org_coordinator)
 
         assert job.results == {str(step.id): {"status": "ok"} for step in steps}
+        permanent_org_coordinator.org_config.salesforce_client.restful.assert_not_called()
+
+    def test_post_task__scratch_org(self, plan_factory, step_factory, job_factory):
+        """
+        Scratch orgs SHOULD call the Salesforce API to reset the user password
+        """
+        plan = plan_factory()
+        steps = [step_factory(plan=plan, step_num=str(i)) for i in range(3)]
+        job = job_factory(plan=plan, steps=steps, org_id="00Dxxxxxxxxxxxxxxx")
+        callbacks = JobFlowCallback(job)
+
+        stepspecs = [MagicMock(step_num=step.step_num) for step in steps]
+        result = MagicMock(exception=None)
+        scratch_org_coordinator = MagicMock(**{"org_config.config": {"scratch": True}})
+
+        callbacks.pre_flow(scratch_org_coordinator)
+        for stepspec in stepspecs:
+            callbacks.post_task(stepspec, result)
+        callbacks.post_flow(scratch_org_coordinator)
+
+        assert job.results == {str(step.id): {"status": "ok"} for step in steps}
+        scratch_org_coordinator.org_config.salesforce_client.restful.assert_called()
 
     def test_post_task__exception(
         self, mocker, user_factory, plan_factory, step_factory, job_factory
