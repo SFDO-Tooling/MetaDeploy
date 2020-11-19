@@ -25,6 +25,7 @@ export type Plan = {
   requires_preflight: boolean;
   order_key: number;
   supported_orgs: SupportedOrgs;
+  scratch_org_duration: number;
 };
 
 export type StepResult = {

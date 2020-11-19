@@ -195,7 +195,7 @@ describe('<PlanDetail />', () => {
   };
 
   beforeAll(() => {
-    window.GLOBALS.SCRATCH_ORGS_AVAILABLE = 'foo@bar.buz';
+    window.GLOBALS.SCRATCH_ORGS_AVAILABLE = true;
   });
 
   afterAll(() => {

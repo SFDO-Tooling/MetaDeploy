@@ -404,7 +404,7 @@ class JobDetail extends React.Component<Props, State> {
                 )
               }
             />
-            <UserInfo job={job} />
+            <UserInfo job={job} scratchOrg={isScratchOrg ? scratchOrg : null} />
             <ProgressBar job={job} />
             {steps?.length ? (
               <StepsTable steps={steps} plan={plan} job={job} />

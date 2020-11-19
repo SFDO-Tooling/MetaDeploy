@@ -21,7 +21,7 @@ from django.contrib.postgres.fields import ArrayField, JSONField
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
-from django.core.validators import RegexValidator
+from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
 from django.db.models import Count, F, Func, Q
 from django.utils.translation import gettext_lazy as _
@@ -478,6 +478,14 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
         default=SUPPORTED_ORG_TYPES.Persistent,
     )
     org_config_name = models.CharField(max_length=64, default="release", blank=True)
+    scratch_org_duration_override = models.IntegerField(
+        "Scratch Org duration (days)",
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(1), MaxValueValidator(30)],
+        help_text="Lifetime of Scratch Orgs created for this plan. Will inherit the "
+        "global default value if left blank.",
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -519,6 +527,10 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
         if len(durations) < settings.MINIMUM_JOBS_FOR_AVERAGE:
             return None
         return median(durations)
+
+    @property
+    def scratch_org_duration(self):
+        return self.scratch_org_duration_override or settings.SCRATCH_ORG_DURATION_DAYS
 
     def natural_key(self):
         return (self.version, self.title)
@@ -940,6 +952,7 @@ class ScratchOrg(HashIdMixin, models.Model):
     status = models.CharField(choices=Status, max_length=64, default=Status.started)
     config = JSONField(null=True, blank=True, encoder=DjangoJSONEncoder)
     org_id = models.CharField(null=True, blank=True, max_length=18)
+    expires_at = models.DateTimeField(null=True, blank=True)
 
     objects = ScratchOrgQuerySet.as_manager()
 
@@ -948,11 +961,7 @@ class ScratchOrg(HashIdMixin, models.Model):
         if not self.enqueued_at:
             from .jobs import create_scratch_org_job
 
-            job = create_scratch_org_job.delay(
-                plan_id=str(self.plan.id),
-                org_name=self.plan.org_config_name,
-                result_id=self.id,
-            )
+            job = create_scratch_org_job.delay(self.id)
             self.job_id = job.id
             self.enqueued_at = job.enqueued_at
             # Yes, this bounces two saves:
@@ -972,10 +981,11 @@ class ScratchOrg(HashIdMixin, models.Model):
         self.save()
         async_to_sync(notify_org_finished)(self, error=error)
 
-    def complete(self, config):
+    def complete(self, org_config):
         self.status = ScratchOrg.Status.complete
-        self.config = config
-        self.org_id = config["org_id"]
+        self.config = org_config.config
+        self.org_id = org_config.config["org_id"]
+        self.expires_at = org_config.expires
         self.save()
         async_to_sync(notify_org_finished)(self)
 

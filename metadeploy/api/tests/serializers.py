@@ -23,6 +23,29 @@ class AnonymousUser:
 
 @pytest.mark.django_db
 class TestPlanSerializer:
+    def test_scratch_org_duration_override(
+        self, rf, user_factory, plan_factory, allowed_list_factory, settings
+    ):
+        user = user_factory()
+        allowed_list = allowed_list_factory()
+        plan = plan_factory(
+            visible_to=allowed_list, preflight_message_additional="test"
+        )
+
+        request = rf.get("/")
+        request.user = user
+        context = {"request": request}
+
+        serializer = PlanSerializer(plan, context=context)
+        assert (
+            serializer.data["scratch_org_duration"]
+            == settings.SCRATCH_ORG_DURATION_DAYS
+        )
+
+        plan.scratch_org_duration_override = 10
+        serializer = PlanSerializer(plan, context=context)
+        assert serializer.data["scratch_org_duration"] == 10
+
     def test_circumspect_description(
         self, rf, user_factory, plan_factory, allowed_list_factory, step_factory
     ):

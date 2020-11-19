@@ -32,7 +32,7 @@ from .cci_configs import MetaDeployCCI, extract_user_and_repo
 from .cleanup import cleanup_user_data
 from .flows import StopFlowException
 from .github import local_github_checkout
-from .models import ORG_TYPES, Job, Plan, PreflightResult, ScratchOrg
+from .models import ORG_TYPES, Job, PreflightResult, ScratchOrg
 from .push import job_started, preflight_started, report_error
 from .salesforce import create_scratch_org as create_scratch_org_on_sf
 
@@ -248,9 +248,12 @@ def expire_preflights():
 expire_preflights_job = job(expire_preflights)
 
 
-def create_scratch_org(*, plan_id, org_name, result_id):
-    plan = Plan.objects.get(id=plan_id)
-    org = ScratchOrg.objects.get(id=result_id)
+def create_scratch_org(org_id):
+    """
+    Takes our local ScratchOrg model instance and creates the actual org on Salesforce
+    """
+    org = ScratchOrg.objects.get(id=org_id)
+    plan = org.plan
     email = org.email
     org.email = None
     org.save()
@@ -268,13 +271,14 @@ def create_scratch_org(*, plan_id, org_name, result_id):
                 repo_branch=commit_ish,
                 email=email,
                 project_path=repo_root,
-                org_name=org_name,
+                org_name=plan.org_config_name,
+                duration=plan.scratch_org_duration,
             )
     except Exception as e:
         org.fail(e)
         return
 
-    org.complete(scratch_org_config.config)
+    org.complete(scratch_org_config)
 
     if plan.requires_preflight:
         preflight_result = PreflightResult.objects.create(

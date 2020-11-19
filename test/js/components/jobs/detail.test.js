@@ -124,6 +124,7 @@ const scratchOrg = {
   org_id: '0x-org-id',
   status: 'complete',
   uuid: 'org-uuid',
+  expires_at: new Date().toISOString(),
 };
 
 const scratchOrgJob = {
@@ -635,6 +636,28 @@ describe('<JobDetail />', () => {
       return canceled.then(() => {
         expect(getAllByText('Canceling Installation…')[0]).toBeVisible();
       });
+    });
+  });
+
+  describe('scratch org job', () => {
+    test('renders org expiration', () => {
+      const initialState = {
+        ...defaultState,
+        jobs: {
+          'job-1': { ...scratchOrgJob, status: 'complete' },
+        },
+        scratchOrgs: {
+          'plan-1': scratchOrg,
+        },
+      };
+      const { getByText } = setup({
+        initialState,
+      });
+
+      expect(getByText('Scratch Org')).toBeVisible();
+      expect(
+        getByText('Your scratch org will expire on', { exact: false }),
+      ).toBeVisible();
     });
   });
 });

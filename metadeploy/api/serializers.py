@@ -189,6 +189,7 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
             "average_duration",
             "requires_preflight",
             "supported_orgs",
+            "scratch_org_duration",
         )
         circumspect_fields = ("steps", "preflight_message")
 
@@ -672,6 +673,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "enqueued_at",
             "created_at",
             "edited_at",
+            "expires_at",
             "status",
             "org_id",
             "uuid",
@@ -681,6 +683,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "enqueued_at": {"read_only": True},
             "created_at": {"read_only": True},
             "edited_at": {"read_only": True},
+            "expires_at": {"read_only": True},
             "status": {"read_only": True},
             "org_id": {"read_only": True},
             "uuid": {"read_only": True},

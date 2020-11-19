@@ -24,8 +24,6 @@ SF_CLIENT_ID = settings.CONNECTED_APP_CLIENT_ID
 SF_CLIENT_SECRET = settings.CONNECTED_APP_CLIENT_SECRET
 SFDX_SIGNUP_INSTANCE = settings.SFDX_SIGNUP_INSTANCE
 
-DURATION_DAYS = 30
-
 
 def _get_devhub_api():
     """Get an access token.
@@ -101,6 +99,7 @@ def _get_org_result(
     repo_owner,
     repo_name,
     repo_branch,
+    duration,
     scratch_org_config,
     scratch_org_definition,
     cci,
@@ -120,7 +119,7 @@ def _get_org_result(
         "ConnectedAppCallbackUrl": SF_CALLBACK_URL,
         "Description": f"{repo_owner}/{repo_name} {repo_branch}",
         # Override whatever is in scratch_org_config.days:
-        "DurationDays": DURATION_DAYS,
+        "DurationDays": duration,
         "Edition": scratch_org_definition["edition"],
         "Features": ";".join(features) if isinstance(features, list) else features,
         "HasSampleData": scratch_org_definition.get("hasSampleData", False),
@@ -142,7 +141,7 @@ def _get_org_result(
     return devhub_api.ScratchOrgInfo.get(response["id"])
 
 
-def _mutate_scratch_org(*, scratch_org_config, org_result, email):
+def _mutate_scratch_org(*, scratch_org_config, org_result, email, duration):
     """Set the scratch org config into a good state.
 
     Update the org config for a new scratch org with details from its
@@ -156,7 +155,7 @@ def _mutate_scratch_org(*, scratch_org_config, org_result, email):
     scratch_org_config.config.update(scratch_org_config._sfdx_info)
     scratch_org_config.config.update(
         {
-            "days": DURATION_DAYS,
+            "days": duration,
             "date_created": datetime.now(),
             "created": True,
             "email": email,
@@ -192,6 +191,7 @@ def create_scratch_org(
     email,
     project_path,
     org_name,
+    duration,
 ):
     """Create a new scratch org
 
@@ -217,6 +217,7 @@ def create_scratch_org(
         repo_owner=repo_owner,
         repo_name=repo_name,
         repo_branch=repo_branch,
+        duration=duration,
         # Created in create_scratch_org:
         cci=cci,
         # From _get_devhub_api:
@@ -228,6 +229,7 @@ def create_scratch_org(
     _mutate_scratch_org(
         # Passed in to create_scratch_org:
         email=email,
+        duration=duration,
         # From _get_org_details:
         scratch_org_config=scratch_org_config,
         # From _get_org_result:
