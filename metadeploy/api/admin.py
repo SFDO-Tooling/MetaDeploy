@@ -1,16 +1,19 @@
 from allauth.socialaccount.admin import SocialTokenAdmin
 from allauth.socialaccount.models import SocialToken
+from django import forms
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.postgres.fields import ArrayField
 from django.forms.widgets import CheckboxSelectMultiple
 from django.shortcuts import redirect
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 from parler.admin import TranslatableAdmin
 from parler.utils.views import TabsList
 
 from .models import (
     ORG_TYPES,
+    SUPPORTED_ORG_TYPES,
     AllowedList,
     AllowedListOrg,
     ClickThroughAgreement,
@@ -105,7 +108,7 @@ class AllowedListOrgAdmin(admin.ModelAdmin):
 
 @admin.register(Job)
 class JobAdmin(AdminHelpTextMixin, admin.ModelAdmin, PlanMixin):
-    help_text = (
+    help_text = _(
         "GDPR reminder: Any information in the log or exception which came from the org "
         "must be used for support/debugging purposes only, and not exported from this system."
     )
@@ -156,8 +159,27 @@ class PlanTemplateAdmin(MetadeployTranslatableAdmin):
     pass
 
 
+class PlanAdminForm(forms.ModelForm):
+    class Meta:
+        model = Plan
+        fields = "__all__"
+
+    def clean(self):
+        if (
+            self.cleaned_data["visible_to"]
+            and self.cleaned_data["supported_orgs"] != SUPPORTED_ORG_TYPES.Persistent
+        ):
+            raise forms.ValidationError(
+                _(
+                    'Restricted plans (with a "visible to" AllowedList) can only support persistent org types.'
+                )
+            )
+        return self.cleaned_data
+
+
 @admin.register(Plan)
 class PlanAdmin(MetadeployTranslatableAdmin):
+    form = PlanAdminForm
     autocomplete_fields = ("version",)
     list_filter = ("version__product", "tier", "is_listed")
     list_editable = ("is_listed", "order_key")
@@ -193,7 +215,7 @@ class PlanSlugAdmin(admin.ModelAdmin):
 
 @admin.register(PreflightResult)
 class PreflightResult(AdminHelpTextMixin, admin.ModelAdmin, PlanMixin):
-    help_text = (
+    help_text = _(
         "GDPR reminder: Any information in the log or exception which came from the org "
         "must be used for support/debugging purposes only, and not exported from this system."
     )
@@ -260,7 +282,7 @@ class StepAdmin(MetadeployTranslatableAdmin, PlanMixin):
 
 @admin.register(User)
 class UserAdmin(AdminHelpTextMixin, admin.ModelAdmin):
-    help_text = (
+    help_text = _(
         "GDPR reminder: The username, name, and email are personally identifiable information. "
         "They must be used for support/debugging purposes only, and not exported from this system."
     )
