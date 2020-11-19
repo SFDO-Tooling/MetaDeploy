@@ -94,8 +94,8 @@ const UserInfo = ({
         <p className="slds-p-top_small">
           <Trans i18nKey="credentialsHoldTime" count={token_minutes}>
             The credentials to your Salesforce org will only be held for{' '}
-            {{ count: token_minutes }} minutes or until your requested
-            installation is complete.
+            {{ token_minutes }} minutes or until your requested installation is
+            complete.
           </Trans>
         </p>
       </Card>
