@@ -7,9 +7,10 @@ from ..admin import (
     ArrayFieldCheckboxSelectMultiple,
     MetadeployTranslatableAdmin,
     PlanAdmin,
+    PlanAdminForm,
     PlanMixin,
 )
-from ..models import AllowedListOrg, Plan
+from ..models import SUPPORTED_ORG_TYPES, AllowedListOrg, Plan
 
 
 class Dummy:
@@ -95,6 +96,34 @@ class TestPlanAdmin:
         obj.version = Dummy()
         obj.version.label = "A version"
         assert admin.version_label(obj) == obj.version.label
+
+    def test_validation(
+        self, allowed_list_factory, plan_template_factory, version_factory
+    ):
+        allowed_list = allowed_list_factory()
+        plan_template = plan_template_factory()
+        version = version_factory()
+        valid_data = {
+            "visible_to": str(allowed_list.pk),
+            "supported_orgs": SUPPORTED_ORG_TYPES.Persistent,
+            "plan_template": str(plan_template.pk),
+            "version": str(version.pk),
+            "order_key": 0,
+            "tier": Plan.Tier.primary,
+        }
+        valid_form = PlanAdminForm(valid_data)
+        assert valid_form.is_valid()
+
+        invalid_data = {
+            "visible_to": str(allowed_list.pk),
+            "supported_orgs": SUPPORTED_ORG_TYPES.Scratch,
+            "plan_template": str(plan_template.pk),
+            "version": str(version.pk),
+            "order_key": 0,
+            "tier": Plan.Tier.primary,
+        }
+        invalid_form = PlanAdminForm(invalid_data)
+        assert not invalid_form.is_valid()
 
 
 @pytest.mark.django_db

@@ -8,7 +8,7 @@ from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
-from ..models import Job, SiteProfile, Step, Version
+from ..models import SUPPORTED_ORG_TYPES, Job, SiteProfile, Step, Version
 
 
 @pytest.mark.django_db
@@ -402,6 +402,28 @@ class TestPlan:
         version = version_factory(label="v0.1.0", product=product)
         plan = plan_factory(title="My Plan", version=version)
         assert str(plan) == "My Product, Version v0.1.0, Plan My Plan"
+
+    def test_is_visible_to(self, allowed_list_factory, plan_factory, user_factory):
+        allowed_list = allowed_list_factory(org_type=["Production"])
+        plan = plan_factory(
+            visible_to=allowed_list, supported_orgs=SUPPORTED_ORG_TYPES.Persistent
+        )
+        scratch_plan = plan_factory(
+            visible_to=allowed_list, supported_orgs=SUPPORTED_ORG_TYPES.Scratch
+        )
+        user = user_factory(
+            socialaccount_set__extra_data={
+                "instance_url": "https://example.com",
+                "organization_details": {
+                    "Name": "Sample Org",
+                    "OrganizationType": "Scratch",
+                    "IsSandbox": True,
+                    "TrialExpirationDate": 1,
+                },
+            }
+        )
+        assert not plan.is_visible_to(user)
+        assert scratch_plan.is_visible_to(user)
 
     def test_plan_post_install_markdown(self, plan_factory):
         msg = "This is a *sample* with some<script src='bad.js'></script> bad tags."

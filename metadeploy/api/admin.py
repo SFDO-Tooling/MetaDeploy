@@ -165,16 +165,16 @@ class PlanAdminForm(forms.ModelForm):
         fields = "__all__"
 
     def clean(self):
-        if (
-            self.cleaned_data["visible_to"]
-            and self.cleaned_data["supported_orgs"] != SUPPORTED_ORG_TYPES.Persistent
-        ):
+        cleaned_data = super().clean()
+        visible_to = cleaned_data.get("visible_to")
+        supported_orgs = cleaned_data.get("supported_orgs")
+        if visible_to and supported_orgs != SUPPORTED_ORG_TYPES.Persistent:
             raise forms.ValidationError(
                 _(
                     'Restricted plans (with a "visible to" AllowedList) can only support persistent org types.'
                 )
             )
-        return self.cleaned_data
+        return cleaned_data
 
 
 @admin.register(Plan)
