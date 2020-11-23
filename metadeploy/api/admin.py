@@ -1,6 +1,5 @@
 from allauth.socialaccount.admin import SocialTokenAdmin
 from allauth.socialaccount.models import SocialToken
-from django import forms
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.postgres.fields import ArrayField
@@ -13,7 +12,6 @@ from parler.utils.views import TabsList
 
 from .models import (
     ORG_TYPES,
-    SUPPORTED_ORG_TYPES,
     AllowedList,
     AllowedListOrg,
     ClickThroughAgreement,
@@ -159,27 +157,8 @@ class PlanTemplateAdmin(MetadeployTranslatableAdmin):
     pass
 
 
-class PlanAdminForm(forms.ModelForm):
-    class Meta:
-        model = Plan
-        fields = "__all__"
-
-    def clean(self):
-        cleaned_data = super().clean()
-        visible_to = cleaned_data.get("visible_to")
-        supported_orgs = cleaned_data.get("supported_orgs")
-        if visible_to and supported_orgs != SUPPORTED_ORG_TYPES.Persistent:
-            raise forms.ValidationError(
-                _(
-                    'Restricted plans (with a "visible to" AllowedList) can only support persistent org types.'
-                )
-            )
-        return cleaned_data
-
-
 @admin.register(Plan)
 class PlanAdmin(MetadeployTranslatableAdmin):
-    form = PlanAdminForm
     autocomplete_fields = ("version",)
     list_filter = ("version__product", "tier", "is_listed")
     list_editable = ("is_listed", "order_key")

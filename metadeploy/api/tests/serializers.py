@@ -93,9 +93,7 @@ class TestPlanSerializer:
 
 @pytest.mark.django_db
 class TestProductSerializer:
-    def test_no_most_recent_version(
-        self, rf, user_factory, product_factory, version_factory
-    ):
+    def test_no_most_recent_version(self, rf, user_factory, product_factory):
         user = user_factory()
         product = product_factory()
 
@@ -300,7 +298,7 @@ class TestJob:
         }
         serializer = JobSerializer(data=data, context=dict(request=request))
 
-        assert not serializer.is_valid()
+        assert not serializer.is_valid(), serializer.errors
 
     def test_create_good_no_preflight(
         self, rf, user_factory, plan_factory, step_factory
@@ -486,7 +484,7 @@ class TestJob:
         job = job_factory(user=user, org_id=user.org_id)
         serializer = JobSerializer(data=data, context=dict(request=request))
 
-        assert not serializer.is_valid()
+        assert not serializer.is_valid(), serializer.errors
         non_field_errors = [
             str(error) for error in serializer.errors["non_field_errors"]
         ]
@@ -526,7 +524,7 @@ class TestJob:
 
         serializer = JobSerializer(data=data, context=dict(request=request))
 
-        assert not serializer.is_valid()
+        assert not serializer.is_valid(), serializer.errors
 
     def test_disallowed_product(
         self,
@@ -561,7 +559,7 @@ class TestJob:
 
         serializer = JobSerializer(data=data, context=dict(request=request))
 
-        assert not serializer.is_valid()
+        assert not serializer.is_valid(), serializer.errors
 
     def test_expired_token(self, rf, user_factory, plan_factory, step_factory):
         plan = plan_factory()
@@ -574,7 +572,7 @@ class TestJob:
         data = {"plan": str(plan.id), "steps": [str(step1.id)]}
         serializer = JobSerializer(data=data, context=dict(request=request))
 
-        assert not serializer.is_valid()
+        assert not serializer.is_valid(), serializer.errors
         non_field_errors = [
             str(error) for error in serializer.errors["non_field_errors"]
         ]

@@ -463,6 +463,19 @@ class TestPlan:
 
         assert plan.average_duration == timedelta(seconds=30)
 
+    def test_validation(self, allowed_list_factory, plan_factory):
+        allowed_list = allowed_list_factory()
+        valid_plan = plan_factory(
+            visible_to=allowed_list, supported_orgs=SUPPORTED_ORG_TYPES.Persistent
+        )
+        invalid_plan = plan_factory(
+            visible_to=allowed_list, supported_orgs=SUPPORTED_ORG_TYPES.Scratch
+        )
+
+        valid_plan.clean()
+        with pytest.raises(ValidationError):
+            invalid_plan.clean()
+
 
 @pytest.mark.django_db
 class TestStep:
