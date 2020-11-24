@@ -595,6 +595,14 @@ class TestScratchOrg:
             assert scratch_org.get_login_url() == "https://example.com"
             assert jwt_session.called
 
+    def test_clean_config(self, scratch_org_factory):
+        scratch_org = scratch_org_factory()
+        scratch_org.config = {"email": "bad", "anything else": "good"}
+        scratch_org.save()
+
+        scratch_org.refresh_from_db()
+        assert scratch_org.config == {"anything else": "good"}
+
 
 @pytest.mark.django_db
 class TestSiteProfile:
