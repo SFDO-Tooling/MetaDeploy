@@ -272,6 +272,7 @@ def create_scratch_org(org_pk):
                 repo_branch=commit_ish,
                 email=email,
                 project_path=repo_root,
+                scratch_org=org,
                 org_name=plan.org_config_name,
                 duration=plan.scratch_org_duration,
             )

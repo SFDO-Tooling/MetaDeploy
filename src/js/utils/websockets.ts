@@ -92,9 +92,9 @@ interface ScratchOrgCreatedEvent {
 }
 
 interface ScratchOrgErrorEvent {
-  type: 'SCRATCH_ORG_ERROR';
+  type: 'SCRATCH_ORG_ERROR' | 'SCRATCH_ORG_DELETED';
   payload: {
-    message: string;
+    message?: string;
     org: string;
     plan: string;
   };
@@ -156,6 +156,7 @@ export const getAction = (event: EventType): Action | null => {
     case 'SCRATCH_ORG_CREATED':
       return createScratchOrg(event.payload);
     case 'SCRATCH_ORG_ERROR':
+    case 'SCRATCH_ORG_DELETED':
       return failScratchOrg(event.payload);
     case 'PREFLIGHT_STARTED':
       return createPreflight(event.payload);

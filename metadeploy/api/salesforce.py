@@ -14,6 +14,9 @@ from cumulusci.oauth.salesforce import SalesforceOAuth2, jwt_session
 from cumulusci.tasks.salesforce.org_settings import DeployOrgSettings
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.utils.translation import gettext_lazy as _
+from requests.exceptions import HTTPError
+from rq import get_current_job
 from simple_salesforce import Salesforce as SimpleSalesforce
 
 # Salesforce connected app
@@ -60,23 +63,50 @@ def _get_org_details(*, cci, org_name, project_path):
     return (scratch_org_config, scratch_org_definition)
 
 
-def _refresh_access_token(*, config, org_name):
+def _refresh_access_token(*, config, org_name, scratch_org):
     """Refresh the JWT.
 
     Construct a new OrgConfig because ScratchOrgConfig tries to use sfdx
     which we don't want now -- this is a total hack which I'll try to
     smooth over with some improvements in CumulusCI
     """
-    org_config = OrgConfig(config, org_name)
-    org_config.refresh_oauth_token = Mock()
-    info = jwt_session(
-        SF_CLIENT_ID, SF_CLIENT_KEY, org_config.username, org_config.instance_url
-    )
-    org_config.config["access_token"] = info["access_token"]
-    return org_config
+    try:
+        org_config = OrgConfig(config, org_name)
+        org_config.refresh_oauth_token = Mock()
+        info = jwt_session(
+            SF_CLIENT_ID, SF_CLIENT_KEY, org_config.username, org_config.instance_url
+        )
+        org_config.config["access_token"] = info["access_token"]
+        return org_config
+    except HTTPError as err:
+        if get_current_job():
+            job_id = get_current_job().id
+            # This error is user-facing, and so for makemessages to
+            # pick it up correctly, we need it to be a single,
+            # unbroken, string literal (even though adjacent string
+            # literals should be parsed by the AST into a single
+            # string literal and picked up by makemessages, but
+            # that's a gripe for another day). We have relatively
+            # few errors that propagate directly from the backend
+            # like this, but when we do, this is the pattern we
+            # should use.
+            #
+            # This is also why we repeat the first sentence.
+            error_msg = _(
+                f"Are you certain that the org still exists? If you need support, your job ID is {job_id}."  # noqa: B950
+            )
+        else:
+            error_msg = _(f"Are you certain that the org still exists? {err.args[0]}")
+
+        err = err.__class__(
+            error_msg,
+            *err.args[1:],
+        )
+        scratch_org.delete(error=err, should_delete_on_sf=False)
+        raise err
 
 
-def _deploy_org_settings(*, cci, org_name, scratch_org_config):
+def _deploy_org_settings(*, cci, org_name, scratch_org_config, scratch_org):
     """Deploy org settings via Metadata API.
 
     Do a Metadata API deployment to configure org settings as specified
@@ -85,6 +115,7 @@ def _deploy_org_settings(*, cci, org_name, scratch_org_config):
     org_config = _refresh_access_token(
         config=scratch_org_config.config,
         org_name=org_name,
+        scratch_org=scratch_org,
     )
     path = os.path.join(cci.project_config.repo_root, scratch_org_config.config_file)
     task_config = TaskConfig({"options": {"definition_file": path}})
@@ -190,6 +221,7 @@ def create_scratch_org(
     repo_branch,
     email,
     project_path,
+    scratch_org,
     org_name,
     duration,
 ):
@@ -248,6 +280,7 @@ def create_scratch_org(
         cci=cci,
         # From _get_org_details:
         scratch_org_config=scratch_org_config,
+        scratch_org=scratch_org,
     )
 
     return (

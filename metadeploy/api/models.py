@@ -5,7 +5,7 @@ from typing import Union
 
 from asgiref.sync import async_to_sync
 from colorfield.fields import ColorField
-from cumulusci.core.config import FlowConfig, OrgConfig
+from cumulusci.core.config import FlowConfig
 from cumulusci.core.flowrunner import (
     FlowCoordinator,
     PreflightFlowCoordinator,
@@ -13,7 +13,6 @@ from cumulusci.core.flowrunner import (
 )
 from cumulusci.core.tasks import BaseTask
 from cumulusci.core.utils import import_class
-from cumulusci.oauth.salesforce import jwt_session
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
@@ -47,6 +46,7 @@ from .push import (
     preflight_failed,
     preflight_invalidated,
 )
+from .salesforce import _refresh_access_token
 
 logger = logging.getLogger(__name__)
 VERSION_STRING = r"^[a-zA-Z0-9._+-]+$"
@@ -1010,9 +1010,11 @@ class ScratchOrg(HashIdMixin, models.Model):
 
         delete_scratch_org_job.delay(self)
 
-    def delete(self, *args, should_delete_on_sf=True, should_notify=True, **kwargs):
+    def delete(
+        self, *args, error=None, should_delete_on_sf=True, should_notify=True, **kwargs
+    ):
         if should_notify:
-            async_to_sync(notify_org_deleted)(self)
+            async_to_sync(notify_org_deleted)(self, error=error)
         if should_delete_on_sf and self.org_id:
             self.queue_delete()
         else:
@@ -1033,14 +1035,9 @@ class ScratchOrg(HashIdMixin, models.Model):
         async_to_sync(notify_org_finished)(self)
 
     def get_refreshed_org_config(self):
-        org_config = OrgConfig(self.config, self.plan.org_config_name)
-        info = jwt_session(
-            settings.CONNECTED_APP_CLIENT_ID,
-            settings.CONNECTED_APP_CLIENT_KEY,
-            org_config.username,
-            org_config.instance_url,
+        org_config = _refresh_access_token(
+            config=self.config, org_name=self.plan.org_config_name, scratch_org=self
         )
-        org_config.config.update(info)
         org_config._load_userinfo()
         org_config._load_orginfo()
         return org_config

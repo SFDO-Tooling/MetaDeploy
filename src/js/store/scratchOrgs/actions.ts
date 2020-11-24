@@ -132,11 +132,13 @@ export const failScratchOrg = ({
   message,
   plan,
 }: {
-  message: string;
+  message?: string;
   org: string;
   plan: string;
 }): ThunkResult<ScratchOrgFailed> => (dispatch) => {
-  dispatch(addError(message));
+  if (message) {
+    dispatch(addError(message));
+  }
   return dispatch({
     type: 'SCRATCH_ORG_FAILED' as const,
     payload: plan,
