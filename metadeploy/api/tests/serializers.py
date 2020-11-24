@@ -6,7 +6,7 @@ from django.utils import timezone
 
 from metadeploy.conftest import format_timestamp
 
-from ..models import Job, PreflightResult, ScratchOrg
+from ..models import SUPPORTED_ORG_TYPES, Job, PreflightResult, ScratchOrg
 from ..serializers import (
     JobSerializer,
     JobSummarySerializer,
@@ -90,12 +90,35 @@ class TestPlanSerializer:
         assert serializer.data["steps"] is None
         assert serializer.data["not_allowed_instructions"] == "<p>Test.</p>"
 
+    def test_update_good(self, rf, user_factory, plan_factory):
+        user = user_factory()
+        plan = plan_factory(supported_orgs=SUPPORTED_ORG_TYPES.Persistent)
+        request = rf.get("/")
+        request.user = user
+        context = {"request": request}
+        data = {"title": plan.title, "supported_orgs": SUPPORTED_ORG_TYPES.Scratch}
+        serializer = PlanSerializer(plan, data=data, context=context)
+
+        assert serializer.is_valid(), serializer.errors
+
+    def test_update_bad(self, rf, user_factory, allowed_list_factory, plan_factory):
+        allowed_list = allowed_list_factory()
+        user = user_factory()
+        plan = plan_factory(
+            visible_to=allowed_list, supported_orgs=SUPPORTED_ORG_TYPES.Persistent
+        )
+        request = rf.get("/")
+        request.user = user
+        context = {"request": request}
+        data = {"title": plan.title, "supported_orgs": SUPPORTED_ORG_TYPES.Scratch}
+        serializer = PlanSerializer(plan, data=data, context=context)
+
+        assert not serializer.is_valid(), serializer.errors
+
 
 @pytest.mark.django_db
 class TestProductSerializer:
-    def test_no_most_recent_version(
-        self, rf, user_factory, product_factory, version_factory
-    ):
+    def test_no_most_recent_version(self, rf, user_factory, product_factory):
         user = user_factory()
         product = product_factory()
 
@@ -300,7 +323,7 @@ class TestJob:
         }
         serializer = JobSerializer(data=data, context=dict(request=request))
 
-        assert not serializer.is_valid()
+        assert not serializer.is_valid(), serializer.errors
 
     def test_create_good_no_preflight(
         self, rf, user_factory, plan_factory, step_factory
@@ -486,7 +509,7 @@ class TestJob:
         job = job_factory(user=user, org_id=user.org_id)
         serializer = JobSerializer(data=data, context=dict(request=request))
 
-        assert not serializer.is_valid()
+        assert not serializer.is_valid(), serializer.errors
         non_field_errors = [
             str(error) for error in serializer.errors["non_field_errors"]
         ]
@@ -526,7 +549,7 @@ class TestJob:
 
         serializer = JobSerializer(data=data, context=dict(request=request))
 
-        assert not serializer.is_valid()
+        assert not serializer.is_valid(), serializer.errors
 
     def test_disallowed_product(
         self,
@@ -561,7 +584,7 @@ class TestJob:
 
         serializer = JobSerializer(data=data, context=dict(request=request))
 
-        assert not serializer.is_valid()
+        assert not serializer.is_valid(), serializer.errors
 
     def test_expired_token(self, rf, user_factory, plan_factory, step_factory):
         plan = plan_factory()
@@ -574,7 +597,7 @@ class TestJob:
         data = {"plan": str(plan.id), "steps": [str(step1.id)]}
         serializer = JobSerializer(data=data, context=dict(request=request))
 
-        assert not serializer.is_valid()
+        assert not serializer.is_valid(), serializer.errors
         non_field_errors = [
             str(error) for error in serializer.errors["non_field_errors"]
         ]

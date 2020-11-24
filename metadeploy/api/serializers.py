@@ -11,6 +11,7 @@ from rest_framework.utils.urls import replace_query_param
 from .constants import ERROR, HIDE, WARN
 from .models import (
     ORG_TYPES,
+    SUPPORTED_ORG_TYPES,
     Job,
     Plan,
     PreflightResult,
@@ -24,6 +25,14 @@ from .models import (
 from .paginators import ProductPaginator
 
 User = get_user_model()
+
+
+def get_from_data_or_instance(instance, data, name, default=None):
+    value = data.get(name, getattr(instance, name, default))
+    # Handle the case where value is a *RelatedManager:
+    if hasattr(value, "all") and callable(value.all):
+        return value.all()
+    return value
 
 
 class IdOnlyField(serializers.Field):
@@ -165,7 +174,7 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
         read_only=True, pk_field=serializers.CharField()
     )
     is_allowed = serializers.SerializerMethodField()
-    steps = StepSerializer(many=True)
+    steps = StepSerializer(many=True, required=False)
     title = serializers.CharField()
     preflight_message = serializers.SerializerMethodField()
     not_allowed_instructions = serializers.SerializerMethodField()
@@ -212,6 +221,27 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
 
     def get_requires_preflight(self, obj):
         return obj.requires_preflight
+
+    def validate(self, data):
+        """
+        Check that restricted plans only support persistent orgs.
+        """
+        visible_to = get_from_data_or_instance(self.instance, data, "visible_to")
+        supported_orgs = get_from_data_or_instance(
+            self.instance,
+            data,
+            "supported_orgs",
+            default=SUPPORTED_ORG_TYPES.Persistent,
+        )
+        if visible_to and supported_orgs != SUPPORTED_ORG_TYPES.Persistent:
+            raise serializers.ValidationError(
+                {
+                    "supported_orgs": _(
+                        'Restricted plans (with a "visible to" AllowedList) can only support persistent org types.'
+                    )
+                }
+            )
+        return data
 
 
 class VersionSerializer(serializers.ModelSerializer):
@@ -479,13 +509,6 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             required_steps -= set(preflight.optional_step_ids)
         return not set(required_steps) - set(s.id for s in steps)
 
-    def _get_from_data_or_instance(self, data, name, default=None):
-        value = data.get(name, getattr(self.instance, name, default))
-        # Handle the case where value is a *RelatedManager:
-        if hasattr(value, "all") and callable(value.all):
-            return value.all()
-        return value
-
     def _pending_job_exists(self, *, org_id):
         return Job.objects.filter(status=Job.Status.started, org_id=org_id).first()
 
@@ -510,10 +533,10 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
                 raise serializers.ValidationError(_("Invalid initial results."))
 
     def validate(self, data):
-        user = self._get_from_data_or_instance(data, "user", default=None)
+        user = get_from_data_or_instance(self.instance, data, "user")
         org_id = getattr(self.instance, "org_id", getattr(user, "org_id", None))
-        plan = self._get_from_data_or_instance(data, "plan")
-        steps = self._get_from_data_or_instance(data, "steps", default=[])
+        plan = get_from_data_or_instance(self.instance, data, "plan")
+        steps = get_from_data_or_instance(self.instance, data, "steps", default=[])
 
         scratch_org = None
         if not (user and user.is_authenticated):

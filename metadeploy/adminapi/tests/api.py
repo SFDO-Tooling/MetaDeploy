@@ -1,6 +1,8 @@
 import pytest
 from rest_framework.test import APIClient
 
+from metadeploy.api.models import SUPPORTED_ORG_TYPES
+
 
 @pytest.mark.django_db
 class TestProductViewSet:
@@ -251,6 +253,33 @@ class TestPlanViewSet:
         plan = plan_factory()
         response = client.get(f"http://testserver/admin/rest/plans/{plan.id}")
 
+        assert response.status_code == 400
+
+    def test_update_bad(self, admin_api_client, allowed_list_factory, plan_factory):
+        allowed_list = allowed_list_factory()
+        plan = plan_factory(
+            visible_to=allowed_list, supported_orgs=SUPPORTED_ORG_TYPES.Persistent
+        )
+
+        response = admin_api_client.put(
+            f"http://testserver/admin/rest/plans/{plan.id}",
+            {
+                "title": "Sample plan",
+                "version": f"http://testserver/admin/rest/versions/{plan.version.id}",
+            },
+            format="json",
+        )
+        assert response.status_code == 200, response.json()
+
+        response = admin_api_client.put(
+            f"http://testserver/admin/rest/plans/{plan.id}",
+            {
+                "title": "Sample plan",
+                "version": f"http://testserver/admin/rest/versions/{plan.version.id}",
+                "supported_orgs": SUPPORTED_ORG_TYPES.Scratch,
+            },
+            format="json",
+        )
         assert response.status_code == 400
 
 

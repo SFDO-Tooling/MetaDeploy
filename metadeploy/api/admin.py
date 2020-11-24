@@ -6,6 +6,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.forms.widgets import CheckboxSelectMultiple
 from django.shortcuts import redirect
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 from parler.admin import TranslatableAdmin
 from parler.utils.views import TabsList
 
@@ -105,7 +106,7 @@ class AllowedListOrgAdmin(admin.ModelAdmin):
 
 @admin.register(Job)
 class JobAdmin(AdminHelpTextMixin, admin.ModelAdmin, PlanMixin):
-    help_text = (
+    help_text = _(
         "GDPR reminder: Any information in the log or exception which came from the org "
         "must be used for support/debugging purposes only, and not exported from this system."
     )
@@ -193,7 +194,7 @@ class PlanSlugAdmin(admin.ModelAdmin):
 
 @admin.register(PreflightResult)
 class PreflightResult(AdminHelpTextMixin, admin.ModelAdmin, PlanMixin):
-    help_text = (
+    help_text = _(
         "GDPR reminder: Any information in the log or exception which came from the org "
         "must be used for support/debugging purposes only, and not exported from this system."
     )
@@ -260,7 +261,7 @@ class StepAdmin(MetadeployTranslatableAdmin, PlanMixin):
 
 @admin.register(User)
 class UserAdmin(AdminHelpTextMixin, admin.ModelAdmin):
-    help_text = (
+    help_text = _(
         "GDPR reminder: The username, name, and email are personally identifiable information. "
         "They must be used for support/debugging purposes only, and not exported from this system."
     )

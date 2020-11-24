@@ -552,6 +552,21 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
             f"{self.plan_template.product.slug}:plan:{self.plan_template.name}",
         )
 
+    def is_visible_to(self, *args, **kwargs):
+        if self.supported_orgs != SUPPORTED_ORG_TYPES.Persistent:
+            return True
+        return super().is_visible_to(*args, **kwargs)
+
+    def clean(self):
+        if self.visible_to and self.supported_orgs != SUPPORTED_ORG_TYPES.Persistent:
+            raise ValidationError(
+                {
+                    "supported_orgs": _(
+                        'Restricted plans (with a "visible to" AllowedList) can only support persistent org types.'
+                    )
+                }
+            )
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 
