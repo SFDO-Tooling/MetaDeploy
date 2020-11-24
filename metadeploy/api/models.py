@@ -957,8 +957,8 @@ class ScratchOrg(HashIdMixin, models.Model):
     objects = ScratchOrgQuerySet.as_manager()
 
     def clean_config(self):
+        banned_keys = {"email"}
         if self.config:
-            banned_keys = {"email"}
             self.config = {
                 k: v for (k, v) in self.config.items() if k not in banned_keys
             }
