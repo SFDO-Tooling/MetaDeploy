@@ -11,6 +11,8 @@ from django.utils import timezone
 from django.utils.timezone import make_aware
 from rq.worker import StopRequested
 
+from metadeploy.api.belvedere_utils import convert_to_18
+
 from ..flows import StopFlowException
 from ..jobs import (
     create_scratch_org,
@@ -241,6 +243,10 @@ class MockDict(dict):
     def expires(self):
         return make_aware(datetime(2020, 11, 11))
 
+    @property
+    def org_id(self):
+        return "0123456789abcef"
+
 
 @pytest.mark.django_db(transaction=True)
 class TestCreateScratchOrg:
@@ -319,6 +325,7 @@ class TestCreateScratchOrg:
 
             scratch_org.refresh_from_db()
             assert scratch_org.expires_at == org_config.expires
+            assert scratch_org.org_id == convert_to_18(org_config.org_id)
 
     def test_create_scratch_org__no_preflight(
         self, settings, plan_factory, scratch_org_factory
@@ -397,6 +404,7 @@ class TestCreateScratchOrg:
 
             scratch_org.refresh_from_db()
             assert scratch_org.expires_at == org_config.expires
+            assert scratch_org.org_id == convert_to_18(org_config.org_id)
 
     def test_create_scratch_org__error(
         self, settings, plan_factory, scratch_org_factory

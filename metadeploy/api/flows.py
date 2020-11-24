@@ -60,12 +60,15 @@ class JobFlowCallback(BasicFlowCallback):
 
     def post_flow(self, coordinator):
         """
-        Send a password reset email when completing scratch org JobFlows
+        Send a password reset email when completing a Job on ScratchOrgs
         """
-        org_config = coordinator.org_config
-        if org_config.config.get("scratch"):
-            org_config.salesforce_client.restful(
-                f"sobjects/User/{org_config.user_id}/password", method="DELETE"
+        from .models import ScratchOrg
+
+        config = coordinator.org_config
+        is_scratch = ScratchOrg.objects.filter(org_id=config.org_id).exists()
+        if is_scratch:
+            config.salesforce_client.restful(
+                f"sobjects/User/{config.user_id}/password", method="DELETE"
             )  # Deleting the password forces a password reset email
 
         self.logger.removeHandler(self.handler)

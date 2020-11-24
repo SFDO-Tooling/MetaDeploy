@@ -984,7 +984,7 @@ class ScratchOrg(HashIdMixin, models.Model):
     def complete(self, org_config):
         self.status = ScratchOrg.Status.complete
         self.config = org_config.config
-        self.org_id = org_config.config["org_id"]
+        self.org_id = convert_to_18(org_config.org_id)
         self.expires_at = org_config.expires
         self.save()
         async_to_sync(notify_org_finished)(self)
