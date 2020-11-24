@@ -35,7 +35,7 @@ export type ScratchOrgCreated = {
 };
 export type ScratchOrgFailed = {
   type: 'SCRATCH_ORG_FAILED';
-  payload: ScratchOrg;
+  payload: string;
 };
 export type ScratchOrgError = {
   type: 'SCRATCH_ORG_ERROR';
@@ -130,15 +130,16 @@ export const createScratchOrg = (payload: ScratchOrg): ScratchOrgCreated => {
 
 export const failScratchOrg = ({
   message,
-  org,
+  plan,
 }: {
   message: string;
-  org: ScratchOrg;
+  org: string;
+  plan: string;
 }): ThunkResult<ScratchOrgFailed> => (dispatch) => {
   dispatch(addError(message));
   return dispatch({
     type: 'SCRATCH_ORG_FAILED' as const,
-    payload: org,
+    payload: plan,
   });
 };
 

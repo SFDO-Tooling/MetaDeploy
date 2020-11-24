@@ -194,8 +194,8 @@ describe('createScratchOrg', () => {
 describe('failScratchOrg', () => {
   test('adds message and dispatches SCRATCH_ORG_FAILED action', () => {
     const store = storeWithApi({});
-    const payload = { message: 'Nope.', org: { id: 'org-id' } };
-    const failed = { type: 'SCRATCH_ORG_FAILED', payload: payload.org };
+    const payload = { message: 'Nope.', org: 'org-id', plan: 'plan-id' };
+    const failed = { type: 'SCRATCH_ORG_FAILED', payload: payload.plan };
 
     store.dispatch(actions.failScratchOrg(payload));
     const allActions = store.getActions();

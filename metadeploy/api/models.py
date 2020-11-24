@@ -37,6 +37,7 @@ from .belvedere_utils import convert_to_18
 from .constants import ERROR, HIDE, OPTIONAL, ORGANIZATION_DETAILS
 from .flows import JobFlowCallback, PreflightFlowCallback
 from .push import (
+    notify_org_deleted,
     notify_org_finished,
     notify_org_result_changed,
     notify_post_job,
@@ -951,6 +952,10 @@ class ScratchOrgQuerySet(models.QuerySet):
         except (ValidationError, ScratchOrg.DoesNotExist):
             return None
 
+    def delete(self):
+        for scratch_org in self:
+            scratch_org.delete()
+
 
 class ScratchOrg(HashIdMixin, models.Model):
     Status = Choices("started", "complete", "failed", "canceled")
@@ -1000,10 +1005,24 @@ class ScratchOrg(HashIdMixin, models.Model):
         scratch_org_id = session.get("scratch_org_id", None)
         return scratch_org_id and scratch_org_id == str(self.uuid)
 
+    def queue_delete(self):
+        from .jobs import delete_scratch_org_job
+
+        delete_scratch_org_job.delay(self)
+
+    def delete(self, *args, should_delete_on_sf=True, should_notify=True, **kwargs):
+        if should_notify:
+            async_to_sync(notify_org_deleted)(self)
+        if should_delete_on_sf and self.org_id:
+            self.queue_delete()
+        else:
+            super().delete(*args, **kwargs)
+
     def fail(self, error):
         self.status = ScratchOrg.Status.failed
         self.save()
         async_to_sync(notify_org_finished)(self, error=error)
+        self.delete(should_notify=False)
 
     def complete(self, org_config):
         self.status = ScratchOrg.Status.complete

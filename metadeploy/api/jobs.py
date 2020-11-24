@@ -35,6 +35,7 @@ from .github import local_github_checkout
 from .models import ORG_TYPES, Job, PreflightResult, ScratchOrg
 from .push import job_started, preflight_started, report_error
 from .salesforce import create_scratch_org as create_scratch_org_on_sf
+from .salesforce import delete_scratch_org as delete_scratch_org_on_sf
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -307,3 +308,14 @@ def create_scratch_org(org_pk):
 
 
 create_scratch_org_job = job(create_scratch_org)
+
+
+def delete_scratch_org(scratch_org):
+    try:
+        scratch_org.refresh_from_db()
+        delete_scratch_org_on_sf(scratch_org)
+    finally:
+        scratch_org.delete(should_delete_on_sf=False, should_notify=False)
+
+
+delete_scratch_org_job = job(delete_scratch_org)

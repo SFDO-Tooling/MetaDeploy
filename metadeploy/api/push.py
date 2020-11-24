@@ -178,7 +178,6 @@ async def notify_org_result_changed(result):
 async def notify_org_finished(scratch_org, error=None):
     from .serializers import ScratchOrgSerializer
 
-    data = ScratchOrgSerializer(scratch_org).data
     if error:
         type_ = "SCRATCH_ORG_ERROR"
         # unwrap the error in the case that there's only one,
@@ -192,10 +191,27 @@ async def notify_org_finished(scratch_org, error=None):
             prepared_message = str(prepared_message)
         except AttributeError:
             prepared_message = str(error)
-        payload = {"message": prepared_message, "org": data}
+        payload = {
+            "message": prepared_message,
+            "org": str(scratch_org.id),
+            "plan": str(scratch_org.plan.id),
+        }
     else:
         type_ = "SCRATCH_ORG_CREATED"
-        payload = data
+        payload = ScratchOrgSerializer(scratch_org).data
+
+    message = {
+        "type": type_,
+        "payload": payload,
+    }
+    group_name = CHANNELS_GROUP_NAME.format(model="scratchorg", id=scratch_org.id)
+    sent_message = {"type": "notify", "group": group_name, "content": message}
+    await push_message(group_name, sent_message)
+
+
+async def notify_org_deleted(scratch_org):
+    type_ = "SCRATCH_ORG_DELETED"
+    payload = {"org": str(scratch_org.id), "plan": str(scratch_org.plan.id)}
 
     message = {
         "type": type_,

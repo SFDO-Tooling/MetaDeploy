@@ -95,7 +95,8 @@ interface ScratchOrgErrorEvent {
   type: 'SCRATCH_ORG_ERROR';
   payload: {
     message: string;
-    org: ScratchOrg;
+    org: string;
+    plan: string;
   };
 }
 

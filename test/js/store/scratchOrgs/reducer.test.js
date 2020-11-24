@@ -40,26 +40,24 @@ describe('reducer', () => {
     expect(actual).toEqual(expected);
   });
 
-  [
-    { type: 'SCRATCH_ORG_SPINNING' },
-    { type: 'SCRATCH_ORG_CREATED' },
-    { type: 'SCRATCH_ORG_FAILED' },
-  ].forEach(({ type }) => {
-    test(`handles ${type} action`, () => {
-      const initial = {
-        'plan-2': { status: 'started', edited_at: '1' },
-      };
-      const expected = {
-        'plan-2': { plan: 'plan-2', status: 'complete', edited_at: '2' },
-      };
-      const actual = reducer(initial, {
-        type,
-        payload: { plan: 'plan-2', status: 'complete', edited_at: '2' },
-      });
+  [{ type: 'SCRATCH_ORG_SPINNING' }, { type: 'SCRATCH_ORG_CREATED' }].forEach(
+    ({ type }) => {
+      test(`handles ${type} action`, () => {
+        const initial = {
+          'plan-2': { status: 'started', edited_at: '1' },
+        };
+        const expected = {
+          'plan-2': { plan: 'plan-2', status: 'complete', edited_at: '2' },
+        };
+        const actual = reducer(initial, {
+          type,
+          payload: { plan: 'plan-2', status: 'complete', edited_at: '2' },
+        });
 
-      expect(actual).toEqual(expected);
-    });
-  });
+        expect(actual).toEqual(expected);
+      });
+    },
+  );
 
   describe('with existing scratch org', () => {
     test('updates with newer scratch org', () => {
@@ -92,14 +90,18 @@ describe('reducer', () => {
     });
   });
 
-  test('handles SCRATCH_ORG_ERROR action', () => {
-    const initial = { 'plan-1': { status: 'started' } };
-    const expected = { 'plan-1': null };
-    const actual = reducer(initial, {
-      type: 'SCRATCH_ORG_ERROR',
-      payload: 'plan-1',
-    });
+  [{ type: 'SCRATCH_ORG_FAILED' }, { type: 'SCRATCH_ORG_ERROR' }].forEach(
+    ({ type }) => {
+      test(`handles ${type} action`, () => {
+        const initial = { 'plan-1': { status: 'started' } };
+        const expected = { 'plan-1': null };
+        const actual = reducer(initial, {
+          type,
+          payload: 'plan-1',
+        });
 
-    expect(actual).toEqual(expected);
-  });
+        expect(actual).toEqual(expected);
+      });
+    },
+  );
 });
