@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 from django_filters import rest_framework as filters
 from rest_framework import serializers, status, viewsets
 from rest_framework.response import Response
@@ -8,6 +9,8 @@ from sfdo_template_helpers.admin.views import AdminAPIViewSet
 
 from metadeploy.adminapi.translations import update_all_translations
 from metadeploy.api import models
+from metadeploy.api.models import SUPPORTED_ORG_TYPES
+from metadeploy.api.serializers import get_from_data_or_instance
 
 
 class ProductSerializer(AdminAPISerializer):
@@ -61,6 +64,27 @@ class PlanSerializer(AdminAPISerializer):
         fields = "__all__"
         extra_kwargs = {"plan_template": {"required": False}}
 
+    def validate(self, data):
+        """
+        Check that restricted plans only support persistent orgs.
+        """
+        visible_to = get_from_data_or_instance(self.instance, data, "visible_to")
+        supported_orgs = get_from_data_or_instance(
+            self.instance,
+            data,
+            "supported_orgs",
+            default=SUPPORTED_ORG_TYPES.Persistent,
+        )
+        if visible_to and supported_orgs != SUPPORTED_ORG_TYPES.Persistent:
+            raise serializers.ValidationError(
+                {
+                    "supported_orgs": _(
+                        'Restricted plans (with a "visible to" AllowedList) can only support persistent org types.'
+                    )
+                }
+            )
+        return data
+
     def create(self, validated_data):
         steps = validated_data.pop("steps") or []
         plan = self.Meta.model.objects.create(**validated_data)
@@ -70,7 +94,7 @@ class PlanSerializer(AdminAPISerializer):
 
     def update(self, instance, validated_data):
         if "steps" in validated_data:
-            raise serializers.ValidationError(detail="Updating steps not supported.")
+            raise serializers.ValidationError(_("Updating steps not supported."))
         validated_data.pop("steps", None)
         return super().update(instance, validated_data)
 
