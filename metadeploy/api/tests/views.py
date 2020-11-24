@@ -778,6 +778,15 @@ class TestPlanView:
         response = client.get(reverse("plan-scratch-org", kwargs={"pk": str(plan.id)}))
         assert response.status_code == 404
 
+    def test_scratch_org_get__invalid_uuid(self, client, plan_factory):
+        plan = plan_factory()
+        session = client.session
+        session["scratch_org_id"] = "invalid"
+        session.save()
+
+        response = client.get(reverse("plan-scratch-org", kwargs={"pk": str(plan.id)}))
+        assert response.status_code == 404
+
     def test_scratch_org_post__no_devhub_username(self, client, plan_factory, settings):
         settings.DEVHUB_USERNAME = None
         plan = plan_factory()
