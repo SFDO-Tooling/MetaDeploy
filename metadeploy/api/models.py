@@ -957,7 +957,15 @@ class ScratchOrg(HashIdMixin, models.Model):
 
     objects = ScratchOrgQuerySet.as_manager()
 
+    def clean_config(self):
+        banned_keys = {"email"}
+        if self.config:
+            self.config = {
+                k: v for (k, v) in self.config.items() if k not in banned_keys
+            }
+
     def save(self, *args, **kwargs):
+        self.clean_config()
         ret = super().save(*args, **kwargs)
         if not self.enqueued_at:
             from .jobs import create_scratch_org_job
