@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core import exceptions
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -262,7 +263,7 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
             return self.preflight_post(request)
 
     def scratch_org_get(self, request):
-        scratch_org_id = request.session.get("scratch_org_id", None)
+        scratch_org_id = request.session.get("scratch_org_id")
         plan = get_object_or_404(Plan.objects, id=self.kwargs["pk"])
         args = (
             Q(status=ScratchOrg.Status.started) | Q(status=ScratchOrg.Status.complete),
@@ -270,8 +271,9 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
         kwargs = {"uuid": scratch_org_id, "plan": plan}
         # Can't use ScratchOrg.objects.get_from_session because we want to filter
         # by multiple status
-        scratch_org = ScratchOrg.objects.filter(*args, **kwargs).distinct().first()
-        if scratch_org is None:
+        try:
+            scratch_org = ScratchOrg.objects.get(*args, **kwargs)
+        except (ValidationError, ScratchOrg.DoesNotExist):
             return Response("", status=status.HTTP_404_NOT_FOUND)
         serializer = ScratchOrgSerializer(instance=scratch_org)
         return Response(serializer.data)
