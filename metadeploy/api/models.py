@@ -930,10 +930,11 @@ class ScratchOrgQuerySet(models.QuerySet):
         (`scratch_org_post` method on `PlanViewSet`),
         or from a URL query string (`GetScratchOrgIdFromQueryStringMiddleware`).
         """
-        scratch_org_id = session.get("scratch_org_id", None)
-        return self.filter(
-            uuid=scratch_org_id, status=self.model.Status.complete
-        ).first()
+        uuid = session.get("scratch_org_id")
+        try:
+            return self.get(uuid=uuid, status=self.model.Status.complete)
+        except (ValidationError, ScratchOrg.DoesNotExist):
+            return None
 
 
 class ScratchOrg(HashIdMixin, models.Model):
@@ -992,7 +993,7 @@ class ScratchOrg(HashIdMixin, models.Model):
     def complete(self, org_config):
         self.status = ScratchOrg.Status.complete
         self.config = org_config.config
-        self.org_id = org_config.config["org_id"]
+        self.org_id = convert_to_18(org_config.org_id)
         self.expires_at = org_config.expires
         self.save()
         async_to_sync(notify_org_finished)(self)
