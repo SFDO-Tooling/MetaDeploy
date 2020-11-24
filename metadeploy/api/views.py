@@ -274,8 +274,6 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
         try:
             scratch_org = ScratchOrg.objects.get(*args, **kwargs)
         except (ValidationError, ScratchOrg.DoesNotExist):
-            scratch_org = None
-        if scratch_org is None:
             return Response("", status=status.HTTP_404_NOT_FOUND)
         serializer = ScratchOrgSerializer(instance=scratch_org)
         return Response(serializer.data)
