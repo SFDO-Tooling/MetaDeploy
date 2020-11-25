@@ -361,9 +361,10 @@ SFDX_CLIENT_ID = env(
 )
 SFDX_SIGNUP_INSTANCE = env("SFDX_SIGNUP_INSTANCE", default=None)
 # Ugly hack to fix https://github.com/moby/moby/issues/12997
+DOCKER_SFDX_HUB_KEY = env("DOCKER_SFDX_HUB_KEY", default="").replace("\\n", "\n")
 SFDX_HUB_KEY = env(
-    "SFDX_HUB_KEY", default=env("CONNECTED_APP_CLIENT_KEY", default="")
-).replace("\\n", "\n")
+    "SFDX_HUB_KEY", default=env("CONNECTED_APP_CLIENT_KEY", default=DOCKER_SFDX_HUB_KEY)
+)
 
 if not SFDX_CLIENT_SECRET:
     raise ImproperlyConfigured("Missing environment variable: SFDX_CLIENT_SECRET.")
@@ -373,6 +374,10 @@ if not SFDX_CLIENT_CALLBACK_URL:
     )
 if not SFDX_CLIENT_ID:
     raise ImproperlyConfigured("Missing environment variable: SFDX_CLIENT_ID.")
+
+# CCI expects these env vars to be set to refresh org oauth tokens
+environ["SFDX_CLIENT_ID"] = SFDX_CLIENT_ID
+environ["SFDX_HUB_KEY"] = SFDX_HUB_KEY
 
 GITHUB_TOKEN = env("GITHUB_TOKEN", default=None)
 GITHUB_APP_ID = env("GITHUB_APP_ID", default=None)

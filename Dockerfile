@@ -50,8 +50,8 @@ RUN DATABASE_URL="" \
   DB_ENCRYPTION_KEY="Ul-OySkEawSxUc7Ck13Twu2109IzIFh54C1WXO9KAFE=" \
   DJANGO_HASHID_SALT="" \
   DJANGO_SECRET_KEY="sample secret key" \
-  SFDX_CLIENT_SECRET="" \
-  SFDX_CLIENT_CALLBACK_URL="" \
-  SFDX_CLIENT_ID="" \
+  SFDX_CLIENT_SECRET="sample secret" \
+  SFDX_CLIENT_CALLBACK_URL="sample callback" \
+  SFDX_CLIENT_ID="sample id" \
   GITHUB_TOKEN="sample token" \
   python manage.py collectstatic --noinput

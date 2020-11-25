@@ -6,7 +6,6 @@ Salesforce utilities
 import json
 import os
 from datetime import datetime
-from unittest.mock import Mock
 
 from cumulusci.core.config import OrgConfig, TaskConfig
 from cumulusci.core.runtime import BaseCumulusCI
@@ -105,14 +104,7 @@ def _refresh_access_token(*, scratch_org, config, org_name, keychain=None):
     """
     try:
         org_config = OrgConfig(config, org_name, keychain=keychain)
-        org_config.refresh_oauth_token = Mock()
-        info = jwt_session(
-            SF_CLIENT_ID, SF_CLIENT_KEY, org_config.username, org_config.instance_url
-        )
-        if info != org_config.config:
-            org_config.config.update(info)
-        org_config._load_userinfo()
-        org_config._load_orginfo()
+        org_config.refresh_oauth_token(keychain)
         return org_config
     except HTTPError as err:
         _handle_sf_error(err, scratch_org=scratch_org)
@@ -128,6 +120,7 @@ def _deploy_org_settings(*, cci, org_name, scratch_org_config, scratch_org):
         scratch_org=scratch_org,
         config=scratch_org_config.config,
         org_name=org_name,
+        keychain=cci.keychain,
     )
     path = os.path.join(cci.project_config.repo_root, scratch_org_config.config_file)
     task_config = TaskConfig({"options": {"definition_file": path}})
