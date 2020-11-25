@@ -299,13 +299,9 @@ def delete_scratch_org(scratch_org):
     devhub_api = _get_devhub_api()
     org_id = scratch_org.org_id
 
-    records = (
-        devhub_api.query(
-            f"SELECT Id FROM ActiveScratchOrg WHERE ScratchOrg='{org_id}'"
-        ).get("records")
-        # the above could return an empty list, so we have to use an or:
-        or [{}]
-    )[0]
-    active_scratch_org_id = records.get("Id")
-    if active_scratch_org_id:
+    results = devhub_api.query(
+        f"SELECT Id FROM ActiveScratchOrg WHERE ScratchOrg='{org_id}'"
+    )
+    if results["records"]:
+        active_scratch_org_id = results["records"][0]["Id"]
         devhub_api.ActiveScratchOrg.delete(active_scratch_org_id)
