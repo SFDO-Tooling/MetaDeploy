@@ -19,6 +19,8 @@ Websocket notifications you can subscribe to:
     scratchorg.:id
         SCRATCH_ORG_CREATED
         SCRATCH_ORG_ERROR
+        SCRATCH_ORG_UPDATED
+        SCRATCH_ORG_DELETED
         PREFLIGHT_STARTED
         JOB_STARTED
 """
@@ -204,18 +206,14 @@ async def notify_org(scratch_org, type_, payload=None, error=None):
     await push_message(group_name, sent_message)
 
 
-async def notify_org_finished(scratch_org, error=None):
+async def notify_org_changed(scratch_org, error=None, _type=None):
     from .serializers import ScratchOrgSerializer
 
     if error:
-        await notify_org(scratch_org, "SCRATCH_ORG_ERROR", error=error)
+        await notify_org(scratch_org, _type or "SCRATCH_ORG_ERROR", error=error)
     else:
         payload = ScratchOrgSerializer(scratch_org).data
-        await notify_org(scratch_org, "SCRATCH_ORG_CREATED", payload=payload)
-
-
-async def notify_org_deleted(scratch_org, error=None):
-    await notify_org(scratch_org, "SCRATCH_ORG_DELETED", error=error)
+        await notify_org(scratch_org, _type or "SCRATCH_ORG_UPDATED", payload=payload)
 
 
 async def preflight_started(scratch_org, preflight):

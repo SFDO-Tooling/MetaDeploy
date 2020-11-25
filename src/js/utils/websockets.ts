@@ -33,8 +33,9 @@ import {
   createPreflight,
   createScratchOrg,
   failScratchOrg,
-  ScratchOrgCreated,
   ScratchOrgFailed,
+  ScratchOrgUpdated,
+  updateScratchOrg,
 } from '@/store/scratchOrgs/actions';
 import { ScratchOrg } from '@/store/scratchOrgs/reducer';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
@@ -86,8 +87,8 @@ interface OrgEvent {
   payload: Org;
 }
 
-interface ScratchOrgCreatedEvent {
-  type: 'SCRATCH_ORG_CREATED';
+interface ScratchOrgEvent {
+  type: 'SCRATCH_ORG_CREATED' | 'SCRATCH_ORG_UPDATED';
   payload: ScratchOrg;
 }
 
@@ -105,7 +106,7 @@ type ModelEvent =
   | PreflightEvent
   | JobEvent
   | OrgEvent
-  | ScratchOrgCreatedEvent
+  | ScratchOrgEvent
   | ScratchOrgErrorEvent;
 type EventType = SubscriptionEvent | ErrorEvent | ModelEvent;
 
@@ -121,7 +122,7 @@ type Action =
   | JobFailed
   | JobCanceled
   | OrgChanged
-  | ScratchOrgCreated
+  | ScratchOrgUpdated
   | ThunkResult<JobStarted>
   | ThunkResult<ScratchOrgFailed>;
 
@@ -155,6 +156,8 @@ export const getAction = (event: EventType): Action | null => {
       return updateOrg(event.payload);
     case 'SCRATCH_ORG_CREATED':
       return createScratchOrg(event.payload);
+    case 'SCRATCH_ORG_UPDATED':
+      return updateScratchOrg(event.payload);
     case 'SCRATCH_ORG_ERROR':
     case 'SCRATCH_ORG_DELETED':
       return failScratchOrg(event.payload);

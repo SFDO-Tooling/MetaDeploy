@@ -29,8 +29,8 @@ export type ScratchOrgSpinning = {
   type: 'SCRATCH_ORG_SPINNING';
   payload: ScratchOrg;
 };
-export type ScratchOrgCreated = {
-  type: 'SCRATCH_ORG_CREATED';
+export type ScratchOrgUpdated = {
+  type: 'SCRATCH_ORG_UPDATED';
   payload: ScratchOrg;
 };
 export type ScratchOrgFailed = {
@@ -48,7 +48,7 @@ export type ScratchOrgsAction =
   | FetchScratchOrgFailed
   | ScratchOrgSpinRequested
   | ScratchOrgSpinning
-  | ScratchOrgCreated
+  | ScratchOrgUpdated
   | ScratchOrgFailed
   | ScratchOrgError;
 
@@ -115,7 +115,12 @@ export const spinScratchOrg = (
   }
 };
 
-export const createScratchOrg = (payload: ScratchOrg): ScratchOrgCreated => {
+export const updateScratchOrg = (payload: ScratchOrg): ScratchOrgUpdated => ({
+  type: 'SCRATCH_ORG_UPDATED' as const,
+  payload,
+});
+
+export const createScratchOrg = (payload: ScratchOrg): ScratchOrgUpdated => {
   if (window.socket && payload.org_id) {
     window.socket.subscribe({
       model: 'org',
@@ -123,7 +128,7 @@ export const createScratchOrg = (payload: ScratchOrg): ScratchOrgCreated => {
     });
   }
   return {
-    type: 'SCRATCH_ORG_CREATED' as const,
+    type: 'SCRATCH_ORG_UPDATED' as const,
     payload,
   };
 };

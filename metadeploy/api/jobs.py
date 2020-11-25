@@ -99,6 +99,15 @@ def report_errors_to(user):
 
 
 @contextlib.contextmanager
+def delete_org_on_error(scratch_org):
+    try:
+        yield
+    except Exception:
+        scratch_org.fail_job()
+        raise
+
+
+@contextlib.contextmanager
 def prepend_python_path(path):
     prev_path = sys.path.copy()
     sys.path.insert(0, path)
@@ -143,6 +152,8 @@ def run_flows(*, plan, skip_steps, result_class, result_id):
         stack.enter_context(finalize_result(result))
         if result.user:
             stack.enter_context(report_errors_to(result.user))
+        if scratch_org:
+            stack.enter_context(delete_org_on_error(scratch_org))
 
         # Let's clone the repo locally:
         repo_user, repo_name = extract_user_and_repo(repo_url)
@@ -317,12 +328,13 @@ def create_scratch_org(org_pk):
 create_scratch_org_job = job(create_scratch_org)
 
 
-def delete_scratch_org(scratch_org):
+def delete_scratch_org(scratch_org, should_delete_locally=True):
     try:
         scratch_org.refresh_from_db()
         delete_scratch_org_on_sf(scratch_org)
     finally:
-        scratch_org.delete(should_delete_on_sf=False, should_notify=False)
+        if should_delete_locally:
+            scratch_org.delete(should_delete_on_sf=False, should_notify=False)
 
 
 delete_scratch_org_job = job(delete_scratch_org)

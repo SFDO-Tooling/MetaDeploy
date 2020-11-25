@@ -32,7 +32,7 @@ const reducer = (
       return { ...scratchOrgs, [plan]: null };
     }
     case 'SCRATCH_ORG_SPINNING':
-    case 'SCRATCH_ORG_CREATED': {
+    case 'SCRATCH_ORG_UPDATED': {
       const org = action.payload;
       const { plan } = org;
       const existingOrg = scratchOrgs[plan];
