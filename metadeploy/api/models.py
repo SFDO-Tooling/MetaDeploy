@@ -978,7 +978,7 @@ class ScratchOrg(HashIdMixin, models.Model):
     objects = ScratchOrgQuerySet.as_manager()
 
     def clean_config(self):
-        banned_keys = {"email"}
+        banned_keys = {"email", "access_token", "refresh_token"}
         if self.config:
             self.config = {
                 k: v for (k, v) in self.config.items() if k not in banned_keys
@@ -1034,12 +1034,13 @@ class ScratchOrg(HashIdMixin, models.Model):
         self.save()
         async_to_sync(notify_org_finished)(self)
 
-    def get_refreshed_org_config(self):
+    def get_refreshed_org_config(self, org_name=None, keychain=None):
         org_config = _refresh_access_token(
-            config=self.config, org_name=self.plan.org_config_name, scratch_org=self
+            scratch_org=self,
+            config=self.config,
+            org_name=org_name or self.plan.org_config_name,
+            keychain=keychain,
         )
-        org_config._load_userinfo()
-        org_config._load_orginfo()
         return org_config
 
     def get_login_url(self):

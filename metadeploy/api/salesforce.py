@@ -21,11 +21,12 @@ from simple_salesforce import Salesforce as SimpleSalesforce
 
 # Salesforce connected app
 # Assign these locally, for brevity:
-SF_CALLBACK_URL = settings.CONNECTED_APP_CALLBACK_URL
-SF_CLIENT_KEY = settings.CONNECTED_APP_CLIENT_KEY
-SF_CLIENT_ID = settings.CONNECTED_APP_CLIENT_ID
-SF_CLIENT_SECRET = settings.CONNECTED_APP_CLIENT_SECRET
+SF_CALLBACK_URL = settings.SFDX_CLIENT_CALLBACK_URL
+SF_CLIENT_KEY = settings.SFDX_HUB_KEY
+SF_CLIENT_ID = settings.SFDX_CLIENT_ID
+SF_CLIENT_SECRET = settings.SFDX_CLIENT_SECRET
 SFDX_SIGNUP_INSTANCE = settings.SFDX_SIGNUP_INSTANCE
+DEVHUB_USERNAME = settings.DEVHUB_USERNAME
 
 
 def _handle_sf_error(err, scratch_org=None):
@@ -62,12 +63,12 @@ def _get_devhub_api(scratch_org=None):
 
     Get an access token (session) using the global dev hub username.
     """
-    if not settings.DEVHUB_USERNAME:
+    if not DEVHUB_USERNAME:
         raise ImproperlyConfigured(
             "You must set the DEVHUB_USERNAME to connect to a Salesforce organization."
         )
     try:
-        jwt = jwt_session(SF_CLIENT_ID, SF_CLIENT_KEY, settings.DEVHUB_USERNAME)
+        jwt = jwt_session(SF_CLIENT_ID, SF_CLIENT_KEY, DEVHUB_USERNAME)
         return SimpleSalesforce(
             instance_url=jwt["instance_url"],
             session_id=jwt["access_token"],
@@ -95,7 +96,7 @@ def _get_org_details(*, cci, org_name, project_path):
     return (scratch_org_config, scratch_org_definition)
 
 
-def _refresh_access_token(*, config, org_name, scratch_org):
+def _refresh_access_token(*, scratch_org, config, org_name, keychain=None):
     """Refresh the JWT.
 
     Construct a new OrgConfig because ScratchOrgConfig tries to use sfdx
@@ -103,12 +104,15 @@ def _refresh_access_token(*, config, org_name, scratch_org):
     smooth over with some improvements in CumulusCI
     """
     try:
-        org_config = OrgConfig(config, org_name)
+        org_config = OrgConfig(config, org_name, keychain=keychain)
         org_config.refresh_oauth_token = Mock()
         info = jwt_session(
             SF_CLIENT_ID, SF_CLIENT_KEY, org_config.username, org_config.instance_url
         )
-        org_config.config["access_token"] = info["access_token"]
+        if info != org_config.config:
+            org_config.config.update(info)
+        org_config._load_userinfo()
+        org_config._load_orginfo()
         return org_config
     except HTTPError as err:
         _handle_sf_error(err, scratch_org=scratch_org)
@@ -121,9 +125,9 @@ def _deploy_org_settings(*, cci, org_name, scratch_org_config, scratch_org):
     in the scratch org definition file.
     """
     org_config = _refresh_access_token(
+        scratch_org=scratch_org,
         config=scratch_org_config.config,
         org_name=org_name,
-        scratch_org=scratch_org,
     )
     path = os.path.join(cci.project_config.repo_root, scratch_org_config.config_file)
     task_config = TaskConfig({"options": {"definition_file": path}})

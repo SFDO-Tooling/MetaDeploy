@@ -125,15 +125,16 @@ def run_flows(*, plan, skip_steps, result_class, result_id):
         result_id (int): the PK of the result instance to get.
     """
     result = result_class.objects.get(pk=result_id)
+    scratch_org = None
+    token = None
+    token_secret = None
+    instance_url = None
     if result.user:
         token, token_secret = result.user.token
         instance_url = result.user.instance_url
     else:
         # This means we're in a ScratchOrg.
         scratch_org = ScratchOrg.objects.get(org_id=result.org_id)
-        token = scratch_org.config["access_token"]
-        token_secret = scratch_org.config["refresh_token"]
-        instance_url = scratch_org.config["instance_url"]
 
     repo_url = plan.version.product.repo_url
     commit_ish = plan.commit_ish or plan.version.commit_ish
@@ -159,23 +160,28 @@ def run_flows(*, plan, skip_steps, result_class, result_id):
         ctx = MetaDeployCCI(repo_root=repo_root, plan=plan)
 
         current_org = "current_org"
-        org_config = OrgConfig(
-            {
-                "access_token": token,
-                "instance_url": instance_url,
-                "refresh_token": token_secret,
-            },
-            current_org,
-            keychain=ctx.keychain,
-        )
+        if scratch_org:
+            org_config = scratch_org.get_refreshed_org_config(
+                org_name=current_org, keychain=ctx.keychain
+            )
+        else:
+            org_config = OrgConfig(
+                {
+                    "access_token": token,
+                    "instance_url": instance_url,
+                    "refresh_token": token_secret,
+                },
+                current_org,
+                keychain=ctx.keychain,
+            )
         org_config.save()
 
         # Set up the connected_app:
         connected_app = ServiceConfig(
             {
-                "client_secret": settings.CONNECTED_APP_CLIENT_SECRET,
-                "callback_url": settings.CONNECTED_APP_CALLBACK_URL,
-                "client_id": settings.CONNECTED_APP_CLIENT_ID,
+                "client_secret": settings.SFDX_CLIENT_SECRET,
+                "callback_url": settings.SFDX_CLIENT_CALLBACK_URL,
+                "client_id": settings.SFDX_CLIENT_ID,
             }
         )
         ctx.keychain.set_service("connected_app", connected_app, True)

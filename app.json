@@ -45,13 +45,13 @@
       "description": "Sentry DSN for error reporting (if not using Heroku Sentry buildpack).",
       "required": false
     },
-    "CONNECTED_APP_CLIENT_ID": {
+    "SFDX_CLIENT_ID": {
       "description": "The client id (consumer key) for the connected app used to auth with Salesforce."
     },
-    "CONNECTED_APP_CLIENT_SECRET": {
+    "SFDX_CLIENT_SECRET": {
       "description": "The client secret (consumer secret) for the connected app used to auth with Salesforce."
     },
-    "CONNECTED_APP_CALLBACK_URL": {
+    "SFDX_CLIENT_CALLBACK_URL": {
       "description": "The callback URL used for OAuth callbacks, must be in the form of fqdn, AllAuth adds what it needs. e.g. https://metadeploy-staging.herokuapp.com/"
     },
     "GITHUB_TOKEN": {
