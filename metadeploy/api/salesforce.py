@@ -28,7 +28,36 @@ SF_CLIENT_SECRET = settings.CONNECTED_APP_CLIENT_SECRET
 SFDX_SIGNUP_INSTANCE = settings.SFDX_SIGNUP_INSTANCE
 
 
-def _get_devhub_api():
+def _handle_sf_error(err, scratch_org=None):
+    if get_current_job():
+        job_id = get_current_job().id
+        # This error is user-facing, and so for makemessages to
+        # pick it up correctly, we need it to be a single,
+        # unbroken, string literal (even though adjacent string
+        # literals should be parsed by the AST into a single
+        # string literal and picked up by makemessages, but
+        # that's a gripe for another day). We have relatively
+        # few errors that propagate directly from the backend
+        # like this, but when we do, this is the pattern we
+        # should use.
+        #
+        # This is also why we repeat the first sentence.
+        error_msg = _(
+            f"Are you certain that the org still exists? If you need support, your job ID is {job_id}."  # noqa: B950
+        )
+    else:
+        error_msg = _(f"Are you certain that the org still exists? {err.args[0]}")
+
+    err = err.__class__(
+        error_msg,
+        *err.args[1:],
+    )
+    if scratch_org:
+        scratch_org.delete(error=err, should_delete_on_sf=False)
+    raise err
+
+
+def _get_devhub_api(scratch_org=None):
     """Get an access token.
 
     Get an access token (session) using the global dev hub username.
@@ -37,13 +66,16 @@ def _get_devhub_api():
         raise ImproperlyConfigured(
             "You must set the DEVHUB_USERNAME to connect to a Salesforce organization."
         )
-    jwt = jwt_session(SF_CLIENT_ID, SF_CLIENT_KEY, settings.DEVHUB_USERNAME)
-    return SimpleSalesforce(
-        instance_url=jwt["instance_url"],
-        session_id=jwt["access_token"],
-        client_id="MetaDeploy",
-        version="49.0",
-    )
+    try:
+        jwt = jwt_session(SF_CLIENT_ID, SF_CLIENT_KEY, settings.DEVHUB_USERNAME)
+        return SimpleSalesforce(
+            instance_url=jwt["instance_url"],
+            session_id=jwt["access_token"],
+            client_id="MetaDeploy",
+            version="49.0",
+        )
+    except HTTPError as err:
+        _handle_sf_error(err, scratch_org=scratch_org)
 
 
 def _get_org_details(*, cci, org_name, project_path):
@@ -79,31 +111,7 @@ def _refresh_access_token(*, config, org_name, scratch_org):
         org_config.config["access_token"] = info["access_token"]
         return org_config
     except HTTPError as err:
-        if get_current_job():
-            job_id = get_current_job().id
-            # This error is user-facing, and so for makemessages to
-            # pick it up correctly, we need it to be a single,
-            # unbroken, string literal (even though adjacent string
-            # literals should be parsed by the AST into a single
-            # string literal and picked up by makemessages, but
-            # that's a gripe for another day). We have relatively
-            # few errors that propagate directly from the backend
-            # like this, but when we do, this is the pattern we
-            # should use.
-            #
-            # This is also why we repeat the first sentence.
-            error_msg = _(
-                f"Are you certain that the org still exists? If you need support, your job ID is {job_id}."  # noqa: B950
-            )
-        else:
-            error_msg = _(f"Are you certain that the org still exists? {err.args[0]}")
-
-        err = err.__class__(
-            error_msg,
-            *err.args[1:],
-        )
-        scratch_org.delete(error=err, should_delete_on_sf=False)
-        raise err
+        _handle_sf_error(err, scratch_org=scratch_org)
 
 
 def _deploy_org_settings(*, cci, org_name, scratch_org_config, scratch_org):
@@ -296,7 +304,7 @@ def create_scratch_org(
 def delete_scratch_org(scratch_org):
     """Delete a scratch org by deleting its ActiveScratchOrg record
     in the Dev Hub org."""
-    devhub_api = _get_devhub_api()
+    devhub_api = _get_devhub_api(scratch_org=scratch_org)
     org_id = scratch_org.org_id
 
     results = devhub_api.query(
