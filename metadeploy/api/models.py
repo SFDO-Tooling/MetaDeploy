@@ -947,7 +947,7 @@ class ScratchOrgQuerySet(models.QuerySet):
         """
         uuid = session.get("scratch_org_id")
         try:
-            return self.get(uuid=uuid, status=self.model.Status.complete)
+            return self.get(uuid=uuid)
         except (ValidationError, ScratchOrg.DoesNotExist):
             return None
 

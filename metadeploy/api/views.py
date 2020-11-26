@@ -265,14 +265,10 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
     def scratch_org_get(self, request):
         scratch_org_id = request.session.get("scratch_org_id")
         plan = get_object_or_404(Plan.objects, id=self.kwargs["pk"])
-        args = (
-            Q(status=ScratchOrg.Status.started) | Q(status=ScratchOrg.Status.complete),
-        )
-        kwargs = {"uuid": scratch_org_id, "plan": plan}
-        # Can't use ScratchOrg.objects.get_from_session because we want to filter
-        # by multiple status
+        # Can't use ScratchOrg.objects.get_from_session
+        # because we want to also filter by plan
         try:
-            scratch_org = ScratchOrg.objects.get(*args, **kwargs)
+            scratch_org = ScratchOrg.objects.get(uuid=scratch_org_id, plan=plan)
         except (ValidationError, ScratchOrg.DoesNotExist):
             return Response("", status=status.HTTP_404_NOT_FOUND)
         serializer = ScratchOrgSerializer(instance=scratch_org)
