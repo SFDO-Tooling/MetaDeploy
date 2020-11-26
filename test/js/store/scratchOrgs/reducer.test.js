@@ -40,7 +40,7 @@ describe('reducer', () => {
     expect(actual).toEqual(expected);
   });
 
-  [{ type: 'SCRATCH_ORG_SPINNING' }, { type: 'SCRATCH_ORG_CREATED' }].forEach(
+  [{ type: 'SCRATCH_ORG_SPINNING' }, { type: 'SCRATCH_ORG_UPDATED' }].forEach(
     ({ type }) => {
       test(`handles ${type} action`, () => {
         const initial = {
@@ -69,7 +69,7 @@ describe('reducer', () => {
         'plan-2': incoming,
       };
       const actual = reducer(initial, {
-        type: 'SCRATCH_ORG_CREATED',
+        type: 'SCRATCH_ORG_UPDATED',
         payload: incoming,
       });
 
@@ -82,7 +82,7 @@ describe('reducer', () => {
       };
       const incoming = { plan: 'plan-2', foo: 'changed', edited_at: '1' };
       const actual = reducer(initial, {
-        type: 'SCRATCH_ORG_CREATED',
+        type: 'SCRATCH_ORG_UPDATED',
         payload: incoming,
       });
 

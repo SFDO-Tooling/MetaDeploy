@@ -170,6 +170,15 @@ describe('spinScratchOrg', () => {
   });
 });
 
+describe('updateScratchOrg', () => {
+  test('returns SCRATCH_ORG_UPDATED action', () => {
+    const payload = { org_id: 'org-id' };
+    const expected = { type: 'SCRATCH_ORG_UPDATED', payload };
+
+    expect(actions.updateScratchOrg(payload)).toEqual(expected);
+  });
+});
+
 describe('createScratchOrg', () => {
   beforeEach(() => {
     window.socket = { subscribe: jest.fn() };
@@ -179,9 +188,9 @@ describe('createScratchOrg', () => {
     Reflect.deleteProperty(window, 'socket');
   });
 
-  test('returns action object: SCRATCH_ORG_CREATED', () => {
+  test('returns action object: SCRATCH_ORG_UPDATED', () => {
     const payload = { org_id: 'org-id' };
-    const expected = { type: 'SCRATCH_ORG_CREATED', payload };
+    const expected = { type: 'SCRATCH_ORG_UPDATED', payload };
 
     expect(actions.createScratchOrg(payload)).toEqual(expected);
     expect(window.socket.subscribe).toHaveBeenCalledWith({
