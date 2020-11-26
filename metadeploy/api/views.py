@@ -222,9 +222,9 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
 
     def preflight_post(self, request):
         plan = get_object_or_404(Plan.objects, id=self.kwargs["pk"])
-        scratch_org = ScratchOrg.objects.filter(plan=plan).get_from_session(
-            request.session
-        )
+        scratch_org = ScratchOrg.objects.filter(
+            plan=plan, status=ScratchOrg.Status.complete
+        ).get_from_session(request.session)
         is_visible_to = plan.is_visible_to(
             request.user
         ) and plan.version.product.is_visible_to(request.user)
@@ -263,12 +263,11 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
             return self.preflight_post(request)
 
     def scratch_org_get(self, request):
-        scratch_org_id = request.session.get("scratch_org_id")
         plan = get_object_or_404(Plan.objects, id=self.kwargs["pk"])
-        # Can't use ScratchOrg.objects.get_from_session
-        # because we want to also filter by plan
         try:
-            scratch_org = ScratchOrg.objects.get(uuid=scratch_org_id, plan=plan)
+            scratch_org = ScratchOrg.objects.filter(plan=plan).get_from_session(
+                request.session
+            )
         except (ValidationError, ScratchOrg.DoesNotExist):
             return Response("", status=status.HTTP_404_NOT_FOUND)
         serializer = ScratchOrgSerializer(instance=scratch_org)
@@ -367,7 +366,9 @@ class ScratchOrgViewSet(viewsets.GenericViewSet):
 
     @action(detail=True, methods=["GET"])
     def redirect(self, request, pk=None):
-        scratch_org = ScratchOrg.objects.get_from_session(request.session)
+        scratch_org = ScratchOrg.objects.filter(
+            status=ScratchOrg.Status.complete
+        ).get_from_session(request.session)
         if not scratch_org:
             raise Http404
         url = scratch_org.get_login_url()

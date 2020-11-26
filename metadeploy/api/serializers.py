@@ -540,9 +540,9 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
 
         scratch_org = None
         if not (user and user.is_authenticated):
-            scratch_org = ScratchOrg.objects.get_from_session(
-                self.context["request"].session
-            )
+            scratch_org = ScratchOrg.objects.filter(
+                status=ScratchOrg.Status.complete
+            ).get_from_session(self.context["request"].session)
             if not org_id:
                 org_id = getattr(scratch_org, "org_id", None)
 
