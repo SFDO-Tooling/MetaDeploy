@@ -455,8 +455,11 @@ class CtaButton extends React.Component<
     } = this.props;
     const { spinOrgModalOpen } = this.state;
     const usesBothOrgTypes = plan.supported_orgs === SUPPORTED_ORGS.Both;
+    const hasValidScratchOrg =
+      scratchOrg?.status === SCRATCH_ORG_STATUSES.started ||
+      scratchOrg?.status === SCRATCH_ORG_STATUSES.complete;
     const btnVariant =
-      usesBothOrgTypes && !scratchOrg ? 'outline-brand' : 'brand';
+      usesBothOrgTypes && !hasValidScratchOrg ? 'outline-brand' : 'brand';
 
     if (scratchOrg?.status === SCRATCH_ORG_STATUSES.started) {
       // Scratch org is being created
@@ -628,7 +631,7 @@ class CtaButton extends React.Component<
       window.GLOBALS.SCRATCH_ORGS_AVAILABLE &&
         plan.supported_orgs !== SUPPORTED_ORGS.Persistent,
     );
-    const hasScratchOrg =
+    const hasValidScratchOrg =
       canUseScratchOrg &&
       (scratchOrg?.status === SCRATCH_ORG_STATUSES.started ||
         scratchOrg?.status === SCRATCH_ORG_STATUSES.complete);
@@ -671,7 +674,7 @@ class CtaButton extends React.Component<
 
     return (
       <>
-        {canUsePersistentOrg && !hasScratchOrg
+        {canUsePersistentOrg && !hasValidScratchOrg
           ? this.getPersistentOrgCTA()
           : null}
         {canUseScratchOrg ? this.getScratchOrgCTA() : null}

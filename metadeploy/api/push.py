@@ -19,6 +19,8 @@ Websocket notifications you can subscribe to:
     scratchorg.:id
         SCRATCH_ORG_CREATED
         SCRATCH_ORG_ERROR
+        SCRATCH_ORG_UPDATED
+        SCRATCH_ORG_DELETED
         PREFLIGHT_STARTED
         JOB_STARTED
 """
@@ -175,27 +177,25 @@ async def notify_org_result_changed(result):
     await push_message(group_name, message)
 
 
-async def notify_org_finished(scratch_org, error=None):
-    from .serializers import ScratchOrgSerializer
-
-    data = ScratchOrgSerializer(scratch_org).data
-    if error:
-        type_ = "SCRATCH_ORG_ERROR"
-        # unwrap the error in the case that there's only one,
-        # which is the most common case:
-        try:
-            prepared_message = error.content
-            if isinstance(prepared_message, list) and len(prepared_message) == 1:
-                prepared_message = prepared_message[0]
-            if isinstance(prepared_message, dict):
-                prepared_message = prepared_message.get("message", prepared_message)
-            prepared_message = str(prepared_message)
-        except AttributeError:
-            prepared_message = str(error)
-        payload = {"message": prepared_message, "org": data}
-    else:
-        type_ = "SCRATCH_ORG_CREATED"
-        payload = data
+async def notify_org(scratch_org, type_, payload=None, error=None):
+    if not payload:
+        payload = {
+            "org": str(scratch_org.id),
+            "plan": str(scratch_org.plan.id),
+        }
+        if error:
+            # unwrap the error in the case that there's only one,
+            # which is the most common case:
+            try:
+                prepared_message = error.content
+                if isinstance(prepared_message, list) and len(prepared_message) == 1:
+                    prepared_message = prepared_message[0]
+                if isinstance(prepared_message, dict):
+                    prepared_message = prepared_message.get("message", prepared_message)
+                prepared_message = str(prepared_message)
+            except AttributeError:
+                prepared_message = str(error)
+            payload["message"] = prepared_message
 
     message = {
         "type": type_,
@@ -204,6 +204,16 @@ async def notify_org_finished(scratch_org, error=None):
     group_name = CHANNELS_GROUP_NAME.format(model="scratchorg", id=scratch_org.id)
     sent_message = {"type": "notify", "group": group_name, "content": message}
     await push_message(group_name, sent_message)
+
+
+async def notify_org_changed(scratch_org, error=None, _type=None):
+    from .serializers import ScratchOrgSerializer
+
+    if error:
+        await notify_org(scratch_org, _type or "SCRATCH_ORG_ERROR", error=error)
+    else:
+        payload = ScratchOrgSerializer(scratch_org).data
+        await notify_org(scratch_org, _type or "SCRATCH_ORG_UPDATED", payload=payload)
 
 
 async def preflight_started(scratch_org, preflight):

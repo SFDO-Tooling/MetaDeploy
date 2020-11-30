@@ -32,8 +32,7 @@ const reducer = (
       return { ...scratchOrgs, [plan]: null };
     }
     case 'SCRATCH_ORG_SPINNING':
-    case 'SCRATCH_ORG_CREATED':
-    case 'SCRATCH_ORG_FAILED': {
+    case 'SCRATCH_ORG_UPDATED': {
       const org = action.payload;
       const { plan } = org;
       const existingOrg = scratchOrgs[plan];
@@ -42,7 +41,8 @@ const reducer = (
       }
       return { [plan]: org };
     }
-    case 'SCRATCH_ORG_ERROR': {
+    case 'SCRATCH_ORG_ERROR':
+    case 'SCRATCH_ORG_FAILED': {
       const plan = action.payload;
       return { ...scratchOrgs, [plan]: null };
     }

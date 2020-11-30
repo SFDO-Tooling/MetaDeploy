@@ -6,7 +6,6 @@ Salesforce utilities
 import json
 import os
 from datetime import datetime
-from unittest.mock import Mock
 
 from cumulusci.core.config import OrgConfig, TaskConfig
 from cumulusci.core.runtime import BaseCumulusCI
@@ -14,18 +13,51 @@ from cumulusci.oauth.salesforce import SalesforceOAuth2, jwt_session
 from cumulusci.tasks.salesforce.org_settings import DeployOrgSettings
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.utils.translation import gettext_lazy as _
+from requests.exceptions import HTTPError
+from rq import get_current_job
 from simple_salesforce import Salesforce as SimpleSalesforce
 
 # Salesforce connected app
 # Assign these locally, for brevity:
-SF_CALLBACK_URL = settings.CONNECTED_APP_CALLBACK_URL
-SF_CLIENT_KEY = settings.CONNECTED_APP_CLIENT_KEY
-SF_CLIENT_ID = settings.CONNECTED_APP_CLIENT_ID
-SF_CLIENT_SECRET = settings.CONNECTED_APP_CLIENT_SECRET
+SF_CALLBACK_URL = settings.SFDX_CLIENT_CALLBACK_URL
+SF_CLIENT_KEY = settings.SFDX_HUB_KEY
+SF_CLIENT_ID = settings.SFDX_CLIENT_ID
+SF_CLIENT_SECRET = settings.SFDX_CLIENT_SECRET
 SFDX_SIGNUP_INSTANCE = settings.SFDX_SIGNUP_INSTANCE
 
 
-def _get_devhub_api():
+class ScratchOrgError(Exception):
+    pass
+
+
+def _handle_sf_error(err, scratch_org=None):
+    if get_current_job():
+        job_id = get_current_job().id
+        # This error is user-facing, and so for makemessages to
+        # pick it up correctly, we need it to be a single,
+        # unbroken, string literal (even though adjacent string
+        # literals should be parsed by the AST into a single
+        # string literal and picked up by makemessages, but
+        # that's a gripe for another day). We have relatively
+        # few errors that propagate directly from the backend
+        # like this, but when we do, this is the pattern we
+        # should use.
+        #
+        # This is also why we repeat the first sentence.
+        error_msg = _(
+            f"Are you certain that the org still exists? If you need support, your job ID is {job_id}."  # noqa: B950
+        )
+    else:
+        error_msg = _(f"Are you certain that the org still exists? {err.args[0]}")
+
+    error = ScratchOrgError(error_msg)
+    if scratch_org:
+        scratch_org.delete(error=error, should_delete_on_sf=False)
+    raise error
+
+
+def _get_devhub_api(scratch_org=None):
     """Get an access token.
 
     Get an access token (session) using the global dev hub username.
@@ -34,13 +66,16 @@ def _get_devhub_api():
         raise ImproperlyConfigured(
             "You must set the DEVHUB_USERNAME to connect to a Salesforce organization."
         )
-    jwt = jwt_session(SF_CLIENT_ID, SF_CLIENT_KEY, settings.DEVHUB_USERNAME)
-    return SimpleSalesforce(
-        instance_url=jwt["instance_url"],
-        session_id=jwt["access_token"],
-        client_id="MetaDeploy",
-        version="49.0",
-    )
+    try:
+        jwt = jwt_session(SF_CLIENT_ID, SF_CLIENT_KEY, settings.DEVHUB_USERNAME)
+        return SimpleSalesforce(
+            instance_url=jwt["instance_url"],
+            session_id=jwt["access_token"],
+            client_id="MetaDeploy",
+            version="49.0",
+        )
+    except HTTPError as err:
+        _handle_sf_error(err, scratch_org=scratch_org)
 
 
 def _get_org_details(*, cci, org_name, project_path):
@@ -60,31 +95,32 @@ def _get_org_details(*, cci, org_name, project_path):
     return (scratch_org_config, scratch_org_definition)
 
 
-def _refresh_access_token(*, config, org_name):
+def refresh_access_token(*, scratch_org, config, org_name, keychain=None):
     """Refresh the JWT.
 
     Construct a new OrgConfig because ScratchOrgConfig tries to use sfdx
     which we don't want now -- this is a total hack which I'll try to
     smooth over with some improvements in CumulusCI
     """
-    org_config = OrgConfig(config, org_name)
-    org_config.refresh_oauth_token = Mock()
-    info = jwt_session(
-        SF_CLIENT_ID, SF_CLIENT_KEY, org_config.username, org_config.instance_url
-    )
-    org_config.config["access_token"] = info["access_token"]
-    return org_config
+    try:
+        org_config = OrgConfig(config, org_name, keychain=keychain)
+        org_config.refresh_oauth_token(keychain)
+        return org_config
+    except HTTPError as err:
+        _handle_sf_error(err, scratch_org=scratch_org)
 
 
-def _deploy_org_settings(*, cci, org_name, scratch_org_config):
+def _deploy_org_settings(*, cci, org_name, scratch_org_config, scratch_org):
     """Deploy org settings via Metadata API.
 
     Do a Metadata API deployment to configure org settings as specified
     in the scratch org definition file.
     """
-    org_config = _refresh_access_token(
+    org_config = refresh_access_token(
+        scratch_org=scratch_org,
         config=scratch_org_config.config,
         org_name=org_name,
+        keychain=cci.keychain,
     )
     path = os.path.join(cci.project_config.repo_root, scratch_org_config.config_file)
     task_config = TaskConfig({"options": {"definition_file": path}})
@@ -190,6 +226,7 @@ def create_scratch_org(
     repo_branch,
     email,
     project_path,
+    scratch_org,
     org_name,
     duration,
 ):
@@ -248,6 +285,7 @@ def create_scratch_org(
         cci=cci,
         # From _get_org_details:
         scratch_org_config=scratch_org_config,
+        scratch_org=scratch_org,
     )
 
     return (
@@ -258,3 +296,17 @@ def create_scratch_org(
         # From _deploy_org_settings:
         org_config,
     )
+
+
+def delete_scratch_org(scratch_org):
+    """Delete a scratch org by deleting its ActiveScratchOrg record
+    in the Dev Hub org."""
+    devhub_api = _get_devhub_api(scratch_org=scratch_org)
+    org_id = scratch_org.org_id
+
+    results = devhub_api.query(
+        f"SELECT Id FROM ActiveScratchOrg WHERE ScratchOrg='{org_id}'"
+    )
+    if results["records"]:
+        active_scratch_org_id = results["records"][0]["Id"]
+        devhub_api.ActiveScratchOrg.delete(active_scratch_org_id)

@@ -540,9 +540,9 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
 
         scratch_org = None
         if not (user and user.is_authenticated):
-            scratch_org = ScratchOrg.objects.get_from_session(
-                self.context["request"].session
-            )
+            scratch_org = ScratchOrg.objects.filter(
+                status=ScratchOrg.Status.complete
+            ).get_from_session(self.context["request"].session)
             if not org_id:
                 org_id = getattr(scratch_org, "org_id", None)
 
@@ -584,9 +584,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             data["org_type"] = user.org_type
             data["full_org_type"] = user.full_org_type
         elif scratch_org:
-            token = scratch_org.config["access_token"]
-            token_secret = scratch_org.config["refresh_token"]
-            user_has_valid_token = bool(token and token_secret)
+            user_has_valid_token = True
             data["user"] = None
             data["full_org_type"] = ORG_TYPES.Scratch
         if not user_has_valid_token:

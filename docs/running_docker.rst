@@ -85,21 +85,21 @@ GITHUB_TOKEN:
     If you need to generate a personal access token please visit the following:
     https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line
 
-CONNECTED_APP_CALLBACK_URL:
+SFDX_CLIENT_CALLBACK_URL:
     Callback url of the connected Salesforce app. The variable has already been set to the proper value for projects running under localhost.
 
 .. note::
 
     If you're an OddBird, you can find the following values in the shared Keybase team folder -- ``metadeploy/env``
 
-CONNECTED_APP_CLIENT_ID:
+SFDX_CLIENT_ID:
     Consumer key of the connected app that MetaDeploy will use for authenticating to any persistent org.
 
-CONNECTED_APP_CLIENT_SECRET:
+SFDX_CLIENT_SECRET:
     Consumer secret of the connected app.
 
-CONNECTED_APP_CLIENT_KEY:
-    This represents the private key corresponding to a certificate that was uploaded to the "Use digital signatures" setting of the Salesforce connected app. Only required if you enable scratch orgs for a plan.
+DOCKER_SFDX_HUB_KEY:
+    This represents the private key (with newlines encoded as `\n` for Docker) corresponding to a certificate that was uploaded to the "Use digital signatures" setting of the Salesforce connected app. Only required if you enable scratch orgs for a plan.
 
 
 

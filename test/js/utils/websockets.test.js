@@ -100,7 +100,9 @@ describe('getAction', () => {
 
   [
     { type: 'SCRATCH_ORG_CREATED', action: 'createScratchOrg', thunk: false },
+    { type: 'SCRATCH_ORG_UPDATED', action: 'updateScratchOrg', thunk: false },
     { type: 'SCRATCH_ORG_ERROR', action: 'failScratchOrg', thunk: true },
+    { type: 'SCRATCH_ORG_DELETED', action: 'failScratchOrg', thunk: true },
     { type: 'PREFLIGHT_STARTED', action: 'createPreflight', thunk: false },
   ].forEach(({ type, action, thunk }) => {
     test(`handles msg: ${type}`, () => {

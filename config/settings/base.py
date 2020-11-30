@@ -350,14 +350,34 @@ STATIC_ROOT = str(PROJECT_ROOT / "staticfiles")
 # WHITENOISE_ROOT = PROJECT_ROOT.joinpath(static_dir_root)
 
 # SF Connected App and GitHub configuration:
-CONNECTED_APP_CLIENT_SECRET = env("CONNECTED_APP_CLIENT_SECRET")
-CONNECTED_APP_CALLBACK_URL = env("CONNECTED_APP_CALLBACK_URL")
-CONNECTED_APP_CLIENT_ID = env("CONNECTED_APP_CLIENT_ID")
+SFDX_CLIENT_SECRET = env(
+    "SFDX_CLIENT_SECRET", default=env("CONNECTED_APP_CLIENT_SECRET", default=None)
+)
+SFDX_CLIENT_CALLBACK_URL = env(
+    "SFDX_CLIENT_CALLBACK_URL", default=env("CONNECTED_APP_CALLBACK_URL", default=None)
+)
+SFDX_CLIENT_ID = env(
+    "SFDX_CLIENT_ID", default=env("CONNECTED_APP_CLIENT_ID", default=None)
+)
 SFDX_SIGNUP_INSTANCE = env("SFDX_SIGNUP_INSTANCE", default=None)
 # Ugly hack to fix https://github.com/moby/moby/issues/12997
-CONNECTED_APP_CLIENT_KEY = env("CONNECTED_APP_CLIENT_KEY", default="").replace(
-    "\\n", "\n"
+DOCKER_SFDX_HUB_KEY = env("DOCKER_SFDX_HUB_KEY", default="").replace("\\n", "\n")
+SFDX_HUB_KEY = env(
+    "SFDX_HUB_KEY", default=env("CONNECTED_APP_CLIENT_KEY", default=DOCKER_SFDX_HUB_KEY)
 )
+
+if not SFDX_CLIENT_SECRET:
+    raise ImproperlyConfigured("Missing environment variable: SFDX_CLIENT_SECRET.")
+if not SFDX_CLIENT_CALLBACK_URL:
+    raise ImproperlyConfigured(
+        "Missing environment variable: SFDX_CLIENT_CALLBACK_URL."
+    )
+if not SFDX_CLIENT_ID:
+    raise ImproperlyConfigured("Missing environment variable: SFDX_CLIENT_ID.")
+
+# CCI expects these env vars to be set to refresh org oauth tokens
+environ["SFDX_CLIENT_ID"] = SFDX_CLIENT_ID
+environ["SFDX_HUB_KEY"] = SFDX_HUB_KEY
 
 GITHUB_TOKEN = env("GITHUB_TOKEN", default=None)
 GITHUB_APP_ID = env("GITHUB_APP_ID", default=None)
@@ -377,8 +397,8 @@ SOCIALACCOUNT_PROVIDERS = {
     "salesforce": {
         "SCOPE": ["web", "full", "refresh_token"],
         "APP": {
-            "client_id": CONNECTED_APP_CLIENT_ID,
-            "secret": CONNECTED_APP_CLIENT_SECRET,
+            "client_id": SFDX_CLIENT_ID,
+            "secret": SFDX_CLIENT_SECRET,
         },
     },
 }

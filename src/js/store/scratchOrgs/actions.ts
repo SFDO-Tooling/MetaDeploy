@@ -29,13 +29,13 @@ export type ScratchOrgSpinning = {
   type: 'SCRATCH_ORG_SPINNING';
   payload: ScratchOrg;
 };
-export type ScratchOrgCreated = {
-  type: 'SCRATCH_ORG_CREATED';
+export type ScratchOrgUpdated = {
+  type: 'SCRATCH_ORG_UPDATED';
   payload: ScratchOrg;
 };
 export type ScratchOrgFailed = {
   type: 'SCRATCH_ORG_FAILED';
-  payload: ScratchOrg;
+  payload: string;
 };
 export type ScratchOrgError = {
   type: 'SCRATCH_ORG_ERROR';
@@ -48,7 +48,7 @@ export type ScratchOrgsAction =
   | FetchScratchOrgFailed
   | ScratchOrgSpinRequested
   | ScratchOrgSpinning
-  | ScratchOrgCreated
+  | ScratchOrgUpdated
   | ScratchOrgFailed
   | ScratchOrgError;
 
@@ -115,7 +115,12 @@ export const spinScratchOrg = (
   }
 };
 
-export const createScratchOrg = (payload: ScratchOrg): ScratchOrgCreated => {
+export const updateScratchOrg = (payload: ScratchOrg): ScratchOrgUpdated => ({
+  type: 'SCRATCH_ORG_UPDATED' as const,
+  payload,
+});
+
+export const createScratchOrg = (payload: ScratchOrg): ScratchOrgUpdated => {
   if (window.socket && payload.org_id) {
     window.socket.subscribe({
       model: 'org',
@@ -123,22 +128,25 @@ export const createScratchOrg = (payload: ScratchOrg): ScratchOrgCreated => {
     });
   }
   return {
-    type: 'SCRATCH_ORG_CREATED' as const,
+    type: 'SCRATCH_ORG_UPDATED' as const,
     payload,
   };
 };
 
 export const failScratchOrg = ({
   message,
-  org,
+  plan,
 }: {
-  message: string;
-  org: ScratchOrg;
+  message?: string;
+  org: string;
+  plan: string;
 }): ThunkResult<ScratchOrgFailed> => (dispatch) => {
-  dispatch(addError(message));
+  if (message) {
+    dispatch(addError(message));
+  }
   return dispatch({
     type: 'SCRATCH_ORG_FAILED' as const,
-    payload: org,
+    payload: plan,
   });
 };
 

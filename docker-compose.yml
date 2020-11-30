@@ -45,6 +45,7 @@ services:
       DJANGO_SETTINGS_MODULE: config.settings.local
       DATABASE_URL: postgres://postgres:sample_db_password@postgres:5432/metadeploy
       REDIS_URL: redis://redis:6379
+      REDIS_HOST: redis
     volumes:
       - .:/app:cached
       - /app/node_modules

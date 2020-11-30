@@ -5,7 +5,7 @@ from typing import Union
 
 from asgiref.sync import async_to_sync
 from colorfield.fields import ColorField
-from cumulusci.core.config import FlowConfig, OrgConfig
+from cumulusci.core.config import FlowConfig
 from cumulusci.core.flowrunner import (
     FlowCoordinator,
     PreflightFlowCoordinator,
@@ -13,7 +13,6 @@ from cumulusci.core.flowrunner import (
 )
 from cumulusci.core.tasks import BaseTask
 from cumulusci.core.utils import import_class
-from cumulusci.oauth.salesforce import jwt_session
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
@@ -37,7 +36,7 @@ from .belvedere_utils import convert_to_18
 from .constants import ERROR, HIDE, OPTIONAL, ORGANIZATION_DETAILS
 from .flows import JobFlowCallback, PreflightFlowCallback
 from .push import (
-    notify_org_finished,
+    notify_org_changed,
     notify_org_result_changed,
     notify_post_job,
     notify_post_task,
@@ -46,6 +45,7 @@ from .push import (
     preflight_failed,
     preflight_invalidated,
 )
+from .salesforce import refresh_access_token
 
 logger = logging.getLogger(__name__)
 VERSION_STRING = r"^[a-zA-Z0-9._+-]+$"
@@ -947,9 +947,13 @@ class ScratchOrgQuerySet(models.QuerySet):
         """
         uuid = session.get("scratch_org_id")
         try:
-            return self.get(uuid=uuid, status=self.model.Status.complete)
+            return self.get(uuid=uuid)
         except (ValidationError, ScratchOrg.DoesNotExist):
             return None
+
+    def delete(self):
+        for scratch_org in self:
+            scratch_org.delete()
 
 
 class ScratchOrg(HashIdMixin, models.Model):
@@ -973,7 +977,7 @@ class ScratchOrg(HashIdMixin, models.Model):
     objects = ScratchOrgQuerySet.as_manager()
 
     def clean_config(self):
-        banned_keys = {"email"}
+        banned_keys = {"email", "access_token", "refresh_token"}
         if self.config:
             self.config = {
                 k: v for (k, v) in self.config.items() if k not in banned_keys
@@ -1000,10 +1004,35 @@ class ScratchOrg(HashIdMixin, models.Model):
         scratch_org_id = session.get("scratch_org_id", None)
         return scratch_org_id and scratch_org_id == str(self.uuid)
 
+    def queue_delete(self, should_delete_locally=True):
+        from .jobs import delete_scratch_org_job
+
+        delete_scratch_org_job.delay(self, should_delete_locally=should_delete_locally)
+
+    def delete(
+        self, *args, error=None, should_delete_on_sf=True, should_notify=True, **kwargs
+    ):
+        if should_notify:
+            async_to_sync(notify_org_changed)(
+                self, error=error, _type="SCRATCH_ORG_DELETED"
+            )
+        if should_delete_on_sf and self.org_id:
+            self.queue_delete()
+        else:
+            super().delete(*args, **kwargs)
+
     def fail(self, error):
+        # This is not really necessary, since we're going to delete the org soon...
         self.status = ScratchOrg.Status.failed
         self.save()
-        async_to_sync(notify_org_finished)(self, error=error)
+        async_to_sync(notify_org_changed)(self, error=error)
+        self.delete(should_notify=False)
+
+    def fail_job(self):
+        self.status = ScratchOrg.Status.failed
+        self.save()
+        async_to_sync(notify_org_changed)(self)
+        self.queue_delete(should_delete_locally=False)
 
     def complete(self, org_config):
         self.status = ScratchOrg.Status.complete
@@ -1011,19 +1040,15 @@ class ScratchOrg(HashIdMixin, models.Model):
         self.org_id = convert_to_18(org_config.org_id)
         self.expires_at = org_config.expires
         self.save()
-        async_to_sync(notify_org_finished)(self)
+        async_to_sync(notify_org_changed)(self, _type="SCRATCH_ORG_CREATED")
 
-    def get_refreshed_org_config(self):
-        org_config = OrgConfig(self.config, self.plan.org_config_name)
-        info = jwt_session(
-            settings.CONNECTED_APP_CLIENT_ID,
-            settings.CONNECTED_APP_CLIENT_KEY,
-            org_config.username,
-            org_config.instance_url,
+    def get_refreshed_org_config(self, org_name=None, keychain=None):
+        org_config = refresh_access_token(
+            scratch_org=self,
+            config=self.config,
+            org_name=org_name or self.plan.org_config_name,
+            keychain=keychain,
         )
-        org_config.config.update(info)
-        org_config._load_userinfo()
-        org_config._load_orginfo()
         return org_config
 
     def get_login_url(self):

@@ -8,7 +8,7 @@ from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
-from ..models import SUPPORTED_ORG_TYPES, Job, SiteProfile, Step, Version
+from ..models import SUPPORTED_ORG_TYPES, Job, ScratchOrg, SiteProfile, Step, Version
 
 
 @pytest.mark.django_db
@@ -583,17 +583,15 @@ class TestJob:
 class TestScratchOrg:
     def test_get_login_url(self, scratch_org_factory):
         with ExitStack() as stack:
-            jwt_session = stack.enter_context(
-                mock.patch("metadeploy.api.models.jwt_session")
+            refresh_access_token = stack.enter_context(
+                mock.patch("metadeploy.api.models.refresh_access_token")
             )
-            OrgConfig = stack.enter_context(
-                mock.patch("metadeploy.api.models.OrgConfig")
+            refresh_access_token.return_value = mock.MagicMock(
+                start_url="https://example.com"
             )
-            OrgConfig.return_value = mock.MagicMock(start_url="https://example.com")
 
             scratch_org = scratch_org_factory()
             assert scratch_org.get_login_url() == "https://example.com"
-            assert jwt_session.called
 
     def test_clean_config(self, scratch_org_factory):
         scratch_org = scratch_org_factory()
@@ -602,6 +600,26 @@ class TestScratchOrg:
 
         scratch_org.refresh_from_db()
         assert scratch_org.config == {"anything else": "good"}
+
+    def test_delete(self, scratch_org_factory):
+        with ExitStack() as stack:
+            scratch_org = scratch_org_factory(org_id="00Dxxxxxxxxxxxxxxx")
+            notify_org_changed = stack.enter_context(
+                mock.patch("metadeploy.api.models.async_to_sync")
+            )
+            scratch_org.delete()
+
+            assert notify_org_changed.called
+
+    def test_delete_queryset(self, scratch_org_factory):
+        with ExitStack() as stack:
+            scratch_org_factory(org_id="00Dxxxxxxxxxxxxxxx")
+            notify_org_changed = stack.enter_context(
+                mock.patch("metadeploy.api.models.async_to_sync")
+            )
+            ScratchOrg.objects.all().delete()
+
+            assert notify_org_changed.called
 
 
 @pytest.mark.django_db
