@@ -9,3 +9,5 @@ declare module '*.png' {
   const pngVal: string;
   export default pngVal;
 }
+
+type PositionError = GeolocationPositionError;
