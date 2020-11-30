@@ -25,7 +25,6 @@ SF_CLIENT_KEY = settings.SFDX_HUB_KEY
 SF_CLIENT_ID = settings.SFDX_CLIENT_ID
 SF_CLIENT_SECRET = settings.SFDX_CLIENT_SECRET
 SFDX_SIGNUP_INSTANCE = settings.SFDX_SIGNUP_INSTANCE
-DEVHUB_USERNAME = settings.DEVHUB_USERNAME
 
 
 def _handle_sf_error(err, scratch_org=None):
@@ -62,12 +61,12 @@ def _get_devhub_api(scratch_org=None):
 
     Get an access token (session) using the global dev hub username.
     """
-    if not DEVHUB_USERNAME:
+    if not settings.DEVHUB_USERNAME:
         raise ImproperlyConfigured(
             "You must set the DEVHUB_USERNAME to connect to a Salesforce organization."
         )
     try:
-        jwt = jwt_session(SF_CLIENT_ID, SF_CLIENT_KEY, DEVHUB_USERNAME)
+        jwt = jwt_session(SF_CLIENT_ID, SF_CLIENT_KEY, settings.DEVHUB_USERNAME)
         return SimpleSalesforce(
             instance_url=jwt["instance_url"],
             session_id=jwt["access_token"],

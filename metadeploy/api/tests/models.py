@@ -583,17 +583,15 @@ class TestJob:
 class TestScratchOrg:
     def test_get_login_url(self, scratch_org_factory):
         with ExitStack() as stack:
-            jwt_session = stack.enter_context(
-                mock.patch("metadeploy.api.models.jwt_session")
+            _refresh_access_token = stack.enter_context(
+                mock.patch("metadeploy.api.models._refresh_access_token")
             )
-            OrgConfig = stack.enter_context(
-                mock.patch("metadeploy.api.models.OrgConfig")
+            _refresh_access_token.return_value = mock.MagicMock(
+                start_url="https://example.com"
             )
-            OrgConfig.return_value = mock.MagicMock(start_url="https://example.com")
 
             scratch_org = scratch_org_factory()
             assert scratch_org.get_login_url() == "https://example.com"
-            assert jwt_session.called
 
     def test_clean_config(self, scratch_org_factory):
         scratch_org = scratch_org_factory()

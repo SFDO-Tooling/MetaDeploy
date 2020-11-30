@@ -263,6 +263,14 @@ class TestCreateScratchOrg:
                 "access_token": "abc123",
                 "refresh_token": "abc123",
             }
+            OrgConfig = stack.enter_context(
+                patch("metadeploy.api.salesforce.OrgConfig")
+            )
+            OrgConfig.return_value = MagicMock(
+                instance_url="https://sample.salesforce.org/",
+                access_token="abc123",
+                refresh_token="abc123",
+            )
             open = stack.enter_context(patch("metadeploy.api.salesforce.open"))
             fake_json = json.dumps({"edition": ""})
             open.return_value = MagicMock(
@@ -303,8 +311,17 @@ class TestCreateScratchOrg:
             BaseCumulusCI = stack.enter_context(
                 patch("metadeploy.api.salesforce.BaseCumulusCI")
             )
+            MetaDeployCCI = stack.enter_context(
+                patch("metadeploy.api.jobs.MetaDeployCCI")
+            )
             org_config = MockDict()
             org_config.config_file = "/"
+            MetaDeployCCI.return_value = MagicMock(
+                **{
+                    "project_config.repo_root": "/",
+                    "keychain.get_org.return_value": org_config,
+                }
+            )
             BaseCumulusCI.return_value = MagicMock(
                 **{
                     "project_config.repo_root": "/",
@@ -342,6 +359,14 @@ class TestCreateScratchOrg:
                 "access_token": "abc123",
                 "refresh_token": "abc123",
             }
+            OrgConfig = stack.enter_context(
+                patch("metadeploy.api.salesforce.OrgConfig")
+            )
+            OrgConfig.return_value = MagicMock(
+                instance_url="https://sample.salesforce.org/",
+                access_token="abc123",
+                refresh_token="abc123",
+            )
             open = stack.enter_context(patch("metadeploy.api.salesforce.open"))
             fake_json = json.dumps({"edition": ""})
             open.return_value = MagicMock(
@@ -424,6 +449,14 @@ class TestCreateScratchOrg:
                 "access_token": "abc123",
                 "refresh_token": "abc123",
             }
+            OrgConfig = stack.enter_context(
+                patch("metadeploy.api.salesforce.OrgConfig")
+            )
+            OrgConfig.return_value = MagicMock(
+                instance_url="https://sample.salesforce.org/",
+                access_token="abc123",
+                refresh_token="abc123",
+            )
             open = stack.enter_context(patch("metadeploy.api.salesforce.open"))
             fake_json = json.dumps({"edition": ""})
             open.return_value = MagicMock(

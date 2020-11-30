@@ -5,7 +5,7 @@ from channels.layers import get_channel_layer
 
 from ..push import (
     job_started,
-    notify_org_finished,
+    notify_org_changed,
     notify_org_result_changed,
     report_error,
 )
@@ -42,37 +42,37 @@ async def test_notify_org_result_changed(
 
 @pytest.mark.django_db
 @pytest.mark.asyncio
-async def test_notify_org_finished(mocker, scratch_org_factory):
+async def test_notify_org_changed(mocker, scratch_org_factory):
     soj = scratch_org_factory()
     gcl = mocker.patch("metadeploy.api.push.get_channel_layer", wraps=get_channel_layer)
-    await notify_org_finished(soj, "error!")
+    await notify_org_changed(soj, "error!")
     gcl.assert_called()
 
 
 @pytest.mark.django_db
 @pytest.mark.asyncio
-async def test_notify_org_finished__attribute_error(mocker, scratch_org_factory):
+async def test_notify_org_changed__attribute_error(mocker, scratch_org_factory):
     soj = scratch_org_factory()
     gcl = mocker.patch("metadeploy.api.push.get_channel_layer", wraps=get_channel_layer)
-    await notify_org_finished(soj, error="fake error")
+    await notify_org_changed(soj, error="fake error")
     gcl.assert_called()
 
 
 @pytest.mark.django_db
 @pytest.mark.asyncio
-async def test_notify_org_finished__list(mocker, scratch_org_factory):
+async def test_notify_org_changed__list(mocker, scratch_org_factory):
     soj = scratch_org_factory()
     gcl = mocker.patch("metadeploy.api.push.get_channel_layer", wraps=get_channel_layer)
-    await notify_org_finished(soj, error=MagicMock(content=["fake error"]))
+    await notify_org_changed(soj, error=MagicMock(content=["fake error"]))
     gcl.assert_called()
 
 
 @pytest.mark.django_db
 @pytest.mark.asyncio
-async def test_notify_org_finished__dict(mocker, scratch_org_factory):
+async def test_notify_org_changed__dict(mocker, scratch_org_factory):
     soj = scratch_org_factory()
     gcl = mocker.patch("metadeploy.api.push.get_channel_layer", wraps=get_channel_layer)
-    await notify_org_finished(soj, error=MagicMock(content={"message": "fake error"}))
+    await notify_org_changed(soj, error=MagicMock(content={"message": "fake error"}))
     gcl.assert_called()
 
 

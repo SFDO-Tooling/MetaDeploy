@@ -8,7 +8,7 @@ from django.utils import timezone
 from ..api.models import Job, PreflightResult, ScratchOrg
 from ..api.push import (
     job_started,
-    notify_org_finished,
+    notify_org_changed,
     notify_org_result_changed,
     notify_post_job,
     preflight_completed,
@@ -70,9 +70,9 @@ async def test_push_notification_consumer__subscribe_scratch_org(scratch_org_fac
     response = await communicator.receive_json_from()
     assert "ok" in response
 
-    await notify_org_finished(scratch_org)
+    await notify_org_changed(scratch_org)
     response = await communicator.receive_json_from()
-    assert response["type"] == "SCRATCH_ORG_CREATED"
+    assert response["type"] == "SCRATCH_ORG_UPDATED"
 
     await communicator.disconnect()
 

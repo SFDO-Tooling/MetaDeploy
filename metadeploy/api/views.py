@@ -5,7 +5,6 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core import exceptions
 from django.core.cache import cache
-from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -264,11 +263,10 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
 
     def scratch_org_get(self, request):
         plan = get_object_or_404(Plan.objects, id=self.kwargs["pk"])
-        try:
-            scratch_org = ScratchOrg.objects.filter(plan=plan).get_from_session(
-                request.session
-            )
-        except (ValidationError, ScratchOrg.DoesNotExist):
+        scratch_org = ScratchOrg.objects.filter(plan=plan).get_from_session(
+            request.session
+        )
+        if not scratch_org:
             return Response("", status=status.HTTP_404_NOT_FOUND)
         serializer = ScratchOrgSerializer(instance=scratch_org)
         return Response(serializer.data)
