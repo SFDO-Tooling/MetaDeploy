@@ -6,7 +6,12 @@ from django.core.exceptions import ImproperlyConfigured
 from django.test import override_settings
 from requests.exceptions import HTTPError
 
-from ..salesforce import _get_devhub_api, delete_scratch_org, refresh_access_token
+from ..salesforce import (
+    ScratchOrgError,
+    _get_devhub_api,
+    delete_scratch_org,
+    refresh_access_token,
+)
 
 
 class TestGetDevhubApi:
@@ -26,7 +31,7 @@ class TestGetDevhubApi:
             )
 
             scratch_org = MagicMock()
-            with pytest.raises(HTTPError, match=".*org still exists*"):
+            with pytest.raises(ScratchOrgError, match=".*org still exists*"):
                 _get_devhub_api(scratch_org=scratch_org)
 
             assert scratch_org.delete.called
@@ -61,7 +66,7 @@ class TestRefreshAccessToken:
             )
 
             scratch_org = MagicMock()
-            with pytest.raises(HTTPError, match=".*job ID.*"):
+            with pytest.raises(ScratchOrgError, match=".*job ID.*"):
                 refresh_access_token(
                     scratch_org=scratch_org,
                     config=MagicMock(),

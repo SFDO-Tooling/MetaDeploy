@@ -27,6 +27,10 @@ SF_CLIENT_SECRET = settings.SFDX_CLIENT_SECRET
 SFDX_SIGNUP_INSTANCE = settings.SFDX_SIGNUP_INSTANCE
 
 
+class ScratchOrgError(Exception):
+    pass
+
+
 def _handle_sf_error(err, scratch_org=None):
     if get_current_job():
         job_id = get_current_job().id
@@ -47,13 +51,10 @@ def _handle_sf_error(err, scratch_org=None):
     else:
         error_msg = _(f"Are you certain that the org still exists? {err.args[0]}")
 
-    err = err.__class__(
-        error_msg,
-        *err.args[1:],
-    )
+    error = ScratchOrgError(error_msg)
     if scratch_org:
-        scratch_org.delete(error=err, should_delete_on_sf=False)
-    raise err
+        scratch_org.delete(error=error, should_delete_on_sf=False)
+    raise error
 
 
 def _get_devhub_api(scratch_org=None):
