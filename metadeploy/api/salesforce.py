@@ -94,7 +94,7 @@ def _get_org_details(*, cci, org_name, project_path):
     return (scratch_org_config, scratch_org_definition)
 
 
-def _refresh_access_token(*, scratch_org, config, org_name, keychain=None):
+def refresh_access_token(*, scratch_org, config, org_name, keychain=None):
     """Refresh the JWT.
 
     Construct a new OrgConfig because ScratchOrgConfig tries to use sfdx
@@ -115,7 +115,7 @@ def _deploy_org_settings(*, cci, org_name, scratch_org_config, scratch_org):
     Do a Metadata API deployment to configure org settings as specified
     in the scratch org definition file.
     """
-    org_config = _refresh_access_token(
+    org_config = refresh_access_token(
         scratch_org=scratch_org,
         config=scratch_org_config.config,
         org_name=org_name,

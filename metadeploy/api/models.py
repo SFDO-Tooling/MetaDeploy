@@ -45,7 +45,7 @@ from .push import (
     preflight_failed,
     preflight_invalidated,
 )
-from .salesforce import _refresh_access_token
+from .salesforce import refresh_access_token
 
 logger = logging.getLogger(__name__)
 VERSION_STRING = r"^[a-zA-Z0-9._+-]+$"
@@ -1043,7 +1043,7 @@ class ScratchOrg(HashIdMixin, models.Model):
         async_to_sync(notify_org_changed)(self, _type="SCRATCH_ORG_CREATED")
 
     def get_refreshed_org_config(self, org_name=None, keychain=None):
-        org_config = _refresh_access_token(
+        org_config = refresh_access_token(
             scratch_org=self,
             config=self.config,
             org_name=org_name or self.plan.org_config_name,

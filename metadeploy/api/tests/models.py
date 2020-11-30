@@ -8,7 +8,7 @@ from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
-from ..models import SUPPORTED_ORG_TYPES, Job, SiteProfile, Step, Version
+from ..models import SUPPORTED_ORG_TYPES, Job, ScratchOrg, SiteProfile, Step, Version
 
 
 @pytest.mark.django_db
@@ -583,10 +583,10 @@ class TestJob:
 class TestScratchOrg:
     def test_get_login_url(self, scratch_org_factory):
         with ExitStack() as stack:
-            _refresh_access_token = stack.enter_context(
-                mock.patch("metadeploy.api.models._refresh_access_token")
+            refresh_access_token = stack.enter_context(
+                mock.patch("metadeploy.api.models.refresh_access_token")
             )
-            _refresh_access_token.return_value = mock.MagicMock(
+            refresh_access_token.return_value = mock.MagicMock(
                 start_url="https://example.com"
             )
 
@@ -600,6 +600,26 @@ class TestScratchOrg:
 
         scratch_org.refresh_from_db()
         assert scratch_org.config == {"anything else": "good"}
+
+    def test_delete(self, scratch_org_factory):
+        with ExitStack() as stack:
+            scratch_org = scratch_org_factory(org_id="00Dxxxxxxxxxxxxxxx")
+            notify_org_changed = stack.enter_context(
+                mock.patch("metadeploy.api.models.async_to_sync")
+            )
+            scratch_org.delete()
+
+            assert notify_org_changed.called
+
+    def test_delete_queryset(self, scratch_org_factory):
+        with ExitStack() as stack:
+            scratch_org_factory(org_id="00Dxxxxxxxxxxxxxxx")
+            notify_org_changed = stack.enter_context(
+                mock.patch("metadeploy.api.models.async_to_sync")
+            )
+            ScratchOrg.objects.all().delete()
+
+            assert notify_org_changed.called
 
 
 @pytest.mark.django_db

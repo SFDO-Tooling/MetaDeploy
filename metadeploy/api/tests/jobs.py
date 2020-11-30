@@ -16,6 +16,8 @@ from metadeploy.api.belvedere_utils import convert_to_18
 from ..flows import StopFlowException
 from ..jobs import (
     create_scratch_org,
+    delete_org_on_error,
+    delete_scratch_org,
     enqueuer,
     expire_preflights,
     finalize_result,
@@ -172,6 +174,17 @@ def test_expire_preflights(user_factory, plan_factory, preflight_result_factory)
 
 
 @pytest.mark.django_db
+def test_delete_org_on_error(scratch_org_factory):
+    scratch_org = scratch_org_factory(org_id="00Dxxxxxxxxxxxxxxx")
+    try:
+        with delete_org_on_error(scratch_org):
+            raise Exception()
+    except Exception:
+        pass
+    assert scratch_org.status == scratch_org.Status.failed
+
+
+@pytest.mark.django_db
 def test_finalize_result_worker_died(job_factory):
     """
     Why do we raise and then catch a StopRequested you might ask? Well, because it's
@@ -246,6 +259,18 @@ class MockDict(dict):
     @property
     def org_id(self):
         return "0123456789abcef"
+
+
+@pytest.mark.django_db
+class TestDeleteScratchOrg:
+    def test_delete_scratch_org(self, scratch_org_factory):
+        scratch_org = scratch_org_factory()
+        with patch(
+            "metadeploy.api.jobs.delete_scratch_org_on_sf"
+        ) as delete_scratch_org_on_sf:
+            delete_scratch_org(scratch_org)
+
+            assert delete_scratch_org_on_sf.called
 
 
 @pytest.mark.django_db(transaction=True)
