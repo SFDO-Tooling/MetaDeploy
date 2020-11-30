@@ -15,6 +15,7 @@ class TestGetDevhubApi:
         with pytest.raises(ImproperlyConfigured):
             _get_devhub_api()
 
+    @override_settings(DEVHUB_USERNAME="test@example.com")
     def test_bad(self):
         with ExitStack() as stack:
             jwt_session = stack.enter_context(
