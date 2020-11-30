@@ -1,6 +1,6 @@
+import logging
 from unittest.mock import MagicMock, sentinel
 
-import logging
 import pytest
 from django.core.cache import cache
 

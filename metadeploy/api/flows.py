@@ -101,7 +101,6 @@ class JobFlowCallback(BasicFlowCallback):
 
 
 class PreflightFlowCallback(BasicFlowCallback):
-
     def pre_flow(self, coordinator):
         # capture cumulusci logs into buffer
         self.logger = logging.getLogger("cumulusci")
