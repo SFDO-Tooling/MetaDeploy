@@ -106,15 +106,16 @@ class TestJobFlow:
         steps = [step_factory(plan=plan, step_num=str(i)) for i in range(3)]
 
         job = job_factory(user=user, plan=plan, steps=steps, org_id=user.org_id)
+        coordinator = MagicMock()
 
         callbacks = JobFlowCallback(job)
 
         step = MagicMock(step_num="0")
         step.result = MagicMock(exception=ValueError("Some error"))
 
-        callbacks.pre_flow(sentinel.flow_coordinator)
+        callbacks.pre_flow(coordinator)
         callbacks.post_task(step, step.result)
-        callbacks.post_flow(sentinel.flow_coordinator)
+        callbacks.post_flow(coordinator)
 
         assert job.results == {
             str(steps[0].id): {"status": "error", "message": "Some error"}
