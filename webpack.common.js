@@ -73,6 +73,7 @@ module.exports = {
           {
             loader: 'css-loader',
             options: {
+              url: (url) => !url.startsWith('/'),
               sourceMap: true,
               importLoaders: 2,
             },
