@@ -22,5 +22,5 @@ rules:
   '@typescript-eslint/no-explicit-any': 0
 
   # Import
-  simple-import-sort/sort: 1
+  simple-import-sort/imports: 1
   import/order: 0
