@@ -110,6 +110,11 @@
         "AWS_SECRET_ACCESS_KEY": "None",
         "AWS_BUCKET_NAME": "None"
       }
+    },
+    "review": {
+      "scripts": {
+        "postdeploy": "./manage.py populate_db"
+      }
     }
   }
 }
