@@ -2,6 +2,7 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
 import ShareModal from '@/components/jobs/shareModal';
+import routes from '@/utils/routes';
 
 import { render } from './../../utils';
 
@@ -12,6 +13,9 @@ describe('<ShareModal />', () => {
     user_can_edit: true,
     status: 'complete',
     results: {},
+    product_slug: 'my-product',
+    version_label: 'my-version',
+    plan_slug: 'my-plan',
   };
   const defaultPlan = {
     id: 'plan-1',
@@ -37,6 +41,7 @@ describe('<ShareModal />', () => {
       },
     ],
     requires_preflight: true,
+    supported_orgs: 'Persistent',
   };
 
   const setup = (options) => {
@@ -105,13 +110,18 @@ describe('<ShareModal />', () => {
     const { getByText, baseElement } = setup({
       job: { ...defaultJob, user_can_edit: false },
     });
-
+    const url = routes.job_detail(
+      'my-product',
+      'my-version',
+      'my-plan',
+      'job-1',
+    );
     const input = baseElement.querySelector('#share-job-link');
 
     expect(getByText('Share Link to Installation Job')).toBeVisible();
     expect(getByText('Copy Link')).toBeVisible();
     expect(input).toBeVisible();
-    expect(input.value).toEqual(window.location.href);
+    expect(input.value).toEqual(`${window.location.origin}${url}`);
   });
 
   describe('copy link', () => {

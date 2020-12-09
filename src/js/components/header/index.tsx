@@ -1,9 +1,9 @@
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
+import { find } from 'lodash';
 import * as React from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-import { RouteComponentProps } from 'react-router';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps } from 'react-router-dom';
 
 import Errors from '@/components/apiErrors';
 import Login from '@/components/header/login';
@@ -13,7 +13,7 @@ import OfflineAlert from '@/components/offlineAlert';
 import { AppState } from '@/store';
 import { clearErrors, removeError } from '@/store/errors/actions';
 import { selectErrors } from '@/store/errors/selectors';
-import { selectOrg } from '@/store/org/selectors';
+import { selectOrgs } from '@/store/org/selectors';
 import { selectSocketState } from '@/store/socket/selectors';
 import { logout } from '@/store/user/actions';
 import { selectUserState } from '@/store/user/selectors';
@@ -22,12 +22,13 @@ import routes from '@/utils/routes';
 type Props = {
   history?: RouteComponentProps['history'];
   jobId?: string | null;
+  hideLogin?: boolean;
 };
 
 const select = (appState: AppState) => ({
   user: selectUserState(appState),
   socket: selectSocketState(appState),
-  org: selectOrg(appState),
+  orgs: selectOrgs(appState),
   errors: selectErrors(appState),
 });
 
@@ -43,12 +44,14 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 
 class Header extends React.Component<Props & PropsFromRedux> {
   controls = () => {
-    const { user, doLogout } = this.props;
-    return (
-      <PageHeaderControl>
-        {user ? <Logout user={user} doLogout={doLogout} /> : <Login />}
-      </PageHeaderControl>
-    );
+    const { user, doLogout, hideLogin } = this.props;
+    let header: React.ReactNode = null;
+    if (user) {
+      header = <Logout user={user} doLogout={doLogout} />;
+    } else if (!hideLogin) {
+      header = <Login />;
+    }
+    return <PageHeaderControl>{header}</PageHeaderControl>;
   };
 
   componentWillUnmount() {
@@ -57,13 +60,16 @@ class Header extends React.Component<Props & PropsFromRedux> {
   }
 
   render() {
-    const { socket, org, errors, history, jobId, doRemoveError } = this.props;
+    const { socket, orgs, errors, history, jobId, doRemoveError } = this.props;
     const logoSrc = window.GLOBALS.SITE?.company_logo;
+    const currentJob = find(orgs, (org) => org.current_job !== null)
+      ?.current_job;
+
     return (
       <>
         {socket ? null : <OfflineAlert />}
-        {org?.current_job && jobId !== org.current_job.id ? (
-          <CurrentJobAlert currentJob={org.current_job} history={history} />
+        {currentJob && jobId !== currentJob.id ? (
+          <CurrentJobAlert currentJob={currentJob} history={history} />
         ) : null}
         <Errors errors={errors} doRemoveError={doRemoveError} />
         <PageHeader

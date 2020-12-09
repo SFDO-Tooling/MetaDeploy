@@ -1,5 +1,6 @@
 from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.sessions import SessionMiddlewareStack
 from django.urls import path
 
 from .consumers import PushNotificationConsumer
@@ -12,6 +13,6 @@ websockets = URLRouter(
 application = ProtocolTypeRouter(
     {
         # (http->django views is added by default)
-        "websocket": AuthMiddlewareStack(websockets)
+        "websocket": SessionMiddlewareStack(AuthMiddlewareStack(websockets)),
     }
 )

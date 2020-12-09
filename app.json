@@ -51,17 +51,18 @@
       "description": "Sentry DSN for error reporting (if not using Heroku Sentry buildpack).",
       "required": false
     },
-    "CONNECTED_APP_CLIENT_ID": {
+    "SFDX_CLIENT_ID": {
       "description": "The client id (consumer key) for the connected app used to auth with Salesforce."
     },
-    "CONNECTED_APP_CLIENT_SECRET": {
+    "SFDX_CLIENT_SECRET": {
       "description": "The client secret (consumer secret) for the connected app used to auth with Salesforce."
     },
-    "CONNECTED_APP_CALLBACK_URL": {
+    "SFDX_CLIENT_CALLBACK_URL": {
       "description": "The callback URL used for OAuth callbacks, must be in the form of fqdn, AllAuth adds what it needs. e.g. https://metadeploy-staging.herokuapp.com/"
     },
     "GITHUB_TOKEN": {
-      "description": "A valid github personal access token that has read access to all repositories."
+      "description": "A valid github personal access token that has read access to all repositories.",
+      "required": false
     },
     "DB_ENCRYPTION_KEY": {
       "description": "A key for encrypting using cryptography.fernet. Generate using cryptography.fernet.Fernet.generate_key"
@@ -87,8 +88,7 @@
   },
   "addons": [
     "heroku-postgresql",
-    "heroku-redis",
-    "bucketeer"
+    "heroku-redis"
   ],
   "buildpacks": [
     {
@@ -110,6 +110,11 @@
         "AWS_ACCESS_KEY_ID": "None",
         "AWS_SECRET_ACCESS_KEY": "None",
         "AWS_BUCKET_NAME": "None"
+      }
+    },
+    "review": {
+      "scripts": {
+        "postdeploy": "./manage.py populate_db"
       }
     }
   }

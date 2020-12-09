@@ -46,6 +46,7 @@ const defaultPlan = {
     },
   ],
   requires_preflight: true,
+  supported_orgs: 'Persistent',
 };
 const selectedSteps = new Set(['step-1', 'step-2', 'step-3']);
 
@@ -53,12 +54,12 @@ describe('<StepsTable />', () => {
   const handleStepsChange = jest.fn();
 
   const setup = (options) => {
-    const defaults = { plan: defaultPlan, user: null, selectedSteps };
+    const defaults = { plan: defaultPlan, canInstall: false, selectedSteps };
     const opts = { ...defaults, ...options };
     return render(
       <StepsTable
         plan={opts.plan}
-        user={opts.user}
+        canInstall={opts.canInstall}
         preflight={opts.preflight}
         steps={opts.plan.steps}
         selectedSteps={opts.selectedSteps}
@@ -468,22 +469,15 @@ describe('<StepsTable />', () => {
       });
     });
 
-    test('hidden if no user', () => {
+    test('hidden if canInstall: false', () => {
       const { container } = setup();
       const checkboxes = container.querySelectorAll('input[type="checkbox"]');
 
       expect(checkboxes).toHaveLength(0);
     });
 
-    test('hidden if no valid token', () => {
-      const { container } = setup({ user: {} });
-      const checkboxes = container.querySelectorAll('input[type="checkbox"]');
-
-      expect(checkboxes).toHaveLength(0);
-    });
-
     test('hidden if no ready preflight', () => {
-      const { container } = setup({ user: { valid_token_for: 'foo' } });
+      const { container } = setup({ canInstall: true });
       const checkboxes = container.querySelectorAll('input[type="checkbox"]');
 
       expect(checkboxes).toHaveLength(0);
@@ -491,7 +485,7 @@ describe('<StepsTable />', () => {
 
     test('no checkbox if required', () => {
       const { container } = setup({
-        user: { valid_token_for: 'foo' },
+        canInstall: true,
         preflight: { status: 'complete', is_valid: true, is_ready: true },
       });
 
@@ -502,7 +496,7 @@ describe('<StepsTable />', () => {
 
     test('no checkbox if skipped, checkbox if optional', () => {
       const { container, getByText } = setup({
-        user: { valid_token_for: 'foo' },
+        canInstall: true,
         preflight: {
           status: 'complete',
           is_valid: true,
@@ -527,7 +521,7 @@ describe('<StepsTable />', () => {
       test('calls handleStepsChange with step id and checked boolean', () => {
         const { container } = setup({
           preflight: { status: 'complete', is_valid: true, is_ready: true },
-          user: { valid_token_for: 'me' },
+          canInstall: true,
         });
 
         const checkbox = container.querySelector('#step-step-4');

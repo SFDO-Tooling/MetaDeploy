@@ -1,3 +1,4 @@
+from contextlib import ExitStack
 from datetime import timedelta
 from unittest import mock
 
@@ -7,7 +8,7 @@ from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
-from ..models import Job, SiteProfile, Step, Version
+from ..models import SUPPORTED_ORG_TYPES, Job, ScratchOrg, SiteProfile, Step, Version
 
 
 @pytest.mark.django_db
@@ -402,6 +403,28 @@ class TestPlan:
         plan = plan_factory(title="My Plan", version=version)
         assert str(plan) == "My Product, Version v0.1.0, Plan My Plan"
 
+    def test_is_visible_to(self, allowed_list_factory, plan_factory, user_factory):
+        allowed_list = allowed_list_factory(org_type=["Production"])
+        plan = plan_factory(
+            visible_to=allowed_list, supported_orgs=SUPPORTED_ORG_TYPES.Persistent
+        )
+        scratch_plan = plan_factory(
+            visible_to=allowed_list, supported_orgs=SUPPORTED_ORG_TYPES.Scratch
+        )
+        user = user_factory(
+            socialaccount_set__extra_data={
+                "instance_url": "https://example.com",
+                "organization_details": {
+                    "Name": "Sample Org",
+                    "OrganizationType": "Scratch",
+                    "IsSandbox": True,
+                    "TrialExpirationDate": 1,
+                },
+            }
+        )
+        assert not plan.is_visible_to(user)
+        assert scratch_plan.is_visible_to(user)
+
     def test_plan_post_install_markdown(self, plan_factory):
         msg = "This is a *sample* with some<script src='bad.js'></script> bad tags."
         plan = plan_factory(post_install_message_additional=msg)
@@ -439,6 +462,19 @@ class TestPlan:
             )
 
         assert plan.average_duration == timedelta(seconds=30)
+
+    def test_validation(self, allowed_list_factory, plan_factory):
+        allowed_list = allowed_list_factory()
+        valid_plan = plan_factory(
+            visible_to=allowed_list, supported_orgs=SUPPORTED_ORG_TYPES.Persistent
+        )
+        invalid_plan = plan_factory(
+            visible_to=allowed_list, supported_orgs=SUPPORTED_ORG_TYPES.Scratch
+        )
+
+        valid_plan.clean()
+        with pytest.raises(ValidationError):
+            invalid_plan.clean()
 
 
 @pytest.mark.django_db
@@ -541,6 +577,49 @@ class TestJob:
 
         preflight.refresh_from_db()
         assert not preflight.is_valid
+
+
+@pytest.mark.django_db
+class TestScratchOrg:
+    def test_get_login_url(self, scratch_org_factory):
+        with ExitStack() as stack:
+            refresh_access_token = stack.enter_context(
+                mock.patch("metadeploy.api.models.refresh_access_token")
+            )
+            refresh_access_token.return_value = mock.MagicMock(
+                start_url="https://example.com"
+            )
+
+            scratch_org = scratch_org_factory()
+            assert scratch_org.get_login_url() == "https://example.com"
+
+    def test_clean_config(self, scratch_org_factory):
+        scratch_org = scratch_org_factory()
+        scratch_org.config = {"email": "bad", "anything else": "good"}
+        scratch_org.save()
+
+        scratch_org.refresh_from_db()
+        assert scratch_org.config == {"anything else": "good"}
+
+    def test_delete(self, scratch_org_factory):
+        with ExitStack() as stack:
+            scratch_org = scratch_org_factory(org_id="00Dxxxxxxxxxxxxxxx")
+            notify_org_changed = stack.enter_context(
+                mock.patch("metadeploy.api.models.async_to_sync")
+            )
+            scratch_org.delete()
+
+            assert notify_org_changed.called
+
+    def test_delete_queryset(self, scratch_org_factory):
+        with ExitStack() as stack:
+            scratch_org_factory(org_id="00Dxxxxxxxxxxxxxxx")
+            notify_org_changed = stack.enter_context(
+                mock.patch("metadeploy.api.models.async_to_sync")
+            )
+            ScratchOrg.objects.all().delete()
+
+            assert notify_org_changed.called
 
 
 @pytest.mark.django_db

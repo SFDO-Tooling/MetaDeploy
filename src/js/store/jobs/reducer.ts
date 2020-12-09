@@ -6,6 +6,7 @@ export type Job = {
   id: string;
   edited_at: string;
   job_id: string;
+  org_id: string | null;
   creator: {
     username: string;
     is_staff: boolean;
@@ -17,6 +18,9 @@ export type Job = {
   org_name: string | null;
   org_type: string | null;
   is_production_org: boolean;
+  product_slug: string;
+  version_label: string;
+  plan_slug: string;
   instance_url: string | null;
   error_count: number;
   warning_count: number;

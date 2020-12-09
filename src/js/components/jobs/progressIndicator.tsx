@@ -4,9 +4,18 @@ import * as React from 'react';
 import { getSteps } from '@/components/plans/progressIndicator';
 import { Job } from '@/store/jobs/reducer';
 import { CONSTANTS } from '@/store/plans/reducer';
+import { SupportedOrgs } from '@/utils/constants';
 
-const ProgressIndicator = ({ job }: { job: Job }) => {
-  const steps = getSteps();
+const ProgressIndicator = ({
+  job,
+  supportedOrgs,
+  preflightRequired,
+}: {
+  job: Job;
+  supportedOrgs: SupportedOrgs;
+  preflightRequired: boolean;
+}) => {
+  const steps = getSteps(supportedOrgs, preflightRequired);
   const completedSteps =
     job.status === CONSTANTS.STATUS.COMPLETE
       ? steps.slice()

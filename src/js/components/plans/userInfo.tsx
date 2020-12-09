@@ -1,12 +1,17 @@
 import Card from '@salesforce/design-system-react/components/card';
 import Icon from '@salesforce/design-system-react/components/icon';
+import { format, parseISO } from 'date-fns';
 import i18n from 'i18next';
 import * as React from 'react';
 import { Trans } from 'react-i18next';
 
 import noConnectionSvg from '!svg-inline-loader!images/no-connection.svg';
 import Login from '@/components/header/login';
+import ScratchOrgInfo from '@/components/scratchOrgs/scratchOrgInfo';
+import { Plan } from '@/store/plans/reducer';
+import { ScratchOrg } from '@/store/scratchOrgs/reducer';
 import { User } from '@/store/user/reducer';
+import { SUPPORTED_ORGS } from '@/utils/constants';
 
 const LoggedOut = () => (
   <div className="slds-illustration slds-illustration_small">
@@ -32,18 +37,35 @@ const Footer = () => (
   </Trans>
 );
 
-const UserInfo = ({ user }: { user: User }) => {
+const UserInfo = ({
+  user,
+  plan,
+  scratchOrg,
+}: {
+  user: User;
+  plan: Plan;
+  scratchOrg?: ScratchOrg | null;
+}) => {
   const hasValidToken = Boolean(user?.valid_token_for);
   const username = user?.username;
   const org_name = user?.org_name;
   const org_type = user?.org_type;
   const token_minutes = window.GLOBALS.TOKEN_LIFETIME_MINUTES || 10;
-  return (
-    <div
-      className="slds-p-around_medium
-        slds-size_1-of-1
-        slds-medium-size_1-of-2"
-    >
+  const canUsePersistentOrg = plan.supported_orgs !== SUPPORTED_ORGS.Scratch;
+  const canUseScratchOrg = Boolean(
+    !user &&
+      window.GLOBALS.SCRATCH_ORGS_AVAILABLE &&
+      plan.supported_orgs !== SUPPORTED_ORGS.Persistent,
+  );
+
+  let contents = null;
+  if (canUseScratchOrg) {
+    const date = scratchOrg?.expires_at
+      ? format(parseISO(scratchOrg.expires_at), 'PP')
+      : null;
+    contents = <ScratchOrgInfo date={date} days={plan.scratch_org_duration} />;
+  } else if (canUsePersistentOrg) {
+    contents = (
       <Card
         bodyClassName="slds-card__body_inner"
         heading={i18n.t('Connected to Salesforce')}
@@ -77,8 +99,18 @@ const UserInfo = ({ user }: { user: User }) => {
           </Trans>
         </p>
       </Card>
+    );
+  }
+
+  return contents ? (
+    <div
+      className="slds-p-around_medium
+        slds-size_1-of-1
+        slds-medium-size_1-of-2"
+    >
+      {contents}
     </div>
-  );
+  ) : null;
 };
 
 export default UserInfo;

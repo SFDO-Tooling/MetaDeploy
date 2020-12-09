@@ -14,8 +14,15 @@ Websocket notifications you can subscribe to:
         JOB_COMPLETED
         JOB_FAILED
         JOB_CANCELED
-    org.:org_url
+    org.:org_id
         ORG_CHANGED
+    scratchorg.:id
+        SCRATCH_ORG_CREATED
+        SCRATCH_ORG_ERROR
+        SCRATCH_ORG_UPDATED
+        SCRATCH_ORG_DELETED
+        PREFLIGHT_STARTED
+        JOB_STARTED
 """
 import logging
 
@@ -41,18 +48,21 @@ async def push_message(group_name, message):
         await channel_layer.group_send(group_name, message)
 
 
-async def push_message_about_instance(instance, message):
+# Events sent via this method are serialized manually,
+# and therefore may not have access to user/session context in the serializer
+async def push_message_about_instance(instance, message, group_name=None):
     model_name = instance._meta.model_name
     id = str(instance.id)
-    group_name = CHANNELS_GROUP_NAME.format(model=model_name, id=id)
+    group_name = group_name or CHANNELS_GROUP_NAME.format(model=model_name, id=id)
     sent_message = {"type": "notify", "group": group_name, "content": message}
     await push_message(group_name, sent_message)
 
 
-async def push_serializable(instance, serializer, type_):
+# Objects serialized via this method will have access to user/session context
+async def push_serializable(instance, serializer, type_, group_name=None):
     model_name = instance._meta.model_name
     id = str(instance.id)
-    group_name = CHANNELS_GROUP_NAME.format(model=model_name, id=id)
+    group_name = group_name or CHANNELS_GROUP_NAME.format(model=model_name, id=id)
     serializer_name = f"{serializer.__module__}.{serializer.__name__}"
     message = {
         "type": "notify",
@@ -72,33 +82,41 @@ async def user_token_expired(user):
 async def preflight_completed(preflight):
     from .serializers import PreflightResultSerializer
 
-    payload = PreflightResultSerializer(instance=preflight).data
-    message = {"type": "PREFLIGHT_COMPLETED", "payload": payload}
-    await push_message_about_instance(preflight, message)
+    await push_serializable(
+        preflight,
+        PreflightResultSerializer,
+        "PREFLIGHT_COMPLETED",
+    )
 
 
 async def preflight_failed(preflight):
     from .serializers import PreflightResultSerializer
 
-    payload = PreflightResultSerializer(instance=preflight).data
-    message = {"type": "PREFLIGHT_FAILED", "payload": payload}
-    await push_message_about_instance(preflight, message)
+    await push_serializable(
+        preflight,
+        PreflightResultSerializer,
+        "PREFLIGHT_FAILED",
+    )
 
 
 async def preflight_canceled(preflight):
     from .serializers import PreflightResultSerializer
 
-    payload = PreflightResultSerializer(instance=preflight).data
-    message = {"type": "PREFLIGHT_CANCELED", "payload": payload}
-    await push_message_about_instance(preflight, message)
+    await push_serializable(
+        preflight,
+        PreflightResultSerializer,
+        "PREFLIGHT_CANCELED",
+    )
 
 
 async def preflight_invalidated(preflight):
     from .serializers import PreflightResultSerializer
 
-    payload = PreflightResultSerializer(instance=preflight).data
-    message = {"type": "PREFLIGHT_INVALIDATED", "payload": payload}
-    await push_message_about_instance(preflight, message)
+    await push_serializable(
+        preflight,
+        PreflightResultSerializer,
+        "PREFLIGHT_INVALIDATED",
+    )
 
 
 async def report_error(user):
@@ -142,7 +160,11 @@ async def notify_org_result_changed(result):
         org_id=org_id, status=PreflightResult.Status.started
     ).first()
     serializer = OrgSerializer(
-        {"current_job": current_job, "current_preflight": current_preflight}
+        {
+            "org_id": org_id,
+            "current_job": current_job,
+            "current_preflight": current_preflight,
+        }
     )
     group_name = CHANNELS_GROUP_NAME.format(
         model="org", id=convert_org_id_to_key(org_id)
@@ -153,3 +175,63 @@ async def notify_org_result_changed(result):
         "content": {"type": type_, "payload": serializer.data},
     }
     await push_message(group_name, message)
+
+
+async def notify_org(scratch_org, type_, payload=None, error=None):
+    if not payload:
+        payload = {
+            "org": str(scratch_org.id),
+            "plan": str(scratch_org.plan.id),
+        }
+        if error:
+            # unwrap the error in the case that there's only one,
+            # which is the most common case:
+            try:
+                prepared_message = error.content
+                if isinstance(prepared_message, list) and len(prepared_message) == 1:
+                    prepared_message = prepared_message[0]
+                if isinstance(prepared_message, dict):
+                    prepared_message = prepared_message.get("message", prepared_message)
+                prepared_message = str(prepared_message)
+            except AttributeError:
+                prepared_message = str(error)
+            payload["message"] = prepared_message
+
+    message = {
+        "type": type_,
+        "payload": payload,
+    }
+    group_name = CHANNELS_GROUP_NAME.format(model="scratchorg", id=scratch_org.id)
+    sent_message = {"type": "notify", "group": group_name, "content": message}
+    await push_message(group_name, sent_message)
+
+
+async def notify_org_changed(scratch_org, error=None, _type=None):
+    from .serializers import ScratchOrgSerializer
+
+    if error:
+        await notify_org(scratch_org, _type or "SCRATCH_ORG_ERROR", error=error)
+    else:
+        payload = ScratchOrgSerializer(scratch_org).data
+        await notify_org(scratch_org, _type or "SCRATCH_ORG_UPDATED", payload=payload)
+
+
+async def preflight_started(scratch_org, preflight):
+    from .serializers import PreflightResultSerializer
+
+    group_name = CHANNELS_GROUP_NAME.format(model="scratchorg", id=scratch_org.id)
+    await push_serializable(
+        preflight, PreflightResultSerializer, "PREFLIGHT_STARTED", group_name=group_name
+    )
+
+
+async def job_started(scratch_org, job):
+    from .serializers import JobSerializer
+
+    group_name = CHANNELS_GROUP_NAME.format(model="scratchorg", id=scratch_org.id)
+    await push_serializable(
+        job,
+        JobSerializer,
+        "JOB_STARTED",
+        group_name=group_name,
+    )

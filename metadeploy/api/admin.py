@@ -6,6 +6,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.forms.widgets import CheckboxSelectMultiple
 from django.shortcuts import redirect
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 from parler.admin import TranslatableAdmin
 from parler.utils.views import TabsList
 
@@ -22,6 +23,7 @@ from .models import (
     Product,
     ProductCategory,
     ProductSlug,
+    ScratchOrg,
     SiteProfile,
     Step,
     Translation,
@@ -104,7 +106,7 @@ class AllowedListOrgAdmin(admin.ModelAdmin):
 
 @admin.register(Job)
 class JobAdmin(AdminHelpTextMixin, admin.ModelAdmin, PlanMixin):
-    help_text = (
+    help_text = _(
         "GDPR reminder: Any information in the log or exception which came from the org "
         "must be used for support/debugging purposes only, and not exported from this system."
     )
@@ -125,6 +127,31 @@ class JobAdmin(AdminHelpTextMixin, admin.ModelAdmin, PlanMixin):
     search_fields = ("org_id", "exception")
 
 
+@admin.register(ScratchOrg)
+class ScratchOrgAdmin(admin.ModelAdmin, PlanMixin):
+    autocomplete_fields = ("plan",)
+    list_filter = ("status", "plan__version__product")
+    list_display = (
+        "org_id",
+        "plan_title",
+        "product",
+        "version",
+        "status",
+        "enqueued_at",
+    )
+    list_select_related = ("plan", "plan__version", "plan__version__product")
+    search_fields = ("org_id",)
+    fields = (
+        "plan",
+        "enqueued_at",
+        "job_id",
+        "status",
+        "config",
+        "org_id",
+        "expires_at",
+    )
+
+
 @admin.register(PlanTemplate)
 class PlanTemplateAdmin(MetadeployTranslatableAdmin):
     pass
@@ -134,11 +161,13 @@ class PlanTemplateAdmin(MetadeployTranslatableAdmin):
 class PlanAdmin(MetadeployTranslatableAdmin):
     autocomplete_fields = ("version",)
     list_filter = ("version__product", "tier", "is_listed")
+    list_editable = ("is_listed", "order_key")
     list_display = (
         "title",
         "product",
         "version_label",
         "tier",
+        "order_key",
         "is_listed",
         "created_at",
     )
@@ -165,7 +194,7 @@ class PlanSlugAdmin(admin.ModelAdmin):
 
 @admin.register(PreflightResult)
 class PreflightResult(AdminHelpTextMixin, admin.ModelAdmin, PlanMixin):
-    help_text = (
+    help_text = _(
         "GDPR reminder: Any information in the log or exception which came from the org "
         "must be used for support/debugging purposes only, and not exported from this system."
     )
@@ -187,13 +216,18 @@ class PreflightResult(AdminHelpTextMixin, admin.ModelAdmin, PlanMixin):
 
 @admin.register(Product)
 class ProductAdmin(MetadeployTranslatableAdmin):
-    list_display = ("title", "category", "order_key")
+    list_display = ("title", "category", "order_key", "is_listed")
+    list_editable = ("is_listed", "order_key")
+    list_filter = ("is_listed", "category")
     search_fields = ("translations__title", "translations__description")
 
 
 @admin.register(ProductCategory)
-class ProductCategoryAdmin(admin.ModelAdmin):
-    list_display = ("title", "order_key")
+class ProductCategoryAdmin(MetadeployTranslatableAdmin):
+    list_display = ("title", "order_key", "is_listed")
+    list_editable = ("is_listed", "order_key")
+    list_filter = ("is_listed",)
+    search_fields = ("translations__title", "translations__description")
 
 
 @admin.register(ProductSlug)
@@ -227,7 +261,7 @@ class StepAdmin(MetadeployTranslatableAdmin, PlanMixin):
 
 @admin.register(User)
 class UserAdmin(AdminHelpTextMixin, admin.ModelAdmin):
-    help_text = (
+    help_text = _(
         "GDPR reminder: The username, name, and email are personally identifiable information. "
         "They must be used for support/debugging purposes only, and not exported from this system."
     )
@@ -238,6 +272,7 @@ class UserAdmin(AdminHelpTextMixin, admin.ModelAdmin):
 @admin.register(Version)
 class VersionAdmin(admin.ModelAdmin):
     list_filter = ("product", "is_production", "is_listed")
+    list_editable = ("is_production", "is_listed")
     list_display = ("label", "product", "is_production", "is_listed", "commit_ish")
     search_fields = ("label", "product")
 

@@ -10,19 +10,27 @@ export type CurrentJob = {
 };
 
 export type Org = {
+  org_id: string;
   current_job: CurrentJob | null;
   current_preflight: string | null;
-} | null;
+};
 
-const reducer = (org: Org = null, action: OrgAction | LogoutAction): Org => {
+export type Orgs = {
+  [key: string]: Org;
+};
+
+const reducer = (orgs: Orgs = {}, action: OrgAction | LogoutAction): Orgs => {
   switch (action.type) {
     case 'USER_LOGGED_OUT':
-      return null;
+      return {};
     case 'FETCH_ORG_JOBS_SUCCEEDED':
-    case 'ORG_CHANGED':
       return action.payload;
+    case 'ORG_CHANGED': {
+      const org = action.payload;
+      return { ...orgs, [org.org_id]: org };
+    }
   }
-  return org;
+  return orgs;
 };
 
 export default reducer;

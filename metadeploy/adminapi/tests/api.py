@@ -1,6 +1,8 @@
 import pytest
 from rest_framework.test import APIClient
 
+from metadeploy.api.models import SUPPORTED_ORG_TYPES
+
 
 @pytest.mark.django_db
 class TestProductViewSet:
@@ -34,6 +36,7 @@ class TestProductViewSet:
                     "title": "Sample Product 0",
                     "url": f"{url}/products/{product.id}",
                     "visible_to": None,
+                    "layout": "Default",
                 }
             ],
             "links": {"next": None, "previous": None},
@@ -60,6 +63,7 @@ class TestPlanViewSet:
                     "commit_ish": None,
                     "id": f"{plan.id}",
                     "is_listed": True,
+                    "order_key": 0,
                     "preflight_checks": [],
                     "preflight_message_additional": "",
                     "plan_template": (
@@ -73,6 +77,9 @@ class TestPlanViewSet:
                     "url": f"http://testserver/admin/rest/plans/{plan.id}",
                     "version": version_url,
                     "visible_to": None,
+                    "supported_orgs": "Persistent",
+                    "org_config_name": "release",
+                    "scratch_org_duration_override": None,
                 }
             ],
             "links": {"next": None, "previous": None},
@@ -93,6 +100,7 @@ class TestPlanViewSet:
             "commit_ish": None,
             "id": str(plan.id),
             "is_listed": True,
+            "order_key": 0,
             "preflight_checks": [],
             "preflight_message_additional": "",
             "plan_template": (
@@ -118,6 +126,9 @@ class TestPlanViewSet:
             "url": url,
             "version": f"http://testserver/admin/rest/versions/{plan.version.id}",
             "visible_to": None,
+            "supported_orgs": "Persistent",
+            "org_config_name": "release",
+            "scratch_org_duration_override": None,
         }
 
     def test_create(self, admin_api_client, version_factory, plan_template_factory):
@@ -128,6 +139,7 @@ class TestPlanViewSet:
             url,
             {
                 "title": "Sample plan",
+                "order_key": 0,
                 "plan_template": (
                     f"http://testserver/admin/rest/plantemplates/{plan_template.id}"
                 ),
@@ -148,6 +160,9 @@ class TestPlanViewSet:
                     },
                 ],
                 "version": f"http://testserver/admin/rest/versions/{version.id}",
+                "supported_orgs": "Persistent",
+                "org_config_name": "release",
+                "scratch_org_duration_override": None,
             },
             format="json",
         )
@@ -161,6 +176,7 @@ class TestPlanViewSet:
             "commit_ish": None,
             "id": plan_id,
             "is_listed": True,
+            "order_key": 0,
             "preflight_checks": [],
             "preflight_message_additional": "",
             "plan_template": (
@@ -198,6 +214,9 @@ class TestPlanViewSet:
             "url": f"http://testserver/admin/rest/plans/{plan_id}",
             "version": f"http://testserver/admin/rest/versions/{version.id}",
             "visible_to": None,
+            "supported_orgs": "Persistent",
+            "org_config_name": "release",
+            "scratch_org_duration_override": None,
         }
         assert response.json() == expected
 
@@ -234,6 +253,33 @@ class TestPlanViewSet:
         plan = plan_factory()
         response = client.get(f"http://testserver/admin/rest/plans/{plan.id}")
 
+        assert response.status_code == 400
+
+    def test_update_bad(self, admin_api_client, allowed_list_factory, plan_factory):
+        allowed_list = allowed_list_factory()
+        plan = plan_factory(
+            visible_to=allowed_list, supported_orgs=SUPPORTED_ORG_TYPES.Persistent
+        )
+
+        response = admin_api_client.put(
+            f"http://testserver/admin/rest/plans/{plan.id}",
+            {
+                "title": "Sample plan",
+                "version": f"http://testserver/admin/rest/versions/{plan.version.id}",
+            },
+            format="json",
+        )
+        assert response.status_code == 200, response.json()
+
+        response = admin_api_client.put(
+            f"http://testserver/admin/rest/plans/{plan.id}",
+            {
+                "title": "Sample plan",
+                "version": f"http://testserver/admin/rest/versions/{plan.version.id}",
+                "supported_orgs": SUPPORTED_ORG_TYPES.Scratch,
+            },
+            format="json",
+        )
         assert response.status_code == 400
 
 

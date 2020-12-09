@@ -1,15 +1,23 @@
+import json
+from contextlib import ExitStack
 from datetime import datetime, timedelta
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 import pytz
 import vcr
 from cumulusci.salesforce_api.exceptions import MetadataParseError
 from django.utils import timezone
+from django.utils.timezone import make_aware
 from rq.worker import StopRequested
+
+from metadeploy.api.belvedere_utils import convert_to_18
 
 from ..flows import StopFlowException
 from ..jobs import (
+    create_scratch_org,
+    delete_org_on_error,
+    delete_scratch_org,
     enqueuer,
     expire_preflights,
     finalize_result,
@@ -21,7 +29,7 @@ from ..models import Job, PreflightResult
 
 @pytest.mark.django_db
 def test_report_error(mocker, job_factory, user_factory, plan_factory, step_factory):
-    mocker.patch("metadeploy.api.jobs.get_github_api_for_repo", side_effect=Exception)
+    mocker.patch("metadeploy.api.jobs.local_github_checkout", side_effect=Exception)
     report_error = mocker.patch("metadeploy.api.jobs.sync_report_error")
 
     user = user_factory()
@@ -31,7 +39,6 @@ def test_report_error(mocker, job_factory, user_factory, plan_factory, step_fact
 
     with pytest.raises(Exception):
         run_flows(
-            user=user,
             plan=plan,
             skip_steps=[],
             result_class=Job,
@@ -54,7 +61,6 @@ def test_run_flows(mocker, job_factory, user_factory, plan_factory, step_factory
     job = job_factory(user=user, plan=plan, org_id=user.org_id)
 
     run_flows(
-        user=user,
         plan=plan,
         skip_steps=[],
         result_class=Job,
@@ -79,7 +85,6 @@ def test_run_flows__preflight(
     )
 
     run_flows(
-        user=user,
         plan=plan,
         skip_steps=[],
         result_class=PreflightResult,
@@ -106,44 +111,6 @@ def test_enqueuer(mocker, job_factory):
 
 
 @pytest.mark.django_db
-def test_malicious_zip_file(
-    mocker, job_factory, user_factory, plan_factory, step_factory
-):
-    # TODO: I don't like this test at all. But there's a lot of IO that
-    # this code causes, so I'm mocking it out.
-    mocker.patch("shutil.move")
-    mocker.patch("shutil.rmtree")
-    glob = mocker.patch("metadeploy.api.jobs.glob")
-    glob.return_value = ["test"]
-    mocker.patch("metadeploy.api.jobs.get_github_api_for_repo")
-    zip_info = MagicMock()
-    zip_info.filename = "/etc/passwd"
-    zip_file_instance = MagicMock()
-    zip_file_instance.infolist.return_value = [zip_info]
-    zip_file = mocker.patch("zipfile.ZipFile")
-    zip_file.return_value = zip_file_instance
-    mocker.patch("metadeploy.api.jobs.OrgConfig")
-    mocker.patch("metadeploy.api.jobs.ServiceConfig")
-    mocker.patch("metadeploy.api.jobs.MetaDeployCCI")
-    job_flow = mocker.patch("metadeploy.api.flows.JobFlowCallback")
-
-    user = user_factory()
-    plan = plan_factory()
-    step_factory(plan=plan)
-    job = job_factory(user=user, org_id=user.org_id)
-
-    run_flows(
-        user=user,
-        plan=plan,
-        skip_steps=[],
-        result_class=Job,
-        result_id=job.id,
-    )
-
-    assert not job_flow.called
-
-
-@pytest.mark.django_db
 def test_preflight(mocker, user_factory, plan_factory, preflight_result_factory):
     run_flows = mocker.patch("metadeploy.api.jobs.run_flows")
 
@@ -161,9 +128,8 @@ def test_preflight(mocker, user_factory, plan_factory, preflight_result_factory)
 def test_preflight_failure(
     mocker, user_factory, plan_factory, preflight_result_factory
 ):
-    glob = mocker.patch("metadeploy.api.jobs.glob")
-    glob.side_effect = Exception
-    mocker.patch("metadeploy.api.jobs.get_github_api_for_repo")
+    local_github_checkout = mocker.patch("metadeploy.api.jobs.local_github_checkout")
+    local_github_checkout.side_effect = Exception
 
     user = user_factory()
     plan = plan_factory()
@@ -205,6 +171,17 @@ def test_expire_preflights(user_factory, plan_factory, preflight_result_factory)
     assert not preflight1.is_valid
     assert preflight2.is_valid
     assert preflight3.is_valid
+
+
+@pytest.mark.django_db
+def test_delete_org_on_error(scratch_org_factory):
+    scratch_org = scratch_org_factory(org_id="00Dxxxxxxxxxxxxxxx")
+    try:
+        with delete_org_on_error(scratch_org):
+            raise Exception()
+    except Exception:
+        pass
+    assert scratch_org.status == scratch_org.Status.failed
 
 
 @pytest.mark.django_db
@@ -262,3 +239,269 @@ def test_finalize_result_mdapi_error(job_factory):
         pass
     assert job.status == job.Status.failed
     assert job.exception == "MDAPI error\ntext"
+
+
+class MockDict(dict):
+    namespaced = False
+
+    @property
+    def config(self):
+        return self
+
+    @property
+    def instance_url(self):
+        return self["instance_url"]
+
+    @property
+    def expires(self):
+        return make_aware(datetime(2020, 11, 11))
+
+    @property
+    def org_id(self):
+        return "0123456789abcef"
+
+
+@pytest.mark.django_db
+class TestDeleteScratchOrg:
+    def test_delete_scratch_org(self, scratch_org_factory):
+        scratch_org = scratch_org_factory()
+        with patch(
+            "metadeploy.api.jobs.delete_scratch_org_on_sf"
+        ) as delete_scratch_org_on_sf:
+            delete_scratch_org(scratch_org)
+
+            assert delete_scratch_org_on_sf.called
+
+
+@pytest.mark.django_db(transaction=True)
+class TestCreateScratchOrg:
+    def test_create_scratch_org(self, settings, plan_factory, scratch_org_factory):
+        settings.DEVHUB_USERNAME = "test@example.com"
+        plan = plan_factory(preflight_checks=[{"when": "True", "action": "error"}])
+        with ExitStack() as stack:
+            stack.enter_context(patch("metadeploy.api.jobs.local_github_checkout"))
+            jwt_session = stack.enter_context(
+                patch("metadeploy.api.salesforce.jwt_session")
+            )
+            jwt_session.return_value = {
+                "instance_url": "https://sample.salesforce.org/",
+                "access_token": "abc123",
+                "refresh_token": "abc123",
+            }
+            OrgConfig = stack.enter_context(
+                patch("metadeploy.api.salesforce.OrgConfig")
+            )
+            OrgConfig.return_value = MagicMock(
+                instance_url="https://sample.salesforce.org/",
+                access_token="abc123",
+                refresh_token="abc123",
+            )
+            open = stack.enter_context(patch("metadeploy.api.salesforce.open"))
+            fake_json = json.dumps({"edition": ""})
+            open.return_value = MagicMock(
+                **{
+                    "__enter__.return_value": MagicMock(
+                        **{"read.return_value": fake_json}
+                    )
+                }
+            )
+            SimpleSalesforce = stack.enter_context(
+                patch("metadeploy.api.salesforce.SimpleSalesforce")
+            )
+            SimpleSalesforce.return_value = MagicMock(
+                **{
+                    "ScratchOrgInfo.get.return_value": {
+                        "LoginUrl": "https://sample.salesforce.org/",
+                        "ScratchOrg": "abc123",
+                        "SignupUsername": "test",
+                        "AuthCode": "abc123",
+                    }
+                }
+            )
+            SalesforceOAuth2 = stack.enter_context(
+                patch("metadeploy.api.salesforce.SalesforceOAuth2")
+            )
+            SalesforceOAuth2.return_value = MagicMock(
+                **{
+                    "get_token.return_value": MagicMock(
+                        **{
+                            "json.return_value": {
+                                "access_token": "abc123",
+                                "refresh_token": "abc123",
+                            }
+                        }
+                    )
+                }
+            )
+            BaseCumulusCI = stack.enter_context(
+                patch("metadeploy.api.salesforce.BaseCumulusCI")
+            )
+            MetaDeployCCI = stack.enter_context(
+                patch("metadeploy.api.jobs.MetaDeployCCI")
+            )
+            org_config = MockDict()
+            org_config.config_file = "/"
+            MetaDeployCCI.return_value = MagicMock(
+                **{
+                    "project_config.repo_root": "/",
+                    "keychain.get_org.return_value": org_config,
+                }
+            )
+            BaseCumulusCI.return_value = MagicMock(
+                **{
+                    "project_config.repo_root": "/",
+                    "keychain.get_org.return_value": org_config,
+                }
+            )
+            stack.enter_context(patch("metadeploy.api.salesforce.DeployOrgSettings"))
+            stack.enter_context(
+                patch("cumulusci.core.flowrunner.PreflightFlowCoordinator.run")
+            )
+            # Cheat the auto-triggering of the job by adding a fake
+            # enqueued_at:
+            scratch_org = scratch_org_factory(
+                plan=plan,
+                enqueued_at=datetime(2020, 9, 4, 12),
+            )
+            create_scratch_org(scratch_org.id)
+
+            scratch_org.refresh_from_db()
+            assert scratch_org.expires_at == org_config.expires
+            assert scratch_org.org_id == convert_to_18(org_config.org_id)
+
+    def test_create_scratch_org__no_preflight(
+        self, settings, plan_factory, scratch_org_factory
+    ):
+        settings.DEVHUB_USERNAME = "test@example.com"
+        plan = plan_factory()
+        with ExitStack() as stack:
+            stack.enter_context(patch("metadeploy.api.jobs.local_github_checkout"))
+            jwt_session = stack.enter_context(
+                patch("metadeploy.api.salesforce.jwt_session")
+            )
+            jwt_session.return_value = {
+                "instance_url": "https://sample.salesforce.org/",
+                "access_token": "abc123",
+                "refresh_token": "abc123",
+            }
+            OrgConfig = stack.enter_context(
+                patch("metadeploy.api.salesforce.OrgConfig")
+            )
+            OrgConfig.return_value = MagicMock(
+                instance_url="https://sample.salesforce.org/",
+                access_token="abc123",
+                refresh_token="abc123",
+            )
+            open = stack.enter_context(patch("metadeploy.api.salesforce.open"))
+            fake_json = json.dumps({"edition": ""})
+            open.return_value = MagicMock(
+                **{
+                    "__enter__.return_value": MagicMock(
+                        **{"read.return_value": fake_json}
+                    )
+                }
+            )
+            SimpleSalesforce = stack.enter_context(
+                patch("metadeploy.api.salesforce.SimpleSalesforce")
+            )
+            SimpleSalesforce.return_value = MagicMock(
+                **{
+                    "ScratchOrgInfo.get.return_value": {
+                        "LoginUrl": "https://sample.salesforce.org/",
+                        "ScratchOrg": "abc123",
+                        "SignupUsername": "test",
+                        "AuthCode": "abc123",
+                    }
+                }
+            )
+            SalesforceOAuth2 = stack.enter_context(
+                patch("metadeploy.api.salesforce.SalesforceOAuth2")
+            )
+            SalesforceOAuth2.return_value = MagicMock(
+                **{
+                    "get_token.return_value": MagicMock(
+                        **{
+                            "json.return_value": {
+                                "access_token": "abc123",
+                                "refresh_token": "abc123",
+                            }
+                        }
+                    )
+                }
+            )
+            BaseCumulusCI = stack.enter_context(
+                patch("metadeploy.api.salesforce.BaseCumulusCI")
+            )
+            org_config = MockDict()
+            org_config.config_file = "/"
+            BaseCumulusCI.return_value = MagicMock(
+                **{
+                    "project_config.repo_root": "/",
+                    "keychain.get_org.return_value": org_config,
+                }
+            )
+            stack.enter_context(patch("metadeploy.api.salesforce.DeployOrgSettings"))
+            stack.enter_context(
+                patch("cumulusci.core.flowrunner.PreflightFlowCoordinator.run")
+            )
+            # Cheat the auto-triggering of the job by adding a fake
+            # enqueued_at:
+            scratch_org = scratch_org_factory(
+                plan=plan,
+                enqueued_at=datetime(2020, 9, 4, 12),
+            )
+            create_scratch_org(scratch_org.id)
+
+            scratch_org.refresh_from_db()
+            assert scratch_org.expires_at == org_config.expires
+            assert scratch_org.org_id == convert_to_18(org_config.org_id)
+
+    def test_create_scratch_org__error(
+        self, settings, plan_factory, scratch_org_factory
+    ):
+        settings.DEVHUB_USERNAME = "test@example.com"
+        plan = plan_factory()
+        with ExitStack() as stack:
+            local_github_checkout = stack.enter_context(
+                patch("metadeploy.api.jobs.local_github_checkout")
+            )
+            local_github_checkout.side_effect = TypeError
+            jwt_session = stack.enter_context(
+                patch("metadeploy.api.salesforce.jwt_session")
+            )
+            jwt_session.return_value = {
+                "instance_url": "https://sample.salesforce.org/",
+                "access_token": "abc123",
+                "refresh_token": "abc123",
+            }
+            OrgConfig = stack.enter_context(
+                patch("metadeploy.api.salesforce.OrgConfig")
+            )
+            OrgConfig.return_value = MagicMock(
+                instance_url="https://sample.salesforce.org/",
+                access_token="abc123",
+                refresh_token="abc123",
+            )
+            open = stack.enter_context(patch("metadeploy.api.salesforce.open"))
+            fake_json = json.dumps({"edition": ""})
+            open.return_value = MagicMock(
+                **{
+                    "__enter__.return_value": MagicMock(
+                        **{"read.return_value": fake_json}
+                    )
+                }
+            )
+            stack.enter_context(patch("metadeploy.api.salesforce.SimpleSalesforce"))
+            stack.enter_context(patch("metadeploy.api.salesforce.SalesforceOAuth2"))
+            BaseCumulusCI = stack.enter_context(
+                patch("metadeploy.api.salesforce.BaseCumulusCI")
+            )
+            BaseCumulusCI.return_value = MagicMock(**{"project_config.repo_root": "/"})
+            stack.enter_context(patch("metadeploy.api.salesforce.DeployOrgSettings"))
+            # Cheat the auto-triggering of the job by adding a fake
+            # enqueued_at:
+            scratch_org = scratch_org_factory(
+                plan=plan,
+                enqueued_at=datetime(2020, 9, 4, 12),
+            )
+            create_scratch_org(scratch_org.id)

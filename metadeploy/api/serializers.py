@@ -11,11 +11,13 @@ from rest_framework.utils.urls import replace_query_param
 from .constants import ERROR, HIDE, WARN
 from .models import (
     ORG_TYPES,
+    SUPPORTED_ORG_TYPES,
     Job,
     Plan,
     PreflightResult,
     Product,
     ProductCategory,
+    ScratchOrg,
     SiteProfile,
     Step,
     Version,
@@ -25,9 +27,24 @@ from .paginators import ProductPaginator
 User = get_user_model()
 
 
-class IdOnlyField(serializers.CharField):
+def get_from_data_or_instance(instance, data, name, default=None):
+    value = data.get(name, getattr(instance, name, default))
+    # Handle the case where value is a *RelatedManager:
+    if hasattr(value, "all") and callable(value.all):
+        return value.all()
+    return value
+
+
+class IdOnlyField(serializers.Field):
+    def __init__(self, *args, model=None, **kwargs):
+        self.model = model
+        return super().__init__(*args, **kwargs)
+
     def to_representation(self, value):
         return str(value.id)
+
+    def to_internal_value(self, data):
+        return self.model.objects.get(pk=data)
 
 
 class ErrorWarningCountMixin:
@@ -157,7 +174,7 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
         read_only=True, pk_field=serializers.CharField()
     )
     is_allowed = serializers.SerializerMethodField()
-    steps = StepSerializer(many=True)
+    steps = StepSerializer(many=True, required=False)
     title = serializers.CharField()
     preflight_message = serializers.SerializerMethodField()
     not_allowed_instructions = serializers.SerializerMethodField()
@@ -173,12 +190,15 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
             "tier",
             "slug",
             "old_slugs",
+            "order_key",
             "steps",
             "is_allowed",
             "is_listed",
             "not_allowed_instructions",
             "average_duration",
             "requires_preflight",
+            "supported_orgs",
+            "scratch_org_duration",
         )
         circumspect_fields = ("steps", "preflight_message")
 
@@ -201,6 +221,27 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
 
     def get_requires_preflight(self, obj):
         return obj.requires_preflight
+
+    def validate(self, data):
+        """
+        Check that restricted plans only support persistent orgs.
+        """
+        visible_to = get_from_data_or_instance(self.instance, data, "visible_to")
+        supported_orgs = get_from_data_or_instance(
+            self.instance,
+            data,
+            "supported_orgs",
+            default=SUPPORTED_ORG_TYPES.Persistent,
+        )
+        if visible_to and supported_orgs != SUPPORTED_ORG_TYPES.Persistent:
+            raise serializers.ValidationError(
+                {
+                    "supported_orgs": _(
+                        'Restricted plans (with a "visible to" AllowedList) can only support persistent org types.'
+                    )
+                }
+            )
+        return data
 
 
 class VersionSerializer(serializers.ModelSerializer):
@@ -227,11 +268,12 @@ class VersionSerializer(serializers.ModelSerializer):
 
 
 class ProductCategorySerializer(serializers.ModelSerializer):
+    description = serializers.CharField(source="description_markdown")
     first_page = serializers.SerializerMethodField()
 
     class Meta:
         model = ProductCategory
-        fields = ("id", "title", "first_page")
+        fields = ("id", "title", "description", "is_listed", "first_page")
 
     def get_next_link(self, paginator, category_id):
         if not paginator.page.has_next():
@@ -281,7 +323,7 @@ class ProductSerializer(CircumspectSerializerMixin, serializers.ModelSerializer)
     click_through_agreement = serializers.CharField(
         source="click_through_agreement_markdown"
     )
-    title = serializers.CharField
+    title = serializers.CharField()
     short_description = serializers.CharField()
     not_allowed_instructions = serializers.SerializerMethodField()
     is_listed = serializers.SerializerMethodField()
@@ -305,6 +347,7 @@ class ProductSerializer(CircumspectSerializerMixin, serializers.ModelSerializer)
             "is_listed",
             "order_key",
             "not_allowed_instructions",
+            "layout",
         )
         circumspect_fields = ("description",)
 
@@ -330,6 +373,9 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
     instance_url = serializers.SerializerMethodField()
     org_id = serializers.SerializerMethodField()
     is_production_org = serializers.SerializerMethodField()
+    product_slug = serializers.SerializerMethodField()
+    version_label = serializers.SerializerMethodField()
+    plan_slug = serializers.SerializerMethodField()
 
     plan = serializers.PrimaryKeyRelatedField(
         queryset=Plan.objects.all(), pk_field=serializers.CharField()
@@ -364,6 +410,9 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             "org_name",
             "org_type",
             "is_production_org",
+            "product_slug",
+            "version_label",
+            "plan_slug",
             "error_count",
             "warning_count",
             "is_public",
@@ -380,15 +429,21 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             "org_type": {"read_only": True},
         }
 
-    def requesting_user_has_rights(self):
+    def requesting_user_has_rights(self, include_staff=True):
         """
         Does the user making the request have rights to see this object?
 
         The user is derived from the serializer context.
         """
         try:
-            user = self.context["request"].user
-            return user.is_staff or user == self.instance.user
+            if self.instance.user:
+                user = self.context["request"].user
+                is_owner = user == self.instance.user
+                return is_owner or user.is_staff if include_staff else is_owner
+            scratch_org = ScratchOrg.objects.get_from_session(
+                self.context["request"].session
+            )
+            return scratch_org and self.instance.org_id == scratch_org.org_id
         except (AttributeError, KeyError):
             return False
 
@@ -399,13 +454,10 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         )
 
     def get_user_can_edit(self, obj):
-        try:
-            return obj.user == self.context["request"].user
-        except (AttributeError, KeyError):
-            return False
+        return self.requesting_user_has_rights(include_staff=False)
 
     def get_creator(self, obj):
-        if self.requesting_user_has_rights():
+        if obj.user and self.requesting_user_has_rights():
             return LimitedUserSerializer(instance=obj.user).data
         return None
 
@@ -427,6 +479,15 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
     def get_is_production_org(self, obj):
         return obj.full_org_type == ORG_TYPES.Production
 
+    def get_product_slug(self, obj):
+        return obj.plan.version.product.slug
+
+    def get_version_label(self, obj):
+        return obj.plan.version.label
+
+    def get_plan_slug(self, obj):
+        return obj.plan.slug
+
     @staticmethod
     def _has_valid_preflight(most_recent_preflight, plan):
         if not plan.requires_preflight:
@@ -438,7 +499,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         return not most_recent_preflight.has_any_errors()
 
     @staticmethod
-    def _has_valid_steps(*, user, plan, steps, preflight):
+    def _has_valid_steps(*, plan, steps, preflight):
         """
         Every set in this method is a set of numeric Step PKs, from the
         local database.
@@ -448,15 +509,8 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             required_steps -= set(preflight.optional_step_ids)
         return not set(required_steps) - set(s.id for s in steps)
 
-    def _get_from_data_or_instance(self, data, name, default=None):
-        value = data.get(name, getattr(self.instance, name, default))
-        # Handle the case where value is a *RelatedManager:
-        if hasattr(value, "all") and callable(value.all):
-            return value.all()
-        return value
-
-    def _pending_job_exists(self, *, user):
-        return Job.objects.filter(status=Job.Status.started, org_id=user.org_id).first()
+    def _pending_job_exists(self, *, org_id):
+        return Job.objects.filter(status=Job.Status.started, org_id=org_id).first()
 
     def validate_plan(self, value):
         if not value.is_visible_to(self.context["request"].user):
@@ -479,12 +533,24 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
                 raise serializers.ValidationError(_("Invalid initial results."))
 
     def validate(self, data):
-        user = self._get_from_data_or_instance(data, "user")
-        plan = self._get_from_data_or_instance(data, "plan")
-        steps = self._get_from_data_or_instance(data, "steps", default=[])
+        user = get_from_data_or_instance(self.instance, data, "user")
+        org_id = getattr(self.instance, "org_id", getattr(user, "org_id", None))
+        plan = get_from_data_or_instance(self.instance, data, "plan")
+        steps = get_from_data_or_instance(self.instance, data, "steps", default=[])
+
+        scratch_org = None
+        if not (user and user.is_authenticated):
+            scratch_org = ScratchOrg.objects.filter(
+                status=ScratchOrg.Status.complete
+            ).get_from_session(self.context["request"].session)
+            if not org_id:
+                org_id = getattr(scratch_org, "org_id", None)
+
+        if not org_id:
+            raise serializers.ValidationError(_("No valid org."))
 
         most_recent_preflight = PreflightResult.objects.most_recent(
-            user=user, plan=plan
+            org_id=org_id, plan=plan
         )
         no_valid_preflight = not self.instance and not self._has_valid_preflight(
             most_recent_preflight, plan=plan
@@ -493,7 +559,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             raise serializers.ValidationError(_("No valid preflight."))
 
         invalid_steps = not self.instance and not self._has_valid_steps(
-            user=user, plan=plan, steps=steps, preflight=most_recent_preflight
+            plan=plan, steps=steps, preflight=most_recent_preflight
         )
         if invalid_steps:
             raise serializers.ValidationError(_("Invalid steps for plan."))
@@ -501,7 +567,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         if "results" in data:
             self._validate_results(data)
 
-        pending_job = not self.instance and self._pending_job_exists(user=user)
+        pending_job = not self.instance and self._pending_job_exists(org_id=org_id)
         if pending_job:
             raise serializers.ValidationError(
                 _(
@@ -510,15 +576,22 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
                 )
             )
 
-        user_has_valid_token = all(user.token)
+        data["org_id"] = org_id
+        user_has_valid_token = False
+
+        if user and user.is_authenticated:
+            user_has_valid_token = all(user.token)
+            data["org_type"] = user.org_type
+            data["full_org_type"] = user.full_org_type
+        elif scratch_org:
+            user_has_valid_token = True
+            data["user"] = None
+            data["full_org_type"] = ORG_TYPES.Scratch
         if not user_has_valid_token:
             raise serializers.ValidationError(
                 _("The connection to your org has been lost. Please log in again.")
             )
 
-        data["org_type"] = user.org_type
-        data["full_org_type"] = user.full_org_type
-        data["org_id"] = user.org_id
         return data
 
 
@@ -589,6 +662,7 @@ class JobSummarySerializer(serializers.ModelSerializer):
 
 
 class OrgSerializer(serializers.Serializer):
+    org_id = serializers.CharField()
     current_job = JobSummarySerializer()
     current_preflight = IdOnlyField()
 
@@ -608,3 +682,33 @@ class SiteSerializer(serializers.ModelSerializer):
             "company_logo",
             "favicon",
         )
+
+
+class ScratchOrgSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ScratchOrg
+        fields = (
+            "id",
+            "plan",
+            "email",
+            "enqueued_at",
+            "created_at",
+            "edited_at",
+            "expires_at",
+            "status",
+            "org_id",
+            "uuid",
+        )
+        extra_kwargs = {
+            "email": {"required": True, "write_only": True},
+            "enqueued_at": {"read_only": True},
+            "created_at": {"read_only": True},
+            "edited_at": {"read_only": True},
+            "expires_at": {"read_only": True},
+            "status": {"read_only": True},
+            "org_id": {"read_only": True},
+            "uuid": {"read_only": True},
+        }
+
+    id = serializers.CharField(read_only=True)
+    plan = IdOnlyField(model=Plan)

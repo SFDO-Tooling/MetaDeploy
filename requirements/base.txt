@@ -5,7 +5,7 @@ Django==2.2.16
 Pillow==8.0.1
 ansi2html==1.6.0
 bleach==3.2.1
-boto3==1.16.25
+boto3==1.16.32
 channels==2.4.0
 channels-redis==3.2.0
 dj-database-url==0.5.0
@@ -48,14 +48,14 @@ asgiref==3.3.1
 asn1crypto==1.4.0
 async-timeout==3.0.1
 autobahn==20.7.1
-botocore==1.19.25
-certifi==2020.11.8
+botocore==1.19.32
+certifi==2020.12.5
 cffi==1.14.4
 chardet==3.0.4
 coloredlogs==14.0
 constantly==15.1.0
 croniter==0.3.36
-daphne==3.0.1
+daphne==2.5.0
 defusedxml==0.6.0
 docutils==0.16
 entrypoints==0.3
@@ -92,7 +92,7 @@ s3transfer==0.3.3
 salesforce-bulk==2.2.0
 sarge==0.1.6
 selenium==3.141.0
-setuptools==50.3.2
+setuptools==51.0.0
 simple-salesforce==1.10.1
 six==1.15.0
 sqlparse==0.4.1

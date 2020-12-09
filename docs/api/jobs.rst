@@ -8,7 +8,7 @@ Retrieve
 --------
 
 .. sourcecode:: http
-   
+
    GET /api/jobs/9wORq4Z/ HTTP/1.1
 
 .. sourcecode:: http
@@ -39,21 +39,24 @@ Retrieve
      "enqueued_at": "2019-05-03T18:47:31.324809Z",
      "job_id": "ea2441f1-d72d-4521-b6d1-59f701807d37",
      "status": "started",
-     "org_name": "Oddbird",
+     "org_name": "OddBird",
      "org_type": "Developer Edition",
      "error_count": 0,
      "warning_count": 0,
      "is_public": false,
      "user_can_edit": true,
      "message": "<p>Success! You installed it.</p>",
-     "error_message": ""
+     "error_message": "",
+     "product_slug": "test-product",
+     "version_label": "1.0.0",
+     "plan_slug": "my-plan"
    }
 
 Create
 ------
 
 .. sourcecode:: http
-   
+
    POST /api/jobs/ HTTP/1.1
 
    {
@@ -73,7 +76,7 @@ Destroy
 -------
 
 .. sourcecode:: http
-   
+
    DELETE /api/jobs/9wORq4Z/ HTTP/1.1
 
 .. sourcecode:: http

@@ -1,9 +1,6 @@
 import { ThunkResult } from '@/store';
 import { fetchOrgJobs, FetchOrgJobsSucceeded } from '@/store/org/actions';
-import {
-  fetchProducts,
-  FetchProductsSucceeded,
-} from '@/store/products/actions';
+import { fetchProducts } from '@/store/products/actions';
 import { User } from '@/store/user/reducer';
 import apiFetch from '@/utils/api';
 
@@ -18,9 +15,7 @@ export type RefetchDataAction = {
     | 'REFETCH_DATA_FAILED';
 };
 
-export const login = (
-  payload: User,
-): ThunkResult<Promise<FetchOrgJobsSucceeded>> => (dispatch) => {
+export const login = (payload: User): LoginAction => {
   if (window.Sentry) {
     window.Sentry.setUser(payload);
   }
@@ -31,21 +26,14 @@ export const login = (
       model: 'user',
       id: payload.id,
     });
-    if (payload.valid_token_for) {
-      window.socket.subscribe({
-        model: 'org',
-        id: payload.valid_token_for,
-      });
-    }
   }
-  dispatch({
+  return {
     type: 'USER_LOGGED_IN' as const,
     payload,
-  });
-  return dispatch(fetchOrgJobs());
+  };
 };
 
-export const logout = (): ThunkResult<Promise<FetchProductsSucceeded>> => (
+export const logout = (): ThunkResult<Promise<FetchOrgJobsSucceeded>> => (
   dispatch,
 ) =>
   apiFetch(window.api_urls.account_logout(), dispatch, {
@@ -59,7 +47,8 @@ export const logout = (): ThunkResult<Promise<FetchProductsSucceeded>> => (
       window.Sentry.configureScope((scope) => scope.clear());
     }
     dispatch({ type: 'USER_LOGGED_OUT' as const });
-    return dispatch(fetchProducts());
+    dispatch(fetchProducts());
+    return dispatch(fetchOrgJobs());
   });
 
 export const invalidateToken = (): TokenInvalidAction => ({
@@ -67,7 +56,7 @@ export const invalidateToken = (): TokenInvalidAction => ({
 });
 
 export const refetchAllData = (): ThunkResult<
-  Promise<FetchOrgJobsSucceeded | null>
+  Promise<LoginAction | null>
 > => async (dispatch) => {
   dispatch({ type: 'REFETCH_DATA_STARTED' as const });
   try {
@@ -78,6 +67,7 @@ export const refetchAllData = (): ThunkResult<
     ]);
     dispatch({ type: 'REFETCH_DATA_SUCCEEDED' as const });
     dispatch({ type: 'USER_LOGGED_OUT' as const });
+    dispatch(fetchOrgJobs());
     if (!payload) {
       return null;
     }

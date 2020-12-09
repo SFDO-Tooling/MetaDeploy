@@ -1,11 +1,12 @@
 from datetime import timedelta
+from uuid import uuid4
 
 import pytest
 from django.utils import timezone
 
 from metadeploy.conftest import format_timestamp
 
-from ..models import Job, PreflightResult
+from ..models import SUPPORTED_ORG_TYPES, Job, PreflightResult, ScratchOrg
 from ..serializers import (
     JobSerializer,
     JobSummarySerializer,
@@ -16,8 +17,35 @@ from ..serializers import (
 )
 
 
+class AnonymousUser:
+    is_authenticated = False
+
+
 @pytest.mark.django_db
 class TestPlanSerializer:
+    def test_scratch_org_duration_override(
+        self, rf, user_factory, plan_factory, allowed_list_factory, settings
+    ):
+        user = user_factory()
+        allowed_list = allowed_list_factory()
+        plan = plan_factory(
+            visible_to=allowed_list, preflight_message_additional="test"
+        )
+
+        request = rf.get("/")
+        request.user = user
+        context = {"request": request}
+
+        serializer = PlanSerializer(plan, context=context)
+        assert (
+            serializer.data["scratch_org_duration"]
+            == settings.SCRATCH_ORG_DURATION_DAYS
+        )
+
+        plan.scratch_org_duration_override = 10
+        serializer = PlanSerializer(plan, context=context)
+        assert serializer.data["scratch_org_duration"] == 10
+
     def test_circumspect_description(
         self, rf, user_factory, plan_factory, allowed_list_factory, step_factory
     ):
@@ -62,12 +90,35 @@ class TestPlanSerializer:
         assert serializer.data["steps"] is None
         assert serializer.data["not_allowed_instructions"] == "<p>Test.</p>"
 
+    def test_update_good(self, rf, user_factory, plan_factory):
+        user = user_factory()
+        plan = plan_factory(supported_orgs=SUPPORTED_ORG_TYPES.Persistent)
+        request = rf.get("/")
+        request.user = user
+        context = {"request": request}
+        data = {"title": plan.title, "supported_orgs": SUPPORTED_ORG_TYPES.Scratch}
+        serializer = PlanSerializer(plan, data=data, context=context)
+
+        assert serializer.is_valid(), serializer.errors
+
+    def test_update_bad(self, rf, user_factory, allowed_list_factory, plan_factory):
+        allowed_list = allowed_list_factory()
+        user = user_factory()
+        plan = plan_factory(
+            visible_to=allowed_list, supported_orgs=SUPPORTED_ORG_TYPES.Persistent
+        )
+        request = rf.get("/")
+        request.user = user
+        context = {"request": request}
+        data = {"title": plan.title, "supported_orgs": SUPPORTED_ORG_TYPES.Scratch}
+        serializer = PlanSerializer(plan, data=data, context=context)
+
+        assert not serializer.is_valid(), serializer.errors
+
 
 @pytest.mark.django_db
 class TestProductSerializer:
-    def test_no_most_recent_version(
-        self, rf, user_factory, product_factory, version_factory
-    ):
+    def test_no_most_recent_version(self, rf, user_factory, product_factory):
         user = user_factory()
         product = product_factory()
 
@@ -196,6 +247,84 @@ class TestJob:
 
         assert serializer.is_valid(), serializer.errors
 
+    def test_create_good__anonymous(
+        self,
+        rf,
+        plan_factory,
+        step_factory,
+        preflight_result_factory,
+        scratch_org_factory,
+    ):
+        plan = plan_factory()
+        user = None
+        step1 = step_factory(plan=plan)
+        step2 = step_factory(plan=plan)
+        step3 = step_factory(plan=plan)
+        org_id = "00Dxxxxxxxxxxxxxxx"
+        uuid = str(uuid4())
+        request = rf.get("/")
+        request.user = AnonymousUser()
+        request.session = {"scratch_org_id": uuid}
+        scratch_org_factory(
+            uuid=uuid,
+            status=ScratchOrg.Status.complete,
+            org_id=org_id,
+            config={
+                "access_token": "abc123",
+                "refresh_token": "abc123",
+                "instance_url": "https://example.com/",
+            },
+        )
+        preflight_result_factory(
+            plan=plan,
+            user=user,
+            status=PreflightResult.Status.complete,
+            results={str(step2.id): [{"status": "error", "message": ""}]},
+            org_id=org_id,
+        )
+        preflight_result_factory(
+            plan=plan,
+            user=user,
+            status=PreflightResult.Status.complete,
+            results={
+                str(step1.id): {"status": "warn", "message": ""},
+                str(step2.id): {"status": "skip", "message": ""},
+                str(step3.id): {"status": "optional", "message": ""},
+            },
+            org_id=org_id,
+        )
+        data = {
+            "plan": str(plan.id),
+            "steps": [str(step1.id), str(step2.id), str(step3.id)],
+        }
+        serializer = JobSerializer(data=data, context=dict(request=request))
+
+        assert serializer.is_valid(), serializer.errors
+
+    def test_create_bad__anonymous(
+        self,
+        rf,
+        plan_factory,
+        step_factory,
+        preflight_result_factory,
+        scratch_org_factory,
+    ):
+        plan = plan_factory()
+        step1 = step_factory(plan=plan)
+        step2 = step_factory(plan=plan)
+        step3 = step_factory(plan=plan)
+        uuid = str(uuid4())
+        request = rf.get("/")
+        request.user = AnonymousUser()
+        request.session = {"scratch_org_id": uuid}
+        data = {
+            "plan": str(plan.id),
+            "steps": [str(step1.id), str(step2.id), str(step3.id)],
+        }
+        serializer = JobSerializer(data=data, context=dict(request=request))
+
+        assert not serializer.is_valid(), serializer.errors
+
     def test_create_good_no_preflight(
         self, rf, user_factory, plan_factory, step_factory
     ):
@@ -295,6 +424,26 @@ class TestJob:
 
         assert serializer.is_valid(), serializer.errors
 
+    def test_user_can_edit_scratch_org(self, rf, job_factory, scratch_org_factory):
+        org_id = "00Dxxxxxxxxxxxxxxx"
+        uuid = str(uuid4())
+        request = rf.get("/")
+        request.user = AnonymousUser()
+        request.session = {"scratch_org_id": uuid}
+        scratch_org_factory(
+            uuid=uuid,
+            status=ScratchOrg.Status.complete,
+            org_id=org_id,
+        )
+        job = job_factory(
+            user=None,
+            status=Job.Status.complete,
+            org_id=org_id,
+        )
+        serializer = JobSerializer(instance=job, context=dict(request=request))
+
+        assert serializer.data["user_can_edit"]
+
     def test_no_context(self, job_factory):
         job = job_factory(
             status=Job.Status.complete,
@@ -360,7 +509,7 @@ class TestJob:
         job = job_factory(user=user, org_id=user.org_id)
         serializer = JobSerializer(data=data, context=dict(request=request))
 
-        assert not serializer.is_valid()
+        assert not serializer.is_valid(), serializer.errors
         non_field_errors = [
             str(error) for error in serializer.errors["non_field_errors"]
         ]
@@ -400,7 +549,7 @@ class TestJob:
 
         serializer = JobSerializer(data=data, context=dict(request=request))
 
-        assert not serializer.is_valid()
+        assert not serializer.is_valid(), serializer.errors
 
     def test_disallowed_product(
         self,
@@ -435,7 +584,7 @@ class TestJob:
 
         serializer = JobSerializer(data=data, context=dict(request=request))
 
-        assert not serializer.is_valid()
+        assert not serializer.is_valid(), serializer.errors
 
     def test_expired_token(self, rf, user_factory, plan_factory, step_factory):
         plan = plan_factory()
@@ -448,7 +597,7 @@ class TestJob:
         data = {"plan": str(plan.id), "steps": [str(step1.id)]}
         serializer = JobSerializer(data=data, context=dict(request=request))
 
-        assert not serializer.is_valid()
+        assert not serializer.is_valid(), serializer.errors
         non_field_errors = [
             str(error) for error in serializer.errors["non_field_errors"]
         ]
@@ -558,6 +707,7 @@ class TestProductCategorySerializer:
                 "is_listed": True,
                 "order_key": 0,
                 "not_allowed_instructions": None,
+                "layout": "Default",
             }
         ]
         assert results == expected

@@ -87,6 +87,7 @@ describe('<Products />', () => {
                 is_listed: true,
                 is_allowed: true,
                 requires_preflight: true,
+                supported_orgs: 'Persistent',
               },
               is_listed: true,
             },
@@ -95,7 +96,15 @@ describe('<Products />', () => {
           },
         ],
         notFound: [],
-        categories: [{ id: 1, title: 'salesforce', next: null }],
+        categories: [
+          {
+            id: 1,
+            title: 'salesforce',
+            description: '<p>This is a category</p>',
+            is_listed: true,
+            next: null,
+          },
+        ],
       },
     };
     const { getByText, queryByText } = setup(initialState);
@@ -129,6 +138,7 @@ describe('<Products />', () => {
                 is_listed: true,
                 is_allowed: true,
                 requires_preflight: true,
+                supported_orgs: 'Persistent',
               },
               is_listed: true,
             },
@@ -152,6 +162,7 @@ describe('<Products />', () => {
                 is_listed: true,
                 is_allowed: true,
                 requires_preflight: true,
+                supported_orgs: 'Persistent',
               },
               is_listed: true,
             },
@@ -174,6 +185,7 @@ describe('<Products />', () => {
                 is_listed: true,
                 is_allowed: true,
                 requires_preflight: true,
+                supported_orgs: 'Persistent',
               },
               is_listed: true,
             },
@@ -182,8 +194,20 @@ describe('<Products />', () => {
         ],
         notFound: [],
         categories: [
-          { id: 1, title: 'salesforce', next: null },
-          { id: 2, title: 'community', next: null },
+          {
+            id: 1,
+            title: 'salesforce',
+            description: '',
+            next: null,
+            is_listed: true,
+          },
+          {
+            id: 2,
+            title: 'community',
+            description: '<p>This is a category</p>',
+            is_listed: true,
+            next: null,
+          },
         ],
       },
     };
@@ -201,7 +225,7 @@ describe('<Products />', () => {
       expect(queryByText('Product 3')).toBeNull();
       expect(activeTab).toBeVisible();
       expect(getByText('community')).toBeVisible();
-      expect(activeTab).toHaveClass('slds-active');
+      expect(activeTab).toHaveClass('slds-is-active');
     });
 
     test('uses saved active tab', () => {
@@ -213,7 +237,7 @@ describe('<Products />', () => {
       expect(getByText('Product 2')).toBeInTheDocument();
       expect(getByText('salesforce')).toBeVisible();
       expect(activeTab).toBeVisible();
-      expect(activeTab).toHaveClass('slds-active');
+      expect(activeTab).toHaveClass('slds-is-active');
     });
 
     test('uses saved tab from url hash', () => {
@@ -226,7 +250,7 @@ describe('<Products />', () => {
       expect(getByText('Product 2')).toBeInTheDocument();
       expect(getByText('salesforce')).toBeVisible();
       expect(activeTab).toBeVisible();
-      expect(activeTab).toHaveClass('slds-active');
+      expect(activeTab).toHaveClass('slds-is-active');
 
       window.location.hash = '';
     });
@@ -247,9 +271,9 @@ describe('<Products />', () => {
         const activeTab = getByText('salesforce');
         const inactiveTab = getByText('community');
 
-        expect(activeTab).toHaveClass('slds-active');
+        expect(activeTab).toHaveClass('slds-is-active');
         fireEvent.click(inactiveTab);
-        expect(inactiveTab).toHaveClass('slds-active');
+        expect(inactiveTab).toHaveClass('slds-is-active');
       });
     });
   });
@@ -274,6 +298,7 @@ describe('<Products />', () => {
                 is_listed: true,
                 is_allowed: true,
                 requires_preflight: true,
+                supported_orgs: 'Persistent',
               },
               is_listed: true,
             },
@@ -296,6 +321,7 @@ describe('<Products />', () => {
                 is_listed: true,
                 is_allowed: true,
                 requires_preflight: true,
+                supported_orgs: 'Persistent',
               },
               is_listed: true,
             },
@@ -305,8 +331,13 @@ describe('<Products />', () => {
         ],
         notFound: [],
         categories: [
-          { id: 1, title: 'salesforce', next: 'sf-next-url' },
-          { id: 2, title: 'community', next: 'community-next-url' },
+          { id: 1, title: 'salesforce', next: 'sf-next-url', is_listed: true },
+          {
+            id: 2,
+            title: 'community',
+            next: 'community-next-url',
+            is_listed: true,
+          },
         ],
       },
     };
@@ -328,7 +359,7 @@ describe('<Products />', () => {
 
       setup(initialState, { y: 1000 }, rerender);
 
-      expect(activeTab).toHaveClass('slds-active');
+      expect(activeTab).toHaveClass('slds-is-active');
       expect(getByText('Loading…')).toBeVisible();
       expect(fetchMoreProducts).toHaveBeenCalledWith({
         url: 'community-next-url',
@@ -342,7 +373,7 @@ describe('<Products />', () => {
 
       setup(initialState, { y: 1000 }, rerender);
 
-      expect(activeTab).toHaveClass('slds-active');
+      expect(activeTab).toHaveClass('slds-is-active');
       expect(getByText('Loading…')).toBeVisible();
       expect(fetchMoreProducts).toHaveBeenCalledWith({
         url: 'sf-next-url',
@@ -356,8 +387,13 @@ describe('<Products />', () => {
         products: {
           ...initialState.products,
           categories: [
-            { id: 1, title: 'salesforce', next: null },
-            { id: 2, title: 'community', next: 'community-next-url' },
+            { id: 1, title: 'salesforce', next: null, is_listed: true },
+            {
+              id: 2,
+              title: 'community',
+              next: 'community-next-url',
+              is_listed: false,
+            },
           ],
         },
       };

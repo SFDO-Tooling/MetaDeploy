@@ -1,14 +1,17 @@
 import { ThunkDispatch } from 'redux-thunk';
 import Sockette from 'sockette';
 
+import { ThunkResult } from '@/store';
 import {
   cancelJob,
   completeJob,
   completeJobStep,
+  createJob,
   failJob,
   JobCanceled,
   JobCompleted,
   JobFailed,
+  JobStarted,
   JobStepCompleted,
 } from '@/store/jobs/actions';
 import { Job } from '@/store/jobs/reducer';
@@ -23,8 +26,18 @@ import {
   PreflightCompleted,
   PreflightFailed,
   PreflightInvalid,
+  PreflightStarted,
 } from '@/store/plans/actions';
 import { Preflight } from '@/store/plans/reducer';
+import {
+  createPreflight,
+  createScratchOrg,
+  failScratchOrg,
+  ScratchOrgFailed,
+  ScratchOrgUpdated,
+  updateScratchOrg,
+} from '@/store/scratchOrgs/actions';
+import { ScratchOrg } from '@/store/scratchOrgs/reducer';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
 import { invalidateToken, TokenInvalidAction } from '@/store/user/actions';
 import { log } from '@/utils/logging';
@@ -32,6 +45,7 @@ import { log } from '@/utils/logging';
 interface Subscription {
   model: string;
   id: string;
+  uuid?: string;
 }
 
 export interface Socket {
@@ -52,6 +66,7 @@ interface UserEvent {
 }
 interface PreflightEvent {
   type:
+    | 'PREFLIGHT_STARTED'
     | 'PREFLIGHT_COMPLETED'
     | 'PREFLIGHT_FAILED'
     | 'PREFLIGHT_CANCELED'
@@ -59,18 +74,45 @@ interface PreflightEvent {
   payload: Preflight;
 }
 interface JobEvent {
-  type: 'TASK_COMPLETED' | 'JOB_COMPLETED' | 'JOB_FAILED' | 'JOB_CANCELED';
+  type:
+    | 'TASK_COMPLETED'
+    | 'JOB_COMPLETED'
+    | 'JOB_FAILED'
+    | 'JOB_CANCELED'
+    | 'JOB_STARTED';
   payload: Job;
 }
 interface OrgEvent {
   type: 'ORG_CHANGED';
   payload: Org;
 }
-type ModelEvent = UserEvent | PreflightEvent | JobEvent | OrgEvent;
+
+interface ScratchOrgEvent {
+  type: 'SCRATCH_ORG_CREATED' | 'SCRATCH_ORG_UPDATED';
+  payload: ScratchOrg;
+}
+
+interface ScratchOrgErrorEvent {
+  type: 'SCRATCH_ORG_ERROR' | 'SCRATCH_ORG_DELETED';
+  payload: {
+    message?: string;
+    org: string;
+    plan: string;
+  };
+}
+
+type ModelEvent =
+  | UserEvent
+  | PreflightEvent
+  | JobEvent
+  | OrgEvent
+  | ScratchOrgEvent
+  | ScratchOrgErrorEvent;
 type EventType = SubscriptionEvent | ErrorEvent | ModelEvent;
 
 type Action =
   | TokenInvalidAction
+  | PreflightStarted
   | PreflightCompleted
   | PreflightFailed
   | PreflightCanceled
@@ -79,7 +121,10 @@ type Action =
   | JobCompleted
   | JobFailed
   | JobCanceled
-  | OrgChanged;
+  | OrgChanged
+  | ScratchOrgUpdated
+  | ThunkResult<JobStarted>
+  | ThunkResult<ScratchOrgFailed>;
 
 const isSubscriptionEvent = (event: EventType): event is SubscriptionEvent =>
   (event as ModelEvent).type === undefined;
@@ -109,6 +154,17 @@ export const getAction = (event: EventType): Action | null => {
       return failJob(event.payload);
     case 'ORG_CHANGED':
       return updateOrg(event.payload);
+    case 'SCRATCH_ORG_CREATED':
+      return createScratchOrg(event.payload);
+    case 'SCRATCH_ORG_UPDATED':
+      return updateScratchOrg(event.payload);
+    case 'SCRATCH_ORG_ERROR':
+    case 'SCRATCH_ORG_DELETED':
+      return failScratchOrg(event.payload);
+    case 'PREFLIGHT_STARTED':
+      return createPreflight(event.payload);
+    case 'JOB_STARTED':
+      return createJob(event.payload);
   }
   return null;
 };

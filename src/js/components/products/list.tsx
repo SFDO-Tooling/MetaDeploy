@@ -6,7 +6,7 @@ import * as React from 'react';
 import DocumentTitle from 'react-document-title';
 import { withScroll } from 'react-fns';
 import { connect, ConnectedProps } from 'react-redux';
-import { RouteComponentProps, withRouter } from 'react-router';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import { EmptyIllustration } from '@/components/404';
 import Header from '@/components/header';
@@ -15,15 +15,11 @@ import ProductItem from '@/components/products/listItem';
 import { AppState } from '@/store';
 import { fetchMoreProducts } from '@/store/products/actions';
 import { Category, Product } from '@/store/products/reducer';
-import {
-  selectProductCategories,
-  selectProductsByCategory,
-} from '@/store/products/selectors';
+import { selectVisibleCategoriesWithProducts } from '@/store/products/selectors';
 import { prettyUrlHash } from '@/utils/helpers';
 
 const select = (appState: AppState) => ({
-  productCategories: selectProductCategories(appState),
-  productsByCategory: selectProductsByCategory(appState),
+  productCategories: selectVisibleCategoriesWithProducts(appState),
 });
 
 const actions = {
@@ -57,9 +53,9 @@ class ProductsList extends React.Component<Props, State> {
     try {
       if (window.location.hash) {
         hashTab = props.productCategories.find(
-          (category) =>
+          ({ category }) =>
             window.location.hash.substring(1) === prettyUrlHash(category.title),
-        );
+        )?.category;
       }
       if (hashTab) {
         activeProductsTab = hashTab.title;
@@ -75,13 +71,27 @@ class ProductsList extends React.Component<Props, State> {
     };
   }
 
-  static getProductsList(products: Product[]) {
+  static getProductsList(products: Product[], category?: Category) {
     return (
-      <div className="slds-grid slds-wrap">
-        {products.map((item) => (
-          <ProductItem item={item} key={item.id} />
-        ))}
-      </div>
+      <>
+        {category?.description && (
+          <div
+            className="slds-text-longform
+              slds-p-around_small
+              slds-size_1-of-1
+              slds-large-size_2-of-3
+              markdown"
+            dangerouslySetInnerHTML={{
+              __html: category.description,
+            }}
+          />
+        )}
+        <div className="slds-size_1-of-1 slds-grid slds-wrap">
+          {products.map((item) => (
+            <ProductItem item={item} key={item.id} />
+          ))}
+        </div>
+      </>
     );
   }
 
@@ -97,7 +107,7 @@ class ProductsList extends React.Component<Props, State> {
   handleSelect = (index: number) => {
     const { history, productCategories } = this.props;
     try {
-      const category = productCategories[index];
+      const { category } = productCategories[index];
 
       /* istanbul ignore else */
       if (category) {
@@ -119,9 +129,9 @@ class ProductsList extends React.Component<Props, State> {
     const { productCategories, doFetchMoreProducts } = this.props;
     const activeCategory = activeProductsTab
       ? productCategories.find(
-          (category) => category.title === activeProductsTab,
-        )
-      : productCategories[0];
+          ({ category }) => category.title === activeProductsTab,
+        )?.category
+      : productCategories[0]?.category;
     const moreProductsUrl = activeCategory?.next;
 
     if (activeCategory && moreProductsUrl && !fetchingProducts) {
@@ -163,9 +173,9 @@ class ProductsList extends React.Component<Props, State> {
 
   render() {
     const { activeProductsTab, fetchingProducts } = this.state;
-    const { productsByCategory, productCategories } = this.props;
+    const { productCategories } = this.props;
     let contents;
-    switch (productsByCategory.size) {
+    switch (productCategories.length) {
       case 0: {
         // No products; show empty message
         const msg = i18n.t('We couldn’t find any products. Try again later?');
@@ -173,24 +183,24 @@ class ProductsList extends React.Component<Props, State> {
         break;
       }
       case 1: {
-        // Products are all in one category; no need for multicategory tabs
-        const products = Array.from(productsByCategory.values())[0];
-        contents = ProductsList.getProductsList(products);
+        // Products are all in one category; no need for category tabs
+        const { category, products } = productCategories[0];
+        contents = ProductsList.getProductsList(products, category);
         break;
       }
       default: {
         // Products are in multiple categories; divide into tabs
         const tabs = [];
-        for (const [category, products] of productsByCategory) {
+        for (const { category, products } of productCategories) {
           const panel = (
-            <TabsPanel label={category} key={category}>
-              {ProductsList.getProductsList(products)}
+            <TabsPanel label={category.title} key={category.id}>
+              {ProductsList.getProductsList(products, category)}
             </TabsPanel>
           );
           tabs.push(panel);
         }
         const savedTabIndex = productCategories.findIndex(
-          (category) => category.title === activeProductsTab,
+          ({ category }) => category.title === activeProductsTab,
         );
         contents = (
           <Tabs
@@ -211,13 +221,14 @@ class ProductsList extends React.Component<Props, State> {
           <Header history={this.props.history} />
           <PageHeader />
           <div className="slds-p-around_x-large">
-            {window.GLOBALS.SITE?.welcome_text ? ( // These messages are pre-cleaned by the API
+            {window.GLOBALS.SITE?.welcome_text ? (
+              // These messages are pre-cleaned by the API
               <div
                 className="markdown
                   slds-p-bottom_medium
                   slds-text-longform
                   slds-size_1-of-1
-                  slds-medium-size_1-of-2"
+                  slds-large-size_2-of-3"
                 dangerouslySetInnerHTML={{
                   __html: window.GLOBALS.SITE.welcome_text,
                 }}

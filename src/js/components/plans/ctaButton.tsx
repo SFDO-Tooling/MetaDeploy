@@ -2,17 +2,22 @@ import Button from '@salesforce/design-system-react/components/button';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import i18n from 'i18next';
 import * as React from 'react';
-import { RouteComponentProps } from 'react-router';
+import { RouteComponentProps } from 'react-router-dom';
 
 import Login from '@/components/header/login';
 import ClickThroughAgreementModal from '@/components/plans/clickThroughAgreementModal';
 import { SelectedSteps } from '@/components/plans/detail';
 import PreflightWarningModal from '@/components/plans/preflightWarningModal';
+import SpinOrgModal from '@/components/scratchOrgs/spinOrgModal';
 import { JobData, JobStarted } from '@/store/jobs/actions';
+import { FetchOrgJobsSucceeded } from '@/store/org/actions';
 import { PreflightStarted } from '@/store/plans/actions';
 import { CONSTANTS, Plan, Preflight, StepResult } from '@/store/plans/reducer';
+import { ScratchOrgSpinning } from '@/store/scratchOrgs/actions';
+import { ScratchOrg } from '@/store/scratchOrgs/reducer';
 import { User } from '@/store/user/reducer';
 import { getUrlParam, removeUrlParam, UrlParams } from '@/utils/api';
+import { SCRATCH_ORG_STATUSES, SUPPORTED_ORGS } from '@/utils/constants';
 import routes from '@/utils/routes';
 
 type Props = {
@@ -24,13 +29,19 @@ type Props = {
   plan: Plan;
   preflight: Preflight | null | undefined;
   selectedSteps: SelectedSteps;
+  scratchOrg: ScratchOrg | null | undefined;
   preventAction: boolean;
   doStartPreflight: (planId: string) => Promise<PreflightStarted>;
   doStartJob: (data: JobData) => Promise<JobStarted>;
+  doSpinScratchOrg: (
+    planId: string,
+    email: string,
+  ) => Promise<ScratchOrgSpinning>;
+  doLogout: () => Promise<FetchOrgJobsSucceeded>;
 };
 
 const { AUTO_START_PREFLIGHT, RESULT_STATUS, STATUS } = CONSTANTS;
-const btnClasses = 'slds-size_full slds-p-vertical_xx-small';
+const btnClasses = 'slds-p-vertical_xx-small';
 
 // For use as a "loading" button label
 export const LabelWithSpinner = ({
@@ -62,9 +73,9 @@ export const LoginBtn = ({
 }) => (
   <Login
     id={id || 'plan-detail-login'}
+    triggerClassName="slds-button"
     buttonClassName={btnClasses}
     buttonVariant="brand"
-    triggerClassName="slds-size_full"
     label={label}
     menuPosition="relative"
     flipped
@@ -77,15 +88,19 @@ export const ActionBtn = ({
   label,
   disabled,
   onClick,
+  btnVariant,
+  className,
 }: {
   label: string | React.ReactNode;
   disabled?: boolean;
   onClick?: () => void;
+  btnVariant?: string;
+  className?: string;
 }) => (
   <Button
-    className={btnClasses}
+    className={className || btnClasses}
     label={label}
-    variant="brand"
+    variant={btnVariant || 'brand'}
     onClick={onClick}
     disabled={disabled}
   />
@@ -95,7 +110,8 @@ class CtaButton extends React.Component<
   Props,
   {
     preflightModalOpen: boolean;
-    clickThroughModal: boolean;
+    clickThroughModalOpen: boolean;
+    spinOrgModalOpen: boolean;
     startPreflight: boolean;
   }
 > {
@@ -103,7 +119,8 @@ class CtaButton extends React.Component<
     super(props);
     this.state = {
       preflightModalOpen: false,
-      clickThroughModal: false,
+      clickThroughModalOpen: false,
+      spinOrgModalOpen: false,
       startPreflight: false,
     };
   }
@@ -113,7 +130,7 @@ class CtaButton extends React.Component<
     if (startPreflight === 'true') {
       const { history, preflight, plan } = this.props;
       // Remove query-string from URL
-      history.push({ search: removeUrlParam(AUTO_START_PREFLIGHT) });
+      history.replace({ search: removeUrlParam(AUTO_START_PREFLIGHT) });
       // Bail if no preflight is required
       if (!plan.requires_preflight) {
         return;
@@ -168,7 +185,11 @@ class CtaButton extends React.Component<
   };
 
   toggleClickThroughModal = (isOpen: boolean) => {
-    this.setState({ clickThroughModal: isOpen });
+    this.setState({ clickThroughModalOpen: isOpen });
+  };
+
+  toggleSpinOrgModal = (isOpen: boolean) => {
+    this.setState({ spinOrgModalOpen: isOpen });
   };
 
   openPreflightModal = () => {
@@ -177,6 +198,10 @@ class CtaButton extends React.Component<
 
   openClickThroughModal = () => {
     this.toggleClickThroughModal(true);
+  };
+
+  openSpinOrgModal = () => {
+    this.toggleSpinOrgModal(true);
   };
 
   startPreflight = () => {
@@ -220,6 +245,11 @@ class CtaButton extends React.Component<
     );
   };
 
+  spinOrg = (email: string) => {
+    const { plan, doSpinScratchOrg } = this.props;
+    doSpinScratchOrg(plan.id, email);
+  };
+
   // Returns an action btn if logged in with a valid token;
   // otherwise returns a login dropdown
   getLoginOrActionBtn(
@@ -252,10 +282,10 @@ class CtaButton extends React.Component<
 
   getClickThroughAgreementModal() {
     const { clickThroughAgreement } = this.props;
-    const { clickThroughModal } = this.state;
+    const { clickThroughModalOpen } = this.state;
     return clickThroughAgreement ? (
       <ClickThroughAgreementModal
-        isOpen={clickThroughModal}
+        isOpen={clickThroughModalOpen}
         text={clickThroughAgreement}
         toggleModal={this.toggleClickThroughModal}
         startJob={this.startJob}
@@ -278,7 +308,7 @@ class CtaButton extends React.Component<
     );
   }
 
-  render() {
+  getPersistentOrgCTA() {
     const {
       user,
       clickThroughAgreement,
@@ -286,52 +316,47 @@ class CtaButton extends React.Component<
       preflight,
       selectedSteps,
     } = this.props;
+    const { preflightModalOpen } = this.state;
+    const usesBothOrgTypes = plan.supported_orgs === SUPPORTED_ORGS.Both;
+
+    if (user && !user.org_type) {
+      return (
+        <LoginBtn
+          id="org-not-allowed-login"
+          label={i18n.t('Log In With a Different Org')}
+        />
+      );
+    }
+
     if (plan.requires_preflight) {
       if (!user) {
         // Require login first...
         return (
           <LoginBtn
-            label={i18n.t('Log In to Start Pre-Install Validation')}
+            label={
+              usesBothOrgTypes
+                ? i18n.t('Log In to Existing Org')
+                : i18n.t('Log In to Start Pre-Install Validation')
+            }
             redirectParams={{ [AUTO_START_PREFLIGHT]: true }}
           />
         );
       }
 
-      // An `undefined` preflight means we don't know whether a preflight exists
-      if (preflight === undefined) {
-        return (
-          <ActionBtn
-            label={<LabelWithSpinner label={i18n.t('Loading…')} />}
-            disabled
-          />
-        );
-      }
-
-      // A `null` preflight means we already fetched and no prior preflight exists
       if (preflight === null) {
-        // No prior preflight exists
+        // A `null` preflight means we already fetched and
+        // no prior preflight exists
         return this.getLoginOrActionBtn(
           i18n.t('Start Pre-Install Validation'),
-          i18n.t('Log In to Start Pre-Install Validation'),
+          usesBothOrgTypes
+            ? i18n.t('Log In to Existing Org')
+            : i18n.t('Log In to Start Pre-Install Validation'),
           this.startPreflight,
           true,
         );
       }
 
-      switch (preflight.status) {
-        case STATUS.STARTED: {
-          // Preflight in progress...
-          return (
-            <ActionBtn
-              label={
-                <LabelWithSpinner
-                  label={i18n.t('Pre-Install Validation In Progress…')}
-                />
-              }
-              disabled
-            />
-          );
-        }
+      switch (preflight?.status) {
         case STATUS.COMPLETE: {
           // Preflight is done, valid, and has no errors -- allow installation
           if (preflight.is_ready) {
@@ -344,12 +369,16 @@ class CtaButton extends React.Component<
             const btn = hasWarnings
               ? this.getLoginOrActionBtn(
                   i18n.t('View Warnings to Continue Installation'),
-                  i18n.t('View Warnings to Continue Installation'),
+                  /* istanbul ignore next */ usesBothOrgTypes
+                    ? i18n.t('Log In to Existing Org')
+                    : i18n.t('Log In to Continue Installation'),
                   this.openPreflightModal,
                 )
               : this.getLoginOrActionBtn(
                   i18n.t('Install'),
-                  i18n.t('Log In to Install'),
+                  usesBothOrgTypes
+                    ? i18n.t('Log In to Existing Org')
+                    : i18n.t('Log In to Install'),
                   action,
                 );
             return (
@@ -357,7 +386,7 @@ class CtaButton extends React.Component<
                 {btn}
                 {hasWarnings ? (
                   <PreflightWarningModal
-                    isOpen={this.state.preflightModalOpen}
+                    isOpen={preflightModalOpen}
                     toggleModal={this.togglePreflightModal}
                     startJob={action}
                     results={preflight.results}
@@ -372,7 +401,9 @@ class CtaButton extends React.Component<
           // Prior preflight exists, but is no longer valid or has errors
           return this.getLoginOrActionBtn(
             i18n.t('Re-Run Pre-Install Validation'),
-            i18n.t('Log In to Re-Run Pre-Install Validation'),
+            usesBothOrgTypes
+              ? i18n.t('Log In to Existing Org')
+              : i18n.t('Log In to Re-Run Pre-Install Validation'),
             this.startPreflight,
             true,
           );
@@ -382,15 +413,17 @@ class CtaButton extends React.Component<
           // Prior preflight exists, but failed or had plan-level errors
           return this.getLoginOrActionBtn(
             i18n.t('Re-Run Pre-Install Validation'),
-            i18n.t('Log In to Re-Run Pre-Install Validation'),
+            usesBothOrgTypes
+              ? i18n.t('Log In to Existing Org')
+              : i18n.t('Log In to Re-Run Pre-Install Validation'),
             this.startPreflight,
             true,
           );
         }
       }
-      return null;
     }
 
+    // No preflight required:
     // Terms must be confirmed before proceeding
     const action = clickThroughAgreement
       ? this.openClickThroughModal
@@ -399,10 +432,252 @@ class CtaButton extends React.Component<
       <>
         {this.getLoginOrActionBtn(
           i18n.t('Install'),
-          i18n.t('Log In to Install'),
+          /* istanbul ignore next */ usesBothOrgTypes
+            ? i18n.t('Log In to Existing Org')
+            : i18n.t('Log In to Install'),
           action,
         )}
         {this.getClickThroughAgreementModal()}
+      </>
+    );
+  }
+
+  getScratchOrgCTA() {
+    const {
+      user,
+      clickThroughAgreement,
+      plan,
+      preflight,
+      selectedSteps,
+      scratchOrg,
+      preventAction,
+      doLogout,
+    } = this.props;
+    const { spinOrgModalOpen } = this.state;
+    const usesBothOrgTypes = plan.supported_orgs === SUPPORTED_ORGS.Both;
+    const hasValidScratchOrg =
+      scratchOrg?.status === SCRATCH_ORG_STATUSES.started ||
+      scratchOrg?.status === SCRATCH_ORG_STATUSES.complete;
+    const btnVariant =
+      usesBothOrgTypes && !hasValidScratchOrg ? 'outline-brand' : 'brand';
+
+    if (scratchOrg?.status === SCRATCH_ORG_STATUSES.started) {
+      // Scratch org is being created
+      return (
+        <ActionBtn
+          label={<LabelWithSpinner label={i18n.t('Creating Scratch Org…')} />}
+          disabled
+          btnVariant={btnVariant}
+        />
+      );
+    }
+
+    if (scratchOrg?.status !== SCRATCH_ORG_STATUSES.complete) {
+      // No existing (valid, done) scratch org
+      if (user) {
+        return (
+          <ActionBtn
+            label={i18n.t('Log Out to Create Scratch Org')}
+            onClick={doLogout}
+            btnVariant={btnVariant}
+          />
+        );
+      }
+      return (
+        <>
+          <ActionBtn
+            label={i18n.t('Create Scratch Org')}
+            onClick={this.openSpinOrgModal}
+            disabled={preventAction}
+            btnVariant={btnVariant}
+          />
+          <SpinOrgModal
+            isOpen={spinOrgModalOpen}
+            clickThroughAgreement={clickThroughAgreement}
+            toggleModal={this.toggleSpinOrgModal}
+            doSpinOrg={this.spinOrg}
+          />
+        </>
+      );
+    }
+
+    if (user) {
+      return (
+        <ActionBtn
+          label={i18n.t('Log Out to Use Scratch Org')}
+          onClick={doLogout}
+          btnVariant={btnVariant}
+        />
+      );
+    }
+
+    if (plan.requires_preflight) {
+      if (preflight === null) {
+        // A `null` preflight means we already fetched and
+        // no prior preflight exists
+        return (
+          <ActionBtn
+            label={
+              /* istanbul ignore next */ usesBothOrgTypes
+                ? i18n.t('Start Pre-Install Validation on Scratch Org')
+                : i18n.t('Start Pre-Install Validation')
+            }
+            onClick={this.startPreflight}
+            disabled={preventAction}
+            btnVariant={btnVariant}
+          />
+        );
+      }
+
+      switch (preflight?.status) {
+        case STATUS.COMPLETE: {
+          // Preflight is done, valid, and has no errors -- allow installation
+          if (preflight.is_ready) {
+            const hasWarnings = this.warningsInSelectedSteps();
+            // Warnings must be confirmed before proceeding
+            const btn = hasWarnings ? (
+              <ActionBtn
+                label={
+                  /* istanbul ignore next */ usesBothOrgTypes
+                    ? i18n.t(
+                        'View Warnings to Continue Installation on Scratch Org',
+                      )
+                    : i18n.t('View Warnings to Continue Installation')
+                }
+                onClick={this.openPreflightModal}
+                disabled={preventAction}
+                btnVariant={btnVariant}
+              />
+            ) : (
+              <ActionBtn
+                label={
+                  /* istanbul ignore next */ usesBothOrgTypes
+                    ? i18n.t('Install on Scratch Org')
+                    : i18n.t('Install')
+                }
+                onClick={this.startJob}
+                disabled={preventAction}
+                btnVariant={btnVariant}
+              />
+            );
+            return (
+              <>
+                {btn}
+                {hasWarnings ? (
+                  <PreflightWarningModal
+                    isOpen={this.state.preflightModalOpen}
+                    toggleModal={this.togglePreflightModal}
+                    startJob={this.startJob}
+                    results={preflight.results}
+                    steps={/* istanbul ignore next */ plan.steps || []}
+                    selectedSteps={selectedSteps}
+                  />
+                ) : null}
+              </>
+            );
+          }
+          // Prior preflight exists, but is no longer valid or has errors
+          return (
+            <ActionBtn
+              label={
+                /* istanbul ignore next */ usesBothOrgTypes
+                  ? i18n.t('Re-Run Pre-Install Validation on Scratch Org')
+                  : i18n.t('Re-Run Pre-Install Validation')
+              }
+              onClick={this.startPreflight}
+              disabled={preventAction}
+              btnVariant={btnVariant}
+            />
+          );
+        }
+        case STATUS.CANCELED:
+        case STATUS.FAILED: {
+          // Prior preflight exists, but failed or had plan-level errors
+          return (
+            <ActionBtn
+              label={
+                /* istanbul ignore next */ usesBothOrgTypes
+                  ? i18n.t('Re-Run Pre-Install Validation on Scratch Org')
+                  : i18n.t('Re-Run Pre-Install Validation')
+              }
+              onClick={this.startPreflight}
+              disabled={preventAction}
+              btnVariant={btnVariant}
+            />
+          );
+        }
+      }
+    }
+
+    // No preflight required:
+    return (
+      <ActionBtn
+        label={
+          /* istanbul ignore next */ usesBothOrgTypes
+            ? i18n.t('Install on Scratch Org')
+            : i18n.t('Install')
+        }
+        onClick={this.startJob}
+        disabled={preventAction}
+        btnVariant={btnVariant}
+      />
+    );
+  }
+
+  render() {
+    const { plan, preflight, scratchOrg } = this.props;
+    const canUsePersistentOrg = plan.supported_orgs !== SUPPORTED_ORGS.Scratch;
+    const canUseScratchOrg = Boolean(
+      window.GLOBALS.SCRATCH_ORGS_AVAILABLE &&
+        plan.supported_orgs !== SUPPORTED_ORGS.Persistent,
+    );
+    const hasValidScratchOrg =
+      canUseScratchOrg &&
+      (scratchOrg?.status === SCRATCH_ORG_STATUSES.started ||
+        scratchOrg?.status === SCRATCH_ORG_STATUSES.complete);
+
+    if (canUseScratchOrg && scratchOrg === undefined) {
+      // An `undefined` org means we don't know whether the org exists
+      return (
+        <ActionBtn
+          label={<LabelWithSpinner label={i18n.t('Loading…')} />}
+          disabled
+        />
+      );
+    }
+
+    if (plan.requires_preflight) {
+      if (preflight === undefined) {
+        // An `undefined` preflight means we don't know whether preflight exists
+        return (
+          <ActionBtn
+            label={<LabelWithSpinner label={i18n.t('Loading…')} />}
+            disabled
+          />
+        );
+      }
+
+      if (preflight?.status === STATUS.STARTED) {
+        // Preflight in progress...
+        return (
+          <ActionBtn
+            label={
+              <LabelWithSpinner
+                label={i18n.t('Pre-Install Validation In Progress…')}
+              />
+            }
+            disabled
+          />
+        );
+      }
+    }
+
+    return (
+      <>
+        {canUsePersistentOrg && !hasValidScratchOrg
+          ? this.getPersistentOrgCTA()
+          : null}
+        {canUseScratchOrg ? this.getScratchOrgCTA() : null}
       </>
     );
   }

@@ -1,4 +1,5 @@
 import logging
+import uuid
 from statistics import median
 from typing import Union
 
@@ -18,7 +19,8 @@ from django.contrib.auth.models import UserManager as BaseUserManager
 from django.contrib.postgres.fields import ArrayField, JSONField
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
-from django.core.validators import RegexValidator
+from django.core.serializers.json import DjangoJSONEncoder
+from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
 from django.db.models import Count, F, Func, Q
 from django.utils.translation import gettext_lazy as _
@@ -27,13 +29,14 @@ from model_utils import Choices, FieldTracker
 from parler.managers import TranslatableQuerySet
 from parler.models import TranslatableModel, TranslatedFields
 from sfdo_template_helpers.crypto import fernet_decrypt
-from sfdo_template_helpers.fields import MarkdownField
+from sfdo_template_helpers.fields import MarkdownField as BaseMarkdownField
 from sfdo_template_helpers.slugs import AbstractSlug, SlugMixin
 
 from .belvedere_utils import convert_to_18
 from .constants import ERROR, HIDE, OPTIONAL, ORGANIZATION_DETAILS
 from .flows import JobFlowCallback, PreflightFlowCallback
 from .push import (
+    notify_org_changed,
     notify_org_result_changed,
     notify_post_job,
     notify_post_task,
@@ -42,12 +45,15 @@ from .push import (
     preflight_failed,
     preflight_invalidated,
 )
+from .salesforce import refresh_access_token
 
 logger = logging.getLogger(__name__)
 VERSION_STRING = r"^[a-zA-Z0-9._+-]+$"
 STEP_NUM = r"^[\d\./]+$"
 WorkableModel = Union["Job", "PreflightResult"]
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
+SUPPORTED_ORG_TYPES = Choices("Persistent", "Scratch", "Both")
+PRODUCT_LAYOUTS = Choices("Default", "Card")
 
 
 class HashIdMixin(models.Model):
@@ -57,9 +63,17 @@ class HashIdMixin(models.Model):
     id = HashidAutoField(primary_key=True)
 
 
+class MarkdownField(BaseMarkdownField):
+    def __init__(self, *args, **kwargs):
+        kwargs["property_suffix"] = kwargs.get("property_suffix", "_markdown")
+        kwargs["blank"] = kwargs.get("blank", True)
+        kwargs["help_text"] = kwargs.get("help_text", "Markdown is supported")
+        super().__init__(*args, **kwargs)
+
+
 class AllowedList(models.Model):
     title = models.CharField(max_length=128, unique=True)
-    description = MarkdownField(blank=True, property_suffix="_markdown")
+    description = MarkdownField()
     org_type = ArrayField(
         models.CharField(max_length=64, choices=ORG_TYPES),
         blank=True,
@@ -135,7 +149,7 @@ class UserManager(BaseUserManager):
 class User(HashIdMixin, AbstractUser):
     objects = UserManager()
 
-    def subscribable_by(self, user):
+    def subscribable_by(self, user, session):
         return self == user
 
     @property
@@ -204,16 +218,28 @@ class User(HashIdMixin, AbstractUser):
         return None
 
 
-class ProductCategory(models.Model):
-    title = models.CharField(max_length=256)
-    order_key = models.PositiveIntegerField(default=0)
-
+class ProductCategory(TranslatableModel):
     class Meta:
         verbose_name_plural = "product categories"
         ordering = ("order_key",)
 
+    order_key = models.PositiveIntegerField(default=0)
+    is_listed = models.BooleanField(default=True)
+
+    translations = TranslatedFields(
+        title=models.CharField(max_length=256),
+        description=MarkdownField(),
+    )
+
+    @property
+    def description_markdown(self):
+        return self._get_translated_model(use_fallback=True).description_markdown
+
     def __str__(self):
         return self.title
+
+    def get_translation_strategy(self):
+        return "fields", f"{self.title}:product_category"
 
 
 class ProductSlug(AbstractSlug):
@@ -245,9 +271,9 @@ class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel)
     translations = TranslatedFields(
         title=models.CharField(max_length=256),
         short_description=models.TextField(blank=True),
-        description=MarkdownField(property_suffix="_markdown", blank=True),
-        click_through_agreement=MarkdownField(blank=True, property_suffix="_markdown"),
-        error_message=MarkdownField(blank=True, property_suffix="_markdown"),
+        description=MarkdownField(),
+        click_through_agreement=MarkdownField(),
+        error_message=MarkdownField(),
     )
 
     @property
@@ -278,6 +304,9 @@ class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel)
     repo_url = models.URLField(blank=True)
     is_listed = models.BooleanField(default=True)
     order_key = models.PositiveIntegerField(default=0)
+    layout = models.CharField(
+        choices=PRODUCT_LAYOUTS, default=PRODUCT_LAYOUTS.Default, max_length=64
+    )
 
     slug_class = ProductSlug
     slug_field_name = "title"
@@ -360,7 +389,7 @@ class Version(HashIdMixin, TranslatableModel):
         # get the most recently created plan for each plan template
         return (
             self.plan_set.filter(tier=Plan.Tier.additional)
-            .order_by("plan_template_id", "-created_at")
+            .order_by("plan_template_id", "order_key", "-created_at")
             .distinct("plan_template_id")
         )
 
@@ -389,9 +418,9 @@ class PlanSlug(AbstractSlug):
 class PlanTemplate(SlugMixin, TranslatableModel):
     name = models.CharField(max_length=100, blank=True)
     translations = TranslatedFields(
-        preflight_message=MarkdownField(blank=True, property_suffix="_markdown"),
-        post_install_message=MarkdownField(blank=True, property_suffix="_markdown"),
-        error_message=MarkdownField(blank=True, property_suffix="_markdown"),
+        preflight_message=MarkdownField(),
+        post_install_message=MarkdownField(),
+        error_message=MarkdownField(),
     )
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
 
@@ -423,12 +452,8 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
 
     translations = TranslatedFields(
         title=models.CharField(max_length=128),
-        preflight_message_additional=MarkdownField(
-            blank=True, property_suffix="_markdown"
-        ),
-        post_install_message_additional=MarkdownField(
-            blank=True, property_suffix="_markdown"
-        ),
+        preflight_message_additional=MarkdownField(),
+        post_install_message_additional=MarkdownField(),
     )
 
     plan_template = models.ForeignKey(PlanTemplate, on_delete=models.PROTECT)
@@ -442,10 +467,25 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
             "Use this to optionally override the Version's commit_ish."
         ),
     )
+    order_key = models.PositiveIntegerField(default=0)
 
     tier = models.CharField(choices=Tier, default=Tier.primary, max_length=64)
     is_listed = models.BooleanField(default=True)
     preflight_checks = JSONField(default=list, blank=True)
+    supported_orgs = models.CharField(
+        max_length=32,
+        choices=SUPPORTED_ORG_TYPES,
+        default=SUPPORTED_ORG_TYPES.Persistent,
+    )
+    org_config_name = models.CharField(max_length=64, default="release", blank=True)
+    scratch_org_duration_override = models.IntegerField(
+        "Scratch Org duration (days)",
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(1), MaxValueValidator(30)],
+        help_text="Lifetime of Scratch Orgs created for this plan. Will inherit the "
+        "global default value if left blank.",
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -488,6 +528,10 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
             return None
         return median(durations)
 
+    @property
+    def scratch_org_duration(self):
+        return self.scratch_org_duration_override or settings.SCRATCH_ORG_DURATION_DAYS
+
     def natural_key(self):
         return (self.version, self.title)
 
@@ -507,6 +551,21 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
             "fields",
             f"{self.plan_template.product.slug}:plan:{self.plan_template.name}",
         )
+
+    def is_visible_to(self, *args, **kwargs):
+        if self.supported_orgs != SUPPORTED_ORG_TYPES.Persistent:
+            return True
+        return super().is_visible_to(*args, **kwargs)
+
+    def clean(self):
+        if self.visible_to and self.supported_orgs != SUPPORTED_ORG_TYPES.Persistent:
+            raise ValidationError(
+                {
+                    "supported_orgs": _(
+                        'Restricted plans (with a "visible to" AllowedList) can only support persistent org types.'
+                    )
+                }
+            )
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
@@ -663,8 +722,13 @@ class Job(HashIdMixin, models.Model):
         if self.user:
             return self.user.instance_url
 
-    def subscribable_by(self, user):
-        return self.is_public or user.is_staff or user == self.user
+    def subscribable_by(self, user, session):
+        # Restrict this to public Jobs, staff users, Job owners, or users who have a
+        # valid scratch_org `uuid` in their session (matching this Job):
+        if self.is_public or user.is_staff or user == self.user:
+            return True
+        scratch_org = ScratchOrg.objects.get_from_session(session)
+        return scratch_org and scratch_org.org_id == self.org_id
 
     def skip_steps(self):
         return [
@@ -737,8 +801,8 @@ class Job(HashIdMixin, models.Model):
 
 
 class PreflightResultQuerySet(models.QuerySet):
-    def most_recent(self, *, user, plan, is_valid_and_complete=True):
-        kwargs = {"plan": plan, "user": user}
+    def most_recent(self, *, org_id, plan, is_valid_and_complete=True):
+        kwargs = {"org_id": org_id, "plan": plan}
         if is_valid_and_complete:
             kwargs.update({"is_valid": True, "status": PreflightResult.Status.complete})
         return self.filter(**kwargs).order_by("-created_at").first()
@@ -785,8 +849,13 @@ class PreflightResult(models.Model):
         if self.user:
             return self.user.instance_url
 
-    def subscribable_by(self, user):
-        return self.user == user
+    def subscribable_by(self, user, session):
+        # Restrict this to staff users, Preflight owners and users who have a valid
+        # scratch_org `uuid` in their session (matching this Preflight):
+        if user.is_staff or self.user == user:
+            return True
+        scratch_org = ScratchOrg.objects.get_from_session(session)
+        return scratch_org and scratch_org.org_id == self.org_id
 
     def has_any_errors(self):
         return any(
@@ -853,7 +922,7 @@ class PreflightResult(models.Model):
             self.push_if_failed()
             self.push_if_canceled()
             self.push_if_invalidated()
-        except RuntimeError as error:
+        except RuntimeError as error:  # pragma: nocover
             logger.warn(f"RuntimeError: {error}")
 
         return ret
@@ -870,14 +939,134 @@ class PreflightResult(models.Model):
         flow_coordinator.run(org)
 
 
+class ScratchOrgQuerySet(models.QuerySet):
+    def get_from_session(self, session):
+        """
+        Retrieve a ScratchOrg from the session by its UUID.
+
+        The UUID is placed in the session when the org is created
+        (`scratch_org_post` method on `PlanViewSet`),
+        or from a URL query string (`GetScratchOrgIdFromQueryStringMiddleware`).
+        """
+        uuid = session.get("scratch_org_id")
+        try:
+            return self.get(uuid=uuid)
+        except (ValidationError, ScratchOrg.DoesNotExist):
+            return None
+
+    def delete(self):
+        for scratch_org in self:
+            scratch_org.delete()
+
+
+class ScratchOrg(HashIdMixin, models.Model):
+    Status = Choices("started", "complete", "failed", "canceled")
+
+    plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
+    email = models.EmailField(null=True)
+
+    enqueued_at = models.DateTimeField(null=True)
+    job_id = models.UUIDField(null=True)
+    # This is set in a user's session to let them continue to access
+    # this job, without being otherwise auth'd:
+    uuid = models.UUIDField(default=uuid.uuid4)
+    created_at = models.DateTimeField(auto_now_add=True)
+    edited_at = models.DateTimeField(auto_now=True)
+    status = models.CharField(choices=Status, max_length=64, default=Status.started)
+    config = JSONField(null=True, blank=True, encoder=DjangoJSONEncoder)
+    org_id = models.CharField(null=True, blank=True, max_length=18)
+    expires_at = models.DateTimeField(null=True, blank=True)
+
+    objects = ScratchOrgQuerySet.as_manager()
+
+    def clean_config(self):
+        banned_keys = {"email", "access_token", "refresh_token"}
+        if self.config:
+            self.config = {
+                k: v for (k, v) in self.config.items() if k not in banned_keys
+            }
+
+    def save(self, *args, **kwargs):
+        self.clean_config()
+        ret = super().save(*args, **kwargs)
+        if not self.enqueued_at:
+            from .jobs import create_scratch_org_job
+
+            job = create_scratch_org_job.delay(self.id)
+            self.job_id = job.id
+            self.enqueued_at = job.enqueued_at
+            # Yes, this bounces two saves:
+            super().save()
+        return ret
+
+    def subscribable_by(self, user, session):
+        # Restrict this to staff users or users who have a valid scratch_org `uuid` in
+        # their session for this org:
+        if user.is_staff:
+            return True
+        scratch_org_id = session.get("scratch_org_id", None)
+        return scratch_org_id and scratch_org_id == str(self.uuid)
+
+    def queue_delete(self, should_delete_locally=True):
+        from .jobs import delete_scratch_org_job
+
+        delete_scratch_org_job.delay(self, should_delete_locally=should_delete_locally)
+
+    def delete(
+        self, *args, error=None, should_delete_on_sf=True, should_notify=True, **kwargs
+    ):
+        if should_notify:
+            async_to_sync(notify_org_changed)(
+                self, error=error, _type="SCRATCH_ORG_DELETED"
+            )
+        if should_delete_on_sf and self.org_id:
+            self.queue_delete()
+        else:
+            super().delete(*args, **kwargs)
+
+    def fail(self, error):
+        # This is not really necessary, since we're going to delete the org soon...
+        self.status = ScratchOrg.Status.failed
+        self.save()
+        async_to_sync(notify_org_changed)(self, error=error)
+        self.delete(should_notify=False)
+
+    def fail_job(self):
+        self.status = ScratchOrg.Status.failed
+        self.save()
+        async_to_sync(notify_org_changed)(self)
+        self.queue_delete(should_delete_locally=False)
+
+    def complete(self, org_config):
+        self.status = ScratchOrg.Status.complete
+        self.config = org_config.config
+        self.org_id = convert_to_18(org_config.org_id)
+        self.expires_at = org_config.expires
+        self.save()
+        async_to_sync(notify_org_changed)(self, _type="SCRATCH_ORG_CREATED")
+
+    def get_refreshed_org_config(self, org_name=None, keychain=None):
+        org_config = refresh_access_token(
+            scratch_org=self,
+            config=self.config,
+            org_name=org_name or self.plan.org_config_name,
+            keychain=keychain,
+        )
+        return org_config
+
+    def get_login_url(self):
+        org_config = self.get_refreshed_org_config()
+        return org_config.start_url
+
+
 class SiteProfile(TranslatableModel):
     site = models.OneToOneField(Site, on_delete=models.CASCADE)
 
     translations = TranslatedFields(
         name=models.CharField(max_length=64),
         company_name=models.CharField(max_length=64, blank=True),
-        welcome_text=MarkdownField(property_suffix="_markdown", blank=True),
-        copyright_notice=MarkdownField(property_suffix="_markdown", blank=True),
+        welcome_text=MarkdownField(),
+        copyright_notice=MarkdownField(),
     )
 
     show_metadeploy_wordmark = models.BooleanField(default=True)

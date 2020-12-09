@@ -1,21 +1,22 @@
+import IconSettings from '@salesforce/design-system-react/components/icon-settings';
+import settings from '@salesforce/design-system-react/components/settings';
+import UNSAFE_DirectionSettings from '@salesforce/design-system-react/components/utilities/UNSAFE_direction';
 import actionSprite from '@salesforce-ux/design-system/assets/icons/action-sprite/svg/symbols.svg';
 import customSprite from '@salesforce-ux/design-system/assets/icons/custom-sprite/svg/symbols.svg';
 import doctypeSprite from '@salesforce-ux/design-system/assets/icons/doctype-sprite/svg/symbols.svg';
 import standardSprite from '@salesforce-ux/design-system/assets/icons/standard-sprite/svg/symbols.svg';
 import utilitySprite from '@salesforce-ux/design-system/assets/icons/utility-sprite/svg/symbols.svg';
-import IconSettings from '@salesforce/design-system-react/components/icon-settings';
-import settings from '@salesforce/design-system-react/components/settings';
-import UNSAFE_DirectionSettings from '@salesforce/design-system-react/components/utilities/UNSAFE_direction';
+import { createBrowserHistory } from 'history';
 import i18n from 'i18next';
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
 import * as ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
-import { AnyAction, applyMiddleware, createStore } from 'redux';
+import { Redirect, Route, Router, Switch } from 'react-router-dom';
+import { applyMiddleware, createStore } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import logger from 'redux-logger';
-import thunk, { ThunkDispatch } from 'redux-thunk';
+import thunk from 'redux-thunk';
 
 import FourOhFour from '@/components/404';
 import AuthError from '@/components/authError';
@@ -26,13 +27,18 @@ import PlanDetail from '@/components/plans/detail';
 import { ProductDetail, VersionDetail } from '@/components/products/detail';
 import ProductsList from '@/components/products/list';
 import init_i18n from '@/i18n';
-import reducer from '@/store';
+import reducer, { ThunkDispatch } from '@/store';
+import { fetchOrgJobs } from '@/store/org/actions';
 import { fetchProducts } from '@/store/products/actions';
 import { login, refetchAllData } from '@/store/user/actions';
 import { User } from '@/store/user/reducer';
+import { getUrlParam, removeUrlParam } from '@/utils/api';
+import { SCRATCH_ORG_QS } from '@/utils/constants';
 import { log, logError } from '@/utils/logging';
 import { routePatterns } from '@/utils/routes';
 import { createSocket } from '@/utils/websockets';
+
+const history = createBrowserHistory();
 
 const App = () => (
   <DocumentTitle title={window.SITE_NAME}>
@@ -88,11 +94,19 @@ init_i18n((i18nError?: string) => {
   }
   const el = document.getElementById('app');
   if (el) {
+    // Remove scratch org UUID from URL
+    const scratchOrgUUID = getUrlParam(SCRATCH_ORG_QS);
+    if (scratchOrgUUID) {
+      history.replace({ search: removeUrlParam(SCRATCH_ORG_QS) });
+    }
+
     // Create store
     const appStore = createStore(
       reducer,
       undefined,
-      composeWithDevTools(applyMiddleware(thunk, logger)),
+      composeWithDevTools(
+        applyMiddleware(thunk.withExtraArgument(history), logger),
+      ),
     );
 
     // Connect to WebSocket server
@@ -103,9 +117,7 @@ init_i18n((i18nError?: string) => {
       dispatch: appStore.dispatch,
       options: {
         onreconnect: () => {
-          (appStore.dispatch as ThunkDispatch<any, void, AnyAction>)(
-            refetchAllData(),
-          );
+          (appStore.dispatch as ThunkDispatch)(refetchAllData());
         },
       },
     });
@@ -146,7 +158,7 @@ init_i18n((i18nError?: string) => {
       }
       if (user) {
         // Login
-        (appStore.dispatch as ThunkDispatch<any, void, AnyAction>)(login(user));
+        (appStore.dispatch as ThunkDispatch)(login(user));
       }
     }
     el.removeAttribute('data-user');
@@ -155,12 +167,11 @@ init_i18n((i18nError?: string) => {
     settings.setAppElement(el);
 
     // Fetch products before rendering App
-    (appStore.dispatch as ThunkDispatch<any, void, AnyAction>)(
-      fetchProducts(),
-    ).finally(() => {
+    (appStore.dispatch as ThunkDispatch)(fetchProducts()).finally(() => {
+      (appStore.dispatch as ThunkDispatch)(fetchOrgJobs());
       ReactDOM.render(
         <Provider store={appStore}>
-          <BrowserRouter>
+          <Router history={history}>
             <UNSAFE_DirectionSettings.Provider value={document.dir || 'ltr'}>
               <IconSettings
                 actionSprite={actionSprite}
@@ -172,7 +183,7 @@ init_i18n((i18nError?: string) => {
                 <App />
               </IconSettings>
             </UNSAFE_DirectionSettings.Provider>
-          </BrowserRouter>
+          </Router>
         </Provider>,
         el,
       );

@@ -1,15 +1,15 @@
 import i18n from 'i18next';
+import { find } from 'lodash';
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
 import { Trans } from 'react-i18next';
 import { connect, ConnectedProps } from 'react-redux';
-import { RouteComponentProps, withRouter } from 'react-router';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 
 import BackLink from '@/components/backLink';
 import BodyContainer from '@/components/bodyContainer';
 import Header from '@/components/header';
-import CtaButton, { LoginBtn } from '@/components/plans/ctaButton';
+import CtaButton from '@/components/plans/ctaButton';
 import PageHeader from '@/components/plans/header';
 import Intro from '@/components/plans/intro';
 import PreflightResults, {
@@ -29,7 +29,7 @@ import {
 } from '@/components/utils';
 import { AppState } from '@/store';
 import { startJob } from '@/store/jobs/actions';
-import { selectOrg } from '@/store/org/selectors';
+import { selectOrgs } from '@/store/org/selectors';
 import { fetchPreflight, startPreflight } from '@/store/plans/actions';
 import { CONSTANTS, Step } from '@/store/plans/reducer';
 import {
@@ -48,7 +48,11 @@ import {
   selectVersion,
   selectVersionLabel,
 } from '@/store/products/selectors';
+import { fetchScratchOrg, spinScratchOrg } from '@/store/scratchOrgs/actions';
+import { selectScratchOrg } from '@/store/scratchOrgs/selectors';
+import { logout } from '@/store/user/actions';
 import { selectUserState } from '@/store/user/selectors';
+import { SCRATCH_ORG_STATUSES, SUPPORTED_ORGS } from '@/utils/constants';
 import routes from '@/utils/routes';
 
 const select = (appState: AppState, props: RouteComponentProps) => ({
@@ -60,7 +64,8 @@ const select = (appState: AppState, props: RouteComponentProps) => ({
   plan: selectPlan(appState, props),
   planSlug: selectPlanSlug(appState, props),
   preflight: selectPreflight(appState, props),
-  org: selectOrg(appState),
+  orgs: selectOrgs(appState),
+  scratchOrg: selectScratchOrg(appState, props),
 });
 
 const actions = {
@@ -70,6 +75,9 @@ const actions = {
   doFetchPreflight: fetchPreflight,
   doStartPreflight: startPreflight,
   doStartJob: startJob,
+  doSpinScratchOrg: spinScratchOrg,
+  doFetchScratchOrg: fetchScratchOrg,
+  doLogout: logout,
 };
 
 const connector = connect(select, actions);
@@ -128,10 +136,21 @@ class PlanDetail extends React.Component<Props, State> {
   }
 
   fetchPreflightIfMissing() {
-    const { user, plan, preflight, doFetchPreflight } = this.props;
-    if (user && preflight === undefined && plan?.requires_preflight) {
+    const { plan, preflight, doFetchPreflight } = this.props;
+    if (preflight === undefined && plan?.requires_preflight) {
       // Fetch most recent preflight result (if any exists)
       doFetchPreflight(plan.id);
+    }
+  }
+
+  fetchScratchOrgIfMissing() {
+    const { plan, scratchOrg, doFetchScratchOrg } = this.props;
+    const canCreateOrg = Boolean(
+      window.GLOBALS.SCRATCH_ORGS_AVAILABLE &&
+        plan?.supported_orgs !== SUPPORTED_ORGS.Persistent,
+    );
+    if (plan && canCreateOrg && scratchOrg === undefined) {
+      doFetchScratchOrg(plan.id);
     }
   }
 
@@ -140,6 +159,7 @@ class PlanDetail extends React.Component<Props, State> {
     this.fetchVersionIfMissing();
     this.fetchPlanIfMissing();
     this.fetchPreflightIfMissing();
+    this.fetchScratchOrgIfMissing();
   }
 
   componentDidUpdate(prevProps: Props) {
@@ -148,10 +168,10 @@ class PlanDetail extends React.Component<Props, State> {
       productSlug,
       version,
       versionLabel,
-      user,
       plan,
       planSlug,
       preflight,
+      scratchOrg,
     } = this.props;
     const productChanged =
       product !== prevProps.product || productSlug !== prevProps.productSlug;
@@ -159,20 +179,23 @@ class PlanDetail extends React.Component<Props, State> {
       productChanged ||
       version !== prevProps.version ||
       versionLabel !== prevProps.versionLabel;
-    const userChanged = user !== prevProps.user;
     const planChanged =
       versionChanged ||
       plan !== prevProps.plan ||
       planSlug !== prevProps.planSlug;
     const preflightChanged = preflight !== prevProps.preflight;
+    const scratchOrgChanged = scratchOrg !== prevProps.scratchOrg;
     if (productChanged) {
       this.fetchProductIfMissing();
     }
     if (versionChanged) {
       this.fetchVersionIfMissing();
     }
-    if (userChanged || planChanged || preflightChanged) {
+    if (planChanged || preflightChanged) {
       this.fetchPreflightIfMissing();
+    }
+    if (planChanged || scratchOrgChanged) {
+      this.fetchScratchOrgIfMissing();
     }
     if (planChanged) {
       this.fetchPlanIfMissing();
@@ -237,13 +260,15 @@ class PlanDetail extends React.Component<Props, State> {
   }
 
   getPostMessage() {
-    const { user, product, version, plan, org } = this.props;
+    const { user, product, version, plan, orgs } = this.props;
 
     /* istanbul ignore if */
     if (!product || !version || !plan) {
       return null;
     }
-    if (user && !user.org_type) {
+
+    const canLogin = plan.supported_orgs !== SUPPORTED_ORGS.Scratch;
+    if (canLogin && user && !user.org_type) {
       return (
         <>
           <div className="slds-p-bottom_xx-small">
@@ -262,42 +287,45 @@ class PlanDetail extends React.Component<Props, State> {
         </>
       );
     }
-    if (org) {
-      if (org.current_job) {
-        const { product_slug, version_label, plan_slug, id } = org.current_job;
-        return (
-          <p>
-            <WarningIcon />
-            <span>
-              <Trans i18nKey="installationCurrentlyRunning">
-                An installation is currently running on this org.{' '}
-                <Link
-                  to={routes.job_detail(
-                    product_slug,
-                    version_label,
-                    plan_slug,
-                    id,
-                  )}
-                >
-                  View the running installation.
-                </Link>
-              </Trans>
-            </span>
-          </p>
-        );
-      }
-      if (org.current_preflight) {
-        return (
-          <p>
-            <WarningIcon />
-            <span>
-              {i18n.t(
-                'A pre-install validation is currently running on this org.',
-              )}
-            </span>
-          </p>
-        );
-      }
+
+    const currentJob = find(orgs, (org) => org.current_job !== null)
+      ?.current_job;
+    const currentPreflight = find(orgs, (org) => org.current_preflight !== null)
+      ?.current_preflight;
+    if (currentJob) {
+      const { product_slug, version_label, plan_slug, id } = currentJob;
+      return (
+        <p>
+          <WarningIcon />
+          <span>
+            <Trans i18nKey="installationCurrentlyRunning">
+              An installation is currently running on this org.{' '}
+              <Link
+                to={routes.job_detail(
+                  product_slug,
+                  version_label,
+                  plan_slug,
+                  id,
+                )}
+              >
+                View the running installation.
+              </Link>
+            </Trans>
+          </span>
+        </p>
+      );
+    }
+    if (currentPreflight) {
+      return (
+        <p>
+          <WarningIcon />
+          <span>
+            {i18n.t(
+              'A pre-install validation is currently running on this org.',
+            )}
+          </span>
+        </p>
+      );
     }
     return null;
   }
@@ -310,23 +338,25 @@ class PlanDetail extends React.Component<Props, State> {
       version,
       plan,
       preflight,
-      org,
+      orgs,
+      scratchOrg,
       doStartPreflight,
       doStartJob,
+      doSpinScratchOrg,
+      doLogout,
     } = this.props;
 
     /* istanbul ignore if */
     if (!product || !version || !plan) {
       return null;
     }
-    if (user && !user.org_type) {
-      return (
-        <LoginBtn
-          id="org-not-allowed-login"
-          label={i18n.t('Log in with a different org')}
-        />
+    if (plan.steps?.length) {
+      const hasCurrentJob = Boolean(
+        find(orgs, (org) => org.current_job !== null),
       );
-    } else if (plan.steps?.length) {
+      const hasCurrentPreflight = Boolean(
+        find(orgs, (org) => org.current_preflight !== null),
+      );
       return (
         <CtaButton
           history={history}
@@ -337,9 +367,16 @@ class PlanDetail extends React.Component<Props, State> {
           plan={plan}
           preflight={preflight}
           selectedSteps={selectedSteps}
-          preventAction={Boolean(org?.current_job || org?.current_preflight)}
+          scratchOrg={scratchOrg}
+          preventAction={Boolean(
+            hasCurrentJob ||
+              hasCurrentPreflight ||
+              scratchOrg?.status === SCRATCH_ORG_STATUSES.started,
+          )}
           doStartPreflight={doStartPreflight}
           doStartJob={doStartJob}
+          doSpinScratchOrg={doSpinScratchOrg}
+          doLogout={doLogout}
         />
       );
     }
@@ -356,6 +393,7 @@ class PlanDetail extends React.Component<Props, State> {
       plan,
       planSlug,
       preflight,
+      scratchOrg,
       history,
     } = this.props;
     const loadingOrNotFound = getLoadingOrNotFound({
@@ -385,18 +423,28 @@ class PlanDetail extends React.Component<Props, State> {
       product.most_recent_version &&
       new Date(version.created_at) >=
         new Date(product.most_recent_version.created_at);
+    const canInstall = Boolean(
+      scratchOrg?.status === SCRATCH_ORG_STATUSES.complete ||
+        user?.valid_token_for,
+    );
 
     return (
       <DocumentTitle
         title={`${plan.title} | ${product.title} | ${window.SITE_NAME}`}
       >
         <>
-          <Header history={history} />
+          <Header
+            history={history}
+            hideLogin={plan.supported_orgs === SUPPORTED_ORGS.Scratch}
+          />
           <PageHeader
             product={product}
             version={version}
             plan={plan}
             userLoggedIn={Boolean(user?.valid_token_for)}
+            scratchOrgCreated={Boolean(
+              scratchOrg?.status === SCRATCH_ORG_STATUSES.complete,
+            )}
             preflightStatus={preflight?.status}
             preflightIsValid={Boolean(preflight?.is_valid)}
             preflightIsReady={Boolean(preflight?.is_ready)}
@@ -411,14 +459,15 @@ class PlanDetail extends React.Component<Props, State> {
                   )}
                 />
               ) : null}
-              {preflight && user ? (
+              {preflight && (scratchOrg || user) ? (
                 <Toasts preflight={preflight} label="Pre-install validation" />
               ) : null}
               <Intro
                 averageDuration={plan.average_duration}
                 isProductionOrg={Boolean(user?.is_production_org)}
                 preMessage={
-                  plan.preflight_message ? ( // These messages are pre-cleaned by the API
+                  plan.preflight_message ? (
+                    // These messages are pre-cleaned by the API
                     <div
                       className="markdown"
                       dangerouslySetInnerHTML={{
@@ -428,7 +477,7 @@ class PlanDetail extends React.Component<Props, State> {
                   ) : null
                 }
                 results={
-                  preflight && user ? (
+                  preflight && (scratchOrg || user) ? (
                     <PreflightResults preflight={preflight} />
                   ) : null
                 }
@@ -442,14 +491,14 @@ class PlanDetail extends React.Component<Props, State> {
                   />
                 }
               />
-              <UserInfo user={user} />
+              <UserInfo user={user} plan={plan} scratchOrg={scratchOrg} />
               {plan.steps?.length ? (
                 <StepsTable
-                  user={user}
                   plan={plan}
                   preflight={preflight}
                   steps={steps}
                   selectedSteps={selectedSteps}
+                  canInstall={canInstall}
                   handleStepsChange={this.handleStepsChange}
                 />
               ) : null}

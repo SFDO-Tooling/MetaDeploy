@@ -18,6 +18,7 @@ const Header = ({
   onRenderActions,
   job,
   userLoggedIn,
+  scratchOrgCreated,
   preflightStatus,
   preflightIsValid,
   preflightIsReady,
@@ -28,6 +29,7 @@ const Header = ({
   onRenderActions?: () => React.ReactNode;
   job?: Job;
   userLoggedIn?: boolean;
+  scratchOrgCreated?: boolean;
   preflightStatus?: string | null | undefined;
   preflightIsValid?: boolean;
   preflightIsReady?: boolean;
@@ -51,13 +53,20 @@ const Header = ({
       variant="object-home"
     />
     {job ? (
-      <JobProgressIndicator job={job} />
+      <JobProgressIndicator
+        job={job}
+        supportedOrgs={plan.supported_orgs}
+        preflightRequired={plan.requires_preflight}
+      />
     ) : (
       <PlanProgressIndicator
         userLoggedIn={userLoggedIn}
+        scratchOrgCreated={scratchOrgCreated}
         preflightStatus={preflightStatus}
         preflightIsValid={preflightIsValid}
         preflightIsReady={preflightIsReady}
+        supportedOrgs={plan.supported_orgs}
+        preflightRequired={plan.requires_preflight}
       />
     )}
   </>

@@ -6,7 +6,8 @@ from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.utils import translation
-from django.utils.translation import get_supported_language_variant, gettext as _
+from django.utils.translation import get_supported_language_variant
+from django.utils.translation import gettext as _
 from django.utils.translation.trans_real import (
     language_code_re,
     parse_accept_lang_header,
@@ -14,16 +15,19 @@ from django.utils.translation.trans_real import (
 
 from .api.constants import CHANNELS_GROUP_NAME
 from .api.hash_url import convert_org_id_to_key
+from .api.models import ScratchOrg
 from .consumer_utils import clear_message_semaphore
 
-Request = namedtuple("Request", "user")
+Request = namedtuple("Request", ["user", "session"])
 
 
-KNOWN_MODELS = {"user", "preflightresult", "job", "org"}
+KNOWN_MODELS = {"user", "preflightresult", "job", "org", "scratchorg"}
 
 
-def user_context(user):
-    return {"request": Request(user)}
+def user_context(user, session):
+    return {
+        "request": Request(user, session),
+    }
 
 
 def get_language_from_scope(scope):
@@ -78,13 +82,15 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
             instance = self.get_instance(**event["instance"])
             with translation.override(self.lang):
                 serializer = self.get_serializer(event["serializer"])
-                payload = {
-                    "payload": serializer(
-                        instance=instance, context=user_context(self.scope["user"])
-                    ).data,
+                payload = serializer(
+                    instance=instance,
+                    context=user_context(self.scope["user"], self.scope["session"]),
+                ).data
+                message = {
+                    "payload": payload,
                     "type": event["inner_type"],
                 }
-            await self.send_json(payload)
+            await self.send_json(message)
             return
 
     def get_instance(self, *, model, id):
@@ -99,6 +105,16 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         # Just used to subscribe to notification channels.
         is_valid = self.is_valid(content)
         is_known_model = self.is_known_model(content.get("model", None))
+
+        # It seems we don't get the correct (updated) value in the session here in the
+        # websocket consumer, after it is set by the scratch_org view in PlanViewSet,
+        # so we accept a value from the user to update the session:
+        uuid = content.get("uuid", None)
+        scratch_org_id = self.scope["session"].get("scratch_org_id", None)
+        if uuid and uuid != scratch_org_id:
+            self.scope["session"]["scratch_org_id"] = uuid
+            self.scope["session"].save()
+
         has_good_permissions = self.has_good_permissions(content)
         all_good = is_valid and is_known_model and has_good_permissions
         if not all_good:
@@ -118,14 +134,18 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         )
 
     def is_valid(self, content):
-        return content.keys() == {"model", "id"}
+        return content.keys() == {"model", "id"} or content.keys() == {
+            "model",
+            "id",
+            "uuid",
+        }
 
     def is_known_model(self, model):
         return model in KNOWN_MODELS
 
     def has_good_permissions(self, content):
-        if self.handle_org_special_case(content):
-            return True
+        if content["model"] == "org":
+            return self.handle_org_special_case(content)
         possible_exceptions = (
             AttributeError,
             KeyError,
@@ -136,13 +156,18 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
             TypeError,
         )
         try:
-            obj = self.get_instance(**content)
-            return obj.subscribable_by(self.scope["user"])
+            obj = self.get_instance(model=content["model"], id=content["id"])
+            return obj.subscribable_by(self.scope["user"], self.scope["session"])
         except possible_exceptions:
             return False
 
     def handle_org_special_case(self, content):
-        if content["model"] == "org":
-            content["id"] = convert_org_id_to_key(self.scope["user"].org_id)
-            return True
-        return False
+        # Restrict this to only authenticated users, or users who have a valid
+        # scratch_org `uuid` in their session, matching the requested org:
+        org_id = content["id"]
+        content["id"] = convert_org_id_to_key(content["id"])
+        if "user" in self.scope and self.scope["user"].is_authenticated:
+            if self.scope["user"].org_id == org_id:
+                return True
+        scratch_org = ScratchOrg.objects.get_from_session(self.scope["session"])
+        return scratch_org and scratch_org.org_id == org_id

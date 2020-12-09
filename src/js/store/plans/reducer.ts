@@ -1,5 +1,6 @@
 import { PlansAction } from '@/store/plans/actions';
 import { LogoutAction } from '@/store/user/actions';
+import { SupportedOrgs } from '@/utils/constants';
 
 export type Step = {
   id: string;
@@ -22,6 +23,9 @@ export type Plan = {
   not_allowed_instructions: string | null;
   average_duration: string | null;
   requires_preflight: boolean;
+  order_key: number;
+  supported_orgs: SupportedOrgs;
+  scratch_org_duration: number;
 };
 
 export type StepResult = {
@@ -35,7 +39,7 @@ export type PreflightErrors = {
 export type Preflight = {
   id: string;
   edited_at: string;
-  user: string;
+  user: string | null;
   plan: string;
   status: 'started' | 'complete' | 'failed' | 'canceled';
   results: PreflightErrors;
@@ -45,7 +49,7 @@ export type Preflight = {
   is_ready: boolean;
 };
 export type PreflightsState = {
-  [key: string]: Preflight;
+  [key: string]: Preflight | null;
 };
 
 type Constants = {

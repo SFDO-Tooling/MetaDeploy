@@ -2,7 +2,7 @@ import Toast from '@salesforce/design-system-react/components/toast';
 import ToastContainer from '@salesforce/design-system-react/components/toast/container';
 import i18n from 'i18next';
 import * as React from 'react';
-import { RouteComponentProps, withRouter } from 'react-router';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 type Props = {
   link: string;

@@ -2,7 +2,7 @@ import Alert from '@salesforce/design-system-react/components/alert';
 import AlertContainer from '@salesforce/design-system-react/components/alert/container';
 import i18n from 'i18next';
 import * as React from 'react';
-import { RouteComponentProps } from 'react-router';
+import { RouteComponentProps } from 'react-router-dom';
 
 import { CurrentJob } from '@/store/org/reducer';
 import { getDuration } from '@/utils/dates';

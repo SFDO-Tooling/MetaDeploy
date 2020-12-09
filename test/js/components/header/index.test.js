@@ -7,9 +7,10 @@ import Header from '@/components/header';
 import { renderWithRedux } from './../../utils';
 
 describe('<Header />', () => {
-  const setup = (
-    initialState = { user: null, socket: false, org: null, errors: [] },
-  ) => {
+  const setup = (state, props) => {
+    const defaultState = { user: null, socket: false, org: null, errors: [] };
+    const initialState = { ...defaultState, ...state };
+    const initialProps = props || {};
     const {
       container,
       getByLabelText,
@@ -18,7 +19,7 @@ describe('<Header />', () => {
       queryByText,
     } = renderWithRedux(
       <MemoryRouter>
-        <Header />
+        <Header {...initialProps} />
       </MemoryRouter>,
       initialState,
     );
@@ -73,6 +74,22 @@ describe('<Header />', () => {
     });
   });
 
+  describe('logged out, hideLogin: true', () => {
+    test('renders no header controls', () => {
+      const { container, queryByText } = setup(
+        {},
+        {
+          hideLogin: true,
+        },
+      );
+      const login = queryByText('Log In');
+      const logout = container.querySelector('#logout');
+
+      expect(login).toBeNull();
+      expect(logout).toBeNull();
+    });
+  });
+
   describe('offline', () => {
     test('renders OfflineAlert if websocket disconnected', () => {
       const { getByText } = setup();
@@ -92,13 +109,16 @@ describe('<Header />', () => {
     test('renders CurrentJobAlert', () => {
       const initialState = {
         user: { username: 'Test User' },
-        org: {
-          current_job: {
-            id: 'my-job',
-            product_slug: 'my-product',
-            version_label: 'my-version',
-            plan_slug: 'my-plan',
-            plan_average_duration: '119.999',
+        orgs: {
+          'org-id': {
+            org_id: 'org-id',
+            current_job: {
+              id: 'my-job',
+              product_slug: 'my-product',
+              version_label: 'my-version',
+              plan_slug: 'my-plan',
+              plan_average_duration: '119.999',
+            },
           },
         },
       };

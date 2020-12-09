@@ -2,8 +2,7 @@ import i18n from 'i18next';
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
 import { Trans } from 'react-i18next';
-import { RouteComponentProps, withRouter } from 'react-router';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 
 import desertSvg from '!svg-inline-loader!images/desert.svg';
 import Header from '@/components/header';

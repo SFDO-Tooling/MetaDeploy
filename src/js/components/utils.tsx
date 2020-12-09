@@ -28,6 +28,8 @@ export const withTransientMessage = function <Props>(
     duration: 5 * 1000,
   };
   const opts = { ...defaults, ...options };
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   return class WithTransientMessage extends React.Component<
     Props,
     TransientMessageState
