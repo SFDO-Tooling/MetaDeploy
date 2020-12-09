@@ -84,7 +84,7 @@
     "@babel/preset-typescript": "^7.12.1",
     "@testing-library/jest-dom": "^5.11.5",
     "@testing-library/react": "^11.1.2",
-    "@testing-library/react-hooks": "^3.4.2",
+    "@testing-library/react-hooks": "^3.7.0",
     "@types/classnames": "^2.2.11",
     "@types/core-js": "^2.5.4",
     "@types/js-cookie": "^2.2.6",
