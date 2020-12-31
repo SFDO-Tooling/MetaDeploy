@@ -739,23 +739,22 @@ class Job(HashIdMixin, models.Model):
         if condition:
             async_to_sync(fn)(self)
 
-    def push_to_org_subscribers(self, is_new):
+    def push_to_org_subscribers(self, is_new, changed):
         self._push_if_condition(
-            is_new or self.tracker.has_changed("status"), notify_org_result_changed
+            is_new or "status" in changed, notify_org_result_changed
         )
 
-    def push_if_results_changed(self):
-        results_has_changed = self.tracker.has_changed("results") and self.results != {}
+    def push_if_results_changed(self, changed):
+        results_has_changed = "results" in changed and self.results != {}
         self._push_if_condition(results_has_changed, notify_post_task)
 
-    def push_if_has_stopped_running(self):
-        has_stopped_running = (
-            self.tracker.has_changed("status") and self.status != Job.Status.started
-        )
+    def push_if_has_stopped_running(self, changed):
+        has_stopped_running = "status" in changed and self.status != Job.Status.started
         self._push_if_condition(has_stopped_running, notify_post_job)
 
     def save(self, *args, **kwargs):
         is_new = self._state.adding
+        changed = self.tracker.changed()
 
         if is_new:
             ctt, _ = ClickThroughAgreement.objects.get_or_create(
@@ -766,9 +765,9 @@ class Job(HashIdMixin, models.Model):
         ret = super().save(*args, **kwargs)
 
         try:
-            self.push_to_org_subscribers(is_new)
-            self.push_if_results_changed()
-            self.push_if_has_stopped_running()
+            self.push_to_org_subscribers(is_new, changed)
+            self.push_if_results_changed(changed)
+            self.push_if_has_stopped_running(changed)
         except RuntimeError as error:
             logger.warn(f"RuntimeError: {error}")
 
@@ -882,46 +881,45 @@ class PreflightResult(models.Model):
         if condition:
             async_to_sync(fn)(self)
 
-    def push_to_org_subscribers(self, is_new):
+    def push_to_org_subscribers(self, is_new, changed):
         self._push_if_condition(
-            is_new or self.tracker.has_changed("status"), notify_org_result_changed
+            is_new or "status" in changed, notify_org_result_changed
         )
 
-    def push_if_completed(self):
+    def push_if_completed(self, changed):
         has_completed = (
-            self.tracker.has_changed("status")
-            and self.status == PreflightResult.Status.complete
+            "status" in changed and self.status == PreflightResult.Status.complete
         )
         self._push_if_condition(has_completed, preflight_completed)
 
-    def push_if_failed(self):
+    def push_if_failed(self, changed):
         has_failed = (
-            self.tracker.has_changed("status")
-            and self.status == PreflightResult.Status.failed
+            "status" in changed and self.status == PreflightResult.Status.failed
         )
         self._push_if_condition(has_failed, preflight_failed)
 
-    def push_if_canceled(self):
+    def push_if_canceled(self, changed):
         has_canceled = (
-            self.tracker.has_changed("status")
-            and self.status == PreflightResult.Status.canceled
+            "status" in changed and self.status == PreflightResult.Status.canceled
         )
         self._push_if_condition(has_canceled, preflight_canceled)
 
-    def push_if_invalidated(self):
-        is_invalidated = self.tracker.has_changed("is_valid") and not self.is_valid
+    def push_if_invalidated(self, changed):
+        is_invalidated = "is_valid" in changed and not self.is_valid
         self._push_if_condition(is_invalidated, preflight_invalidated)
 
     def save(self, *args, **kwargs):
         is_new = self._state.adding
+        changed = self.tracker.changed()
+
         ret = super().save(*args, **kwargs)
 
         try:
-            self.push_to_org_subscribers(is_new)
-            self.push_if_completed()
-            self.push_if_failed()
-            self.push_if_canceled()
-            self.push_if_invalidated()
+            self.push_to_org_subscribers(is_new, changed)
+            self.push_if_completed(changed)
+            self.push_if_failed(changed)
+            self.push_if_canceled(changed)
+            self.push_if_invalidated(changed)
         except RuntimeError as error:  # pragma: nocover
             logger.warn(f"RuntimeError: {error}")
 

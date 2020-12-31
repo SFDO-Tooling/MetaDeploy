@@ -321,7 +321,7 @@ def create_scratch_org(org_pk):
             job.steps.set(plan.steps.all())
         # This is already called on `save()`, but the new Job isn't in the
         # database yet because it's in an atomic transaction.
-        job.push_to_org_subscribers(is_new=True)
+        job.push_to_org_subscribers(is_new=True, changed={})
         async_to_sync(job_started)(org, job)
 
 

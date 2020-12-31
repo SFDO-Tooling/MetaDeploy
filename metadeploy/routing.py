@@ -6,7 +6,13 @@ from django.urls import path
 from .consumers import PushNotificationConsumer
 
 websockets = URLRouter(
-    [path("ws/notifications/", PushNotificationConsumer, name="ws_notifications")]
+    [
+        path(
+            "ws/notifications/",
+            PushNotificationConsumer.as_asgi(),
+            name="ws_notifications",
+        )
+    ]
 )
 
 
