@@ -56,12 +56,9 @@ def get_language_from_scope(scope):
 
 
 class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
-    def __init__(self, *args, **kw):
-        super().__init__(*args, **kw)
-        self.lang = get_language_from_scope(self.scope)
-
     async def connect(self):
         await self.accept()
+        self.lang = get_language_from_scope(self.scope)
 
     async def notify(self, event):
         """

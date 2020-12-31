@@ -60,7 +60,9 @@ async def test_push_notification_consumer__subscribe_scratch_org(scratch_org_fac
         scratch_org_factory, uuid=uuid, enqueued_at=timezone.now()
     )
 
-    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator = WebsocketCommunicator(
+        PushNotificationConsumer.as_asgi(), "/ws/notifications/"
+    )
     communicator.scope["user"] = AnonymousUser()
     communicator.scope["session"] = Session(scratch_org_id=uuid)
     connected, _ = await communicator.connect()
@@ -85,7 +87,9 @@ async def test_push_notification_consumer__subscribe_scratch_org_staff(
     user = await generate_model(user_factory, is_staff=True)
     scratch_org = await generate_model(scratch_org_factory, enqueued_at=timezone.now())
 
-    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator = WebsocketCommunicator(
+        PushNotificationConsumer.as_asgi(), "/ws/notifications/"
+    )
     communicator.scope["user"] = user
     communicator.scope["session"] = Session()
     connected, _ = await communicator.connect()
@@ -116,7 +120,9 @@ async def test_push_notification_consumer__scratch_org_job_started(
         job_factory, user=None, status=Job.Status.complete, org_id=org_id
     )
 
-    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator = WebsocketCommunicator(
+        PushNotificationConsumer.as_asgi(), "/ws/notifications/"
+    )
     communicator.scope["user"] = AnonymousUser()
     communicator.scope["session"] = Session(scratch_org_id=uuid)
     connected, _ = await communicator.connect()
@@ -138,7 +144,9 @@ async def test_push_notification_consumer__scratch_org_job_started(
 async def test_push_notification_consumer__user_token_invalid(user_factory):
     user = await generate_model(user_factory)
 
-    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator = WebsocketCommunicator(
+        PushNotificationConsumer.as_asgi(), "/ws/notifications/"
+    )
     communicator.scope["user"] = user
     communicator.scope["session"] = Session()
     connected, _ = await communicator.connect()
@@ -170,7 +178,9 @@ async def test_push_notification_consumer__subscribe_preflight(
         org_id=user.org_id,
     )
 
-    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator = WebsocketCommunicator(
+        PushNotificationConsumer.as_asgi(), "/ws/notifications/"
+    )
     communicator.scope["user"] = user
     session = Session()
     communicator.scope["session"] = session
@@ -218,7 +228,9 @@ async def test_push_notification_consumer__subscribe_preflight_scratch_org(
         org_id=org_id,
     )
 
-    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator = WebsocketCommunicator(
+        PushNotificationConsumer.as_asgi(), "/ws/notifications/"
+    )
     communicator.scope["user"] = AnonymousUser()
     communicator.scope["session"] = Session(scratch_org_id=uuid)
     connected, _ = await communicator.connect()
@@ -241,7 +253,9 @@ async def test_push_notification_consumer__subscribe_job(user_factory, job_facto
         job_factory, user=user, status=Job.Status.complete, org_id=user.org_id
     )
 
-    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator = WebsocketCommunicator(
+        PushNotificationConsumer.as_asgi(), "/ws/notifications/"
+    )
     communicator.scope["user"] = user
     session = Session()
     communicator.scope["session"] = session
@@ -274,7 +288,9 @@ async def test_push_notification_consumer__subscribe_job__bad(
         job_factory, status=Job.Status.complete, org_id="00Dxxxxxxxxxxxxxxx"
     )
 
-    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator = WebsocketCommunicator(
+        PushNotificationConsumer.as_asgi(), "/ws/notifications/"
+    )
     communicator.scope["user"] = user
     communicator.scope["session"] = Session()
     connected, _ = await communicator.connect()
@@ -295,7 +311,9 @@ async def test_push_notification_consumer__subscribe_job__bad(
 async def test_push_notification_consumer__subscribe_job__missing(user_factory):
     user = await generate_model(user_factory)
 
-    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator = WebsocketCommunicator(
+        PushNotificationConsumer.as_asgi(), "/ws/notifications/"
+    )
     communicator.scope["user"] = user
     communicator.scope["session"] = Session()
     connected, _ = await communicator.connect()
@@ -337,7 +355,9 @@ async def test_push_notification_consumer__subscribe_org(
         org_id=user.org_id,
     )
 
-    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator = WebsocketCommunicator(
+        PushNotificationConsumer.as_asgi(), "/ws/notifications/"
+    )
     communicator.scope["user"] = user
     communicator.scope["session"] = Session()
     connected, _ = await communicator.connect()
@@ -396,7 +416,9 @@ async def test_push_notification_consumer__anon_subscribe_org(
         org_id=user.org_id,
     )
 
-    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator = WebsocketCommunicator(
+        PushNotificationConsumer.as_asgi(), "/ws/notifications/"
+    )
     communicator.scope["session"] = Session()
     connected, _ = await communicator.connect()
     assert connected
@@ -426,7 +448,9 @@ async def test_push_notification_consumer__anon_subscribe_org(
 async def test_push_notification_consumer__subscribe_org_bad(user_factory):
     user = await generate_model(user_factory)
 
-    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator = WebsocketCommunicator(
+        PushNotificationConsumer.as_asgi(), "/ws/notifications/"
+    )
     communicator.scope["user"] = user
     communicator.scope["session"] = Session()
     connected, _ = await communicator.connect()
