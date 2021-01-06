@@ -135,13 +135,7 @@ def run_flows(*, plan, skip_steps, result_class, result_id):
     """
     result = result_class.objects.get(pk=result_id)
     scratch_org = None
-    token = None
-    token_secret = None
-    instance_url = None
-    if result.user:
-        token, token_secret = result.user.token
-        instance_url = result.user.instance_url
-    else:
+    if not result.user:
         # This means we're in a ScratchOrg.
         scratch_org = ScratchOrg.objects.get(org_id=result.org_id)
 
@@ -176,11 +170,13 @@ def run_flows(*, plan, skip_steps, result_class, result_id):
                 org_name=current_org, keychain=ctx.keychain
             )
         else:
+            token, token_secret = result.user.token
             org_config = OrgConfig(
                 {
                     "access_token": token,
-                    "instance_url": instance_url,
+                    "instance_url": result.user.instance_url,
                     "refresh_token": token_secret,
+                    "username": result.user.sf_username,
                 },
                 current_org,
                 keychain=ctx.keychain,
