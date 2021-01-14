@@ -177,6 +177,8 @@ def run_flows(*, plan, skip_steps, result_class, result_id):
                     "instance_url": result.user.instance_url,
                     "refresh_token": token_secret,
                     "username": result.user.sf_username,
+                    # 'id' is used by CumulusCI to pick the right 'aud' for JWT auth
+                    "id": result.user.oauth_id,
                 },
                 current_org,
                 keychain=ctx.keychain,
