@@ -154,10 +154,44 @@ class TestPreflightFlow:
 
         assert pfr.log == "test\n"
         assert pfr.results == {
-            step1.id: {"status": "error", "message": "error 1"},
-            step3.id: {"status": "warn", "message": "warn 1"},
-            step4.id: {"status": "optional", "message": ""},
-            step5.id: {"status": "skip", "message": "skip 1"},
+            step1.id: [{"status": "error", "message": "error 1"}],
+            step3.id: [{"status": "warn", "message": "warn 1"}],
+            step4.id: [{"status": "optional", "message": ""}],
+            step5.id: [{"status": "skip", "message": "skip 1"}],
+        }
+
+    @pytest.mark.django_db
+    def test_post_flow__multiple_results_for_single_step_saved(
+        self, mocker, user_factory, plan_factory, step_factory, preflight_result_factory
+    ):
+        """This test ensures that if multiple results exist for a given step_num
+        that they are all saved to the database."""
+        user = user_factory()
+        plan = plan_factory()
+        step1 = step_factory(plan=plan, path="name_1", step_num="1")
+        step2 = step_factory(plan=plan, path="name_2", step_num="2")
+        preflight_result = preflight_result_factory(
+            user=user, plan=plan, org_id=user.org_id
+        )
+
+        results = {
+            None: [
+                {"status": "warn", "message": "a warning message"},
+                {"status": "error", "message": "an error message"},
+            ]
+        }
+        flow_coordinator = MagicMock(preflight_results=results)
+
+        callbacks = PreflightFlowCallback(preflight_result)
+        callbacks.pre_flow(flow_coordinator)
+        callbacks.post_flow(flow_coordinator)
+
+        actual_results = preflight_result.results
+        assert actual_results == {
+            "plan": [
+                {"status": "warn", "message": "a warning message"},
+                {"status": "error", "message": "an error message"},
+            ]
         }
 
     @pytest.mark.django_db

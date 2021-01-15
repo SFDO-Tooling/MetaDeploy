@@ -123,10 +123,13 @@ class PreflightFlowCallback(BasicFlowCallback):
         sanitized_results = {}
         for step_num, step_results in results.items():
             step_id = self._get_step_id(step_num=step_num) if step_num else "plan"
-            step_result = step_results[0]
-            if step_result["message"]:
-                step_result["message"] = bleach.clean(step_result["message"])
-            sanitized_results[step_id] = step_result
+            for step_result in step_results:
+                if step_result["message"]:
+                    step_result["message"] = bleach.clean(step_result["message"])
+                if step_id not in sanitized_results:
+                    sanitized_results[step_id] = []
+                sanitized_results[step_id].append(step_result)
+
         self.context.results = sanitized_results
         self.context.save()
 
