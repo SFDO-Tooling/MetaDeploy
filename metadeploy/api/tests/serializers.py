@@ -155,7 +155,7 @@ class TestPreflightSerializer:
             user=user,
             org_id=user.org_id,
             plan=plan,
-            results={0: {"status": "error"}},
+            results={0: [{"status": "error"}]},
             status=PreflightResult.Status.complete,
         )
         serializer = PreflightResultSerializer(instance=preflight).data
@@ -171,7 +171,7 @@ class TestPreflightSerializer:
             user=user,
             org_id=user.org_id,
             plan=plan,
-            results={0: {"status": "warn"}},
+            results={0: [{"status": "warn"}]},
             status=PreflightResult.Status.complete,
         )
         serializer = PreflightResultSerializer(instance=preflight).data
@@ -202,7 +202,7 @@ class TestPreflightSerializer:
             user=user,
             org_id=user.org_id,
             plan=plan,
-            results={0: {"status": "error"}},
+            results={0: [{"status": "error"}]},
             status=PreflightResult.Status.complete,
         )
         serializer = PreflightResultSerializer(instance=preflight).data
