@@ -169,6 +169,11 @@ class User(HashIdMixin, AbstractUser):
             return self.social_account.extra_data.get("organization_id")
 
     @property
+    def oauth_id(self):
+        if self.social_account:
+            return self.social_account.extra_data.get("id")
+
+    @property
     def org_name(self):
         return self._get_org_property("Name")
 
