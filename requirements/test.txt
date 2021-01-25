@@ -2,9 +2,9 @@
 
 -r base.txt
 
-Sphinx==3.4.2
+Sphinx==3.4.3
 black==20.8b1
-coveralls==2.2.0
+coveralls==3.0.0
 factory_boy==3.2.0
 flake8==3.8.4
 isort==5.7.0
@@ -12,15 +12,15 @@ pytest-asyncio==0.14.0
 pytest-cov==2.8.1
 pytest-django==4.1.0
 pytest-factoryboy==2.1.0
-pytest-mock==3.5.0
+pytest-mock==3.5.1
 pytest==6.2.1
 sphinxcontrib-httpdomain==1.7.0
 vcrpy==4.1.1
 
 # Transitive dependencies
 Babel==2.9.0
-Faker==5.3.0
-Pygments==2.7.3
+Faker==5.6.3
+Pygments==2.7.4
 alabaster==0.7.12
 appdirs==1.4.4
 atomicwrites==1.4.0
@@ -28,7 +28,7 @@ attrs==20.3.0
 coverage==5.3.1
 docopt==0.6.2
 imagesize==1.2.0
-importlib-metadata==3.3.0
+importlib-metadata==3.4.0
 inflection==0.5.1
 mccabe==0.6.1
 more-itertools==8.6.0

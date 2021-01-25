@@ -1,4 +1,5 @@
 import logging
+import re
 
 from django.conf import settings
 from parler.models import TranslatableModel
@@ -7,6 +8,9 @@ from metadeploy.api.jobs import job
 from metadeploy.api.models import Translation
 
 logger = logging.getLogger(__name__)
+
+
+INSTALL_VERSION_RE = re.compile(r"^Install .*\d$")
 
 
 @job
@@ -37,7 +41,7 @@ def update_translations(obj, langs=None):
             for field in obj._parler_meta.get_translated_fields():
                 slug = getattr(obj, field)
                 product_id = ""
-                if slug.startswith("Install "):
+                if INSTALL_VERSION_RE.match(slug):
                     product_id = slug[8:]
                     slug = "Install {product} {version}"
                 try:
