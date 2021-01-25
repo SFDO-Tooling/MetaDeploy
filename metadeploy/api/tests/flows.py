@@ -72,7 +72,7 @@ class TestJobFlow:
             callbacks.post_task(stepspec, result)
         callbacks.post_flow(permanent_org_coordinator)
 
-        assert job.results == {str(step.id): {"status": "ok"} for step in steps}
+        assert job.results == {str(step.id): [{"status": "ok"}] for step in steps}
         # Permanent orgs SHOULD NOT call the Salesforce API to reset the user password
         permanent_org_coordinator.org_config.salesforce_client.restful.assert_not_called()
 
@@ -94,7 +94,7 @@ class TestJobFlow:
             callbacks.post_task(stepspec, result)
         callbacks.post_flow(scratch_org_coordinator)
 
-        assert job.results == {str(step.id): {"status": "ok"} for step in steps}
+        assert job.results == {str(step.id): [{"status": "ok"}] for step in steps}
         # Scratch orgs SHOULD call the Salesforce API to reset the user password
         scratch_org_coordinator.org_config.salesforce_client.restful.assert_called()
 
@@ -118,7 +118,7 @@ class TestJobFlow:
         callbacks.post_flow(coordinator)
 
         assert job.results == {
-            str(steps[0].id): {"status": "error", "message": "Some error"}
+            str(steps[0].id): [{"status": "error", "message": "Some error"}]
         }
 
 
