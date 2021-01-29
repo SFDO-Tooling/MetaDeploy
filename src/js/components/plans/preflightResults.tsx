@@ -37,37 +37,46 @@ export const WarningIcon = () => (
 );
 
 // Job "error" or "warning" message
-export const JobError = ({ err }: { err: StepResult }) => {
-  let node = null;
-
-  /* istanbul ignore else */
-  if (err.message) {
-    switch (err.status) {
-      case CONSTANTS.RESULT_STATUS.ERROR:
-        node = (
-          <li>
-            <ErrorIcon />
-            {/* These messages are pre-cleaned by the API */}
-            <span
-              className="slds-text-color_error"
-              dangerouslySetInnerHTML={{ __html: err.message }}
-            />
-          </li>
-        );
-        break;
-      case CONSTANTS.RESULT_STATUS.WARN:
-        node = (
-          <li>
-            <WarningIcon />
-            {/* These messages are pre-cleaned by the API */}
-            <span dangerouslySetInnerHTML={{ __html: err.message }} />
-          </li>
-        );
-        break;
+export const JobError = ({ errors }: { errors: StepResult[] }) => {
+  const errorList = [];
+  const warnList = [];
+  let listItem = null;
+  for (const err of errors) {
+    /* istanbul ignore else */
+    if (err.message) {
+      switch (err.status) {
+        case CONSTANTS.RESULT_STATUS.ERROR:
+          listItem = (
+            <li>
+              <ErrorIcon />
+              {/* These messages are pre-cleaned by the API */}
+              <span
+                className="slds-text-color_error"
+                dangerouslySetInnerHTML={{ __html: err.message }}
+              />
+            </li>
+          );
+          errorList.push(listItem);
+          break;
+        case CONSTANTS.RESULT_STATUS.WARN:
+          listItem = (
+            <li>
+              <WarningIcon />
+              {/* These messages are pre-cleaned by the API */}
+              <span dangerouslySetInnerHTML={{ __html: err.message }} />
+            </li>
+          );
+          warnList.push(listItem);
+          break;
+      }
     }
   }
-
-  return <ul className="plan-error-list">{node}</ul>;
+  // show errors only if both are present
+  const listItems = errorList.length > 0 ? errorList : warnList;
+  if (listItems) {
+    return <ul className="plan-error-list">{listItems.map((item) => item)}</ul>;
+  }
+  return null;
 };
 
 export const getErrorInfo = ({
@@ -167,7 +176,7 @@ const PreflightResults = ({ preflight }: { preflight: Preflight }) => {
             )}
           </p>
         ) : null}
-        {planErrors ? <JobError err={planErrors} /> : null}
+        {planErrors ? <JobError errors={planErrors} /> : null}
       </>
     );
   }

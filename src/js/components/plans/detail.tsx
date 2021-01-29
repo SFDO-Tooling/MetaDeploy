@@ -216,9 +216,13 @@ class PlanDetail extends React.Component<Props, State> {
     }
     for (const step of plan.steps) {
       const { id } = step;
-      const result = preflight?.results?.[id];
-      if (!result || result.status !== RESULT_STATUS.HIDE) {
-        steps.push(step);
+      const results = preflight?.results?.[id];
+      if (results) {
+        for (const result of results) {
+          if (!result || result.status !== RESULT_STATUS.HIDE) {
+            steps.push(step);
+          }
+        }
       }
     }
     return steps;
@@ -235,12 +239,14 @@ class PlanDetail extends React.Component<Props, State> {
     const { changedSteps } = this.state;
     for (const step of plan.steps) {
       const { id } = step;
-      const result = preflight?.results?.[id];
+      const results = preflight?.results?.[id];
       let hidden, skipped, optional;
-      if (result) {
-        hidden = result.status === RESULT_STATUS.HIDE ? result : null;
-        skipped = result.status === RESULT_STATUS.SKIP ? result : null;
-        optional = result.status === RESULT_STATUS.OPTIONAL ? result : null;
+      if (results) {
+        for (const result of results) {
+          hidden = result.status === RESULT_STATUS.HIDE ? result : null;
+          skipped = result.status === RESULT_STATUS.SKIP ? result : null;
+          optional = result.status === RESULT_STATUS.OPTIONAL ? result : null;
+        }
       }
       if (!hidden && !skipped) {
         const required = step.is_required && !optional;

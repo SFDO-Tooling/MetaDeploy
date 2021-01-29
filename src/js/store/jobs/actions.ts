@@ -8,7 +8,7 @@ export type JobData = {
   plan: string;
   steps: string[];
   results: {
-    [key: string]: StepResult;
+    [key: string]: StepResult[];
   };
 };
 

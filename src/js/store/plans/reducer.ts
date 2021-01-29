@@ -34,7 +34,7 @@ export type StepResult = {
   logs?: string;
 };
 export type PreflightErrors = {
-  [key: string]: StepResult;
+  [key: string]: StepResult[];
 };
 export type Preflight = {
   id: string;
