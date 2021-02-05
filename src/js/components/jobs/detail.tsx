@@ -350,10 +350,12 @@ class JobDetail extends React.Component<Props, State> {
     const steps = plan.steps
       ? plan.steps.filter((step) => {
           let hidden = true;
-          const results = job.results[step.id];
-          for (const result of results) {
-            if (!hidden) {
-              hidden = result?.status === CONSTANTS.RESULT_STATUS.HIDE;
+          const stepResults = job.results[step.id];
+          if (stepResults) {
+            for (const result of stepResults) {
+              if (!hidden) {
+                hidden = result?.status === CONSTANTS.RESULT_STATUS.HIDE;
+              }
             }
           }
           return !hidden;

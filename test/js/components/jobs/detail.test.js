@@ -507,7 +507,7 @@ describe('<JobDetail />', () => {
             'job-1': {
               ...defaultState.jobs['job-1'],
               results: {
-                'step-4': { status: 'hide' },
+                'step-4': [{ status: 'hide' }],
               },
             },
           },

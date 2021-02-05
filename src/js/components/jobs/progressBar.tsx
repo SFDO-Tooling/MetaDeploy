@@ -82,9 +82,11 @@ class ProgressBar extends React.Component<Props, State> {
   static getCompletedSteps(job: Job): number {
     // Get number of completed steps
     return job.steps.filter((step) => {
-      for (const result of job.results[step]) {
-        if (result.status === CONSTANTS.RESULT_STATUS.OK) {
-          return true;
+      if (job.results[step]) {
+        for (const result of job.results[step]) {
+          if (result.status === CONSTANTS.RESULT_STATUS.OK) {
+            return true;
+          }
         }
       }
       return false;
