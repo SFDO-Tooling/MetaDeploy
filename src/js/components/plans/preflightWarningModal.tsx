@@ -6,18 +6,13 @@ import * as React from 'react';
 
 import { SelectedSteps } from '@/components/plans/detail';
 import { WarningIcon } from '@/components/plans/preflightResults';
-import {
-  CONSTANTS,
-  PreflightErrors,
-  Step,
-  StepResult,
-} from '@/store/plans/reducer';
+import { CONSTANTS, JobErrors, Step, StepResult } from '@/store/plans/reducer';
 
 type Props = {
   isOpen: boolean;
   toggleModal: (open: boolean) => void;
   startJob: () => void;
-  results: PreflightErrors;
+  results: JobErrors;
   steps: Step[];
   selectedSteps: SelectedSteps;
 };
@@ -106,16 +101,16 @@ class PreflightWarningModal extends React.Component<Props, State> {
         footer={footer}
       >
         <div className="slds-p-horizontal_large slds-p-vertical_medium">
-          {results.plan ? <Warning id="plan" result={results.plan} /> : null}
+          {results ? <Warning id="plan" result={results} /> : null}
           {[...selectedSteps].map((id) => {
             const step = steps.find((s) => s.id === id);
-            const stepResult = results[id];
-            if (!step || !stepResult) {
+            const stepResults = results[id];
+            if (!step || !stepResults) {
               return null;
             }
-            return (
-              <Warning key={id} id={id} result={stepResult} name={step.name} />
-            );
+            stepResults.map((result) => (
+              <Warning key={id} id={id} result={result} name={step.name} />
+            ));
           })}
           <Checkbox
             id="preflight-warning-confirm"

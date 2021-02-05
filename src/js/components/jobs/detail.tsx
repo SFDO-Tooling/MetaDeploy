@@ -349,8 +349,13 @@ class JobDetail extends React.Component<Props, State> {
     const { canceling } = this.state;
     const steps = plan.steps
       ? plan.steps.filter((step) => {
-          const result = job.results[step.id];
-          const hidden = result?.status === CONSTANTS.RESULT_STATUS.HIDE;
+          let hidden = true;
+          const results = job.results[step.id];
+          for (const result of results) {
+            if (!hidden) {
+              hidden = result?.status === CONSTANTS.RESULT_STATUS.HIDE;
+            }
+          }
           return !hidden;
         })
       : [];

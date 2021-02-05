@@ -24,11 +24,13 @@ const RequiredDataCell = (props: DataCellProps) => {
   }
   const { id } = item;
   const isActive = activeJobStep && id === activeJobStep;
-  const result = preflight?.results?.[id];
+  const results = preflight?.results?.[id];
   let skipped, optional;
-  if (result) {
-    skipped = result.status === RESULT_STATUS.SKIP ? result : null;
-    optional = result.status === RESULT_STATUS.OPTIONAL ? result : null;
+  if (results) {
+    for (const result of results) {
+      skipped = result.status === RESULT_STATUS.SKIP ? result : null;
+      optional = result.status === RESULT_STATUS.OPTIONAL ? result : null;
+    }
   }
   const required =
     item.is_required && !optional && (!job || job.steps.includes(id));

@@ -50,20 +50,24 @@ class NameDataCell extends React.Component<Props> {
     const { name, description } = item;
     const { id } = item;
     const isActive = Boolean(activeJobStep && id === activeJobStep);
-    const result = currentJob?.results?.[id];
+    const results = currentJob?.results?.[id];
     const showErrorColors = !selectedSteps || selectedSteps.has(id);
     let hasError = false;
     let hasWarning = false;
     let optionalMsg = '';
     let optional, logs;
-    if (result) {
-      hasError = result.status === RESULT_STATUS.ERROR;
-      hasWarning = Boolean(
-        result.message && result.status === RESULT_STATUS.WARN,
-      );
-      optional = result.status === RESULT_STATUS.OPTIONAL ? result : null;
-      optionalMsg = optional?.message || '';
-      logs = job ? result.logs : null;
+    if (results) {
+      for (const result of results) {
+        if (result.status === RESULT_STATUS.ERROR) {
+          hasError = true;
+        }
+        if (result.message && result.status === RESULT_STATUS.WARN) {
+          hasWarning = true;
+        }
+        optional = result.status === RESULT_STATUS.OPTIONAL ? result : null;
+        optionalMsg = optional?.message || '';
+        logs = job ? result.logs : null;
+      }
     }
     let display: React.ReactNode = name;
     if (optionalMsg) {
@@ -83,7 +87,9 @@ class NameDataCell extends React.Component<Props> {
       },
     );
     const errorList =
-      result && (hasError || hasWarning) ? <JobError err={result} /> : null;
+      results && (hasError || hasWarning) ? (
+        <JobError errors={results} />
+      ) : null;
     const desc = description ? (
       <Tooltip
         content={description}

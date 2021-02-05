@@ -88,10 +88,16 @@ class StepsTable extends React.Component<Props, State> {
     // Get the currently-running step
     let activeJobStepId = null;
     if (job && this.jobIsRunning(job)) {
-      for (const step of job.steps) {
-        if (!job.results[step]?.status) {
-          activeJobStepId = step;
+      for (const stepId of job.steps) {
+        // TODO: How to break multiple loops?
+        if (activeJobStepId !== null) {
           break;
+        }
+        for (const result of job.results[stepId]) {
+          if (!result.status) {
+            activeJobStepId = stepId;
+            break;
+          }
         }
       }
     }
@@ -109,13 +115,22 @@ class StepsTable extends React.Component<Props, State> {
     if (!job) {
       return hasLogs;
     }
-    for (const step of job.steps) {
-      if (job.results[step]?.logs) {
-        hasLogs = true;
+    for (const stepId of job.steps) {
+      hasLogs = this.stepHasLogs(stepId, job);
+      if (hasLogs) {
         break;
       }
     }
     return hasLogs;
+  };
+
+  stepHasLogs = (stepId: string, job: Job) => {
+    for (const result of job.results[stepId]) {
+      if (result.logs) {
+        return true;
+      }
+    }
+    return false;
   };
 
   togglePanel = (id: string): void => {
