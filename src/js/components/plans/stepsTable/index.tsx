@@ -118,6 +118,7 @@ class StepsTable extends React.Component<Props, State> {
     for (const stepId of job.steps) {
       hasLogs = this.stepHasLogs(stepId, job);
       if (hasLogs) {
+        hasLogs = true;
         break;
       }
     }
@@ -125,9 +126,11 @@ class StepsTable extends React.Component<Props, State> {
   };
 
   stepHasLogs = (stepId: string, job: Job) => {
-    for (const result of job.results[stepId]) {
-      if (result.logs) {
-        return true;
+    for (const stepResults of job.results[stepId]) {
+      for (const result of stepResults) {
+        if (result.logs) {
+          return true;
+        }
       }
     }
     return false;

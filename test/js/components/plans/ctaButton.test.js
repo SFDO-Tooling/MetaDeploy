@@ -301,7 +301,7 @@ describe('<CtaButton />', () => {
           plan: 'plan-1',
           status: 'complete',
           results: {
-            'step-1': { status: 'warn', message: 'This is a warning.' },
+            'step-1': [{ status: 'warn', message: 'This is a warning.' }],
           },
           is_valid: true,
           error_count: 0,
@@ -359,7 +359,7 @@ describe('<CtaButton />', () => {
           plan: 'plan-1',
           status: 'complete',
           results: {
-            'step-1': { status: 'warn', message: 'This is a warning.' },
+            'step-1': [{ status: 'warn', message: 'This is a warning.' }],
           },
           is_valid: true,
           error_count: 0,
@@ -383,7 +383,7 @@ describe('<CtaButton />', () => {
           plan: 'plan-1',
           status: 'complete',
           results: {
-            'step-2': { status: 'warn', message: 'This is a warning.' },
+            'step-2': [{ status: 'warn', message: 'This is a warning.' }],
           },
           is_valid: true,
           error_count: 0,
@@ -458,7 +458,7 @@ describe('<CtaButton />', () => {
       const preflight = {
         ...defaultPreflight,
         results: {
-          'step-1': { status: 'hide' },
+          'step-1': [{ status: 'hide' }],
         },
       };
       const { getByText } = setup({ doStartJob, history, preflight });
@@ -469,7 +469,7 @@ describe('<CtaButton />', () => {
         plan: 'plan-1',
         steps: ['step-1'],
         results: {
-          'step-1': { status: 'hide' },
+          'step-1': [{ status: 'hide' }],
         },
       });
     });
@@ -794,7 +794,7 @@ describe('<CtaButton />', () => {
             plan: 'plan-1',
             status: 'complete',
             results: {
-              'step-1': { status: 'warn', message: 'This is a warning.' },
+              'step-1': [{ status: 'warn', message: 'This is a warning.' }],
             },
             is_valid: true,
             error_count: 0,

@@ -7,11 +7,11 @@ import { render } from './../../utils';
 
 describe('<PreflightWarningModal />', () => {
   const defaultResults = {
-    plan: { status: 'warn', message: 'This is a plan warning.' },
-    'step-1': { status: 'warn', message: 'This is a step warning.' },
-    'step-2': { status: 'warn' },
+    plan: [{ status: 'warn', message: 'This is a plan warning.' }],
+    'step-1': [{ status: 'warn', message: 'This is a step warning.' }],
+    'step-2': [{ status: 'warn' }],
     'step-3': undefined,
-    'step-4': { status: 'warn', message: 'This is another step warning.' },
+    'step-4': [{ status: 'warn', message: 'This is another step warning.' }],
   };
   const defaultSteps = [
     { id: 'step-1', name: 'Step 1' },

@@ -33,9 +33,11 @@ export type StepResult = {
   message?: string;
   logs?: string;
 };
+
 export type JobErrors = {
   [key: string]: StepResult[];
 };
+
 export type Preflight = {
   id: string;
   edited_at: string;
