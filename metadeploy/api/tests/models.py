@@ -8,7 +8,15 @@ from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
-from ..models import SUPPORTED_ORG_TYPES, Job, ScratchOrg, SiteProfile, Step, Version
+from ..models import (
+    SUPPORTED_ORG_TYPES,
+    Job,
+    ScratchOrg,
+    SiteProfile,
+    Step,
+    Version,
+    PreflightResult,
+)
 
 
 @pytest.mark.django_db
@@ -640,3 +648,21 @@ class TestSiteProfile:
         site = Site.objects.create(name="Test")
         site_profile = SiteProfile.objects.create(site=site, name="A name")
         assert str(site_profile) == "A name"
+
+
+@pytest.mark.django_db
+class TestPreflightResult:
+    def test_has_any_errors(self, user_factory, plan_factory, preflight_result_factory):
+        user = user_factory()
+        plan = plan_factory()
+        preflight_result = preflight_result_factory(
+            user=user,
+            org_id=user.org_id,
+            plan=plan,
+            results={0: [{"status": "warn"}]},
+            status=PreflightResult.Status.complete,
+        )
+        assert not preflight_result.has_any_errors()
+
+        preflight_result.results = {"plan": [{"status": "warn"}, {"status": "error"}]}
+        assert preflight_result.has_any_errors()
