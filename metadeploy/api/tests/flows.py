@@ -168,8 +168,8 @@ class TestPreflightFlow:
         that they are all saved to the database."""
         user = user_factory()
         plan = plan_factory()
-        step1 = step_factory(plan=plan, path="name_1", step_num="1")
-        step2 = step_factory(plan=plan, path="name_2", step_num="2")
+        step_factory(plan=plan, path="name_1", step_num="1")
+        step_factory(plan=plan, path="name_2", step_num="2")
         preflight_result = preflight_result_factory(
             user=user, plan=plan, org_id=user.org_id
         )
