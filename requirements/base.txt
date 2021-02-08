@@ -1,11 +1,11 @@
-cumulusci==3.27.0
+cumulusci==3.28.0
 
 -e git+https://github.com/SFDO-Tooling/sfdo-template-helpers.git@v0.18.0#egg=sfdo-template-helpers
 Django==2.2.16
 Pillow==8.1.0
 ansi2html==1.6.0
-bleach==3.2.1
-boto3==1.16.57
+bleach==3.3.0
+boto3==1.17.0
 channels==3.0.3
 channels-redis==3.2.0
 dj-database-url==0.5.0
@@ -25,7 +25,7 @@ django-storages==1.11.1
 djangorestframework==3.12.2
 github3.py==1.3.0
 logfmt==0.4
-newrelic==5.24.0.153
+newrelic==6.0.1.155
 psycopg2-binary==2.8.6
 rq==1.7.0
 sentry-sdk==0.19.5
@@ -36,25 +36,25 @@ whitenoise==5.2.0
 # Transitive dependencies
 Automat==20.2.0
 Click==7.1.2
-Jinja2==2.11.2
+Jinja2==2.11.3
 Markdown==3.3.3
 MarkupSafe==1.1.1
 PyHamcrest==2.0.2
-PyYAML==5.4
-SQLAlchemy==1.3.22
+PyYAML==5.4.1
+SQLAlchemy==1.3.23
 Twisted==20.3.0
 aioredis==1.3.1
 asgiref==3.3.1
 asn1crypto==1.4.0
 async-timeout==3.0.1
 autobahn==20.12.3
-botocore==1.19.57
-certifi==2020.11.8
+botocore==1.20.0
+certifi==2020.12.5
 cffi==1.14.4
 chardet==4.0.0
 coloredlogs==15.0
 constantly==15.1.0
-croniter==1.0.2
+croniter==1.0.6
 daphne==3.0.1
 defusedxml==0.6.0
 docutils==0.16
@@ -65,11 +65,11 @@ hashids==1.3.1
 hiredis==1.1.0
 humanfriendly==9.1
 hyperlink==21.0.0
-idna==3.1
+idna==2.10
 incremental==17.5.0
 jmespath==0.10.0
 jwcrypto==0.8
-keyring==21.8.0
+keyring==22.0.1
 logfmt==0.4
 lxml==4.6.2
 msgpack==1.0.2
@@ -79,7 +79,7 @@ pyasn1==0.4.8
 pycparser==2.20
 python-dateutil==2.8.1
 python3-openid==3.2.0
-pytz==2020.5
+pytz==2021.1
 raven==6.10.0
 redis==3.5.3
 requests-oauthlib==1.3.0
@@ -92,14 +92,14 @@ s3transfer==0.3.4
 salesforce-bulk==2.2.0
 sarge==0.1.6
 selenium==3.141.0
-setuptools==51.3.3
+setuptools==53.0.0
 simple-salesforce==1.10.1
 six==1.15.0
 sqlparse==0.4.1
 txaio==20.12.1
 unicodecsv==0.14.1
 uritemplate==3.0.1
-urllib3==1.26.2
+urllib3==1.26.3
 webencodings==0.5.1
 xmltodict==0.12.0
 zope.interface==5.2.0
