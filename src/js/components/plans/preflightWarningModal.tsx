@@ -101,14 +101,18 @@ class PreflightWarningModal extends React.Component<Props, State> {
         footer={footer}
       >
         <div className="slds-p-horizontal_large slds-p-vertical_medium">
-          {results ? <Warning id="plan" result={results} /> : null}
+          {results.plan
+            ? results.plan.map((result) => (
+                <Warning key="id" id="plan" result={result} />
+              ))
+            : null}
           {[...selectedSteps].map((id) => {
             const step = steps.find((s) => s.id === id);
             const stepResults = results[id];
             if (!step || !stepResults) {
               return null;
             }
-            stepResults.map((result) => (
+            return stepResults.map((result) => (
               <Warning key={id} id={id} result={result} name={step.name} />
             ));
           })}

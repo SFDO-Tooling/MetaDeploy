@@ -83,10 +83,9 @@ class ShareModal extends React.Component<WrappedProps> {
       let stepError = null;
       if (plan.steps?.length) {
         // Get step-specific error (and step name)
+        // will return the last error present in the list
+        // of results for a given step
         for (const stepId of Object.keys(job.results)) {
-          if (stepName) {
-            break;
-          }
           for (const result of job.results[stepId]) {
             if (
               result.status === CONSTANTS.RESULT_STATUS.ERROR &&

@@ -89,19 +89,24 @@ class StepsTable extends React.Component<Props, State> {
     let activeJobStepId = null;
     if (job && this.jobIsRunning(job)) {
       for (const stepId of job.steps) {
-        // TODO: How to break multiple loops?
-        if (activeJobStepId !== null) {
+        if (this.isActiveStep(stepId, job)) {
+          activeJobStepId = stepId;
           break;
-        }
-        for (const result of job.results[stepId]) {
-          if (!result.status) {
-            activeJobStepId = stepId;
-            break;
-          }
         }
       }
     }
     return activeJobStepId;
+  };
+
+  isActiveStep = (stepId: string, job: Job) => {
+    if (job.results[stepId]) {
+      for (const result of job.results[stepId]) {
+        if (!result.status) {
+          return true;
+        }
+      }
+    }
+    return false;
   };
 
   jobIsRunning = (job?: Job): boolean =>
@@ -126,8 +131,8 @@ class StepsTable extends React.Component<Props, State> {
   };
 
   stepHasLogs = (stepId: string, job: Job) => {
-    for (const stepResults of job.results[stepId]) {
-      for (const result of stepResults) {
+    if (job.results[stepId]) {
+      for (const result of job.results[stepId]) {
         if (result.logs) {
           return true;
         }

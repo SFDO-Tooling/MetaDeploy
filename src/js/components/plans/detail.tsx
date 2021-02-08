@@ -223,6 +223,8 @@ class PlanDetail extends React.Component<Props, State> {
             steps.push(step);
           }
         }
+      } else {
+        steps.push(step);
       }
     }
     return steps;
