@@ -71,12 +71,8 @@ export const JobError = ({ errors }: { errors: StepResult[] }) => {
       }
     }
   }
-  // show errors only if both are present
   const listItems = errorList.length > 0 ? errorList : warnList;
-  if (listItems) {
-    return <ul className="plan-error-list">{listItems.map((item) => item)}</ul>;
-  }
-  return null;
+  return <ul className="plan-error-list">{listItems.map((item) => item)}</ul>;
 };
 
 export const getErrorInfo = ({
@@ -161,7 +157,7 @@ const PreflightResults = ({ preflight }: { preflight: Preflight }) => {
   }
 
   const { failed, message } = getErrorInfo({ preflight });
-  const planErrors = preflight.results?.plan;
+  const planErrors = preflight.results?.plan || [];
   if (message !== null) {
     return (
       <>
@@ -176,7 +172,7 @@ const PreflightResults = ({ preflight }: { preflight: Preflight }) => {
             )}
           </p>
         ) : null}
-        {planErrors ? <JobError errors={planErrors} /> : null}
+        <JobError errors={planErrors} />
       </>
     );
   }

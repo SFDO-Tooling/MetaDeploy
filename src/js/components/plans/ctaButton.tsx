@@ -225,11 +225,7 @@ class CtaButton extends React.Component<
       Object.keys(preflight.results).forEach((stepId) => {
         for (const result of preflight.results[stepId]) {
           if (result?.status === CONSTANTS.RESULT_STATUS.HIDE) {
-            if (results[stepId]) {
-              results[stepId].push(result);
-            } else {
-              results[stepId] = [result];
-            }
+            results[stepId] = [result];
           }
         }
       });

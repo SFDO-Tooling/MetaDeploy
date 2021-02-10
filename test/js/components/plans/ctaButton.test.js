@@ -359,7 +359,10 @@ describe('<CtaButton />', () => {
           plan: 'plan-1',
           status: 'complete',
           results: {
-            'step-1': [{ status: 'warn', message: 'This is a warning.' }],
+            'step-1': [
+              { status: 'warn', message: 'This is a warning.' },
+              { status: 'warn', message: 'This is another warning.' },
+            ],
           },
           is_valid: true,
           error_count: 0,
@@ -371,6 +374,7 @@ describe('<CtaButton />', () => {
 
       expect(getByText('Potential Issues')).toBeVisible();
       expect(getByText('This is a warning.')).toBeVisible();
+      expect(getByText('This is another warning.')).toBeVisible();
       expect(
         getByLabelText('I understand these warnings', { exact: false }),
       ).toBeVisible();
@@ -458,7 +462,7 @@ describe('<CtaButton />', () => {
       const preflight = {
         ...defaultPreflight,
         results: {
-          'step-1': [{ status: 'hide' }],
+          'step-1': [{ status: 'hide' }, { status: 'hide' }],
         },
       };
       const { getByText } = setup({ doStartJob, history, preflight });

@@ -101,7 +101,7 @@ describe('<PreflightResults />', () => {
   describe('completed preflight with errors and warnings', () => {
     test('displays error/warning messages', () => {
       const { getByText } = setup();
-
+      // TODO: Only errors should be displayed
       expect(
         getByText(
           'Pre-install validation encountered 4 errors and 3 warnings.',
