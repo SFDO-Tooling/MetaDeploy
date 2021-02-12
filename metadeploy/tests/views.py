@@ -50,7 +50,6 @@ def test_custom_500_view__ip_restricted_error(render):
         request.user = AnonymousUser()
         custom_500_view(request)
 
-    expected = render.call_args[1]["context"]["JS_CONTEXT"]["error_message"]
     assert (
         "We've detected that your org has ip login recstrictions in place."
         in render.call_args[1]["context"]["JS_CONTEXT"]["error_message"]
