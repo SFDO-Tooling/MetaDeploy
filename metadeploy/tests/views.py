@@ -1,3 +1,4 @@
+import os
 import pytest
 from unittest import mock
 
@@ -45,12 +46,11 @@ def test_custom_500_view__ip_restricted_error(render):
             'Error retrieving access token: b\'{"error":"invalid_grant","error_description":"ip restricted"}\''
         )
     except OAuth2Error:
-        factory = RequestFactory()
-        request = factory.get("/accounts/salesforce/login/callback/")
-        request.user = AnonymousUser()
-        custom_500_view(request)
+        test_ips = "0.0.0.1, 0.0.0.2, 0.0.0.3"
+        with mock.patch.dict(os.environ, {"IPS_TO_WHITELIST": test_ips}):
+            factory = RequestFactory()
+            request = factory.get("/accounts/salesforce/login/callback/")
+            request.user = AnonymousUser()
+            custom_500_view(request)
 
-    assert (
-        "We've detected that your org has ip login recstrictions in place."
-        in render.call_args[1]["context"]["JS_CONTEXT"]["error_message"]
-    )
+    assert test_ips in render.call_args[1]["context"]["JS_CONTEXT"]["error_message"]
