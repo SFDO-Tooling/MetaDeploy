@@ -1,4 +1,3 @@
-import os
 import pytest
 from unittest import mock
 
@@ -7,7 +6,7 @@ from django.test import RequestFactory
 from django.contrib.auth.models import AnonymousUser
 from sfdo_template_helpers.oauth2.salesforce.views import SalesforcePermissionsError
 
-from ..views import custom_permission_denied_view, custom_500_view, IP_RESTRICTED_MSG
+from ..views import custom_permission_denied_view, custom_500_view
 
 
 @pytest.mark.django_db

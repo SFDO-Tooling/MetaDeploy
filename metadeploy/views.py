@@ -1,7 +1,6 @@
 import sys
 from django.shortcuts import render
 
-from allauth.socialaccount.providers.oauth2.client import OAuth2Error
 from sfdo_template_helpers.oauth2.salesforce.views import SalesforcePermissionsError
 
 from config.settings.base import IPS_TO_ALLOWLIST
