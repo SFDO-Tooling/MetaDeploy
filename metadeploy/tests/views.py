@@ -7,7 +7,7 @@ from django.test import RequestFactory
 from django.contrib.auth.models import AnonymousUser
 from sfdo_template_helpers.oauth2.salesforce.views import SalesforcePermissionsError
 
-from ..views import custom_permission_denied_view, custom_500_view
+from ..views import custom_permission_denied_view, custom_500_view, IP_RESTRICTED_MSG
 
 
 @pytest.mark.django_db
@@ -53,4 +53,7 @@ def test_custom_500_view__ip_restricted_error(render):
             request.user = AnonymousUser()
             custom_500_view(request)
 
-    assert test_ips in render.call_args[1]["context"]["JS_CONTEXT"]["error_message"]
+    assert (
+        IP_RESTRICTED_MSG.format(test_ips)
+        == render.call_args[1]["context"]["JS_CONTEXT"]["error_message"]
+    )
