@@ -46,14 +46,11 @@ def test_custom_500_view__ip_restricted_error(render):
             'Error retrieving access token: b\'{"error":"invalid_grant","error_description":"ip restricted"}\''
         )
     except OAuth2Error:
-        test_ips = "0.0.0.1, 0.0.0.2, 0.0.0.3"
-        with mock.patch.dict(os.environ, {"IPS_TO_WHITELIST": test_ips}):
+        allow_list = "0.0.0.1, 0.0.0.2, 0.0.0.3"
+        with mock.patch("metadeploy.views.IPS_TO_ALLOWLIST", allow_list):
             factory = RequestFactory()
             request = factory.get("/accounts/salesforce/login/callback/")
             request.user = AnonymousUser()
             custom_500_view(request)
 
-    assert (
-        IP_RESTRICTED_MSG.format(test_ips)
-        == render.call_args[1]["context"]["JS_CONTEXT"]["error_message"]
-    )
+    assert allow_list in render.call_args[1]["context"]["JS_CONTEXT"]["error_message"]

@@ -109,9 +109,9 @@ ALLOWED_HOSTS = [
     if el.strip()
 ]
 
-# These are displayed to the customer if MetaDeploy
-# detects that their org has login ip restrictions in place
-IPS_TO_WHITELIST = env("IPS_TO_WHITELIST", default="")
+# This is a stringa displayed to the customer if MetaDeploy
+# detects that their org has Login IP Ranges in place for the user
+IPS_TO_ALLOWLIST = env("IPS_TO_ALLOWLIST", default=None)
 
 
 # Application definition

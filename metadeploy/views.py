@@ -4,13 +4,12 @@ from django.shortcuts import render
 from allauth.socialaccount.providers.oauth2.client import OAuth2Error
 from sfdo_template_helpers.oauth2.salesforce.views import SalesforcePermissionsError
 
-from config.settings.base import IPS_TO_WHITELIST
+from config.settings.base import IPS_TO_ALLOWLIST
 
 GENERIC_ERROR_MSG = "An internal error occurred while processing your request."
 
 IP_RESTRICTED_MSG = (
-    "We've detected that your user has login IP ranges in place. "
-    "Please ensure that the following IP addresses are whitelisted in the org you're attempting to login to: {}"
+    "Unable to access this org because your user has IP Login Ranges that block access."
 )
 
 
@@ -32,7 +31,12 @@ def custom_500_view(request):
     error_type, value, traceback = sys.exc_info()
 
     if "ip restricted" in value.args[0]:
-        message = IP_RESTRICTED_MSG.format(IPS_TO_WHITELIST)
+        message = IP_RESTRICTED_MSG
+        if IPS_TO_ALLOWLIST:
+            message += (
+                " Please ensure that the following IP addresses are "
+                f"included in the IP Login Ranges for you user's Profile: {IPS_TO_ALLOWLIST}"
+            )
 
     return render(
         request,
