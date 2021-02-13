@@ -109,8 +109,8 @@ ALLOWED_HOSTS = [
     if el.strip()
 ]
 
-# This is a stringa displayed to the customer if MetaDeploy
-# detects that their org has Login IP Ranges in place for the user
+# String of IPs (or ranges) shown to the user if
+# we detect the user has Login IP Ranges in place for their profile
 IPS_TO_ALLOWLIST = env("IPS_TO_ALLOWLIST", default=None)
 
 
