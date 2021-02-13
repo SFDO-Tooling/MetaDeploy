@@ -27,7 +27,7 @@ def custom_permission_denied_view(request, exception):
 
 def custom_500_view(request):
     message = GENERIC_ERROR_MSG
-    error_type, value, traceback = sys.exc_info()
+    value = sys.exc_info()[1]
 
     if "ip restricted" in value.args[0]:
         message = IP_RESTRICTED_MSG
