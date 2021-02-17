@@ -34,7 +34,7 @@ export type StepResult = {
   logs?: string;
 };
 
-export type JobErrors = {
+export type PlanResults = {
   [key: string]: StepResult[];
 };
 
@@ -44,7 +44,7 @@ export type Preflight = {
   user: string | null;
   plan: string;
   status: 'started' | 'complete' | 'failed' | 'canceled';
-  results: JobErrors;
+  results: PlanResults;
   is_valid: boolean;
   error_count: number;
   warning_count: number;

@@ -1,5 +1,5 @@
 import { JobsAction } from '@/store/jobs/actions';
-import { JobErrors } from '@/store/plans/reducer';
+import { PlanResults } from '@/store/plans/reducer';
 import { LogoutAction } from '@/store/user/actions';
 
 export type Job = {
@@ -14,7 +14,7 @@ export type Job = {
   plan: string;
   status: 'started' | 'complete' | 'failed' | 'canceled';
   steps: string[];
-  results: JobErrors;
+  results: PlanResults;
   org_name: string | null;
   org_type: string | null;
   is_production_org: boolean;

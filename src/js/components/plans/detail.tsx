@@ -219,7 +219,12 @@ class PlanDetail extends React.Component<Props, State> {
       const results = preflight?.results?.[id];
       if (results) {
         for (const result of results) {
-          if (!result || result.status !== RESULT_STATUS.HIDE) {
+          const stepAlreadyIncluded = (stepId: string) =>
+            steps.some((s) => s.id === stepId);
+          if (
+            (!result || result.status !== RESULT_STATUS.HIDE) &&
+            !stepAlreadyIncluded(id)
+          ) {
             steps.push(step);
           }
         }

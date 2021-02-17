@@ -131,12 +131,8 @@ class StepsTable extends React.Component<Props, State> {
   };
 
   stepHasLogs = (stepId: string, job: Job) => {
-    if (job.results[stepId]) {
-      for (const result of job.results[stepId]) {
-        if (result.logs) {
-          return true;
-        }
-      }
+    if (job.results[stepId]?.[0].logs) {
+      return true;
     }
     return false;
   };

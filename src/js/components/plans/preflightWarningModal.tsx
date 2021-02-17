@@ -6,13 +6,18 @@ import * as React from 'react';
 
 import { SelectedSteps } from '@/components/plans/detail';
 import { WarningIcon } from '@/components/plans/preflightResults';
-import { CONSTANTS, JobErrors, Step, StepResult } from '@/store/plans/reducer';
+import {
+  CONSTANTS,
+  PlanResults,
+  Step,
+  StepResult,
+} from '@/store/plans/reducer';
 
 type Props = {
   isOpen: boolean;
   toggleModal: (open: boolean) => void;
   startJob: () => void;
-  results: JobErrors;
+  results: PlanResults;
   steps: Step[];
   selectedSteps: SelectedSteps;
 };
