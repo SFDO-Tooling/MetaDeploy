@@ -111,7 +111,10 @@ ALLOWED_HOSTS = [
 
 # String of IPs (or ranges) shown to the user if
 # we detect the user has Login IP Ranges in place for their profile
-IPS_TO_ALLOWLIST = env("IPS_TO_ALLOWLIST", default=None)
+IP_RESTRICTED_MESSAGE = env(
+    "IP_RESTRICTED_MESSAGE",
+    default="Unable to access this org because your user has IP Login Ranges that block access.",
+)
 
 
 # Application definition

@@ -3,13 +3,9 @@ from django.shortcuts import render
 
 from sfdo_template_helpers.oauth2.salesforce.views import SalesforcePermissionsError
 
-from config.settings.base import IPS_TO_ALLOWLIST
+from config.settings.base import IP_RESTRICTED_MESSAGE
 
 GENERIC_ERROR_MSG = "An internal error occurred while processing your request."
-
-IP_RESTRICTED_MSG = (
-    "Unable to access this org because your user has IP Login Ranges that block access."
-)
 
 
 def custom_permission_denied_view(request, exception):
@@ -30,12 +26,7 @@ def custom_500_view(request):
     value = sys.exc_info()[1]
 
     if "ip restricted" in value.args[0]:
-        message = IP_RESTRICTED_MSG
-        if IPS_TO_ALLOWLIST:
-            message += (
-                " Please ensure that the following IP addresses are "
-                f"included in the IP Login Ranges for you user's Profile: {IPS_TO_ALLOWLIST}"
-            )
+        message = IP_RESTRICTED_MESSAGE
 
     return render(
         request,
