@@ -246,21 +246,17 @@ class PlanDetail extends React.Component<Props, State> {
     const { changedSteps } = this.state;
     for (const step of plan.steps) {
       const { id } = step;
-      const results = preflight?.results?.[id];
-      let hidden, skipped, optional;
-      if (results) {
-        for (const result of results) {
-          if (!hidden) {
-            hidden = result.status === RESULT_STATUS.HIDE ? result : null;
-          }
-          if (!skipped) {
-            skipped = result.status === RESULT_STATUS.SKIP ? result : null;
-          }
-          if (!optional) {
-            optional = result.status === RESULT_STATUS.OPTIONAL ? result : null;
-          }
-        }
-      }
+      const results = preflight?.results?.[id] || [];
+      const hidden = results.some(
+        (result) => result.status === RESULT_STATUS.HIDE,
+      );
+      const optional = results.some(
+        (result) => result.status === RESULT_STATUS.OPTIONAL,
+      );
+      const skipped = results.some(
+        (result) => result.status === RESULT_STATUS.SKIP,
+      );
+
       if (!hidden && !skipped) {
         const required = step.is_required && !optional;
         const recommended = !required && step.is_recommended;
