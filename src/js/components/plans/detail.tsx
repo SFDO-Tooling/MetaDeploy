@@ -250,9 +250,15 @@ class PlanDetail extends React.Component<Props, State> {
       let hidden, skipped, optional;
       if (results) {
         for (const result of results) {
-          hidden = result.status === RESULT_STATUS.HIDE ? result : null;
-          skipped = result.status === RESULT_STATUS.SKIP ? result : null;
-          optional = result.status === RESULT_STATUS.OPTIONAL ? result : null;
+          if (!hidden) {
+            hidden = result.status === RESULT_STATUS.HIDE ? result : null;
+          }
+          if (!skipped) {
+            skipped = result.status === RESULT_STATUS.SKIP ? result : null;
+          }
+          if (!optional) {
+            optional = result.status === RESULT_STATUS.OPTIONAL ? result : null;
+          }
         }
       }
       if (!hidden && !skipped) {

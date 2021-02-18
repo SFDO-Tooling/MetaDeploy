@@ -186,8 +186,12 @@ class PreflightCell extends React.Component<DataCellProps> {
     let skipped, optional, content;
     if (results) {
       for (const result of results) {
-        skipped = result.status === RESULT_STATUS.SKIP ? result : null;
-        optional = result.status === RESULT_STATUS.OPTIONAL ? result : null;
+        if (!skipped) {
+          skipped = result.status === RESULT_STATUS.SKIP ? result : null;
+        }
+        if (!optional) {
+          optional = result.status === RESULT_STATUS.OPTIONAL ? result : null;
+        }
       }
     }
     const required = item.is_required && !optional;
