@@ -99,12 +99,10 @@ class StepsTable extends React.Component<Props, State> {
   };
 
   isActiveStep = (stepId: string, job: Job) => {
-    if (job.results[stepId]) {
-      for (const result of job.results[stepId]) {
-        if (!result.status) {
-          return true;
-        }
-      }
+    // If we don't yet have results for a step
+    // then it is the active step
+    if (!job.results[stepId]) {
+      return true;
     }
     return false;
   };
