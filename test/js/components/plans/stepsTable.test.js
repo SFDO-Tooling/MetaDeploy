@@ -429,6 +429,24 @@ describe('<StepsTable />', () => {
   });
 
   describe('<InstallDataCell>', () => {
+    describe('with preflight', () => {
+      test('returns skipped, optional', () => {
+        const { getByText } = setup({
+          canInstall: true,
+          preflight: {
+            status: 'complete',
+            is_ready: true,
+            results: {
+              'step-1': [{ status: 'optional' }],
+              'step-2': [{ status: 'skip' }],
+            },
+          },
+        });
+
+        expect(getByText('Step 1')).toBeVisible();
+      });
+    });
+
     describe('with job', () => {
       test('returns completed, skipped, installing, checkbox', () => {
         const { getByText } = setup({
