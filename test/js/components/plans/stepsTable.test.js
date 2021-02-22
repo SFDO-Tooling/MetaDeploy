@@ -437,8 +437,8 @@ describe('<StepsTable />', () => {
             status: 'complete',
             is_ready: true,
             results: {
-              'step-1': [{ status: 'optional' }],
-              'step-2': [{ status: 'skip' }],
+              'step-1': [{ status: 'optional' }, { status: 'optional' }],
+              'step-2': [{ status: 'skip' }, { status: 'skip' }],
             },
           },
         });
