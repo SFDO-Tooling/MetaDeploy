@@ -16,6 +16,7 @@ import logging
 import os
 import sys
 import traceback
+import uuid
 from datetime import timedelta
 
 from asgiref.sync import async_to_sync
@@ -165,7 +166,9 @@ def run_flows(*, plan, skip_steps, result_class, result_id):
         ctx = MetaDeployCCI(repo_root=repo_root, plan=plan)
 
         current_org = "current_org"
-        if scratch_org:
+        if settings.METADEPLOY_FAST_FORWARD:  # pragma: no cover
+            org_config = OrgConfig({}, name=current_org, keychain=ctx.keychain)
+        elif scratch_org:
             org_config = scratch_org.get_refreshed_org_config(
                 org_name=current_org, keychain=ctx.keychain
             )
@@ -276,24 +279,29 @@ def create_scratch_org(org_pk):
     repo_url = plan.version.product.repo_url
     repo_owner, repo_name = extract_user_and_repo(repo_url)
     commit_ish = plan.commit_ish
-    try:
-        with local_github_checkout(
-            repo_owner, repo_name, commit_ish=commit_ish
-        ) as repo_root:
-            scratch_org_config, _, org_config = create_scratch_org_on_sf(
-                repo_owner=repo_owner,
-                repo_name=repo_name,
-                repo_url=repo_url,
-                repo_branch=commit_ish,
-                email=email,
-                project_path=repo_root,
-                scratch_org=org,
-                org_name=plan.org_config_name,
-                duration=plan.scratch_org_duration,
-            )
-    except Exception as e:
-        org.fail(e)
-        return
+
+    if settings.METADEPLOY_FAST_FORWARD:  # pragma: no cover
+        fake_org_id = str(uuid.uuid4())[:18]
+        scratch_org_config = OrgConfig({"org_id": fake_org_id}, "scratch")
+    else:
+        try:
+            with local_github_checkout(
+                repo_owner, repo_name, commit_ish=commit_ish
+            ) as repo_root:
+                scratch_org_config, _, org_config = create_scratch_org_on_sf(
+                    repo_owner=repo_owner,
+                    repo_name=repo_name,
+                    repo_url=repo_url,
+                    repo_branch=commit_ish,
+                    email=email,
+                    project_path=repo_root,
+                    scratch_org=org,
+                    org_name=plan.org_config_name,
+                    duration=plan.scratch_org_duration,
+                )
+        except Exception as e:
+            org.fail(e)
+            return
 
     org.complete(scratch_org_config)
 
