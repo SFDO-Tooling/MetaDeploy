@@ -93,10 +93,10 @@ describe('<ShareModal />', () => {
           ...defaultJob,
           status: 'failed',
           results: {
-            'not-a-step': { status: 'error', message: 'Not an error.' },
-            'step-1': { status: 'ok' },
-            'step-2': { status: 'error' },
-            'step-3': { status: 'error', message: 'Nope.' },
+            'not-a-step': [{ status: 'error', message: 'Not an error.' }],
+            'step-1': [{ status: 'ok' }],
+            'step-2': [{ status: 'error' }],
+            'step-3': [{ status: 'error', message: 'Nope.' }],
           },
         },
       });

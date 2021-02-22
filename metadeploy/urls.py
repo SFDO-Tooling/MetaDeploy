@@ -26,6 +26,7 @@ PREFIX = settings.ADMIN_AREA_PREFIX
 
 # Custom error views
 handler403 = "metadeploy.views.custom_permission_denied_view"
+handler500 = "metadeploy.views.custom_500_view"
 
 
 urlpatterns = [

@@ -88,14 +88,31 @@ class StepsTable extends React.Component<Props, State> {
     // Get the currently-running step
     let activeJobStepId = null;
     if (job && this.jobIsRunning(job)) {
-      for (const step of job.steps) {
-        if (!job.results[step]?.status) {
-          activeJobStepId = step;
+      for (const stepId of job.steps) {
+        if (this.isActiveStep(stepId, job)) {
+          activeJobStepId = stepId;
           break;
         }
       }
     }
     return activeJobStepId;
+  };
+
+  /**
+   * A step is considered active if either are true:
+   * (1) There are no results for the step yet
+   * (2) There are results but a "status" is not present.
+   */
+  isActiveStep = (stepId: string, job: Job) => {
+    if (!job.results[stepId]) {
+      return true;
+    }
+    for (const result of job.results[stepId]) {
+      if (!result.status) {
+        return true;
+      }
+    }
+    return false;
   };
 
   jobIsRunning = (job?: Job): boolean =>
@@ -109,13 +126,21 @@ class StepsTable extends React.Component<Props, State> {
     if (!job) {
       return hasLogs;
     }
-    for (const step of job.steps) {
-      if (job.results[step]?.logs) {
+    for (const stepId of job.steps) {
+      hasLogs = this.stepHasLogs(stepId, job);
+      if (hasLogs) {
         hasLogs = true;
         break;
       }
     }
     return hasLogs;
+  };
+
+  stepHasLogs = (stepId: string, job: Job) => {
+    if (job.results[stepId]?.[0].logs) {
+      return true;
+    }
+    return false;
   };
 
   togglePanel = (id: string): void => {

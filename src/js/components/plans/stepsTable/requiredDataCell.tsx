@@ -24,12 +24,15 @@ const RequiredDataCell = (props: DataCellProps) => {
   }
   const { id } = item;
   const isActive = activeJobStep && id === activeJobStep;
-  const result = preflight?.results?.[id];
-  let skipped, optional;
-  if (result) {
-    skipped = result.status === RESULT_STATUS.SKIP ? result : null;
-    optional = result.status === RESULT_STATUS.OPTIONAL ? result : null;
-  }
+
+  const results = preflight?.results?.[id] || [];
+  const skipped = results.some(
+    (result) => result.status === RESULT_STATUS.SKIP,
+  );
+  const optional = results.some(
+    (result) => result.status === RESULT_STATUS.OPTIONAL,
+  );
+
   const required =
     item.is_required && !optional && (!job || job.steps.includes(id));
   const classes = classNames('slds-align-middle', 'slds-badge', {

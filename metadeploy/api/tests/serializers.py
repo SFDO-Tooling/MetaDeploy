@@ -155,7 +155,7 @@ class TestPreflightSerializer:
             user=user,
             org_id=user.org_id,
             plan=plan,
-            results={0: {"status": "error"}},
+            results={0: [{"status": "error"}]},
             status=PreflightResult.Status.complete,
         )
         serializer = PreflightResultSerializer(instance=preflight).data
@@ -171,7 +171,7 @@ class TestPreflightSerializer:
             user=user,
             org_id=user.org_id,
             plan=plan,
-            results={0: {"status": "warn"}},
+            results={0: [{"status": "warn"}]},
             status=PreflightResult.Status.complete,
         )
         serializer = PreflightResultSerializer(instance=preflight).data
@@ -187,7 +187,7 @@ class TestPreflightSerializer:
             user=user,
             org_id=user.org_id,
             plan=plan,
-            results={0: {"status": "warn"}},
+            results={0: [{"status": "warn"}]},
             status=PreflightResult.Status.complete,
         )
         serializer = PreflightResultSerializer(instance=preflight).data
@@ -202,7 +202,7 @@ class TestPreflightSerializer:
             user=user,
             org_id=user.org_id,
             plan=plan,
-            results={0: {"status": "error"}},
+            results={0: [{"status": "error"}]},
             status=PreflightResult.Status.complete,
         )
         serializer = PreflightResultSerializer(instance=preflight).data
@@ -233,9 +233,9 @@ class TestJob:
             user=user,
             status=PreflightResult.Status.complete,
             results={
-                str(step1.id): {"status": "warn", "message": ""},
-                str(step2.id): {"status": "skip", "message": ""},
-                str(step3.id): {"status": "optional", "message": ""},
+                str(step1.id): [{"status": "warn", "message": ""}],
+                str(step2.id): [{"status": "skip", "message": ""}],
+                str(step3.id): [{"status": "optional", "message": ""}],
             },
             org_id=user.org_id,
         )
@@ -287,9 +287,9 @@ class TestJob:
             user=user,
             status=PreflightResult.Status.complete,
             results={
-                str(step1.id): {"status": "warn", "message": ""},
-                str(step2.id): {"status": "skip", "message": ""},
-                str(step3.id): {"status": "optional", "message": ""},
+                str(step1.id): [{"status": "warn", "message": ""}],
+                str(step2.id): [{"status": "skip", "message": ""}],
+                str(step3.id): [{"status": "optional", "message": ""}],
             },
             org_id=org_id,
         )
@@ -359,7 +359,7 @@ class TestJob:
             plan=plan,
             user=user,
             status=PreflightResult.Status.complete,
-            results={str(step2.id): {"status": "error", "message": ""}},
+            results={str(step2.id): [{"status": "error", "message": ""}]},
             org_id=user.org_id,
         )
         data = {
@@ -416,7 +416,7 @@ class TestJob:
             plan=plan,
             user=user,
             status=PreflightResult.Status.complete,
-            results={str(step1.id): {"status": "optional", "message": ""}},
+            results={str(step1.id): [{"status": "optional", "message": ""}]},
             org_id=user.org_id,
         )
         data = {"plan": str(plan.id), "steps": [str(step2.id)]}
@@ -488,7 +488,7 @@ class TestJob:
             plan=plan,
             user=user,
             status=PreflightResult.Status.complete,
-            results={str(step2.id): {"status": "error", "message": ""}},
+            results={str(step2.id): [{"status": "error", "message": ""}]},
             org_id=user.org_id,
         )
         preflight_result_factory(
@@ -496,9 +496,9 @@ class TestJob:
             user=user,
             status=PreflightResult.Status.complete,
             results={
-                str(step1.id): {"status": "warn", "message": ""},
-                str(step2.id): {"status": "skip", "message": ""},
-                str(step3.id): {"status": "optional", "message": ""},
+                str(step1.id): [{"status": "warn", "message": ""}],
+                str(step2.id): [{"status": "skip", "message": ""}],
+                str(step3.id): [{"status": "optional", "message": ""}],
             },
             org_id=user.org_id,
         )

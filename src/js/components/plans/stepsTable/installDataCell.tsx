@@ -49,11 +49,13 @@ const JobCell = (props: DataCellProps) => {
   }
   const { id } = item;
   const isActive = activeJobStep && id === activeJobStep;
-  const result = job.results[id];
+  const results = job.results[id];
   let complete, error, contents, title;
-  if (result) {
-    complete = result.status === RESULT_STATUS.OK;
-    error = result.status === RESULT_STATUS.ERROR;
+  if (results) {
+    for (const result of results) {
+      complete = result.status === RESULT_STATUS.OK;
+      error = result.status === RESULT_STATUS.ERROR;
+    }
   }
   if (!job.steps.includes(id)) {
     title = i18n.t('Skipped');
@@ -180,11 +182,17 @@ class PreflightCell extends React.Component<DataCellProps> {
       return null;
     }
     const { id } = item;
-    const result = preflight?.results?.[id];
+    const results = preflight?.results?.[id];
     let skipped, optional, content;
-    if (result) {
-      skipped = result.status === RESULT_STATUS.SKIP ? result : null;
-      optional = result.status === RESULT_STATUS.OPTIONAL ? result : null;
+    if (results) {
+      for (const result of results) {
+        if (!skipped) {
+          skipped = result.status === RESULT_STATUS.SKIP ? result : null;
+        }
+        if (!optional) {
+          optional = result.status === RESULT_STATUS.OPTIONAL ? result : null;
+        }
+      }
     }
     const required = item.is_required && !optional;
     const recommended = !required && item.is_recommended;

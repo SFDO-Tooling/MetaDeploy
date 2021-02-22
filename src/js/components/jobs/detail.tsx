@@ -5,6 +5,7 @@ import * as React from 'react';
 import DocumentTitle from 'react-document-title';
 import { connect, ConnectedProps } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { Job } from 'src/js/store/jobs/reducer';
 
 import BackLink from '@/components/backLink';
 import BodyContainer from '@/components/bodyContainer';
@@ -303,6 +304,23 @@ class JobDetail extends React.Component<Props, State> {
     </PageHeaderControl>
   );
 
+  /** Returns false if _any_ results for the given step
+   * have a status of "hide". True otherwise.
+   */
+  stepIsVisible = (stepId: string, job: Job) => {
+    let visible = true;
+    const stepResults = job.results[stepId];
+    if (stepResults) {
+      for (const result of stepResults) {
+        if (result?.status === CONSTANTS.RESULT_STATUS.HIDE) {
+          visible = false;
+          break;
+        }
+      }
+    }
+    return visible;
+  };
+
   render() {
     const {
       user,
@@ -348,11 +366,7 @@ class JobDetail extends React.Component<Props, State> {
     );
     const { canceling } = this.state;
     const steps = plan.steps
-      ? plan.steps.filter((step) => {
-          const result = job.results[step.id];
-          const hidden = result?.status === CONSTANTS.RESULT_STATUS.HIDE;
-          return !hidden;
-        })
+      ? plan.steps.filter((step) => this.stepIsVisible(step.id, job))
       : [];
     return (
       <DocumentTitle

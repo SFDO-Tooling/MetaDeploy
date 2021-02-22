@@ -33,16 +33,18 @@ export type StepResult = {
   message?: string;
   logs?: string;
 };
-export type PreflightErrors = {
-  [key: string]: StepResult;
+
+export type PlanResults = {
+  [key: string]: StepResult[];
 };
+
 export type Preflight = {
   id: string;
   edited_at: string;
   user: string | null;
   plan: string;
   status: 'started' | 'complete' | 'failed' | 'canceled';
-  results: PreflightErrors;
+  results: PlanResults;
   is_valid: boolean;
   error_count: number;
   warning_count: number;

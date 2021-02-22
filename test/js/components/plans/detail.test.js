@@ -147,9 +147,9 @@ const defaultState = {
       error_count: 0,
       warning_count: 0,
       results: {
-        'step-1': { status: 'optional' },
-        'step-3': { status: 'skip' },
-        'step-5': { status: 'hide' },
+        'step-1': [{ status: 'optional' }],
+        'step-3': [{ status: 'skip' }],
+        'step-5': [{ status: 'hide' }],
       },
       is_ready: true,
     },

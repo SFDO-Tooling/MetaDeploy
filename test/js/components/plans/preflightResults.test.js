@@ -12,9 +12,9 @@ const defaultPreflight = {
   warning_count: 3,
   is_valid: true,
   results: {
-    plan: { status: 'error', message: 'This plan error.' },
-    1: { status: 'warn', message: 'This warning.' },
-    2: { status: 'error', message: 'This other error.' },
+    plan: [{ status: 'error', message: 'This plan error.' }],
+    1: [{ status: 'warn', message: 'This warning.' }],
+    2: [{ status: 'error', message: 'This other error.' }],
     malformed: { foo: 'bar' },
   },
 };
@@ -101,7 +101,6 @@ describe('<PreflightResults />', () => {
   describe('completed preflight with errors and warnings', () => {
     test('displays error/warning messages', () => {
       const { getByText } = setup();
-
       expect(
         getByText(
           'Pre-install validation encountered 4 errors and 3 warnings.',

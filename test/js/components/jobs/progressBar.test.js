@@ -7,7 +7,7 @@ import { render, rerenderWithI18n } from './../../utils';
 const defaultJob = {
   id: 'job-1',
   steps: ['1', '2', '3', '4'],
-  results: { 1: { status: 'ok' } },
+  results: { 1: [{ status: 'ok' }] },
   status: 'started',
 };
 
@@ -48,7 +48,7 @@ describe('<ProgressBar />', () => {
 
       expect(getByText('45% Complete')).toBeVisible();
 
-      job.results['2'] = { status: 'ok' };
+      job.results['2'] = [{ status: 'ok' }];
       rerenderWithI18n(<ProgressBar job={job} />, rerender);
 
       expect(getByText('50% Complete')).toBeVisible();
@@ -67,10 +67,10 @@ describe('<ProgressBar />', () => {
         job: {
           ...defaultJob,
           results: {
-            1: { status: 'ok' },
-            2: { status: 'ok' },
-            3: { status: 'ok' },
-            4: { status: 'ok' },
+            1: [{ status: 'ok' }],
+            2: [{ status: 'ok' }],
+            3: [{ status: 'ok' }],
+            4: [{ status: 'ok' }],
           },
           status: 'complete',
         },
@@ -86,8 +86,8 @@ describe('<ProgressBar />', () => {
         job: {
           ...defaultJob,
           results: {
-            1: { status: 'ok' },
-            2: { status: 'error' },
+            1: [{ status: 'ok' }],
+            2: [{ status: 'error' }],
           },
           status: 'failed',
         },
@@ -104,8 +104,8 @@ describe('<ProgressBar />', () => {
         job: {
           ...defaultJob,
           results: {
-            1: { status: 'ok' },
-            2: { status: 'error' },
+            1: [{ status: 'ok' }],
+            2: [{ status: 'error' }],
           },
           status: 'canceled',
         },

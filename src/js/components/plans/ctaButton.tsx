@@ -220,12 +220,13 @@ class CtaButton extends React.Component<
       doStartJob,
     } = this.props;
     // propagate hidden steps from the preflight results to the job results
-    const results: { [key: string]: StepResult } = {};
+    const results: { [key: string]: StepResult[] } = {};
     if (preflight?.results) {
-      Object.keys(preflight.results).forEach((id) => {
-        const result = preflight.results[id];
-        if (result?.status === CONSTANTS.RESULT_STATUS.HIDE) {
-          results[id] = result;
+      Object.keys(preflight.results).forEach((stepId) => {
+        for (const result of preflight.results[stepId]) {
+          if (result?.status === CONSTANTS.RESULT_STATUS.HIDE) {
+            results[stepId] = [result];
+          }
         }
       });
     }
@@ -300,11 +301,13 @@ class CtaButton extends React.Component<
     if (!preflight?.results) {
       return false;
     }
+
     return [...selectedSteps].some(
       (id) =>
         preflight.results[id] &&
-        preflight.results[id].message &&
-        preflight.results[id].status === RESULT_STATUS.WARN,
+        preflight.results[id].some(
+          (result) => result.message && result.status === RESULT_STATUS.WARN,
+        ),
     );
   }
 
