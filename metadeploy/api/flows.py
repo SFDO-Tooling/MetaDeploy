@@ -79,16 +79,18 @@ class JobFlowCallback(BasicFlowCallback):
         self.set_current_key_by_step(step)
 
     def post_task(self, step, result):
-        step_id = self._get_step_id(step_num=step.step_num)
-        if step_id:
-            if step_id not in self.context.results:
-                self.context.results[step_id] = {}
+        job_id = self._get_step_id(step_num=step.step_num)
+        if job_id:
+            if job_id not in self.context.results:
+                self.context.results[job_id] = [{}]
+                print(f">>> initialized {self.context.results[job_id]}")
+
             if result.exception:
-                self.context.results[step_id].update(
+                self.context.results[job_id][0].update(
                     {"status": ERROR, "message": bleach.clean(str(result.exception))}
                 )
             else:
-                self.context.results[step_id].update({"status": OK})
+                self.context.results[job_id][0].update({"status": OK})
             self.context.log = obscure_salesforce_log(self.string_buffer.getvalue())
             self.context.save()
         self.set_current_key_by_step(None)
@@ -123,10 +125,13 @@ class PreflightFlowCallback(BasicFlowCallback):
         sanitized_results = {}
         for step_num, step_results in results.items():
             step_id = self._get_step_id(step_num=step_num) if step_num else "plan"
-            step_result = step_results[0]
-            if step_result["message"]:
-                step_result["message"] = bleach.clean(step_result["message"])
-            sanitized_results[step_id] = step_result
+            for step_result in step_results:
+                if step_result["message"]:
+                    step_result["message"] = bleach.clean(step_result["message"])
+                if step_id not in sanitized_results:
+                    sanitized_results[step_id] = []
+                sanitized_results[step_id].append(step_result)
+
         self.context.results = sanitized_results
         self.context.save()
 

@@ -87,7 +87,7 @@ describe('<StepsTable />', () => {
           status: 'started',
           steps: ['step-1', 'step-2', 'step-3'],
           results: {
-            'step-1': { logs: 'Test log 1' },
+            'step-1': [{ logs: 'Test log 1' }],
           },
         };
         const { getAllByText, container, rerender } = setup({
@@ -104,7 +104,7 @@ describe('<StepsTable />', () => {
           ...job,
           results: {
             ...job.results,
-            'step-1': { logs: 'Test log 1 and more' },
+            'step-1': [{ logs: 'Test log 1 and more' }],
           },
         };
         rerenderWithI18n(
@@ -126,8 +126,8 @@ describe('<StepsTable />', () => {
           ...job,
           results: {
             ...job.results,
-            'step-1': { status: 'ok', logs: 'Test log 1' },
-            'step-2': { logs: 'Test log 2' },
+            'step-1': [{ status: 'ok', logs: 'Test log 1' }],
+            'step-2': [{ logs: 'Test log 2' }],
           },
         };
         rerenderWithI18n(
@@ -155,9 +155,9 @@ describe('<StepsTable />', () => {
           status: 'started',
           steps: ['step-1', 'step-2', 'step-3'],
           results: {
-            'step-1': { status: 'ok', logs: 'Test log 1' },
-            'step-2': { status: 'ok', logs: 'Test log 2' },
-            'step-3': { logs: 'Test log 3' },
+            'step-1': [{ status: 'ok', logs: 'Test log 1' }],
+            'step-2': [{ status: 'ok', logs: 'Test log 2' }],
+            'step-3': [{ logs: 'Test log 3' }],
           },
         };
         const { getAllByText, container, rerender } = setup({
@@ -180,7 +180,7 @@ describe('<StepsTable />', () => {
           status: 'complete',
           results: {
             ...job.results,
-            'step-3': { status: 'ok', logs: 'Test log 3' },
+            'step-3': [{ status: 'ok', logs: 'Test log 3' }],
           },
         };
         rerenderWithI18n(
@@ -209,9 +209,9 @@ describe('<StepsTable />', () => {
         status: 'complete',
         steps: ['step-1', 'step-2', 'step-3'],
         results: {
-          'step-1': { status: 'ok', logs: 'Test log 1' },
-          'step-2': { status: 'ok', logs: 'Test log 2' },
-          'step-3': { status: 'ok', logs: 'Test log 3' },
+          'step-1': [{ status: 'ok', logs: 'Test log 1' }],
+          'step-2': [{ status: 'ok', logs: 'Test log 2' }],
+          'step-3': [{ status: 'ok', logs: 'Test log 3' }],
         },
       },
     });
@@ -241,10 +241,12 @@ describe('<StepsTable />', () => {
           preflight: {
             status: 'complete',
             results: {
-              'step-1': {
-                status: 'optional',
-                message: 'This became optional.',
-              },
+              'step-1': [
+                {
+                  status: 'optional',
+                  message: 'This became optional.',
+                },
+              ],
             },
           },
         });
@@ -257,8 +259,8 @@ describe('<StepsTable />', () => {
           preflight: {
             status: 'complete',
             results: {
-              'step-1': { status: 'warn', message: 'This warning.' },
-              'step-2': { status: 'error', message: 'This other error.' },
+              'step-1': [{ status: 'warn', message: 'This warning.' }],
+              'step-2': [{ status: 'error', message: 'This other error.' }],
             },
           },
         });
@@ -277,11 +279,13 @@ describe('<StepsTable />', () => {
             status: 'complete',
             steps: ['step-1', 'step-2', 'step-4'],
             results: {
-              'step-1': {
-                status: 'error',
-                message: 'This error.',
-                logs: 'These logs.',
-              },
+              'step-1': [
+                {
+                  status: 'error',
+                  message: 'This error.',
+                  logs: 'These logs.',
+                },
+              ],
             },
           },
         });
@@ -297,9 +301,9 @@ describe('<StepsTable />', () => {
             status: 'started',
             steps: ['step-1', 'step-2', 'step-4'],
             results: {
-              'step-1': { status: 'ok', logs: 'Test log 1' },
-              'step-2': { logs: 'Test log 2' },
-              foo: { status: 'ok', logs: 'Another test log' },
+              'step-1': [{ status: 'ok', logs: 'Test log 1' }],
+              'step-2': [{ logs: 'Test log 2' }],
+              foo: [{ status: 'ok', logs: 'Another test log' }],
             },
           },
         });
@@ -318,8 +322,8 @@ describe('<StepsTable />', () => {
           status: 'started',
           steps: ['step-1', 'step-2', 'step-3'],
           results: {
-            'step-1': { status: 'ok', logs: 'Test log 1' },
-            'step-2': { logs: 'Test log 2' },
+            'step-1': [{ status: 'ok', logs: 'Test log 1' }],
+            'step-2': [{ logs: 'Test log 2' }],
           },
         },
       });
@@ -349,8 +353,8 @@ describe('<StepsTable />', () => {
         status: 'started',
         steps: ['step-1', 'step-2', 'step-3'],
         results: {
-          'step-1': { status: 'ok', logs: 'Test log 1' },
-          'step-2': { logs: 'Test log 2' },
+          'step-1': [{ status: 'ok', logs: 'Test log 1' }],
+          'step-2': [{ logs: 'Test log 2' }],
         },
       };
       const { getByText, getAllByText, container, rerender } = setup({
@@ -374,7 +378,7 @@ describe('<StepsTable />', () => {
         ...job,
         results: {
           ...job.results,
-          'step-2': { status: 'ok', logs: 'Test log 2' },
+          'step-2': [{ status: 'ok', logs: 'Test log 2' }],
         },
       };
       rerenderWithI18n(
@@ -400,8 +404,8 @@ describe('<StepsTable />', () => {
         preflight: {
           status: 'complete',
           results: {
-            'step-1': { status: 'optional' },
-            'step-2': { status: 'optional' },
+            'step-1': [{ status: 'optional' }],
+            'step-2': [{ status: 'optional' }],
           },
         },
       });
@@ -425,6 +429,24 @@ describe('<StepsTable />', () => {
   });
 
   describe('<InstallDataCell>', () => {
+    describe('with preflight', () => {
+      test('returns skipped, optional', () => {
+        const { getByText } = setup({
+          canInstall: true,
+          preflight: {
+            status: 'complete',
+            is_ready: true,
+            results: {
+              'step-1': [{ status: 'optional' }, { status: 'optional' }],
+              'step-2': [{ status: 'skip' }, { status: 'skip' }],
+            },
+          },
+        });
+
+        expect(getByText('Step 1')).toBeVisible();
+      });
+    });
+
     describe('with job', () => {
       test('returns completed, skipped, installing, checkbox', () => {
         const { getByText } = setup({
@@ -434,9 +456,9 @@ describe('<StepsTable />', () => {
             status: 'started',
             steps: ['step-1', 'step-2', 'step-4'],
             results: {
-              'step-1': { status: 'ok', logs: 'Test log' },
-              'step-2': { logs: 'Test log' },
-              foo: { status: 'ok', logs: 'Another test log' },
+              'step-1': [{ status: 'ok', logs: 'Test log' }],
+              'step-2': [{ logs: 'Test log' }],
+              foo: [{ status: 'ok', logs: 'Another test log' }],
             },
           },
         });
@@ -456,8 +478,8 @@ describe('<StepsTable />', () => {
               status: 'failed',
               steps: ['step-1', 'step-2', 'step-4'],
               results: {
-                'step-1': { status: 'ok' },
-                'step-2': { status: 'error', message: 'totally failed' },
+                'step-1': [{ status: 'ok' }],
+                'step-2': [{ status: 'error', message: 'totally failed' }],
               },
             },
           });
@@ -503,9 +525,9 @@ describe('<StepsTable />', () => {
           error_count: 0,
           warning_count: 0,
           results: {
-            'step-1': { status: 'optional' },
-            'step-3': { status: 'skip', message: 'This was skipped.' },
-            'step-4': { status: 'skip', logs: 'Test log' },
+            'step-1': [{ status: 'optional' }],
+            'step-3': [{ status: 'skip', message: 'This was skipped.' }],
+            'step-4': [{ status: 'skip', logs: 'Test log' }],
           },
           is_ready: true,
         },

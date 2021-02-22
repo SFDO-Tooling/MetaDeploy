@@ -17,7 +17,7 @@ class MockRecord:
 @pytest.mark.django_db
 class TestResultSpoolLogger:
     def test_emit(self, job_factory):
-        job = job_factory(results={"test": {"logs": ""}}, org_id="00Dxxxxxxxxxxxxxxx")
+        job = job_factory(results={"test": [{"logs": ""}]}, org_id="00Dxxxxxxxxxxxxxxx")
         handler = ResultSpoolLogger(result=job)
         handler.current_key = "test"
         record = MockRecord("test")
@@ -25,7 +25,7 @@ class TestResultSpoolLogger:
         handler.emit(record)
 
         job.refresh_from_db()
-        assert job.results == {"test": {"logs": "\ntest"}}
+        assert job.results == {"test": [{"logs": "\ntest"}]}
 
     def test_emit_none(self, job_factory):
         job = job_factory(results={}, org_id="00Dxxxxxxxxxxxxxxx")
@@ -39,7 +39,7 @@ class TestResultSpoolLogger:
         assert job.results == {}
 
     def test_emit_no_logs_key(self, job_factory):
-        job = job_factory(results={"test": {}}, org_id="00Dxxxxxxxxxxxxxxx")
+        job = job_factory(results={"test": [{}]}, org_id="00Dxxxxxxxxxxxxxxx")
         handler = ResultSpoolLogger(result=job)
         handler.current_key = "test"
         record = MockRecord("test")
@@ -47,7 +47,7 @@ class TestResultSpoolLogger:
         handler.emit(record)
 
         job.refresh_from_db()
-        assert job.results == {"test": {"logs": "test"}}
+        assert job.results == {"test": [{"logs": "test"}]}
 
     def test_emit_no_current_key(self, job_factory):
         job = job_factory(results={}, org_id="00Dxxxxxxxxxxxxxxx")
@@ -58,4 +58,4 @@ class TestResultSpoolLogger:
         handler.emit(record)
 
         job.refresh_from_db()
-        assert job.results == {"test": {"logs": "test"}}
+        assert job.results == {"test": [{"logs": "test"}]}

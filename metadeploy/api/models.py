@@ -862,9 +862,12 @@ class PreflightResult(models.Model):
         return scratch_org and scratch_org.org_id == self.org_id
 
     def has_any_errors(self):
-        return any(
-            (val for val in self.results.values() if val.get("status", None) == ERROR)
-        )
+        for results in self.results.values():
+            if any(
+                (result for result in results if result.get("status", None) == ERROR)
+            ):
+                return True
+        return False
 
     @property
     def optional_step_ids(self):
@@ -878,9 +881,13 @@ class PreflightResult(models.Model):
 
         So this will return a list of step PKs, for now.
         """
-        return [
-            str(k) for k, v in self.results.items() if v["status"] in (OPTIONAL, HIDE)
-        ]
+        optional_step_pks = []
+        for step_id, results in self.results.items():
+            for result in results:
+                if result["status"] in (OPTIONAL, HIDE):
+                    optional_step_pks.append(step_id)
+
+        return optional_step_pks
 
     def _push_if_condition(self, condition, fn):
         if condition:

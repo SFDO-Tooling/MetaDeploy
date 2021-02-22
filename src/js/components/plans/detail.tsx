@@ -216,8 +216,19 @@ class PlanDetail extends React.Component<Props, State> {
     }
     for (const step of plan.steps) {
       const { id } = step;
-      const result = preflight?.results?.[id];
-      if (!result || result.status !== RESULT_STATUS.HIDE) {
+      const results = preflight?.results?.[id];
+      if (results) {
+        for (const result of results) {
+          const stepAlreadyIncluded = (stepId: string) =>
+            steps.some((s) => s.id === stepId);
+          if (
+            (!result || result.status !== RESULT_STATUS.HIDE) &&
+            !stepAlreadyIncluded(id)
+          ) {
+            steps.push(step);
+          }
+        }
+      } else {
         steps.push(step);
       }
     }
@@ -235,13 +246,17 @@ class PlanDetail extends React.Component<Props, State> {
     const { changedSteps } = this.state;
     for (const step of plan.steps) {
       const { id } = step;
-      const result = preflight?.results?.[id];
-      let hidden, skipped, optional;
-      if (result) {
-        hidden = result.status === RESULT_STATUS.HIDE ? result : null;
-        skipped = result.status === RESULT_STATUS.SKIP ? result : null;
-        optional = result.status === RESULT_STATUS.OPTIONAL ? result : null;
-      }
+      const results = preflight?.results?.[id] || [];
+      const hidden = results.some(
+        (result) => result.status === RESULT_STATUS.HIDE,
+      );
+      const optional = results.some(
+        (result) => result.status === RESULT_STATUS.OPTIONAL,
+      );
+      const skipped = results.some(
+        (result) => result.status === RESULT_STATUS.SKIP,
+      );
+
       if (!hidden && !skipped) {
         const required = step.is_required && !optional;
         const recommended = !required && step.is_recommended;
