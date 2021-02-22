@@ -85,7 +85,7 @@
   "Product Terms of Use and Licenses": "Produkt-Nutzungsbedingungen und Lizenzen",
   "Production or Developer Org": "Produktions- oder Entwicklerorganisation",
   "Products": "Produkte",
-  "Progress: {{percent}}%": "Status: {{percent}} %",
+  "Progress: {{percent}}%": "Status: {{percent}} %",
   "Re-Run Pre-Install Validation": "Überprüfung vor der Installation erneut ausführen",
   "Re-Run Pre-Install Validation on Scratch Org": "Überprüfung vor der Installation für die Testorganisation erneut ausführen",
   "Required": "Erforderlich",
@@ -224,8 +224,8 @@
   "scratchOrgDuration_3": "Ihre Testorganisation läuft nach {{count}} Tagen ab.",
   "scratchOrgDuration_4": "Ihre Testorganisation läuft nach {{count}} Tagen ab.",
   "scratchOrgDuration_5": "Ihre Testorganisation läuft nach {{count}} Tagen ab.",
-  "scratchOrgInfo": "Wenn Sie Ihre Organisation sofort anzeigen möchten, klicken Sie unten auf die Schaltfläche \"Testorganisation anzeigen\". Wenn Sie Ihre Organisation später anzeigen möchten, kopieren Sie diesen Link.<1></1><2>An Sie wurde außerdem eine E-Mail zum Zurücksetzen des Kennworts für Ihre neue Organisation gesendet.</2>",
-  "scratchOrgWarning": "<0>Dieses Ablaufdatum kann weder geändert noch verlängert werden. Nach dem Ablaufdatum sind alle Änderungen verloren, und Sie müssen eine neue Testorganisation erstellen.</0><1>Diese Organisation dient nur zu Demozwecken.</1>",
+  "scratchOrgInfo": "Wenn Sie Ihre Organisation sofort anzeigen möchten, klicken Sie unten auf die Schaltfläche \"Testorganisation anzeigen\". Wenn Sie Ihre Organisation später anzeigen möchten, kopieren Sie diesen Link.<1></1><2>Ihnen wurde außerdem eine E-Mail zum Zurücksetzen des Kennworts für Ihre neue Organisation gesendet.</2>",
+  "scratchOrgWarning": "<0>Dieses Ablaufdatum kann weder geändert noch verlängert werden. Nach dem Ablaufdatum gehen alle Änderungen verloren, und Sie müssen eine neue Testorganisation erstellen.</0><1>Diese Organisation dient nur zu Demozwecken.</1>",
   "switchOrg": "Ist dies die richtige Organisation? Falls nicht, bitte <2></2>",
   "versionNotFound": "Wir können die Version, nach der Sie suchen, nicht finden. Mit der <2>Liste aller Produkte</2> versuchen?",
   "versionNotFoundMostRecent": "Wir können die Version, nach der Sie suchen, nicht finden. Möchten Sie es mit der <2>aktuellsten Version</2> dieses Produkts oder mit der <6>Liste aller Produkte</6> versuchen?",
@@ -239,6 +239,6 @@
   "warningMsg_4": "{{count}} Warnungen",
   "warningMsg_5": "{{count}} Warnungen",
   "{{item1}} and {{item2}}": "{{item1}} und {{item2}}",
-  "{{percent}}% Complete": "{{percent}} % abgeschlossen",
+  "{{percent}}% Complete": "{{percent}} % abgeschlossen",
   "{{title}} - View Details": "{{title}} – Details anzeigen"
 }
