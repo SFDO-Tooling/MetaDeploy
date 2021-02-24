@@ -2,7 +2,6 @@ import time
 
 from cumulusci.core.tasks import BaseTask
 from django.core.management.base import BaseCommand
-from django.utils import timezone
 from django.utils.text import slugify
 
 from ...models import (
