@@ -16,7 +16,7 @@
     "webpack:serve": "webpack serve --config webpack.dev.js",
     "django:serve": "python manage.py runserver 0.0.0.0:${PORT:-8000}",
     "worker:serve": "python manage.py rqworker default short",
-    "scheduler:serve": "python manage.py rqscheduler --queue short",
+    "scheduler:serve": "python manage.py metadeploy_rqscheduler",
     "redis:clear": "redis-cli -h ${REDIS_HOST:-localhost} FLUSHALL",
     "rq:serve": "npm-run-all redis:clear -p worker:serve scheduler:serve",
     "serve": "run-p django:serve webpack:serve rq:serve",
