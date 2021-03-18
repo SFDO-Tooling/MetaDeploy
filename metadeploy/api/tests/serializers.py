@@ -615,7 +615,7 @@ class TestJob:
         data = {
             "plan": str(plan.id),
             "steps": [str(step1.id)],
-            "results": {str(step1.id): {"status": "ok"}},
+            "results": [{str(step1.id): {"status": "ok"}}],
         }
         serializer = JobSerializer(data=data, context=dict(request=request))
 
