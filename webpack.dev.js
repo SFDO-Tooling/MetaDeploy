@@ -26,7 +26,7 @@ module.exports = merge(common, {
     host: '0.0.0.0',
     proxy: {
       '**': 'http://localhost:8000',
-      '/ws': {
+      '/ws/notifications': {
         target: 'http://localhost:8000',
         ws: true,
       },

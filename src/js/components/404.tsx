@@ -4,7 +4,7 @@ import DocumentTitle from 'react-document-title';
 import { Trans } from 'react-i18next';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 
-import desertSvg from '!svg-inline-loader!images/desert.svg';
+import desertSvg from '!raw-loader!images/desert.svg';
 import Header from '@/components/header';
 import routes from '@/utils/routes';
 
