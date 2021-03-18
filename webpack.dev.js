@@ -20,13 +20,10 @@ module.exports = merge(common, {
     filename: '[name].js',
     path: path.join(__dirname, 'dist'),
   },
-  devtool: 'inline-cheap-module-source-map',
+  devtool: 'cheap-module-inline-source-map',
   devServer: {
-    dev: {
-      index: '',
-      publicPath: '/static/',
-      writeToDisk: true,
-    },
+    index: '',
+    host: '0.0.0.0',
     proxy: {
       '**': 'http://localhost:8000',
       '/ws/notifications': {
@@ -34,9 +31,8 @@ module.exports = merge(common, {
         ws: true,
       },
     },
-    static: false,
-    host: '0.0.0.0',
     hot: false,
+    writeToDisk: true,
   },
   plugins: [
     new MiniCssExtractPlugin({
