@@ -29,7 +29,7 @@ module.exports = {
     runtimeChunk: 'single',
     splitChunks: {
       cacheGroups: {
-        vendor: {
+        defaultVendors: {
           name: 'vendors',
           test: /[\\/]node_modules[\\/](?!@sentry)/,
           chunks: 'all',
@@ -114,4 +114,7 @@ module.exports = {
       template: path.join(__dirname, 'src', 'index.html'),
     }),
   ],
+  performance: {
+    hints: false,
+  },
 };
