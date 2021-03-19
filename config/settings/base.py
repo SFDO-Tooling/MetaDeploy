@@ -257,7 +257,7 @@ LANGUAGES = [
     ("en-us", "English (US)"),
     ("ar", "Arabic"),
     ("bg", "Bulgarian"),
-    {"ca-es", "Catalan (Spain)"},
+    {"ca", "Catalan (Spain)"},
     ("cs", "Czech"),
     ("da", "Danish"),
     ("de", "German"),
