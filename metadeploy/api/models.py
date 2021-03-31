@@ -884,7 +884,7 @@ class PreflightResult(models.Model):
         optional_step_pks = []
         for step_id, results in self.results.items():
             for result in results:
-                if result["status"] in (OPTIONAL, HIDE, SKIP):
+                if result["status"] in (OPTIONAL, SKIP, HIDE):
                     optional_step_pks.append(step_id)
 
         return optional_step_pks
