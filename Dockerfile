@@ -53,5 +53,4 @@ RUN DATABASE_URL="" \
   SFDX_CLIENT_SECRET="sample secret" \
   SFDX_CLIENT_CALLBACK_URL="sample callback" \
   SFDX_CLIENT_ID="sample id" \
-  GITHUB_TOKEN="sample token" \
   python manage.py collectstatic --noinput

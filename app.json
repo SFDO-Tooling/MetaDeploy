@@ -60,9 +60,11 @@
     "SFDX_CLIENT_CALLBACK_URL": {
       "description": "The callback URL used for OAuth callbacks, must be in the form of fqdn, AllAuth adds what it needs. e.g. https://metadeploy-staging.herokuapp.com/"
     },
-    "GITHUB_TOKEN": {
-      "description": "A valid github personal access token that has read access to all repositories.",
-      "required": false
+    "GITHUB_APP_ID": {
+      "description": "App ID of the GitHub app that will be used to read repositories from GitHub",
+    },
+    "GITHUB_APP_KEY": {
+      "description": "Private key of the GitHub app that will be used to read repositories from GitHub",
     },
     "DB_ENCRYPTION_KEY": {
       "description": "A key for encrypting using cryptography.fernet. Generate using cryptography.fernet.Fernet.generate_key"
