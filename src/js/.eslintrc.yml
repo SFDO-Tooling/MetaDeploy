@@ -14,7 +14,6 @@ plugins:
   - '@typescript-eslint'
 extends:
   - plugin:@typescript-eslint/recommended
-  - prettier/@typescript-eslint
 rules:
   # TypeScript
   '@typescript-eslint/explicit-module-boundary-types': 0

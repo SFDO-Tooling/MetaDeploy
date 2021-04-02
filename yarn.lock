@@ -5444,6 +5444,13 @@ i18next-browser-languagedetector@^6.1.0:
   dependencies:
     "@babel/runtime" "^7.5.5"
 
+i18next-http-backend@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/i18next-http-backend/-/i18next-http-backend-1.2.1.tgz#50ced1a147c37c851daf64d230b3832fb7a20527"
+  integrity sha512-9L2sa+wybqi57/+VsrJPo5DCI7WLoudaK12xz0okYSmsi3Izyj7sCgrYL52WHy/O3BFY9HGORBwSwlD1WYuH6Q==
+  dependencies:
+    node-fetch "2.6.1"
+
 i18next-scanner-webpack@^0.7.0:
   version "0.7.1"
   resolved "https://registry.yarnpkg.com/i18next-scanner-webpack/-/i18next-scanner-webpack-0.7.1.tgz#85564065fda1594df76648e3a4a09ab292803708"
@@ -5477,13 +5484,6 @@ i18next-scanner@^3.0.0:
     through2 "^4.0.0"
     vinyl "^2.2.0"
     vinyl-fs "^3.0.1"
-
-i18next-xhr-backend@^3.2.2:
-  version "3.2.2"
-  resolved "https://registry.yarnpkg.com/i18next-xhr-backend/-/i18next-xhr-backend-3.2.2.tgz#769124441461b085291f539d91864e3691199178"
-  integrity sha512-OtRf2Vo3IqAxsttQbpjYnmMML12IMB5e0fc5B7qKJFLScitYaXa1OhMX0n0X/3vrfFlpHL9Ro/H+ps4Ej2j7QQ==
-  dependencies:
-    "@babel/runtime" "^7.5.5"
 
 i18next@*, i18next@20.1.0:
   version "20.1.0"
@@ -7439,7 +7439,7 @@ no-case@^3.0.4:
     lower-case "^2.0.2"
     tslib "^2.0.3"
 
-node-fetch@^2.6.1:
+node-fetch@2.6.1, node-fetch@^2.6.1:
   version "2.6.1"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.1.tgz#045bd323631f76ed2e2b55573394416b639a0052"
   integrity sha512-V4aYg89jEoVRxRb2fJdAg8FHvI7cEyYdVAh94HH0UIK8oJxUfkjlDQN9RbMx+bEjP7+ggMiFRprSti032Oipxw==
