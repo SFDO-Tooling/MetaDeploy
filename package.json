@@ -105,7 +105,7 @@
     "babel-loader": "^8.2.2",
     "core-js": "^3.10.1",
     "coveralls": "^3.1.0",
-    "css-loader": "^5.2.1",
+    "css-loader": "^5.2.4",
     "css-minimizer-webpack-plugin": "^1.1.5",
     "eslint": "^7.24.0",
     "eslint-config-prettier": "^8.2.0",
