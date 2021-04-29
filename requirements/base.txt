@@ -57,7 +57,7 @@ constantly==15.1.0
 croniter==1.0.12
 daphne==3.0.2
 defusedxml==0.7.1
-docutils==0.17.1
+docutils==0.16
 entrypoints==0.3
 future==0.18.2
 hashids==1.3.1
