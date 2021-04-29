@@ -1,4 +1,4 @@
-cumulusci==3.33.1
+cumulusci==3.34.0
 
 -e git+https://github.com/SFDO-Tooling/sfdo-template-helpers.git@v0.18.0#egg=sfdo-template-helpers
 Django==2.2.20
