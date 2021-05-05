@@ -91,7 +91,7 @@ s3transfer==0.4.2
 salesforce-bulk==2.2.0
 sarge==0.1.6
 selenium==3.141.0
-setuptools==56.0.0
+setuptools==56.1.0
 simple-salesforce==1.11.1
 six==1.15.0
 sqlparse==0.4.1
