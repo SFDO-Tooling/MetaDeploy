@@ -1,0 +1,18 @@
+-c prod.txt
+
+Sphinx
+black
+coveralls
+django-extensions
+factory_boy
+flake8
+ipython
+isort
+pytest-asyncio
+pytest-cov
+pytest-django
+pytest-factoryboy
+pytest-mock
+pytest
+sphinxcontrib-httpdomain
+vcrpy
