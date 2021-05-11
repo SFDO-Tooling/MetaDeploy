@@ -8,6 +8,7 @@ factory_boy
 flake8
 ipython
 isort
+pip-tools
 pytest-asyncio
 pytest-cov
 pytest-django
