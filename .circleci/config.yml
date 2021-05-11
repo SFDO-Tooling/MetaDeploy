@@ -31,7 +31,8 @@ jobs:
             python3 -m venv venv
             . venv/bin/activate
             pip install -U pip
-            pip install -r requirements/dev.txt
+            pip install pip-tools
+            make dev-install
       - run:
           name: Compile Front-End Assets
           command: yarn prod
