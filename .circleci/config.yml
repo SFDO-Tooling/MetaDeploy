@@ -113,7 +113,7 @@ jobs:
           DJANGO_SETTINGS_MODULE: config.settings.test
           GITHUB_TOKEN: circle_test
           SECURE_SSL_REDIRECT: False
-      - image: circleci/redis:5.0
+      - image: circleci/redis:6
       - image: circleci/postgres:12.3
         environment:
           POSTGRES_DB: circle_test
