@@ -1,7 +1,7 @@
 import ssl
 
-from .base import *  # NOQA
-from .base import PROJECT_ROOT, TEMPLATES
+from .base import *  # noqa
+from .base import REDIS_LOCATION, CACHES, CHANNEL_LAYERS, PROJECT_ROOT, TEMPLATES
 
 STATICFILES_DIRS = [str(PROJECT_ROOT / "dist" / "prod"), str(PROJECT_ROOT / "locales")]
 
