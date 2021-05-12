@@ -6,6 +6,7 @@ from django.core.management import call_command
 
 
 class TestMetaDeployRQSchedulerCommand:
+    @pytest.mark.django_db
     @mock.patch("django.conf.settings.CRON_JOBS")
     def test_command__success(self, CRON_JOBS):
 
@@ -24,6 +25,7 @@ class TestMetaDeployRQSchedulerCommand:
         # assert that job defined in settings.CRON_JOBS is in the 'short' queue
         # assert we see the "Scheduled job test_job: {'queue_name': 'short', 'use_local_timezone': True}""
 
+    @pytest.mark.django_db
     @mock.patch("django.conf.settings.CRON_JOBS")
     def test_command__job_missing(self):
         """Test that a missing job attribute raises the expected error"""
