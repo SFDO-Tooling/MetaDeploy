@@ -19,6 +19,7 @@ asgiref==3.3.4
     #   channels
     #   channels-redis
     #   daphne
+    #   django
 async-timeout==3.0.1
     # via aioredis
 attrs==21.2.0
@@ -84,6 +85,7 @@ cryptography==3.4.7
     #   jwcrypto
     #   pyjwt
     #   pyopenssl
+    #   secretstorage
     #   service-identity
     #   sfdo-template-helpers
 cumulusci==3.34.1
@@ -126,7 +128,7 @@ django-rq==2.4.1
     #   django-rq-scheduler
 django-storages==1.11.1
     # via -r requirements/prod.in
-django==2.2.20
+django==3.1.10
     # via
     #   -r requirements/prod.in
     #   channels
@@ -193,6 +195,10 @@ importlib-metadata==4.0.1
     #   keyring
 incremental==21.3.0
     # via twisted
+jeepney==0.6.0
+    # via
+    #   keyring
+    #   secretstorage
 jinja2==2.11.3
     # via
     #   cumulusci
@@ -327,6 +333,8 @@ salesforce-bulk==2.2.0
     # via cumulusci
 sarge==0.1.6
     # via cumulusci
+secretstorage==3.3.1
+    # via keyring
 selenium==3.141.0
     # via
     #   cumulusci
