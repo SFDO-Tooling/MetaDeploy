@@ -33,7 +33,7 @@ from sfdo_template_helpers.fields import MarkdownField as BaseMarkdownField
 from sfdo_template_helpers.slugs import AbstractSlug, SlugMixin
 
 from .belvedere_utils import convert_to_18
-from .constants import ERROR, HIDE, OPTIONAL, ORGANIZATION_DETAILS
+from .constants import ERROR, HIDE, OPTIONAL, ORGANIZATION_DETAILS, SKIP
 from .flows import JobFlowCallback, PreflightFlowCallback
 from .push import (
     notify_org_changed,
@@ -884,7 +884,7 @@ class PreflightResult(models.Model):
         optional_step_pks = []
         for step_id, results in self.results.items():
             for result in results:
-                if result["status"] in (OPTIONAL, HIDE):
+                if result["status"] in (OPTIONAL, HIDE, SKIP):
                     optional_step_pks.append(step_id)
 
         return optional_step_pks

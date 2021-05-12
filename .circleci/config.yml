@@ -29,7 +29,8 @@ jobs:
             yarn install --frozen-lockfile
             python3 -m venv venv
             . venv/bin/activate
-            pip install -Ur requirements/local.txt
+            pip install -U pip
+            pip install -r requirements/local.txt
       - run:
           name: Compile Front-End Assets
           command: yarn prod

@@ -111,7 +111,7 @@ class NameDataCell extends React.Component<Props> {
           <>
             <Accordion
               className={classNames({
-                'slds-p-bottom_small': errorList,
+                'slds-p-bottom_small': Boolean(errorList),
               })}
             >
               <AccordionPanel
@@ -134,7 +134,7 @@ class NameDataCell extends React.Component<Props> {
             {errorList ? (
               <div
                 className={classNames('slds-cell-wrap', 'step-name-no-icon', {
-                  'has-job': job,
+                  'has-job': Boolean(job),
                 })}
               >
                 {errorList}
@@ -144,10 +144,14 @@ class NameDataCell extends React.Component<Props> {
         ) : (
           <div
             className={classNames('slds-cell-wrap', 'step-name-no-icon', {
-              'has-job': job,
+              'has-job': Boolean(job),
             })}
           >
-            <div className={classNames({ 'slds-p-bottom_small': errorList })}>
+            <div
+              className={classNames({
+                'slds-p-bottom_small': Boolean(errorList),
+              })}
+            >
               {display}
               {desc}
             </div>

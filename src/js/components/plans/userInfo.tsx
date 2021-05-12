@@ -5,7 +5,7 @@ import i18n from 'i18next';
 import * as React from 'react';
 import { Trans } from 'react-i18next';
 
-import noConnectionSvg from '!svg-inline-loader!images/no-connection.svg';
+import noConnectionSvg from '!raw-loader!images/no-connection.svg';
 import Login from '@/components/header/login';
 import ScratchOrgInfo from '@/components/scratchOrgs/scratchOrgInfo';
 import { Plan } from '@/store/plans/reducer';

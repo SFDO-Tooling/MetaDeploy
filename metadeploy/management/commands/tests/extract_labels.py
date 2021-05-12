@@ -30,7 +30,7 @@ def product():
 
 @pytest.mark.django_db
 def test_extract_labels(product):
-    """ Test extract labels command."""
+    """Test extract labels command."""
     out = StringIO()
     call_command("extract_labels", stdout=out)
 
