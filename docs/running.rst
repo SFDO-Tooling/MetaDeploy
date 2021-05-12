@@ -30,7 +30,7 @@ create a virtualenv (once you have `virtualenvwrapper`_ installed locally)::
 
 Install Python requirements::
 
-    pip install -r requirements/dev.txt
+    make dev-install
 
 Copy the ``.env`` file somewhere that will be sourced when you need it::
 
