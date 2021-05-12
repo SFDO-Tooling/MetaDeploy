@@ -29,7 +29,7 @@ newrelic==6.2.0.156
 psycopg2-binary==2.8.6
 rq==1.8.0
 sentry-sdk==1.0.0
-service_identity==18.1.0
+service_identity==21.1.0
 werkzeug==1.0.1
 whitenoise==5.2.0
 
