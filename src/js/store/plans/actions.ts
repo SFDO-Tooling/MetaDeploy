@@ -49,54 +49,54 @@ export type PlansAction =
   | PreflightCanceled
   | PreflightInvalid;
 
-export const fetchPreflight = (
-  planId: string,
-): ThunkResult<Promise<FetchPreflightSucceeded>> => async (dispatch) => {
-  dispatch({ type: 'FETCH_PREFLIGHT_STARTED' as const, payload: planId });
-  try {
-    const response = await apiFetch(
-      window.api_urls.plan_preflight(planId),
-      dispatch,
-    );
-    if (response && window.socket) {
-      window.socket.subscribe({
-        model: 'preflightresult',
-        id: response.id,
+export const fetchPreflight =
+  (planId: string): ThunkResult<Promise<FetchPreflightSucceeded>> =>
+  async (dispatch) => {
+    dispatch({ type: 'FETCH_PREFLIGHT_STARTED' as const, payload: planId });
+    try {
+      const response = await apiFetch(
+        window.api_urls.plan_preflight(planId),
+        dispatch,
+      );
+      if (response && window.socket) {
+        window.socket.subscribe({
+          model: 'preflightresult',
+          id: response.id,
+        });
+      }
+      return dispatch({
+        type: 'FETCH_PREFLIGHT_SUCCEEDED' as const,
+        payload: { plan: planId, preflight: response },
       });
+    } catch (err) {
+      dispatch({ type: 'FETCH_PREFLIGHT_FAILED' as const, payload: planId });
+      throw err;
     }
-    return dispatch({
-      type: 'FETCH_PREFLIGHT_SUCCEEDED' as const,
-      payload: { plan: planId, preflight: response },
-    });
-  } catch (err) {
-    dispatch({ type: 'FETCH_PREFLIGHT_FAILED' as const, payload: planId });
-    throw err;
-  }
-};
+  };
 
-export const startPreflight = (
-  planId: string,
-): ThunkResult<Promise<PreflightStarted>> => async (dispatch) => {
-  dispatch({ type: 'PREFLIGHT_REQUESTED' as const, payload: planId });
-  const url = window.api_urls.plan_preflight(planId);
-  try {
-    const response = await apiFetch(url, dispatch, { method: 'POST' });
-    /* istanbul ignore else */
-    if (response && window.socket) {
-      window.socket.subscribe({
-        model: 'preflightresult',
-        id: response.id,
+export const startPreflight =
+  (planId: string): ThunkResult<Promise<PreflightStarted>> =>
+  async (dispatch) => {
+    dispatch({ type: 'PREFLIGHT_REQUESTED' as const, payload: planId });
+    const url = window.api_urls.plan_preflight(planId);
+    try {
+      const response = await apiFetch(url, dispatch, { method: 'POST' });
+      /* istanbul ignore else */
+      if (response && window.socket) {
+        window.socket.subscribe({
+          model: 'preflightresult',
+          id: response.id,
+        });
+      }
+      return dispatch({
+        type: 'PREFLIGHT_STARTED' as const,
+        payload: response,
       });
+    } catch (err) {
+      dispatch({ type: 'PREFLIGHT_REJECTED' as const, payload: planId });
+      throw err;
     }
-    return dispatch({
-      type: 'PREFLIGHT_STARTED' as const,
-      payload: response,
-    });
-  } catch (err) {
-    dispatch({ type: 'PREFLIGHT_REJECTED' as const, payload: planId });
-    throw err;
-  }
-};
+  };
 
 export const completePreflight = (payload: Preflight): PreflightCompleted => ({
   type: 'PREFLIGHT_COMPLETED' as const,

@@ -141,9 +141,9 @@ const reducer = (
                 },
               };
             } else if (p.versions) {
-              const thisVersion: Version | null | undefined = (Object.values(
-                p.versions,
-              ) as any).find((v: Version | null) => v?.id === version);
+              const thisVersion: Version | null | undefined = (
+                Object.values(p.versions) as any
+              ).find((v: Version | null) => v?.id === version);
               if (thisVersion) {
                 return {
                   ...p,
@@ -187,9 +187,9 @@ const reducer = (
                 },
               };
             } else if (p.versions) {
-              const thisVersion: Version | null | undefined = (Object.values(
-                p.versions,
-              ) as any).find((v: Version | null) => v?.id === version);
+              const thisVersion: Version | null | undefined = (
+                Object.values(p.versions) as any
+              ).find((v: Version | null) => v?.id === version);
               if (thisVersion) {
                 return {
                   ...p,

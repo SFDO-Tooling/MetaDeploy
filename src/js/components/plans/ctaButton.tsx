@@ -312,13 +312,8 @@ class CtaButton extends React.Component<
   }
 
   getPersistentOrgCTA() {
-    const {
-      user,
-      clickThroughAgreement,
-      plan,
-      preflight,
-      selectedSteps,
-    } = this.props;
+    const { user, clickThroughAgreement, plan, preflight, selectedSteps } =
+      this.props;
     const { preflightModalOpen } = this.state;
     const usesBothOrgTypes = plan.supported_orgs === SUPPORTED_ORGS.Both;
 
