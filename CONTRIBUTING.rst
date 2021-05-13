@@ -54,7 +54,7 @@ In commit messages or pull request titles, we use the following emojis to label
 which development commands need to be run before serving locally (these are
 automatically prepended to commit messages):
 
-- 📦 (``:package:``) -> ``pip install -r requirements/local.txt``
+- 📦 (``:package:``) -> ``make dev-install``
 - 🛢 (``:oil_drum:``) -> ``python manage.py migrate``
 - 🐈 (``:cat2:``) -> ``yarn``
 
