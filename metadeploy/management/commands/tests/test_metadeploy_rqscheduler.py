@@ -1,6 +1,5 @@
 import pytest
 
-from io import StringIO
 from unittest import mock
 from django.core.management import call_command
 from django.conf import settings
