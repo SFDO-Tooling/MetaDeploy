@@ -8,8 +8,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - metadeploy-py-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
-            - metadeploy-py-
+            - metadeploy-py-{{ checksum "requirements/prod.txt" }}-{{ checksum "requirements/dev.txt" }}
       - restore_cache:
           keys:
             - metadeploy-npm-{{ checksum "yarn.lock" }}
@@ -30,7 +29,8 @@ jobs:
             python3 -m venv venv
             . venv/bin/activate
             pip install -U pip
-            pip install -r requirements/local.txt
+            pip install pip-tools
+            make dev-install
       - run:
           name: Compile Front-End Assets
           command: yarn prod
@@ -42,7 +42,8 @@ jobs:
             - ./node_modules
             - ./node
       - save_cache:
-          key: metadeploy-py-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+          key:
+            metadeploy-py-{{ checksum "requirements/prod.txt" }}-{{ checksum "requirements/dev.txt" }}
           paths:
             - ./venv
       - save_cache:
@@ -125,7 +126,12 @@ jobs:
           at: .
       - run:
           name: Install Dockerize
-          command: wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && sudo tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+          command:
+            wget
+            https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+            && sudo tar -C /usr/local/bin -xzvf
+            dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm
+            dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
           environment:
             DOCKERIZE_VERSION: v0.6.1
       - run:
