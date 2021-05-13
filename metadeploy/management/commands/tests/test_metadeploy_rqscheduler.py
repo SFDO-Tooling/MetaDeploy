@@ -3,37 +3,43 @@ import pytest
 from io import StringIO
 from unittest import mock
 from django.core.management import call_command
+from django.conf import settings
+
+mock_scheduler = mock.Mock()
+mock_scheduler.get_jobs.return_value = [{}]
 
 
+@mock.patch("django_rq.management.commands.rqscheduler.Command.handle", mock.Mock())
+@mock.patch("django_rq.get_scheduler", mock.Mock(return_value=mock_scheduler))
 class TestMetaDeployRQSchedulerCommand:
-    @pytest.mark.django_db
-    @mock.patch("django.conf.settings.CRON_JOBS")
-    def test_command__success(self, CRON_JOBS):
-
+    def test_command__success(self, caplog):
         # add an existing job with unique name to the queue
+        with mock.patch.object(
+            settings,
+            "CRON_JOBS",
+            {
+                "test_job": {
+                    "func": "metadeploy.api.jobs.cleanup_user_data_job",
+                    "cron_string": "* * * * *",
+                }
+            },
+        ):
+            call_command("metadeploy_rqscheduler")
+            mock_scheduler.cancel.assert_called()
+            mock_scheduler.cron.assert_called()
+            assert "Scheduled job test_job" in caplog.text
 
-        CRON_JOBS = {
-            "test_job": {
-                "func": "metadeploy.api.jobs.cleanup_user_data_job",
-                "cron_string": "* * * * *",
-            }
-        }
-        output = StringIO()
-        call_command("metadeploy_rqscheduler", stdout=output)
-
-        # query for existing job, assert it was cancelled
-        # assert that job defined in settings.CRON_JOBS is in the 'short' queue
-        # assert we see the "Scheduled job test_job: {'queue_name': 'short', 'use_local_timezone': True}""
-
-    @pytest.mark.django_db
-    @mock.patch("django.conf.settings.CRON_JOBS")
     def test_command__job_missing(self):
         """Test that a missing job attribute raises the expected error"""
-        CRON_JOBS = {
-            "test_job": {
-                "not_func": "metadeploy.api.jobs.cleanup_user_data_job",
-                "cron_string": "* * * * *",
-            }
-        }
-        with pytest.raises(TypeError):
-            call_command("metadeploy_rqscheduler")
+        with mock.patch.object(
+            settings,
+            "CRON_JOBS",
+            {
+                "test_job": {
+                    "not_func": "metadeploy.api.jobs.cleanup_user_data_job",
+                    "cron_string": "* * * * *",
+                }
+            },
+        ):
+            with pytest.raises(TypeError):
+                call_command("metadeploy_rqscheduler")
