@@ -2,7 +2,7 @@
 
 -e git+https://github.com/SFDO-Tooling/sfdo-template-helpers.git@v0.18.0#egg=sfdo-template-helpers
 cumulusci
-Django<3
+Django<4
 Pillow
 ansi2html
 bleach
