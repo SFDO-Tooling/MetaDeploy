@@ -38,9 +38,9 @@ bleach==3.3.0
     # via
     #   -r requirements/prod.in
     #   sfdo-template-helpers
-boto3==1.17.71
+boto3==1.17.72
     # via -r requirements/prod.in
-botocore==1.20.71
+botocore==1.20.72
     # via
     #   boto3
     #   s3transfer
@@ -86,7 +86,7 @@ cryptography==3.4.7
     #   pyopenssl
     #   service-identity
     #   sfdo-template-helpers
-cumulusci==3.34.1
+cumulusci==3.35.0
     # via -r requirements/prod.in
 daphne==3.0.2
     # via channels
@@ -126,7 +126,7 @@ django-rq==2.4.1
     #   django-rq-scheduler
 django-storages==1.11.1
     # via -r requirements/prod.in
-django==2.2.20
+django==2.2.23
     # via
     #   -r requirements/prod.in
     #   channels
@@ -149,7 +149,7 @@ djangorestframework==3.12.4
     #   sfdo-template-helpers
 docutils==0.16
     # via cumulusci
-faker==8.1.1
+faker==8.1.3
     # via
     #   cumulusci
     #   snowfakery
@@ -159,7 +159,7 @@ github3.py==2.0.0
     # via
     #   -r requirements/prod.in
     #   cumulusci
-greenlet==1.0.0
+greenlet==1.1.0
     # via
     #   cumulusci
     #   sqlalchemy
@@ -241,7 +241,7 @@ pycparser==2.20
     # via
     #   cffi
     #   cumulusci
-pydantic==1.8.1
+pydantic==1.8.2
     # via
     #   cumulusci
     #   snowfakery
@@ -305,7 +305,7 @@ robotframework-requests==0.9.1
     # via cumulusci
 robotframework-seleniumlibrary==4.5.0
     # via cumulusci
-robotframework==3.2.2
+robotframework==4.0.2
     # via
     #   cumulusci
     #   robotframework-lint
@@ -341,7 +341,7 @@ simple-salesforce==1.11.1
     # via
     #   cumulusci
     #   salesforce-bulk
-six==1.15.0
+six==1.16.0
     # via
     #   automat
     #   bleach
@@ -351,9 +351,9 @@ six==1.15.0
     #   python-dateutil
     #   salesforce-bulk
     #   service-identity
-snowfakery==1.10
+snowfakery==1.11
     # via cumulusci
-sqlalchemy==1.4.11
+sqlalchemy==1.4.15
     # via
     #   cumulusci
     #   snowfakery
@@ -369,7 +369,7 @@ twisted[tls]==21.2.0
     # via daphne
 txaio==21.2.1
     # via autobahn
-typing-extensions==3.7.4.3
+typing-extensions==3.10.0.0
     # via
     #   cumulusci
     #   pydantic
@@ -405,7 +405,7 @@ zope.interface==5.4.0
     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==56.0.0
+setuptools==56.2.0
     # via
     #   cumulusci
     #   fs
