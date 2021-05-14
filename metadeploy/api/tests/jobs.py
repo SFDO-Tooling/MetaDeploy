@@ -318,12 +318,12 @@ class TestCreateScratchOrg:
                     }
                 }
             )
-            SalesforceOAuth2 = stack.enter_context(
-                patch("metadeploy.api.salesforce.SalesforceOAuth2")
+            OAuth2Client = stack.enter_context(
+                patch("metadeploy.api.salesforce.OAuth2Client")
             )
-            SalesforceOAuth2.return_value = MagicMock(
+            OAuth2Client.return_value = MagicMock(
                 **{
-                    "get_token.return_value": MagicMock(
+                    "auth_code_grant.return_value": MagicMock(
                         **{
                             "json.return_value": {
                                 "access_token": "abc123",
@@ -414,12 +414,12 @@ class TestCreateScratchOrg:
                     }
                 }
             )
-            SalesforceOAuth2 = stack.enter_context(
-                patch("metadeploy.api.salesforce.SalesforceOAuth2")
+            OAuth2Client = stack.enter_context(
+                patch("metadeploy.api.salesforce.OAuth2Client")
             )
-            SalesforceOAuth2.return_value = MagicMock(
+            OAuth2Client.return_value = MagicMock(
                 **{
-                    "get_token.return_value": MagicMock(
+                    "auth_code_grant.return_value": MagicMock(
                         **{
                             "json.return_value": {
                                 "access_token": "abc123",
@@ -492,7 +492,7 @@ class TestCreateScratchOrg:
                 }
             )
             stack.enter_context(patch("metadeploy.api.salesforce.SimpleSalesforce"))
-            stack.enter_context(patch("metadeploy.api.salesforce.SalesforceOAuth2"))
+            stack.enter_context(patch("metadeploy.api.salesforce.OAuth2Client"))
             BaseCumulusCI = stack.enter_context(
                 patch("metadeploy.api.salesforce.BaseCumulusCI")
             )
