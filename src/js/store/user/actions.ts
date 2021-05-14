@@ -33,47 +33,46 @@ export const login = (payload: User): LoginAction => {
   };
 };
 
-export const logout = (): ThunkResult<Promise<FetchOrgJobsSucceeded>> => (
-  dispatch,
-) =>
-  apiFetch(window.api_urls.account_logout(), dispatch, {
-    method: 'POST',
-  }).then(() => {
-    /* istanbul ignore else */
-    if (window.socket) {
-      window.socket.reconnect();
-    }
-    if (window.Sentry) {
-      window.Sentry.configureScope((scope) => scope.clear());
-    }
-    dispatch({ type: 'USER_LOGGED_OUT' as const });
-    dispatch(fetchProducts());
-    return dispatch(fetchOrgJobs());
-  });
+export const logout =
+  (): ThunkResult<Promise<FetchOrgJobsSucceeded>> => (dispatch) =>
+    apiFetch(window.api_urls.account_logout(), dispatch, {
+      method: 'POST',
+    }).then(() => {
+      /* istanbul ignore else */
+      if (window.socket) {
+        window.socket.reconnect();
+      }
+      if (window.Sentry) {
+        window.Sentry.configureScope((scope) => scope.clear());
+      }
+      dispatch({ type: 'USER_LOGGED_OUT' as const });
+      dispatch(fetchProducts());
+      return dispatch(fetchOrgJobs());
+    });
 
 export const invalidateToken = (): TokenInvalidAction => ({
   type: 'USER_TOKEN_INVALIDATED' as const,
 });
 
-export const refetchAllData = (): ThunkResult<
-  Promise<LoginAction | null>
-> => async (dispatch) => {
-  dispatch({ type: 'REFETCH_DATA_STARTED' as const });
-  try {
-    const payload = await apiFetch(window.api_urls.user(), dispatch, {}, [
-      401,
-      403,
-      404,
-    ]);
-    dispatch({ type: 'REFETCH_DATA_SUCCEEDED' as const });
-    dispatch({ type: 'USER_LOGGED_OUT' as const });
-    dispatch(fetchOrgJobs());
-    if (!payload) {
-      return null;
+export const refetchAllData =
+  (): ThunkResult<Promise<LoginAction | null>> => async (dispatch) => {
+    dispatch({ type: 'REFETCH_DATA_STARTED' as const });
+    try {
+      const payload = await apiFetch(
+        window.api_urls.user(),
+        dispatch,
+        {},
+        [401, 403, 404],
+      );
+      dispatch({ type: 'REFETCH_DATA_SUCCEEDED' as const });
+      dispatch({ type: 'USER_LOGGED_OUT' as const });
+      dispatch(fetchOrgJobs());
+      if (!payload) {
+        return null;
+      }
+      return dispatch(login(payload));
+    } catch (err) {
+      dispatch({ type: 'REFETCH_DATA_FAILED' as const });
+      throw err;
     }
-    return dispatch(login(payload));
-  } catch (err) {
-    dispatch({ type: 'REFETCH_DATA_FAILED' as const });
-    throw err;
-  }
-};
+  };
