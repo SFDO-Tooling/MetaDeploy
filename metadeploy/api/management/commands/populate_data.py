@@ -2,9 +2,7 @@ import time
 
 from cumulusci.core.tasks import BaseTask
 from django.core.management.base import BaseCommand
-from django.utils import timezone
 from django.utils.text import slugify
-from scheduler.models import RepeatableJob
 
 from ...models import (
     AllowedList,
@@ -236,42 +234,6 @@ class Command(BaseCommand):
             step_num="9",
         )
 
-    def create_enqueuer_job(self):
-        RepeatableJob.objects.get_or_create(
-            callable="metadeploy.api.jobs.enqueuer_job",
-            defaults=dict(
-                name="Enqueuer",
-                interval=1,
-                interval_unit="minutes",
-                queue="short",
-                scheduled_time=timezone.now(),
-            ),
-        )
-
-    def create_token_expiry_job(self):
-        RepeatableJob.objects.get_or_create(
-            callable="metadeploy.api.jobs.cleanup_user_data_job",
-            defaults=dict(
-                name="Expire User Tokens",
-                interval=1,
-                interval_unit="minutes",
-                queue="short",
-                scheduled_time=timezone.now(),
-            ),
-        )
-
-    def create_preflight_expiry_job(self):
-        RepeatableJob.objects.get_or_create(
-            callable="metadeploy.api.jobs.expire_preflights_job",
-            defaults=dict(
-                name="Expire Preflight Results",
-                interval=1,
-                interval_unit="minutes",
-                queue="short",
-                scheduled_time=timezone.now(),
-            ),
-        )
-
     def create_eda(self, category):
         product = Product.objects.create(
             title="Education Data Architecture (EDA)",
@@ -436,9 +398,6 @@ class Command(BaseCommand):
             Step.objects.create(plan=plan, **step)
 
     def handle(self, *args, **options):
-        self.create_enqueuer_job()
-        self.create_token_expiry_job()
-        self.create_preflight_expiry_job()
         sf_category = ProductCategory.objects.create(
             title="Salesforce.org Products",
             order_key=0,

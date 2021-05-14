@@ -1,5 +1,4 @@
 from django.core.management.base import BaseCommand
-from scheduler.models import RepeatableJob
 
 from ...models import (
     AllowedList,
@@ -23,7 +22,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         ordered_models = [
             Job,
-            RepeatableJob,
             PreflightResult,
             Step,
             PlanSlug,
