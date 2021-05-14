@@ -62,8 +62,10 @@ class Header extends React.Component<Props & PropsFromRedux> {
   render() {
     const { socket, orgs, errors, history, jobId, doRemoveError } = this.props;
     const logoSrc = window.GLOBALS.SITE?.company_logo;
-    const currentJob = find(orgs, (org) => org.current_job !== null)
-      ?.current_job;
+    const currentJob = find(
+      orgs,
+      (org) => org.current_job !== null,
+    )?.current_job;
 
     return (
       <>
