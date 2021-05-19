@@ -84,6 +84,7 @@ cryptography==3.4.7
     #   jwcrypto
     #   pyjwt
     #   pyopenssl
+    #   secretstorage
     #   service-identity
     #   sfdo-template-helpers
 cumulusci==3.35.0
@@ -193,6 +194,10 @@ importlib-metadata==4.0.1
     #   keyring
 incremental==21.3.0
     # via twisted
+jeepney==0.6.0
+    # via
+    #   keyring
+    #   secretstorage
 jinja2==2.11.3
     # via
     #   cumulusci
@@ -314,7 +319,7 @@ robotframework==4.0.2
     #   robotframework-seleniumlibrary
 rq-scheduler==0.11.0
     # via django-rq-scheduler
-rq==1.8.0
+rq==1.8.1
     # via
     #   -r requirements/prod.in
     #   django-rq
@@ -327,6 +332,8 @@ salesforce-bulk==2.2.0
     # via cumulusci
 sarge==0.1.6
     # via cumulusci
+secretstorage==3.3.1
+    # via keyring
 selenium==3.141.0
     # via
     #   cumulusci
