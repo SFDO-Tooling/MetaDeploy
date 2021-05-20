@@ -19,6 +19,7 @@ asgiref==3.3.4
     #   channels
     #   channels-redis
     #   daphne
+    #   django
 async-timeout==3.0.1
     # via aioredis
 attrs==21.2.0
@@ -38,9 +39,9 @@ bleach==3.3.0
     # via
     #   -r requirements/prod.in
     #   sfdo-template-helpers
-boto3==1.17.72
+boto3==1.17.76
     # via -r requirements/prod.in
-botocore==1.20.72
+botocore==1.20.76
     # via
     #   boto3
     #   s3transfer
@@ -126,7 +127,7 @@ django-rq==2.4.1
     #   django-rq-scheduler
 django-storages==1.11.1
     # via -r requirements/prod.in
-django==2.2.23
+django==3.1.11
     # via
     #   -r requirements/prod.in
     #   channels
@@ -314,7 +315,7 @@ robotframework==4.0.2
     #   robotframework-seleniumlibrary
 rq-scheduler==0.11.0
     # via django-rq-scheduler
-rq==1.8.0
+rq==1.8.1
     # via
     #   -r requirements/prod.in
     #   django-rq
@@ -391,7 +392,7 @@ urllib3==1.26.4
     #   sentry-sdk
 webencodings==0.5.1
     # via bleach
-werkzeug==2.0.0
+werkzeug==2.0.1
     # via -r requirements/prod.in
 whitenoise==5.2.0
     # via -r requirements/prod.in
