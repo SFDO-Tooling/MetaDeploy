@@ -28,6 +28,7 @@ import logging
 
 from channels.layers import get_channel_layer
 from django.utils.translation import gettext_lazy as _
+from asgiref.sync import sync_to_async
 
 from ..consumer_utils import get_set_message_semaphore
 from .constants import CHANNELS_GROUP_NAME
@@ -149,11 +150,27 @@ async def notify_post_job(job):
 
 
 async def notify_org_result_changed(result):
-    from .models import Job, PreflightResult
-    from .serializers import OrgSerializer
 
     type_ = "ORG_CHANGED"
     org_id = result.org_id
+
+    data = await serialize_org(org_id)
+
+    group_name = CHANNELS_GROUP_NAME.format(
+        model="org", id=convert_org_id_to_key(org_id)
+    )
+    message = {
+        "type": "notify",
+        "group": group_name,
+        "content": {"type": type_, "payload": data},
+    }
+    await push_message(group_name, message)
+
+
+@sync_to_async
+def serialize_org(org_id):
+    from .models import Job, PreflightResult
+    from .serializers import OrgSerializer
 
     current_job = Job.objects.filter(org_id=org_id, status=Job.Status.started).first()
     current_preflight = PreflightResult.objects.filter(
@@ -166,15 +183,7 @@ async def notify_org_result_changed(result):
             "current_preflight": current_preflight,
         }
     )
-    group_name = CHANNELS_GROUP_NAME.format(
-        model="org", id=convert_org_id_to_key(org_id)
-    )
-    message = {
-        "type": "notify",
-        "group": group_name,
-        "content": {"type": type_, "payload": serializer.data},
-    }
-    await push_message(group_name, message)
+    return serializer.data
 
 
 async def notify_org(scratch_org, type_, payload=None, error=None):

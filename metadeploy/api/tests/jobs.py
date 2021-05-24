@@ -10,6 +10,7 @@ from cumulusci.salesforce_api.exceptions import MetadataParseError
 from django.utils import timezone
 from django.utils.timezone import make_aware
 from rq.worker import StopRequested
+from asgiref.sync import sync_to_async
 
 from metadeploy.api.belvedere_utils import convert_to_18
 

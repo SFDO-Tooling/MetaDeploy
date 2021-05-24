@@ -3,7 +3,7 @@ import uuid
 from statistics import median
 from typing import Union
 
-from asgiref.sync import async_to_sync
+from asgiref.sync import async_to_sync, sync_to_async
 from colorfield.fields import ColorField
 from cumulusci.core.config import FlowConfig
 from cumulusci.core.flowrunner import (

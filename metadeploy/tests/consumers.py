@@ -1,4 +1,5 @@
 from uuid import uuid4
+from asgiref.sync import sync_to_async
 
 import pytest
 from channels.db import database_sync_to_async
@@ -45,6 +46,11 @@ class Session(dict):
 
     def save(self):
         pass
+
+
+@sync_to_async
+def get_org_id(user):
+    return user.org_id
 
 
 @database_sync_to_async
@@ -249,8 +255,9 @@ async def test_push_notification_consumer__subscribe_preflight_scratch_org(
 @pytest.mark.asyncio
 async def test_push_notification_consumer__subscribe_job(user_factory, job_factory):
     user = await generate_model(user_factory)
+    org_id = await get_org_id(user)
     job = await generate_model(
-        job_factory, user=user, status=Job.Status.complete, org_id=user.org_id
+        job_factory, user=user, status=Job.Status.complete, org_id=org_id
     )
 
     communicator = WebsocketCommunicator(
@@ -347,12 +354,13 @@ async def test_push_notification_consumer__subscribe_org(
         },
     )
     plan = await generate_model(plan_factory)
+    org_id = await get_org_id(user)
     job = await generate_model(
         job_factory,
         status=Job.Status.started,
         user=user,
         plan=plan,
-        org_id=user.org_id,
+        org_id=org_id,
     )
 
     communicator = WebsocketCommunicator(
