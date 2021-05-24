@@ -17,6 +17,11 @@ class AsyncMock(MagicMock):
         return super().__call__(*args, **kwargs)
 
 
+@sync_to_async
+def get_org_id_async(user):
+    return user.org_id
+
+
 @pytest.mark.django_db
 @pytest.mark.asyncio
 async def test_report_error(mocker, user_factory):
@@ -40,7 +45,8 @@ async def test_notify_org_result_changed(
     plan_factory = sync_to_async(plan_factory)
     plan = await plan_factory()
     job_factory = sync_to_async(job_factory)
-    job = await job_factory(user=user, plan=plan, org_id=user.org_id)
+    org_id = await get_org_id_async(user)
+    job = await job_factory(user=user, plan=plan, org_id=org_id)
     await notify_org_result_changed(job)
     gcl.assert_called()
 

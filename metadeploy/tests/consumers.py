@@ -1,3 +1,4 @@
+from os import sync
 from uuid import uuid4
 from asgiref.sync import sync_to_async
 
@@ -49,8 +50,18 @@ class Session(dict):
 
 
 @sync_to_async
-def get_org_id(user):
+def get_org_id_async(user):
     return user.org_id
+
+
+@sync_to_async
+def get_serialized_org_async(data):
+    return OrgSerializer(data)
+
+
+@sync_to_async
+def get_org_data_async(org):
+    return org.data
 
 
 @database_sync_to_async
@@ -176,12 +187,13 @@ async def test_push_notification_consumer__subscribe_preflight(
 ):
     user = await generate_model(user_factory)
     plan = await generate_model(plan_factory)
+    org_id = await get_org_id_async(user)
     preflight = await generate_model(
         preflight_result_factory,
         user=user,
         status=PreflightResult.Status.complete,
         plan=plan,
-        org_id=user.org_id,
+        org_id=org_id,
     )
 
     communicator = WebsocketCommunicator(
@@ -255,7 +267,7 @@ async def test_push_notification_consumer__subscribe_preflight_scratch_org(
 @pytest.mark.asyncio
 async def test_push_notification_consumer__subscribe_job(user_factory, job_factory):
     user = await generate_model(user_factory)
-    org_id = await get_org_id(user)
+    org_id = await get_org_id_async(user)
     job = await generate_model(
         job_factory, user=user, status=Job.Status.complete, org_id=org_id
     )
@@ -354,7 +366,7 @@ async def test_push_notification_consumer__subscribe_org(
         },
     )
     plan = await generate_model(plan_factory)
-    org_id = await get_org_id(user)
+    org_id = await get_org_id_async(user)
     job = await generate_model(
         job_factory,
         status=Job.Status.started,
@@ -377,16 +389,15 @@ async def test_push_notification_consumer__subscribe_org(
 
     await notify_org_result_changed(job)
     response = await communicator.receive_json_from()
-    assert response == {
-        "type": "ORG_CHANGED",
-        "payload": OrgSerializer(
-            {
-                "org_id": org_id,
-                "current_job": job,
-                "current_preflight": None,
-            }
-        ).data,
-    }
+    org = await get_serialized_org_async(
+        {
+            "org_id": org_id,
+            "current_job": job,
+            "current_preflight": None,
+        }
+    )
+    org_data = await get_org_data_async(org)
+    assert response == {"type": "ORG_CHANGED", "payload": org_data}
 
     await communicator.disconnect()
 
@@ -416,12 +427,13 @@ async def test_push_notification_consumer__anon_subscribe_org(
         },
     )
     plan = await generate_model(plan_factory)
+    org_id = await get_org_id_async(user)
     job = await generate_model(
         job_factory,
         status=Job.Status.started,
         user=user,
         plan=plan,
-        org_id=user.org_id,
+        org_id=org_id,
     )
 
     communicator = WebsocketCommunicator(
@@ -437,15 +449,17 @@ async def test_push_notification_consumer__anon_subscribe_org(
 
     await notify_org_result_changed(job)
     response = await communicator.receive_json_from()
+    org = await get_serialized_org_async(
+        {
+            "org_id": org_id,
+            "current_job": job,
+            "current_preflight": None,
+        }
+    )
+    data = get_org_data_async(org)
     assert response == {
         "type": "ORG_CHANGED",
-        "payload": OrgSerializer(
-            {
-                "org_id": org_id,
-                "current_job": job,
-                "current_preflight": None,
-            }
-        ).data,
+        "payload": data,
     }, response
 
     await communicator.disconnect()
