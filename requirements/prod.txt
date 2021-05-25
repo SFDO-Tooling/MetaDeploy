@@ -38,9 +38,9 @@ bleach==3.3.0
     # via
     #   -r requirements/prod.in
     #   sfdo-template-helpers
-boto3==1.17.72
+boto3==1.17.79
     # via -r requirements/prod.in
-botocore==1.20.72
+botocore==1.20.79
     # via
     #   boto3
     #   s3transfer
@@ -96,7 +96,7 @@ dj-database-url==0.5.0
     # via -r requirements/prod.in
 django-allauth==0.44.0
     # via -r requirements/prod.in
-django-binary-database-files==1.0.14
+django-binary-database-files==1.0.15
     # via -r requirements/prod.in
 django-colorfield==0.4.1
     # via -r requirements/prod.in
@@ -221,7 +221,7 @@ markupsafe==1.1.1
     #   jinja2
 msgpack==1.0.2
     # via channels-redis
-newrelic==6.2.0.156
+newrelic==6.4.0.157
     # via -r requirements/prod.in
 oauthlib==3.1.0
     # via requests-oauthlib
@@ -314,7 +314,7 @@ robotframework==4.0.2
     #   robotframework-seleniumlibrary
 rq-scheduler==0.11.0
     # via django-rq-scheduler
-rq==1.8.0
+rq==1.8.1
     # via
     #   -r requirements/prod.in
     #   django-rq
@@ -391,7 +391,7 @@ urllib3==1.26.4
     #   sentry-sdk
 webencodings==0.5.1
     # via bleach
-werkzeug==2.0.0
+werkzeug==2.0.1
     # via -r requirements/prod.in
 whitenoise==5.2.0
     # via -r requirements/prod.in
