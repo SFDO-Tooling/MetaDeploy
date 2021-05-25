@@ -2,13 +2,7 @@
   "name": "MetaDeploy",
   "description": "Web-based tool for installing Salesforce products",
   "repository": "https://github.com/SFDO-Tooling/MetaDeploy",
-  "keywords": [
-    "ci",
-    "python",
-    "django",
-    "salesforce",
-    "github"
-  ],
+  "keywords": ["ci", "python", "django", "salesforce", "github"],
   "env": {
     "DJANGO_ALLOWED_HOSTS": {
       "description": "Heroku proxies web requests and Django needs to be configured to allow the forwards",
@@ -61,10 +55,10 @@
       "description": "The callback URL used for OAuth callbacks, must be in the form of fqdn, AllAuth adds what it needs. e.g. https://metadeploy-staging.herokuapp.com/"
     },
     "GITHUB_APP_ID": {
-      "description": "App ID of the GitHub app that will be used to read repositories from GitHub",
+      "description": "App ID of the GitHub app that will be used to read repositories from GitHub"
     },
     "GITHUB_APP_KEY": {
-      "description": "Private key of the GitHub app that will be used to read repositories from GitHub",
+      "description": "Private key of the GitHub app that will be used to read repositories from GitHub"
     },
     "DB_ENCRYPTION_KEY": {
       "description": "A key for encrypting using cryptography.fernet. Generate using cryptography.fernet.Fernet.generate_key"
@@ -88,10 +82,7 @@
       "size": "free"
     }
   },
-  "addons": [
-    "heroku-postgresql",
-    "heroku-redis"
-  ],
+  "addons": ["heroku-postgresql", "heroku-redis"],
   "buildpacks": [
     {
       "url": "heroku/nodejs"

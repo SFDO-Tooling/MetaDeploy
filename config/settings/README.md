@@ -1,11 +1,11 @@
 # MetaDeploy Settings
 
 The Django `settings` module/system has been in production for many applications
-for a long time. People like Daniel Roy Greenfield (of [Two Scoops of
-Django](https://twoscoopspress.com/products/two-scoops-of-django-1-11) fame) and
-@wlonk, [OddBird](https://oddbird.net/) eagle, have developed great patterns for
-using Django settings in [12-factor applications](https://12factor.net/) on
-Heroku.
+for a long time. People like Daniel Roy Greenfield (of
+[Two Scoops of Django](https://twoscoopspress.com/products/two-scoops-of-django-1-11)
+fame) and @wlonk, [OddBird](https://oddbird.net/) eagle, have developed great
+patterns for using Django settings in
+[12-factor applications](https://12factor.net/) on Heroku.
 
 MetaDeploy settings primarily uses patterns learned from past OddBird projects,
 and it works well. Settings are override-based, where _all_ application settings
