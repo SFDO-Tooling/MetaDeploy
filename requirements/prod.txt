@@ -38,9 +38,9 @@ bleach==3.3.0
     # via
     #   -r requirements/prod.in
     #   sfdo-template-helpers
-boto3==1.17.72
+boto3==1.17.80
     # via -r requirements/prod.in
-botocore==1.20.72
+botocore==1.20.80
     # via
     #   boto3
     #   s3transfer
@@ -84,6 +84,7 @@ cryptography==3.4.7
     #   jwcrypto
     #   pyjwt
     #   pyopenssl
+    #   secretstorage
     #   service-identity
     #   sfdo-template-helpers
 cumulusci==3.35.0
@@ -193,6 +194,10 @@ importlib-metadata==4.0.1
     #   keyring
 incremental==21.3.0
     # via twisted
+jeepney==0.6.0
+    # via
+    #   keyring
+    #   secretstorage
 jinja2==2.11.3
     # via
     #   cumulusci
@@ -327,6 +332,8 @@ salesforce-bulk==2.2.0
     # via cumulusci
 sarge==0.1.6
     # via cumulusci
+secretstorage==3.3.1
+    # via keyring
 selenium==3.141.0
     # via
     #   cumulusci
