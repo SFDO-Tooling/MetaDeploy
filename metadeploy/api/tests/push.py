@@ -22,7 +22,7 @@ def get_org_id_async(user):
     return user.org_id
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_report_error(mocker, user_factory):
     push_message = mocker.patch(
@@ -34,7 +34,7 @@ async def test_report_error(mocker, user_factory):
     assert push_message.called
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_notify_org_result_changed(
     mocker, user_factory, job_factory, plan_factory
@@ -51,7 +51,7 @@ async def test_notify_org_result_changed(
     gcl.assert_called()
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_notify_org_changed(mocker, scratch_org_factory):
     scratch_org_factory = sync_to_async(scratch_org_factory)
@@ -61,7 +61,7 @@ async def test_notify_org_changed(mocker, scratch_org_factory):
     gcl.assert_called()
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_notify_org_changed__attribute_error(mocker, scratch_org_factory):
     scratch_org_factory = sync_to_async(scratch_org_factory)
@@ -71,7 +71,7 @@ async def test_notify_org_changed__attribute_error(mocker, scratch_org_factory):
     gcl.assert_called()
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_notify_org_changed__list(mocker, scratch_org_factory):
     scratch_org_factory = sync_to_async(scratch_org_factory)
@@ -81,7 +81,7 @@ async def test_notify_org_changed__list(mocker, scratch_org_factory):
     gcl.assert_called()
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_notify_org_changed__dict(mocker, scratch_org_factory):
     scratch_org_factory = sync_to_async(scratch_org_factory)
@@ -91,7 +91,7 @@ async def test_notify_org_changed__dict(mocker, scratch_org_factory):
     gcl.assert_called()
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_job_started(mocker, scratch_org_factory, job_factory):
     scratch_org_factory = sync_to_async(scratch_org_factory)

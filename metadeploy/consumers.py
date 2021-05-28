@@ -160,7 +160,7 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         try:
             obj = self.get_instance(model=content["model"], id=content["id"])
             return obj.subscribable_by(self.scope["user"], self.scope["session"])
-        except possible_exceptions as e:
+        except possible_exceptions:
             return False
 
     def handle_org_special_case(self, content):
