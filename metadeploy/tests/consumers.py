@@ -71,7 +71,9 @@ def generate_model(model_factory, **kwargs):
 
 @pytest.mark.django_db
 @pytest.mark.asyncio
-async def test_push_notification_consumer__subscribe_scratch_org(scratch_org_factory):
+async def test_push_notification_consumer__subscribe_scratch_org(
+    scratch_org_factory, user_factory
+):
     uuid = str(uuid4())
     scratch_org = await generate_model(
         scratch_org_factory, uuid=uuid, enqueued_at=timezone.now()
@@ -85,7 +87,8 @@ async def test_push_notification_consumer__subscribe_scratch_org(scratch_org_fac
     connected, _ = await communicator.connect()
     assert connected
 
-    await communicator.send_json_to({"model": "scratchorg", "id": str(scratch_org.id)})
+    scratch_org_id = str(scratch_org.id)
+    await communicator.send_json_to({"model": "scratchorg", "id": scratch_org_id})
     response = await communicator.receive_json_from()
     assert "ok" in response
 
@@ -101,6 +104,7 @@ async def test_push_notification_consumer__subscribe_scratch_org(scratch_org_fac
 async def test_push_notification_consumer__subscribe_scratch_org_staff(
     user_factory, scratch_org_factory
 ):
+    print("we're here!")
     user = await generate_model(user_factory, is_staff=True)
     scratch_org = await generate_model(scratch_org_factory, enqueued_at=timezone.now())
 

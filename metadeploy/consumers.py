@@ -1,7 +1,7 @@
+from asgiref.sync import sync_to_async
 from collections import namedtuple
 from importlib import import_module
 from os import sync
-from asgiref.sync import sync_to_async
 
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.apps import apps
@@ -80,17 +80,21 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         if "serializer" in event and "instance" in event and "inner_type" in event:
             instance = await self.get_instance(**event["instance"])
             with translation.override(self.lang):
-                serializer = self.get_serializer(event["serializer"])
-                payload = serializer(
-                    instance=instance,
-                    context=user_context(self.scope["user"], self.scope["session"]),
-                ).data
+                SerializerClass = self.get_serializer(event["serializer"])
+                context = user_context(self.scope["user"], self.scope["session"])
+                data = await self.get_data_from_serializer_async(
+                    SerializerClass, instance, context
+                )
                 message = {
-                    "payload": payload,
+                    "payload": data,
                     "type": event["inner_type"],
                 }
             await self.send_json(message)
             return
+
+    @sync_to_async
+    def get_data_from_serializer_async(self, SerializerClass, instance, context):
+        return SerializerClass(instance=instance, context=context).data
 
     @sync_to_async
     def get_instance(self, *, model, id):
@@ -143,8 +147,7 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
     def is_known_model(self, model):
         return model in KNOWN_MODELS
 
-    @sync_to_async
-    def has_good_permissions(self, content):
+    async def has_good_permissions(self, content):
         if content["model"] == "org":
             return self.handle_org_special_case(content)
         possible_exceptions = (
@@ -157,9 +160,10 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
             TypeError,
         )
         try:
-            obj = self.get_instance(model=content["model"], id=content["id"])
-            return obj.subscribable_by(self.scope["user"], self.scope["session"])
+            obj = await self.get_instance(model=content["model"], id=content["id"])
+            return await obj.subscribable_by(self.scope["user"], self.scope["session"])
         except possible_exceptions:
+
             return False
 
     def handle_org_special_case(self, content):

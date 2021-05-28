@@ -853,6 +853,7 @@ class PreflightResult(models.Model):
         if self.user:
             return self.user.instance_url
 
+    @sync_to_async
     def subscribable_by(self, user, session):
         # Restrict this to staff users, Preflight owners and users who have a valid
         # scratch_org `uuid` in their session (matching this Preflight):
@@ -1015,6 +1016,8 @@ class ScratchOrg(HashIdMixin, models.Model):
         if user.is_staff:
             return True
         scratch_org_id = session.get("scratch_org_id", None)
+        print(f"scratch_org_id: {scratch_org_id}")
+        print(f"self.uuid: {self.uuid}")
         return scratch_org_id and scratch_org_id == str(self.uuid)
 
     def queue_delete(self, should_delete_locally=True):
