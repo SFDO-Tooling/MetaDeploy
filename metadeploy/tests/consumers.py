@@ -104,7 +104,6 @@ async def test_push_notification_consumer__subscribe_scratch_org(
 async def test_push_notification_consumer__subscribe_scratch_org_staff(
     user_factory, scratch_org_factory
 ):
-    print("we're here!")
     user = await generate_model(user_factory, is_staff=True)
     scratch_org = await generate_model(scratch_org_factory, enqueued_at=timezone.now())
 
@@ -184,6 +183,11 @@ async def test_push_notification_consumer__user_token_invalid(user_factory):
     await communicator.disconnect()
 
 
+@sync_to_async
+def run_serializer(serializer_class, instance, context):
+    return serializer_class(instance=instance, context=context).data
+
+
 @pytest.mark.django_db
 @pytest.mark.asyncio
 async def test_push_notification_consumer__subscribe_preflight(
@@ -217,12 +221,11 @@ async def test_push_notification_consumer__subscribe_preflight(
 
     await preflight_completed(preflight)
     response = await communicator.receive_json_from()
-    assert response == {
-        "type": "PREFLIGHT_COMPLETED",
-        "payload": PreflightResultSerializer(
-            instance=preflight, context=user_context(user, session)
-        ).data,
-    }
+
+    payload = await run_serializer(
+        PreflightResultSerializer, preflight, user_context(user, session)
+    )
+    assert response == {"type": "PREFLIGHT_COMPLETED", "payload": payload}
 
     await communicator.disconnect()
 
@@ -293,9 +296,9 @@ async def test_push_notification_consumer__subscribe_job(user_factory, job_facto
     response = await communicator.receive_json_from()
     assert response == {
         "type": "JOB_COMPLETED",
-        "payload": JobSerializer(
-            instance=job, context=user_context(user, session)
-        ).data,
+        "payload": await run_serializer(
+            JobSerializer, job, user_context(user, session)
+        ),
     }
 
     await communicator.disconnect()
@@ -460,7 +463,7 @@ async def test_push_notification_consumer__anon_subscribe_org(
             "current_preflight": None,
         }
     )
-    data = get_org_data_async(org)
+    data = await get_org_data_async(org)
     assert response == {
         "type": "ORG_CHANGED",
         "payload": data,
