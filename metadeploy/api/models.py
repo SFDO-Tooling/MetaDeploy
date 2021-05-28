@@ -1016,8 +1016,6 @@ class ScratchOrg(HashIdMixin, models.Model):
         if user.is_staff:
             return True
         scratch_org_id = session.get("scratch_org_id", None)
-        print(f"scratch_org_id: {scratch_org_id}")
-        print(f"self.uuid: {self.uuid}")
         return scratch_org_id and scratch_org_id == str(self.uuid)
 
     def queue_delete(self, should_delete_locally=True):
