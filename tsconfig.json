@@ -19,13 +19,8 @@
     "isolatedModules": true,
     "baseUrl": ".",
     "paths": {
-      "*": [
-        "*",
-        "src/*"
-      ],
-      "@/*": [
-        "src/js/*"
-      ],
+      "*": ["*", "src/*"],
+      "@/*": ["src/js/*"],
       // Override buggy React-SLDS type definitions
       "@salesforce/design-system-react/components/*": [
         "src/js/@types/design-system-react/component.d.ts"
@@ -44,11 +39,6 @@
       ]
     }
   },
-  "include": [
-    "src/js/**/*.ts",
-    "src/js/**/*.tsx"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["src/js/**/*.ts", "src/js/**/*.tsx"],
+  "exclude": ["node_modules"]
 }

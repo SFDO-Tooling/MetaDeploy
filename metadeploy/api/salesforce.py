@@ -9,8 +9,8 @@ from datetime import datetime
 
 from cumulusci.core.config import OrgConfig, TaskConfig
 from cumulusci.core.runtime import BaseCumulusCI
+from cumulusci.oauth.client import OAuth2Client, OAuth2ClientConfig
 from cumulusci.oauth.salesforce import jwt_session
-from cumulusci.oauth.client import OAuth2ClientConfig, OAuth2Client
 from cumulusci.tasks.salesforce.org_settings import DeployOrgSettings
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
