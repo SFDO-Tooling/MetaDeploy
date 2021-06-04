@@ -1,12 +1,12 @@
-import pytest
 from unittest import mock
 
+import pytest
 from allauth.socialaccount.providers.oauth2.client import OAuth2Error
-from django.test import RequestFactory
 from django.contrib.auth.models import AnonymousUser
+from django.test import RequestFactory
 from sfdo_template_helpers.oauth2.salesforce.views import SalesforcePermissionsError
 
-from ..views import custom_permission_denied_view, custom_500_view
+from ..views import custom_500_view, custom_permission_denied_view
 
 
 @pytest.mark.django_db
