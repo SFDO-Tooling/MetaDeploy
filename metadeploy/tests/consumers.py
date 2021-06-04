@@ -1,4 +1,3 @@
-from os import sync
 from uuid import uuid4
 
 import pytest
