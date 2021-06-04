@@ -6,7 +6,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 import pytz
 import vcr
-from asgiref.sync import sync_to_async
 from cumulusci.salesforce_api.exceptions import MetadataParseError
 from django.utils import timezone
 from django.utils.timezone import make_aware
