@@ -1,8 +1,8 @@
-from asgiref.sync import sync_to_async
 from collections import namedtuple
 from importlib import import_module
 from os import sync
 
+from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.apps import apps
 from django.conf import settings

@@ -11,11 +11,11 @@ from django.utils import timezone
 from ..models import (
     SUPPORTED_ORG_TYPES,
     Job,
+    PreflightResult,
     ScratchOrg,
     SiteProfile,
     Step,
     Version,
-    PreflightResult,
 )
 
 

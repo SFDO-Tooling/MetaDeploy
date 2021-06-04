@@ -1,8 +1,8 @@
-import pytest
-
 from unittest import mock
-from django.core.management import call_command
+
+import pytest
 from django.conf import settings
+from django.core.management import call_command
 
 mock_scheduler = mock.Mock()
 mock_scheduler.get_jobs.return_value = [{}]

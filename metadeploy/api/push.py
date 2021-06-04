@@ -26,9 +26,9 @@ Websocket notifications you can subscribe to:
 """
 import logging
 
+from asgiref.sync import sync_to_async
 from channels.layers import get_channel_layer
 from django.utils.translation import gettext_lazy as _
-from asgiref.sync import sync_to_async
 
 from ..consumer_utils import get_set_message_semaphore
 from .constants import CHANNELS_GROUP_NAME
