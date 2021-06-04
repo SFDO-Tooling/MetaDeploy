@@ -355,8 +355,6 @@ class Command(BaseCommand):
                             {
                                 "unmanaged": False,
                                 "namespace_inject": "hed",
-                                "namespace_token": "%%%NAMESPACE%%%",
-                                "filename_token": "___NAMESPACE___",
                                 "repo_owner": "SalesforceFoundation",
                                 "repo_name": "EDA",
                                 "ref": "e785195d07a3ac9e395f27829866005dbdcd5bd0",
@@ -381,8 +379,6 @@ class Command(BaseCommand):
                             {
                                 "unmanaged": False,
                                 "namespace_inject": "hed",
-                                "namespace_token": "%%%NAMESPACE%%%",
-                                "filename_token": "___NAMESPACE___",
                                 "repo_owner": "SalesforceFoundation",
                                 "repo_name": "EDA",
                                 "ref": "e785195d07a3ac9e395f27829866005dbdcd5bd0",
