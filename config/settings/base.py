@@ -9,11 +9,11 @@ https://docs.djangoproject.com/en/1.11/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
+import json
 from ipaddress import IPv4Network
 from os import environ
 from pathlib import Path
 from typing import List
-import json
 
 import dj_database_url
 import sentry_sdk
@@ -257,7 +257,7 @@ LANGUAGES = [
     ("en-us", "English (US)"),
     ("ar", "Arabic"),
     ("bg", "Bulgarian"),
-    {"ca", "Catalan (Spain)"},
+    {"ca", "Catalan"},
     ("cs", "Czech"),
     ("da", "Danish"),
     ("de", "German"),
