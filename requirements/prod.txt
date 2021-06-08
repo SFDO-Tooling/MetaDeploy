@@ -19,6 +19,7 @@ asgiref==3.3.4
     #   channels
     #   channels-redis
     #   daphne
+    #   django
 async-timeout==3.0.1
     # via aioredis
 attrs==21.2.0
@@ -126,7 +127,7 @@ django-rq==2.4.1
     #   django-rq-scheduler
 django-storages==1.11.1
     # via -r requirements/prod.in
-django==2.2.23
+django==3.1.11
     # via
     #   -r requirements/prod.in
     #   channels

@@ -773,7 +773,7 @@ class Job(HashIdMixin, models.Model):
             self.push_to_org_subscribers(is_new, changed)
             self.push_if_results_changed(changed)
             self.push_if_has_stopped_running(changed)
-        except RuntimeError as error:
+        except RuntimeError as error:  # pragma: no cover
             logger.warn(f"RuntimeError: {error}")
 
         return ret
