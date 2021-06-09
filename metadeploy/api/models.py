@@ -1094,6 +1094,9 @@ class SiteProfile(TranslatableModel):
     def __str__(self):
         return self.name
 
+    def get_translation_strategy(self):  # pragma: no cover
+        return "fields", "siteprofile"
+
 
 class Translation(models.Model):
     """Holds a generic catalog of translated text.
