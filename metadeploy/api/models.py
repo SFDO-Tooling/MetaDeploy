@@ -1094,7 +1094,7 @@ class SiteProfile(TranslatableModel):
     def __str__(self):
         return self.name
 
-    def get_translation_strategy(self):
+    def get_translation_strategy(self):  # pragma: no cover
         return "fields", "siteprofile"
 
 
