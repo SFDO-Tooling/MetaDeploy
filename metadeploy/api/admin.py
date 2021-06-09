@@ -124,7 +124,7 @@ class JobAdmin(AdminHelpTextMixin, admin.ModelAdmin, PlanMixin):
         "enqueued_at",
     )
     list_select_related = ("user", "plan", "plan__version", "plan__version__product")
-    search_fields = ("org_id", "exception")
+    search_fields = ("job_id", "org_id", "exception")
 
 
 @admin.register(ScratchOrg)
