@@ -77,7 +77,7 @@ module.exports = {
             options: {
               url: (url) => !url.startsWith('/'),
               sourceMap: true,
-              importLoaders: 2,
+              importLoaders: 1,
             },
           },
           {
