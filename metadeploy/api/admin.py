@@ -291,6 +291,7 @@ class SiteProfileAdmin(MetadeployTranslatableAdmin):
 class TranslationAdmin(admin.ModelAdmin):
     list_display = ("lang", "context", "slug", "text")
     list_filter = ("lang",)
+    search_fields = ("context", "slug")
 
 
 # Disable editing SocialTokens
