@@ -27,7 +27,7 @@ attrs==21.2.0
     #   automat
     #   service-identity
     #   twisted
-authlib==0.15.3
+authlib==0.15.4
     # via
     #   cumulusci
     #   simple-salesforce
@@ -39,13 +39,13 @@ bleach==3.3.0
     # via
     #   -r requirements/prod.in
     #   sfdo-template-helpers
-boto3==1.17.90
+boto3==1.17.92
     # via -r requirements/prod.in
-botocore==1.20.90
+botocore==1.20.92
     # via
     #   boto3
     #   s3transfer
-certifi==2020.12.5
+certifi==2021.5.30
     # via
     #   cumulusci
     #   requests
@@ -93,6 +93,10 @@ daphne==3.0.2
     # via channels
 defusedxml==0.7.1
     # via python3-openid
+deprecated==1.2.12
+    # via
+    #   cumulusci
+    #   jwcrypto
 dj-database-url==0.5.0
     # via -r requirements/prod.in
 django-allauth==0.44.0
@@ -150,7 +154,7 @@ djangorestframework==3.12.4
     #   sfdo-template-helpers
 docutils==0.16
     # via cumulusci
-faker==8.2.1
+faker==8.6.0
     # via
     #   cumulusci
     #   snowfakery
@@ -188,7 +192,7 @@ idna==2.10
     #   hyperlink
     #   requests
     #   twisted
-importlib-metadata==4.0.1
+importlib-metadata==4.5.0
     # via
     #   cumulusci
     #   keyring
@@ -202,7 +206,7 @@ jmespath==0.10.0
     # via
     #   boto3
     #   botocore
-jwcrypto==0.8
+jwcrypto==0.9
     # via
     #   cumulusci
     #   github3.py
@@ -296,7 +300,7 @@ requests==2.25.1
     #   simple-salesforce
 robotframework-lint==1.1
     # via cumulusci
-robotframework-pabot==1.13
+robotframework-pabot==2.0.0
     # via cumulusci
 robotframework-pythonlibcore==2.2.1
     # via
@@ -304,8 +308,12 @@ robotframework-pythonlibcore==2.2.1
     #   robotframework-seleniumlibrary
 robotframework-requests==0.9.1
     # via cumulusci
-robotframework-seleniumlibrary==4.5.0
+robotframework-seleniumlibrary==5.1.3
     # via cumulusci
+robotframework-stacktrace==0.4.0
+    # via
+    #   cumulusci
+    #   robotframework-pabot
 robotframework==4.0.3
     # via
     #   cumulusci
@@ -313,6 +321,7 @@ robotframework==4.0.3
     #   robotframework-pabot
     #   robotframework-requests
     #   robotframework-seleniumlibrary
+    #   robotframework-stacktrace
 rq-scheduler==0.11.0
     # via django-rq-scheduler
 rq==1.8.1
@@ -348,13 +357,14 @@ six==1.16.0
     #   bleach
     #   cumulusci
     #   fs
+    #   jwcrypto
     #   pyopenssl
     #   python-dateutil
     #   salesforce-bulk
     #   service-identity
 snowfakery==1.12
     # via cumulusci
-sqlalchemy==1.4.15
+sqlalchemy==1.4.17
     # via
     #   cumulusci
     #   snowfakery
@@ -383,7 +393,7 @@ uritemplate==3.0.1
     # via
     #   cumulusci
     #   github3.py
-urllib3==1.26.4
+urllib3==1.26.5
     # via
     #   botocore
     #   cumulusci
@@ -396,6 +406,10 @@ werkzeug==2.0.1
     # via -r requirements/prod.in
 whitenoise==5.2.0
     # via -r requirements/prod.in
+wrapt==1.12.1
+    # via
+    #   cumulusci
+    #   deprecated
 xmltodict==0.12.0
     # via cumulusci
 zipp==3.4.1

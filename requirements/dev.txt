@@ -26,7 +26,7 @@ backcall==0.2.0
     # via ipython
 black==21.5b2
     # via -r requirements/dev.in
-certifi==2020.12.5
+certifi==2021.5.30
     # via
     #   -c requirements/prod.txt
     #   requests
@@ -63,7 +63,7 @@ factory-boy==3.2.0
     # via
     #   -r requirements/dev.in
     #   pytest-factoryboy
-faker==8.2.1
+faker==8.6.0
     # via
     #   -c requirements/prod.txt
     #   factory-boy
@@ -222,7 +222,7 @@ traitlets==5.0.5
     # via
     #   ipython
     #   matplotlib-inline
-urllib3==1.26.4
+urllib3==1.26.5
     # via
     #   -c requirements/prod.txt
     #   requests
@@ -231,7 +231,9 @@ vcrpy==4.1.1
 wcwidth==0.2.5
     # via prompt-toolkit
 wrapt==1.12.1
-    # via vcrpy
+    # via
+    #   -c requirements/prod.txt
+    #   vcrpy
 yarl==1.6.3
     # via vcrpy
 
