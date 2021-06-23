@@ -52,7 +52,7 @@ beforeAll(() => {
   initI18n();
 });
 
-afterEach(fetchMock.reset);
+afterEach(() => fetchMock.reset());
 
 afterAll(() => {
   window.location = location;
