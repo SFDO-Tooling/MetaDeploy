@@ -253,8 +253,10 @@ class ProductSlug(AbstractSlug):
 
 class ProductQuerySet(TranslatableQuerySet):
     def published(self):
-        return self.annotate(version__count=Count("version")).filter(
-            version__count__gte=1
+        return (
+            self.annotate(version__count=Count("version"))
+            .filter(version__count__gte=1)
+            .order_by("order_key")
         )
 
 
