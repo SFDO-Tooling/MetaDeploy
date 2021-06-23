@@ -85,6 +85,7 @@ cryptography==3.4.7
     #   jwcrypto
     #   pyjwt
     #   pyopenssl
+    #   secretstorage
     #   service-identity
     #   sfdo-template-helpers
 cumulusci==3.37.0
@@ -198,6 +199,10 @@ importlib-metadata==4.5.0
     #   keyring
 incremental==21.3.0
     # via twisted
+jeepney==0.6.0
+    # via
+    #   keyring
+    #   secretstorage
 jinja2==2.11.3
     # via
     #   cumulusci
@@ -226,7 +231,7 @@ markupsafe==1.1.1
     #   jinja2
 msgpack==1.0.2
     # via channels-redis
-newrelic==6.4.1.158
+newrelic==6.4.2.159
     # via -r requirements/prod.in
 oauthlib==3.1.1
     # via requests-oauthlib
@@ -337,6 +342,8 @@ salesforce-bulk==2.2.0
     # via cumulusci
 sarge==0.1.6
     # via cumulusci
+secretstorage==3.3.1
+    # via keyring
 selenium==3.141.0
     # via
     #   cumulusci
