@@ -32,6 +32,7 @@ describe('<ProgressBar />', () => {
   describe('step progress', () => {
     beforeEach(() => {
       jest.useFakeTimers();
+      jest.spyOn(window, 'clearInterval');
     });
 
     test('shows incremental progress within steps', () => {
