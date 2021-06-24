@@ -66,6 +66,7 @@ describe('<ShareModal />', () => {
 
   beforeEach(() => {
     jest.useFakeTimers();
+    jest.spyOn(window, 'setTimeout');
   });
 
   describe('with error', () => {
