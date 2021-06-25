@@ -197,7 +197,7 @@ def run_flows(*, plan, skip_steps, result_class, result_id):
             }
         )
         ctx.keychain.set_service("connected_app", "metadeploy", connected_app)
-        ctx.keychain._default_services["metadeploy"] = "metadeploy"
+        ctx.keychain._default_services["connected_app"] = "metadeploy"
 
         steps = [
             step.to_spec(
