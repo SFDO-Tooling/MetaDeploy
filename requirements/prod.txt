@@ -426,7 +426,7 @@ zope.interface==5.4.0
     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==57.0.0
+setuptools==57.1.0
     # via
     #   cumulusci
     #   fs
