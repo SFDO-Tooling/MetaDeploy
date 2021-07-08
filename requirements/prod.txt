@@ -370,7 +370,7 @@ six==1.16.0
     #   service-identity
 snowfakery==1.12
     # via cumulusci
-sqlalchemy==1.4.19
+sqlalchemy==1.4.20
     # via
     #   cumulusci
     #   snowfakery
