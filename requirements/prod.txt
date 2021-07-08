@@ -156,7 +156,7 @@ djangorestframework==3.12.4
     #   sfdo-template-helpers
 docutils==0.16
     # via cumulusci
-faker==8.9.1
+faker==8.9.
     # via
     #   cumulusci
     #   snowfakery
@@ -418,7 +418,7 @@ wrapt==1.12.1
     #   deprecated
 xmltodict==0.12.0
     # via cumulusci
-zipp==3.4.1
+zipp==3.5.0
     # via
     #   cumulusci
     #   importlib-metadata
