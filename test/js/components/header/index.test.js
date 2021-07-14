@@ -11,18 +11,13 @@ describe('<Header />', () => {
     const defaultState = { user: null, socket: false, org: null, errors: [] };
     const initialState = { ...defaultState, ...state };
     const initialProps = props || {};
-    const {
-      container,
-      getByLabelText,
-      getByText,
-      getByAltText,
-      queryByText,
-    } = renderWithRedux(
-      <MemoryRouter>
-        <Header {...initialProps} />
-      </MemoryRouter>,
-      initialState,
-    );
+    const { container, getByLabelText, getByText, getByAltText, queryByText } =
+      renderWithRedux(
+        <MemoryRouter>
+          <Header {...initialProps} />
+        </MemoryRouter>,
+        initialState,
+      );
     return { container, getByLabelText, getByText, getByAltText, queryByText };
   };
 

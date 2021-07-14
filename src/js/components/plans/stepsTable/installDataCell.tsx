@@ -169,13 +169,8 @@ class PreflightCell extends React.Component<DataCellProps> {
   };
 
   render() {
-    const {
-      preflight,
-      item,
-      selectedSteps,
-      className,
-      ...otherProps
-    } = this.props;
+    const { preflight, item, selectedSteps, className, ...otherProps } =
+      this.props;
 
     /* istanbul ignore if */
     if (!item) {

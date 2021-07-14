@@ -1,8 +1,6 @@
 export const logError = (
   message: string | Error,
-  data: {
-    [key: string]: unknown;
-  } = {},
+  data: { [key: string]: any } = {},
 ) => {
   if (window.Sentry) {
     window.Sentry.withScope((scope) => {

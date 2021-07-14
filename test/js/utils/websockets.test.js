@@ -239,6 +239,7 @@ describe('createSocket', () => {
 
       test('dispatches disconnectSocket action after 5 seconds', () => {
         jest.useFakeTimers();
+        jest.spyOn(window, 'setTimeout');
         socketInstance.onopen();
         socketInstance.onclose();
 

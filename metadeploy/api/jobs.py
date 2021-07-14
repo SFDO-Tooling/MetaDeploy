@@ -196,7 +196,8 @@ def run_flows(*, plan, skip_steps, result_class, result_id):
                 "client_id": settings.SFDX_CLIENT_ID,
             }
         )
-        ctx.keychain.set_service("connected_app", connected_app, True)
+        ctx.keychain.set_service("connected_app", "metadeploy", connected_app)
+        ctx.keychain._default_services["connected_app"] = "metadeploy"
 
         steps = [
             step.to_spec(

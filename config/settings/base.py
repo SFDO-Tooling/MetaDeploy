@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/1.11/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
+import json
 from ipaddress import IPv4Network
 from os import environ
 from pathlib import Path
@@ -130,7 +131,6 @@ INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "django_rq",
-    "scheduler",
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
@@ -257,6 +257,7 @@ LANGUAGES = [
     ("en-us", "English (US)"),
     ("ar", "Arabic"),
     ("bg", "Bulgarian"),
+    {"ca", "Catalan"},
     ("cs", "Czech"),
     ("da", "Danish"),
     ("de", "German"),
@@ -449,6 +450,38 @@ CHANNEL_LAYERS = {
     }
 }
 MAX_QUEUE_LENGTH = env("MAX_QUEUE_LENGTH", default=15, type_=int)
+
+CRON_JOBS = {
+    "cleanup_user_data": {
+        "func": "metadeploy.api.jobs.cleanup_user_data_job",
+        "cron_string": "* * * * *",
+    },
+    "enqueue_jobs": {
+        "func": "metadeploy.api.jobs.enqueuer_job",
+        "cron_string": "* * * * *",
+    },
+    "expire_preflight_results": {
+        "func": "metadeploy.api.jobs.expire_preflights_job",
+        "cron_string": "* * * * *",
+    },
+}
+# There is a default dict of cron jobs,
+# and the cron_string can be optionally overridden
+# using JSON in the CRON_SCHEDULE environment variable.
+# CRON_SCHEDULE is a mapping from a name identifying the job
+# to a cron string specifying the schedule for the job,
+# or null to disable the job.
+cron_overrides = json.loads(env("CRON_SCHEDULE", default="{}"))
+if not isinstance(cron_overrides, dict):
+    raise TypeError("CRON_SCHEDULE must be a JSON object")
+for key, cron_string in cron_overrides.items():
+    if key in CRON_JOBS:
+        if cron_string is None:
+            del CRON_JOBS[key]
+        else:
+            CRON_JOBS[key]["cron_string"] = cron_string
+    else:
+        raise KeyError(key)
 
 # Rest Framework settings:
 REST_FRAMEWORK = {

@@ -1,6 +1,6 @@
 import sys
-from django.shortcuts import render
 
+from django.shortcuts import render
 from sfdo_template_helpers.oauth2.salesforce.views import SalesforcePermissionsError
 
 from config.settings.base import IP_RESTRICTED_MESSAGE

@@ -147,12 +147,8 @@ class VersionDetail extends React.Component<VersionDetailProps> {
   }
 
   fetchVersionIfMissing() {
-    const {
-      product,
-      version,
-      versionLabelAndPlanSlug,
-      doFetchVersion,
-    } = this.props;
+    const { product, version, versionLabelAndPlanSlug, doFetchVersion } =
+      this.props;
     const { label, slug } = versionLabelAndPlanSlug;
     // If we have a plan slug, do not try to fetch version
     // (redirect to plan-detail instead)
@@ -196,12 +192,8 @@ class VersionDetail extends React.Component<VersionDetailProps> {
   }
 
   componentDidUpdate(prevProps: VersionDetailProps) {
-    const {
-      product,
-      productSlug,
-      version,
-      versionLabelAndPlanSlug,
-    } = this.props;
+    const { product, productSlug, version, versionLabelAndPlanSlug } =
+      this.props;
     const { label, slug, maybeVersion, maybeSlug } = versionLabelAndPlanSlug;
     const productChanged =
       product !== prevProps.product || productSlug !== prevProps.productSlug;

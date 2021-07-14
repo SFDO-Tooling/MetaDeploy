@@ -9,14 +9,8 @@ import { CONSTANTS } from '@/store/plans/reducer';
 const { RESULT_STATUS } = CONSTANTS;
 
 const RequiredDataCell = (props: DataCellProps) => {
-  const {
-    preflight,
-    item,
-    job,
-    className,
-    activeJobStep,
-    ...otherProps
-  } = props;
+  const { preflight, item, job, className, activeJobStep, ...otherProps } =
+    props;
 
   /* istanbul ignore if */
   if (!item) {

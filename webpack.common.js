@@ -6,6 +6,7 @@ process.env.BROWSERSLIST_CONFIG = './.browserslistrc';
 
 const path = require('path');
 
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
@@ -26,10 +27,11 @@ module.exports = {
     publicPath: '/static/',
   },
   optimization: {
+    minimizer: ['...', new CssMinimizerPlugin()],
     runtimeChunk: 'single',
     splitChunks: {
       cacheGroups: {
-        vendor: {
+        defaultVendors: {
           name: 'vendors',
           test: /[\\/]node_modules[\\/](?!@sentry)/,
           chunks: 'all',
@@ -75,7 +77,7 @@ module.exports = {
             options: {
               url: (url) => !url.startsWith('/'),
               sourceMap: true,
-              importLoaders: 2,
+              importLoaders: 1,
             },
           },
           {
@@ -114,4 +116,7 @@ module.exports = {
       template: path.join(__dirname, 'src', 'index.html'),
     }),
   ],
+  performance: {
+    hints: false,
+  },
 };

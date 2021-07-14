@@ -33,7 +33,7 @@ from sfdo_template_helpers.fields import MarkdownField as BaseMarkdownField
 from sfdo_template_helpers.slugs import AbstractSlug, SlugMixin
 
 from .belvedere_utils import convert_to_18
-from .constants import ERROR, HIDE, OPTIONAL, ORGANIZATION_DETAILS
+from .constants import ERROR, HIDE, OPTIONAL, ORGANIZATION_DETAILS, SKIP
 from .flows import JobFlowCallback, PreflightFlowCallback
 from .push import (
     notify_org_changed,
@@ -253,8 +253,10 @@ class ProductSlug(AbstractSlug):
 
 class ProductQuerySet(TranslatableQuerySet):
     def published(self):
-        return self.annotate(version__count=Count("version")).filter(
-            version__count__gte=1
+        return (
+            self.annotate(version__count=Count("version"))
+            .filter(version__count__gte=1)
+            .order_by("order_key")
         )
 
 
@@ -773,7 +775,7 @@ class Job(HashIdMixin, models.Model):
             self.push_to_org_subscribers(is_new, changed)
             self.push_if_results_changed(changed)
             self.push_if_has_stopped_running(changed)
-        except RuntimeError as error:
+        except RuntimeError as error:  # pragma: no cover
             logger.warn(f"RuntimeError: {error}")
 
         return ret
@@ -884,7 +886,7 @@ class PreflightResult(models.Model):
         optional_step_pks = []
         for step_id, results in self.results.items():
             for result in results:
-                if result["status"] in (OPTIONAL, HIDE):
+                if result["status"] in (OPTIONAL, HIDE, SKIP):
                     optional_step_pks.append(step_id)
 
         return optional_step_pks
@@ -1093,6 +1095,9 @@ class SiteProfile(TranslatableModel):
 
     def __str__(self):
         return self.name
+
+    def get_translation_strategy(self):  # pragma: no cover
+        return "fields", "siteprofile"
 
 
 class Translation(models.Model):
