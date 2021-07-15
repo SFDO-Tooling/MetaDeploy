@@ -32,6 +32,8 @@ services:
     ports:
       - '8080:8080'
       - '8000:8000'
+      # Storybook server
+      - '6006:6006'
     stdin_open: true
     tty: true
     depends_on:
