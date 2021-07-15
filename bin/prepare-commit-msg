@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 GIT_PARAMS_ARRAY=($HUSKY_GIT_PARAMS)
 MSG_FILE=${GIT_PARAMS_ARRAY[0]}
