@@ -25,11 +25,10 @@ COPY ./utility/install_sfdx.sh /app/utility/install_sfdx.sh
 RUN /bin/sh /app/utility/install_sfdx.sh
 # installing python related dependencies with pip
 COPY ./requirements /app/requirements
-RUN if [ "${BUILD_ENV}" = "production" ] ; then \
-    pip install --no-cache --upgrade pip \
-    && pip install --no-cache -r /app/requirements/production.txt ; \
-    else pip install --no-cache --upgrade pip \
-    && pip install --no-cache -r /app/requirements/dev.txt ; \
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r /app/requirements/prod.txt
+RUN if [ "${BUILD_ENV}" = "development" ] ; then \
+    pip install --no-cache-dir -r /app/requirements/dev.txt; \
     fi
 COPY ./package.json /app/package.json
 COPY ./yarn.lock /app/yarn.lock
@@ -50,6 +49,7 @@ RUN DATABASE_URL="" \
   DB_ENCRYPTION_KEY="Ul-OySkEawSxUc7Ck13Twu2109IzIFh54C1WXO9KAFE=" \
   DJANGO_HASHID_SALT="" \
   DJANGO_SECRET_KEY="sample secret key" \
+  GITHUB_TOKEN="sample token" \
   SFDX_CLIENT_SECRET="sample secret" \
   SFDX_CLIENT_CALLBACK_URL="sample callback" \
   SFDX_CLIENT_ID="sample id" \
