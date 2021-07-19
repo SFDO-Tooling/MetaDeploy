@@ -10,14 +10,35 @@ import customSprite from '@salesforce-ux/design-system/assets/icons/custom-sprit
 import doctypeSprite from '@salesforce-ux/design-system/assets/icons/doctype-sprite/svg/symbols.svg';
 import standardSprite from '@salesforce-ux/design-system/assets/icons/standard-sprite/svg/symbols.svg';
 import utilitySprite from '@salesforce-ux/design-system/assets/icons/utility-sprite/svg/symbols.svg';
+import i18n from 'i18next';
 import React from 'react';
+import { initReactI18next } from 'react-i18next';
 import { MemoryRouter } from 'react-router-dom';
+
+import translations from '../locales/en/translation.json';
 
 export const parameters = {
   actions: { argTypesRegex: '^on[A-Z].*' },
   viewMode: 'story',
   previewTabs: { 'storybook/docs/panel': { hidden: true } },
 };
+
+// Enable translations
+i18n.use(initReactI18next).init({
+  lng: 'en',
+  resources: {
+    en: {
+      translation: translations,
+    },
+  },
+  keySeparator: false,
+  nsSeparator: false,
+  returnNull: false,
+  returnEmptyString: false,
+  interpolation: {
+    escapeValue: false,
+  },
+});
 
 window.GLOBALS = {};
 
