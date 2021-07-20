@@ -1,6 +1,4 @@
-import {
-  SCRATCH_ORG_STATUSES
-} from '@/utils/constants';
+import { SCRATCH_ORG_STATUSES } from '@/utils/constants';
 
 export const sampleJob1 = {
   id: 'job1',
@@ -12,7 +10,7 @@ export const sampleJob1 = {
     is_staff: true,
   },
   plan: 'plan1',
-  status: SCRATCH_ORG_STATUSES.started ,
+  status: SCRATCH_ORG_STATUSES.started,
   steps: ['gYBP3dj', 'gYBP3dj', 'SgYBP3dj'],
   results: {},
   org_name: 'OddBird',
