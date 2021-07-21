@@ -2,7 +2,7 @@
   "404": "404",
   "(confirm to continue)": "(jatka vahvistamalla)",
   "A pre-install validation is currently running on this org.": "Esiasennettu vahvistusta suoritetaan tällä hetkellä tässä organisaatiossa.",
-  "About {{title}}": "Tietoja {{title}}",
+  "About {{title}}": "Tietoja: {{title}}",
   "Access Your Scratch Org": "Avaa luonnosorganisaatiosi",
   "Access to view the installation job does not provide access to your Salesforce org.": "Asennustyön tarkastelulupa ei tarjoa pääsyä Salesforce-organisaatioosi.",
   "Additional Plans": "Lisäsuunnitelmat",
