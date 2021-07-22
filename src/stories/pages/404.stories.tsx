@@ -6,7 +6,7 @@ import FourOhFour from '@/components/404';
 import { withRedux } from '../decorators';
 
 export default {
-  title: 'Pages/404/Example',
+  title: 'Pages/404/Examples',
   component: FourOhFour,
   decorators: [withRedux()],
 };
