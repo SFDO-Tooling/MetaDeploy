@@ -15,8 +15,22 @@ const Template: Story<ComponentProps<typeof FourOhFour>> = (args) => (
   <FourOhFour {...args} />
 );
 
-export const FourOhFourComponent = Template.bind({});
-FourOhFourComponent.argTypes = {
+export const Default404 = Template.bind({});
+Default404.argTypes = {
   message: { control: 'text' },
 };
-FourOhFourComponent.storyName = '404';
+Default404.storyName = 'Default';
+
+export const Custom404 = Template.bind({});
+Custom404.args = {
+  message: (
+    <>
+      We can’t find the Product you’re looking for. Try another Product from{' '}
+      <a href="#">this page</a>.
+    </>
+  ),
+};
+Custom404.argTypes = {
+  message: { control: { disable: true } },
+};
+Custom404.storyName = 'Custom Message';
