@@ -1,4 +1,4 @@
-import { SCRATCH_ORG_STATUSES } from '@/utils/constants';
+import { CONSTANTS } from '@/store/plans/reducer';
 
 export const sampleJob1 = {
   id: 'job1',
@@ -10,7 +10,7 @@ export const sampleJob1 = {
     is_staff: true,
   },
   plan: 'plan1',
-  status: SCRATCH_ORG_STATUSES.started,
+  status: CONSTANTS.STATUS.STARTED,
   steps: ['gYBP3dj', 'gYBP3dj', 'SgYBP3dj'],
   results: {},
   org_name: 'OddBird',
@@ -38,7 +38,7 @@ export const sampleJob2 = {
     is_staff: true,
   },
   plan: 'plan2',
-  status: SCRATCH_ORG_STATUSES.complete,
+  status: CONSTANTS.STATUS.COMPLETE,
   steps: ['gYBP3dj', 'gYBP3dj', 'SgYBP3dj'],
   results: {},
   org_name: 'OddBird',
@@ -66,7 +66,7 @@ export const sampleJob3 = {
     is_staff: true,
   },
   plan: 'plan2',
-  status: SCRATCH_ORG_STATUSES.failed,
+  status: CONSTANTS.STATUS.FAILED,
   steps: ['gYBP3dj', 'gYBP3dj', 'SgYBP3dj'],
   results: {},
   org_name: 'OddBird',
@@ -94,7 +94,7 @@ export const sampleJob4 = {
     is_staff: true,
   },
   plan: 'plan2',
-  status: SCRATCH_ORG_STATUSES.canceled,
+  status: CONSTANTS.STATUS.CANCELED,
   steps: ['gYBP3dj', 'gYBP3dj', 'SgYBP3dj'],
   results: {},
   org_name: 'OddBird',
