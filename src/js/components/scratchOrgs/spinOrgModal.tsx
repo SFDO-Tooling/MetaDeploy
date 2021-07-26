@@ -34,7 +34,7 @@ const SpinOrg = ({
   }, [clickThroughAgreement, toggleModal]);
 
   const handleSubmit = useCallback(() => {
-    /* istanbul ignore else */
+    /* istanbul ignore next */
     if (confirmed) {
       if (currentPage === 0) {
         nextPage();
