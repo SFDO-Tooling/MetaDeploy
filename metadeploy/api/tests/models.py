@@ -243,6 +243,9 @@ class TestIconProperty:
 
 @pytest.mark.django_db
 class TestVersion:
+    def test_get_absolute_url(self, version_factory):
+        assert version_factory().get_absolute_url().startswith("/")
+
     def test_primary_plan__none(self, version_factory):
         version = version_factory()
         assert version.primary_plan is None
@@ -287,9 +290,13 @@ def test_product_category_str(product_category_factory):
 
 
 @pytest.mark.django_db
-def test_product_str(product_factory):
-    product = product_factory(title="My Product")
-    assert str(product) == "My Product"
+class TestProduct:
+    def test_str(self, product_factory):
+        product = product_factory(title="My Product")
+        assert str(product) == "My Product"
+
+    def test_get_absolute_url(self, product_factory):
+        assert product_factory().get_absolute_url().startswith("/")
 
 
 @pytest.mark.django_db
@@ -410,6 +417,9 @@ class TestPlan:
         version = version_factory(label="v0.1.0", product=product)
         plan = plan_factory(title="My Plan", version=version)
         assert str(plan) == "My Product, Version v0.1.0, Plan My Plan"
+
+    def test_get_absolute_url(self, plan_factory):
+        assert plan_factory().get_absolute_url().startswith("/")
 
     def test_is_visible_to(self, allowed_list_factory, plan_factory, user_factory):
         allowed_list = allowed_list_factory(org_type=["Production"])
@@ -558,6 +568,9 @@ class TestVersionNaturalKey:
 
 @pytest.mark.django_db
 class TestJob:
+    def test_get_absolute_url(self, job_factory):
+        assert job_factory().get_absolute_url().startswith("/")
+
     def test_job_saves_click_through_text(self, plan_factory, job_factory):
         plan = plan_factory(version__product__click_through_agreement="Test")
         job = job_factory(plan=plan, org_id="00Dxxxxxxxxxxxxxxx")

@@ -120,7 +120,7 @@ export const removeUrlParam = (key: string, search?: string): string => {
 
 export const extractCustomDomain = (url: string): string => {
   const protocol = /(http(s?)):\/\//;
-  const domain = /\.my\.salesforce\.com(\/?)/;
+  const domain = /(\.sandbox)?\.my\.salesforce\.com(\/?)/;
   return url.replace(protocol, '').replace(domain, '');
 };
 

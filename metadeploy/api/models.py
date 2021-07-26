@@ -344,6 +344,10 @@ class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel)
     def get_translation_strategy(self):
         return "fields", f"{self.slug}:product"
 
+    def get_absolute_url(self):
+        # See src/js/utils/routes.ts
+        return f"/products/{self.slug}"
+
 
 class VersionQuerySet(TranslatableQuerySet):
     def get_by_natural_key(self, *, product, label):
@@ -402,6 +406,10 @@ class Version(HashIdMixin, TranslatableModel):
 
     def get_translation_strategy(self):
         return "fields", f"{self.product.slug}:version:{self.label}"
+
+    def get_absolute_url(self):
+        # See src/js/utils/routes.ts
+        return f"/products/{self.product.slug}/{self.label}"
 
 
 class PlanSlug(AbstractSlug):
@@ -558,6 +566,10 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
             "fields",
             f"{self.plan_template.product.slug}:plan:{self.plan_template.name}",
         )
+
+    def get_absolute_url(self):
+        # See src/js/utils/routes.ts
+        return f"/products/{self.version.product.slug}/{self.version.label}/{self.slug}"
 
     def is_visible_to(self, *args, **kwargs):
         if self.supported_orgs != SUPPORTED_ORG_TYPES.Persistent:
@@ -728,6 +740,13 @@ class Job(HashIdMixin, models.Model):
     def instance_url(self):
         if self.user:
             return self.user.instance_url
+
+    def get_absolute_url(self):
+        # See src/js/utils/routes.ts
+        return (
+            f"/products/{self.plan.version.product.slug}/{self.plan.version.label}/"
+            f"{self.plan.slug}/jobs/{self.id}"
+        )
 
     def subscribable_by(self, user, session):
         # Restrict this to public Jobs, staff users, Job owners, or users who have a
