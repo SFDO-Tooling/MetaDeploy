@@ -303,10 +303,14 @@ class PlanDetail extends React.Component<Props, State> {
       );
     }
 
-    const currentJob = find(orgs, (org) => org.current_job !== null)
-      ?.current_job;
-    const currentPreflight = find(orgs, (org) => org.current_preflight !== null)
-      ?.current_preflight;
+    const currentJob = find(
+      orgs,
+      (org) => org.current_job !== null,
+    )?.current_job;
+    const currentPreflight = find(
+      orgs,
+      (org) => org.current_preflight !== null,
+    )?.current_preflight;
     if (currentJob) {
       const { product_slug, version_label, plan_slug, id } = currentJob;
       return (

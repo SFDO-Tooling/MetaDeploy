@@ -2,7 +2,7 @@ import i18n from 'i18next';
 import * as React from 'react';
 import { Trans } from 'react-i18next';
 
-import svgPath from '!svg-inline-loader!images/no-access.svg';
+import svgPath from '!raw-loader!images/no-access.svg';
 import Login from '@/components/header/login';
 
 // No-op wrapper because `Trans` components can contain other components,

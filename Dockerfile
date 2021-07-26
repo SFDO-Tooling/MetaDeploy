@@ -29,7 +29,7 @@ RUN if [ "${BUILD_ENV}" = "production" ] ; then \
     pip install --no-cache --upgrade pip \
     && pip install --no-cache -r /app/requirements/production.txt ; \
     else pip install --no-cache --upgrade pip \
-    && pip install --no-cache -r /app/requirements/local.txt ; \
+    && pip install --no-cache -r /app/requirements/dev.txt ; \
     fi
 COPY ./package.json /app/package.json
 COPY ./yarn.lock /app/yarn.lock
@@ -53,5 +53,4 @@ RUN DATABASE_URL="" \
   SFDX_CLIENT_SECRET="sample secret" \
   SFDX_CLIENT_CALLBACK_URL="sample callback" \
   SFDX_CLIENT_ID="sample id" \
-  GITHUB_TOKEN="sample token" \
   python manage.py collectstatic --noinput

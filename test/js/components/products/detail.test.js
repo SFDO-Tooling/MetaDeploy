@@ -216,13 +216,8 @@ describe('<VersionDetail />', () => {
       versionLabel: '1.0.0',
     };
     const opts = Object.assign({}, defaults, options);
-    const {
-      productSlug,
-      versionLabel,
-      rerenderFn,
-      customStore,
-      initialState,
-    } = opts;
+    const { productSlug, versionLabel, rerenderFn, customStore, initialState } =
+      opts;
     const context = {};
     const ui = (
       <StaticRouter context={context}>

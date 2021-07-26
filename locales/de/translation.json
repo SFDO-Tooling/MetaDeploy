@@ -72,7 +72,7 @@
   "Oops! It looks like you don’t have permissions to run an installation on this org.": "Hoppla! Anscheinend haben Sie keine Berechtigung, um eine Installation in dieser Organisation auszuführen.",
   "Optional": "Optional",
   "Org:": "Organisation:",
-  "Other": "Weitere",
+  "Other": "Sonstiges",
   "Please contact an Admin within your org or use the button below to log in with a different org.": "Bitte wenden Sie sich an einen Administrator innerhalb Ihrer Organisation, oder verwenden Sie die Schaltfläche unten, um sich bei einer anderen Organisation anzumelden.",
   "Potential Issues": "Mögliche Probleme",
   "Pre-Install Validation In Progress…": "Die Überprüfung vor der Installation wird ausgeführt…",
@@ -85,7 +85,7 @@
   "Product Terms of Use and Licenses": "Produkt-Nutzungsbedingungen und Lizenzen",
   "Production or Developer Org": "Produktions- oder Entwicklerorganisation",
   "Products": "Produkte",
-  "Progress: {{percent}}%": "Status: {{percent}} %",
+  "Progress: {{percent}}%": "Status: {{percent}} %",
   "Re-Run Pre-Install Validation": "Überprüfung vor der Installation erneut ausführen",
   "Re-Run Pre-Install Validation on Scratch Org": "Überprüfung vor der Installation für die Testorganisation erneut ausführen",
   "Required": "Erforderlich",
@@ -239,6 +239,6 @@
   "warningMsg_4": "{{count}} Warnungen",
   "warningMsg_5": "{{count}} Warnungen",
   "{{item1}} and {{item2}}": "{{item1}} und {{item2}}",
-  "{{percent}}% Complete": "{{percent}} % abgeschlossen",
+  "{{percent}}% Complete": "{{percent}} % abgeschlossen",
   "{{title}} - View Details": "{{title}} – Details anzeigen"
 }

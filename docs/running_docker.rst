@@ -81,7 +81,7 @@ POSTGRES_DB:
     This can be set up using a personal GitHub account by providing your personal access token.
 
 GITHUB_TOKEN:
-    This represents the users github personal access token which requires a scope of `repo`.
+    This represents a GitHub user's Personal Access Token which requires a scope of `repo`.
     If you need to generate a personal access token please visit the following:
     https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line
 
