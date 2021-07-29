@@ -165,7 +165,7 @@ def _get_org_result(
             if scratch_org_config.namespaced
             else None
         ),
-        "OrgName": scratch_org_definition.get("orgName", "Metecho Task Org"),
+        "OrgName": scratch_org_definition.get("orgName", "MetaDeploy Scratch Org"),
         # should really flesh this out to pass the other
         # optional fields from the scratch org definition file,
         # but this will work for a start
