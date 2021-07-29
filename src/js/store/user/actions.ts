@@ -1,8 +1,8 @@
-import { ThunkResult } from '@/store';
-import { fetchOrgJobs, FetchOrgJobsSucceeded } from '@/store/org/actions';
-import { fetchProducts } from '@/store/products/actions';
-import { User } from '@/store/user/reducer';
-import apiFetch from '@/utils/api';
+import { ThunkResult } from '@/js/store';
+import { fetchOrgJobs, FetchOrgJobsSucceeded } from '@/js/store/org/actions';
+import { fetchProducts } from '@/js/store/products/actions';
+import { User } from '@/js/store/user/reducer';
+import apiFetch from '@/js/utils/api';
 
 type LoginAction = { type: 'USER_LOGGED_IN'; payload: User };
 export type LogoutAction = { type: 'USER_LOGGED_OUT' };

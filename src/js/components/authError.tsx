@@ -5,13 +5,13 @@ import { Trans } from 'react-i18next';
 import { connect } from 'react-redux';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 
-import { EmptyIllustration } from '@/components/404';
-import Header from '@/components/header';
-import Login from '@/components/header/login';
-import { AppState } from '@/store';
-import { User } from '@/store/user/reducer';
-import { selectUserState } from '@/store/user/selectors';
-import routes from '@/utils/routes';
+import { EmptyIllustration } from '@/js/components/404';
+import Header from '@/js/components/header';
+import Login from '@/js/components/header/login';
+import { AppState } from '@/js/store';
+import { User } from '@/js/store/user/reducer';
+import { selectUserState } from '@/js/store/user/selectors';
+import routes from '@/js/utils/routes';
 
 const AuthError = withRouter(
   ({ user, history }: { user: User } & RouteComponentProps) => {

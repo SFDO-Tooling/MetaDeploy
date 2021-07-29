@@ -1,7 +1,7 @@
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
-import ClickThroughAgreementModal from '@/components/plans/clickThroughAgreementModal';
+import ClickThroughAgreementModal from '@/js/components/plans/clickThroughAgreementModal';
 
 import { render } from './../../utils';
 

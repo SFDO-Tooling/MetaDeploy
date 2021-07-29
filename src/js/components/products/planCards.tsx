@@ -3,9 +3,9 @@ import i18n from 'i18next';
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 
-import { Plan } from '@/store/plans/reducer';
-import { Product, Version } from '@/store/products/reducer';
-import routes from '@/utils/routes';
+import { Plan } from '@/js/store/plans/reducer';
+import { Product, Version } from '@/js/store/products/reducer';
+import routes from '@/js/utils/routes';
 
 const PlanCard = ({
   productSlug,

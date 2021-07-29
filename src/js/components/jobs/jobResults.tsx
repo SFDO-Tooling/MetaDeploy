@@ -2,9 +2,12 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import i18n from 'i18next';
 import * as React from 'react';
 
-import { ErrorIcon, getErrorInfo } from '@/components/plans/preflightResults';
-import { Job } from '@/store/jobs/reducer';
-import { CONSTANTS } from '@/store/plans/reducer';
+import {
+  ErrorIcon,
+  getErrorInfo,
+} from '@/js/components/plans/preflightResults';
+import { Job } from '@/js/store/jobs/reducer';
+import { CONSTANTS } from '@/js/store/plans/reducer';
 
 const JobResults = ({
   job,

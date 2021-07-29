@@ -1,8 +1,8 @@
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
-import Login from '@/components/header/login';
-import { addUrlParams } from '@/utils/api';
+import Login from '@/js/components/header/login';
+import { addUrlParams } from '@/js/utils/api';
 
 import { render } from './../../utils';
 

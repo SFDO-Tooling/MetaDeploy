@@ -3,9 +3,9 @@ import i18n from 'i18next';
 import * as React from 'react';
 import { Trans } from 'react-i18next';
 
-import ProductIcon from '@/components/products/icon';
-import { Product } from '@/store/products/reducer';
-import { PRODUCT_LAYOUTS } from '@/utils/constants';
+import ProductIcon from '@/js/components/products/icon';
+import { Product } from '@/js/store/products/reducer';
+import { PRODUCT_LAYOUTS } from '@/js/utils/constants';
 
 const Header = ({
   product,

@@ -1,8 +1,8 @@
 import { createSelector } from 'reselect';
 
-import { AppState } from '@/store';
-import { selectPlan } from '@/store/plans/selectors';
-import { ScratchOrg, ScratchOrgState } from '@/store/scratchOrgs/reducer';
+import { AppState } from '@/js/store';
+import { selectPlan } from '@/js/store/plans/selectors';
+import { ScratchOrg, ScratchOrgState } from '@/js/store/scratchOrgs/reducer';
 
 export const selectScratchOrgState = (appState: AppState): ScratchOrgState =>
   appState.scratchOrgs;

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import ProductIcon from '@/components/products/icon';
+import ProductIcon from '@/js/components/products/icon';
 
 import { render } from './../../utils';
 

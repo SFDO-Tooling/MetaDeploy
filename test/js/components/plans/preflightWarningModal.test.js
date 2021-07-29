@@ -1,7 +1,7 @@
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
-import PreflightWarningModal from '@/components/plans/preflightWarningModal';
+import PreflightWarningModal from '@/js/components/plans/preflightWarningModal';
 
 import { render } from './../../utils';
 

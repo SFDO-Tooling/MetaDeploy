@@ -5,8 +5,8 @@ import {
   getLoadingOrNotFound,
   shouldFetchPlan,
   shouldFetchVersion,
-} from '@/components/utils';
-import routes from '@/utils/routes';
+} from '@/js/components/utils';
+import routes from '@/js/utils/routes';
 
 import { renderWithRedux } from './../utils';
 

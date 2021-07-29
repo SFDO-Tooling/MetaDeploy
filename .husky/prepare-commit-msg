@@ -1,7 +1,7 @@
 #!/bin/bash
+. "$(dirname "$0")/_/husky.sh"
 
-GIT_PARAMS_ARRAY=($HUSKY_GIT_PARAMS)
-MSG_FILE=${GIT_PARAMS_ARRAY[0]}
+MSG_FILE=$1
 COMMIT_MSG=`cat $MSG_FILE`
 CHANGED=$(git diff --cached --name-only)
 

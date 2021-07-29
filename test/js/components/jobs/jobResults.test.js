@@ -1,6 +1,6 @@
 import React from 'react';
 
-import JobResults from '@/components/jobs/jobResults';
+import JobResults from '@/js/components/jobs/jobResults';
 
 import { render } from './../../utils';
 

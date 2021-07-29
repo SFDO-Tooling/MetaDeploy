@@ -2,15 +2,15 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import JobDetail from '@/components/jobs/detail';
-import { fetchJob, requestCancelJob } from '@/store/jobs/actions';
+import JobDetail from '@/js/components/jobs/detail';
+import { fetchJob, requestCancelJob } from '@/js/store/jobs/actions';
 import {
   fetchPlan,
   fetchProduct,
   fetchVersion,
-} from '@/store/products/actions';
-import { fetchScratchOrg } from '@/store/scratchOrgs/actions';
-import routes from '@/utils/routes';
+} from '@/js/store/products/actions';
+import { fetchScratchOrg } from '@/js/store/scratchOrgs/actions';
+import routes from '@/js/utils/routes';
 
 import {
   renderWithRedux,
@@ -18,9 +18,9 @@ import {
   storeWithApi,
 } from './../../utils';
 
-jest.mock('@/store/jobs/actions');
-jest.mock('@/store/products/actions');
-jest.mock('@/store/scratchOrgs/actions');
+jest.mock('@/js/store/jobs/actions');
+jest.mock('@/js/store/products/actions');
+jest.mock('@/js/store/scratchOrgs/actions');
 
 fetchScratchOrg.mockReturnValue({ type: 'TEST' });
 fetchJob.mockReturnValue({ type: 'TEST' });

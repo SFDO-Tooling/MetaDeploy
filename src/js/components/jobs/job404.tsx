@@ -3,11 +3,11 @@ import * as React from 'react';
 import { Trans } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
-import FourOhFour from '@/components/404';
-import Login from '@/components/header/login';
-import { Plan } from '@/store/plans/reducer';
-import { Product, Version } from '@/store/products/reducer';
-import routes from '@/utils/routes';
+import FourOhFour from '@/js/components/404';
+import Login from '@/js/components/header/login';
+import { Plan } from '@/js/store/plans/reducer';
+import { Product, Version } from '@/js/store/products/reducer';
+import routes from '@/js/utils/routes';
 
 const JobNotFound = ({
   product,

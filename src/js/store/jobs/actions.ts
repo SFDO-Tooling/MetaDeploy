@@ -1,8 +1,8 @@
-import { ThunkResult } from '@/store';
-import { Job } from '@/store/jobs/reducer';
-import { StepResult } from '@/store/plans/reducer';
-import apiFetch, { addUrlParams } from '@/utils/api';
-import routes from '@/utils/routes';
+import { ThunkResult } from '@/js/store';
+import { Job } from '@/js/store/jobs/reducer';
+import { StepResult } from '@/js/store/plans/reducer';
+import apiFetch, { addUrlParams } from '@/js/utils/api';
+import routes from '@/js/utils/routes';
 
 export type JobData = {
   plan: string;

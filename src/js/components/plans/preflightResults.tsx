@@ -3,8 +3,8 @@ import i18n from 'i18next';
 import * as React from 'react';
 import { Trans } from 'react-i18next';
 
-import { Job } from '@/store/jobs/reducer';
-import { CONSTANTS, Preflight, StepResult } from '@/store/plans/reducer';
+import { Job } from '@/js/store/jobs/reducer';
+import { CONSTANTS, Preflight, StepResult } from '@/js/store/plans/reducer';
 
 export const ErrorIcon = ({
   size,
