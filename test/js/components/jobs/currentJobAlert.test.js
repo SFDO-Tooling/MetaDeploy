@@ -1,7 +1,7 @@
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
-import CurrentJobAlert from '@/components/jobs/currentJobAlert';
+import CurrentJobAlert from '@/js/components/jobs/currentJobAlert';
 
 import { render } from './../../utils';
 

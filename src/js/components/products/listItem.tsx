@@ -3,9 +3,9 @@ import i18n from 'i18next';
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 
-import ProductIcon from '@/components/products/icon';
-import { Product } from '@/store/products/reducer';
-import routes from '@/utils/routes';
+import ProductIcon from '@/js/components/products/icon';
+import { Product } from '@/js/store/products/reducer';
+import routes from '@/js/utils/routes';
 
 const ProductItem = ({ item }: { item: Product }) => {
   if (!item.most_recent_version) {

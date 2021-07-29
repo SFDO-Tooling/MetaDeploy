@@ -2,7 +2,7 @@ import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import i18n from 'i18next';
 import * as React from 'react';
 
-import { getDuration } from '@/utils/dates';
+import { getDuration } from '@/js/utils/dates';
 
 const Intro = ({
   averageDuration,

@@ -1,6 +1,6 @@
 import fetchMock from 'fetch-mock';
 
-import * as actions from '@/store/scratchOrgs/actions';
+import * as actions from '@/js/store/scratchOrgs/actions';
 
 import { storeWithApi } from './../../utils';
 

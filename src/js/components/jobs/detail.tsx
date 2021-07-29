@@ -7,46 +7,46 @@ import { connect, ConnectedProps } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { Job } from 'src/js/store/jobs/reducer';
 
-import BackLink from '@/components/backLink';
-import BodyContainer from '@/components/bodyContainer';
-import Header from '@/components/header';
-import CtaButton from '@/components/jobs/ctaButton';
-import JobMessage from '@/components/jobs/jobMessage';
-import JobResults from '@/components/jobs/jobResults';
-import ProgressBar from '@/components/jobs/progressBar';
-import ShareModal from '@/components/jobs/shareModal';
-import UserInfo from '@/components/jobs/userInfo';
-import { LabelWithSpinner } from '@/components/plans/ctaButton';
-import PageHeader from '@/components/plans/header';
-import Intro from '@/components/plans/intro';
-import StepsTable from '@/components/plans/stepsTable';
-import Toasts from '@/components/plans/toasts';
-import ProductNotFound from '@/components/products/product404';
+import BackLink from '@/js/components/backLink';
+import BodyContainer from '@/js/components/bodyContainer';
+import Header from '@/js/components/header';
+import CtaButton from '@/js/components/jobs/ctaButton';
+import JobMessage from '@/js/components/jobs/jobMessage';
+import JobResults from '@/js/components/jobs/jobResults';
+import ProgressBar from '@/js/components/jobs/progressBar';
+import ShareModal from '@/js/components/jobs/shareModal';
+import UserInfo from '@/js/components/jobs/userInfo';
+import { LabelWithSpinner } from '@/js/components/plans/ctaButton';
+import PageHeader from '@/js/components/plans/header';
+import Intro from '@/js/components/plans/intro';
+import StepsTable from '@/js/components/plans/stepsTable';
+import Toasts from '@/js/components/plans/toasts';
+import ProductNotFound from '@/js/components/products/product404';
 import {
   getLoadingOrNotFound,
   shouldFetchPlan,
   shouldFetchVersion,
-} from '@/components/utils';
-import { AppState } from '@/store';
-import { fetchJob, requestCancelJob, updateJob } from '@/store/jobs/actions';
-import { selectJob, selectJobId } from '@/store/jobs/selectors';
-import { CONSTANTS } from '@/store/plans/reducer';
-import { selectPlan, selectPlanSlug } from '@/store/plans/selectors';
+} from '@/js/components/utils';
+import { AppState } from '@/js/store';
+import { fetchJob, requestCancelJob, updateJob } from '@/js/store/jobs/actions';
+import { selectJob, selectJobId } from '@/js/store/jobs/selectors';
+import { CONSTANTS } from '@/js/store/plans/reducer';
+import { selectPlan, selectPlanSlug } from '@/js/store/plans/selectors';
 import {
   fetchPlan,
   fetchProduct,
   fetchVersion,
-} from '@/store/products/actions';
+} from '@/js/store/products/actions';
 import {
   selectProduct,
   selectProductSlug,
   selectVersion,
   selectVersionLabel,
-} from '@/store/products/selectors';
-import { fetchScratchOrg } from '@/store/scratchOrgs/actions';
-import { selectScratchOrg } from '@/store/scratchOrgs/selectors';
-import { selectUserState } from '@/store/user/selectors';
-import routes from '@/utils/routes';
+} from '@/js/store/products/selectors';
+import { fetchScratchOrg } from '@/js/store/scratchOrgs/actions';
+import { selectScratchOrg } from '@/js/store/scratchOrgs/selectors';
+import { selectUserState } from '@/js/store/user/selectors';
+import routes from '@/js/utils/routes';
 
 const select = (appState: AppState, props: RouteComponentProps) => ({
   user: selectUserState(appState),

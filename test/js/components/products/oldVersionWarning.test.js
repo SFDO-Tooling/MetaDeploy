@@ -2,7 +2,7 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import OldVersionWarning from '@/components/products/oldVersionWarning';
+import OldVersionWarning from '@/js/components/products/oldVersionWarning';
 
 import { render } from './../../utils';
 

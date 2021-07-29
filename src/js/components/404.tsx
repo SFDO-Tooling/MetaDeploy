@@ -4,9 +4,9 @@ import DocumentTitle from 'react-document-title';
 import { Trans } from 'react-i18next';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 
-import desertSvg from '!raw-loader!images/desert.svg';
-import Header from '@/components/header';
-import routes from '@/utils/routes';
+import desertSvg from '@/img/desert.svg?raw';
+import Header from '@/js/components/header';
+import routes from '@/js/utils/routes';
 
 export const EmptyIllustration = ({
   message,

@@ -3,8 +3,8 @@ import classNames from 'classnames';
 import i18n from 'i18next';
 import * as React from 'react';
 
-import { DataCellProps } from '@/components/plans/stepsTable';
-import { CONSTANTS } from '@/store/plans/reducer';
+import { DataCellProps } from '@/js/components/plans/stepsTable';
+import { CONSTANTS } from '@/js/store/plans/reducer';
 
 const { RESULT_STATUS } = CONSTANTS;
 

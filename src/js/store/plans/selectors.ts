@@ -1,10 +1,10 @@
 import { RouteComponentProps } from 'react-router-dom';
 import { createSelector } from 'reselect';
 
-import { AppState } from '@/store';
-import { Plan, Preflight, PreflightsState } from '@/store/plans/reducer';
-import { Product, Version } from '@/store/products/reducer';
-import { selectProduct, selectVersion } from '@/store/products/selectors';
+import { AppState } from '@/js/store';
+import { Plan, Preflight, PreflightsState } from '@/js/store/plans/reducer';
+import { Product, Version } from '@/js/store/products/reducer';
+import { selectProduct, selectVersion } from '@/js/store/products/selectors';
 
 export const selectPlanSlug = (
   appState: AppState,

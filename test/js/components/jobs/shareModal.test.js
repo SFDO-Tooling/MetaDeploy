@@ -1,8 +1,8 @@
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
-import ShareModal from '@/components/jobs/shareModal';
-import routes from '@/utils/routes';
+import ShareModal from '@/js/components/jobs/shareModal';
+import routes from '@/js/utils/routes';
 
 import { render } from './../../utils';
 

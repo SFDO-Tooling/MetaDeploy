@@ -11,34 +11,37 @@ import {
   withRouter,
 } from 'react-router-dom';
 
-import BackLink from '@/components/backLink';
-import BodyContainer from '@/components/bodyContainer';
-import Header from '@/components/header';
-import PageHeader from '@/components/products/header';
-import ProductNotAllowed from '@/components/products/notAllowed';
-import OldVersionWarning from '@/components/products/oldVersionWarning';
-import PlanCards from '@/components/products/planCards';
-import ProductNotFound from '@/components/products/product404';
-import VersionNotFound from '@/components/products/version404';
-import { getLoadingOrNotFound, shouldFetchVersion } from '@/components/utils';
-import { AppState } from '@/store';
-import { Plan } from '@/store/plans/reducer';
+import BackLink from '@/js/components/backLink';
+import BodyContainer from '@/js/components/bodyContainer';
+import Header from '@/js/components/header';
+import PageHeader from '@/js/components/products/header';
+import ProductNotAllowed from '@/js/components/products/notAllowed';
+import OldVersionWarning from '@/js/components/products/oldVersionWarning';
+import PlanCards from '@/js/components/products/planCards';
+import ProductNotFound from '@/js/components/products/product404';
+import VersionNotFound from '@/js/components/products/version404';
+import {
+  getLoadingOrNotFound,
+  shouldFetchVersion,
+} from '@/js/components/utils';
+import { AppState } from '@/js/store';
+import { Plan } from '@/js/store/plans/reducer';
 import {
   fetchAdditionalPlans,
   fetchPlan,
   fetchProduct,
   fetchVersion,
-} from '@/store/products/actions';
-import { Product } from '@/store/products/reducer';
+} from '@/js/store/products/actions';
+import { Product } from '@/js/store/products/reducer';
 import {
   selectProduct,
   selectProductSlug,
   selectVersion,
   selectVersionLabelOrPlanSlug,
-} from '@/store/products/selectors';
-import { selectUserState } from '@/store/user/selectors';
-import { PRODUCT_LAYOUTS } from '@/utils/constants';
-import routes from '@/utils/routes';
+} from '@/js/store/products/selectors';
+import { selectUserState } from '@/js/store/user/selectors';
+import { PRODUCT_LAYOUTS } from '@/js/utils/constants';
+import routes from '@/js/utils/routes';
 
 const selectProductDetail = (
   appState: AppState,

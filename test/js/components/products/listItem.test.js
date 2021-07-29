@@ -1,7 +1,7 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import ProductItem from '@/components/products/listItem';
+import ProductItem from '@/js/components/products/listItem';
 
 import { render } from './../../utils';
 

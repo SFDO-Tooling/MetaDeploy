@@ -3,9 +3,9 @@ import i18n from 'i18next';
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 
-import { ActionBtn, LabelWithSpinner } from '@/components/plans/ctaButton';
-import { Job } from '@/store/jobs/reducer';
-import { CONSTANTS } from '@/store/plans/reducer';
+import { ActionBtn, LabelWithSpinner } from '@/js/components/plans/ctaButton';
+import { Job } from '@/js/store/jobs/reducer';
+import { CONSTANTS } from '@/js/store/plans/reducer';
 
 const { STATUS } = CONSTANTS;
 const btnClasses = 'slds-button slds-button_brand slds-p-vertical_xx-small';

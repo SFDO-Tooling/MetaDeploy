@@ -4,14 +4,14 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
 import * as React from 'react';
 
-import { SelectedSteps } from '@/components/plans/detail';
-import { WarningIcon } from '@/components/plans/preflightResults';
+import { SelectedSteps } from '@/js/components/plans/detail';
+import { WarningIcon } from '@/js/components/plans/preflightResults';
 import {
   CONSTANTS,
   PlanResults,
   Step,
   StepResult,
-} from '@/store/plans/reducer';
+} from '@/js/store/plans/reducer';
 
 type Props = {
   isOpen: boolean;

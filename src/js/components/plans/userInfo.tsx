@@ -5,13 +5,13 @@ import i18n from 'i18next';
 import * as React from 'react';
 import { Trans } from 'react-i18next';
 
-import noConnectionSvg from '!raw-loader!images/no-connection.svg';
-import Login from '@/components/header/login';
-import ScratchOrgInfo from '@/components/scratchOrgs/scratchOrgInfo';
-import { Plan } from '@/store/plans/reducer';
-import { ScratchOrg } from '@/store/scratchOrgs/reducer';
-import { User } from '@/store/user/reducer';
-import { SUPPORTED_ORGS } from '@/utils/constants';
+import noConnectionSvg from '@/img/no-connection.svg?raw';
+import Login from '@/js/components/header/login';
+import ScratchOrgInfo from '@/js/components/scratchOrgs/scratchOrgInfo';
+import { Plan } from '@/js/store/plans/reducer';
+import { ScratchOrg } from '@/js/store/scratchOrgs/reducer';
+import { User } from '@/js/store/user/reducer';
+import { SUPPORTED_ORGS } from '@/js/utils/constants';
 
 const LoggedOut = () => (
   <div className="slds-illustration slds-illustration_small">

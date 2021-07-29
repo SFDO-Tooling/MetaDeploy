@@ -1,4 +1,4 @@
-import reducer from '@/store/scratchOrgs/reducer';
+import reducer from '@/js/store/scratchOrgs/reducer';
 
 describe('reducer', () => {
   test('returns initial state', () => {

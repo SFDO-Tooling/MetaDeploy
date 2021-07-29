@@ -4,9 +4,9 @@ import i18n from 'i18next';
 import * as React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { CurrentJob } from '@/store/org/reducer';
-import { getDuration } from '@/utils/dates';
-import routes from '@/utils/routes';
+import { CurrentJob } from '@/js/store/org/reducer';
+import { getDuration } from '@/js/utils/dates';
+import routes from '@/js/utils/routes';
 
 type Props = {
   currentJob: CurrentJob;

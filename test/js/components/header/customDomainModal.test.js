@@ -1,8 +1,8 @@
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
-import CustomDomainModal from '@/components/header/customDomainModal';
-import { addUrlParams } from '@/utils/api';
+import CustomDomainModal from '@/js/components/header/customDomainModal';
+import { addUrlParams } from '@/js/utils/api';
 
 import { render } from './../../utils';
 

@@ -2,8 +2,8 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import ProductsList from '@/components/products/list';
-import { fetchMoreProducts } from '@/store/products/actions';
+import ProductsList from '@/js/components/products/list';
+import { fetchMoreProducts } from '@/js/store/products/actions';
 
 import {
   renderWithRedux,
@@ -17,7 +17,7 @@ jest.mock('react-fns', () => ({
     return (props) => <Component x={0} y={0} {...props} />;
   },
 }));
-jest.mock('@/store/products/actions');
+jest.mock('@/js/store/products/actions');
 fetchMoreProducts.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {

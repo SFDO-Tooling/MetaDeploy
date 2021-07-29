@@ -1,6 +1,6 @@
 import React from 'react';
 
-import ProgressBar from '@/components/jobs/progressBar';
+import ProgressBar from '@/js/components/jobs/progressBar';
 
 import { render, rerenderWithI18n } from './../../utils';
 

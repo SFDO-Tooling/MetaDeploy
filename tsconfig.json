@@ -20,7 +20,8 @@
     "baseUrl": ".",
     "paths": {
       "*": ["*", "src/*"],
-      "@/*": ["src/js/*"],
+      "@/js/*": ["src/js/*"],
+      "@/img/*": ["static/images/*"],
       // Override buggy React-SLDS type definitions
       "@salesforce/design-system-react/components/*": [
         "src/js/@types/design-system-react/component.d.ts"

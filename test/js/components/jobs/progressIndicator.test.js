@@ -1,6 +1,6 @@
 import React from 'react';
 
-import ProgressIndicator from '@/components/jobs/progressIndicator';
+import ProgressIndicator from '@/js/components/jobs/progressIndicator';
 
 import { render } from './../../utils';
 

@@ -1,7 +1,7 @@
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
-import Toasts from '@/components/plans/toasts';
+import Toasts from '@/js/components/plans/toasts';
 
 import { render, rerenderWithI18n } from './../../utils';
 

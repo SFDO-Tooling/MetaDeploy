@@ -1,6 +1,6 @@
-import { Plan } from '@/store/plans/reducer';
-import { ProductsAction } from '@/store/products/actions';
-import { ProductLayouts } from '@/utils/constants';
+import { Plan } from '@/js/store/plans/reducer';
+import { ProductsAction } from '@/js/store/products/actions';
+import { ProductLayouts } from '@/js/utils/constants';
 
 export type Version = {
   id: string;

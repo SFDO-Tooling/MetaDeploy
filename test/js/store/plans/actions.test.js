@@ -1,6 +1,6 @@
 import fetchMock from 'fetch-mock';
 
-import * as actions from '@/store/plans/actions';
+import * as actions from '@/js/store/plans/actions';
 
 import { storeWithApi } from './../../utils';
 

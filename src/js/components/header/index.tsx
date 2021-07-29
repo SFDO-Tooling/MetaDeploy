@@ -5,19 +5,19 @@ import * as React from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Link, RouteComponentProps } from 'react-router-dom';
 
-import Errors from '@/components/apiErrors';
-import Login from '@/components/header/login';
-import Logout from '@/components/header/logout';
-import CurrentJobAlert from '@/components/jobs/currentJobAlert';
-import OfflineAlert from '@/components/offlineAlert';
-import { AppState } from '@/store';
-import { clearErrors, removeError } from '@/store/errors/actions';
-import { selectErrors } from '@/store/errors/selectors';
-import { selectOrgs } from '@/store/org/selectors';
-import { selectSocketState } from '@/store/socket/selectors';
-import { logout } from '@/store/user/actions';
-import { selectUserState } from '@/store/user/selectors';
-import routes from '@/utils/routes';
+import Errors from '@/js/components/apiErrors';
+import Login from '@/js/components/header/login';
+import Logout from '@/js/components/header/logout';
+import CurrentJobAlert from '@/js/components/jobs/currentJobAlert';
+import OfflineAlert from '@/js/components/offlineAlert';
+import { AppState } from '@/js/store';
+import { clearErrors, removeError } from '@/js/store/errors/actions';
+import { selectErrors } from '@/js/store/errors/selectors';
+import { selectOrgs } from '@/js/store/org/selectors';
+import { selectSocketState } from '@/js/store/socket/selectors';
+import { logout } from '@/js/store/user/actions';
+import { selectUserState } from '@/js/store/user/selectors';
+import routes from '@/js/utils/routes';
 
 type Props = {
   history?: RouteComponentProps['history'];
