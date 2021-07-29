@@ -3,29 +3,50 @@ import React, { ComponentProps } from 'react';
 
 import ProgressIndicator from '@/js/components/jobs/progressIndicator';
 import { SUPPORTED_ORGS } from '@/js/utils/constants';
+import { Job } from '@/js/store/jobs/reducer';
 
-import { sampleJob1 } from '../fixtures';
+import { sampleJob1, sampleJob2, sampleJob3, sampleJob4 } from '../fixtures';
 
 export default {
   title: 'Jobs/ProgressIndicator/Example',
   component: ProgressIndicator,
 };
 
-const Template: Story<ComponentProps<typeof ProgressIndicator>> = (args) => (
-  <ProgressIndicator {...args} />
-);
+const jobs: { [key: string]: Job } = {
+  Started: sampleJob1,
+  Complete: sampleJob2,
+  Failed: sampleJob3,
+  Canceled: sampleJob4,
+};
 
-export const ProgressIndicatorComponent = Template.bind({});
+type Props = ComponentProps<typeof ProgressIndicator>;
+interface StoryProps extends Omit<Props, 'job'> {
+  job: string;
+}
+
+const Template = ({ job, ...rest }: StoryProps) => (
+  <ProgressIndicator job={jobs[job]} {...rest} />
+);
+export const ProgressIndicatorComponent: Story<StoryProps> = Template.bind({});
 
 ProgressIndicatorComponent.args = {
-  job: sampleJob1,
+  job: 'Started',
   preflightRequired: true,
   supportedOrgs: SUPPORTED_ORGS.Both,
 };
 ProgressIndicatorComponent.argTypes = {
-  job: { control: { disable: true } },
-  preflightRequired: { control: { disable: true } },
-  supportedOrgs: { control: { disable: true } },
+  job: {
+    options: Object.keys(jobs),
+    control: {
+      type: 'select',
+    },
+  },
+  supportedOrgs: {
+    options: Object.values(SUPPORTED_ORGS),
+    control: {
+      type: 'select',
+    },
+  },
 };
 
 ProgressIndicatorComponent.storyName = 'Progress Indicator';

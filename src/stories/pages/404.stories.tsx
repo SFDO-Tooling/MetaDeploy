@@ -8,7 +8,7 @@ import { withRedux } from '../decorators';
 export default {
   title: 'Pages/404/Examples',
   component: FourOhFour,
-  decorators: [withRedux()],
+  decorators: [withRedux({ socket: true })],
 };
 
 const Template: Story<ComponentProps<typeof FourOhFour>> = (args) => (
@@ -25,8 +25,8 @@ export const Custom404 = Template.bind({});
 Custom404.args = {
   message: (
     <>
-      We can’t find the Product you’re looking for. Try another Product from{' '}
-      <a href="#">this page</a>.
+      We can’t find the product you’re looking for. Try the{' '}
+      <a href="#">list of all products</a>?
     </>
   ),
 };
