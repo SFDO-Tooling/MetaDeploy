@@ -4,7 +4,7 @@ import classNames from 'classnames';
 import i18n from 'i18next';
 import * as React from 'react';
 
-import { DataCellProps } from '@/components/plans/stepsTable';
+import { DataCellProps } from '@/js/components/plans/stepsTable';
 
 const KindDataCell = (props: DataCellProps) => {
   /* istanbul ignore if */

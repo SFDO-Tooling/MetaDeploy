@@ -2,14 +2,14 @@ import Spinner from '@salesforce/design-system-react/components/spinner';
 import * as React from 'react';
 import { Redirect } from 'react-router-dom';
 
-import JobNotFound from '@/components/jobs/job404';
-import PlanNotFound from '@/components/plans/plan404';
-import ProductNotFound from '@/components/products/product404';
-import VersionNotFound from '@/components/products/version404';
-import { Job } from '@/store/jobs/reducer';
-import { Plan } from '@/store/plans/reducer';
-import { Product, Version } from '@/store/products/reducer';
-import routes from '@/utils/routes';
+import JobNotFound from '@/js/components/jobs/job404';
+import PlanNotFound from '@/js/components/plans/plan404';
+import ProductNotFound from '@/js/components/products/product404';
+import VersionNotFound from '@/js/components/products/version404';
+import { Job } from '@/js/store/jobs/reducer';
+import { Plan } from '@/js/store/plans/reducer';
+import { Product, Version } from '@/js/store/products/reducer';
+import routes from '@/js/utils/routes';
 
 type TransientMessageState = {
   transientMessageVisible: boolean;

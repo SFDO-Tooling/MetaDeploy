@@ -1,8 +1,8 @@
 import fetchMock from 'fetch-mock';
 
-import * as actions from '@/store/jobs/actions';
-import { addUrlParams } from '@/utils/api';
-import routes from '@/utils/routes';
+import * as actions from '@/js/store/jobs/actions';
+import { addUrlParams } from '@/js/utils/api';
+import routes from '@/js/utils/routes';
 
 import { getStoreWithHistory, storeWithApi } from './../../utils';
 

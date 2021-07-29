@@ -4,9 +4,9 @@ import { format, parseISO } from 'date-fns';
 import i18n from 'i18next';
 import * as React from 'react';
 
-import ScratchOrgInfo from '@/components/scratchOrgs/scratchOrgInfo';
-import { Job } from '@/store/jobs/reducer';
-import { ScratchOrg } from '@/store/scratchOrgs/reducer';
+import ScratchOrgInfo from '@/js/components/scratchOrgs/scratchOrgInfo';
+import { Job } from '@/js/store/jobs/reducer';
+import { ScratchOrg } from '@/js/store/scratchOrgs/reducer';
 
 const UserInfo = ({
   job,

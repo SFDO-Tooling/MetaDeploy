@@ -4,7 +4,7 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
 import * as React from 'react';
 
-import { addUrlParams, extractCustomDomain, UrlParams } from '@/utils/api';
+import { addUrlParams, extractCustomDomain, UrlParams } from '@/js/utils/api';
 
 type Props = {
   isOpen: boolean;

@@ -1,7 +1,7 @@
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
-import StepsTable from '@/components/plans/stepsTable';
+import StepsTable from '@/js/components/plans/stepsTable';
 
 import { render, rerenderWithI18n } from './../../utils';
 

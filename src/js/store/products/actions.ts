@@ -1,14 +1,14 @@
 import { omit } from 'lodash';
 
-import { ThunkResult } from '@/store';
-import { Plan } from '@/store/plans/reducer';
+import { ThunkResult } from '@/js/store';
+import { Plan } from '@/js/store/plans/reducer';
 import {
   ApiCategory,
   Category,
   Product,
   Version,
-} from '@/store/products/reducer';
-import apiFetch, { addUrlParams, ApiError } from '@/utils/api';
+} from '@/js/store/products/reducer';
+import apiFetch, { addUrlParams, ApiError } from '@/js/utils/api';
 
 type FetchProductsStarted = { type: 'FETCH_PRODUCTS_STARTED' };
 export type FetchProductsSucceeded = {

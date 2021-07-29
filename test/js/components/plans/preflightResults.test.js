@@ -2,7 +2,7 @@ import React from 'react';
 
 import PreflightResults, {
   getErrorInfo,
-} from '@/components/plans/preflightResults';
+} from '@/js/components/plans/preflightResults';
 
 import { render } from './../../utils';
 

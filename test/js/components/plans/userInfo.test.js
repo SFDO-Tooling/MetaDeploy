@@ -1,7 +1,7 @@
 import React from 'react';
 
-import UserInfo from '@/components/plans/userInfo';
-import { SUPPORTED_ORGS } from '@/utils/constants';
+import UserInfo from '@/js/components/plans/userInfo';
+import { SUPPORTED_ORGS } from '@/js/utils/constants';
 
 import { render } from './../../utils';
 

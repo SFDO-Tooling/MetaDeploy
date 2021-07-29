@@ -3,8 +3,8 @@ import withLanguageDirection from '@salesforce/design-system-react/components/ut
 import i18n from 'i18next';
 import * as React from 'react';
 
-import CustomDomainModal from '@/components/header/customDomainModal';
-import { addUrlParams, UrlParams } from '@/utils/api';
+import CustomDomainModal from '@/js/components/header/customDomainModal';
+import { addUrlParams, UrlParams } from '@/js/utils/api';
 
 type Props = {
   id: string;

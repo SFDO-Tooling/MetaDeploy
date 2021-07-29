@@ -11,7 +11,7 @@ RUN apt-get update \
 ARG BUILD_ENV
 RUN mkdir /app
 # declaring necessary node and yarn versions
-ENV NODE_VERSION 12.13.0
+ENV NODE_VERSION 14.17.4
 # installing node
 COPY ./utility/install_node.sh /app/utility/install_node.sh
 RUN /bin/sh /app/utility/install_node.sh

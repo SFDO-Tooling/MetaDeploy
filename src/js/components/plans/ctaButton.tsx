@@ -4,21 +4,26 @@ import i18n from 'i18next';
 import * as React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import Login from '@/components/header/login';
-import ClickThroughAgreementModal from '@/components/plans/clickThroughAgreementModal';
-import { SelectedSteps } from '@/components/plans/detail';
-import PreflightWarningModal from '@/components/plans/preflightWarningModal';
-import SpinOrgModal from '@/components/scratchOrgs/spinOrgModal';
-import { JobData, JobStarted } from '@/store/jobs/actions';
-import { FetchOrgJobsSucceeded } from '@/store/org/actions';
-import { PreflightStarted } from '@/store/plans/actions';
-import { CONSTANTS, Plan, Preflight, StepResult } from '@/store/plans/reducer';
-import { ScratchOrgSpinning } from '@/store/scratchOrgs/actions';
-import { ScratchOrg } from '@/store/scratchOrgs/reducer';
-import { User } from '@/store/user/reducer';
-import { getUrlParam, removeUrlParam, UrlParams } from '@/utils/api';
-import { SCRATCH_ORG_STATUSES, SUPPORTED_ORGS } from '@/utils/constants';
-import routes from '@/utils/routes';
+import Login from '@/js/components/header/login';
+import ClickThroughAgreementModal from '@/js/components/plans/clickThroughAgreementModal';
+import { SelectedSteps } from '@/js/components/plans/detail';
+import PreflightWarningModal from '@/js/components/plans/preflightWarningModal';
+import SpinOrgModal from '@/js/components/scratchOrgs/spinOrgModal';
+import { JobData, JobStarted } from '@/js/store/jobs/actions';
+import { FetchOrgJobsSucceeded } from '@/js/store/org/actions';
+import { PreflightStarted } from '@/js/store/plans/actions';
+import {
+  CONSTANTS,
+  Plan,
+  Preflight,
+  StepResult,
+} from '@/js/store/plans/reducer';
+import { ScratchOrgSpinning } from '@/js/store/scratchOrgs/actions';
+import { ScratchOrg } from '@/js/store/scratchOrgs/reducer';
+import { User } from '@/js/store/user/reducer';
+import { getUrlParam, removeUrlParam, UrlParams } from '@/js/utils/api';
+import { SCRATCH_ORG_STATUSES, SUPPORTED_ORGS } from '@/js/utils/constants';
+import routes from '@/js/utils/routes';
 
 type Props = {
   history: RouteComponentProps['history'];

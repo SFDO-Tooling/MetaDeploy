@@ -3,16 +3,16 @@ import DataTableColumn from '@salesforce/design-system-react/components/data-tab
 import i18n from 'i18next';
 import * as React from 'react';
 
-import { SelectedSteps } from '@/components/plans/detail';
+import { SelectedSteps } from '@/js/components/plans/detail';
 import InstallDataCell, {
   InstallDataColumnLabel,
-} from '@/components/plans/stepsTable/installDataCell';
-import KindDataCell from '@/components/plans/stepsTable/kindDataCell';
-import NameDataCell from '@/components/plans/stepsTable/nameDataCell';
-import RequiredDataCell from '@/components/plans/stepsTable/requiredDataCell';
-import ToggleLogsDataColumnLabel from '@/components/plans/stepsTable/toggleLogsDataColumnLabel';
-import { Job } from '@/store/jobs/reducer';
-import { CONSTANTS, Plan, Preflight, Step } from '@/store/plans/reducer';
+} from '@/js/components/plans/stepsTable/installDataCell';
+import KindDataCell from '@/js/components/plans/stepsTable/kindDataCell';
+import NameDataCell from '@/js/components/plans/stepsTable/nameDataCell';
+import RequiredDataCell from '@/js/components/plans/stepsTable/requiredDataCell';
+import ToggleLogsDataColumnLabel from '@/js/components/plans/stepsTable/toggleLogsDataColumnLabel';
+import { Job } from '@/js/store/jobs/reducer';
+import { CONSTANTS, Plan, Preflight, Step } from '@/js/store/plans/reducer';
 
 export type DataCellProps = {
   item?: Step;

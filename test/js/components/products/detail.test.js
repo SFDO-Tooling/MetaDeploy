@@ -1,19 +1,19 @@
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import { ProductDetail, VersionDetail } from '@/components/products/detail';
+import { ProductDetail, VersionDetail } from '@/js/components/products/detail';
 import {
   fetchAdditionalPlans,
   fetchPlan,
   fetchProduct,
   fetchVersion,
-} from '@/store/products/actions';
-import { PRODUCT_LAYOUTS } from '@/utils/constants';
-import routes from '@/utils/routes';
+} from '@/js/store/products/actions';
+import { PRODUCT_LAYOUTS } from '@/js/utils/constants';
+import routes from '@/js/utils/routes';
 
 import { renderWithRedux, reRenderWithRedux } from './../../utils';
 
-jest.mock('@/store/products/actions');
+jest.mock('@/js/store/products/actions');
 
 fetchAdditionalPlans.mockReturnValue({ type: 'TEST' });
 fetchPlan.mockReturnValue({ type: 'TEST' });

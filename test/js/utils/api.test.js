@@ -5,7 +5,7 @@ import apiFetch, {
   extractCustomDomain,
   getUrlParam,
   removeUrlParam,
-} from '@/utils/api';
+} from '@/js/utils/api';
 
 const dispatch = jest.fn();
 

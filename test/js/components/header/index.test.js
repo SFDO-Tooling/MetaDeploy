@@ -2,7 +2,7 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import Header from '@/components/header';
+import Header from '@/js/components/header';
 
 import { renderWithRedux } from './../../utils';
 

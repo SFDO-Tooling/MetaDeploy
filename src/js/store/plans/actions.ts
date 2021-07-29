@@ -1,6 +1,6 @@
-import { ThunkResult } from '@/store';
-import { Preflight } from '@/store/plans/reducer';
-import apiFetch from '@/utils/api';
+import { ThunkResult } from '@/js/store';
+import { Preflight } from '@/js/store/plans/reducer';
+import apiFetch from '@/js/utils/api';
 
 type FetchPreflightStarted = {
   type: 'FETCH_PREFLIGHT_STARTED';

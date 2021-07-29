@@ -6,8 +6,8 @@ import UNSAFE_DirectionSettings from '@salesforce/design-system-react/components
 import i18n from 'i18next';
 import * as React from 'react';
 
-import { FetchOrgJobsSucceeded } from '@/store/org/actions';
-import { User } from '@/store/user/reducer';
+import { FetchOrgJobsSucceeded } from '@/js/store/org/actions';
+import { User } from '@/js/store/user/reducer';
 
 const Logout = ({
   user,

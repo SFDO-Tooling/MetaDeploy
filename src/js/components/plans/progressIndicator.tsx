@@ -2,8 +2,8 @@ import SLDSProgressIndicator from '@salesforce/design-system-react/components/pr
 import i18n from 'i18next';
 import * as React from 'react';
 
-import { CONSTANTS } from '@/store/plans/reducer';
-import { SUPPORTED_ORGS, SupportedOrgs } from '@/utils/constants';
+import { CONSTANTS } from '@/js/store/plans/reducer';
+import { SUPPORTED_ORGS, SupportedOrgs } from '@/js/utils/constants';
 
 export const getSteps = (
   supportedOrgs: SupportedOrgs,
