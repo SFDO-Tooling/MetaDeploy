@@ -1,7 +1,7 @@
 import { Story } from '@storybook/react/types-6-0';
 import React, { ComponentProps } from 'react';
 
-import FourOhFour from '@/components/404';
+import FourOhFour from '@/js/components/404';
 
 import { withRedux } from '../decorators';
 

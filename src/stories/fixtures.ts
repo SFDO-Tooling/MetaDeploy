@@ -1,4 +1,4 @@
-import { CONSTANTS } from '@/store/plans/reducer';
+import { CONSTANTS } from '@/js/store/plans/reducer';
 
 export const sampleJob1 = {
   id: 'job1',
