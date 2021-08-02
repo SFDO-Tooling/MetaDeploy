@@ -8,17 +8,17 @@ import i18n from 'i18next';
 import * as React from 'react';
 import { Trans } from 'react-i18next';
 
-import JobMessage from '@/components/jobs/jobMessage';
+import JobMessage from '@/js/components/jobs/jobMessage';
 import {
   TransientMessageProps,
   withTransientMessage,
-} from '@/components/utils';
-import { JobUpdated } from '@/store/jobs/actions';
-import { Job } from '@/store/jobs/reducer';
-import { CONSTANTS, Plan } from '@/store/plans/reducer';
-import { ScratchOrg } from '@/store/scratchOrgs/reducer';
-import { addUrlParams } from '@/utils/api';
-import routes from '@/utils/routes';
+} from '@/js/components/utils';
+import { JobUpdated } from '@/js/store/jobs/actions';
+import { Job } from '@/js/store/jobs/reducer';
+import { CONSTANTS, Plan } from '@/js/store/plans/reducer';
+import { ScratchOrg } from '@/js/store/scratchOrgs/reducer';
+import { addUrlParams } from '@/js/utils/api';
+import routes from '@/js/utils/routes';
 
 type Props = {
   isOpen: boolean;

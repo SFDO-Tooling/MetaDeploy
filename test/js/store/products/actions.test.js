@@ -1,7 +1,7 @@
 import fetchMock from 'fetch-mock';
 
-import * as actions from '@/store/products/actions';
-import { addUrlParams } from '@/utils/api';
+import * as actions from '@/js/store/products/actions';
+import { addUrlParams } from '@/js/utils/api';
 
 import { storeWithApi } from './../../utils';
 

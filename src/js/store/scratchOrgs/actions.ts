@@ -1,9 +1,9 @@
-import { ThunkResult } from '@/store';
-import { addError } from '@/store/errors/actions';
-import { PreflightStarted } from '@/store/plans/actions';
-import { Preflight } from '@/store/plans/reducer';
-import { ScratchOrg } from '@/store/scratchOrgs/reducer';
-import apiFetch from '@/utils/api';
+import { ThunkResult } from '@/js/store';
+import { addError } from '@/js/store/errors/actions';
+import { PreflightStarted } from '@/js/store/plans/actions';
+import { Preflight } from '@/js/store/plans/reducer';
+import { ScratchOrg } from '@/js/store/scratchOrgs/reducer';
+import apiFetch from '@/js/utils/api';
 
 type FetchScratchOrgStarted = {
   type: 'FETCH_SCRATCH_ORG_STARTED';

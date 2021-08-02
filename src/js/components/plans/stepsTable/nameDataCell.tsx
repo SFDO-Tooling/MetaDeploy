@@ -7,9 +7,9 @@ import classNames from 'classnames';
 import i18n from 'i18next';
 import * as React from 'react';
 
-import { JobError } from '@/components/plans/preflightResults';
-import { DataCellProps } from '@/components/plans/stepsTable';
-import { CONSTANTS } from '@/store/plans/reducer';
+import { JobError } from '@/js/components/plans/preflightResults';
+import { DataCellProps } from '@/js/components/plans/stepsTable';
+import { CONSTANTS } from '@/js/store/plans/reducer';
 
 const { RESULT_STATUS } = CONSTANTS;
 

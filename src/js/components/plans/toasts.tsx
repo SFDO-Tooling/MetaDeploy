@@ -3,8 +3,8 @@ import ToastContainer from '@salesforce/design-system-react/components/toast/con
 import i18n from 'i18next';
 import * as React from 'react';
 
-import { Job } from '@/store/jobs/reducer';
-import { CONSTANTS, Preflight } from '@/store/plans/reducer';
+import { Job } from '@/js/store/jobs/reducer';
+import { CONSTANTS, Preflight } from '@/js/store/plans/reducer';
 
 type Props = {
   job?: Job;

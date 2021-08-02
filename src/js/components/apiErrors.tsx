@@ -3,8 +3,8 @@ import ToastContainer from '@salesforce/design-system-react/components/toast/con
 import i18n from 'i18next';
 import * as React from 'react';
 
-import { removeError } from '@/store/errors/actions';
-import { ErrorType } from '@/store/errors/reducer';
+import { removeError } from '@/js/store/errors/actions';
+import { ErrorType } from '@/js/store/errors/reducer';
 
 const reloadPage = (): void => {
   window.location.reload();

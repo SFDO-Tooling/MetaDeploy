@@ -1,5 +1,5 @@
-import { OrgAction } from '@/store/org/actions';
-import { LogoutAction } from '@/store/user/actions';
+import { OrgAction } from '@/js/store/org/actions';
+import { LogoutAction } from '@/js/store/user/actions';
 
 export type CurrentJob = {
   id: string;

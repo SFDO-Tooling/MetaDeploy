@@ -1,5 +1,5 @@
-import { ScratchOrgsAction } from '@/store/scratchOrgs/actions';
-import { LogoutAction } from '@/store/user/actions';
+import { ScratchOrgsAction } from '@/js/store/scratchOrgs/actions';
+import { LogoutAction } from '@/js/store/user/actions';
 
 export type ScratchOrg = {
   id: string;

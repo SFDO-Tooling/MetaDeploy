@@ -2,7 +2,7 @@ import Avatar from '@salesforce/design-system-react/components/avatar';
 import Icon from '@salesforce/design-system-react/components/icon';
 import * as React from 'react';
 
-import { Product } from '@/store/products/reducer';
+import { Product } from '@/js/store/products/reducer';
 
 const ProductIcon = ({ item }: { item: Product }) => {
   const icon = item.icon;

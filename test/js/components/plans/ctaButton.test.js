@@ -1,13 +1,13 @@
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
-import CtaButton from '@/components/plans/ctaButton';
-import { getUrlParam, removeUrlParam } from '@/utils/api';
-import { SCRATCH_ORG_STATUSES, SUPPORTED_ORGS } from '@/utils/constants';
+import CtaButton from '@/js/components/plans/ctaButton';
+import { getUrlParam, removeUrlParam } from '@/js/utils/api';
+import { SCRATCH_ORG_STATUSES, SUPPORTED_ORGS } from '@/js/utils/constants';
 
 import { render, rerenderWithI18n } from './../../utils';
 
-jest.mock('@/utils/api');
+jest.mock('@/js/utils/api');
 
 afterEach(() => {
   getUrlParam.mockReset();

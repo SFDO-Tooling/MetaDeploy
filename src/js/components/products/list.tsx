@@ -8,15 +8,15 @@ import { withScroll } from 'react-fns';
 import { connect, ConnectedProps } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
-import { EmptyIllustration } from '@/components/404';
-import Header from '@/components/header';
-import PageHeader from '@/components/products/listHeader';
-import ProductItem from '@/components/products/listItem';
-import { AppState } from '@/store';
-import { fetchMoreProducts } from '@/store/products/actions';
-import { Category, Product } from '@/store/products/reducer';
-import { selectVisibleCategoriesWithProducts } from '@/store/products/selectors';
-import { prettyUrlHash } from '@/utils/helpers';
+import { EmptyIllustration } from '@/js/components/404';
+import Header from '@/js/components/header';
+import PageHeader from '@/js/components/products/listHeader';
+import ProductItem from '@/js/components/products/listItem';
+import { AppState } from '@/js/store';
+import { fetchMoreProducts } from '@/js/store/products/actions';
+import { Category, Product } from '@/js/store/products/reducer';
+import { selectVisibleCategoriesWithProducts } from '@/js/store/products/selectors';
+import { prettyUrlHash } from '@/js/utils/helpers';
 
 const select = (appState: AppState) => ({
   productCategories: selectVisibleCategoriesWithProducts(appState),

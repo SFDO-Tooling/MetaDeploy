@@ -1,7 +1,7 @@
 import { ThunkDispatch } from 'redux-thunk';
 import Sockette from 'sockette';
 
-import { ThunkResult } from '@/store';
+import { ThunkResult } from '@/js/store';
 import {
   cancelJob,
   completeJob,
@@ -13,10 +13,10 @@ import {
   JobFailed,
   JobStarted,
   JobStepCompleted,
-} from '@/store/jobs/actions';
-import { Job } from '@/store/jobs/reducer';
-import { OrgChanged, updateOrg } from '@/store/org/actions';
-import { Org } from '@/store/org/reducer';
+} from '@/js/store/jobs/actions';
+import { Job } from '@/js/store/jobs/reducer';
+import { OrgChanged, updateOrg } from '@/js/store/org/actions';
+import { Org } from '@/js/store/org/reducer';
 import {
   cancelPreflight,
   completePreflight,
@@ -27,8 +27,8 @@ import {
   PreflightFailed,
   PreflightInvalid,
   PreflightStarted,
-} from '@/store/plans/actions';
-import { Preflight } from '@/store/plans/reducer';
+} from '@/js/store/plans/actions';
+import { Preflight } from '@/js/store/plans/reducer';
 import {
   createPreflight,
   createScratchOrg,
@@ -36,11 +36,11 @@ import {
   ScratchOrgFailed,
   ScratchOrgUpdated,
   updateScratchOrg,
-} from '@/store/scratchOrgs/actions';
-import { ScratchOrg } from '@/store/scratchOrgs/reducer';
-import { connectSocket, disconnectSocket } from '@/store/socket/actions';
-import { invalidateToken, TokenInvalidAction } from '@/store/user/actions';
-import { log } from '@/utils/logging';
+} from '@/js/store/scratchOrgs/actions';
+import { ScratchOrg } from '@/js/store/scratchOrgs/reducer';
+import { connectSocket, disconnectSocket } from '@/js/store/socket/actions';
+import { invalidateToken, TokenInvalidAction } from '@/js/store/user/actions';
+import { log } from '@/js/utils/logging';
 
 interface Subscription {
   model: string;

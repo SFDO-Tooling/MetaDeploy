@@ -1,6 +1,6 @@
-import { ThunkResult } from '@/store';
-import { Org, Orgs } from '@/store/org/reducer';
-import apiFetch from '@/utils/api';
+import { ThunkResult } from '@/js/store';
+import { Org, Orgs } from '@/js/store/org/reducer';
+import apiFetch from '@/js/utils/api';
 
 type FetchOrgJobsStarted = {
   type: 'FETCH_ORG_JOBS_STARTED';

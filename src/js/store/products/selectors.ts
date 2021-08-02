@@ -1,14 +1,14 @@
 import { RouteComponentProps } from 'react-router-dom';
 import { createSelector } from 'reselect';
 
-import { AppState } from '@/store';
-import { Plan } from '@/store/plans/reducer';
+import { AppState } from '@/js/store';
+import { Plan } from '@/js/store/plans/reducer';
 import {
   Category,
   Product,
   ProductsState,
   Version,
-} from '@/store/products/reducer';
+} from '@/js/store/products/reducer';
 
 export type CategoryWithProducts = {
   category: Category;

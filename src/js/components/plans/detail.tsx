@@ -6,54 +6,57 @@ import { Trans } from 'react-i18next';
 import { connect, ConnectedProps } from 'react-redux';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 
-import BackLink from '@/components/backLink';
-import BodyContainer from '@/components/bodyContainer';
-import Header from '@/components/header';
-import CtaButton from '@/components/plans/ctaButton';
-import PageHeader from '@/components/plans/header';
-import Intro from '@/components/plans/intro';
+import BackLink from '@/js/components/backLink';
+import BodyContainer from '@/js/components/bodyContainer';
+import Header from '@/js/components/header';
+import CtaButton from '@/js/components/plans/ctaButton';
+import PageHeader from '@/js/components/plans/header';
+import Intro from '@/js/components/plans/intro';
 import PreflightResults, {
   ErrorIcon,
   WarningIcon,
-} from '@/components/plans/preflightResults';
-import StepsTable from '@/components/plans/stepsTable';
-import Toasts from '@/components/plans/toasts';
-import UserInfo from '@/components/plans/userInfo';
-import PlanNotAllowed from '@/components/products/notAllowed';
-import OldVersionWarning from '@/components/products/oldVersionWarning';
-import ProductNotFound from '@/components/products/product404';
+} from '@/js/components/plans/preflightResults';
+import StepsTable from '@/js/components/plans/stepsTable';
+import Toasts from '@/js/components/plans/toasts';
+import UserInfo from '@/js/components/plans/userInfo';
+import PlanNotAllowed from '@/js/components/products/notAllowed';
+import OldVersionWarning from '@/js/components/products/oldVersionWarning';
+import ProductNotFound from '@/js/components/products/product404';
 import {
   getLoadingOrNotFound,
   shouldFetchPlan,
   shouldFetchVersion,
-} from '@/components/utils';
-import { AppState } from '@/store';
-import { startJob } from '@/store/jobs/actions';
-import { selectOrgs } from '@/store/org/selectors';
-import { fetchPreflight, startPreflight } from '@/store/plans/actions';
-import { CONSTANTS, Step } from '@/store/plans/reducer';
+} from '@/js/components/utils';
+import { AppState } from '@/js/store';
+import { startJob } from '@/js/store/jobs/actions';
+import { selectOrgs } from '@/js/store/org/selectors';
+import { fetchPreflight, startPreflight } from '@/js/store/plans/actions';
+import { CONSTANTS, Step } from '@/js/store/plans/reducer';
 import {
   selectPlan,
   selectPlanSlug,
   selectPreflight,
-} from '@/store/plans/selectors';
+} from '@/js/store/plans/selectors';
 import {
   fetchPlan,
   fetchProduct,
   fetchVersion,
-} from '@/store/products/actions';
+} from '@/js/store/products/actions';
 import {
   selectProduct,
   selectProductSlug,
   selectVersion,
   selectVersionLabel,
-} from '@/store/products/selectors';
-import { fetchScratchOrg, spinScratchOrg } from '@/store/scratchOrgs/actions';
-import { selectScratchOrg } from '@/store/scratchOrgs/selectors';
-import { logout } from '@/store/user/actions';
-import { selectUserState } from '@/store/user/selectors';
-import { SCRATCH_ORG_STATUSES, SUPPORTED_ORGS } from '@/utils/constants';
-import routes from '@/utils/routes';
+} from '@/js/store/products/selectors';
+import {
+  fetchScratchOrg,
+  spinScratchOrg,
+} from '@/js/store/scratchOrgs/actions';
+import { selectScratchOrg } from '@/js/store/scratchOrgs/selectors';
+import { logout } from '@/js/store/user/actions';
+import { selectUserState } from '@/js/store/user/selectors';
+import { SCRATCH_ORG_STATUSES, SUPPORTED_ORGS } from '@/js/utils/constants';
+import routes from '@/js/utils/routes';
 
 const select = (appState: AppState, props: RouteComponentProps) => ({
   user: selectUserState(appState),

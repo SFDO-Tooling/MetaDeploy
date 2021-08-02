@@ -1,4 +1,4 @@
-import { UserAction } from '@/store/user/actions';
+import { UserAction } from '@/js/store/user/actions';
 
 export type User = {
   id: string;
