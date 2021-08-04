@@ -33,7 +33,7 @@ from .cci_configs import MetaDeployCCI, extract_user_and_repo
 from .cleanup import cleanup_user_data
 from .flows import StopFlowException
 from .github import local_github_checkout
-from .models import ORG_TYPES, Job, PreflightResult, ScratchOrg
+from .models import ORG_TYPES, Job, Plan, PreflightResult, ScratchOrg
 from .push import job_started, preflight_started, report_error
 from .salesforce import create_scratch_org as create_scratch_org_on_sf
 from .salesforce import delete_scratch_org as delete_scratch_org_on_sf
@@ -345,3 +345,15 @@ def delete_scratch_org(scratch_org, should_delete_locally=True):
 
 
 delete_scratch_org_job = job(delete_scratch_org)
+
+
+def calculate_average_plan_runtime():
+    """Plan.average_duration is a slow query, so we
+    get its value for each plan via this method and store its value
+    on Plan.calculated_average_duration.
+    """
+    for plan in Plan.objects.all():
+        plan.calculated_average_duration = plan.average_duration
+        plan.save()
+
+calculate_average_plan_runtime_job = job(calculate_average_plan_runtime)
