@@ -21,7 +21,7 @@ export type Plan = {
   is_listed: boolean;
   is_allowed: boolean;
   not_allowed_instructions: string | null;
-  average_duration: string | null;
+  calculated_average_duration: string | null;
   requires_preflight: boolean;
   order_key: number;
   supported_orgs: SupportedOrgs;
