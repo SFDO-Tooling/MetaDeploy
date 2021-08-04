@@ -505,6 +505,8 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
         "Average duration of a plan (seconds)",
         null=True,
         blank=True,
+        validators=[MinValueValidator(0)],
+        help_text="The duration between the enqueing of a job and its successful completion."
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -546,7 +548,7 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
         ]
         if len(durations) < settings.MINIMUM_JOBS_FOR_AVERAGE:
             return None
-        return median(durations)
+        return median(durations).total_seconds()
 
     @property
     def scratch_org_duration(self):

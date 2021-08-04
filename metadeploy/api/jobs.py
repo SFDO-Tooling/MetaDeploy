@@ -353,7 +353,9 @@ def calculate_average_plan_runtime():
     on Plan.calculated_average_duration.
     """
     for plan in Plan.objects.all():
-        plan.calculated_average_duration = plan.average_duration
-        plan.save()
+        duration_seconds = plan.average_duration
+        if duration_seconds:
+            plan.calculated_average_duration = int(duration_seconds)
+            plan.save()
 
 calculate_average_plan_runtime_job = job(calculate_average_plan_runtime)
