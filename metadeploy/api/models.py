@@ -501,6 +501,11 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
         help_text="Lifetime of Scratch Orgs created for this plan. Will inherit the "
         "global default value if left blank.",
     )
+    calculated_average_duration = models.IntegerField(
+        "Average duration of a plan (seconds)",
+        null=True,
+        blank=True,
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
 
