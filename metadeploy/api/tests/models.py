@@ -9,6 +9,7 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 from config.settings.base import MINIMUM_JOBS_FOR_AVERAGE
+
 from ..models import (
     SUPPORTED_ORG_TYPES,
     Job,

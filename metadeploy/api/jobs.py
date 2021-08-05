@@ -358,4 +358,5 @@ def calculate_average_plan_runtime():
             plan.calculated_average_duration = int(duration_seconds)
             plan.save()
 
+
 calculate_average_plan_runtime_job = job(calculate_average_plan_runtime)

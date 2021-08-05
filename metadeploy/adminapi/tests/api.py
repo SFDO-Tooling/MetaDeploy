@@ -174,7 +174,7 @@ class TestPlanViewSet:
         # Remove timestamp for easy comparison
         del json["created_at"]
         plan_id = json["id"]
-        expected = {  
+        expected = {
             "calculated_average_duration": None,
             "commit_ish": None,
             "id": plan_id,

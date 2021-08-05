@@ -223,7 +223,7 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
 
     def get_requires_preflight(self, obj):
         return obj.requires_preflight
-    
+
     def get_average_duration(self, obj):
         """Plan.average_duration is an expensive query,
         so we prefer the already calculated value if available."""
@@ -667,6 +667,7 @@ class JobSummarySerializer(serializers.ModelSerializer):
         if obj.plan.calculated_average_duration:
             return obj.plan.calculated_average_duration
         return None
+
 
 class OrgSerializer(serializers.Serializer):
     org_id = serializers.CharField()

@@ -11,9 +11,9 @@ from django.utils import timezone
 from django.utils.timezone import make_aware
 from rq.worker import StopRequested
 
+from config.settings.base import MINIMUM_JOBS_FOR_AVERAGE
 from metadeploy.api.belvedere_utils import convert_to_18
 from metadeploy.api.models import Job
-from config.settings.base import MINIMUM_JOBS_FOR_AVERAGE
 
 from ..flows import StopFlowException
 from ..jobs import (
@@ -518,7 +518,7 @@ class TestCalculateAveragePlanRuntime:
         for _ in range(MINIMUM_JOBS_FOR_AVERAGE):
             job = job_factory(
                 plan=plan,
-                status='complete',
+                status="complete",
                 # give a runtime of one hour
                 enqueued_at=datetime(2020, 1, 1, 0, 0, 0),
                 success_at=datetime(2020, 1, 1, 1, 0, 0),
@@ -528,15 +528,17 @@ class TestCalculateAveragePlanRuntime:
         assert plan.calculated_average_duration is None
         calculate_average_plan_runtime()
         plan.refresh_from_db()
-        assert plan.calculated_average_duration == 3600 
+        assert plan.calculated_average_duration == 3600
 
-    def test_calculate_average_plan_runtime__minimum_jobs_not_present(self, plan_factory, job_factory):
+    def test_calculate_average_plan_runtime__minimum_jobs_not_present(
+        self, plan_factory, job_factory
+    ):
         plan = plan_factory()
         plan.save()
         for _ in range(MINIMUM_JOBS_FOR_AVERAGE - 1):
             job = job_factory(
                 plan=plan,
-                status='complete',
+                status="complete",
                 # give a runtime of one hour
                 enqueued_at=datetime(2020, 1, 1, 0, 0, 0),
                 success_at=datetime(2020, 1, 1, 1, 0, 0),
@@ -546,4 +548,4 @@ class TestCalculateAveragePlanRuntime:
         assert plan.calculated_average_duration is None
         calculate_average_plan_runtime()
         plan.refresh_from_db()
-        assert plan.calculated_average_duration is None 
+        assert plan.calculated_average_duration is None

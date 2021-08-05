@@ -466,8 +466,8 @@ CRON_JOBS = {
     },
     "calculate_average_plan_runtimes": {
         "func": "metadeploy.api.jobs.calculate_average_plan_runtime_job",
-        "cron_string": "0 0 * * *" # run daily at midnight
-    }
+        "cron_string": "0 0 * * *",  # run daily at midnight
+    },
 }
 # There is a default dict of cron jobs,
 # and the cron_string can be optionally overridden
