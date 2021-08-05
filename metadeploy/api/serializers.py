@@ -180,6 +180,7 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
     preflight_message = serializers.SerializerMethodField()
     not_allowed_instructions = serializers.SerializerMethodField()
     requires_preflight = serializers.SerializerMethodField()
+    average_duration = serializers.SerializerMethodField()
 
     class Meta:
         model = Plan
@@ -222,6 +223,11 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
 
     def get_requires_preflight(self, obj):
         return obj.requires_preflight
+    
+    def get_average_duration(self, obj):
+        """Plan.average_duration is an expensive query,
+        so we prefer the already calculated value if available."""
+        return obj.calculated_average_duration or obj.average_duration
 
     def validate(self, data):
         """

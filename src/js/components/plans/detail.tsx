@@ -485,7 +485,7 @@ class PlanDetail extends React.Component<Props, State> {
                 <Toasts preflight={preflight} label="Pre-install validation" />
               ) : null}
               <Intro
-                averageDuration={plan.calculated_average_duration}
+                averageDuration={plan.average_duration}
                 isProductionOrg={Boolean(user?.is_production_org)}
                 preMessage={
                   plan.preflight_message ? (
