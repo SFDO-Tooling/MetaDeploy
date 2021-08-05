@@ -506,7 +506,7 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
         null=True,
         blank=True,
         validators=[MinValueValidator(0)],
-        help_text="The duration between the enqueing of a job and its successful completion."
+        help_text="The duration between the enqueueing of a job and its successful completion."
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
