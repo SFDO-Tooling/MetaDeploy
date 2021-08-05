@@ -664,7 +664,7 @@ class TestJobSummarySerializer:
                 org_id="00Dxxxxxxxxxxxxxxx",
             )
 
-        assert JobSummarySerializer(job).data["plan_average_duration"] == None
+        assert JobSummarySerializer(job).data["plan_average_duration"] is None
 
         # run the cron job that sets this value
         calculate_average_plan_runtime()

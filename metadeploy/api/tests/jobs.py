@@ -13,7 +13,6 @@ from rq.worker import StopRequested
 
 from config.settings.base import MINIMUM_JOBS_FOR_AVERAGE
 from metadeploy.api.belvedere_utils import convert_to_18
-from metadeploy.api.models import Job
 
 from ..flows import StopFlowException
 from ..jobs import (
