@@ -665,7 +665,7 @@ class JobSummarySerializer(serializers.ModelSerializer):
 
     def get_plan_average_duration(self, obj):
         if obj.plan.calculated_average_duration:
-            return str(obj.plan.calculated_average_duration)
+            return obj.plan.calculated_average_duration
         return None
 
 class OrgSerializer(serializers.Serializer):

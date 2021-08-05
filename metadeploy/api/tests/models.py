@@ -8,6 +8,7 @@ from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
+from config.settings.base import MINIMUM_JOBS_FOR_AVERAGE
 from ..models import (
     SUPPORTED_ORG_TYPES,
     Job,
@@ -470,7 +471,7 @@ class TestPlan:
 
         assert plan.average_duration is None
 
-        for _ in range(4):
+        for _ in range(MINIMUM_JOBS_FOR_AVERAGE - 1):
             job_factory(
                 plan=plan,
                 status=Job.Status.complete,
@@ -479,7 +480,7 @@ class TestPlan:
                 org_id="00Dxxxxxxxxxxxxxxx",
             )
 
-        assert plan.average_duration == timedelta(seconds=30)
+        assert plan.average_duration == timedelta(seconds=30).total_seconds()
 
     def test_validation(self, allowed_list_factory, plan_factory):
         allowed_list = allowed_list_factory()

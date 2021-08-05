@@ -60,6 +60,7 @@ class TestPlanViewSet:
         assert json == {
             "data": [
                 {
+                    "calculated_average_duration": None,
                     "commit_ish": None,
                     "id": f"{plan.id}",
                     "is_listed": True,
@@ -97,6 +98,7 @@ class TestPlanViewSet:
         # Remove timestamp for easy comparison
         del json["created_at"]
         assert json == {
+            "calculated_average_duration": None,
             "commit_ish": None,
             "id": str(plan.id),
             "is_listed": True,
@@ -172,7 +174,8 @@ class TestPlanViewSet:
         # Remove timestamp for easy comparison
         del json["created_at"]
         plan_id = json["id"]
-        expected = {
+        expected = {  
+            "calculated_average_duration": None,
             "commit_ish": None,
             "id": plan_id,
             "is_listed": True,
