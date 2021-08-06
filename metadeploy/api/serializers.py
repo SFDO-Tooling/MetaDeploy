@@ -227,7 +227,7 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
     def get_average_duration(self, obj):
         """Plan.average_duration is an expensive query,
         so we prefer the already calculated value if available."""
-        return obj.calculated_average_duration or obj.average_duration
+        return obj.calculated_average_duration
 
     def validate(self, data):
         """
