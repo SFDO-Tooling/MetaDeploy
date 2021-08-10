@@ -2,8 +2,8 @@ import { Story } from '@storybook/react/types-6-0';
 import React, { ComponentProps } from 'react';
 
 import ProgressIndicator from '@/js/components/jobs/progressIndicator';
-import { SUPPORTED_ORGS } from '@/js/utils/constants';
 import { Job } from '@/js/store/jobs/reducer';
+import { SUPPORTED_ORGS } from '@/js/utils/constants';
 
 import { sampleJob1, sampleJob2, sampleJob3, sampleJob4 } from '../fixtures';
 

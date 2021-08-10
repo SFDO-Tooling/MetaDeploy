@@ -4,11 +4,19 @@ import { Canvas, Meta, Story } from '@storybook/addon-docs';
 
 # ProgressIndicator
 
-**Communicates the progress of a Plan installation.**
+**Communicates the progress of an installation.**
 
 ## Overview
 
-The **ProgressIndicator** component is an [SLDS Progress Indicator](https://react.lightningdesignsystem.com/components/progress-indicators/) used to communicate to the user the progress of a `Plan` installation process.
+The **ProgressIndicator** component is an [SLDS Progress Indicator](https://react.lightningdesignsystem.com/components/progress-indicators/) used to communicate to the user the progress of an installation.
+
+The **ProgressIndicator** has two main steps: `Login` (or `Create a Scratch Org`) and `Install`.
+
+If pre-install validation is required, another step is added before `Install`.
+
+The `Install` step is empty at the start of installation. `Completed` steps are represented by checkmarks.
+
+`Canceled` or `Failed` steps show an error symbol.
 
 <Canvas>
   <Story id="jobs-progressindicator-example--progress-indicator-component" />
