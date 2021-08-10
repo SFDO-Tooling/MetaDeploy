@@ -8,7 +8,7 @@ import { SUPPORTED_ORGS } from '@/js/utils/constants';
 import { sampleJob1, sampleJob2, sampleJob3, sampleJob4 } from '../fixtures';
 
 export default {
-  title: 'Jobs/ProgressIndicator/Example',
+  title: 'Components/ProgressIndicator/Example',
   component: ProgressIndicator,
 };
 
