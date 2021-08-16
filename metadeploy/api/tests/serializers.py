@@ -4,8 +4,10 @@ from uuid import uuid4
 import pytest
 from django.utils import timezone
 
+from config.settings.base import MINIMUM_JOBS_FOR_AVERAGE
 from metadeploy.conftest import format_timestamp
 
+from ..jobs import calculate_average_plan_runtime
 from ..models import SUPPORTED_ORG_TYPES, Job, PreflightResult, ScratchOrg
 from ..serializers import (
     JobSerializer,
@@ -653,7 +655,7 @@ class TestJobSummarySerializer:
         )
         assert JobSummarySerializer(job).data["plan_average_duration"] is None
 
-        for _ in range(4):
+        for _ in range(MINIMUM_JOBS_FOR_AVERAGE - 1):
             job_factory(
                 plan=plan,
                 status=Job.Status.complete,
@@ -661,7 +663,14 @@ class TestJobSummarySerializer:
                 enqueued_at=start,
                 org_id="00Dxxxxxxxxxxxxxxx",
             )
-        assert JobSummarySerializer(job).data["plan_average_duration"] == "30.0"
+
+        assert JobSummarySerializer(job).data["plan_average_duration"] is None
+
+        # run the cron job that sets this value
+        calculate_average_plan_runtime()
+        job.refresh_from_db()
+
+        assert JobSummarySerializer(job).data["plan_average_duration"] == 30
 
 
 @pytest.mark.django_db

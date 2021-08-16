@@ -11,10 +11,12 @@ from django.utils import timezone
 from django.utils.timezone import make_aware
 from rq.worker import StopRequested
 
+from config.settings.base import MINIMUM_JOBS_FOR_AVERAGE
 from metadeploy.api.belvedere_utils import convert_to_18
 
 from ..flows import StopFlowException
 from ..jobs import (
+    calculate_average_plan_runtime,
     create_scratch_org,
     delete_org_on_error,
     delete_scratch_org,
@@ -505,3 +507,44 @@ class TestCreateScratchOrg:
                 enqueued_at=datetime(2020, 9, 4, 12),
             )
             create_scratch_org(scratch_org.id)
+
+
+@pytest.mark.django_db
+class TestCalculateAveragePlanRuntime:
+    def test_calculate_average_plan_runtime(self, plan_factory, job_factory):
+        plan = plan_factory()
+        plan.save()
+        for _ in range(MINIMUM_JOBS_FOR_AVERAGE):
+            job = job_factory(
+                plan=plan,
+                status="complete",
+                # give a runtime of one hour
+                enqueued_at=datetime(2020, 1, 1, 0, 0, 0),
+                success_at=datetime(2020, 1, 1, 1, 0, 0),
+            )
+            job.save()
+
+        assert plan.calculated_average_duration is None
+        calculate_average_plan_runtime()
+        plan.refresh_from_db()
+        assert plan.calculated_average_duration == 3600
+
+    def test_calculate_average_plan_runtime__minimum_jobs_not_present(
+        self, plan_factory, job_factory
+    ):
+        plan = plan_factory()
+        plan.save()
+        for _ in range(MINIMUM_JOBS_FOR_AVERAGE - 1):
+            job = job_factory(
+                plan=plan,
+                status="complete",
+                # give a runtime of one hour
+                enqueued_at=datetime(2020, 1, 1, 0, 0, 0),
+                success_at=datetime(2020, 1, 1, 1, 0, 0),
+            )
+            job.save()
+
+        assert plan.calculated_average_duration is None
+        calculate_average_plan_runtime()
+        plan.refresh_from_db()
+        assert plan.calculated_average_duration is None
