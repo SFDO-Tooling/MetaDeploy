@@ -13,13 +13,17 @@ class CTCSettings(pydantic.BaseSettings):
     ctc_auth_key: str
     ctc_sm_business_name_id: str
     ctc_repo_url: str
+    heroku_app_name: str
     heroku_slug_commit: str
 
 
 def check_change_traffic_control():
     settings = CTCSettings()
     assertion = jwt.encode(
-        {"exp": timegm(datetime.utcnow().utctimetuple())},
+        {
+            "iss": settings.heroku_app_name,
+            "exp": timegm(datetime.utcnow().utctimetuple()),
+        },
         settings.ctc_auth_key,
         algorithm="HS256",
     )
