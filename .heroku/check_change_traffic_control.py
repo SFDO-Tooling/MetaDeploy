@@ -23,17 +23,31 @@ def check_change_traffic_control():
         settings.ctc_auth_key,
         algorithm="HS256",
     )
+    headers = {"Authorization": f"Bearer {assertion}"}
+
+    # match case and start implementation step
     source_url = f"{settings.ctc_repo_url}/commit/{settings.heroku_slug_commit}"
-    response = requests.get(
-        settings.ctc_url,
+    response = requests.post(
+        f"{settings.ctc_url}/case/match-and-start",
         params={
             "sm_business_name_id": settings.ctc_sm_business_name_id,
             "source_url": source_url,
         },
-        headers={"Authorization": f"Bearer {assertion}"},
+        headers=headers,
     )
     response.raise_for_status()
     result = response.json()
+    if "error" in result:
+        raise Exception(result["error"])
+
+    # stop implementation step
+    step_id = result["implementation_step_id"]
+    response = requests.post(
+        f"{settings.ctc_url}/implementation/{step_id}/stop",
+        params={"status": "Implemented - per plan"},
+        headers=headers,
+    )
+    response.raise_for_status()
     if "error" in result:
         raise Exception(result["error"])
 
