@@ -63,7 +63,7 @@ factory-boy==3.2.0
     # via
     #   -r requirements/dev.in
     #   pytest-factoryboy
-faker==8.11.0
+faker==8.10.3
     # via
     #   -c requirements/prod.txt
     #   factory-boy
@@ -92,7 +92,7 @@ jinja2==2.11.3
     # via
     #   -c requirements/prod.txt
     #   sphinx
-markupsafe==1.1.1
+markupsafe==2.0.1
     # via
     #   -c requirements/prod.txt
     #   jinja2
