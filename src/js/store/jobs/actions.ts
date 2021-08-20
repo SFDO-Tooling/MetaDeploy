@@ -2,6 +2,7 @@ import { ThunkResult } from '@/js/store';
 import { Job } from '@/js/store/jobs/reducer';
 import { StepResult } from '@/js/store/plans/reducer';
 import apiFetch, { addUrlParams } from '@/js/utils/api';
+import { LATEST_VERSION } from '@/js/utils/constants';
 import routes from '@/js/utils/routes';
 
 export type JobData = {
@@ -151,10 +152,18 @@ export const createJob =
       payload,
     });
     const { pathname } = history.location;
-    const { product_slug, version_label, plan_slug } = payload;
-    const planUrl = routes.plan_detail(product_slug, version_label, plan_slug);
+    const { product_slug, version_label, version_is_most_recent, plan_slug } =
+      payload;
+    const matchingRoutes = [
+      routes.plan_detail(product_slug, version_label, plan_slug),
+    ];
+    if (version_is_most_recent) {
+      matchingRoutes.push(
+        routes.plan_detail(product_slug, LATEST_VERSION, plan_slug),
+      );
+    }
     /* istanbul ignore else */
-    if (planUrl === pathname) {
+    if (matchingRoutes.includes(pathname)) {
       // redirect to job page, if still on plan-detail page
       const url = routes.job_detail(
         product_slug,

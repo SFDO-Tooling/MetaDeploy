@@ -61,7 +61,7 @@ class PlanSerializer(AdminAPISerializer):
     )
 
     class Meta:
-        exclude = ['calculated_average_duration']
+        exclude = ["calculated_average_duration"]
         extra_kwargs = {"plan_template": {"required": False}}
 
     def validate(self, data):
