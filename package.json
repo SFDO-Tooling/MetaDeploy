@@ -163,5 +163,10 @@
   },
   "resolutions": {
     "glob-parent": "^5.1.2"
+  },
+  "storybook-deployer": {
+    "gitUsername": "Storybook Deployer Bot",
+    "gitEmail": "dev-ops@oddbird.net",
+    "commitMessage": "Deploy Storybook [skip ci]"
   }
 }
