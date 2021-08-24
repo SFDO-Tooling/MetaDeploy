@@ -80,4 +80,5 @@ def check_change_traffic_control():
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     check_change_traffic_control()
