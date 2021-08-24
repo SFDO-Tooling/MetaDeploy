@@ -45,7 +45,7 @@ async def push_message(group_name, message):
     channel_layer = get_channel_layer()
     action_type = message.get("content", {}).get("type")
     if await get_set_message_semaphore(channel_layer, message):
-        logger.info(f"Push message: group={group_name} type={action_type}")
+        logger.debug(f"Push message: group={group_name} type={action_type}")
         await channel_layer.group_send(group_name, message)
 
 
