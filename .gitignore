@@ -121,3 +121,6 @@ requirements/*.tar.xz
 .yarn/
 
 robot/results
+
+# Component library documentation
+storybook-static/
