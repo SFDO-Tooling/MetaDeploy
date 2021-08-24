@@ -57,9 +57,4 @@ def check_change_traffic_control():
 
 
 if __name__ == "__main__":
-    try:
-        check_change_traffic_control()
-    except Exception:
-        # temporary until I know it works
-        logger.exception("Failed to check change traffic control")
-        pass
+    check_change_traffic_control()
