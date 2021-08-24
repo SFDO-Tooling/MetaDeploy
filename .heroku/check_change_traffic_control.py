@@ -4,6 +4,8 @@ import jwt
 import logging
 import pydantic
 import requests
+import subprocess
+import sys
 
 logger = logging.getLogger()
 
@@ -17,8 +19,10 @@ class CTCSettings(pydantic.BaseSettings):
     heroku_slug_commit: str
 
 
-def check_change_traffic_control():
-    settings = CTCSettings()
+settings = CTCSettings()
+
+
+def call_ctc(endpoint, **kw):
     assertion = jwt.encode(
         {
             "iss": settings.heroku_app_name,
@@ -28,32 +32,51 @@ def check_change_traffic_control():
         algorithm="HS256",
     )
     headers = {"Authorization": f"Bearer {assertion}"}
-
-    # match case and start implementation step
-    source_url = f"{settings.ctc_repo_url}/commit/{settings.heroku_slug_commit}"
     response = requests.post(
-        f"{settings.ctc_url}/case/match-and-start",
-        params={
-            "sm_business_name_id": settings.ctc_sm_business_name_id,
-            "source_url": source_url,
-        },
+        endpoint,
+        **kw,
         headers=headers,
     )
     response.raise_for_status()
     result = response.json()
     if "error" in result:
         raise Exception(result["error"])
+    return result
 
-    # stop implementation step
-    step_id = result["implementation_step_id"]
-    response = requests.post(
-        f"{settings.ctc_url}/implementation/{step_id}/stop",
-        params={"status": "Implemented - per plan"},
-        headers=headers,
+
+def check_change_traffic_control():
+    source_url = f"{settings.ctc_repo_url}/commit/{settings.heroku_slug_commit}"
+    logger.info("Checking change traffic control for {source_url}")
+
+    # find Case and start implementation step
+    result = call_ctc(
+        f"{settings.ctc_url}/case/match-and-start",
+        params={
+            "sm_business_name_id": settings.ctc_sm_business_name_id,
+            "source_url": source_url,
+        },
     )
-    response.raise_for_status()
-    if "error" in result:
-        raise Exception(result["error"])
+    step_id = result["implementation_step_id"]
+
+    # run migration
+    success = False
+    status = "Rolled back - with no impact"
+    try:
+        p = subprocess.run(args=["python", "manage.py", "migrate", "--noinput"])
+        success = not p.returncode
+        status = "Implemented - per plan" if success else "Rolled back - with no impact"
+    finally:
+        # stop implementation step
+        logger.info(f"Updating implementation step status to: {status}")
+        call_ctc(
+            f"{settings.ctc_url}/implementation/{step_id}/stop",
+            params={"status": status},
+        )
+
+        # Be sure to propagate the return code
+        # so we abort the release phase if the migration failed.
+        if not success:
+            sys.exit(1)
 
 
 if __name__ == "__main__":
