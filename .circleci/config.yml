@@ -206,22 +206,22 @@ jobs:
             cd docs
             make html
 deploy-storybook:
-    working_directory: ~/metadeploy
-    docker:
-      - image: circleci/python:3.8
-    steps:
-      - checkout
-      - attach_workspace:
-          at: .
-      - add_ssh_keys:
-          fingerprints:
-            - 'c1:84:57:29:98:26:96:91:21:f4:bf:93:b4:7a:5d:e8'
-      - run:
-          name: Deploy Storybook
-          command: |
-            if [ -n "${DEPLOY_STORYBOOK}" ]; then
-              yarn deploy-storybook --ci
-            fi
+  working_directory: ~/metadeploy
+  docker:
+    - image: circleci/python:3.8
+  steps:
+    - checkout
+    - attach_workspace:
+        at: .
+    - add_ssh_keys:
+        fingerprints:
+          - 'c1:84:57:29:98:26:96:91:21:f4:bf:93:b4:7a:5d:e8'
+    - run:
+        name: Deploy Storybook
+        command: |
+          if [ -n "${DEPLOY_STORYBOOK}" ]; then
+            yarn deploy-storybook --ci
+          fi
 
 workflows:
   version: 2
