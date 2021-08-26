@@ -56,6 +56,7 @@ def check_change_traffic_control():
             "source_url": source_url,
         },
     )
+    case_id = result["case_id"]
     step_id = result["implementation_step_id"]
 
     # run migration
@@ -72,8 +73,13 @@ def check_change_traffic_control():
             f"{settings.ctc_url}/implementation/{step_id}/stop",
             params={"status": status},
         )
+        # if successful, close the case
+        logger.info(f"Closing case: {case_id}")
+        call_ctc(
+            f"{settings.ctc_url}/case/{case_id}/close",
+        )
 
-        # Be sure to propagate the return code
+        # if not successful, propagate the return code
         # so we abort the release phase if the migration failed.
         if not success:
             sys.exit(1)
