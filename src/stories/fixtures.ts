@@ -1,3 +1,5 @@
+import { SUPPORTED_ORGS } from '@/js/utils/constants';
+
 import { CONSTANTS } from '@/js/store/plans/reducer';
 
 export const sampleJob1 = {
@@ -110,4 +112,40 @@ export const sampleJob4 = {
   user_can_edit: true,
   message: '<p>Success! You installed it.</p>',
   error_message: '',
+};
+
+export const samplePlan1 = {
+  id: 'my-plan',
+  slug: 'plan_slug',
+  old_slugs: ['123', 'sample-slug'],
+  title: 'My Plan',
+  preflight_message: '<p>This will install Test Module in your org.</p>',
+  steps: [
+    {
+      id: 'abc',
+      name: 'Install Test Module 1.0',
+      description: 'description for package',
+      is_required: true,
+      is_recommended: true,
+      kind: 'Managed Package',
+      kind_icon: null,
+    },
+    {
+      id: 'abc',
+      name: 'Install Companion Module 0.8',
+      description: 'description for package',
+      is_required: true,
+      is_recommended: true,
+      kind: 'Managed Package',
+      kind_icon: null,
+    },
+  ],
+  is_listed: true,
+  is_allowed: true,
+  not_allowed_instructions: null,
+  average_duration: null,
+  requires_preflight: false,
+  order_key: 2,
+  supported_orgs: SUPPORTED_ORGS.Persistent,
+  scratch_org_duration: 30,
 };
