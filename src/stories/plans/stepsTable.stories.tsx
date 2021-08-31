@@ -1,25 +1,29 @@
+import { action } from '@storybook/addon-actions';
 import { Story } from '@storybook/react/types-6-0';
 import React, { ComponentProps } from 'react';
 
-import StepsTable from '@/js/components/plans/stepsTable';
+import StepsTableComponent from '@/js/components/plans/stepsTable';
 
-import { samplePlan1 } from '../fixtures';
+import { sampleJob1, sampleJob2, samplePlan1 } from '../fixtures';
 
 export default {
   title: 'Plans/StepsTable/Example',
-  component: StepsTable,
+  component: StepsTableComponent,
 };
 
-type Props = ComponentProps<typeof StepsTable>;
 
-const Template: Story<ComponentProps<typeof StepsTable>> = (args) => (
-  <StepsTable {...args} />
+const Template: Story<ComponentProps<typeof StepsTableComponent>> = (args) => (
+  <StepsTableComponent {...args} />
 );
 
-export const StepsTableComponent = Template.bind({});
+export const StepsTable = Template.bind({});
 
-StepsTableComponent.args = {
+StepsTable.args = {
+  canInstall: true,
+  job: sampleJob2,
   plan: samplePlan1,
+  steps: samplePlan1.steps,
+  handleStepsChange: action('handleStepsChange'),
 };
 
-StepsTableComponent.storyName = 'Steps Table';
+StepsTable.storyName = 'Steps Table';
