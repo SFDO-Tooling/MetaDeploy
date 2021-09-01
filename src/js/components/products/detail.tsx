@@ -40,7 +40,8 @@ import {
   selectVersionLabelOrPlanSlug,
 } from '@/js/store/products/selectors';
 import { selectUserState } from '@/js/store/user/selectors';
-import { PRODUCT_LAYOUTS } from '@/js/utils/constants';
+import { LATEST_VERSION, PRODUCT_LAYOUTS } from '@/js/utils/constants';
+import { getVersionLabel } from '@/js/utils/helpers';
 import routes from '@/js/utils/routes';
 
 const selectProductDetail = (
@@ -114,8 +115,6 @@ class ProductDetail extends React.Component<ProductDetailProps> {
     if (loadingOrNotFound !== false) {
       return loadingOrNotFound;
     }
-    // This redundant check is required to satisfy Flow:
-    // https://flow.org/en/docs/lang/refinements/#toc-refinement-invalidations
 
     /* istanbul ignore if */
     if (!product) {
@@ -124,8 +123,9 @@ class ProductDetail extends React.Component<ProductDetailProps> {
     if (!product.most_recent_version) {
       return <VersionNotFound product={product} />;
     }
-    const version = product.most_recent_version;
-    return <Redirect to={routes.version_detail(product.slug, version.label)} />;
+    return (
+      <Redirect to={routes.version_detail(product.slug, LATEST_VERSION)} />
+    );
   }
 }
 
@@ -273,8 +273,6 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     if (loadingOrNotFound !== false) {
       return loadingOrNotFound;
     }
-    // this redundant check is required to satisfy Flow:
-    // https://flow.org/en/docs/lang/refinements/#toc-refinement-invalidations
 
     /* istanbul ignore if */
     if (!product || !version) {
@@ -310,10 +308,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
             <BodyContainer>
               {product.most_recent_version && !isMostRecent ? (
                 <OldVersionWarning
-                  link={routes.version_detail(
-                    product.slug,
-                    product.most_recent_version.label,
-                  )}
+                  link={routes.version_detail(product.slug, LATEST_VERSION)}
                 />
               ) : null}
               <BodySection>
@@ -326,7 +321,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                         <Link
                           to={routes.plan_detail(
                             product.slug,
-                            version.label,
+                            getVersionLabel(product, version),
                             primary_plan.slug,
                           )}
                           className="slds-button
@@ -344,7 +339,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                         <Link
                           to={routes.plan_detail(
                             product.slug,
-                            version.label,
+                            getVersionLabel(product, version),
                             secondary_plan.slug,
                           )}
                           className="slds-button
@@ -375,7 +370,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                         <Link
                           to={routes.plan_detail(
                             product.slug,
-                            version.label,
+                            getVersionLabel(product, version),
                             plan.slug,
                           )}
                         >

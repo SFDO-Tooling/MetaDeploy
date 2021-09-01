@@ -32,10 +32,13 @@ export const fetchOrgJobs =
       );
       if (response && window.socket) {
         for (const orgId of Object.keys(response)) {
-          window.socket.subscribe({
-            model: 'org',
-            id: orgId,
-          });
+          /* istanbul ignore else */
+          if (orgId !== 'null') {
+            window.socket.subscribe({
+              model: 'org',
+              id: orgId,
+            });
+          }
         }
       }
       return dispatch({

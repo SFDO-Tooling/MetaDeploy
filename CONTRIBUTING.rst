@@ -95,3 +95,15 @@ translations to ``locales/<language>/translation.json``.
 
 .. _GNU gettext toolset: https://www.gnu.org/software/gettext/
 .. _user language is auto-detected at runtime: https://github.com/i18next/i18next-browser-languageDetector
+
+Storybook Development Workflow
+------------------------------
+
+When doing development for the component library in Storybook,
+use one of these two commands::
+
+    $ ./derrick storybook  # if running outside of container
+    $ yarn storybook  # if working in a remote container in VS Code
+
+After running one of these commands, you can view the Storybook at
+`<http://localhost:6006/>`_ in your browser.

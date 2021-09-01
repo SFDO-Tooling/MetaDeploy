@@ -8,7 +8,7 @@ import {
   fetchProduct,
   fetchVersion,
 } from '@/js/store/products/actions';
-import { PRODUCT_LAYOUTS } from '@/js/utils/constants';
+import { LATEST_VERSION, PRODUCT_LAYOUTS } from '@/js/utils/constants';
 import routes from '@/js/utils/routes';
 
 import { renderWithRedux, reRenderWithRedux } from './../../utils';
@@ -125,7 +125,9 @@ describe('<ProductDetail />', () => {
     const { context } = setup();
 
     expect(context.action).toEqual('REPLACE');
-    expect(context.url).toEqual(routes.version_detail('product-1', '1.0.0'));
+    expect(context.url).toEqual(
+      routes.version_detail('product-1', LATEST_VERSION),
+    );
   });
 
   describe('product has old_slug', () => {
@@ -284,7 +286,7 @@ describe('<VersionDetail />', () => {
 
         expect(context.action).toEqual('REPLACE');
         expect(context.url).toEqual(
-          routes.plan_detail('product-1', '1.0.0', 'my-secondary-plan'),
+          routes.plan_detail('product-1', LATEST_VERSION, 'my-secondary-plan'),
         );
       });
     });

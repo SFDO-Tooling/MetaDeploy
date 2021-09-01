@@ -9,6 +9,8 @@ import VersionNotFound from '@/js/components/products/version404';
 import { Job } from '@/js/store/jobs/reducer';
 import { Plan } from '@/js/store/plans/reducer';
 import { Product, Version } from '@/js/store/products/reducer';
+import { LATEST_VERSION } from '@/js/utils/constants';
+import { getVersionLabel } from '@/js/utils/helpers';
 import routes from '@/js/utils/routes';
 
 type TransientMessageState = {
@@ -165,7 +167,9 @@ export const getLoadingOrNotFound = ({
   // If we have a plan slug but no plan, redirect to that plan detail page
   if (planSlug && versionLabel && plan === undefined) {
     return (
-      <Redirect to={routes.plan_detail(product.slug, versionLabel, planSlug)} />
+      <Redirect
+        to={routes.plan_detail(product.slug, LATEST_VERSION, planSlug)}
+      />
     );
   }
   if (version === null) {
@@ -190,9 +194,11 @@ export const getLoadingOrNotFound = ({
     if (job === null) {
       return (
         <JobNotFound
-          product={product}
-          version={version}
-          plan={plan}
+          url={routes.plan_detail(
+            product.slug,
+            getVersionLabel(product, version),
+            plan.slug,
+          )}
           isLoggedIn={isLoggedIn}
         />
       );

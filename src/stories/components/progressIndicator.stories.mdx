@@ -1,0 +1,37 @@
+import { Canvas, Meta, Story } from '@storybook/addon-docs';
+
+<Meta title="Components/ProgressIndicator/Docs" />
+
+# ProgressIndicator
+
+**Communicates the progress of an installation.**
+
+## Overview
+
+The **ProgressIndicator** component is an
+[SLDS Progress Indicator](https://react.lightningdesignsystem.com/components/progress-indicators/)
+used to communicate to the user the progress of a `Plan` installation.
+
+The component has two main steps: **"Log In"** (or **"Create Scratch Org"**) and
+**"Install."**
+
+## Guidelines
+
+If a user must be logged in to install a plan, **"Log in"** will be the first
+step. If it's possible to install the `Plan` into a `Scratch Org`,
+**"Create Scratch Org"** will be the first step. If both options are possible,
+both will be listed in the first step.
+
+If pre-install validation is required, another step is added before
+**"Install"**: **"Run pre-install validation."**
+
+Active steps are empty and marked by a colored border. `Completed` steps are
+filled with checkmarks.
+
+`Canceled` or `Failed` steps show an error symbol.
+
+Labels for each step are shown on hover.
+
+<Canvas>
+  <Story id="components-progressindicator-example--progress-indicator-component" />
+</Canvas>

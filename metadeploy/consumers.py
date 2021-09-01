@@ -113,7 +113,7 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         scratch_org_id = self.scope["session"].get("scratch_org_id", None)
         if uuid and uuid != scratch_org_id:
             self.scope["session"]["scratch_org_id"] = uuid
-            self.scope["session"].save()
+            await sync_to_async(self.scope["session"].save)()
 
         has_good_permissions = await self.has_good_permissions(content)
         all_good = is_valid and is_known_model and has_good_permissions
