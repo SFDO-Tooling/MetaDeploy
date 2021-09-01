@@ -19,7 +19,7 @@ export const routePatterns = {
   auth_error: () => '/accounts/*',
   product_list: () => '/products',
   product_detail: () => '/products/:productSlug',
-  version_detail: () => `/products/:productSlug/:versionLabel`,
+  version_detail: () => '/products/:productSlug/:versionLabel',
   plan_detail: () => '/products/:productSlug/:versionLabel/:planSlug',
   job_detail: () =>
     '/products/:productSlug/:versionLabel/:planSlug/jobs/:jobId',
