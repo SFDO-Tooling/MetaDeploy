@@ -88,7 +88,7 @@ class LogfmtFormatter(ServerFormatter):
             msg = self._escape_quotes(record.getMessage())
         rest = self.format_line(getattr(record, "context", {}))
         fields = [
-            f"id={id_}",
+            f"request_id={id_}",
             f"at={record.levelname}",
             f"time={time}",
             f"tag={tag}",
