@@ -6,6 +6,7 @@ import {
   shouldFetchPlan,
   shouldFetchVersion,
 } from '@/js/components/utils';
+import { LATEST_VERSION } from '@/js/utils/constants';
 import routes from '@/js/utils/routes';
 
 import { renderWithRedux } from './../utils';
@@ -169,7 +170,7 @@ describe('getLoadingOrNotFound', () => {
 
       expect(context.action).toEqual('REPLACE');
       expect(context.url).toEqual(
-        routes.plan_detail('product-1', '1.0.0', 'plan-1'),
+        routes.plan_detail('product-1', LATEST_VERSION, 'plan-1'),
       );
     });
   });

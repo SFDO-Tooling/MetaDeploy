@@ -382,6 +382,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
     is_production_org = serializers.SerializerMethodField()
     product_slug = serializers.SerializerMethodField()
     version_label = serializers.SerializerMethodField()
+    version_is_most_recent = serializers.SerializerMethodField()
     plan_slug = serializers.SerializerMethodField()
 
     plan = serializers.PrimaryKeyRelatedField(
@@ -419,6 +420,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             "is_production_org",
             "product_slug",
             "version_label",
+            "version_is_most_recent",
             "plan_slug",
             "error_count",
             "warning_count",
@@ -491,6 +493,9 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
 
     def get_version_label(self, obj):
         return obj.plan.version.label
+
+    def get_version_is_most_recent(self, obj):
+        return obj.plan.version == obj.plan.version.product.most_recent_version
 
     def get_plan_slug(self, obj):
         return obj.plan.slug

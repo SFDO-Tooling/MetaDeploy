@@ -20,6 +20,7 @@ export type Job = {
   is_production_org: boolean;
   product_slug: string;
   version_label: string;
+  version_is_most_recent: boolean;
   plan_slug: string;
   instance_url: string | null;
   error_count: number;
