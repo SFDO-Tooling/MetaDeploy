@@ -4,7 +4,7 @@ import React, { ComponentProps } from 'react';
 
 import StepsTableComponent from '@/js/components/plans/stepsTable';
 
-import { sampleJob1, sampleJob2, samplePlan1 } from '../fixtures';
+import { sampleJob2, samplePlan1 } from '../fixtures';
 
 export default {
   title: 'Plans/StepsTable/Example',
@@ -25,5 +25,13 @@ StepsTable.args = {
   steps: samplePlan1.steps,
   handleStepsChange: action('handleStepsChange'),
 };
+StepsTable.argTypes = {
+  canInstall: { control: { disable: true } },
+  job: { control: { disable: true } },
+  plan: { control: { disable: true } },
+  steps: { control: { disable: true } },
+  preflight: { control: { disable: true } },
+  selectedSteps: { control: { disable: true } },
+}
 
 StepsTable.storyName = 'Steps Table';
