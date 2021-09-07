@@ -11,7 +11,6 @@ export default {
   component: StepsTableComponent,
 };
 
-
 const Template: Story<ComponentProps<typeof StepsTableComponent>> = (args) => (
   <StepsTableComponent {...args} />
 );
@@ -32,6 +31,6 @@ StepsTable.argTypes = {
   steps: { control: { disable: true } },
   preflight: { control: { disable: true } },
   selectedSteps: { control: { disable: true } },
-}
+};
 
 StepsTable.storyName = 'Steps Table';
