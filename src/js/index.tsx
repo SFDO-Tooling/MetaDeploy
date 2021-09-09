@@ -129,7 +129,7 @@ init_i18n((i18nError?: string) => {
       if (globalsEl?.textContent) {
         GLOBALS = JSON.parse(globalsEl.textContent);
       }
-    } catch (err) {
+    } catch (err: any) {
       logError(err);
     }
     window.GLOBALS = GLOBALS;
@@ -142,7 +142,7 @@ init_i18n((i18nError?: string) => {
       if (contextEl?.textContent) {
         JS_CONTEXT = JSON.parse(contextEl.textContent);
       }
-    } catch (err) {
+    } catch (err: any) {
       logError(err);
     }
     window.JS_CONTEXT = JS_CONTEXT;
