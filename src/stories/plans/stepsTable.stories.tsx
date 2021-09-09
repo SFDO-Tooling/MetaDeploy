@@ -4,11 +4,20 @@ import React, { ComponentProps } from 'react';
 
 import StepsTableComponent from '@/js/components/plans/stepsTable';
 
-import { sampleJob2, samplePlan1 } from '../fixtures';
+import { sampleJob2, samplePlan1, sampleStep1, sampleStep2 } from '../fixtures';
+
+import { withRedux } from '../decorators';
 
 export default {
   title: 'Plans/StepsTable/Example',
   component: StepsTableComponent,
+  decorators: [
+    withRedux({
+      socket: true,
+      showLogs: true,
+      expandedPanels: new Set(),
+    }),
+  ],
 };
 
 const Template: Story<ComponentProps<typeof StepsTableComponent>> = (args) => (
@@ -21,7 +30,7 @@ StepsTable.args = {
   canInstall: true,
   job: sampleJob2,
   plan: samplePlan1,
-  steps: samplePlan1.steps,
+  steps: [sampleStep1, sampleStep2],
   handleStepsChange: action('handleStepsChange'),
 };
 StepsTable.argTypes = {

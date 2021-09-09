@@ -2,6 +2,42 @@ import { SUPPORTED_ORGS } from '@/js/utils/constants';
 
 import { CONSTANTS } from '@/js/store/plans/reducer';
 
+
+
+export const sampleStep1 = {
+  id: 'samplestep1',
+  name: 'Install sfdobase 1.0',
+  kind: 'Managed Package',
+  kind_icon: 'archive',
+  is_required: true,
+  is_recommended: true,
+  description: '',
+};
+
+export const sampleStepResult1 = {
+  status: CONSTANTS.RESULT_STATUS.OK,
+  message: 'Here is a message',
+  logs: '<span style="color: #25bc24">2021-09-09 11:11:36</span> Options:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>   dependencies:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>',
+};
+
+
+export const sampleStep2 = {
+  id: 'samplestep2',
+  name: 'Install AnyPackage 1.0',
+  kind: 'Managed Package',
+  kind_icon: 'package',
+  is_required: true,
+  is_recommended: true,
+  description: '',
+};
+
+
+export const sampleStepResult2 = {
+  status: CONSTANTS.RESULT_STATUS.WARN,
+  message: 'Here is a message',
+  logs: '<span style="color: #25bc24">2021-09-09 11:11:36</span> Options:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>   dependencies:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>',
+};
+
 export const sampleJob1 = {
   id: 'job1',
   edited_at: '2021-02-01T19:47:49Z',
@@ -13,7 +49,7 @@ export const sampleJob1 = {
   },
   plan: 'plan1',
   status: CONSTANTS.STATUS.STARTED,
-  steps: ['gYBP3dj', 'gYBP3dj', 'SgYBP3dj'],
+  steps: [sampleStep1.id],
   results: {},
   org_name: 'OddBird',
   org_type: 'Developer Edition',
@@ -42,8 +78,8 @@ export const sampleJob2 = {
   },
   plan: 'plan2',
   status: CONSTANTS.STATUS.COMPLETE,
-  steps: ['gYBP3dj', 'gYBP3dj', 'SgYBP3dj'],
-  results: {},
+  steps: [sampleStep1.id, sampleStep2.id],
+  results: { 'gYBP3dj': [sampleStepResult1], 'samplestep1': [sampleStepResult2]  },
   org_name: 'OddBird',
   org_type: 'Developer Edition',
   is_production_org: false,
@@ -54,10 +90,10 @@ export const sampleJob2 = {
   instance_url: 'https://sample.salesforce.org/',
   error_count: 0,
   warning_count: 0,
-  is_public: false,
+  is_public: true,
   user_can_edit: true,
   message: '<p>Success! You installed it.</p>',
-  error_message: '',
+  error_message: 'There is an error',
 };
 
 export const sampleJob3 = {
