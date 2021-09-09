@@ -1,8 +1,5 @@
-import { SUPPORTED_ORGS } from '@/js/utils/constants';
-
 import { CONSTANTS } from '@/js/store/plans/reducer';
-
-
+import { SUPPORTED_ORGS } from '@/js/utils/constants';
 
 export const sampleStep1 = {
   id: 'samplestep1',
@@ -20,7 +17,6 @@ export const sampleStepResult1 = {
   logs: '<span style="color: #25bc24">2021-09-09 11:11:36</span> Options:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>   dependencies:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>',
 };
 
-
 export const sampleStep2 = {
   id: 'samplestep2',
   name: 'Install AnyPackage 1.0',
@@ -30,7 +26,6 @@ export const sampleStep2 = {
   is_recommended: true,
   description: '',
 };
-
 
 export const sampleStepResult2 = {
   status: CONSTANTS.RESULT_STATUS.OK,
@@ -79,7 +74,10 @@ export const sampleJob2 = {
   plan: 'plan2',
   status: CONSTANTS.STATUS.COMPLETE,
   steps: [sampleStep1.id, sampleStep2.id],
-  results: { 'samplestep1': [sampleStepResult1], 'samplestep2': [sampleStepResult2]  },
+  results: {
+    samplestep1: [sampleStepResult1],
+    samplestep2: [sampleStepResult2],
+  },
   org_name: 'OddBird',
   org_type: 'Developer Edition',
   is_production_org: false,
@@ -160,10 +158,7 @@ export const samplePlan1 = {
   old_slugs: ['123', 'sample-slug'],
   title: 'My Plan',
   preflight_message: '<p>This will install Test Module in your org.</p>',
-  steps: [
-   sampleStep1,
-    sampleStep2,
-  ],
+  steps: [sampleStep1, sampleStep2],
   is_listed: true,
   is_allowed: true,
   not_allowed_instructions: null,

@@ -4,9 +4,8 @@ import React, { ComponentProps } from 'react';
 
 import StepsTableComponent from '@/js/components/plans/stepsTable';
 
-import { sampleJob2, samplePlan1, sampleStep1, sampleStep2 } from '../fixtures';
-
 import { withRedux } from '../decorators';
+import { sampleJob2, samplePlan1, sampleStep1, sampleStep2 } from '../fixtures';
 
 export default {
   title: 'Plans/StepsTable/Example',
