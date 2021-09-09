@@ -33,7 +33,7 @@ export const sampleStep2 = {
 
 
 export const sampleStepResult2 = {
-  status: CONSTANTS.RESULT_STATUS.WARN,
+  status: CONSTANTS.RESULT_STATUS.OK,
   message: 'Here is a message',
   logs: '<span style="color: #25bc24">2021-09-09 11:11:36</span> Options:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>   dependencies:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>',
 };
@@ -79,7 +79,7 @@ export const sampleJob2 = {
   plan: 'plan2',
   status: CONSTANTS.STATUS.COMPLETE,
   steps: [sampleStep1.id, sampleStep2.id],
-  results: { 'gYBP3dj': [sampleStepResult1], 'samplestep1': [sampleStepResult2]  },
+  results: { 'samplestep1': [sampleStepResult1], 'samplestep2': [sampleStepResult2]  },
   org_name: 'OddBird',
   org_type: 'Developer Edition',
   is_production_org: false,
@@ -161,24 +161,8 @@ export const samplePlan1 = {
   title: 'My Plan',
   preflight_message: '<p>This will install Test Module in your org.</p>',
   steps: [
-    {
-      id: 'abc',
-      name: 'Install Test Module 1.0',
-      description: 'description for package',
-      is_required: true,
-      is_recommended: false,
-      kind: 'Managed Package',
-      kind_icon: null,
-    },
-    {
-      id: 'abc',
-      name: 'Install Companion Module 0.8',
-      description: 'description for package',
-      is_required: true,
-      is_recommended: false,
-      kind: 'Managed Package',
-      kind_icon: null,
-    },
+   sampleStep1,
+    sampleStep2,
   ],
   is_listed: true,
   is_allowed: true,
