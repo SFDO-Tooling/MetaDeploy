@@ -15,4 +15,8 @@ declare module '*.png' {
   export default pngVal;
 }
 
+// TypeScript renamed or removed globals,
+// but some packages (e.g. react-fns) still reference the old names.
 type PositionError = GeolocationPositionError;
+type DeviceAcceleration = DeviceMotionEventAccelerationInit;
+type DeviceRotationRate = DeviceMotionEventRotationRateInit;
