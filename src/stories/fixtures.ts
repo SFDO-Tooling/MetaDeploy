@@ -41,7 +41,6 @@ export const sampleStep4 = {
   description: '',
 };
 
-
 export const sampleStepResult1 = {
   status: CONSTANTS.RESULT_STATUS.OK,
   message: 'Here is a message',
