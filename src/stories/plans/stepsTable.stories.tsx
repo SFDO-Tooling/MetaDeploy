@@ -5,18 +5,12 @@ import React, { ComponentProps } from 'react';
 import StepsTableComponent from '@/js/components/plans/stepsTable';
 
 import { withRedux } from '../decorators';
-import { sampleJob1, samplePlan1, sampleStep1, sampleStep2 } from '../fixtures';
+import { sampleJob2, samplePlan1, sampleStep3, sampleStep4 } from '../fixtures';
 
 export default {
   title: 'Plans/StepsTable/Example',
   component: StepsTableComponent,
-  decorators: [
-    withRedux({
-      socket: true,
-      showLogs: true,
-      expandedPanels: new Set(),
-    }),
-  ],
+  decorators: [withRedux({ socket: true })],
 };
 
 const Template: Story<ComponentProps<typeof StepsTableComponent>> = (args) => (
@@ -26,10 +20,9 @@ const Template: Story<ComponentProps<typeof StepsTableComponent>> = (args) => (
 export const StepsTable = Template.bind({});
 
 StepsTable.args = {
-  canInstall: true,
-  job: sampleJob1,
+  job: sampleJob2,
   plan: samplePlan1,
-  steps: [sampleStep1, sampleStep2],
+  steps: [sampleStep3, sampleStep4],
   handleStepsChange: action('handleStepsChange'),
 };
 StepsTable.argTypes = {

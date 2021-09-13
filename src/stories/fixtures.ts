@@ -106,7 +106,7 @@ export const sampleJob2 = {
     username: 'user-name',
     is_staff: true,
   },
-  plan: 'plan2',
+  plan: 'plan1',
   status: CONSTANTS.STATUS.COMPLETE,
   steps: [sampleStep3.id, sampleStep4.id],
   results: {
@@ -138,7 +138,7 @@ export const sampleJob3 = {
     username: 'user-name',
     is_staff: true,
   },
-  plan: 'plan2',
+  plan: 'plan1',
   status: CONSTANTS.STATUS.FAILED,
   steps: ['gYBP3dj', 'gYBP3dj', 'SgYBP3dj'],
   results: {},
@@ -167,7 +167,7 @@ export const sampleJob4 = {
     username: 'user-name',
     is_staff: true,
   },
-  plan: 'plan2',
+  plan: 'plan1',
   status: CONSTANTS.STATUS.CANCELED,
   steps: ['gYBP3dj', 'gYBP3dj', 'SgYBP3dj'],
   results: {},
@@ -188,7 +188,7 @@ export const sampleJob4 = {
 };
 
 export const samplePlan1 = {
-  id: 'my-plan',
+  id: 'plan1',
   slug: 'plan_slug',
   old_slugs: ['123', 'sample-slug'],
   title: 'My Plan',
