@@ -11,12 +11,6 @@ export const sampleStep1 = {
   description: '',
 };
 
-export const sampleStepResult1 = {
-  status: CONSTANTS.RESULT_STATUS.OK,
-  message: 'Here is a message',
-  logs: '<span style="color: #25bc24">2021-09-09 11:11:36</span> Options:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>   dependencies:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>',
-};
-
 export const sampleStep2 = {
   id: 'samplestep2',
   name: 'Install AnyPackage 1.0',
@@ -27,8 +21,47 @@ export const sampleStep2 = {
   description: '',
 };
 
+export const sampleStep3 = {
+  id: 'samplestep3',
+  name: 'Install NCSC 1.0',
+  kind: 'Managed Package',
+  kind_icon: 'package',
+  is_required: false,
+  is_recommended: true,
+  description: '',
+};
+
+export const sampleStep4 = {
+  id: 'samplestep4',
+  name: 'Install ABC 2.0',
+  kind: 'Managed Package',
+  kind_icon: 'archive',
+  is_required: true,
+  is_recommended: true,
+  description: '',
+};
+
+
+export const sampleStepResult1 = {
+  status: CONSTANTS.RESULT_STATUS.OK,
+  message: 'Here is a message',
+  logs: '<span style="color: #25bc24">2021-09-09 11:11:36</span> Options:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>   dependencies:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>',
+};
+
 export const sampleStepResult2 = {
   status: CONSTANTS.RESULT_STATUS.OK,
+  message: 'Here is a message',
+  logs: '<span style="color: #25bc24">2021-09-09 11:11:36</span> Options:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>   dependencies:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>',
+};
+
+export const sampleStepResult3 = {
+  status: CONSTANTS.RESULT_STATUS.OK,
+  message: 'Here is a message',
+  logs: '<span style="color: #25bc24">2021-09-09 11:11:36</span> Options:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>   dependencies:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>',
+};
+
+export const sampleStepResult4 = {
+  status: CONSTANTS.RESULT_STATUS.OPTIONAL,
   message: 'Here is a message',
   logs: '<span style="color: #25bc24">2021-09-09 11:11:36</span> Options:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>   dependencies:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>',
 };
@@ -44,8 +77,11 @@ export const sampleJob1 = {
   },
   plan: 'plan1',
   status: CONSTANTS.STATUS.STARTED,
-  steps: [sampleStep1.id],
-  results: {},
+  steps: [sampleStep1.id, sampleStep2.id],
+  results: {
+    samplestep1: [sampleStepResult1],
+    samplestep2: [sampleStepResult2],
+  },
   org_name: 'OddBird',
   org_type: 'Developer Edition',
   is_production_org: false,
@@ -73,10 +109,10 @@ export const sampleJob2 = {
   },
   plan: 'plan2',
   status: CONSTANTS.STATUS.COMPLETE,
-  steps: [sampleStep1.id, sampleStep2.id],
+  steps: [sampleStep3.id, sampleStep4.id],
   results: {
-    samplestep1: [sampleStepResult1],
-    samplestep2: [sampleStepResult2],
+    samplestep3: [sampleStepResult3],
+    samplestep4: [sampleStepResult4],
   },
   org_name: 'OddBird',
   org_type: 'Developer Edition',

@@ -5,7 +5,7 @@ import React, { ComponentProps } from 'react';
 import StepsTableComponent from '@/js/components/plans/stepsTable';
 
 import { withRedux } from '../decorators';
-import { sampleJob2, samplePlan1, sampleStep1, sampleStep2 } from '../fixtures';
+import { sampleJob1, samplePlan1, sampleStep1, sampleStep2 } from '../fixtures';
 
 export default {
   title: 'Plans/StepsTable/Example',
@@ -27,7 +27,7 @@ export const StepsTable = Template.bind({});
 
 StepsTable.args = {
   canInstall: true,
-  job: sampleJob2,
+  job: sampleJob1,
   plan: samplePlan1,
   steps: [sampleStep1, sampleStep2],
   handleStepsChange: action('handleStepsChange'),
