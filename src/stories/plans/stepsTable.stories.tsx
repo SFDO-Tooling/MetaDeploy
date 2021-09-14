@@ -42,7 +42,7 @@ const Template = ({ job, ...rest }: StoryProps) => (
 export const StepsTable: Story<StoryProps> = Template.bind({});
 
 StepsTable.args = {
-  job: 'Completed',
+  job: 'Complete',
   plan: samplePlan1,
   steps: [sampleStep3, sampleStep4],
   handleStepsChange: action('handleStepsChange'),
