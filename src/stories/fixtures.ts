@@ -60,7 +60,7 @@ export const sampleStepResult3 = {
 };
 
 export const sampleStepResult4 = {
-  status: CONSTANTS.RESULT_STATUS.OPTIONAL,
+  status: CONSTANTS.RESULT_STATUS.OK,
   message: 'Here is a message',
   logs: '<span style="color: #25bc24">2021-09-09 11:11:36</span> Options:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>   dependencies:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>',
 };
