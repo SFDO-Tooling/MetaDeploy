@@ -1,0 +1,30 @@
+import { Canvas, Meta, Story } from '@storybook/addon-docs';
+
+<Meta title="Plans/StepsTable/Docs" />
+
+# StepsTable
+**Shows detailed information about the Steps of an installation.**
+
+## Overview
+ The **StepsTable** component is an [SLDS Data Table](https://react.lightningdesignsystem.com/components/data-tables/)
+ used to display information about each **Step** involved in
+  installing a **Product** or **Plan**.
+
+If a pre-install validation check is required, the
+**StepsTable** initially only displays columns for
+each **Step** name and type.
+
+Once the installation process is able to be started,
+an `Install` column appears. If a **Step** is required,
+the `Install` column for that **Step** is checked.
+If the **Step** is optional, checkbox that can
+be selected is shown.
+
+The table features columns for the name, type, and
+install status of each **Step**.
+
+
+
+<Canvas>
+  <Story id="plans-stepstable-example--steps-table" />
+</Canvas>
