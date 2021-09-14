@@ -41,6 +41,16 @@ export const sampleStep4 = {
   description: '',
 };
 
+export const sampleStep5 = {
+  id: 'samplestep4',
+  name: 'Install ABC 2.0',
+  kind: 'Managed Package',
+  kind_icon: 'archive',
+  is_required: true,
+  is_recommended: true,
+  description: '',
+};
+
 export const sampleStepResult1 = {
   status: CONSTANTS.RESULT_STATUS.OK,
   message: 'Here is a message',
@@ -65,6 +75,13 @@ export const sampleStepResult4 = {
   logs: '<span style="color: #25bc24">2021-09-09 11:11:36</span> Options:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>   dependencies:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>',
 };
 
+export const sampleStepResult5 = {
+  status: CONSTANTS.RESULT_STATUS.ERROR,
+  message: 'failed to install',
+  logs: '<span style="color: #25bc24">2021-09-09 11:11:36</span> Options:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>   dependencies:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>',
+};
+
+
 export const sampleJob1 = {
   id: 'job1',
   edited_at: '2021-02-01T19:47:49Z',
@@ -76,11 +93,8 @@ export const sampleJob1 = {
   },
   plan: 'plan1',
   status: CONSTANTS.STATUS.STARTED,
-  steps: [sampleStep1.id, sampleStep2.id],
-  results: {
-    samplestep1: [sampleStepResult1],
-    samplestep2: [sampleStepResult2],
-  },
+  steps: [sampleStep1.id, sampleStep2.id,],
+  results: {},
   org_name: 'OddBird',
   org_type: 'Developer Edition',
   is_production_org: false,
@@ -140,8 +154,10 @@ export const sampleJob3 = {
   },
   plan: 'plan1',
   status: CONSTANTS.STATUS.FAILED,
-  steps: ['gYBP3dj', 'gYBP3dj', 'SgYBP3dj'],
-  results: {},
+  steps: [sampleStep5.id],
+  results: {
+    samplestep5: [sampleStepResult5],
+  },
   org_name: 'OddBird',
   org_type: 'Developer Edition',
   is_production_org: false,
