@@ -10,20 +10,32 @@ import { Canvas, Meta, Story } from '@storybook/addon-docs';
  used to display information about each **Step** involved in
   installing a **Product** or **Plan**.
 
+The table features columns for the name, type, and
+install status of each **Step**.
+
 If a pre-install validation check is required, the
 **StepsTable** initially only displays columns for
 each **Step** name and type.
 
 Once the installation process is able to be started,
 an `Install` column appears. If a **Step** is required,
-the `Install` column for that **Step** is checked.
-If the **Step** is optional, checkbox that can
+the `Install` column for that **Step** features a checkmark.
+If the **Step** is optional, a checkbox that can
 be selected is shown.
 
-The table features columns for the name, type, and
-install status of each **Step**.
+Once the installation process has begun for a **Step**,
+a toggle button appears at the beginning of the **Step** name.
+Clicking on the button toggles an expanded list of information
+about the time, status, and detailed processes of the **Step**.
 
+When an installation **Step** is complete, a green circle icon with
+a white checkmark appears in the `Install` column.
 
+A toggle button for hiding or expanding all logs appears in the `Steps`
+column once the first **Step** starts to transmit log data.
+
+If a **Step** fails or is not installed a gray dash is shown in the
+`Install` column.
 
 <Canvas>
   <Story id="plans-stepstable-example--steps-table" />
