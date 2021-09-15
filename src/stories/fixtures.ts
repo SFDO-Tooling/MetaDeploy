@@ -5,7 +5,7 @@ export const sampleStep1 = {
   id: 'samplestep1',
   name: 'Install sfdobase 1.0',
   kind: 'Managed Package',
-  kind_icon: 'archive',
+  kind_icon: 'metadata',
   is_required: true,
   is_recommended: true,
   description: '',
@@ -24,7 +24,7 @@ export const sampleStep2 = {
 export const sampleStep3 = {
   id: 'samplestep3',
   name: 'Install NCSC 1.0',
-  kind: 'Managed Package',
+  kind: 'Metadata',
   kind_icon: 'package',
   is_required: false,
   is_recommended: true,
@@ -66,13 +66,13 @@ export const sampleStepResult2 = {
 export const sampleStepResult3 = {
   status: CONSTANTS.RESULT_STATUS.OK,
   message: 'Here is a message',
-  logs: '<span style="color: #25bc24">2021-09-09 11:11:36</span> Options:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>   dependencies:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>',
+  logs: '<span style="color: #25bc24">2021-09-15 16:54:13</span> Options: \n<span style="color: #25bc24">2021-09-15 16:55:02</span> dependencies:\n<span style="color: #25bc24">2021-09-15 16:56:10</span>   packages_only: False \n<span style="color: #25bc24">2021-09-15 16:57:01</span> Org info updated, writing to keychain \n<span style="color: #25bc24">2021-09-15 16:57:40</span> Beginning task: UpdateDependencies\n<span style="color: #25bc24">2021-09-15 16:58:35</span> Resolving dependencies... \n<span style="color: #25bc24">2021-09-15 16:58:40</span> Collected dependencies:\n<span style="color: #25bc24">2021-09-15 16:58:55</span> Contacts &amp; Organizations 3.19 \n<span style="color: #25bc24">2021-09-15 16:59:10</span> Contacts &amp; Organizations 3.19 or a newer version is already installed; skipping.',
 };
 
 export const sampleStepResult4 = {
   status: CONSTANTS.RESULT_STATUS.OK,
   message: 'Here is a message',
-  logs: '<span style="color: #25bc24">2021-09-09 11:11:36</span> Options:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>   dependencies:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>',
+  logs: '<span style="color: #25bc24">2021-09-15 17:00:13</span> Options: \n<span style="color: #25bc24">2021-09-15 17:01:13</span> dependencies:\n <span style="color: #25bc24">2021-09-15 17:01:42</span>   - {\'ref\': \'2fe07cc960625f3a914b55c91da7e05a9dd66624\', \'github\': \'https://github.com/SalesforceFoundation/NPSP\', \'subfolder\': \'unpackaged/post/first\', \'unmanaged\': False, \'namespace_inject\': \'npsp\'} \n <span style="color: #25bc24">2021-09-15 17:02:05</span> packages_only: False \n<span style="color: #25bc24">2021-09-15 17:02:20</span>   security_type: FULL \n<span style="color: #25bc24">2021-09-15 17:02:40</span> Org info updated, writing to keychain\n<span style="color: #25bc24">2021-09-15 17:03:05</span> Beginning task: UpdateDependencies \n<span style="color: #25bc24">2021-09-15 17:03:20</span> Resolving dependencies... \n<span style="color: #25bc24">2021-09-15 17:03:45</span> Collected dependencies: \n<span style="color: #25bc24">2021-09-15 17:03:50</span> Mail &amp; Databases 3.19  \n<span style="color: #25bc24">2021-09-15 17:03:58</span>  [Success]: Succeeded',
 };
 
 export const sampleStepResult5 = {
@@ -92,7 +92,7 @@ export const sampleJob1 = {
   },
   plan: 'plan1',
   status: CONSTANTS.STATUS.STARTED,
-  steps: [sampleStep1.id, sampleStep2.id],
+  steps: [sampleStep3.id, sampleStep4.id],
   results: {},
   org_name: 'OddBird',
   org_type: 'Developer Edition',
@@ -104,7 +104,7 @@ export const sampleJob1 = {
   instance_url: 'https://sample.salesforce.org/',
   error_count: 0,
   warning_count: 0,
-  is_public: false,
+  is_public: true,
   user_can_edit: true,
   message: '<p>Success! You installed it.</p>',
   error_message: '',
@@ -184,7 +184,7 @@ export const sampleJob4 = {
   },
   plan: 'plan1',
   status: CONSTANTS.STATUS.CANCELED,
-  steps: ['gYBP3dj', 'gYBP3dj', 'SgYBP3dj'],
+  steps: [sampleStep3.id, sampleStep4.id],
   results: {},
   org_name: 'OddBird',
   org_type: 'Developer Edition',
