@@ -1,7 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import i18n from 'i18next';
-import React, { useCallback } from 'react';
+import * as React from 'react';
 
 type Props = {
   logsExpanded: boolean;
@@ -12,7 +12,7 @@ type Props = {
 const ToggleLogsDataColumnLabel = (props: Props) => {
   const { logsExpanded, hasLogs, toggleLogs } = props;
 
-  const handleToggle = useCallback(() => {
+  const handleToggle = React.useCallback(() => {
     toggleLogs(logsExpanded);
   }, [logsExpanded, toggleLogs]);
 
