@@ -42,7 +42,7 @@ export const sampleStep4 = {
 };
 
 export const sampleStep5 = {
-  id: 'samplestep4',
+  id: 'samplestep5',
   name: 'Install ABC 2.0',
   kind: 'Managed Package',
   kind_icon: 'archive',
@@ -53,31 +53,27 @@ export const sampleStep5 = {
 
 export const sampleStepResult1 = {
   status: CONSTANTS.RESULT_STATUS.OK,
-  message: 'Here is a message',
   logs: '<span style="color: #25bc24">2021-09-09 11:11:36</span> Options:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>   dependencies:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>',
 };
 
 export const sampleStepResult2 = {
   status: CONSTANTS.RESULT_STATUS.OK,
-  message: 'Here is a message',
   logs: '<span style="color: #25bc24">2021-09-09 11:11:36</span> Options:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>   dependencies:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>',
 };
 
 export const sampleStepResult3 = {
   status: CONSTANTS.RESULT_STATUS.OK,
-  message: 'Here is a message',
   logs: '<span style="color: #25bc24">2021-09-15 16:54:13</span> Options: \n<span style="color: #25bc24">2021-09-15 16:55:02</span> dependencies:\n<span style="color: #25bc24">2021-09-15 16:56:10</span>   packages_only: False \n<span style="color: #25bc24">2021-09-15 16:57:01</span> Org info updated, writing to keychain \n<span style="color: #25bc24">2021-09-15 16:57:40</span> Beginning task: UpdateDependencies\n<span style="color: #25bc24">2021-09-15 16:58:35</span> Resolving dependencies... \n<span style="color: #25bc24">2021-09-15 16:58:40</span> Collected dependencies:\n<span style="color: #25bc24">2021-09-15 16:58:55</span> Contacts &amp; Organizations 3.19 \n<span style="color: #25bc24">2021-09-15 16:59:10</span> Contacts &amp; Organizations 3.19 or a newer version is already installed; skipping.',
 };
 
 export const sampleStepResult4 = {
   status: CONSTANTS.RESULT_STATUS.OK,
-  message: 'Here is a message',
   logs: '<span style="color: #25bc24">2021-09-15 17:00:13</span> Options: \n<span style="color: #25bc24">2021-09-15 17:01:13</span> dependencies:\n <span style="color: #25bc24">2021-09-15 17:01:42</span>   - {\'ref\': \'2fe07cc960625f3a914b55c91da7e05a9dd66624\', \'github\': \'https://github.com/SalesforceFoundation/NPSP\', \'subfolder\': \'unpackaged/post/first\', \'unmanaged\': False, \'namespace_inject\': \'npsp\'} \n <span style="color: #25bc24">2021-09-15 17:02:05</span> packages_only: False \n<span style="color: #25bc24">2021-09-15 17:02:20</span>   security_type: FULL \n<span style="color: #25bc24">2021-09-15 17:02:40</span> Org info updated, writing to keychain\n<span style="color: #25bc24">2021-09-15 17:03:05</span> Beginning task: UpdateDependencies \n<span style="color: #25bc24">2021-09-15 17:03:20</span> Resolving dependencies... \n<span style="color: #25bc24">2021-09-15 17:03:45</span> Collected dependencies: \n<span style="color: #25bc24">2021-09-15 17:03:50</span> Mail &amp; Databases 3.19  \n<span style="color: #25bc24">2021-09-15 17:03:58</span>  [Success]: Succeeded',
 };
 
 export const sampleStepResult5 = {
   status: CONSTANTS.RESULT_STATUS.ERROR,
-  message: 'failed to install',
+  message: 'This is an error message. It failed to install.',
   logs: '<span style="color: #25bc24">2021-09-09 11:11:36</span> Options:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>   dependencies:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>',
 };
 
@@ -92,8 +88,11 @@ export const sampleJob1 = {
   },
   plan: 'plan1',
   status: CONSTANTS.STATUS.STARTED,
-  steps: [sampleStep3.id, sampleStep4.id],
-  results: {},
+  steps: [sampleStep1.id, sampleStep2.id, sampleStep4.id, sampleStep5.id],
+  results: {
+    samplestep1: [sampleStepResult1],
+    samplestep2: [sampleStepResult2],
+  },
   org_name: 'OddBird',
   org_type: 'Developer Edition',
   is_production_org: false,
@@ -121,10 +120,17 @@ export const sampleJob2 = {
   },
   plan: 'plan1',
   status: CONSTANTS.STATUS.COMPLETE,
-  steps: [sampleStep3.id, sampleStep4.id],
+  steps: [sampleStep1.id, sampleStep2.id, sampleStep4.id, sampleStep5.id],
   results: {
-    samplestep3: [sampleStepResult3],
+    samplestep1: [sampleStepResult1],
+    samplestep2: [sampleStepResult2],
     samplestep4: [sampleStepResult4],
+    samplestep5: [
+      {
+        ...sampleStepResult5,
+        status: CONSTANTS.RESULT_STATUS.OK,
+      },
+    ],
   },
   org_name: 'OddBird',
   org_type: 'Developer Edition',
@@ -153,8 +159,11 @@ export const sampleJob3 = {
   },
   plan: 'plan1',
   status: CONSTANTS.STATUS.FAILED,
-  steps: [sampleStep5.id],
+  steps: [sampleStep1.id, sampleStep2.id, sampleStep4.id, sampleStep5.id],
   results: {
+    samplestep1: [sampleStepResult1],
+    samplestep2: [sampleStepResult2],
+    samplestep4: [sampleStepResult4],
     samplestep5: [sampleStepResult5],
   },
   org_name: 'OddBird',
@@ -184,8 +193,11 @@ export const sampleJob4 = {
   },
   plan: 'plan1',
   status: CONSTANTS.STATUS.CANCELED,
-  steps: [sampleStep3.id, sampleStep4.id],
-  results: {},
+  steps: [sampleStep1.id, sampleStep2.id, sampleStep4.id, sampleStep5.id],
+  results: {
+    samplestep1: [sampleStepResult1],
+    samplestep2: [sampleStepResult2],
+  },
   org_name: 'OddBird',
   org_type: 'Developer Edition',
   is_production_org: false,
@@ -208,7 +220,7 @@ export const samplePlan1 = {
   old_slugs: ['123', 'sample-slug'],
   title: 'My Plan',
   preflight_message: '<p>This will install Test Module in your org.</p>',
-  steps: [sampleStep1, sampleStep2],
+  steps: [sampleStep1, sampleStep2, sampleStep3, sampleStep4, sampleStep5],
   is_listed: true,
   is_allowed: true,
   not_allowed_instructions: null,

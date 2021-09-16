@@ -6,15 +6,7 @@ import StepsTableComponent from '@/js/components/plans/stepsTable';
 import { Job } from '@/js/store/jobs/reducer';
 
 import { withRedux } from '../decorators';
-import {
-  sampleJob1,
-  sampleJob2,
-  sampleJob3,
-  sampleJob4,
-  samplePlan1,
-  sampleStep3,
-  sampleStep4,
-} from '../fixtures';
+import { sampleJob1, sampleJob2, sampleJob3, samplePlan1 } from '../fixtures';
 
 export default {
   title: 'Plans/StepsTable/Example',
@@ -26,7 +18,6 @@ const sampleJobs: { [key: string]: Job } = {
   Started: sampleJob1,
   Complete: sampleJob2,
   Failed: sampleJob3,
-  Canceled: sampleJob4,
 };
 
 type Props = ComponentProps<typeof StepsTableComponent>;
@@ -44,7 +35,7 @@ export const StepsTable: Story<StoryProps> = Template.bind({});
 StepsTable.args = {
   job: 'Complete',
   plan: samplePlan1,
-  steps: [sampleStep3, sampleStep4],
+  steps: samplePlan1.steps,
   handleStepsChange: action('handleStepsChange'),
 };
 StepsTable.argTypes = {
