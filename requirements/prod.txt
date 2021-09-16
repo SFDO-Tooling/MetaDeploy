@@ -81,7 +81,7 @@ croniter==1.0.15
     # via
     #   django-rq-scheduler
     #   rq-scheduler
-cryptography==3.4.7
+cryptography==3.4.8
     # via
     #   authlib
     #   autobahn
@@ -91,13 +91,13 @@ cryptography==3.4.7
     #   pyopenssl
     #   service-identity
     #   sfdo-template-helpers
-cumulusci==3.43.0
+cumulusci==3.44.0.dev1
     # via -r requirements/prod.in
 daphne==3.0.2
     # via channels
 defusedxml==0.7.1
     # via python3-openid
-deprecated==1.2.12
+deprecated==1.2.13
     # via
     #   cumulusci
     #   jwcrypto
@@ -124,7 +124,7 @@ django-allauth==0.45.0
     # via -r requirements/prod.in
 django-binary-database-files==1.0.15
     # via -r requirements/prod.in
-django-colorfield==0.4.2
+django-colorfield==0.4.3
     # via -r requirements/prod.in
 django-filter==2.4.0
     # via
@@ -312,7 +312,7 @@ requests-futures==1.0.0
     # via cumulusci
 requests-oauthlib==1.3.0
     # via django-allauth
-robotframework==4.1
+robotframework==4.1.1
     # via
     #   cumulusci
     #   robotframework-lint
@@ -437,7 +437,7 @@ zope.interface==5.4.0
     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==57.4.0
+setuptools==58.0.3
     # via
     #   cumulusci
     #   fs

@@ -244,7 +244,7 @@ yarl==1.6.3
 # The following packages are considered to be unsafe in a requirements file:
 pip==21.2.4
     # via pip-tools
-setuptools==57.4.0
+setuptools==58.0.3
     # via
     #   -c requirements/prod.txt
     #   ipython
