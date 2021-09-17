@@ -71,7 +71,7 @@ export const sampleStepResult4 = {
   logs: '<span style="color: #25bc24">2021-09-17 13:36:01</span> Options: \n<span style="color: #25bc24">2021-09-17 13:01:13</span> dependencies:\n <span style="color: #25bc24">2021-09-17 13:36:02</span>   - {\'ref\': \'2fe07cc960625f3a914b55c91da7e05a9dd66624\', \'github\': \'https://github.com/SalesforceFoundation/NPSP\', \'subfolder\': \'unpackaged/post/first\', \'unmanaged\': False, \'namespace_inject\': \'npsp\'} \n <span style="color: #25bc24">2021-09-17 13:36:02</span> packages_only: False \n<span style="color: #25bc24">2021-09-17 13:36:03</span>   security_type: FULL \n<span style="color: #25bc24">2021-09-17 13:36:03</span> Org info updated, writing to keychain\n<span style="color: #25bc24">2021-09-17 13:36:05</span> Beginning task: UpdateDependencies \n<span style="color: #25bc24">2021-09-17 13:36:05</span> Resolving dependencies... \n<span style="color: #25bc24">2021-09-17 13:36:05</span> Collected dependencies: \n<span style="color: #25bc24">2021-09-17 13:36:05</span> Mail &amp; Databases 3.19  \n<span style="color: #25bc24">2021-09-17 13:36:05</span>  [Success]: Succeeded',
 };
 
-export const sampleStepResult5 = {
+export const sampleFailedResult = {
   status: CONSTANTS.RESULT_STATUS.ERROR,
   message: 'This is an error message. It failed to install.',
   logs: '<span style="color: #25bc24">2021-09-17 13:30:09</span> Options: \n<span style="color: #25bc24">2021-09-17 13:30:09</span> name: Admissions Connect - Unmanaged Components \n<span style="color: #25bc24">2021-09-17 13:30:09</span> namespace: admissions_connect \n<span style="color: #25bc24">2021-09-17 13:30:09</span> version: 1.24 \n<span style="color: #25bc24">2021-09-17 13:30:09</span> security_type: FULL \n<span style="color: #25bc24">2021-09-17 13:30:09</span> activate_remote_site_settings: True \n<span style="color: #25bc24">2021-09-17 13:30:11</span> Org info updated, writing to keychain \n<span style="color: #25bc24">2021-09-17 13:30:11</span> Beginning task: InstallPackageVersion \n<span style="color: #25bc24">2021-09-17 13:30:21</span> Installing Admissions Connect - Unmanaged Components \n<span style="color: #25bc24">2021-09-17 13:30:21</span> Pending ',
@@ -92,6 +92,7 @@ export const sampleJob1 = {
   results: {
     samplestep1: [sampleStepResult1],
     samplestep2: [sampleStepResult2],
+    samplestep4: [{ logs: sampleStepResult4.logs }],
   },
   org_name: 'OddBird',
   org_type: 'Developer Edition',
@@ -127,7 +128,7 @@ export const sampleJob2 = {
     samplestep4: [sampleStepResult4],
     samplestep5: [
       {
-        ...sampleStepResult5,
+        ...sampleFailedResult,
         status: CONSTANTS.RESULT_STATUS.OK,
       },
     ],
@@ -163,8 +164,7 @@ export const sampleJob3 = {
   results: {
     samplestep1: [sampleStepResult1],
     samplestep2: [sampleStepResult2],
-    samplestep4: [sampleStepResult4],
-    samplestep5: [sampleStepResult5],
+    samplestep4: [sampleFailedResult],
   },
   org_name: 'OddBird',
   org_type: 'Developer Edition',
