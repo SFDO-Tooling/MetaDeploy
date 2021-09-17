@@ -3,9 +3,9 @@ import { SUPPORTED_ORGS } from '@/js/utils/constants';
 
 export const sampleStep1 = {
   id: 'samplestep1',
-  name: 'Install sfdobase 1.0',
+  name: 'Install SFDO Base 1.0',
   kind: 'Managed Package',
-  kind_icon: 'metadata',
+  kind_icon: 'archive',
   is_required: true,
   is_recommended: true,
   description: '',
@@ -13,9 +13,9 @@ export const sampleStep1 = {
 
 export const sampleStep2 = {
   id: 'samplestep2',
-  name: 'Install AnyPackage 1.0',
+  name: 'Install Outbound Funds (Core) 1.24',
   kind: 'Managed Package',
-  kind_icon: 'package',
+  kind_icon: 'archive',
   is_required: true,
   is_recommended: true,
   description: '',
@@ -23,17 +23,17 @@ export const sampleStep2 = {
 
 export const sampleStep3 = {
   id: 'samplestep3',
-  name: 'Install NCSC 1.0',
+  name: 'EDA - Course Connection Record Types',
   kind: 'Metadata',
   kind_icon: 'package',
-  is_required: false,
+  is_required: true,
   is_recommended: true,
   description: '',
 };
 
 export const sampleStep4 = {
   id: 'samplestep4',
-  name: 'Install ABC 2.0',
+  name: 'Install Admissions Connect 1.14',
   kind: 'Managed Package',
   kind_icon: 'archive',
   is_required: true,
@@ -43,9 +43,9 @@ export const sampleStep4 = {
 
 export const sampleStep5 = {
   id: 'samplestep5',
-  name: 'Install ABC 2.0',
-  kind: 'Managed Package',
-  kind_icon: 'archive',
+  name: 'Admissions Connect - Unmanaged Components',
+  kind: 'Metadata',
+  kind_icon: 'package',
   is_required: true,
   is_recommended: true,
   description: '',
@@ -53,28 +53,28 @@ export const sampleStep5 = {
 
 export const sampleStepResult1 = {
   status: CONSTANTS.RESULT_STATUS.OK,
-  logs: '<span style="color: #25bc24">2021-09-09 11:11:36</span> Options:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>   dependencies:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>',
+  logs: '<span style="color: #25bc24">2021-09-17 13:28:36</span>  Options: \n<span style="color: #25bc24">2021-09-17 13:29:53</span> name: sfdobase \n<span style="color: #25bc24">2021-09-17 13:29:53</span> namespace: sfdobase \n<span style="color: #25bc24">2021-09-17 13:29:53</span> version: 1.0 \n<span style="color: #25bc24">2021-09-17 13:29:54</span> security_type: FULL \n<span style="color: #25bc24">2021-09-17 13:29:56</span> Org info updated, writing to keychain \n<span style="color: #25bc24">2021-09-17 13:29:56</span> Beginning task: InstallPackageVersion \n<span style="color: #25bc24">2021-09-17 13:30:08</span> sfdobase 1.0 or a newer version is already installed; skipping.',
 };
 
 export const sampleStepResult2 = {
   status: CONSTANTS.RESULT_STATUS.OK,
-  logs: '<span style="color: #25bc24">2021-09-09 11:11:36</span> Options:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>   dependencies:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>',
+  logs: '<span style="color: #25bc24">2021-09-17 13:30:09</span> <span style="color: #adad27">The activateRSS option is deprecated. Please use activate_remote_site_settings.</span> \n<span style="color: #25bc24">2021-09-17 13:30:09</span> Options: \n<span style="color: #25bc24">2021-09-17 13:30:09</span> name: Outbound Funds (Core) \n<span style="color: #25bc24">2021-09-17 13:30:09</span> namespace: outfunds \n<span style="color: #25bc24">2021-09-17 13:30:09</span> version: 1.24 \n<span style="color: #25bc24">2021-09-17 13:30:09</span> security_type: FULL \n<span style="color: #25bc24">2021-09-17 13:30:09</span> activate_remote_site_settings: True \n<span style="color: #25bc24">2021-09-17 13:30:11</span> Org info updated, writing to keychain \n<span style="color: #25bc24">2021-09-17 13:30:11</span> Beginning task: InstallPackageVersion \n<span style="color: #25bc24">2021-09-17 13:30:11</span> \n<span style="color: #25bc24">2021-09-17 13:30:21</span> Installing Outbound Funds (Core) 1.24 \n<span style="color: #25bc24">2021-09-17 13:30:21</span> Pending \n<span style="color: #25bc24">2021-09-17 13:30:22</span> [Pending]: next check in 1 seconds \n<span style="color: #25bc24">2021-09-17 13:30:24</span> [Pending]: next check in 1 seconds \n<span style="color: #25bc24">2021-09-17 13:30:25</span> [Pending]: next check in 2 seconds \n<span style="color: #25bc24">2021-09-17 13:30:27</span> [Done] \n<span style="color: #25bc24">2021-09-17 13:32:47</span> [Success]: Succeeded',
 };
 
 export const sampleStepResult3 = {
   status: CONSTANTS.RESULT_STATUS.OK,
-  logs: '<span style="color: #25bc24">2021-09-15 16:54:13</span> Options: \n<span style="color: #25bc24">2021-09-15 16:55:02</span> dependencies:\n<span style="color: #25bc24">2021-09-15 16:56:10</span>   packages_only: False \n<span style="color: #25bc24">2021-09-15 16:57:01</span> Org info updated, writing to keychain \n<span style="color: #25bc24">2021-09-15 16:57:40</span> Beginning task: UpdateDependencies\n<span style="color: #25bc24">2021-09-15 16:58:35</span> Resolving dependencies... \n<span style="color: #25bc24">2021-09-15 16:58:40</span> Collected dependencies:\n<span style="color: #25bc24">2021-09-15 16:58:55</span> Contacts &amp; Organizations 3.19 \n<span style="color: #25bc24">2021-09-15 16:59:10</span> Contacts &amp; Organizations 3.19 or a newer version is already installed; skipping.',
+  logs: '<span style="color: #25bc24">2021-09-17 13:33:13</span> Options: \n<span style="color: #25bc24">2021-09-17 13:34:02</span> dependencies:\n<span style="color: #25bc24">2021-09-17 13:34:10</span>   packages_only: False \n<span style="color: #25bc24">2021-09-17 13:35:01</span> Org info updated, writing to keychain \n<span style="color: #25bc24">2021-09-17 13:35:40</span> Beginning task: UpdateDependencies\n<span style="color: #25bc24">2021-09-17 13:35:41</span> Resolving dependencies... \n<span style="color: #25bc24">2021-09-17 13:35:50</span> Collected dependencies:\n<span style="color: #25bc24">2021-09-17 13:35:51</span> Contacts &amp; Organizations 3.19 \n<span style="color: #25bc24">2021-09-17 13:35:52</span> Contacts &amp; Organizations 3.19 or a newer version is already installed; skipping.',
 };
 
 export const sampleStepResult4 = {
   status: CONSTANTS.RESULT_STATUS.OK,
-  logs: '<span style="color: #25bc24">2021-09-15 17:00:13</span> Options: \n<span style="color: #25bc24">2021-09-15 17:01:13</span> dependencies:\n <span style="color: #25bc24">2021-09-15 17:01:42</span>   - {\'ref\': \'2fe07cc960625f3a914b55c91da7e05a9dd66624\', \'github\': \'https://github.com/SalesforceFoundation/NPSP\', \'subfolder\': \'unpackaged/post/first\', \'unmanaged\': False, \'namespace_inject\': \'npsp\'} \n <span style="color: #25bc24">2021-09-15 17:02:05</span> packages_only: False \n<span style="color: #25bc24">2021-09-15 17:02:20</span>   security_type: FULL \n<span style="color: #25bc24">2021-09-15 17:02:40</span> Org info updated, writing to keychain\n<span style="color: #25bc24">2021-09-15 17:03:05</span> Beginning task: UpdateDependencies \n<span style="color: #25bc24">2021-09-15 17:03:20</span> Resolving dependencies... \n<span style="color: #25bc24">2021-09-15 17:03:45</span> Collected dependencies: \n<span style="color: #25bc24">2021-09-15 17:03:50</span> Mail &amp; Databases 3.19  \n<span style="color: #25bc24">2021-09-15 17:03:58</span>  [Success]: Succeeded',
+  logs: '<span style="color: #25bc24">2021-09-17 13:36:01</span> Options: \n<span style="color: #25bc24">2021-09-17 13:01:13</span> dependencies:\n <span style="color: #25bc24">2021-09-17 13:36:02</span>   - {\'ref\': \'2fe07cc960625f3a914b55c91da7e05a9dd66624\', \'github\': \'https://github.com/SalesforceFoundation/NPSP\', \'subfolder\': \'unpackaged/post/first\', \'unmanaged\': False, \'namespace_inject\': \'npsp\'} \n <span style="color: #25bc24">2021-09-17 13:36:02</span> packages_only: False \n<span style="color: #25bc24">2021-09-17 13:36:03</span>   security_type: FULL \n<span style="color: #25bc24">2021-09-17 13:36:03</span> Org info updated, writing to keychain\n<span style="color: #25bc24">2021-09-17 13:36:05</span> Beginning task: UpdateDependencies \n<span style="color: #25bc24">2021-09-17 13:36:05</span> Resolving dependencies... \n<span style="color: #25bc24">2021-09-17 13:36:05</span> Collected dependencies: \n<span style="color: #25bc24">2021-09-17 13:36:05</span> Mail &amp; Databases 3.19  \n<span style="color: #25bc24">2021-09-17 13:36:05</span>  [Success]: Succeeded',
 };
 
 export const sampleStepResult5 = {
   status: CONSTANTS.RESULT_STATUS.ERROR,
   message: 'This is an error message. It failed to install.',
-  logs: '<span style="color: #25bc24">2021-09-09 11:11:36</span> Options:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>   dependencies:\n<span style="color: #25bc24">2021-09-09 11:11:36</span>',
+  logs: '<span style="color: #25bc24">2021-09-17 13:30:09</span> Options: \n<span style="color: #25bc24">2021-09-17 13:30:09</span> name: Admissions Connect - Unmanaged Components \n<span style="color: #25bc24">2021-09-17 13:30:09</span> namespace: admissions_connect \n<span style="color: #25bc24">2021-09-17 13:30:09</span> version: 1.24 \n<span style="color: #25bc24">2021-09-17 13:30:09</span> security_type: FULL \n<span style="color: #25bc24">2021-09-17 13:30:09</span> activate_remote_site_settings: True \n<span style="color: #25bc24">2021-09-17 13:30:11</span> Org info updated, writing to keychain \n<span style="color: #25bc24">2021-09-17 13:30:11</span> Beginning task: InstallPackageVersion \n<span style="color: #25bc24">2021-09-17 13:30:21</span> Installing Admissions Connect - Unmanaged Components \n<span style="color: #25bc24">2021-09-17 13:30:21</span> Pending ',
 };
 
 export const sampleJob1 = {
@@ -88,11 +88,8 @@ export const sampleJob1 = {
   },
   plan: 'plan1',
   status: CONSTANTS.STATUS.STARTED,
-  steps: [sampleStep1.id, sampleStep2.id, sampleStep4.id, sampleStep5.id],
-  results: {
-    samplestep1: [sampleStepResult1],
-    samplestep2: [sampleStepResult2],
-  },
+  steps: [sampleStep1.id, sampleStep2.id, sampleStep3.id, sampleStep4.id, sampleStep5.id],
+  results: {},
   org_name: 'OddBird',
   org_type: 'Developer Edition',
   is_production_org: false,
@@ -120,10 +117,11 @@ export const sampleJob2 = {
   },
   plan: 'plan1',
   status: CONSTANTS.STATUS.COMPLETE,
-  steps: [sampleStep1.id, sampleStep2.id, sampleStep4.id, sampleStep5.id],
+  steps: [sampleStep1.id, sampleStep2.id, sampleStep3.id, sampleStep4.id, sampleStep5.id],
   results: {
     samplestep1: [sampleStepResult1],
     samplestep2: [sampleStepResult2],
+    samplestep3: [sampleStepResult3],
     samplestep4: [sampleStepResult4],
     samplestep5: [
       {
@@ -159,10 +157,11 @@ export const sampleJob3 = {
   },
   plan: 'plan1',
   status: CONSTANTS.STATUS.FAILED,
-  steps: [sampleStep1.id, sampleStep2.id, sampleStep4.id, sampleStep5.id],
+  steps: [sampleStep1.id, sampleStep2.id, sampleStep3.id, sampleStep4.id, sampleStep5.id],
   results: {
     samplestep1: [sampleStepResult1],
     samplestep2: [sampleStepResult2],
+    samplestep3: [sampleStepResult3],
     samplestep4: [sampleStepResult4],
     samplestep5: [sampleStepResult5],
   },
