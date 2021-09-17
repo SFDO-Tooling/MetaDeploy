@@ -26,7 +26,7 @@ export const sampleStep3 = {
   name: 'EDA - Course Connection Record Types',
   kind: 'Metadata',
   kind_icon: 'package',
-  is_required: true,
+  is_required: false,
   is_recommended: true,
   description: '',
 };
@@ -88,14 +88,11 @@ export const sampleJob1 = {
   },
   plan: 'plan1',
   status: CONSTANTS.STATUS.STARTED,
-  steps: [
-    sampleStep1.id,
-    sampleStep2.id,
-    sampleStep3.id,
-    sampleStep4.id,
-    sampleStep5.id,
-  ],
-  results: {},
+  steps: [sampleStep1.id, sampleStep2.id, sampleStep4.id, sampleStep5.id],
+  results: {
+    samplestep1: [sampleStepResult1],
+    samplestep2: [sampleStepResult2],
+  },
   org_name: 'OddBird',
   org_type: 'Developer Edition',
   is_production_org: false,
@@ -123,17 +120,10 @@ export const sampleJob2 = {
   },
   plan: 'plan1',
   status: CONSTANTS.STATUS.COMPLETE,
-  steps: [
-    sampleStep1.id,
-    sampleStep2.id,
-    sampleStep3.id,
-    sampleStep4.id,
-    sampleStep5.id,
-  ],
+  steps: [sampleStep1.id, sampleStep2.id, sampleStep4.id, sampleStep5.id],
   results: {
     samplestep1: [sampleStepResult1],
     samplestep2: [sampleStepResult2],
-    samplestep3: [sampleStepResult3],
     samplestep4: [sampleStepResult4],
     samplestep5: [
       {
@@ -169,17 +159,10 @@ export const sampleJob3 = {
   },
   plan: 'plan1',
   status: CONSTANTS.STATUS.FAILED,
-  steps: [
-    sampleStep1.id,
-    sampleStep2.id,
-    sampleStep3.id,
-    sampleStep4.id,
-    sampleStep5.id,
-  ],
+  steps: [sampleStep1.id, sampleStep2.id, sampleStep4.id, sampleStep5.id],
   results: {
     samplestep1: [sampleStepResult1],
     samplestep2: [sampleStepResult2],
-    samplestep3: [sampleStepResult3],
     samplestep4: [sampleStepResult4],
     samplestep5: [sampleStepResult5],
   },
