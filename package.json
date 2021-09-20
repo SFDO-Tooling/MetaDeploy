@@ -162,7 +162,8 @@
     "webpack-merge": "^5.8.0"
   },
   "resolutions": {
-    "glob-parent": "^5.1.2"
+    "glob-parent": "^5.1.2",
+    "node-fetch": "2.6.2"
   },
   "storybook-deployer": {
     "gitUsername": "Storybook Deployer Bot",
