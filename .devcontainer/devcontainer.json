@@ -14,7 +14,6 @@
   // Add the IDs of extensions you want installed when the container is created in the array below.
   "extensions": [
     "bibhasdn.django-html",
-    "coenraads.bracket-pair-colorizer-2",
     "csstools.postcss",
     "dbaeumer.vscode-eslint",
     "formulahendry.auto-rename-tag",
@@ -39,6 +38,7 @@
     // not in base container images. You can also update this to an specific shell to ensure VS Code
     // uses the right one for terminals and tasks. For example, /bin/bash (or /bin/ash for Alpine).
     "terminal.integrated.shell.linux": null,
+    "editor.bracketPairColorization.enabled": true,
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": true
     },
@@ -62,6 +62,7 @@
     "remote.extensionKind": {
       "ms-azuretools.vscode-docker": "workspace"
     },
+    "typescript.tsdk": "node_modules/typescript/lib",
     "[javascript]": {
       "editor.rulers": [80]
     },

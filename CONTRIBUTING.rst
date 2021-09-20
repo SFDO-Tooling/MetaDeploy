@@ -39,7 +39,7 @@ root directory:
 - ``yarn lint:sass``: formats and lints ``.scss`` files
 - ``yarn lint:py``: formats and lints ``.py`` files
 - ``yarn prettier:js``: formats ``.js`` files
-- ``yarn prettier:other``: formats ``.json``, ``.md``, and ``.yml`` files
+- ``yarn lint:other``: formats ``.json``, ``.md``, and ``.yml`` files
 - ``yarn tsc``: runs JS type-checking
 - ``yarn build``: builds development (unminified) static assets into ``dist/``
   dir
