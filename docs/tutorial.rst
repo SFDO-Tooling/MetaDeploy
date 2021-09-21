@@ -5,9 +5,9 @@ Tutorial
 Overview
 --------
 
-MetaCI makes it possible to publish a CumulusCI flow as an installer so that it can be repeated by any user who brings their own org.
+MetaDeploy makes it possible to publish a CumulusCI flow as an installer so that it can be repeated by any user who brings their own org.
 
-A single instance of MetaCI can host installers for multiple Products and multiple Versions of each Product. For each version, multiple Plans can be configured. Each Plan represents a separate series of Steps that will be run in sequence to complete the installation.
+A single instance of MetaDeploy can host installers for multiple Products and multiple Versions of each Product. For each version, multiple Plans can be configured. Each Plan represents a separate series of Steps that will be run in sequence to complete the installation.
 
 Publishing an installer
 -----------------------

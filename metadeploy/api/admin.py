@@ -211,7 +211,7 @@ class PreflightResult(AdminHelpTextMixin, admin.ModelAdmin, PlanMixin):
         "created_at",
     )
     list_select_related = ("plan", "plan__version", "plan__version__product")
-    search_fields = ("org_id", "plan", "exception")
+    search_fields = ("id", "org_id", "exception")
 
 
 @admin.register(Product)
