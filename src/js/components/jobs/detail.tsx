@@ -46,6 +46,7 @@ import {
 import { fetchScratchOrg } from '@/js/store/scratchOrgs/actions';
 import { selectScratchOrg } from '@/js/store/scratchOrgs/selectors';
 import { selectUserState } from '@/js/store/user/selectors';
+import { getVersionLabel } from '@/js/utils/helpers';
 import routes from '@/js/utils/routes';
 
 const select = (appState: AppState, props: RouteComponentProps) => ({
@@ -351,8 +352,6 @@ class JobDetail extends React.Component<Props, State> {
     if (loadingOrNotFound !== false) {
       return loadingOrNotFound;
     }
-    // this redundant check is required to satisfy Flow:
-    // https://flow.org/en/docs/lang/refinements/#toc-refinement-invalidations
 
     /* istanbul ignore if */
     if (!product || !version || !plan || !job) {
@@ -361,7 +360,7 @@ class JobDetail extends React.Component<Props, State> {
     const isScratchOrg = Boolean(job.org_id && !job.creator);
     const linkToPlan = routes.plan_detail(
       product.slug,
-      version.label,
+      getVersionLabel(product, version),
       plan.slug,
     );
     const { canceling } = this.state;

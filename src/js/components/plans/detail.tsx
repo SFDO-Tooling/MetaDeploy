@@ -55,7 +55,12 @@ import {
 import { selectScratchOrg } from '@/js/store/scratchOrgs/selectors';
 import { logout } from '@/js/store/user/actions';
 import { selectUserState } from '@/js/store/user/selectors';
-import { SCRATCH_ORG_STATUSES, SUPPORTED_ORGS } from '@/js/utils/constants';
+import {
+  LATEST_VERSION,
+  SCRATCH_ORG_STATUSES,
+  SUPPORTED_ORGS,
+} from '@/js/utils/constants';
+import { getVersionLabel } from '@/js/utils/helpers';
 import routes from '@/js/utils/routes';
 
 const select = (appState: AppState, props: RouteComponentProps) => ({
@@ -430,8 +435,6 @@ class PlanDetail extends React.Component<Props, State> {
     if (loadingOrNotFound !== false) {
       return loadingOrNotFound;
     }
-    // this redundant check is required to satisfy Flow:
-    // https://flow.org/en/docs/lang/refinements/#toc-refinement-invalidations
 
     /* istanbul ignore if */
     if (!product || !version || !plan) {
@@ -475,10 +478,7 @@ class PlanDetail extends React.Component<Props, State> {
             <BodyContainer>
               {product.most_recent_version && !isMostRecent ? (
                 <OldVersionWarning
-                  link={routes.version_detail(
-                    product.slug,
-                    product.most_recent_version.label,
-                  )}
+                  link={routes.version_detail(product.slug, LATEST_VERSION)}
                 />
               ) : null}
               {preflight && (scratchOrg || user) ? (
@@ -508,7 +508,10 @@ class PlanDetail extends React.Component<Props, State> {
                 backLink={
                   <BackLink
                     label={i18n.t('Select a different plan')}
-                    url={routes.version_detail(product.slug, version.label)}
+                    url={routes.version_detail(
+                      product.slug,
+                      getVersionLabel(product, version),
+                    )}
                     className="slds-p-top_small"
                   />
                 }
@@ -532,7 +535,12 @@ class PlanDetail extends React.Component<Props, State> {
               link={
                 <Trans i18nKey="planNotAllowed">
                   Try{' '}
-                  <Link to={routes.version_detail(product.slug, version.label)}>
+                  <Link
+                    to={routes.version_detail(
+                      product.slug,
+                      getVersionLabel(product, version),
+                    )}
+                  >
                     another plan
                   </Link>{' '}
                   from that product version

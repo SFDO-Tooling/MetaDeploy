@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 
 import { Plan } from '@/js/store/plans/reducer';
 import { Product, Version } from '@/js/store/products/reducer';
+import { getVersionLabel } from '@/js/utils/helpers';
 import routes from '@/js/utils/routes';
 
 const PlanCard = ({
@@ -62,14 +63,14 @@ const PlanCards = ({
       {primary_plan && visiblePrimaryPlan ? (
         <PlanCard
           productSlug={product.slug}
-          versionLabel={version.label}
+          versionLabel={getVersionLabel(product, version)}
           plan={primary_plan}
         />
       ) : null}
       {secondary_plan && visibleSecondaryPlan ? (
         <PlanCard
           productSlug={product.slug}
-          versionLabel={version.label}
+          versionLabel={getVersionLabel(product, version)}
           plan={secondary_plan}
         />
       ) : null}
@@ -77,7 +78,7 @@ const PlanCards = ({
         <PlanCard
           key={plan.id}
           productSlug={product.slug}
-          versionLabel={version.label}
+          versionLabel={getVersionLabel(product, version)}
           plan={plan}
         />
       ))}

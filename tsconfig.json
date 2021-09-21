@@ -40,6 +40,6 @@
       ]
     }
   },
-  "include": ["src/js/**/*.ts", "src/js/**/*.tsx"],
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules"]
 }

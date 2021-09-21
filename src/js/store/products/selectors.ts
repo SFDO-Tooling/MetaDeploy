@@ -9,6 +9,7 @@ import {
   ProductsState,
   Version,
 } from '@/js/store/products/reducer';
+import { LATEST_VERSION } from '@/js/utils/constants';
 
 export type CategoryWithProducts = {
   category: Category;
@@ -101,7 +102,8 @@ const selectVersion = createSelector(
     }
     if (
       product.most_recent_version &&
-      product.most_recent_version.label === versionLabel
+      (versionLabel === LATEST_VERSION ||
+        versionLabel === product.most_recent_version.label)
     ) {
       return product.most_recent_version;
     }

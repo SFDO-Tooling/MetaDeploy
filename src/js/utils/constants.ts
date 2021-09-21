@@ -20,3 +20,5 @@ export const PRODUCT_LAYOUTS = {
   Card: 'Card' as const,
 };
 export type ProductLayouts = 'Default' | 'Card';
+
+export const LATEST_VERSION = 'latest';

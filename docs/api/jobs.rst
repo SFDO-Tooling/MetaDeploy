@@ -49,6 +49,7 @@ Retrieve
      "error_message": "",
      "product_slug": "test-product",
      "version_label": "1.0.0",
+     "version_is_most_recent": true,
      "plan_slug": "my-plan"
    }
 
