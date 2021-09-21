@@ -6,7 +6,13 @@ import StepsTableComponent from '@/js/components/plans/stepsTable';
 import { Job } from '@/js/store/jobs/reducer';
 
 import { withRedux } from '../decorators';
-import { sampleJob1, sampleJob2, sampleJob3, samplePlan1 } from '../fixtures';
+import {
+  sampleJob1,
+  sampleJob2,
+  sampleJob3,
+  samplePlan1,
+  samplePreflight1,
+} from '../fixtures';
 
 export default {
   title: 'Plans/StepsTable/Example',
@@ -29,6 +35,23 @@ interface StoryProps extends Omit<Props, 'job'> {
 const Template = ({ job, ...rest }: StoryProps) => (
   <StepsTableComponent job={sampleJobs[job]} {...rest} />
 );
+
+export const PreValidation: Story<StoryProps> = Template.bind({});
+PreValidation.args = {
+  job: '',
+  plan: samplePlan1,
+  steps: samplePlan1.steps,
+};
+
+export const PostValidation: Story<StoryProps> = Template.bind({});
+PostValidation.args = {
+  plan: samplePlan1,
+  steps: samplePlan1.steps,
+  preflight: samplePreflight1,
+  canInstall: true,
+};
+
+PostValidation.storyName = 'PostValidation(Approved)';
 
 export const StepsTable: Story<StoryProps> = Template.bind({});
 

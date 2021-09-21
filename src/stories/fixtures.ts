@@ -230,3 +230,16 @@ export const samplePlan1 = {
   supported_orgs: SUPPORTED_ORGS.Persistent,
   scratch_org_duration: 30,
 };
+
+export const samplePreflight1 = {
+  id: 'pf-1',
+  edited_at: '',
+  user: 'XlZVyyl',
+  plan: samplePlan1.id,
+  status: CONSTANTS.STATUS.COMPLETE,
+  results: {},
+  is_valid: false,
+  error_count: 0,
+  warning_count: 0,
+  is_ready: true,
+};
