@@ -42,6 +42,14 @@ PreValidation.args = {
   plan: samplePlan1,
   steps: samplePlan1.steps,
 };
+PreValidation.argTypes = {
+  job: { control: { disable: true } },
+  plan: { control: { disable: true } },
+  steps: { control: { disable: true } },
+  preflight: { control: { disable: true } },
+  selectedSteps: { control: { disable: true } },
+};
+PreValidation.storyName = 'Pre-validation';
 
 export const PostValidation: Story<StoryProps> = Template.bind({});
 PostValidation.args = {
@@ -50,8 +58,14 @@ PostValidation.args = {
   preflight: samplePreflight1,
   canInstall: true,
 };
-
-PostValidation.storyName = 'PostValidation(Approved)';
+PostValidation.argTypes = {
+  job: { control: { disable: true } },
+  plan: { control: { disable: true } },
+  steps: { control: { disable: true } },
+  preflight: { control: { disable: true } },
+  selectedSteps: { control: { disable: true } },
+};
+PostValidation.storyName = 'Post-validation(Can Install)';
 
 export const StepsTable: Story<StoryProps> = Template.bind({});
 
@@ -70,4 +84,4 @@ StepsTable.argTypes = {
   selectedSteps: { control: { disable: true } },
 };
 
-StepsTable.storyName = 'Steps Table';
+StepsTable.storyName = 'Steps Table (Active Job)';
