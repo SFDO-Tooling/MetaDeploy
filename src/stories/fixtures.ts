@@ -238,8 +238,45 @@ export const samplePreflight1 = {
   plan: samplePlan1.id,
   status: CONSTANTS.STATUS.COMPLETE,
   results: {},
-  is_valid: false,
+  is_valid: true,
   error_count: 0,
   warning_count: 0,
   is_ready: true,
+};
+
+export const samplePreflight2 = {
+  id: 'pf-2',
+  edited_at: '',
+  user: 'XlZVyyl',
+  plan: samplePlan1.id,
+  status: CONSTANTS.STATUS.FAILED,
+  results: {
+    samplestep1: [{ status: CONSTANTS.RESULT_STATUS.SKIP }],
+    samplestep2: [
+      {
+        status: CONSTANTS.RESULT_STATUS.OPTIONAL,
+        message: 'Pre-install validation marked this step as optional',
+      },
+    ],
+    samplestep4: [
+      {
+        status: CONSTANTS.RESULT_STATUS.WARN,
+        message: 'This step has a warning',
+      },
+    ],
+    samplestep5: [
+      {
+        status: CONSTANTS.RESULT_STATUS.ERROR,
+        message: 'This step has an error',
+      },
+      {
+        status: CONSTANTS.RESULT_STATUS.ERROR,
+        message: 'This step has another error too',
+      },
+    ],
+  },
+  is_valid: true,
+  error_count: 1,
+  warning_count: 1,
+  is_ready: false,
 };
