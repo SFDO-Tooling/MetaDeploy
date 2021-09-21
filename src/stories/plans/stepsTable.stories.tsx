@@ -72,7 +72,7 @@ PostValidation.storyName = 'Can Be Installed';
 export const StepsTable: Story<StoryProps> = Template.bind({});
 
 StepsTable.args = {
-  job: 'Started',
+  job: 'Failed',
   plan: samplePlan1,
   steps: samplePlan1.steps,
   handleStepsChange: action('handleStepsChange'),
