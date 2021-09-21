@@ -15,7 +15,7 @@ import {
 } from '../fixtures';
 
 export default {
-  title: 'Plans/StepsTable/Example',
+  title: 'Plans/StepsTable/Examples',
   component: StepsTableComponent,
   decorators: [withRedux({ socket: true })],
 };
@@ -43,6 +43,7 @@ PreValidation.args = {
   steps: samplePlan1.steps,
 };
 PreValidation.argTypes = {
+  canInstall: { control: { disable: true } },
   job: { control: { disable: true } },
   plan: { control: { disable: true } },
   steps: { control: { disable: true } },
@@ -59,6 +60,7 @@ PostValidation.args = {
   canInstall: true,
 };
 PostValidation.argTypes = {
+  canInstall: { control: { disable: true } },
   job: { control: { disable: true } },
   plan: { control: { disable: true } },
   steps: { control: { disable: true } },

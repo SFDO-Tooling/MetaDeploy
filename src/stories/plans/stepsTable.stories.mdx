@@ -13,32 +13,35 @@ The **StepsTable** component is an
 used to display information about each **Step** involved in installing a
 **Plan**.
 
-The table features columns for the name, type, and install status of each
-**Step**.
-
 If a pre-install validation check is required, the **StepsTable** initially only
-displays columns for each **Step** name and type.
+displays **Step** names and types.
 
-Once the installation process is able to begin, an `Install` column appears. If
-a **Step** is required, the `Install` column for that **Step** features a
-checkmark. If the **Step** is optional, a checkbox that can be selected is shown
-instead.
+<Canvas>
+  <Story id="plans-stepstable-examples--pre-validation" />
+</Canvas>
 
-Once the installation process has begun for a **Step**, a toggle button appears
-at the beginning of each **Step** name. Clicking on the button toggles an
-expanded log of information about the time, status, and detailed processes of
-the **Step**.
+Once the installation process can be started an `Install` column appears. If a
+**Step** is required, the `Install` column for that **Step** features a
+checkmark. If it is optional, a selectable checkbox is shown instead.
+
+<Canvas>
+  <Story id="plans-stepstable-examples--post-validation" />
+</Canvas>
+
+During the installation process for a **Step**, a toggle button appears next to
+its name. Clicking on the button toggles an expanded log of information about
+the time, status, and detailed processes of the **Step**.
 
 When an installation **Step** is complete, a round, green icon with a white
 checkmark appears in the `Install` column.
 
 A toggle button for hiding or expanding all logs appears in the `Steps` column
-once the first **Step** starts to transmit log data.
+header once the first **Step** starts to transmit log data.
 
 Skipped **Steps** display a gray dash in the `Install` column. If a **Step**
 fails its status is labeled as `Error` and an error message is shown below the
 **Step** name.
 
 <Canvas>
-  <Story id="plans-stepstable-example--steps-table" />
+  <Story id="plans-stepstable-examples--steps-table" />
 </Canvas>
