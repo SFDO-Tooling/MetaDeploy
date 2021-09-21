@@ -128,7 +128,7 @@
     "eslint-plugin-jest": "^24.4.2",
     "eslint-plugin-mdx": "^1.15.1",
     "eslint-plugin-prettier": "^4.0.0",
-    "eslint-plugin-react": "7.25.3",
+    "eslint-plugin-react": "7.26.0",
     "eslint-plugin-react-hooks": "^4.2.0",
     "eslint-plugin-simple-import-sort": "^7.0.0",
     "fetch-mock": "^9.11.0",
@@ -148,7 +148,7 @@
     "prettier": "^2.4.1",
     "react-test-renderer": "^17.0.2",
     "redux-mock-store": "^1.5.4",
-    "sass": "^1.41.1",
+    "sass": "^1.42.0",
     "sass-loader": "^12.1.0",
     "stylelint": "^13.13.1",
     "stylelint-config-prettier": "^8.0.2",
@@ -162,12 +162,13 @@
     "webpack-merge": "^5.8.0"
   },
   "resolutions": {
-    "browserslist": ">=4.16.5",
-    "glob-parent": ">=5.1.2",
+    "@storybook/**/browserslist": "^4.16.5",
+    "@storybook/**/immer": "^9.0.6",
+    "@storybook/**/set-value": "^4.0.1",
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.0",
+    "glob-parent": "^5.1.2",
     "i18next": "^20.6.1",
-    "immer": ">=9.0.6",
-    "set-value": ">=4.0.1",
-    "trim": ">=0.0.3"
+    "trim": "^0.0.3"
   },
   "storybook-deployer": {
     "gitUsername": "Storybook Deployer Bot",
