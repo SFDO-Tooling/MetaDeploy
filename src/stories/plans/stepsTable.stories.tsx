@@ -49,7 +49,7 @@ PreValidation.argTypes = {
   preflight: { control: { disable: true } },
   selectedSteps: { control: { disable: true } },
 };
-PreValidation.storyName = 'Pre-validation';
+PreValidation.storyName = 'Pre- Install or Validation';
 
 export const PostValidation: Story<StoryProps> = Template.bind({});
 PostValidation.args = {
@@ -65,7 +65,7 @@ PostValidation.argTypes = {
   preflight: { control: { disable: true } },
   selectedSteps: { control: { disable: true } },
 };
-PostValidation.storyName = 'Post-validation(Can Install)';
+PostValidation.storyName = 'Can Be Installed';
 
 export const StepsTable: Story<StoryProps> = Template.bind({});
 
@@ -84,4 +84,4 @@ StepsTable.argTypes = {
   selectedSteps: { control: { disable: true } },
 };
 
-StepsTable.storyName = 'Steps Table (Active Job)';
+StepsTable.storyName = 'Active Job';

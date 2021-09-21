@@ -8,7 +8,7 @@ export const sampleStep1 = {
   kind_icon: 'archive',
   is_required: true,
   is_recommended: true,
-  description: '',
+  description: 'More information about this step.',
 };
 
 export const sampleStep2 = {
