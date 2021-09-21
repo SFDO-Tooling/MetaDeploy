@@ -162,12 +162,16 @@
     "webpack-merge": "^5.8.0"
   },
   "resolutions": {
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.0",
+    "@storybook/**/ansi-regex": "^5.0.1",
     "@storybook/**/browserslist": "^4.16.5",
     "@storybook/**/immer": "^9.0.6",
+    "@storybook/**/prismjs": "^1.25.0",
     "@storybook/**/set-value": "^4.0.1",
-    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.0",
     "glob-parent": "^5.1.2",
+    "html-webpack-plugin/**/ansi-regex": "^5.0.1",
     "i18next": "^20.6.1",
+    "jest-junit/**/ansi-regex": "^5.0.1",
     "trim": "^0.0.3"
   },
   "storybook-deployer": {
