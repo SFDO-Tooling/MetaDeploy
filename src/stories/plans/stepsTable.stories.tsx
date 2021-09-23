@@ -27,71 +27,56 @@ const sampleJobs: { [key: string]: Job } = {
   Complete: sampleJob2,
   Failed: sampleJob3,
 };
-const samplePreflights: { [key: string]: Preflight } = {
+const samplePreflights: { [key: string]: Preflight | null } = {
+  None: null,
   Success: samplePreflight1,
   Error: samplePreflight2,
 };
 
 type Props = ComponentProps<typeof StepsTableComponent>;
 
-interface StoryProps extends Omit<Props, 'job' | 'preflight'> {
-  job: string;
-  preflight: string;
-}
+const Template = (props: Props) => <StepsTableComponent {...props} />;
 
-const Template = ({ job, preflight, ...rest }: StoryProps) => (
-  <StepsTableComponent
-    job={sampleJobs[job]}
-    preflight={samplePreflights[preflight]}
-    {...rest}
-  />
-);
-
-export const PreValidation: Story<StoryProps> = Template.bind({});
-PreValidation.args = {
+export const PlanSteps: Story<Props> = Template.bind({});
+PlanSteps.args = {
   plan: samplePlan1,
-  steps: samplePlan1.steps,
-  canInstall: false,
-  handleStepsChange: action('handleStepsChange'),
-};
-PreValidation.argTypes = {
-  canInstall: { control: { disable: true } },
-  preflight: { control: { disable: true } },
-  selectedSteps: { control: { disable: true } },
-  job: { control: { disable: true } },
-};
-PreValidation.storyName = 'Needs pre-install validation';
-
-export const PostValidation: Story<StoryProps> = Template.bind({});
-PostValidation.args = {
-  preflight: 'Success',
-  plan: samplePlan1,
+  preflight: 'None' as unknown as Preflight | null,
   steps: samplePlan1.steps,
   canInstall: true,
   handleStepsChange: action('handleStepsChange'),
 };
-PostValidation.argTypes = {
+PlanSteps.argTypes = {
+  plan: { table: { disable: true } },
   preflight: {
-    options: Object.keys(samplePreflights),
+    type: { name: 'string' },
     control: { type: 'select' },
+    options: Object.keys(samplePreflights),
+    mapping: samplePreflights,
   },
-  canInstall: { control: { disable: true } },
-  job: { control: { disable: true } },
-  selectedSteps: { control: { disable: true } },
+  job: { table: { disable: true } },
+  selectedSteps: { table: { disable: true } },
+  canInstall: { table: { disable: true } },
+  handleStepsChange: { table: { disable: true } },
 };
-PostValidation.storyName = 'Pre-install validation complete';
+PlanSteps.storyName = 'Pre-install validation';
 
-export const InstallationJob: Story<StoryProps> = Template.bind({});
+export const InstallationJob: Story<Props> = Template.bind({});
 InstallationJob.args = {
-  job: 'Started',
   plan: samplePlan1,
+  job: 'Started' as unknown as Job,
   steps: samplePlan1.steps,
-  handleStepsChange: action('handleStepsChange'),
 };
 InstallationJob.argTypes = {
-  canInstall: { control: { disable: true } },
-  job: { options: Object.keys(sampleJobs), control: { type: 'select' } },
-  preflight: { control: { disable: true } },
-  selectedSteps: { control: { disable: true } },
+  plan: { table: { disable: true } },
+  preflight: { table: { disable: true } },
+  job: {
+    type: { name: 'string' },
+    control: { type: 'select' },
+    options: Object.keys(sampleJobs),
+    mapping: sampleJobs,
+  },
+  selectedSteps: { table: { disable: true } },
+  canInstall: { table: { disable: true } },
+  handleStepsChange: { table: { disable: true } },
 };
 InstallationJob.storyName = 'Installation';
