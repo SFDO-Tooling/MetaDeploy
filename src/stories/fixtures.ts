@@ -225,7 +225,7 @@ export const samplePlan1 = {
   is_allowed: true,
   not_allowed_instructions: null,
   average_duration: null,
-  requires_preflight: false,
+  requires_preflight: true,
   order_key: 2,
   supported_orgs: SUPPORTED_ORGS.Persistent,
   scratch_org_duration: 30,
