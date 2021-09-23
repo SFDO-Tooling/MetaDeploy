@@ -91,8 +91,6 @@ InstallationJob.args = {
 InstallationJob.argTypes = {
   canInstall: { control: { disable: true } },
   job: { options: Object.keys(sampleJobs), control: { type: 'select' } },
-  plan: { control: { disable: true } },
-  steps: { control: { disable: true } },
   preflight: { control: { disable: true } },
   selectedSteps: { control: { disable: true } },
 };
