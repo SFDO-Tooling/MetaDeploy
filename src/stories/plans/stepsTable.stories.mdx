@@ -1,0 +1,73 @@
+import { Canvas, Meta, Story } from '@storybook/addon-docs';
+
+<Meta title="Plans/StepsTable/Docs" />
+
+# StepsTable
+
+**Shows detailed information about the Steps of an installation.**
+
+## Overview
+
+The **StepsTable** component is an
+[SLDS Data Table](https://react.lightningdesignsystem.com/components/data-tables/)
+used to display information about each **Step** involved in installing a
+**Plan**.
+
+If a pre-install validation check is required, the **StepsTable** initially only
+displays **Step** names and types.
+
+<Story
+  id="plans-stepstable-examples--plan-steps&args=preflight:None"
+  height="320px"
+/>
+
+Once the pre-install validation is complete, an `Install` column appears. If a
+**Step** is required, the `Install` column for that **Step** features a
+checkmark. A pre-install validation can also mark a **Step** as optional. If it
+is optional, a selectable checkbox is shown instead.
+
+<Story
+  id="plans-stepstable-examples--plan-steps&args=preflight:Success"
+  height="320px"
+/>
+
+If the pre-install validation check generates a warning, the **Step** is
+highlighted orange, displays a warning symbol, and lists the warning message(s).
+
+Red is shown if the validation discovers an error, along with an error symbol
+and messages detailing each error.
+
+<Story
+  id="plans-stepstable-examples--plan-steps&args=preflight:Error"
+  height="420px"
+/>
+
+During the installation process for a **Step**, a toggle button appears next to
+its name. Clicking on the button toggles an expanded log of information about
+the time, status, and detailed processes of the **Step**.
+
+<Story
+  id="plans-stepstable-examples--installation-job&args=job:Started"
+  height="335px"
+/>
+
+When an installation **Step** is complete, a round, green icon with a white
+checkmark appears in the `Install` column.
+
+A toggle button for hiding or expanding logs for the active step (or all steps,
+if the installation is not running) appears in the `Steps` column header once
+the first **Step** starts to transmit log data.
+
+<Story
+  id="plans-stepstable-examples--installation-job&args=job:Complete"
+  height="335px"
+/>
+
+Skipped **Steps** display a gray dash in the `Install` column. If a **Step**
+fails its status is labeled as `Error` and an error message is shown below the
+**Step** name.
+
+<Story
+  id="plans-stepstable-examples--installation-job&args=job:Failed"
+  height="370px"
+/>

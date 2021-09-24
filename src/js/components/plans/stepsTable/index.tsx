@@ -27,10 +27,10 @@ export type DataCellProps = {
 type Props = {
   plan: Plan;
   preflight?: Preflight | null | undefined;
+  job?: Job;
   steps: Step[] | null;
   selectedSteps?: SelectedSteps;
   canInstall?: boolean;
-  job?: Job;
   handleStepsChange?: (id: string, checked: boolean) => void;
 };
 

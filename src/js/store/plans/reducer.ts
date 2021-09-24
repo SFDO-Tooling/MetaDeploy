@@ -29,7 +29,7 @@ export type Plan = {
 };
 
 export type StepResult = {
-  status: 'ok' | 'warn' | 'error' | 'skip' | 'optional' | 'hide';
+  status?: 'ok' | 'warn' | 'error' | 'skip' | 'optional' | 'hide';
   message?: string;
   logs?: string;
 };
