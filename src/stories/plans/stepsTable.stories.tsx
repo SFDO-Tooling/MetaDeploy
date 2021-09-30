@@ -6,7 +6,6 @@ import StepsTableComponent from '@/js/components/plans/stepsTable';
 import { Job } from '@/js/store/jobs/reducer';
 import { Preflight } from '@/js/store/plans/reducer';
 
-import { withRedux } from '../decorators';
 import {
   sampleJob1,
   sampleJob2,
@@ -19,7 +18,6 @@ import {
 export default {
   title: 'Plans/StepsTable/Examples',
   component: StepsTableComponent,
-  decorators: [withRedux({ socket: true })],
 };
 
 const sampleJobs: { [key: string]: Job } = {

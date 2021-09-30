@@ -4,16 +4,14 @@ import React, { ComponentProps } from 'react';
 import ProgressBar from '@/js/components/jobs/progressBar';
 import { Job } from '@/js/store/jobs/reducer';
 
-import { withRedux } from '../decorators';
 import { sampleJob1, sampleJob2, sampleJob3, sampleJob4 } from '../fixtures';
 
 export default {
   title: 'Jobs/ProgressBar/Example',
   component: ProgressBar,
-  decorators: [withRedux({ socket: true })],
 };
 
-const jobs: { [key: string]: Job } = {
+const sampleJobs: { [key: string]: Job } = {
   Started: sampleJob1,
   Complete: sampleJob2,
   Failed: sampleJob3,
@@ -22,25 +20,18 @@ const jobs: { [key: string]: Job } = {
 
 type Props = ComponentProps<typeof ProgressBar>;
 
-interface StoryProps extends Omit<Props, 'job'> {
-  job: string;
-}
+const Template = (props: Props) => <ProgressBar {...props} />;
 
-const Template = ({ job, ...rest }: StoryProps) => (
-  <ProgressBar job={jobs[job]} {...rest} />
-);
-export const ProgressBarComponent: Story<StoryProps> = Template.bind({});
-
+export const ProgressBarComponent: Story<Props> = Template.bind({});
 ProgressBarComponent.args = {
-  job: 'Complete',
+  job: 'Started' as unknown as Job,
 };
 ProgressBarComponent.argTypes = {
   job: {
-    options: Object.keys(jobs),
-    control: {
-      type: 'select',
-    },
+    type: { name: 'string' },
+    control: { type: 'select' },
+    options: Object.keys(sampleJobs),
+    mapping: sampleJobs,
   },
 };
-
 ProgressBarComponent.storyName = 'Progress Bar';
