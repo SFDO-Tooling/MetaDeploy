@@ -13,12 +13,27 @@ The **ProgressBar** component is an
 used to visually communciate the completion of `Steps` within a `Job`
 installation.
 
-<Story id="jobs-progressbar-example--progress-bar-component" />
+<Story
+  id="jobs-progressbar-example--progress-bar-component&args=job:Complete"
+  height="auto"
+/>
 
 The **ProgressBar** appears once an installation has started. The component is
-labeled "Installation Progress:" and updates the percentage of `Steps` completed
-as the install continues, represented by a number and a colored bar.
+labeled "Installation Progress:" and updates the percentage of `Steps`
+completed. The completed `Steps` percentage is represented by a colored bar and
+a number that grow as the install continues.
+
+<Story
+  id="jobs-progressbar-example--progress-bar-component&args=job:Started"
+  height="auto"
+/>
 
 The entire bar is filled with a solid green color at one percent completion. If
-the the installation fails or or is canceled, the entire bar turns red and the
-respective status is inserted after the "Installation Progress:" label.
+the the installation fails or or is canceled, the entire **ProgressBar** turns
+red and the respective status is inserted after the "Installation Progress:"
+label.
+
+<Story
+  id="jobs-progressbar-example--progress-bar-component&args=job:Failed"
+  height="auto"
+/>
