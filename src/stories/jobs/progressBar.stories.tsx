@@ -5,7 +5,6 @@ import ProgressBar from '@/js/components/jobs/progressBar';
 import { Job } from '@/js/store/jobs/reducer';
 
 import { withRedux } from '../decorators';
-
 import { sampleJob1, sampleJob2, sampleJob3, sampleJob4 } from '../fixtures';
 
 export default {
