@@ -1,9 +1,24 @@
-import { Canvas, Meta, Story } from '@storybook/addon-docs';
+import { Meta, Story } from '@storybook/addon-docs';
 
 <Meta title="Jobs/ProgressBar/Docs" />
 
 # ProgressBar
 
-**Communicates the progress of a job installation.**
+**Visualizes the progress of an installation Job.**
 
 ## Overview
+
+The **ProgressBar** component is an
+[SLDS Progress Bar](https://react.lightningdesignsystem.com/components/progress-bars/)
+used to visually communciate the completion of `Steps` within a `Job`
+installation.
+
+<Story id="jobs-progressbar-example--progress-bar-component" />
+
+The **ProgressBar** appears once an installation has started. The component is
+labeled "Installation Progress:" and updates the percentage of `Steps` completed
+as the install continues, represented by a number and a colored bar.
+
+The entire bar is filled with a solid green color at one percent completion. If
+the the installation fails or or is canceled, the entire bar turns red and the
+respective status is inserted after the "Installation Progress:" label.
