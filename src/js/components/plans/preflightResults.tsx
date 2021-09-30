@@ -41,13 +41,13 @@ export const JobError = ({ errors }: { errors: StepResult[] }) => {
   const errorList = [];
   const warnList = [];
   let listItem = null;
-  for (const err of errors) {
+  for (const [idx, err] of errors.entries()) {
     /* istanbul ignore else */
     if (err.message) {
       switch (err.status) {
         case CONSTANTS.RESULT_STATUS.ERROR:
           listItem = (
-            <li>
+            <li key={idx}>
               <ErrorIcon />
               {/* These messages are pre-cleaned by the API */}
               <span
@@ -60,7 +60,7 @@ export const JobError = ({ errors }: { errors: StepResult[] }) => {
           break;
         case CONSTANTS.RESULT_STATUS.WARN:
           listItem = (
-            <li>
+            <li key={idx}>
               <WarningIcon />
               {/* These messages are pre-cleaned by the API */}
               <span dangerouslySetInnerHTML={{ __html: err.message }} />
