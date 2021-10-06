@@ -12,10 +12,12 @@ instances of the Job model and triggers the run_flows_job.
 """
 
 import contextlib
+import enum
 import logging
 import os
 import sys
 import traceback
+from typing import Optional, Union, List, Type
 import uuid
 from datetime import timedelta
 
@@ -49,12 +51,33 @@ def job(*args, **kw):
     return django_rq_job(*args, **kw)
 
 
+class JobType(str, enum.Enum):
+    JOB = "job"
+    PREFLIGHT = "preflight"
+    TEST_JOB = "test_job"
+
+
+class JobStatus(str, enum.Enum):
+    SUCCESS = "success"
+    FAILURE = "failure"
+    ERROR = "error"
+
+
 @contextlib.contextmanager
-def finalize_result(result):
+def finalize_result(
+    plan: Plan, result: Union[Job, PreflightResult], job_type: Optional[JobType] = None
+):
+    start_time = timezone.now()
+    end_time = None
+    status = None
+
     try:
         yield
+
         result.status = result.Status.complete
         result.success_at = timezone.now()
+        end_time = result.success_at
+        status = JobStatus.SUCCESS
     except (StopRequested, ShutDownImminentException):
         # When an RQ worker gets a SIGTERM, it will initiate a warm shutdown,
         # trying to wrap up existing tasks and then raising a
@@ -63,6 +86,8 @@ def finalize_result(result):
         # by catching that exception as it propagates back up.
         result.status = result.Status.canceled
         result.canceled_at = timezone.now()
+        end_time = result.canceled_at
+        status = JobStatus.FAILURE
         result.exception = (
             "The installation job was interrupted. Please retry the installation."
         )
@@ -74,17 +99,35 @@ def finalize_result(result):
         # User requested cancellation of job
         result.status = result.Status.canceled
         result.canceled_at = timezone.now()
+        end_time = result.canceled_at
+        status = JobStatus.CANCELED
         result.exception = str(e)
         logger.info(f"{result._meta.model_name} {result.id} canceled.")
     except Exception as e:
         # Other failures
         result.status = result.Status.failed
+        end_time = timezone.now()
+        status = JobStatus.FAILURE
         result.exception = str(e)
         if hasattr(e, "response"):
             result.exception += "\n" + e.response.text
         logger.error(f"{result._meta.model_name} {result.id} failed.")
         raise
     finally:
+        try:
+            duration = (end_time - start_time).seconds
+            if not job_type:
+                if isinstance(result, PreflightResult):
+                    job_type = JobType.PREFLIGHT
+                elif isinstance(result, Job):
+                    job_type = JobType.JOB
+
+            context = f"{plan.version.product.title} {plan.version.label}"
+            logger.info(
+                f"event={job_type} context={context} status={status} duration={duration}"
+            )
+        except:  # noqa: E722
+            pass  # Always save the job, even if logging failed.
         result.save()
 
 
@@ -118,7 +161,13 @@ def prepend_python_path(path):
         sys.path = prev_path
 
 
-def run_flows(*, plan, skip_steps, result_class, result_id):
+def run_flows(
+    *,
+    plan: Plan,
+    skip_steps: List[str],
+    result_class: Union[Type[Job], Type[PreflightResult]],
+    result_id: int,
+):
     """
     This operates with side effects; it changes things in a Salesforce
     org, and then records the results of those operations on to a
@@ -144,7 +193,7 @@ def run_flows(*, plan, skip_steps, result_class, result_id):
     commit_ish = plan.commit_ish or plan.version.commit_ish
 
     with contextlib.ExitStack() as stack:
-        stack.enter_context(finalize_result(result))
+        stack.enter_context(finalize_result(plan, result))
         if result.user:
             stack.enter_context(report_errors_to(result.user))
         if scratch_org:

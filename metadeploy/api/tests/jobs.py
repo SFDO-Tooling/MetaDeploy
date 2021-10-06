@@ -187,7 +187,7 @@ def test_delete_org_on_error(scratch_org_factory):
 
 
 @pytest.mark.django_db
-def test_finalize_result_worker_died(job_factory):
+def test_finalize_result_worker_died(job_factory, plan_factory):
     """
     Why do we raise and then catch a StopRequested you might ask? Well, because it's
     what RQ will internally raise on a SIGTERM, so we're essentially faking the "I got a
@@ -196,8 +196,9 @@ def test_finalize_result_worker_died(job_factory):
     triggered, so we can test its behavior.
     """
     job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
+    plan = plan_factory()
     try:
-        with finalize_result(job):
+        with finalize_result(plan, job):
             raise StopRequested()
     except StopRequested:
         pass
@@ -205,12 +206,13 @@ def test_finalize_result_worker_died(job_factory):
 
 
 @pytest.mark.django_db
-def test_finalize_result_canceled_job(job_factory):
+def test_finalize_result_canceled_job(job_factory, plan_factory):
     # User-requested job cancellation.
     # Unlike cancelation due to the worker restarting,
     # this kind doesn't propagate the exception.
     job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
-    with finalize_result(job):
+    plan = plan_factory()
+    with finalize_result(plan, job):
         raise StopFlowException()
     assert job.status == job.Status.canceled
 
@@ -223,7 +225,7 @@ def test_finalize_result_preflight_worker_died(
     plan = plan_factory()
     preflight = preflight_result_factory(user=user, plan=plan, org_id=user.org_id)
     try:
-        with finalize_result(preflight):
+        with finalize_result(plan, preflight):
             raise StopRequested()
     except StopRequested:
         pass
@@ -231,11 +233,12 @@ def test_finalize_result_preflight_worker_died(
 
 
 @pytest.mark.django_db
-def test_finalize_result_mdapi_error(job_factory):
+def test_finalize_result_mdapi_error(job_factory, plan_factory):
     job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
     response = MagicMock(text="text")
+    plan = plan_factory()
     try:
-        with finalize_result(job):
+        with finalize_result(plan, job):
             raise MetadataParseError("MDAPI error", response=response)
     except MetadataParseError:
         pass
