@@ -28,14 +28,11 @@ the install continues.
 To provide users with a sense of continuous movement, the component updates
 every one hundred milliseconds.
 
-Inidividual `Steps` progress over a span of fifteen seconds. In that time, the
-`ProgressBar` moves from showing the actual completion percentage of a `Step` to
-eighty percent completion of the `Step`.
+While an individual `Step` is installing, the `ProgressBar` moves from zero to
+eighty percent completion of that `Step` over a span of fifteen seconds, at
+which point it pauses.
 
-At that point the bar pauses until the `Step` is fully installed. Next, the
-`ProgressBar` moves to a position equivalent to twenty percent completion of the
-following `Step`.
-
+When a `Step` is fully installed, the `ProgressBar` jumps to the next `Step`.
 This process repeats until all `Steps` are installed, at which point the entire
 bar turns solid green.
 
