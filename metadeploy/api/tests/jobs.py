@@ -187,7 +187,7 @@ def test_delete_org_on_error(scratch_org_factory):
 
 
 @pytest.mark.django_db
-def test_finalize_result_worker_died(job_factory, plan_factory):
+def test_finalize_result_worker_died(job_factory, plan_factory, caplog):
     """
     Why do we raise and then catch a StopRequested you might ask? Well, because it's
     what RQ will internally raise on a SIGTERM, so we're essentially faking the "I got a
@@ -204,9 +204,13 @@ def test_finalize_result_worker_died(job_factory, plan_factory):
         pass
     assert job.status == job.Status.canceled
 
+    context = f"{plan.version.product.title} {plan.version.label}"
+    assert f"event=job context={context} status=terminated" in caplog.text
+    assert "duration" in caplog.text
+
 
 @pytest.mark.django_db
-def test_finalize_result_canceled_job(job_factory, plan_factory):
+def test_finalize_result_canceled_job(job_factory, plan_factory, caplog):
     # User-requested job cancellation.
     # Unlike cancelation due to the worker restarting,
     # this kind doesn't propagate the exception.
@@ -216,10 +220,14 @@ def test_finalize_result_canceled_job(job_factory, plan_factory):
         raise StopFlowException()
     assert job.status == job.Status.canceled
 
+    context = f"{plan.version.product.title} {plan.version.label}"
+    assert f"event=job context={context} status=canceled" in caplog.text
+    assert "duration" in caplog.text
+
 
 @pytest.mark.django_db
 def test_finalize_result_preflight_worker_died(
-    user_factory, plan_factory, preflight_result_factory
+    user_factory, plan_factory, preflight_result_factory, caplog
 ):
     user = user_factory()
     plan = plan_factory()
@@ -231,9 +239,13 @@ def test_finalize_result_preflight_worker_died(
         pass
     assert preflight.status == preflight.Status.canceled
 
+    context = f"{plan.version.product.title} {plan.version.label}"
+    assert f"event=preflight context={context} status=terminated" in caplog.text
+    assert "duration" in caplog.text
+
 
 @pytest.mark.django_db
-def test_finalize_result_mdapi_error(job_factory, plan_factory):
+def test_finalize_result_mdapi_error(job_factory, plan_factory, caplog):
     job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
     response = MagicMock(text="text")
     plan = plan_factory()
@@ -244,6 +256,10 @@ def test_finalize_result_mdapi_error(job_factory, plan_factory):
         pass
     assert job.status == job.Status.failed
     assert job.exception == "MDAPI error\ntext"
+
+    context = f"{plan.version.product.title} {plan.version.label}"
+    assert f"event=job context={context} status=error" in caplog.text
+    assert "duration" in caplog.text
 
 
 class MockDict(dict):

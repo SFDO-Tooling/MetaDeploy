@@ -59,17 +59,17 @@ class JobType(str, enum.Enum):
 
 class JobStatus(str, enum.Enum):
     SUCCESS = "success"
-    FAILURE = "failure"
-    ERROR = "error"
+    FAILURE = "failure"  # preflight returned negative result
+    ERROR = "error"  # job threw an exception and failed
+    CANCELED = "canceled"  # by admins
+    TERMINATED = "TERMINATED"  # by Heroku
 
 
 @contextlib.contextmanager
-def finalize_result(
-    plan: Plan, result: Union[Job, PreflightResult], job_type: Optional[JobType] = None
-):
+def finalize_result(plan: Plan, result: Union[Job, PreflightResult]):
     start_time = timezone.now()
     end_time = None
-    status = None
+    log_status = None
 
     try:
         yield
@@ -77,7 +77,12 @@ def finalize_result(
         result.status = result.Status.complete
         result.success_at = timezone.now()
         end_time = result.success_at
-        status = JobStatus.SUCCESS
+
+        if isinstance(result, PreflightResult) and result.has_any_errors():
+            # Determine if the preflight returned a negative status (FAILURE) as opposed to throwing an exception (ERROR)
+            log_status = JobStatus.FAILURE
+        else:
+            log_status = JobStatus.SUCCESS
     except (StopRequested, ShutDownImminentException):
         # When an RQ worker gets a SIGTERM, it will initiate a warm shutdown,
         # trying to wrap up existing tasks and then raising a
@@ -87,7 +92,7 @@ def finalize_result(
         result.status = result.Status.canceled
         result.canceled_at = timezone.now()
         end_time = result.canceled_at
-        status = JobStatus.FAILURE
+        log_status = JobStatus.TERMINATED
         result.exception = (
             "The installation job was interrupted. Please retry the installation."
         )
@@ -100,34 +105,32 @@ def finalize_result(
         result.status = result.Status.canceled
         result.canceled_at = timezone.now()
         end_time = result.canceled_at
-        status = JobStatus.CANCELED
+        log_status = JobStatus.CANCELED
         result.exception = str(e)
         logger.info(f"{result._meta.model_name} {result.id} canceled.")
     except Exception as e:
         # Other failures
         result.status = result.Status.failed
         end_time = timezone.now()
-        status = JobStatus.FAILURE
+        log_status = JobStatus.ERROR
         result.exception = str(e)
         if hasattr(e, "response"):
             result.exception += "\n" + e.response.text
         logger.error(f"{result._meta.model_name} {result.id} failed.")
         raise
     finally:
-        try:
-            duration = (end_time - start_time).seconds
-            if not job_type:
-                if isinstance(result, PreflightResult):
-                    job_type = JobType.PREFLIGHT
-                elif isinstance(result, Job):
-                    job_type = JobType.JOB
+        duration = (end_time - start_time).seconds
+        if result.is_release_test:
+            job_type = JobType.TEST_JOB
+        elif isinstance(result, PreflightResult):
+            job_type = JobType.PREFLIGHT
+        elif isinstance(result, Job):
+            job_type = JobType.JOB
 
-            context = f"{plan.version.product.title} {plan.version.label}"
-            logger.info(
-                f"event={job_type} context={context} status={status} duration={duration}"
-            )
-        except:  # noqa: E722
-            pass  # Always save the job, even if logging failed.
+        context = f"{plan.version.product.title} {plan.version.label}"
+        logger.info(
+            f"event={job_type} context={context} status={log_status} duration={duration}"
+        )
         result.save()
 
 
