@@ -17,7 +17,7 @@ import logging
 import os
 import sys
 import traceback
-from typing import Optional, Union, List, Type
+from typing import Union, List, Type
 import uuid
 from datetime import timedelta
 
@@ -57,12 +57,12 @@ class JobType(str, enum.Enum):
     TEST_JOB = "test_job"
 
 
-class JobStatus(str, enum.Enum):
+class JobLogStatus(str, enum.Enum):
     SUCCESS = "success"
     FAILURE = "failure"  # preflight returned negative result
     ERROR = "error"  # job threw an exception and failed
     CANCELED = "canceled"  # by admins
-    TERMINATED = "TERMINATED"  # by Heroku
+    TERMINATED = "terminated"  # by Heroku
 
 
 @contextlib.contextmanager
@@ -79,10 +79,11 @@ def finalize_result(plan: Plan, result: Union[Job, PreflightResult]):
         end_time = result.success_at
 
         if isinstance(result, PreflightResult) and result.has_any_errors():
-            # Determine if the preflight returned a negative status (FAILURE) as opposed to throwing an exception (ERROR)
-            log_status = JobStatus.FAILURE
+            # Determine if the preflight returned a negative status (FAILURE)
+            # as opposed to throwing an exception (ERROR)
+            log_status = JobLogStatus.FAILURE
         else:
-            log_status = JobStatus.SUCCESS
+            log_status = JobLogStatus.SUCCESS
     except (StopRequested, ShutDownImminentException):
         # When an RQ worker gets a SIGTERM, it will initiate a warm shutdown,
         # trying to wrap up existing tasks and then raising a
@@ -92,7 +93,7 @@ def finalize_result(plan: Plan, result: Union[Job, PreflightResult]):
         result.status = result.Status.canceled
         result.canceled_at = timezone.now()
         end_time = result.canceled_at
-        log_status = JobStatus.TERMINATED
+        log_status = JobLogStatus.TERMINATED
         result.exception = (
             "The installation job was interrupted. Please retry the installation."
         )
@@ -105,14 +106,14 @@ def finalize_result(plan: Plan, result: Union[Job, PreflightResult]):
         result.status = result.Status.canceled
         result.canceled_at = timezone.now()
         end_time = result.canceled_at
-        log_status = JobStatus.CANCELED
+        log_status = JobLogStatus.CANCELED
         result.exception = str(e)
         logger.info(f"{result._meta.model_name} {result.id} canceled.")
     except Exception as e:
         # Other failures
         result.status = result.Status.failed
         end_time = timezone.now()
-        log_status = JobStatus.ERROR
+        log_status = JobLogStatus.ERROR
         result.exception = str(e)
         if hasattr(e, "response"):
             result.exception += "\n" + e.response.text

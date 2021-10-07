@@ -13,6 +13,7 @@ from rq.worker import StopRequested
 
 from config.settings.base import MINIMUM_JOBS_FOR_AVERAGE
 from metadeploy.api.belvedere_utils import convert_to_18
+from metadeploy.api.constants import ERROR
 
 from ..flows import StopFlowException
 from ..jobs import (
@@ -245,6 +246,21 @@ def test_finalize_result_preflight_worker_died(
 
 
 @pytest.mark.django_db
+def test_finalize_result_preflight_failed(
+    user_factory, plan_factory, preflight_result_factory, caplog
+):
+    user = user_factory()
+    plan = plan_factory()
+    preflight = preflight_result_factory(user=user, plan=plan, org_id=user.org_id)
+    with finalize_result(plan, preflight):
+        preflight.results["foo"] = [{"status": ERROR}]
+
+    context = f"{plan.version.product.title} {plan.version.label}"
+    assert f"event=preflight context={context} status=failure" in caplog.text
+    assert "duration" in caplog.text
+
+
+@pytest.mark.django_db
 def test_finalize_result_mdapi_error(job_factory, plan_factory, caplog):
     job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
     response = MagicMock(text="text")
@@ -259,6 +275,19 @@ def test_finalize_result_mdapi_error(job_factory, plan_factory, caplog):
 
     context = f"{plan.version.product.title} {plan.version.label}"
     assert f"event=job context={context} status=error" in caplog.text
+    assert "duration" in caplog.text
+
+
+@pytest.mark.django_db
+def test_finalize_result_job_success(job_factory, plan_factory, caplog):
+    job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
+    response = MagicMock(text="text")
+    plan = plan_factory()
+    with finalize_result(plan, job):
+        pass
+
+    context = f"{plan.version.product.title} {plan.version.label}"
+    assert f"event=job context={context} status=success" in caplog.text
     assert "duration" in caplog.text
 
 
