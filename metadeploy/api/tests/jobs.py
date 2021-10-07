@@ -275,7 +275,6 @@ def test_finalize_result_preflight_failed(
     user_factory, plan_factory, preflight_result_factory, caplog
 ):
     user = user_factory()
-    plan = plan_factory()
     preflight = preflight_result_factory(
         user=user,
         plan__version__product__title="Test Product",
