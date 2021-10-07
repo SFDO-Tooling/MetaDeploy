@@ -13,10 +13,10 @@ import {
   samplePlan1,
   samplePreflight1,
   samplePreflight2,
-} from '../fixtures';
+} from '../../fixtures';
 
 export default {
-  title: 'Plans/StepsTable/Examples',
+  title: 'Components/StepsTable/Examples',
   component: StepsTableComponent,
 };
 
