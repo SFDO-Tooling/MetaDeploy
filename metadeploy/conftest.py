@@ -248,6 +248,7 @@ class ScratchOrgFactory(factory.django.DjangoModelFactory):
 class PreflightResultFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = PreflightResult
+
     plan = factory.SubFactory(PlanFactory)
 
 
