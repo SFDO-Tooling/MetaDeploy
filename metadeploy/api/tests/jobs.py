@@ -188,7 +188,7 @@ def test_delete_org_on_error(scratch_org_factory):
 
 
 @pytest.mark.django_db
-def test_finalize_result_worker_died(job_factory, plan_factory, caplog):
+def test_finalize_result_worker_died(job_factory, caplog):
     """
     Why do we raise and then catch a StopRequested you might ask? Well, because it's
     what RQ will internally raise on a SIGTERM, so we're essentially faking the "I got a
@@ -196,34 +196,50 @@ def test_finalize_result_worker_died(job_factory, plan_factory, caplog):
     and kill the tests. But we do want the context manager's except block to be
     triggered, so we can test its behavior.
     """
-    job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
-    plan = plan_factory()
+    job = job_factory(
+        org_id="00Dxxxxxxxxxxxxxxx",
+        plan__version__product__title="Test Product",
+        plan__version__label="1.0",
+    )
     try:
-        with finalize_result(plan, job):
+        with finalize_result(job):
             raise StopRequested()
     except StopRequested:
         pass
     assert job.status == job.Status.canceled
 
-    context = f"{plan.version.product.title} {plan.version.label}"
-    assert f"event=job context={context} status=terminated" in caplog.text
-    assert "duration" in caplog.text
+    log_record = next(
+        r for r in caplog.records if r.message == "Job reached a completion status"
+    )
+
+    assert log_record.context["event"] == "job"
+    assert log_record.context["context"] == "Test Product 1.0"
+    assert log_record.context["status"] == "terminated"
+    assert "duration" in log_record.context
 
 
 @pytest.mark.django_db
-def test_finalize_result_canceled_job(job_factory, plan_factory, caplog):
+def test_finalize_result_canceled_job(job_factory, caplog):
     # User-requested job cancellation.
     # Unlike cancelation due to the worker restarting,
     # this kind doesn't propagate the exception.
-    job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
-    plan = plan_factory()
-    with finalize_result(plan, job):
+    job = job_factory(
+        org_id="00Dxxxxxxxxxxxxxxx",
+        plan__version__product__title="Test Product",
+        plan__version__label="1.0",
+    )
+    with finalize_result(job):
         raise StopFlowException()
     assert job.status == job.Status.canceled
 
-    context = f"{plan.version.product.title} {plan.version.label}"
-    assert f"event=job context={context} status=canceled" in caplog.text
-    assert "duration" in caplog.text
+    log_record = next(
+        r for r in caplog.records if r.message == "Job reached a completion status"
+    )
+
+    assert log_record.context["event"] == "job"
+    assert log_record.context["context"] == "Test Product 1.0"
+    assert log_record.context["status"] == "canceled"
+    assert "duration" in log_record.context
 
 
 @pytest.mark.django_db
@@ -231,18 +247,27 @@ def test_finalize_result_preflight_worker_died(
     user_factory, plan_factory, preflight_result_factory, caplog
 ):
     user = user_factory()
-    plan = plan_factory()
-    preflight = preflight_result_factory(user=user, plan=plan, org_id=user.org_id)
+    preflight = preflight_result_factory(
+        user=user,
+        plan__version__product__title="Test Product",
+        plan__version__label="1.0",
+        org_id=user.org_id,
+    )
     try:
-        with finalize_result(plan, preflight):
+        with finalize_result(preflight):
             raise StopRequested()
     except StopRequested:
         pass
     assert preflight.status == preflight.Status.canceled
 
-    context = f"{plan.version.product.title} {plan.version.label}"
-    assert f"event=preflight context={context} status=terminated" in caplog.text
-    assert "duration" in caplog.text
+    log_record = next(
+        r for r in caplog.records if r.message == "Job reached a completion status"
+    )
+
+    assert log_record.context["event"] == "preflight"
+    assert log_record.context["context"] == "Test Product 1.0"
+    assert log_record.context["status"] == "terminated"
+    assert "duration" in log_record.context
 
 
 @pytest.mark.django_db
@@ -251,43 +276,69 @@ def test_finalize_result_preflight_failed(
 ):
     user = user_factory()
     plan = plan_factory()
-    preflight = preflight_result_factory(user=user, plan=plan, org_id=user.org_id)
-    with finalize_result(plan, preflight):
+    preflight = preflight_result_factory(
+        user=user,
+        plan__version__product__title="Test Product",
+        plan__version__label="1.0",
+        org_id=user.org_id,
+    )
+    with finalize_result(preflight):
         preflight.results["foo"] = [{"status": ERROR}]
 
-    context = f"{plan.version.product.title} {plan.version.label}"
-    assert f"event=preflight context={context} status=failure" in caplog.text
-    assert "duration" in caplog.text
+    log_record = next(
+        r for r in caplog.records if r.message == "Job reached a completion status"
+    )
+
+    assert log_record.context["event"] == "preflight"
+    assert log_record.context["context"] == "Test Product 1.0"
+    assert log_record.context["status"] == "failure"
+    assert "duration" in log_record.context
 
 
 @pytest.mark.django_db
-def test_finalize_result_mdapi_error(job_factory, plan_factory, caplog):
-    job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
+def test_finalize_result_mdapi_error(job_factory, caplog):
+    job = job_factory(
+        org_id="00Dxxxxxxxxxxxxxxx",
+        plan__version__product__title="Test Product",
+        plan__version__label="1.0",
+    )
     response = MagicMock(text="text")
-    plan = plan_factory()
     try:
-        with finalize_result(plan, job):
+        with finalize_result(job):
             raise MetadataParseError("MDAPI error", response=response)
     except MetadataParseError:
         pass
     assert job.status == job.Status.failed
     assert job.exception == "MDAPI error\ntext"
 
-    context = f"{plan.version.product.title} {plan.version.label}"
-    assert f"event=job context={context} status=error" in caplog.text
-    assert "duration" in caplog.text
+    log_record = next(
+        r for r in caplog.records if r.message == "Job reached a completion status"
+    )
+
+    assert log_record.context["event"] == "job"
+    assert log_record.context["context"] == "Test Product 1.0"
+    assert log_record.context["status"] == "error"
+    assert "duration" in log_record.context
 
 
 @pytest.mark.django_db
-def test_finalize_result_job_success(job_factory, plan_factory, caplog):
-    job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
-    plan = plan_factory()
-    with finalize_result(plan, job):
+def test_finalize_result_job_success(job_factory, caplog):
+    job = job_factory(
+        org_id="00Dxxxxxxxxxxxxxxx",
+        plan__version__product__title="Test Product",
+        plan__version__label="1.0",
+    )
+    with finalize_result(job):
         pass
 
-    context = f"{plan.version.product.title} {plan.version.label}"
-    assert f"event=job context={context} status=success" in caplog.text
-    assert "duration" in caplog.text
+    log_record = next(
+        r for r in caplog.records if r.message == "Job reached a completion status"
+    )
+
+    assert log_record.context["event"] == "job"
+    assert log_record.context["context"] == "Test Product 1.0"
+    assert log_record.context["status"] == "success"
+    assert "duration" in log_record.context
 
 
 class MockDict(dict):

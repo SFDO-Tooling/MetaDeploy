@@ -66,7 +66,7 @@ class JobLogStatus(str, enum.Enum):
 
 
 @contextlib.contextmanager
-def finalize_result(plan: Plan, result: Union[Job, PreflightResult]):
+def finalize_result(result: Union[Job, PreflightResult]):
     start_time = timezone.now()
     end_time = None
     log_status = None
@@ -130,9 +130,17 @@ def finalize_result(plan: Plan, result: Union[Job, PreflightResult]):
         elif isinstance(result, Job):
             job_type = JobType.JOB
 
-        context = f"{plan.version.product.title} {plan.version.label}"
+        context = f"{result.plan.version.product.title} {result.plan.version.label}"
         logger.info(
-            f"event={job_type} context={context} status={log_status} duration={duration}"
+            "Job reached a completion status",
+            extra={
+                "context": {
+                    "event": f"{job_type}",
+                    "context": context,
+                    "status": f"{log_status}",
+                    "duration": duration,
+                }
+            },
         )
         result.save()
 
@@ -199,7 +207,7 @@ def run_flows(
     commit_ish = plan.commit_ish or plan.version.commit_ish
 
     with contextlib.ExitStack() as stack:
-        stack.enter_context(finalize_result(plan, result))
+        stack.enter_context(finalize_result(result))
         if result.user:
             stack.enter_context(report_errors_to(result.user))
         if scratch_org:
