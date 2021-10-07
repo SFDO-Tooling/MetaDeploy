@@ -281,7 +281,6 @@ def test_finalize_result_mdapi_error(job_factory, plan_factory, caplog):
 @pytest.mark.django_db
 def test_finalize_result_job_success(job_factory, plan_factory, caplog):
     job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
-    response = MagicMock(text="text")
     plan = plan_factory()
     with finalize_result(plan, job):
         pass
