@@ -25,6 +25,7 @@ class Command(BaseCommand):
             plan=plan, enqueued_at=datetime.utcnow().isoformat()
         )
         create_scratch_org(scratch_org.pk, release_test=True)
-        
-        if 
-        delete_scratch_org(scratch_org, should_delete_locally=False)
+
+        # We want to keep the scratch org record if it failed
+        delete_locally = False if scratch_org.status == "failed" else True
+        delete_scratch_org(scratch_org, should_delete_locally=delete_locally)
