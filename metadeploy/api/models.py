@@ -464,7 +464,6 @@ class PlanTemplate(SlugMixin, TranslatableModel):
 
 class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
     Tier = Choices("primary", "secondary", "additional")
-    
 
     translations = TranslatedFields(
         title=models.CharField(max_length=128),
@@ -702,7 +701,6 @@ class ClickThroughAgreement(models.Model):
 
 class Job(HashIdMixin, models.Model):
     Status = Choices("started", "complete", "failed", "canceled")
-    
     tracker = FieldTracker(fields=("results", "status"))
 
     user = models.ForeignKey(
