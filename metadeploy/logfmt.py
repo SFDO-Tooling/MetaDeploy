@@ -82,16 +82,10 @@ class LogfmtFormatter(ServerFormatter):
             or "unknown"
         )
 
-    def _get_tag(self, record):
-        tag = getattr(record, "tag", None)
-        if tag:
-            return quote_logvalue(tag)
-
     def format(self, record):
         parsed_msg = record.module == "logging_middleware"
         id_ = self._get_id(record)
         time = self._get_time(record)
-        tag = self._get_tag(record)
         if parsed_msg:
             msg = self._parse_msg(record.getMessage())
         else:
@@ -107,8 +101,6 @@ class LogfmtFormatter(ServerFormatter):
             f"time={time}",
             f"module={record.module}",
         ]
-        if tag:
-            fields.append(f"tag={tag}")
         if parsed_msg:
             for k, v in msg.items():
                 fields.append(f"{k}={quote_logvalue(str(v))}")
