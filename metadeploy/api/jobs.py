@@ -121,9 +121,9 @@ def finalize_result(result: Union[Job, PreflightResult]):
         raise
     finally:
         duration = (end_time - start_time).seconds
-        
+
         if result.is_release_test:
-           job_type = JobType.TEST_JOB
+            job_type = JobType.TEST_JOB
         else:
             if isinstance(result, PreflightResult):
                 job_type = JobType.PREFLIGHT
@@ -347,7 +347,7 @@ def create_scratch_org(org_pk):
     if plan.requires_preflight:
         preflight_result = run_preflight_checks_sync(org)
         async_to_sync(preflight_started)(org, preflight_result)
-    
+
     if plan.required_step_ids.count() == plan.steps.count():
         # Start installation job automatically if both:
         # - Plan has no preflight
@@ -415,11 +415,12 @@ def run_plan_steps(org: ScratchOrg, release_test=False):
             enqueued_at=timezone.now() if release_test else None,
         )
         job.steps.set(org.plan.steps.all())
-    
+
     if release_test:
         run_flows(plan=job.plan, skip_steps=[], result_class=Job, result_id=str(job.id))
 
     return job
+
 
 def setup_scratch_org(org_pk: str):
     """Given the id for a ScratchOrg record,
