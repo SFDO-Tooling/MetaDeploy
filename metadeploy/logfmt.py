@@ -19,6 +19,18 @@ class JobIDFilter(logging.Filter):
         return True
 
 
+def quote_logvalue(value):
+    """Return a value formatted for use in a logfmt log entry.
+
+    The input is quoted if it contains spaces or quotes; otherwise returned unchanged
+    """
+    s = str(value)
+    if " " in s or '"' in s:
+        s = s.replace('"', "\\" + '"')
+        return f'"{s}"'
+    return s
+
+
 class LogfmtFormatter(ServerFormatter):
     """
     To use this logger to its fullest extent, log lines like this:
@@ -38,12 +50,11 @@ class LogfmtFormatter(ServerFormatter):
         msg = list(parse(io.StringIO(msg)))
         return msg[0]
 
-    def _escape_quotes(self, string):
-        return '"{}"'.format(string.replace('"', "\\" + '"'))
-
     def format_line(self, extra):
         out = []
         for k, v in extra.items():
+            if k == "event":
+                continue  # already emitted at the beginning of the line
             if v is None:
                 v = ""
             elif isinstance(v, bool):
@@ -53,12 +64,12 @@ class LogfmtFormatter(ServerFormatter):
             else:
                 if isinstance(v, (dict, object)):
                     v = str(v)
-                v = self._escape_quotes(v)
+                v = quote_logvalue(v)
             out.append("{}={}".format(k, v))
         return " ".join(out)
 
     def _get_time(self, record):
-        return self._escape_quotes(
+        return quote_logvalue(
             datetime.datetime.fromtimestamp(record.created).strftime(
                 "%Y-%m-%d %H:%M:%S.%f"
             )
@@ -71,33 +82,29 @@ class LogfmtFormatter(ServerFormatter):
             or "unknown"
         )
 
-    def _get_tag(self, record):
-        tag = getattr(record, "tag", None)
-        if tag:
-            return self._escape_quotes(tag)
-        return "external"
-
     def format(self, record):
         parsed_msg = record.module == "logging_middleware"
         id_ = self._get_id(record)
         time = self._get_time(record)
-        tag = self._get_tag(record)
         if parsed_msg:
             msg = self._parse_msg(record.getMessage())
         else:
-            msg = self._escape_quotes(record.getMessage())
-        rest = self.format_line(getattr(record, "context", {}))
-        fields = [
+            msg = record.getMessage()
+        context = getattr(record, "context", {})
+        rest = self.format_line(context)
+        fields = []
+        if "event" in context:
+            fields.append(f"event={quote_logvalue(context['event'])}")
+        fields += [
             f"request_id={id_}",
             f"at={record.levelname}",
             f"time={time}",
-            f"tag={tag}",
             f"module={record.module}",
         ]
         if parsed_msg:
             for k, v in msg.items():
-                fields.append(f"{k}={v}")
+                fields.append(f"{k}={quote_logvalue(str(v))}")
         else:
-            fields.append(f"msg={msg}")
+            fields.append(f"msg={quote_logvalue(msg)}")
         fields.append(f"{rest}")
         return " ".join(filter(None, fields))
