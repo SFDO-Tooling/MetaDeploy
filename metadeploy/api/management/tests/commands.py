@@ -1,6 +1,7 @@
 from contextlib import ExitStack
 from unittest.mock import patch
 from cumulusci.core.config import OrgConfig
+from django.core.management.base import CommandError
 import pytest
 
 from django.core.management import call_command
@@ -51,3 +52,9 @@ def test_run_plan(plan_factory):
 
     with pytest.raises(ScratchOrg.DoesNotExist):
         ScratchOrg.objects.get(plan=plan)
+
+
+@pytest.mark.django_db
+def test_run_plan__no_plan_exists():
+    with pytest.raises(CommandError):
+        call_command("run_plan", 'abc123')
