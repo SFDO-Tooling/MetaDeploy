@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0115_plan_calculated_average_duration_help_text'),
+        ("api", "0115_plan_calculated_average_duration_help_text"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='job',
-            name='is_release_test',
+            model_name="job",
+            name="is_release_test",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='preflightresult',
-            name='is_release_test',
+            model_name="preflightresult",
+            name="is_release_test",
             field=models.BooleanField(default=False),
         ),
     ]

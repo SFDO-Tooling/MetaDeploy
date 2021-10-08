@@ -369,7 +369,7 @@ def create_scratch_org(org_pk, release_test=False):
                     duration=plan.scratch_org_duration,
                 )
         except Exception as e:
-            print(f'exception: {e}')
+            print(f"exception: {e}")
             org.fail(e)
             return
 
@@ -380,7 +380,7 @@ def create_scratch_org(org_pk, release_test=False):
     # If this is a test of release on Heroku
     # we want to run both preflight and the plan itself.
     if release_test:
-        prefligh_result = run_preflight_checks_sync(org, release_test=True)
+        run_preflight_checks_sync(org, release_test=True)
         job = run_plan_steps_sync(org, release_test=True)
     elif plan.requires_preflight:
         preflight_result = run_preflight_checks_sync(org)
@@ -439,10 +439,11 @@ def run_preflight_checks_sync(org: ScratchOrg, release_test=False):
         user=None,
         plan=org.plan,
         org_id=org.org_id,  # Set by org.complete()
-        is_release_test=release_test
+        is_release_test=release_test,
     )
     preflight(preflight_result.pk)
     return preflight_result
+
 
 def run_plan_steps_sync(org: ScratchOrg, release_test=False):
     """Runs the plan steps against the org synchronously"""
@@ -453,7 +454,7 @@ def run_plan_steps_sync(org: ScratchOrg, release_test=False):
             org_id=org.org_id,  # Set by org.complete()
             full_org_type=ORG_TYPES.Scratch,
             is_release_test=release_test,
-            enqueued_at=timezone.now()
+            enqueued_at=timezone.now(),
         )
         job.steps.set(org.plan.steps.all())
     run_flows(plan=job.plan, skip_steps=[], result_class=Job, result_id=str(job.id))
