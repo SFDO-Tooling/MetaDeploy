@@ -209,9 +209,10 @@ def test_finalize_result_worker_died(job_factory, caplog):
     assert job.status == job.Status.canceled
 
     log_record = next(
-        r for r in caplog.records if r.message == "Job reached a completion status"
+        r for r in caplog.records if "interrupted" in r.message
     )
 
+    assert log_record.message == f"Job {job.id} interrupted by dyno restart"
     assert log_record.context["event"] == "job"
     assert log_record.context["context"] == "Test Product 1.0"
     assert log_record.context["status"] == "terminated"
@@ -232,10 +233,9 @@ def test_finalize_result_canceled_job(job_factory, caplog):
         raise StopFlowException()
     assert job.status == job.Status.canceled
 
-    log_record = next(
-        r for r in caplog.records if r.message == "Job reached a completion status"
-    )
+    log_record = next(r for r in caplog.records if "canceled" in r.message)
 
+    assert log_record.message == f"Job {job.id} canceled"
     assert log_record.context["event"] == "job"
     assert log_record.context["context"] == "Test Product 1.0"
     assert log_record.context["status"] == "canceled"
@@ -260,10 +260,12 @@ def test_finalize_result_preflight_worker_died(
         pass
     assert preflight.status == preflight.Status.canceled
 
-    log_record = next(
-        r for r in caplog.records if r.message == "Job reached a completion status"
-    )
+    log_record = next(r for r in caplog.records if "interrupted" in r.message)
 
+    assert (
+        log_record.message
+        == f"PreflightResult {preflight.id} interrupted by dyno restart"
+    )
     assert log_record.context["event"] == "preflight"
     assert log_record.context["context"] == "Test Product 1.0"
     assert log_record.context["status"] == "terminated"
@@ -284,10 +286,9 @@ def test_finalize_result_preflight_failed(
     with finalize_result(preflight):
         preflight.results["foo"] = [{"status": ERROR}]
 
-    log_record = next(
-        r for r in caplog.records if r.message == "Job reached a completion status"
-    )
+    log_record = next(r for r in caplog.records if "failed" in r.message)
 
+    assert log_record.message == f"PreflightResult {preflight.id} failed"
     assert log_record.context["event"] == "preflight"
     assert log_record.context["context"] == "Test Product 1.0"
     assert log_record.context["status"] == "failure"
@@ -310,10 +311,9 @@ def test_finalize_result_mdapi_error(job_factory, caplog):
     assert job.status == job.Status.failed
     assert job.exception == "MDAPI error\ntext"
 
-    log_record = next(
-        r for r in caplog.records if r.message == "Job reached a completion status"
-    )
+    log_record = next(r for r in caplog.records if "errored" in r.message)
 
+    assert log_record.message == f"Job {job.id} errored"
     assert log_record.context["event"] == "job"
     assert log_record.context["context"] == "Test Product 1.0"
     assert log_record.context["status"] == "error"
@@ -330,10 +330,9 @@ def test_finalize_result_job_success(job_factory, caplog):
     with finalize_result(job):
         pass
 
-    log_record = next(
-        r for r in caplog.records if r.message == "Job reached a completion status"
-    )
+    log_record = next(r for r in caplog.records if "succeeded" in r.message)
 
+    assert log_record.message == f"Job {job.id} succeeded"
     assert log_record.context["event"] == "job"
     assert log_record.context["context"] == "Test Product 1.0"
     assert log_record.context["status"] == "success"

@@ -70,6 +70,7 @@ def finalize_result(result: Union[Job, PreflightResult]):
     start_time = timezone.now()
     end_time = None
     log_status = None
+    log_msg = None
 
     try:
         yield
@@ -82,8 +83,10 @@ def finalize_result(result: Union[Job, PreflightResult]):
             # Determine if the preflight returned a negative status (FAILURE)
             # as opposed to throwing an exception (ERROR)
             log_status = JobLogStatus.FAILURE
+            log_msg = f"{result.__class__.__name__} {result.id} failed"
         else:
             log_status = JobLogStatus.SUCCESS
+            log_msg = f"{result.__class__.__name__} {result.id} succeeded"
     except (StopRequested, ShutDownImminentException):
         # When an RQ worker gets a SIGTERM, it will initiate a warm shutdown,
         # trying to wrap up existing tasks and then raising a
@@ -94,11 +97,9 @@ def finalize_result(result: Union[Job, PreflightResult]):
         result.canceled_at = timezone.now()
         end_time = result.canceled_at
         log_status = JobLogStatus.TERMINATED
+        log_msg = f"{result.__class__.__name__} {result.id} interrupted by dyno restart"
         result.exception = (
             "The installation job was interrupted. Please retry the installation."
-        )
-        logger.error(
-            f"{result._meta.model_name} {result.id} canceled due to dyno restart."
         )
         raise
     except StopFlowException as e:
@@ -107,17 +108,17 @@ def finalize_result(result: Union[Job, PreflightResult]):
         result.canceled_at = timezone.now()
         end_time = result.canceled_at
         log_status = JobLogStatus.CANCELED
+        log_msg = f"{result.__class__.__name__} {result.id} canceled"
         result.exception = str(e)
-        logger.info(f"{result._meta.model_name} {result.id} canceled.")
     except Exception as e:
         # Other failures
         result.status = result.Status.failed
         end_time = timezone.now()
         log_status = JobLogStatus.ERROR
+        log_msg = f"{result.__class__.__name__} {result.id} errored"
         result.exception = str(e)
         if hasattr(e, "response"):
             result.exception += "\n" + e.response.text
-        logger.error(f"{result._meta.model_name} {result.id} failed.")
         raise
     finally:
         duration = (end_time - start_time).seconds
@@ -132,7 +133,7 @@ def finalize_result(result: Union[Job, PreflightResult]):
 
         context = f"{result.plan.version.product.title} {result.plan.version.label}"
         logger.info(
-            "Job reached a completion status",
+            log_msg,
             extra={
                 "context": {
                     "event": f"{job_type}",
@@ -277,7 +278,7 @@ run_flows_job = job(run_flows)
 
 
 def enqueuer():
-    logger.debug("Enqueuer live", extra={"tag": "jobs.enqueuer"})
+    logger.debug("Enqueuer live")
     for j in Job.objects.filter(enqueued_at=None):
         j.invalidate_related_preflight()
         rq_job = run_flows_job.delay(
