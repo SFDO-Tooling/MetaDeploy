@@ -369,7 +369,6 @@ def create_scratch_org(org_pk, release_test=False):
                     duration=plan.scratch_org_duration,
                 )
         except Exception as e:
-            print(f"exception: {e}")
             org.fail(e)
             return
 
