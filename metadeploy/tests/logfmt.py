@@ -71,19 +71,6 @@ def test_formatter_format_line():
     assert result == expected
 
 
-def test_formatter_tag():
-    record = logging.LogRecord(
-        "name", logging.INFO, "module", 1, "Some message", (), None
-    )
-
-    record.tag = "some-tag"
-
-    result = LogfmtFormatter()._get_tag(record)
-    expected = "some-tag"
-
-    assert result == expected
-
-
 def test_parsed_msg():
     record = logging.LogRecord(
         "name", logging.INFO, "logging_middleware", 1, "foo=bar baz=qux", (), None
