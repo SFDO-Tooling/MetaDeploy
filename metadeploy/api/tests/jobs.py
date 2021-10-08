@@ -208,13 +208,11 @@ def test_finalize_result_worker_died(job_factory, caplog):
         pass
     assert job.status == job.Status.canceled
 
-    log_record = next(
-        r for r in caplog.records if "interrupted" in r.message
-    )
+    log_record = next(r for r in caplog.records if "interrupted" in r.message)
 
     assert log_record.message == f"Job {job.id} interrupted by dyno restart"
     assert log_record.context["event"] == "job"
-    assert log_record.context["context"] == "Test Product 1.0"
+    assert log_record.context["context"] == "test-product/1.0/sample-plan"
     assert log_record.context["status"] == "terminated"
     assert "duration" in log_record.context
 
@@ -237,7 +235,7 @@ def test_finalize_result_canceled_job(job_factory, caplog):
 
     assert log_record.message == f"Job {job.id} canceled"
     assert log_record.context["event"] == "job"
-    assert log_record.context["context"] == "Test Product 1.0"
+    assert log_record.context["context"] == "test-product/1.0/sample-plan"
     assert log_record.context["status"] == "canceled"
     assert "duration" in log_record.context
 
@@ -267,7 +265,7 @@ def test_finalize_result_preflight_worker_died(
         == f"PreflightResult {preflight.id} interrupted by dyno restart"
     )
     assert log_record.context["event"] == "preflight"
-    assert log_record.context["context"] == "Test Product 1.0"
+    assert log_record.context["context"] == "test-product/1.0/sample-plan"
     assert log_record.context["status"] == "terminated"
     assert "duration" in log_record.context
 
@@ -290,7 +288,7 @@ def test_finalize_result_preflight_failed(
 
     assert log_record.message == f"PreflightResult {preflight.id} failed"
     assert log_record.context["event"] == "preflight"
-    assert log_record.context["context"] == "Test Product 1.0"
+    assert log_record.context["context"] == "test-product/1.0/sample-plan"
     assert log_record.context["status"] == "failure"
     assert "duration" in log_record.context
 
@@ -315,7 +313,7 @@ def test_finalize_result_mdapi_error(job_factory, caplog):
 
     assert log_record.message == f"Job {job.id} errored"
     assert log_record.context["event"] == "job"
-    assert log_record.context["context"] == "Test Product 1.0"
+    assert log_record.context["context"] == "test-product/1.0/sample-plan"
     assert log_record.context["status"] == "error"
     assert "duration" in log_record.context
 
@@ -334,7 +332,7 @@ def test_finalize_result_job_success(job_factory, caplog):
 
     assert log_record.message == f"Job {job.id} succeeded"
     assert log_record.context["event"] == "job"
-    assert log_record.context["context"] == "Test Product 1.0"
+    assert log_record.context["context"] == "test-product/1.0/sample-plan"
     assert log_record.context["status"] == "success"
     assert "duration" in log_record.context
 

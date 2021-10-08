@@ -131,7 +131,7 @@ def finalize_result(result: Union[Job, PreflightResult]):
             elif isinstance(result, Job):
                 job_type = JobType.JOB
 
-        context = f"{result.plan.version.product.title} {result.plan.version.label}"
+        context = f"{result.plan.version.product.slug}/{result.plan.version.label}/{result.plan.slug}"
         logger.info(
             log_msg,
             extra={
