@@ -268,9 +268,19 @@ def expire_preflights():
 expire_preflights_job = job(expire_preflights)
 
 
-def create_scratch_org(org_pk):
+def run_release_test(org_pk: str):
     """
-    Takes our local ScratchOrg model instance and creates the actual org on Salesforce
+    Runs the preflight checks and plan steps against
+    """
+
+def create_scratch_org(org_pk, release_test=False):
+    """
+    Takes our local ScratchOrg model instance and creates the actual org on Salesforce.
+
+    If the plan associated with the ScratchOrg requires preflight checks, then
+    they are automatically run against the org.
+    If the plan associated with the ScratchOrg has *NO OPTIONAL STEPS* then
+    the plan steps are also run against the org.
     """
     org = ScratchOrg.objects.get(pk=org_pk)
     plan = org.plan
@@ -301,19 +311,22 @@ def create_scratch_org(org_pk):
                     duration=plan.scratch_org_duration,
                 )
         except Exception as e:
+            print(f'exception: {e}')
             org.fail(e)
             return
 
+    # this stores some values on the scratch
+    # org model in the db
     org.complete(scratch_org_config)
 
-    if plan.requires_preflight:
-        preflight_result = PreflightResult.objects.create(
-            user=None,
-            plan=plan,
-            org_id=org.org_id,  # Set by org.complete()
-        )
+    # If this is a test of release on Heroku
+    # we want to run both preflight and the plan itself.
+    if release_test:
+        prefligh_result = run_preflight_checks_sync(org, release_test=True)
+        job = run_plan_steps_sync(org, release_test=True)
+    elif plan.requires_preflight:
+        preflight_result = run_preflight_checks_sync(org)
         async_to_sync(preflight_started)(org, preflight_result)
-        preflight(preflight_result.pk)
     elif plan.required_step_ids.count() == plan.steps.count():
         # Start installation job automatically if both:
         # - Plan has no preflight
@@ -360,3 +373,30 @@ def calculate_average_plan_runtime():
 
 
 calculate_average_plan_runtime_job = job(calculate_average_plan_runtime)
+
+
+def run_preflight_checks_sync(org: ScratchOrg, release_test=False):
+    """Runs the preflight checks of the given plan against an org synchronously"""
+    preflight_result = PreflightResult.objects.create(
+        user=None,
+        plan=org.plan,
+        org_id=org.org_id,  # Set by org.complete()
+        is_release_test=release_test
+    )
+    preflight(preflight_result.pk)
+    return preflight_result
+
+def run_plan_steps_sync(org: ScratchOrg, release_test=False):
+    """Runs the plan steps against the org synchronously"""
+    with transaction.atomic():
+        job = Job.objects.create(
+            user=None,
+            plan=org.plan,
+            org_id=org.org_id,  # Set by org.complete()
+            full_org_type=ORG_TYPES.Scratch,
+            is_release_test=release_test,
+            enqueued_at=timezone.now()
+        )
+        job.steps.set(org.plan.steps.all())
+    run_flows(plan=job.plan, skip_steps=[], result_class=Job, result_id=str(job.id))
+    return job
