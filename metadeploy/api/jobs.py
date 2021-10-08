@@ -121,14 +121,14 @@ def finalize_result(result: Union[Job, PreflightResult]):
         raise
     finally:
         duration = (end_time - start_time).seconds
-        # TBD, dependent on another story.
-        # if result.is_release_test:
-        #    job_type = JobType.TEST_JOB
-        # elif
-        if isinstance(result, PreflightResult):
-            job_type = JobType.PREFLIGHT
-        elif isinstance(result, Job):
-            job_type = JobType.JOB
+        
+        if result.is_release_test:
+           job_type = JobType.TEST_JOB
+        else:
+            if isinstance(result, PreflightResult):
+                job_type = JobType.PREFLIGHT
+            elif isinstance(result, Job):
+                job_type = JobType.JOB
 
         context = f"{result.plan.version.product.title} {result.plan.version.label}"
         logger.info(

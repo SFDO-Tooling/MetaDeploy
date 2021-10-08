@@ -43,8 +43,8 @@ def test_run_plan(plan_factory):
         call_command("run_plan", str(plan.id))
 
     # We can't query the scratch org since it's been deleted
-    job = Job.objects.filter()[0]
-    preflight_result = PreflightResult.objects.filter()[0]
+    job = Job.objects.get()
+    preflight_result = PreflightResult.objects.get()
 
     assert job.status == "complete"
     assert job.is_release_test

@@ -25,5 +25,6 @@ class Command(BaseCommand):
             plan=plan, enqueued_at=datetime.utcnow().isoformat()
         )
         create_scratch_org(scratch_org.pk, release_test=True)
-
-        delete_scratch_org(scratch_org)
+        
+        if 
+        delete_scratch_org(scratch_org, should_delete_locally=False)
