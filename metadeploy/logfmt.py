@@ -100,7 +100,7 @@ class LogfmtFormatter(ServerFormatter):
         rest = self.format_line(context)
         fields = []
         if "event" in context:
-            fields.append(f"event={context['event']}")
+            fields.append(f"event={quote_logvalue(context['event'])}")
         fields += [
             f"request_id={id_}",
             f"at={record.levelname}",
