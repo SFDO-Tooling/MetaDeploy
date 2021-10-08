@@ -37,6 +37,7 @@ def test_run_plan(plan_factory):
                 return_value=(org_config, None, None),
             )
         )
+        stack.enter_context(patch("metadeploy.api.jobs.delete_scratch_org_on_sf"))
 
         call_command("run_plan", str(plan.id))
 
