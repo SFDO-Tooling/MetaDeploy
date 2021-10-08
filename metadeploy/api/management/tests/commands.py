@@ -8,7 +8,7 @@ from django.core.management import call_command
 from metadeploy.api.models import Job, PreflightResult, ScratchOrg
 
 
-@pytest.mark.django_db(transaction=True)
+@pytest.mark.django_db()
 def test_run_plan(plan_factory):
     plan = plan_factory(preflight_checks=[{"when": "False", "action": "error"}])
 
