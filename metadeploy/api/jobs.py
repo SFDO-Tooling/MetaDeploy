@@ -268,11 +268,6 @@ def expire_preflights():
 expire_preflights_job = job(expire_preflights)
 
 
-def run_release_test(org_pk: str):
-    """
-    Runs the preflight checks and plan steps against
-    """
-
 def create_scratch_org(org_pk, release_test=False):
     """
     Takes our local ScratchOrg model instance and creates the actual org on Salesforce.
