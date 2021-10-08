@@ -26,7 +26,7 @@ def quote_logvalue(value):
     """
     s = str(value)
     if " " in s or '"' in s:
-        string = s.replace('"', "\\" + '"')
+        s = s.replace('"', "\\" + '"')
         return f'"{s}"'
     return s
 
