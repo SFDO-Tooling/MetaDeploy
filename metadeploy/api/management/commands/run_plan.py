@@ -26,6 +26,4 @@ class Command(BaseCommand):
         )
         create_scratch_org(scratch_org.pk, release_test=True)
 
-        # If we delete the org here, then we are unable to
-        # query for it in the test
         delete_scratch_org(scratch_org)
