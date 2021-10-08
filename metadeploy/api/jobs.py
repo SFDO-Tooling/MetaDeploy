@@ -12,10 +12,12 @@ instances of the Job model and triggers the run_flows_job.
 """
 
 import contextlib
+import enum
 import logging
 import os
 import sys
 import traceback
+from typing import Union, List, Type
 import uuid
 from datetime import timedelta
 
@@ -49,12 +51,39 @@ def job(*args, **kw):
     return django_rq_job(*args, **kw)
 
 
+class JobType(str, enum.Enum):
+    JOB = "job"
+    PREFLIGHT = "preflight"
+    TEST_JOB = "test_job"
+
+
+class JobLogStatus(str, enum.Enum):
+    SUCCESS = "success"
+    FAILURE = "failure"  # preflight returned negative result
+    ERROR = "error"  # job threw an exception and failed
+    CANCELED = "canceled"  # by admins
+    TERMINATED = "terminated"  # by Heroku
+
+
 @contextlib.contextmanager
-def finalize_result(result):
+def finalize_result(result: Union[Job, PreflightResult]):
+    start_time = timezone.now()
+    end_time = None
+    log_status = None
+
     try:
         yield
+
         result.status = result.Status.complete
         result.success_at = timezone.now()
+        end_time = result.success_at
+
+        if isinstance(result, PreflightResult) and result.has_any_errors():
+            # Determine if the preflight returned a negative status (FAILURE)
+            # as opposed to throwing an exception (ERROR)
+            log_status = JobLogStatus.FAILURE
+        else:
+            log_status = JobLogStatus.SUCCESS
     except (StopRequested, ShutDownImminentException):
         # When an RQ worker gets a SIGTERM, it will initiate a warm shutdown,
         # trying to wrap up existing tasks and then raising a
@@ -63,6 +92,8 @@ def finalize_result(result):
         # by catching that exception as it propagates back up.
         result.status = result.Status.canceled
         result.canceled_at = timezone.now()
+        end_time = result.canceled_at
+        log_status = JobLogStatus.TERMINATED
         result.exception = (
             "The installation job was interrupted. Please retry the installation."
         )
@@ -74,17 +105,43 @@ def finalize_result(result):
         # User requested cancellation of job
         result.status = result.Status.canceled
         result.canceled_at = timezone.now()
+        end_time = result.canceled_at
+        log_status = JobLogStatus.CANCELED
         result.exception = str(e)
         logger.info(f"{result._meta.model_name} {result.id} canceled.")
     except Exception as e:
         # Other failures
         result.status = result.Status.failed
+        end_time = timezone.now()
+        log_status = JobLogStatus.ERROR
         result.exception = str(e)
         if hasattr(e, "response"):
             result.exception += "\n" + e.response.text
         logger.error(f"{result._meta.model_name} {result.id} failed.")
         raise
     finally:
+        duration = (end_time - start_time).seconds
+        # TBD, dependent on another story.
+        # if result.is_release_test:
+        #    job_type = JobType.TEST_JOB
+        # elif
+        if isinstance(result, PreflightResult):
+            job_type = JobType.PREFLIGHT
+        elif isinstance(result, Job):
+            job_type = JobType.JOB
+
+        context = f"{result.plan.version.product.title} {result.plan.version.label}"
+        logger.info(
+            "Job reached a completion status",
+            extra={
+                "context": {
+                    "event": f"{job_type}",
+                    "context": context,
+                    "status": f"{log_status}",
+                    "duration": duration,
+                }
+            },
+        )
         result.save()
 
 
@@ -118,7 +175,13 @@ def prepend_python_path(path):
         sys.path = prev_path
 
 
-def run_flows(*, plan, skip_steps, result_class, result_id):
+def run_flows(
+    *,
+    plan: Plan,
+    skip_steps: List[str],
+    result_class: Union[Type[Job], Type[PreflightResult]],
+    result_id: int,
+):
     """
     This operates with side effects; it changes things in a Salesforce
     org, and then records the results of those operations on to a
