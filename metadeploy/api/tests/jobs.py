@@ -600,7 +600,7 @@ class TestCreateScratchOrg:
                 plan=plan,
                 enqueued_at=datetime(2020, 9, 4, 12),
             )
-            create_scratch_org(scratch_org.id)
+            create_scratch_org(str(scratch_org.id))
 
 
 @pytest.mark.django_db

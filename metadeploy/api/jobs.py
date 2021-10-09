@@ -122,14 +122,14 @@ def finalize_result(result: Union[Job, PreflightResult]):
         raise
     finally:
         duration = (end_time - start_time).seconds
-        # TBD, dependent on another story.
-        # if result.is_release_test:
-        #    job_type = JobType.TEST_JOB
-        # elif
-        if isinstance(result, PreflightResult):
-            job_type = JobType.PREFLIGHT
-        elif isinstance(result, Job):
-            job_type = JobType.JOB
+
+        if result.is_release_test:
+            job_type = JobType.TEST_JOB
+        else:
+            if isinstance(result, PreflightResult):
+                job_type = JobType.PREFLIGHT
+            elif isinstance(result, Job):
+                job_type = JobType.JOB
 
         context = f"{result.plan.version.product.slug}/{result.plan.version.label}/{result.plan.slug}"
         logger.info(
@@ -334,62 +334,26 @@ expire_preflights_job = job(expire_preflights)
 
 def create_scratch_org(org_pk):
     """
-    Takes our local ScratchOrg model instance and creates the actual org on Salesforce
+    Takes our local ScratchOrg model instance and creates the actual org on Salesforce.
+
+    If the plan associated with the ScratchOrg requires preflight checks, then
+    they are automatically run against the org.
+    If the plan associated with the ScratchOrg has *NO OPTIONAL STEPS* then
+    the plan steps are also run against the org.
     """
-    org = ScratchOrg.objects.get(pk=org_pk)
-    plan = org.plan
-    email = org.email
-    org.email = None
-    org.save()
-    repo_url = plan.version.product.repo_url
-    repo_owner, repo_name = extract_user_and_repo(repo_url)
-    commit_ish = plan.commit_ish
-
-    if settings.METADEPLOY_FAST_FORWARD:  # pragma: no cover
-        fake_org_id = str(uuid.uuid4())[:18]
-        scratch_org_config = OrgConfig({"org_id": fake_org_id}, "scratch")
-    else:
-        try:
-            with local_github_checkout(
-                repo_owner, repo_name, commit_ish=commit_ish
-            ) as repo_root:
-                scratch_org_config, _, org_config = create_scratch_org_on_sf(
-                    repo_owner=repo_owner,
-                    repo_name=repo_name,
-                    repo_url=repo_url,
-                    repo_branch=commit_ish,
-                    email=email,
-                    project_path=repo_root,
-                    scratch_org=org,
-                    org_name=plan.org_config_name,
-                    duration=plan.scratch_org_duration,
-                )
-        except Exception as e:
-            org.fail(e)
-            return
-
-    org.complete(scratch_org_config)
+    org, plan = setup_scratch_org(org_pk)
+    if not org or not plan:
+        return
 
     if plan.requires_preflight:
-        preflight_result = PreflightResult.objects.create(
-            user=None,
-            plan=plan,
-            org_id=org.org_id,  # Set by org.complete()
-        )
+        preflight_result = run_preflight_checks_sync(org)
         async_to_sync(preflight_started)(org, preflight_result)
-        preflight(preflight_result.pk)
-    elif plan.required_step_ids.count() == plan.steps.count():
+
+    if plan.required_step_ids.count() == plan.steps.count():
         # Start installation job automatically if both:
         # - Plan has no preflight
         # - All plan steps are required
-        with transaction.atomic():
-            job = Job.objects.create(
-                user=None,
-                plan=plan,
-                org_id=org.org_id,  # Set by org.complete()
-                full_org_type=ORG_TYPES.Scratch,
-            )
-            job.steps.set(plan.steps.all())
+        job = run_plan_steps(org, release_test=False)
         # This is already called on `save()`, but the new Job isn't in the
         # database yet because it's in an atomic transaction.
         job.push_to_org_subscribers(is_new=True, changed={})
@@ -424,3 +388,80 @@ def calculate_average_plan_runtime():
 
 
 calculate_average_plan_runtime_job = job(calculate_average_plan_runtime)
+
+
+def run_preflight_checks_sync(org: ScratchOrg, release_test=False):
+    """Runs the preflight checks of the given plan against an org synchronously"""
+    preflight_result = PreflightResult.objects.create(
+        user=None,
+        plan=org.plan,
+        org_id=org.org_id,  # Set by org.complete()
+        is_release_test=release_test,
+    )
+    preflight(preflight_result.pk)
+    return preflight_result
+
+
+def run_plan_steps(org: ScratchOrg, release_test=False):
+    """Runs the plan steps against the org.
+    If this is a release test then enqueued_at is populated to bypass queues,
+    and the flow is run immediately."""
+    with transaction.atomic():
+        job = Job.objects.create(
+            user=None,
+            plan=org.plan,
+            org_id=org.org_id,  # Set by org.complete()
+            full_org_type=ORG_TYPES.Scratch,
+            is_release_test=release_test,
+            enqueued_at=timezone.now() if release_test else None,
+        )
+        job.steps.set(org.plan.steps.all())
+
+    if release_test:
+        run_flows(plan=job.plan, skip_steps=[], result_class=Job, result_id=str(job.id))
+
+    return job
+
+
+def setup_scratch_org(org_pk: str):
+    """Given the id for a ScratchOrg record,
+    checkout the source at the given commit from the associated plan
+    and create a scratch org from Salesforce with code from the given
+    commit."""
+    org = ScratchOrg.objects.get(pk=org_pk)
+    plan = org.plan
+    email = org.email
+    org.email = None
+    org.save()
+    repo_url = plan.version.product.repo_url
+    repo_owner, repo_name = extract_user_and_repo(repo_url)
+    commit_ish = plan.commit_ish
+
+    if settings.METADEPLOY_FAST_FORWARD:  # pragma: no cover
+        fake_org_id = str(uuid.uuid4())[:18]
+        scratch_org_config = OrgConfig({"org_id": fake_org_id}, "scratch")
+    else:
+        try:
+            with local_github_checkout(
+                repo_owner, repo_name, commit_ish=commit_ish
+            ) as repo_root:
+                scratch_org_config, _, org_config = create_scratch_org_on_sf(
+                    repo_owner=repo_owner,
+                    repo_name=repo_name,
+                    repo_url=repo_url,
+                    repo_branch=commit_ish,
+                    email=email,
+                    project_path=repo_root,
+                    scratch_org=org,
+                    org_name=plan.org_config_name,
+                    duration=plan.scratch_org_duration,
+                )
+        except Exception as e:
+            org.fail(e)
+            return (None, None)
+
+    # this stores some values on the scratch
+    # org model in the db
+    org.complete(scratch_org_config)
+
+    return org, plan
