@@ -249,6 +249,8 @@ class PreflightResultFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = PreflightResult
 
+    plan = factory.SubFactory(PlanFactory)
+
 
 @pytest.fixture
 def client(user_factory):

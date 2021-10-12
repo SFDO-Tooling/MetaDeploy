@@ -737,6 +737,7 @@ class Job(HashIdMixin, models.Model):
     click_through_agreement = models.ForeignKey(
         ClickThroughAgreement, on_delete=models.PROTECT, null=True
     )
+    is_release_test = models.BooleanField(default=False)
 
     @property
     def org_name(self):
@@ -875,6 +876,7 @@ class PreflightResult(models.Model):
     # }
 
     exception = models.TextField(null=True)
+    is_release_test = models.BooleanField(default=False)
 
     @property
     def instance_url(self):

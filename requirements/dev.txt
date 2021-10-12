@@ -26,7 +26,7 @@ certifi==2021.5.30
     # via
     #   -c requirements/prod.txt
     #   requests
-charset-normalizer==2.0.4
+charset-normalizer==2.0.6
     # via
     #   -c requirements/prod.txt
     #   requests
@@ -59,7 +59,7 @@ factory-boy==3.2.0
     # via
     #   -r requirements/dev.in
     #   pytest-factoryboy
-faker==8.10.3
+faker==8.14.0
     # via
     #   -c requirements/prod.txt
     #   factory-boy
@@ -76,7 +76,7 @@ inflection==0.5.1
     # via pytest-factoryboy
 iniconfig==1.1.1
     # via pytest
-ipython==7.27.0
+ipython==7.28.0
     # via -r requirements/dev.in
 isort==5.9.3
     # via -r requirements/dev.in
@@ -113,9 +113,9 @@ pexpect==4.8.0
     # via ipython
 pickleshare==0.7.5
     # via ipython
-pip-tools==6.2.0
+pip-tools==6.3.0
     # via -r requirements/dev.in
-platformdirs==2.3.0
+platformdirs==2.4.0
     # via black
 pluggy==1.0.0
     # via pytest
@@ -131,6 +131,7 @@ pyflakes==2.3.1
     # via flake8
 pygments==2.10.0
     # via
+    #   -c requirements/prod.txt
     #   ipython
     #   sphinx
 pyparsing==2.4.7
@@ -168,7 +169,7 @@ pyyaml==5.4.1
     # via
     #   -c requirements/prod.txt
     #   vcrpy
-regex==2021.8.28
+regex==2021.9.30
     # via black
 requests==2.26.0
     # via
@@ -192,7 +193,7 @@ sphinxcontrib-devhelp==1.0.2
     # via sphinx
 sphinxcontrib-htmlhelp==2.0.0
     # via sphinx
-sphinxcontrib-httpdomain==1.7.0
+sphinxcontrib-httpdomain==1.8.0
     # via -r requirements/dev.in
 sphinxcontrib-jsmath==1.0.1
     # via sphinx
@@ -220,11 +221,11 @@ traitlets==5.1.0
     # via
     #   ipython
     #   matplotlib-inline
-typing-extensions==3.10.0.0
+typing-extensions==3.10.0.2
     # via
     #   -c requirements/prod.txt
     #   black
-urllib3==1.26.6
+urllib3==1.26.7
     # via
     #   -c requirements/prod.txt
     #   requests
@@ -244,7 +245,7 @@ yarl==1.6.3
 # The following packages are considered to be unsafe in a requirements file:
 pip==21.2.4
     # via pip-tools
-setuptools==58.0.3
+setuptools==58.1.0
     # via
     #   -c requirements/prod.txt
     #   ipython

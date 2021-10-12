@@ -83,8 +83,6 @@ class JobFlowCallback(BasicFlowCallback):
         if job_id:
             if job_id not in self.context.results:
                 self.context.results[job_id] = [{}]
-                print(f">>> initialized {self.context.results[job_id]}")
-
             if result.exception:
                 self.context.results[job_id][0].update(
                     {"status": ERROR, "message": bleach.clean(str(result.exception))}
