@@ -30,7 +30,7 @@ jobs:
             python3 -m venv venv
             . venv/bin/activate
             pip install -U pip
-            pip install pip-tools
+            pip install -U pip-tools
             make dev-install
       - run:
           name: Compile Front-End Assets
