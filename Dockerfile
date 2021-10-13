@@ -25,7 +25,7 @@ COPY ./utility/install_sfdx.sh /app/utility/install_sfdx.sh
 RUN /bin/sh /app/utility/install_sfdx.sh
 # installing python related dependencies with pip
 COPY ./requirements /app/requirements
-RUN pip install --no-cache-dir --upgrade pip \
+RUN pip install --no-cache-dir --upgrade pip pip-tools \
     && pip install --no-cache-dir -r /app/requirements/prod.txt
 RUN if [ "${BUILD_ENV}" = "development" ] ; then \
     pip install --no-cache-dir -r /app/requirements/dev.txt; \
