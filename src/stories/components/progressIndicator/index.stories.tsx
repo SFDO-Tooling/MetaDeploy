@@ -5,7 +5,7 @@ import ProgressIndicator from '@/js/components/jobs/progressIndicator';
 import { Job } from '@/js/store/jobs/reducer';
 import { SUPPORTED_ORGS } from '@/js/utils/constants';
 
-import { sampleJob1, sampleJob2, sampleJob3, sampleJob4 } from '../fixtures';
+import { sampleJob1, sampleJob2, sampleJob3, sampleJob4 } from '../../fixtures';
 
 export default {
   title: 'Components/ProgressIndicator/Example',
