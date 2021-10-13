@@ -1,0 +1,50 @@
+import { Meta, Story } from '@storybook/addon-docs';
+
+<Meta title="Jobs/ProgressBar/Docs" />
+
+# ProgressBar
+
+**Visualizes the progress of an installation Job.**
+
+## Overview
+
+The **ProgressBar** component is an
+[SLDS Progress Bar](https://react.lightningdesignsystem.com/components/progress-bars/)
+used to visually communciate the completion of `Steps` within a `Job`
+installation.
+
+The **ProgressBar** appears once an installation has started. The component is
+labeled "Installation Progress" and updates the percentage of `Steps` completed.
+The completed `Steps` percentage is represented by a striped bar that grows as
+the install continues.
+
+<Story
+  id="jobs-progressbar-example--progress-bar-component&args=job:Started"
+  height="125px"
+/>
+
+## Progress Rate
+
+To provide users with a sense of continuous movement, the component updates
+every one hundred milliseconds.
+
+While an individual `Step` is installing, the `ProgressBar` moves from zero to
+eighty percent completion of that `Step` over a span of fifteen seconds, at
+which point it pauses.
+
+When a `Step` is fully installed, the `ProgressBar` jumps to the next `Step`.
+This process repeats until all `Steps` are installed, at which point the entire
+bar turns solid green.
+
+<Story
+  id="jobs-progressbar-example--progress-bar-component&args=job:Complete"
+  height="125px"
+/>
+
+If the installation fails or is canceled, the **ProgressBar** turns red and the
+respective status is inserted after the "Installation Progress:" label.
+
+<Story
+  id="jobs-progressbar-example--progress-bar-component&args=job:Failed"
+  height="125px"
+/>
