@@ -9,4 +9,10 @@ else
      python manage.py migrate --noinput
 fi
 
+if [ -n "$RELEASE_TEST_ENABLED"] ; then
+     # TODO: check if value is 'True'
+     python .heroku/schedule_release_test.py 
+fi
+
+
 echo "Done."
