@@ -99,7 +99,7 @@ cryptography==3.4.8
     #   pyopenssl
     #   service-identity
     #   sfdo-template-helpers
-cumulusci==3.45.0
+cumulusci==3.46.0
     # via -r requirements/prod.in
 daphne==3.0.2
     # via channels
