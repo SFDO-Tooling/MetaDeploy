@@ -624,7 +624,9 @@ class Step(HashIdMixin, TranslatableModel):
     Kind = Choices(
         ("metadata", _("Metadata")),
         ("onetime", _("One Time Apex")),
-        ("managed", _("Managed Package")),
+        # This is used for package installation steps regardless of package type,
+        # but the internal value is "managed" for backwards-compatibility
+        ("managed", _("Package")),
         ("data", _("Data")),
         ("other", _("Other")),
     )
