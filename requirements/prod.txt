@@ -324,7 +324,7 @@ requests-futures==1.0.0
     # via cumulusci
 requests-oauthlib==1.3.0
     # via django-allauth
-rich==10.11.0
+rich==10.12.0
     # via cumulusci
 robotframework==4.1.1
     # via
