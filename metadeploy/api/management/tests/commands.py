@@ -1,10 +1,10 @@
 from contextlib import ExitStack
 from unittest.mock import patch
-from cumulusci.core.config import OrgConfig
-from django.core.management.base import CommandError
-import pytest
 
+import pytest
+from cumulusci.core.config import OrgConfig
 from django.core.management import call_command
+from django.core.management.base import CommandError
 
 from metadeploy.api.models import Job, PreflightResult, ScratchOrg
 
@@ -57,4 +57,4 @@ def test_run_plan(plan_factory):
 @pytest.mark.django_db
 def test_run_plan__no_plan_exists():
     with pytest.raises(CommandError):
-        call_command("run_plan", 'abc123')
+        call_command("run_plan", "abc123")

@@ -17,9 +17,9 @@ import logging
 import os
 import sys
 import traceback
-from typing import Union, List, Type
 import uuid
 from datetime import timedelta
+from typing import List, Type, Union
 
 from asgiref.sync import async_to_sync
 from cumulusci.core.config import OrgConfig, ServiceConfig

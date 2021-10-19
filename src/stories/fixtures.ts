@@ -290,4 +290,4 @@ export const sampleUser1 = {
   org_name: 'org-1',
   org_type: 'Developer Edition',
   is_production_org: false,
-}
+};

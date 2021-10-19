@@ -2,12 +2,13 @@ from datetime import datetime
 
 from django.core.management.base import BaseCommand, CommandError, CommandParser
 
-from metadeploy.api.jobs import delete_scratch_org
-from metadeploy.api.jobs import setup_scratch_org
-from metadeploy.api.jobs import run_plan_steps
-from metadeploy.api.jobs import run_preflight_checks_sync
-from metadeploy.api.models import Plan
-from metadeploy.api.models import ScratchOrg
+from metadeploy.api.jobs import (
+    delete_scratch_org,
+    run_plan_steps,
+    run_preflight_checks_sync,
+    setup_scratch_org,
+)
+from metadeploy.api.models import Plan, ScratchOrg
 
 
 class Command(BaseCommand):

@@ -3,8 +3,6 @@ import React, { ComponentProps } from 'react';
 
 import UserInfo from '@/js/components/plans/userInfo';
 
-
-
 import { samplePlan1, sampleUser1 } from '../../fixtures';
 
 export default {
