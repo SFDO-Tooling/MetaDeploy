@@ -1,24 +1,25 @@
 import { Story } from '@storybook/react/types-6-0';
 import React, { ComponentProps } from 'react';
 
-import UserInfo from '@/js/components/jobs/userInfo';
-import { Job } from '@/js/store/jobs/reducer';
+import UserInfo from '@/js/components/plans/userInfo';
 
-import { sampleJob1 } from '../../fixtures';
+
+
+import { samplePlan1, sampleUser1 } from '../../fixtures';
 
 export default {
   title: 'Components/UserInfo/Example',
   component: UserInfo,
 };
 
+type Props = ComponentProps<typeof UserInfo>;
 
 const Template = (props: Props) => <UserInfo {...props} />;
 
-export const UserInfoComponent = Template.bind({});
+export const UserInfoComponent: Story<Props> = Template.bind({});
 UserInfoComponent.args = {
-  job: sampleJob1 as unknown as Job,
-}
-
-
+  plan: samplePlan1,
+  user: sampleUser1,
+};
 
 UserInfoComponent.storyName = 'User Info';

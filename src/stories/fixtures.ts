@@ -280,3 +280,14 @@ export const samplePreflight2 = {
   warning_count: 1,
   is_ready: false,
 };
+
+export const sampleUser1 = {
+  id: 'user-1',
+  username: 'user@user.com',
+  email: 'user@user.com',
+  is_staff: false,
+  valid_token_for: '99D09999999FQMlEAO',
+  org_name: 'org-1',
+  org_type: 'Developer Edition',
+  is_production_org: false,
+}
