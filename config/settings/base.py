@@ -387,6 +387,9 @@ if not SFDX_CLIENT_ID:
 environ["SFDX_CLIENT_ID"] = SFDX_CLIENT_ID
 environ["SFDX_HUB_KEY"] = SFDX_HUB_KEY
 
+HEROKU_WORKER_APP_NAME = env("HEROKU_WORKER_APP_NAME", default=None)
+HEROKU_TOKEN = env("HEROKU_TOKEN", default=None)
+
 GITHUB_TOKEN = env("GITHUB_TOKEN", default=None)
 GITHUB_APP_ID = env("GITHUB_APP_ID", default=None)
 GITHUB_APP_KEY = env("GITHUB_APP_KEY", default=None)

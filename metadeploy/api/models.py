@@ -439,7 +439,8 @@ class PlanTemplate(SlugMixin, TranslatableModel):
     )
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
     # When true, the latest version of the associated product Plan
-    # will be run against a scratch org in a one-off dyno.
+    # will be run against a scratch org in a one-off dyno after
+    # a production release on Heroku.
     regression_test_opt_out = models.BooleanField(default=False)
 
     slug_class = PlanSlug
