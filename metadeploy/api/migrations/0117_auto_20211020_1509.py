@@ -6,18 +6,28 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0116_auto_20211006_1833'),
+        ("api", "0116_auto_20211006_1833"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='plantemplate',
-            name='regression_test_opt_out',
+            model_name="plantemplate",
+            name="regression_test_opt_out",
             field=models.BooleanField(default=False),
         ),
         migrations.AlterField(
-            model_name='step',
-            name='kind',
-            field=models.CharField(choices=[('metadata', 'Metadata'), ('onetime', 'One Time Apex'), ('managed', 'Package'), ('data', 'Data'), ('other', 'Other')], default='metadata', max_length=64),
+            model_name="step",
+            name="kind",
+            field=models.CharField(
+                choices=[
+                    ("metadata", "Metadata"),
+                    ("onetime", "One Time Apex"),
+                    ("managed", "Package"),
+                    ("data", "Data"),
+                    ("other", "Other"),
+                ],
+                default="metadata",
+                max_length=64,
+            ),
         ),
     ]
