@@ -23,14 +23,6 @@ HEADERS = {
 logger = logging.getLogger(__name__)
 
 
-###################################
-#   RELEASE TESTING ON HEROKU
-###################################
-"""
-Regression testing happens 
-"""
-
-
 def execute_release_test() -> None:
     """For each plan to test, make an API call to Heroku
     to spin up a one-off dyno, and run the plan against
