@@ -45,11 +45,15 @@ def execute_release_test() -> None:
 
 def get_plans_to_test() -> List[Plan]:
     """Returns all plans related to PlanTemplates that have
-    not opted out of regression testing.
+    not opted out of regression testing, and are not of type 'additional'.
     (See PlanTemplate.regression_test_opt_out)"""
     plan_templates = PlanTemplate(regression_test_opt_out=False)
     return [
-        Plan.objects.filter(plan_template=template.Id).order_by("-created_at").first()
+        Plan.objects.filter(
+            plan_template=template.Id, tier__in=[Plan.Tier.primary, Plan.Tier.secondary]
+        )
+        .order_by("-created_at")
+        .first()
         for template in plan_templates
     ]
 
