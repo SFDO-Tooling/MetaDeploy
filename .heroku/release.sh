@@ -9,7 +9,7 @@ else
      python manage.py migrate --noinput
 fi
 
-if [ $RELEASE_TEST_ENABLED = true ]; then
+if [ -n "$RELEASE_TEST_ENABLED" ]; then
      echo "Release tests enabled. Scheduling tests now."
      python .heroku/schedule_release_test.py 
 fi
