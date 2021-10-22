@@ -1,4 +1,4 @@
-#!/usr/bin/env bash 
+#!/bin/sh 
 set -e
 
 if [ -n "$CTC_URL" ] ; then
