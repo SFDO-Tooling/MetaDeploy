@@ -15,19 +15,4 @@ class Migration(migrations.Migration):
             name="regression_test_opt_out",
             field=models.BooleanField(default=False),
         ),
-        migrations.AlterField(
-            model_name="step",
-            name="kind",
-            field=models.CharField(
-                choices=[
-                    ("metadata", "Metadata"),
-                    ("onetime", "One Time Apex"),
-                    ("managed", "Package"),
-                    ("data", "Data"),
-                    ("other", "Other"),
-                ],
-                default="metadata",
-                max_length=64,
-            ),
-        ),
     ]
