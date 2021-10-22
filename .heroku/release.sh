@@ -1,4 +1,4 @@
-#!/usr/bin/env bash 
+#!/bin/sh 
 set -e
 
 if [ -n "$CTC_URL" ] ; then
@@ -9,9 +9,7 @@ else
      python manage.py migrate --noinput
 fi
 
-# RELEASE_TEST_ENABLED needs to be set to 'True' (case-insensitive).
-LOWER_CASE = $(echo $RELEASE_TEST_ENABLED | tr [:upper:] [:lower:])
-if [ $LOWER_CASE = true ]; then
+if [ $RELEASE_TEST_ENABLED = true ]; then
      echo "Release tests enabled. Scheduling tests now."
      python .heroku/schedule_release_test.py 
 fi
