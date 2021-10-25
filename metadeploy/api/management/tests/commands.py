@@ -1,11 +1,14 @@
 import pytest
 import logging
+import re
 
 from contextlib import ExitStack
 from requests.exceptions import HTTPError
 from unittest import mock
 from unittest.mock import patch
 
+from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.core.management.base import CommandError
 from django.core.management import call_command
 
@@ -119,3 +122,33 @@ def test_schedule_release_test__bad_response(post, plan_factory, plan_template_f
     post.return_value = mock.Mock(status_code=500, text="Fatal Error")
     with pytest.raises(HTTPError, match="An internal server error occurred."):
         execute_release_test()
+
+
+@pytest.mark.django_db
+def test_schedule_release_test__no_heroku_worker_app_name(
+    plan_template_factory, plan_factory
+):
+    template = plan_template_factory()
+    plan_factory(plan_template=template)
+
+    with mock.patch.object(settings, "HEROKU_WORKER_APP_NAME", None):
+        with pytest.raises(
+            ImproperlyConfigured,
+            match="The HEROKU_WORKER_APP_NAME environment variable is required for regression testing.",
+        ):
+            execute_release_test()
+
+
+@pytest.mark.django_db
+def test_schedule_release_test__no_heroku_token(plan_template_factory, plan_factory):
+    template = plan_template_factory()
+    plan_factory(plan_template=template)
+
+    with mock.patch.object(settings, "HEROKU_TOKEN", None):
+        with pytest.raises(
+            ImproperlyConfigured,
+            match=re.escape(
+                "The HEROKU_TOKEN environment variable is required for regression testing."
+            ),
+        ):
+            execute_release_test()
