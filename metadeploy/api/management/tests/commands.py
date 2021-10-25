@@ -10,9 +10,8 @@ from django.core.management.base import CommandError
 from django.core.management import call_command
 
 from cumulusci.core.config import OrgConfig
-from metadeploy.api.models import Job, PreflightResult, ScratchOrg, PlanTemplate, Plan
+from metadeploy.api.models import Job, PreflightResult, ScratchOrg, Plan
 from metadeploy.api.management.commands.schedule_release_test import (
-    HEROKU_API_URL,
     execute_release_test,
     get_plans_to_test,
 )
@@ -82,16 +81,14 @@ def test_get_plans_to_test(plan_template_factory, plan_factory):
     template_1 = plan_template_factory()
     # two plans of tier 'primary'
     plan_factory(tier=Plan.Tier.primary, plan_template=template_1)
-    most_recent_primary = plan_factory(tier=Plan.Tier.primary, plan_template=template_1)
+    plan_factory(tier=Plan.Tier.primary, plan_template=template_1)
     # one plan with tier of 'additional' (should not be tested).
     plan_factory(tier=Plan.Tier.additional, plan_template=template_1)
 
     template_2 = plan_template_factory()
     # two plans of tier 'secondary'
     plan_factory(tier=Plan.Tier.secondary, plan_template=template_2)
-    most_recent_secondary = plan_factory(
-        tier=Plan.Tier.secondary, plan_template=template_2
-    )
+    plan_factory(tier=Plan.Tier.secondary, plan_template=template_2)
     # one plan with tier of 'additional' (should not be tested).
     plan_factory(tier=Plan.Tier.additional, plan_template=template_2)
 
