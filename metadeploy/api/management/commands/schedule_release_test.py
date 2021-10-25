@@ -7,6 +7,7 @@ from requests.exceptions import HTTPError
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.core.management.base import BaseCommand
 
 import django_rq
 
@@ -14,10 +15,10 @@ from metadeploy.api.models import Plan, PlanTemplate
 
 MINUTE_DELAY = 5
 TIME_TO_LIVE = 86400
-HEROKU_API_URL = f"https://api.heroku.com/apps/{settings.heroku_worker_app_name}/dynos"
+HEROKU_API_URL = f"https://api.heroku.com/apps/{settings.HEROKU_WORKER_APP_NAME}/dynos"
 HEADERS = {
     "Accept": "application/vnd.heroku+json; version=3",
-    "Authorization": f"Bearer {settings.heroku_token}",
+    "Authorization": f"Bearer {settings.HEROKU_TOKEN}",
 }
 
 logger = logging.getLogger(__name__)
@@ -34,7 +35,7 @@ def execute_release_test() -> None:
 
     check_settings()
     for plan in plans_to_test:
-        command = f"python ./manage.py run_plan {str(plan.Id)}"
+        command = f"python ./manage.py run_plan {str(plan.id)}"
         resp = start_job_in_one_off_dyno(command)
         if resp.status_code > 299:
             logger.error(
@@ -48,9 +49,10 @@ def get_plans_to_test() -> List[Plan]:
     not opted out of regression testing, and are not of type 'additional'.
     (See PlanTemplate.regression_test_opt_out)"""
     plan_templates = PlanTemplate.objects.filter(regression_test_opt_out=False)
+    # TODO: Do we only ever need one plan per plan template to test?
     return [
         Plan.objects.filter(
-            plan_template=template.Id, tier__in=[Plan.Tier.primary, Plan.Tier.secondary]
+            plan_template=template.pk, tier__in=[Plan.Tier.primary, Plan.Tier.secondary]
         )
         .order_by("-created_at")
         .first()
@@ -60,11 +62,11 @@ def get_plans_to_test() -> List[Plan]:
 
 def check_settings() -> None:
     """Raises an error if we don't have the settings needed to talk to Heroku."""
-    if not settings.heroku_worker_app_name:
+    if not settings.HEROKU_WORKER_APP_NAME:
         raise ImproperlyConfigured(
             "The HEROKU_WORKER_APP_NAME environment variable is required for regression testing."
         )
-    if not settings.heroku_token:
+    if not settings.HEROKU_TOKEN:
         raise ImproperlyConfigured(
             "The HEROKU_TOKEN environment variable is required for regression testing."
         )
@@ -80,6 +82,9 @@ def start_job_in_one_off_dyno(command: str) -> requests.Response:
     )
 
 
-if __name__ == "__main__":
-    scheduler = django_rq.get_scheduler("short")
-    scheduler.enqueue_in(timedelta(minutes=MINUTE_DELAY), execute_release_test)
+class Command(BaseCommand):
+    help = "Schedules regression tests to execute after a deploy on Heroku"
+
+    def handle(self, *args, **options):  # pragma: no cover
+        scheduler = django_rq.get_scheduler("short")
+        scheduler.enqueue_in(timedelta(minutes=MINUTE_DELAY), execute_release_test)

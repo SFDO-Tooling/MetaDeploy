@@ -1,12 +1,21 @@
-from contextlib import ExitStack
-from unittest.mock import patch
-from cumulusci.core.config import OrgConfig
-from django.core.management.base import CommandError
 import pytest
+import logging
 
+from contextlib import ExitStack
+from requests.exceptions import HTTPError
+from unittest import mock
+from unittest.mock import patch
+
+from django.core.management.base import CommandError
 from django.core.management import call_command
 
-from metadeploy.api.models import Job, PreflightResult, ScratchOrg
+from cumulusci.core.config import OrgConfig
+from metadeploy.api.models import Job, PreflightResult, ScratchOrg, PlanTemplate, Plan
+from metadeploy.api.management.commands.schedule_release_test import (
+    HEROKU_API_URL,
+    execute_release_test,
+    get_plans_to_test,
+)
 
 
 @pytest.mark.django_db()
@@ -57,4 +66,59 @@ def test_run_plan(plan_factory):
 @pytest.mark.django_db
 def test_run_plan__no_plan_exists():
     with pytest.raises(CommandError):
-        call_command("run_plan", 'abc123')
+        call_command("run_plan", "abc123")
+
+
+@pytest.mark.django_db
+def test_schedule_release_test__no_plans_to_test(caplog):
+    caplog.set_level(logging.INFO)
+    caplog.clear()
+    execute_release_test()
+    assert caplog.records[0].getMessage() == "No plans found for regression testing."
+
+
+@pytest.mark.django_db
+def test_get_plans_to_test(plan_template_factory, plan_factory):
+    template_1 = plan_template_factory()
+    # two plans of tier 'primary'
+    plan_factory(tier=Plan.Tier.primary, plan_template=template_1)
+    most_recent_primary = plan_factory(tier=Plan.Tier.primary, plan_template=template_1)
+    # one plan with tier of 'additional' (should not be tested).
+    plan_factory(tier=Plan.Tier.additional, plan_template=template_1)
+
+    template_2 = plan_template_factory()
+    # two plans of tier 'secondary'
+    plan_factory(tier=Plan.Tier.secondary, plan_template=template_2)
+    most_recent_secondary = plan_factory(
+        tier=Plan.Tier.secondary, plan_template=template_2
+    )
+    # one plan with tier of 'additional' (should not be tested).
+    plan_factory(tier=Plan.Tier.additional, plan_template=template_2)
+
+    # one template that has opted out of testing completely
+    template_opted_out = plan_template_factory(regression_test_opt_out=True)
+    plan_factory(tier=Plan.Tier.primary, plan_template=template_opted_out)
+
+    plans_to_test = get_plans_to_test()
+    assert len(plans_to_test) == 2
+
+
+@pytest.mark.django_db
+@mock.patch("metadeploy.api.management.commands.schedule_release_test.requests.post")
+def test_schedule_release_test__happy_path(post, plan_template_factory, plan_factory):
+    template = plan_template_factory()
+    plan_factory(plan_template=template)
+
+    post.return_value = mock.Mock(status_code=200, text="Fatal Error")
+    execute_release_test()
+
+
+@pytest.mark.django_db
+@mock.patch("metadeploy.api.management.commands.schedule_release_test.requests.post")
+def test_schedule_release_test__bad_response(post, plan_factory, plan_template_factory):
+    template = plan_template_factory()
+    plan_factory(plan_template=template)
+
+    post.return_value = mock.Mock(status_code=500, text="Fatal Error")
+    with pytest.raises(HTTPError, match="An internal server error occurred."):
+        execute_release_test()

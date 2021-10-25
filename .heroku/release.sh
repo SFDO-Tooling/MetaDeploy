@@ -11,7 +11,7 @@ fi
 
 if [ -n "$RELEASE_TEST_ENABLED" ]; then
      echo "Release tests enabled. Scheduling tests now."
-     python .heroku/schedule_release_test.py 
+     python manage.py schedule_release_test
 fi
 
 
