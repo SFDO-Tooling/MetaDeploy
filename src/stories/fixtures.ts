@@ -283,11 +283,22 @@ export const samplePreflight2 = {
 
 export const sampleUser1 = {
   id: 'user-1',
-  username: 'user@user.com',
-  email: 'user@user.com',
+  username: 'dev@dev.com',
+  email: 'dev@dev.com',
   is_staff: false,
   valid_token_for: '99D09999999FQMlEAO',
-  org_name: 'org-1',
+  org_name: 'Sample Org',
+  org_type: 'Developer Edition',
+  is_production_org: false,
+};
+
+export const sampleUser2 = {
+  id: 'user-2',
+  username: 'dev2@dev.com',
+  email: 'dev2@dev.com',
+  is_staff: false,
+  valid_token_for: '',
+  org_name: 'Sample Org',
   org_type: 'Developer Edition',
   is_production_org: false,
 };
