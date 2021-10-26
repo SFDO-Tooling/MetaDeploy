@@ -1,0 +1,30 @@
+import { Meta } from '@storybook/addon-docs';
+
+<Meta title="Components/UserInfo/Docs" />
+
+# UserInfo
+
+** Shows information about the user installing a Plan.**
+
+## Overview
+
+The **UserInfo** component is an
+[SLDS Card](https://react.lightningdesignsystem.com/components/cards/) used to
+display information about the User installing a **Plan**.
+
+## States
+
+On a Product page, before a User has logged in, the **UserInfo** component shows
+an illustration and text that informs the user that they are not logged in.
+
+Once a User logs in, the component shows the name, organization, and
+organization type. The header reads "Connected to Salesforce" and a message
+explains for how long the user's credentials will be valid.
+
+A message in the footer provides a link to a dropdown menu that gives the User
+the ability to log in with a different organization.
+
+Once an installation has started, the component shows fields for the User's
+name, organization name, and organization type.
+
+The heading displays a user profile icon and reads "Salesforce Org Information."

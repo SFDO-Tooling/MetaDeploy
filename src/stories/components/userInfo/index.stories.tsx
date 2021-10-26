@@ -3,6 +3,7 @@ import React, { ComponentProps } from 'react';
 
 import UserInfo from '@/js/components/plans/userInfo';
 
+/* import UserInfo from '@/js/components/jobs/userInfo'; */
 import { samplePlan1, sampleUser1 } from '../../fixtures';
 
 export default {
