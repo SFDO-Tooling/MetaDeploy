@@ -4,11 +4,11 @@ import React, { ComponentProps } from 'react';
 import UserInfo from '@/js/components/plans/userInfo';
 import { User } from '@/js/store/user/reducer';
 
-/* import UserInfo from '@/js/components/jobs/userInfo'; */
+/* import * as JobsUserInfo from '@/js/components/jobs/userInfo'; */
 import { samplePlan1, sampleUser1, sampleUser2 } from '../../fixtures';
 
 export default {
-  title: 'Components/UserInfo/Example',
+  title: 'Components/UserInfo/Examples',
   component: UserInfo,
 };
 
