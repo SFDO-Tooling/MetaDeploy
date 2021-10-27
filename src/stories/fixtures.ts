@@ -297,7 +297,7 @@ export const sampleUser2 = {
   username: 'dev2@dev.com',
   email: 'dev2@dev.com',
   is_staff: false,
-  valid_token_for: '',
+  valid_token_for: null,
   org_name: 'Sample Org',
   org_type: 'Developer Edition',
   is_production_org: false,

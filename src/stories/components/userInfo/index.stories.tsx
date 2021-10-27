@@ -13,24 +13,18 @@ export default {
 };
 
 const sampleUsers: { [key: string]: User } = {
-  LoggedIn: sampleUser1,
-  LoggedOut: sampleUser2,
+  'Logged In': sampleUser1,
+  'Logged Out': sampleUser2,
 };
 
 type Props = ComponentProps<typeof UserInfo>;
 
-interface StoryProps extends Omit<Props, 'user'> {
-  user: string;
-}
+const Template = (props: Props) => <UserInfo {...props} />;
 
-const PlanTemplate = ({ user, ...rest }: StoryProps) => (
-  <UserInfo user={sampleUsers[user]} {...rest} />
-);
-
-export const UserInfoComponent: Story<StoryProps> = PlanTemplate.bind({});
+export const UserInfoComponent: Story<Props> = Template.bind({});
 UserInfoComponent.args = {
   plan: samplePlan1,
-  user: 'LoggedIn',
+  user: 'Logged In' as unknown as User,
 };
 UserInfoComponent.argTypes = {
   plan: { table: { disable: true } },
@@ -38,7 +32,7 @@ UserInfoComponent.argTypes = {
     type: { name: 'string' },
     control: { type: 'select' },
     options: Object.keys(sampleUsers),
+    mapping: sampleUsers,
   },
 };
-
 UserInfoComponent.storyName = 'User Info';
