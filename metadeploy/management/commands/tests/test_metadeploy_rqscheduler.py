@@ -5,7 +5,7 @@ from django.conf import settings
 from django.core.management import call_command
 
 mock_scheduler = mock.Mock()
-mock_scheduler.get_jobs.return_value = [{}]
+mock_scheduler.get_jobs.return_value = [mock.Mock(meta="cron_string")]
 
 
 @mock.patch("django_rq.management.commands.rqscheduler.Command.handle", mock.Mock())
