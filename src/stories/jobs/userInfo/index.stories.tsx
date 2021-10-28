@@ -3,7 +3,7 @@ import React, { ComponentProps } from 'react';
 
 import UserInfo from '@/js/components/jobs/userInfo';
 
-import { sampleJob1 } from '../../fixtures';
+import { sampleJob1, sampleScratchOrg1 } from '../../fixtures';
 
 export default {
   title: 'Jobs/UserInfo/Example',
@@ -17,6 +17,7 @@ const Template = (props: Props) => <UserInfo {...props} />;
 export const UserInfoComponent: Story<Props> = Template.bind({});
 UserInfoComponent.args = {
   job: sampleJob1,
+  scratchOrg: sampleScratchOrg1,
 };
 UserInfoComponent.argTypes = {
   job: { table: { disable: true } },

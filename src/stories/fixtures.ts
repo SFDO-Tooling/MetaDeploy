@@ -302,3 +302,15 @@ export const sampleUser2 = {
   org_type: 'Developer Edition',
   is_production_org: false,
 };
+
+export const sampleScratchOrg1 = {
+  id: 'v96dzZr',
+  plan: 'samplePlan1',
+  status: CONSTANTS.STATUS.STARTED,
+  org_id: 'v96dzZr',
+  enqueued_at: '2021-10-28T13:34:07.780075Z',
+  created_at: '2021-10-28T13:34:07.780075Z',
+  edited_at: '2021-10-28T13:34:07.780075Z',
+  uuid: '5746',
+  expires_at: '2021-11-27T13:32:17.081504Z',
+};
