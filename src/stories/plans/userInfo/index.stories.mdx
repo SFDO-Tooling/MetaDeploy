@@ -15,20 +15,21 @@ display information about the User installing a **Plan**.
 ## States
 
 On a Product page, before a User has logged in, the **UserInfo** component shows
-an illustration and text that informs the user that they are not logged in.
+an illustration and text that informs the user that they are not authenticated
+with a Salesforce org.
 
 <Story
-  id="plans-userinfo-examples--user-info-component&args=user:LoggedOut"
-  height="400px"
+  id="plans-userinfo-examples--user-info-component&args=user:Logged+Out"
+  height="330px"
 />
 
-Once a User logs in, the component shows the name, organization, and
-organization type. The header reads "Connected to Salesforce" and a message
+Once a User connects to a Salesforce org, the component shows the user email,
+org name, and org type. The header reads "Connected to Salesforce" and a message
 explains for how long the user's credentials will be valid.
 
 <Story
-  id="plans-userinfo-examples--user-info-component&args=user:LoggedIn"
-  height="400px"
+  id="plans-userinfo-examples--user-info-component&args=user:Logged+In"
+  height="330px"
 />
 
 A message in the footer provides a link to a dropdown menu that gives the User

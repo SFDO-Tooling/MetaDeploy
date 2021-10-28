@@ -26,6 +26,7 @@ export const parameters = {
 
 // Enable translations
 i18n.use(initReactI18next).init({
+  compatibilityJSON: 'v3',
   lng: 'en',
   resources: {
     en: {
