@@ -1,7 +1,7 @@
 
 
 -e git+https://github.com/SFDO-Tooling/sfdo-template-helpers.git@v0.18.0#egg=sfdo-template-helpers
-cumulusci>=3.44.0.dev1
+cumulusci==3.47.0.dev0
 Django<3.2
 Pillow
 ansi2html

@@ -20,7 +20,8 @@ def register_cron_jobs(jobs: dict, queue_name: str):
 
     # Cancel existing jobs
     for job in list(scheduler.get_jobs()):
-        scheduler.cancel(job)
+        if "cron_string" in job.meta:
+            scheduler.cancel(job)
 
     # Schedule jobs from settings
     for job_id, kwargs in jobs.items():

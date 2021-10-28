@@ -20,4 +20,5 @@ node/
 node_modules/
 requirements/
 staticfiles/
+storybook-static/
 venv/
