@@ -4,11 +4,10 @@ import React, { ComponentProps } from 'react';
 import UserInfo from '@/js/components/plans/userInfo';
 import { User } from '@/js/store/user/reducer';
 
-/* import * as JobsUserInfo from '@/js/components/jobs/userInfo'; */
 import { samplePlan1, sampleUser1, sampleUser2 } from '../../fixtures';
 
 export default {
-  title: 'Components/UserInfo/Examples',
+  title: 'Plans/UserInfo/Examples',
   component: UserInfo,
 };
 
@@ -23,11 +22,11 @@ interface StoryProps extends Omit<Props, 'user'> {
   user: string;
 }
 
-const PlanTemplate = ({ user, ...rest }: StoryProps) => (
+const Template = ({ user, ...rest }: StoryProps) => (
   <UserInfo user={sampleUsers[user]} {...rest} />
 );
 
-export const UserInfoComponent: Story<StoryProps> = PlanTemplate.bind({});
+export const UserInfoComponent: Story<StoryProps> = Template.bind({});
 UserInfoComponent.args = {
   plan: samplePlan1,
   user: 'LoggedIn',
