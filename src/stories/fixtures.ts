@@ -83,7 +83,7 @@ export const sampleJob1 = {
   job_id: 'j1',
   org_id: 'org1',
   creator: {
-    username: 'user-name',
+    username: 'dev@dev.org',
     is_staff: true,
   },
   plan: 'plan1',
