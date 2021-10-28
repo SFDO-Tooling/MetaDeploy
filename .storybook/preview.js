@@ -1,7 +1,7 @@
 /* eslint-env browser */
 /* eslint-disable import/no-duplicates */
 
-import 'sass/app.scss';
+import '../src/sass/app.scss';
 
 import IconSettings from '@salesforce/design-system-react/components/icon-settings';
 import settings from '@salesforce/design-system-react/components/settings';
