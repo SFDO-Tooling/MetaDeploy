@@ -1,18 +1,20 @@
-import { Meta, Story } from '@storybook/addon-docs';
+import { Canvas, Meta, Story } from '@storybook/addon-docs';
 
 <Meta title="Jobs/UserInfo/Docs" />
 
 # UserInfo
 
-** Shows information about a User during an installation Job.**
+** Shows information about the Salesforce Org during an installation Job.**
 
 ## Overview
 
 The **UserInfo** component is an
 [SLDS Card](https://react.lightningdesignsystem.com/components/cards/) used to
-display information about the User installing a **Job**.
+display information about the Salesforce Org used to install a **Job**.
 
-<Story id="jobs-userinfo-example--user-info-component" height="150pxpx" />
+<Canvas>
+  <Story id="jobs-userinfo-example--user-info-component" />
+</Canvas>
 
 The component shows fields for the User's name, Org name, and Org type.
 

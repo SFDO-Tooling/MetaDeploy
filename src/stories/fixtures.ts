@@ -1,5 +1,5 @@
 import { CONSTANTS } from '@/js/store/plans/reducer';
-import { SUPPORTED_ORGS } from '@/js/utils/constants';
+import { SCRATCH_ORG_STATUSES, SUPPORTED_ORGS } from '@/js/utils/constants';
 
 export const sampleStep1 = {
   id: 'samplestep1',
@@ -306,7 +306,7 @@ export const sampleUser2 = {
 export const sampleScratchOrg1 = {
   id: 'v96dzZr',
   plan: 'samplePlan1',
-  status: CONSTANTS.STATUS.STARTED,
+  status: SCRATCH_ORG_STATUSES.started,
   org_id: 'v96dzZr',
   enqueued_at: '2021-10-28T13:34:07.780075Z',
   created_at: '2021-10-28T13:34:07.780075Z',
