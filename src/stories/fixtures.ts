@@ -77,6 +77,23 @@ export const sampleFailedResult = {
   logs: '<span style="color: #25bc24">2021-09-17 13:30:09</span> Options: \n<span style="color: #25bc24">2021-09-17 13:30:09</span> name: Admissions Connect - Unmanaged Components \n<span style="color: #25bc24">2021-09-17 13:30:09</span> namespace: admissions_connect \n<span style="color: #25bc24">2021-09-17 13:30:09</span> version: 1.24 \n<span style="color: #25bc24">2021-09-17 13:30:09</span> security_type: FULL \n<span style="color: #25bc24">2021-09-17 13:30:09</span> activate_remote_site_settings: True \n<span style="color: #25bc24">2021-09-17 13:30:11</span> Org info updated, writing to keychain \n<span style="color: #25bc24">2021-09-17 13:30:11</span> Beginning task: InstallPackageVersion \n<span style="color: #25bc24">2021-09-17 13:30:21</span> Installing Admissions Connect - Unmanaged Components \n<span style="color: #25bc24">2021-09-17 13:30:21</span> Pending ',
 };
 
+export const samplePlan1 = {
+  id: 'plan1',
+  slug: 'plan_slug',
+  old_slugs: ['123', 'sample-slug'],
+  title: 'My Plan',
+  preflight_message: '<p>This will install Test Module in your org.</p>',
+  steps: [sampleStep1, sampleStep2, sampleStep3, sampleStep4, sampleStep5],
+  is_listed: true,
+  is_allowed: true,
+  not_allowed_instructions: null,
+  average_duration: null,
+  requires_preflight: true,
+  order_key: 2,
+  supported_orgs: SUPPORTED_ORGS.Both,
+  scratch_org_duration: 30,
+};
+
 export const sampleJob1 = {
   id: 'job1',
   edited_at: '2021-02-01T19:47:49Z',
@@ -86,7 +103,7 @@ export const sampleJob1 = {
     username: 'dev@dev.org',
     is_staff: true,
   },
-  plan: 'plan1',
+  plan: samplePlan1.id,
   status: CONSTANTS.STATUS.STARTED,
   steps: [sampleStep1.id, sampleStep2.id, sampleStep4.id, sampleStep5.id],
   results: {
@@ -212,23 +229,6 @@ export const sampleJob4 = {
   user_can_edit: true,
   message: '<p>Success! You installed it.</p>',
   error_message: '',
-};
-
-export const samplePlan1 = {
-  id: 'plan1',
-  slug: 'plan_slug',
-  old_slugs: ['123', 'sample-slug'],
-  title: 'My Plan',
-  preflight_message: '<p>This will install Test Module in your org.</p>',
-  steps: [sampleStep1, sampleStep2, sampleStep3, sampleStep4, sampleStep5],
-  is_listed: true,
-  is_allowed: true,
-  not_allowed_instructions: null,
-  average_duration: null,
-  requires_preflight: true,
-  order_key: 2,
-  supported_orgs: SUPPORTED_ORGS.Persistent,
-  scratch_org_duration: 30,
 };
 
 export const samplePreflight1 = {
