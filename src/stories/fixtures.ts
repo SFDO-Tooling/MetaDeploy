@@ -90,7 +90,24 @@ export const samplePlan1 = {
   average_duration: null,
   requires_preflight: true,
   order_key: 2,
-  supported_orgs: SUPPORTED_ORGS.Both,
+  supported_orgs: SUPPORTED_ORGS.Persistent,
+  scratch_org_duration: 30,
+};
+
+export const samplePlan2 = {
+  id: 'plan1',
+  slug: 'plan_slug',
+  old_slugs: ['123', 'sample-slug'],
+  title: 'My Plan',
+  preflight_message: '<p>This will install Test Module in your org.</p>',
+  steps: [sampleStep1, sampleStep2, sampleStep3, sampleStep4, sampleStep5],
+  is_listed: true,
+  is_allowed: true,
+  not_allowed_instructions: null,
+  average_duration: null,
+  requires_preflight: true,
+  order_key: 2,
+  supported_orgs: SUPPORTED_ORGS.Scratch,
   scratch_org_duration: 30,
 };
 
@@ -319,10 +336,10 @@ export const sampleScratchOrg2 = {
   id: '',
   plan: '',
   status: SCRATCH_ORG_STATUSES.canceled,
-  org_id: 'v96dzZr',
-  enqueued_at: '2021-10-28T13:34:07.780075Z',
+  org_id: null,
+  enqueued_at: null,
   created_at: '2021-10-28T13:34:07.780075Z',
   edited_at: '2021-10-28T13:34:07.780075Z',
   uuid: '5746',
-  expires_at: '',
+  expires_at: null,
 };
