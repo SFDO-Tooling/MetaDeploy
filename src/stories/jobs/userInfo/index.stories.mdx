@@ -1,4 +1,4 @@
-import { Canvas, Meta, Story } from '@storybook/addon-docs';
+import { Meta, Story } from '@storybook/addon-docs';
 
 <Meta title="Jobs/UserInfo/Docs" />
 
@@ -12,10 +12,22 @@ The **UserInfo** component is an
 [SLDS Card](https://react.lightningdesignsystem.com/components/cards/) used to
 display information about the Salesforce Org used to install a **Job**.
 
-<Canvas>
-  <Story id="jobs-userinfo-example--user-info-component" />
-</Canvas>
+## States
 
-The component shows fields for the User's name, Org name, and Org type.
+If the User connects with a Scratch Org, the card shows the expiration date of
+the Org and displays a message regarding what happens when the Org expires.
 
-The heading displays a User profile icon and reads "Salesforce Org Information."
+<Story
+  id="jobs-userinfo-example--user-info-component&args=scratchOrg:With+Scratch+Org"
+  height="250px"
+/>
+
+If the User is connected without a Scratch Org, the heading displays a User
+profile icon and reads "Salesforce Org Information."
+
+<Story
+  id="jobs-userinfo-example--user-info-component&args=scratchOrg:Without+Scratch+Org"
+  height="250px"
+/>
+
+If provided, information for User name, Org name, and Org type will be shown.
