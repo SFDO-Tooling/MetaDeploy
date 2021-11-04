@@ -24,8 +24,8 @@ const sampleUsers: { [key: string]: User } = {
 };
 
 const sampleScratchOrgs: { [key: string]: ScratchOrg } = {
-  Date: sampleScratchOrg1,
-  Days: sampleScratchOrg2,
+  'Expiration Date': sampleScratchOrg1,
+  'Days Remaining': sampleScratchOrg2,
 };
 
 type Props = ComponentProps<typeof UserInfo>;
@@ -35,29 +35,43 @@ const Template = (props: Props) => {
   return <UserInfo {...props} />;
 };
 
-export const UserInfoComponent: Story<Props> = Template.bind({});
-UserInfoComponent.args = {
+export const DisconnectedUserInfoComponent: Story<Props> = Template.bind({});
+DisconnectedUserInfoComponent.args = {
   plan: samplePlan1,
-  user: 'Logged In' as unknown as User,
+  user: 'Logged Out' as unknown as User,
 };
-UserInfoComponent.argTypes = {
+DisconnectedUserInfoComponent.argTypes = {
   plan: { table: { disable: true } },
   user: {
+    table: { disable: true },
     type: { name: 'string' },
-    control: { type: 'select' },
-    options: Object.keys(sampleUsers),
     mapping: sampleUsers,
   },
 };
-UserInfoComponent.storyName = 'Connected as User';
+DisconnectedUserInfoComponent.storyName = 'Disconnected';
 
-export const OrgUserInfo: Story<Props> = Template.bind({});
-OrgUserInfo.args = {
+export const DevUserInfoComponent: Story<Props> = Template.bind({});
+DevUserInfoComponent.args = {
+  plan: samplePlan1,
+  user: 'Logged In' as unknown as User,
+};
+DevUserInfoComponent.argTypes = {
+  plan: { table: { disable: true } },
+  user: {
+    table: { disable: true },
+    type: { name: 'string' },
+    mapping: sampleUsers,
+  },
+};
+DevUserInfoComponent.storyName = 'Production or Developer Org';
+
+export const OrgUserInfoComponent: Story<Props> = Template.bind({});
+OrgUserInfoComponent.args = {
   user: null,
   plan: samplePlan2,
-  scratchOrg: 'Date' as unknown as ScratchOrg,
+  scratchOrg: 'Expiration Date' as unknown as ScratchOrg,
 };
-OrgUserInfo.argTypes = {
+OrgUserInfoComponent.argTypes = {
   user: { table: { disable: true } },
   plan: { table: { disable: true } },
   scratchOrg: {
@@ -68,4 +82,4 @@ OrgUserInfo.argTypes = {
   },
 };
 
-OrgUserInfo.storyName = 'Connected With Scratch Org';
+OrgUserInfoComponent.storyName = 'Connected With Scratch Org';

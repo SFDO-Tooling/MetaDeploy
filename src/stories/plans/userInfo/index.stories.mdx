@@ -14,41 +14,39 @@ display information about the Salesforce Org for installing a **Plan**.
 
 ## States
 
-On a Product page, before a User has logged in, the **UserInfo** component shows
-an illustration and text that informs the User that they are not authenticated
-with a Salesforce Org.
+On a Product page, before a User has connected to a Salesforce Org, the
+**UserInfo** component shows an illustration and text that reads "Not Connected
+to Salesforce."
 
 <Story
-  id="plans-userinfo-examples--user-info-component&args=user:Logged+Out"
+  id="plans-userinfo-examples--disconnected-user-info-component"
   height="330px"
 />
 
 Once a User connects to a Salesforce Org, the component shows the Org owner's
-email, Org name, and Org type. The header reads "Connected to Salesforce" and a
-message explains for how long the User's credentials will be valid.
+email, Org name, and Org type, if the information is provided. The header reads
+"Connected to Salesforce" and a message explains for how long the User's
+credentials will be valid.
 
-<Story
-  id="plans-userinfo-examples--user-info-component&args=user:Logged+In"
-  height="330px"
-/>
+<Story id="plans-userinfo-examples--dev-user-info-component" height="330px" />
 
 A message in the footer provides a link to a dropdown menu that gives the User
-the ability to log in with a different organization.
+the ability to log in with a different Org.
 
 If a User connects to Salesforce through a Scratch Org, the **UserInfo**
-component shows when the expiration date of the Org and displays a message
-explaining what happens when the Org expires.
+component shows the expiration date of the Org and displays a message warning
+what happens when the Org expires.
 
 The date can either be shown as an amount of remaining days ...
 
 <Story
-  id="plans-userinfo-examples--org-user-info&args=scratchOrg:Days"
+  id="plans-userinfo-examples--org-user-info-component&args=scratchOrg:Days+Remaining"
   height="250px"
 />
 
 or as a particular date.
 
 <Story
-  id="plans-userinfo-examples--org-user-info&args=scratchOrg:Date"
+  id="plans-userinfo-examples--org-user-info-component&args=scratchOrg:Expiration+Date"
   height="250px"
 />

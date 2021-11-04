@@ -329,7 +329,7 @@ export const sampleScratchOrg1 = {
   created_at: '2021-10-28T13:34:07.780075Z',
   edited_at: '2021-10-28T13:34:07.780075Z',
   uuid: '5746',
-  expires_at: '2022-11-27T13:32:17.081504Z',
+  expires_at: '2021-11-27T13:32:17.081504Z',
 };
 
 export const sampleScratchOrg2 = {
