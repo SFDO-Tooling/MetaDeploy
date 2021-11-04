@@ -4,20 +4,16 @@ import React, { ComponentProps } from 'react';
 import UserInfo from '@/js/components/jobs/userInfo';
 import { ScratchOrg } from '@/js/store/scratchOrgs/reducer';
 
-import {
-  sampleJob1,
-  sampleScratchOrg1,
-  sampleScratchOrg2,
-} from '../../fixtures';
+import { sampleJob1, sampleScratchOrg1 } from '../../fixtures';
 
 export default {
   title: 'Jobs/UserInfo/Example',
   component: UserInfo,
 };
 
-const sampleScratchOrgs: { [key: string]: ScratchOrg } = {
+const sampleScratchOrgs: { [key: string]: ScratchOrg | null } = {
   'With Scratch Org': sampleScratchOrg1,
-  'Without Scratch Org': sampleScratchOrg2,
+  'With Persistent Org': null,
 };
 type Props = ComponentProps<typeof UserInfo>;
 
@@ -37,5 +33,4 @@ UserInfoComponent.argTypes = {
     mapping: sampleScratchOrgs,
   },
 };
-
 UserInfoComponent.storyName = 'User Info';

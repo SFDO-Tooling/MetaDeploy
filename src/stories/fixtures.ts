@@ -331,15 +331,3 @@ export const sampleScratchOrg1 = {
   uuid: '5746',
   expires_at: '2021-11-27T13:32:17.081504Z',
 };
-
-export const sampleScratchOrg2 = {
-  id: '',
-  plan: '',
-  status: SCRATCH_ORG_STATUSES.canceled,
-  org_id: null,
-  enqueued_at: null,
-  created_at: '2021-10-28T13:34:07.780075Z',
-  edited_at: '2021-10-28T13:34:07.780075Z',
-  uuid: '5746',
-  expires_at: null,
-};

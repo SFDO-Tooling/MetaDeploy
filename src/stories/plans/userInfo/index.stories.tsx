@@ -3,13 +3,11 @@ import React, { ComponentProps } from 'react';
 
 import UserInfo from '@/js/components/plans/userInfo';
 import { ScratchOrg } from '@/js/store/scratchOrgs/reducer';
-import { User } from '@/js/store/user/reducer';
 
 import {
   samplePlan1,
   samplePlan2,
   sampleScratchOrg1,
-  sampleScratchOrg2,
   sampleUser1,
 } from '../../fixtures';
 
@@ -18,58 +16,42 @@ export default {
   component: UserInfo,
 };
 
-const sampleUsers: { [key: string]: User } = {
-  'Logged In': sampleUser1,
-  'Logged Out': null,
-};
-
-const sampleScratchOrgs: { [key: string]: ScratchOrg } = {
-  'Expiration Date': sampleScratchOrg1,
-  'Days Remaining': sampleScratchOrg2,
+const sampleScratchOrgs: { [key: string]: ScratchOrg | null } = {
+  'Scratch Org not yet created': null,
+  'Scratch Org created': sampleScratchOrg1,
 };
 
 type Props = ComponentProps<typeof UserInfo>;
 
-const Template = (props: Props) => {
-  window.GLOBALS.SCRATCH_ORGS_AVAILABLE = true;
-  return <UserInfo {...props} />;
-};
+const Template = (props: Props) => <UserInfo {...props} />;
 
 export const DisconnectedUserInfoComponent: Story<Props> = Template.bind({});
 DisconnectedUserInfoComponent.args = {
   plan: samplePlan1,
-  user: 'Logged Out' as unknown as User,
+  user: null,
 };
 DisconnectedUserInfoComponent.argTypes = {
   plan: { table: { disable: true } },
-  user: {
-    table: { disable: true },
-    type: { name: 'string' },
-    mapping: sampleUsers,
-  },
+  user: { table: { disable: true } },
 };
 DisconnectedUserInfoComponent.storyName = 'Disconnected';
 
-export const DevUserInfoComponent: Story<Props> = Template.bind({});
-DevUserInfoComponent.args = {
+export const ConnectedUserInfoComponent: Story<Props> = Template.bind({});
+ConnectedUserInfoComponent.args = {
   plan: samplePlan1,
-  user: 'Logged In' as unknown as User,
+  user: sampleUser1,
 };
-DevUserInfoComponent.argTypes = {
+ConnectedUserInfoComponent.argTypes = {
   plan: { table: { disable: true } },
-  user: {
-    table: { disable: true },
-    type: { name: 'string' },
-    mapping: sampleUsers,
-  },
+  user: { table: { disable: true } },
 };
-DevUserInfoComponent.storyName = 'Production or Developer Org';
+ConnectedUserInfoComponent.storyName = 'Connected to Persistent Org';
 
 export const OrgUserInfoComponent: Story<Props> = Template.bind({});
 OrgUserInfoComponent.args = {
-  user: null,
   plan: samplePlan2,
-  scratchOrg: 'Expiration Date' as unknown as ScratchOrg,
+  user: null,
+  scratchOrg: 'Scratch Org not yet created' as unknown as null,
 };
 OrgUserInfoComponent.argTypes = {
   user: { table: { disable: true } },
@@ -81,5 +63,4 @@ OrgUserInfoComponent.argTypes = {
     mapping: sampleScratchOrgs,
   },
 };
-
-OrgUserInfoComponent.storyName = 'Connected With Scratch Org';
+OrgUserInfoComponent.storyName = 'Connected to Scratch Org';

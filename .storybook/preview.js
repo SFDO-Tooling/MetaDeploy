@@ -42,7 +42,9 @@ i18n.use(initReactI18next).init({
   },
 });
 
-window.GLOBALS = {};
+window.GLOBALS = {
+  SCRATCH_ORGS_AVAILABLE: true,
+};
 
 // Make all API requests return a `404`
 fetchMock.mock('*', 404);

@@ -14,39 +14,33 @@ display information about the Salesforce Org for installing a **Plan**.
 
 ## States
 
-On a Product page, before a User has connected to a Salesforce Org, the
-**UserInfo** component shows an illustration and text that reads "Not Connected
-to Salesforce."
+On a Product page for a Plan that requires connecting to an existing Org, before
+a User has connected the **UserInfo** component shows an illustration and text
+that reads "Not Connected to Salesforce."
 
-<Story
-  id="plans-userinfo-examples--disconnected-user-info-component"
-  height="330px"
-/>
+<Story id="plans-userinfo-examples--disconnected-user-info-component" />
 
 Once a User connects to a Salesforce Org, the component shows the Org owner's
 email, Org name, and Org type, if the information is provided. The header reads
 "Connected to Salesforce" and a message explains for how long the User's
-credentials will be valid.
+credentials will be valid. A message in the footer provides a link to a dropdown
+menu that gives the User the ability to log in with a different Org.
 
-<Story id="plans-userinfo-examples--dev-user-info-component" height="330px" />
+<Story id="plans-userinfo-examples--connected-user-info-component" />
 
-A message in the footer provides a link to a dropdown menu that gives the User
-the ability to log in with a different Org.
-
-If a User connects to Salesforce through a Scratch Org, the **UserInfo**
-component shows the expiration date of the Org and displays a message warning
-what happens when the Org expires.
-
-The date can either be shown as an amount of remaining days ...
+If a Plan allows connecting to Salesforce through a temporary Scratch Org, the
+**UserInfo** component shows the number of days before the Org will expire, and
+a message warning what happens when the Org expires.
 
 <Story
-  id="plans-userinfo-examples--org-user-info-component&args=scratchOrg:Days+Remaining"
+  id="plans-userinfo-examples--org-user-info-component&args=scratchOrg:Scratch+Org+not+yet+created"
   height="250px"
 />
 
-or as a particular date.
+Once a Scratch Org has been created, the component displays the exact date when
+the Org will expire.
 
 <Story
-  id="plans-userinfo-examples--org-user-info-component&args=scratchOrg:Expiration+Date"
+  id="plans-userinfo-examples--org-user-info-component&args=scratchOrg:Scratch+Org+created"
   height="250px"
 />
