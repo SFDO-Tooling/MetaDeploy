@@ -307,7 +307,8 @@ def test_finalize_result_mdapi_error(job_factory, caplog):
     except MetadataParseError:
         pass
     assert job.status == job.Status.failed
-    assert job.exception == "MDAPI error\ntext"
+    assert "finalize_result" in job.exception  # includes traceback
+    assert "MDAPI error\ntext" in job.exception
 
     log_record = next(r for r in caplog.records if "errored" in r.message)
 
