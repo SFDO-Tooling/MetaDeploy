@@ -116,7 +116,8 @@ def finalize_result(result: Union[Job, PreflightResult]):
         end_time = timezone.now()
         log_status = JobLogStatus.ERROR
         log_msg = f"{result.__class__.__name__} {result.id} errored"
-        result.exception = str(e)
+        result.exception = "".join(traceback.format_tb(e.__traceback__))
+        result.exception += "\n" + f"{e.__class__.__name__}: {e}"
         if hasattr(e, "response"):
             result.exception += "\n" + e.response.text
         raise

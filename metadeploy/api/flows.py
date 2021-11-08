@@ -134,13 +134,12 @@ class PreflightFlowCallback(BasicFlowCallback):
         self.context.save()
 
     def post_task(self, step, result):
-        """Report exception evaluating a preflight task."""
+        """Report exception evaluating a preflight task.
+
+        If there was an exception while running the task,
+        it is stored on the StepResult but we need to re-raise it
+        so that it can be picked up and recorded
+        by the finalize_result context manager
+        """
         if result.exception:
-            error_result = {
-                "plan": {
-                    "status": ERROR,
-                    "message": bleach.clean(str(result.exception)),
-                }
-            }
-            self.context.results.update(error_result)
-            self.context.save()
+            raise result.exception
