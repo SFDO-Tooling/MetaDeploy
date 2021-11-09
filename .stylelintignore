@@ -4,6 +4,8 @@
 .nyc_output/
 .pytest_cache/
 .vscode/
+.yarn/
+.yarnrc
 ENV/
 __pycache__/
 coverage/
@@ -17,6 +19,8 @@ locales_dev/
 node/
 node_modules/
 requirements/
+postgres/
 staticfiles/
 storybook-static/
 venv/
+webpack-stats.json
