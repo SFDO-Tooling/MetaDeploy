@@ -1,7 +1,7 @@
 /* eslint-env browser */
 /* eslint-disable import/no-duplicates */
 
-import 'sass/app.scss';
+import '../src/sass/app.scss';
 
 import IconSettings from '@salesforce/design-system-react/components/icon-settings';
 import settings from '@salesforce/design-system-react/components/settings';
@@ -26,6 +26,7 @@ export const parameters = {
 
 // Enable translations
 i18n.use(initReactI18next).init({
+  compatibilityJSON: 'v3',
   lng: 'en',
   resources: {
     en: {
@@ -41,7 +42,9 @@ i18n.use(initReactI18next).init({
   },
 });
 
-window.GLOBALS = {};
+window.GLOBALS = {
+  SCRATCH_ORGS_AVAILABLE: true,
+};
 
 // Make all API requests return a `404`
 fetchMock.mock('*', 404);

@@ -1,15 +1,13 @@
 import logging
-import requests
 from datetime import timedelta
 from typing import List
 
-from requests.exceptions import HTTPError
-
+import django_rq
+import requests
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management.base import BaseCommand
-
-import django_rq
+from requests.exceptions import HTTPError
 
 from metadeploy.api.models import Plan, PlanTemplate
 

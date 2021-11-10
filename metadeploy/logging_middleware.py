@@ -8,8 +8,9 @@ from log_request_id import (
     local,
 )
 from log_request_id.middleware import RequestIDMiddleware
-from .logfmt import quote_logvalue
 from sfdo_template_helpers.addresses import get_remote_ip
+
+from .logfmt import quote_logvalue
 
 logger = logging.getLogger(__name__)
 
