@@ -15,7 +15,7 @@ from metadeploy.api.models import Plan, PlanTemplate
 
 MINUTE_DELAY = 5
 TIME_TO_LIVE = 86400
-HEROKU_API_URL = f"https://api.heroku.com/apps/{settings.HEROKU_WORKER_APP_NAME}/dynos"
+HEROKU_API_URL = f"https://api.heroku.com/apps/{settings.HEROKU_APP_NAME}/dynos"
 HEADERS = {
     "Accept": "application/vnd.heroku+json; version=3",
     "Authorization": f"Bearer {settings.HEROKU_TOKEN}",
@@ -62,9 +62,9 @@ def get_plans_to_test() -> List[Plan]:
 
 def check_settings() -> None:
     """Raises an error if we don't have the settings needed to talk to Heroku."""
-    if not settings.HEROKU_WORKER_APP_NAME:
+    if not settings.HEROKU_APP_NAME:
         raise ImproperlyConfigured(
-            "The HEROKU_WORKER_APP_NAME environment variable is required for regression testing."
+            "The HEROKU_APP_NAME environment variable is required for regression testing."
         )
     if not settings.HEROKU_TOKEN:
         raise ImproperlyConfigured(
