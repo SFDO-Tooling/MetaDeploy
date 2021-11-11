@@ -131,10 +131,10 @@ def test_schedule_release_test__no_heroku_worker_app_name(
     template = plan_template_factory()
     plan_factory(plan_template=template)
 
-    with mock.patch.object(settings, "HEROKU_WORKER_APP_NAME", None):
+    with mock.patch.object(settings, "HEROKU_APP_NAME", None):
         with pytest.raises(
             ImproperlyConfigured,
-            match="The HEROKU_WORKER_APP_NAME environment variable is required for regression testing.",
+            match="The HEROKU_APP_NAME environment variable is required for regression testing.",
         ):
             execute_release_test()
 
