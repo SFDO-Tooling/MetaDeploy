@@ -271,6 +271,7 @@ class VersionSerializer(serializers.ModelSerializer):
             "primary_plan",
             "secondary_plan",
             "is_listed",
+            "publish_date",
         )
 
 

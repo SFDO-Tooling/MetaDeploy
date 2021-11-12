@@ -364,6 +364,7 @@ class Version(HashIdMixin, TranslatableModel):
         max_length=1024, validators=[RegexValidator(regex=VERSION_STRING)]
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    publish_date = models.DateTimeField(blank=True, null=True)
     is_production = models.BooleanField(default=True)
     commit_ish = models.CharField(
         max_length=256,

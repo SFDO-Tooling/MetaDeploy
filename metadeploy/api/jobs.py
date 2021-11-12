@@ -35,7 +35,7 @@ from .cci_configs import MetaDeployCCI, extract_user_and_repo
 from .cleanup import cleanup_user_data
 from .flows import StopFlowException
 from .github import local_github_checkout
-from .models import ORG_TYPES, Job, Plan, PreflightResult, ScratchOrg
+from .models import ORG_TYPES, Job, Plan, PreflightResult, ScratchOrg, Version
 from .push import job_started, preflight_started, report_error
 from .salesforce import create_scratch_org as create_scratch_org_on_sf
 from .salesforce import delete_scratch_org as delete_scratch_org_on_sf
@@ -294,6 +294,16 @@ def enqueuer():
 
 
 enqueuer_job = job(enqueuer)
+
+
+def publish_installers():
+    now = timezone.now()
+    for v in Version.objects.filter(publish_date__lt=now, is_listed=False):
+        v.is_listed = True
+        v.save()
+
+
+publish_installers_job = job(publish_installers)
 
 
 # Aliased to expire_user_tokens_job for backwards compatibility

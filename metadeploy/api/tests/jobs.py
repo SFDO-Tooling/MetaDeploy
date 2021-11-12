@@ -26,6 +26,7 @@ from ..jobs import (
     finalize_result,
     preflight,
     run_flows,
+    publish_installers,
 )
 from ..models import Job, PreflightResult
 
@@ -174,6 +175,26 @@ def test_expire_preflights(user_factory, plan_factory, preflight_result_factory)
     assert not preflight1.is_valid
     assert preflight2.is_valid
     assert preflight3.is_valid
+
+
+@pytest.mark.django_db
+def test_publish_installers(version_factory):
+    now = timezone.now()
+    version1 = version_factory(
+        publish_date=now - timedelta(seconds=60), is_listed=False
+    )
+    version2 = version_factory(publish_date=now + timedelta(days=1), is_listed=False)
+
+    assert version1.is_listed == False
+    assert version2.is_listed == False
+
+    publish_installers()
+
+    version1.refresh_from_db()
+    version2.refresh_from_db()
+
+    assert version1.is_listed == True
+    assert version2.is_listed == False
 
 
 @pytest.mark.django_db

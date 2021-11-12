@@ -455,6 +455,10 @@ CHANNEL_LAYERS = {
 MAX_QUEUE_LENGTH = env("MAX_QUEUE_LENGTH", default=15, type_=int)
 
 CRON_JOBS = {
+    "calculate_average_plan_runtimes": {
+        "func": "metadeploy.api.jobs.calculate_average_plan_runtime_job",
+        "cron_string": "0 0 * * *",  # run daily at midnight
+    },
     "cleanup_user_data": {
         "func": "metadeploy.api.jobs.cleanup_user_data_job",
         "cron_string": "* * * * *",
@@ -467,9 +471,9 @@ CRON_JOBS = {
         "func": "metadeploy.api.jobs.expire_preflights_job",
         "cron_string": "* * * * *",
     },
-    "calculate_average_plan_runtimes": {
-        "func": "metadeploy.api.jobs.calculate_average_plan_runtime_job",
-        "cron_string": "0 0 * * *",  # run daily at midnight
+    "publish_installers": {
+        "func": "metadeploy.api.jobs.publish_installers_job",
+        "cron_string": "* * * * *",
     },
 }
 # There is a default dict of cron jobs,
