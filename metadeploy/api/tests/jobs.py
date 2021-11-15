@@ -184,17 +184,21 @@ def test_publish_installers(version_factory):
         publish_date=now - timedelta(seconds=60), is_listed=False
     )
     version2 = version_factory(publish_date=now + timedelta(days=1), is_listed=False)
+    version3 = version_factory(is_listed=False)
 
     assert version1.is_listed == False
     assert version2.is_listed == False
+    assert version3.is_listed == False
 
     publish_installers()
 
     version1.refresh_from_db()
     version2.refresh_from_db()
+    version3.refresh_from_db()
 
     assert version1.is_listed == True
     assert version2.is_listed == False
+    assert version3.is_listed == False
 
 
 @pytest.mark.django_db
