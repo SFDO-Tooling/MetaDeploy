@@ -46,18 +46,16 @@ def execute_release_test() -> None:
 
 def get_plans_to_test() -> List[Plan]:
     """Returns all plans related to PlanTemplates that have
-    not opted out of regression testing, and are not of type 'additional'.
+    not opted out of regression testing, and have a tier or 'primary'.
     (See PlanTemplate.regression_test_opt_out)"""
     plan_templates = PlanTemplate.objects.filter(regression_test_opt_out=False)
-    # TODO: Do we only ever need one plan per plan template to test?
-    return [
-        Plan.objects.filter(
-            plan_template=template.pk, tier__in=[Plan.Tier.primary, Plan.Tier.secondary]
-        )
+    plans = [
+        Plan.objects.filter(plan_template=template.pk, tier=Plan.Tier.primary)
         .order_by("-created_at")
         .first()
         for template in plan_templates
     ]
+    return [p for p in plans if p is not None]
 
 
 def check_settings() -> None:
