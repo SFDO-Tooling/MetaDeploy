@@ -343,8 +343,6 @@ def create_scratch_org(org_pk):
     the plan steps are also run against the org.
     """
     org, plan = setup_scratch_org(org_pk)
-    if not org or not plan:
-        return
 
     if plan.requires_preflight:
         preflight_result = run_preflight_checks_sync(org)
@@ -459,7 +457,7 @@ def setup_scratch_org(org_pk: str):
                 )
         except Exception as e:
             org.fail(e)
-            return (None, None)
+            raise
 
     # this stores some values on the scratch
     # org model in the db
