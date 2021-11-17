@@ -273,7 +273,7 @@ class UserAdmin(AdminHelpTextMixin, admin.ModelAdmin):
 class VersionAdmin(admin.ModelAdmin):
     list_filter = ("product", "is_production", "is_listed")
     list_editable = ("is_production", "is_listed")
-    list_display = ("label", "product", "is_production", "is_listed", "commit_ish")
+    list_display = ("label", "product", "is_production", "is_listed", "commit_ish", "publish_date")
     search_fields = ("label", "product")
 
 
