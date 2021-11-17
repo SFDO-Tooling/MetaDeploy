@@ -457,7 +457,7 @@ def setup_scratch_org(org_pk: str):
                 )
         except Exception as e:
             org.fail(e)
-            raise e
+            raise
 
     # this stores some values on the scratch
     # org model in the db
