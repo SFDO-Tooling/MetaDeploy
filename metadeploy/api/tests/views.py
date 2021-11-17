@@ -277,7 +277,6 @@ class TestBasicGetViews:
             "primary_plan": None,
             "secondary_plan": None,
             "is_listed": True,
-            "publish_date": None,
         }
 
     def test_plan(self, client, plan_factory, settings):
