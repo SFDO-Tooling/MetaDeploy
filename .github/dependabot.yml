@@ -1,14 +1,14 @@
 version: 2
 updates:
   - package-ecosystem: pip
-    directory: '/'
+    directory: "/"
     schedule:
       interval: weekly
       day: wednesday
-    open-pull-requests-limit: 99
+    open-pull-requests-limit: 0
   - package-ecosystem: npm
-    directory: '/'
+    directory: "/"
     schedule:
       interval: weekly
       day: wednesday
-    open-pull-requests-limit: 99
+    open-pull-requests-limit: 0
