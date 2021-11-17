@@ -100,7 +100,7 @@ def test_get_plans_to_test(plan_template_factory, plan_factory):
     plan_factory(tier=Plan.Tier.primary, plan_template=template_opted_out)
 
     plans_to_test = get_plans_to_test()
-    assert len(plans_to_test) == 2
+    assert len(plans_to_test) == 1
 
 
 @pytest.mark.django_db
