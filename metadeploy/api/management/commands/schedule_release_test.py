@@ -84,5 +84,5 @@ class Command(BaseCommand):
     help = "Schedules regression tests to execute after a deploy on Heroku"
 
     def handle(self, *args, **options):  # pragma: no cover
-        scheduler = django_rq.get_scheduler("short")
+        scheduler = django_rq.get_scheduler("default")
         scheduler.enqueue_in(timedelta(minutes=MINUTE_DELAY), execute_release_test)
