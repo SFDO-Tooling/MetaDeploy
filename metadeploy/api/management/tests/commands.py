@@ -76,32 +76,6 @@ def test_run_plan__scratch_org_creation_fails(setup_scratch_org, plan_factory, c
     caplog.set_level(logging.INFO)
     setup_scratch_org.side_effect = Exception("Scratch org creation failed")
     plan = plan_factory(preflight_checks=[{"when": "False", "action": "error"}])
-    org_config = OrgConfig(
-        {
-            "instance_url": "https://sample.salesforce.org/",
-            "access_token": "abc123",
-            "refresh_token": "abc123",
-            "org_id": "00Dxxxxxxxxxxxxxxx",
-        },
-        "Release",
-    )
-
-    # with ExitStack() as stack:
-    # stack.enter_context(patch("metadeploy.api.jobs.local_github_checkout"))
-    # stack.enter_context(
-    # patch("metadeploy.api.salesforce.OrgConfig.refresh_oauth_token")
-    # )
-    # stack.enter_context(
-    # patch("cumulusci.core.flowrunner.PreflightFlowCoordinator.run")
-    # )
-    # stack.enter_context(patch("cumulusci.core.flowrunner.FlowCoordinator.run"))
-    # stack.enter_context(
-    # patch(
-    # "metadeploy.api.jobs.create_scratch_org_on_sf",
-    # return_value=(org_config, None, None),
-    # )
-    # )
-    # stack.enter_context(patch("metadeploy.api.jobs.delete_scratch_org_on_sf"))
 
     with pytest.raises(Exception, match="Scratch org creation failed"):
         call_command("run_plan", str(plan.id))
