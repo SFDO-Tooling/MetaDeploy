@@ -1,13 +1,16 @@
 from datetime import datetime
+from logging import getLogger
 
 from django.core.management.base import BaseCommand, CommandError, CommandParser
 
-from metadeploy.api.jobs import delete_scratch_org
+from metadeploy.api.jobs import JobLogStatus, JobType, delete_scratch_org
 from metadeploy.api.jobs import setup_scratch_org
 from metadeploy.api.jobs import run_plan_steps
 from metadeploy.api.jobs import run_preflight_checks_sync
 from metadeploy.api.models import Plan
 from metadeploy.api.models import ScratchOrg
+
+logger = getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -27,7 +30,21 @@ class Command(BaseCommand):
         scratch_org = ScratchOrg.objects.create(
             plan=plan, enqueued_at=datetime.utcnow().isoformat()
         )
-        org, plan = setup_scratch_org(scratch_org.pk)
+        try:
+            org, plan = setup_scratch_org(scratch_org.pk)
+        except Exception:
+            context = f"{plan.version.product.slug}/{plan.version.label}/{plan.slug}"
+            logger.info(
+                "Scratch org creation failed.",
+                extra={
+                    "context": {
+                        "event": JobType.TEST_JOB,
+                        "context": context,
+                        "status": JobLogStatus.ERROR,
+                    }
+                },
+            )
+            raise
         run_preflight_checks_sync(org, release_test=True)
         run_plan_steps(org, release_test=True)
         delete_scratch_org(scratch_org)

@@ -23,7 +23,6 @@ from metadeploy.api.management.commands.schedule_release_test import (
 @pytest.mark.django_db()
 def test_run_plan(plan_factory):
     plan = plan_factory(preflight_checks=[{"when": "False", "action": "error"}])
-
     org_config = OrgConfig(
         {
             "instance_url": "https://sample.salesforce.org/",
@@ -69,6 +68,20 @@ def test_run_plan(plan_factory):
 def test_run_plan__no_plan_exists():
     with pytest.raises(CommandError):
         call_command("run_plan", "abc123")
+
+
+@pytest.mark.django_db()
+@mock.patch("metadeploy.api.management.commands.run_plan.setup_scratch_org")
+def test_run_plan__scratch_org_creation_fails(setup_scratch_org, plan_factory, caplog):
+    caplog.set_level(logging.INFO)
+    setup_scratch_org.side_effect = Exception("Scratch org creation failed")
+    plan = plan_factory(preflight_checks=[{"when": "False", "action": "error"}])
+
+    with pytest.raises(Exception, match="Scratch org creation failed"):
+        call_command("run_plan", str(plan.id))
+
+    expected_output = "INFO     metadeploy.api.management.commands.run_plan:run_plan.py:37 Scratch org creation failed.\n"
+    assert caplog.text == expected_output
 
 
 @pytest.mark.django_db
