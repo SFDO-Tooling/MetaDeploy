@@ -9,7 +9,7 @@
     "url": "https://github.com/SFDO-Tooling/MetaDeploy.git"
   },
   "engines": {
-    "node": "14.17.4",
+    "node": "16.13.1",
     "yarn": "1.22.5"
   },
   "scripts": {
