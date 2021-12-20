@@ -116,7 +116,8 @@ def finalize_result(result: Union[Job, PreflightResult]):
         end_time = timezone.now()
         log_status = JobLogStatus.ERROR
         log_msg = f"{result.__class__.__name__} {result.id} errored"
-        result.exception = str(e)
+        result.exception = "".join(traceback.format_tb(e.__traceback__))
+        result.exception += "\n" + f"{e.__class__.__name__}: {e}"
         if hasattr(e, "response"):
             result.exception += "\n" + e.response.text
         raise
@@ -342,8 +343,6 @@ def create_scratch_org(org_pk):
     the plan steps are also run against the org.
     """
     org, plan = setup_scratch_org(org_pk)
-    if not org or not plan:
-        return
 
     if plan.requires_preflight:
         preflight_result = run_preflight_checks_sync(org)
@@ -458,7 +457,7 @@ def setup_scratch_org(org_pk: str):
                 )
         except Exception as e:
             org.fail(e)
-            return (None, None)
+            raise
 
     # this stores some values on the scratch
     # org model in the db

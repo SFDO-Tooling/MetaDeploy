@@ -205,6 +205,5 @@ class TestPreflightFlow:
 
         step = MagicMock()
         step.result = MagicMock(exception=ValueError("A value error."))
-        callbacks.post_task(step, step.result)
-
-        assert pfr.results == {"plan": {"status": "error", "message": "A value error."}}
+        with pytest.raises(ValueError, match="A value error."):
+            callbacks.post_task(step, step.result)

@@ -307,7 +307,8 @@ def test_finalize_result_mdapi_error(job_factory, caplog):
     except MetadataParseError:
         pass
     assert job.status == job.Status.failed
-    assert job.exception == "MDAPI error\ntext"
+    assert "finalize_result" in job.exception  # includes traceback
+    assert "MDAPI error\ntext" in job.exception
 
     log_record = next(r for r in caplog.records if "errored" in r.message)
 
@@ -600,7 +601,8 @@ class TestCreateScratchOrg:
                 plan=plan,
                 enqueued_at=datetime(2020, 9, 4, 12),
             )
-            create_scratch_org(str(scratch_org.id))
+            with pytest.raises(TypeError):
+                create_scratch_org(str(scratch_org.id))
 
 
 @pytest.mark.django_db

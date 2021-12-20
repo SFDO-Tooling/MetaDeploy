@@ -13,7 +13,7 @@ from metadeploy.api.models import Plan, PlanTemplate
 
 MINUTE_DELAY = 5
 TIME_TO_LIVE = 86400
-HEROKU_API_URL = f"https://api.heroku.com/apps/{settings.HEROKU_WORKER_APP_NAME}/dynos"
+HEROKU_API_URL = f"https://api.heroku.com/apps/{settings.HEROKU_APP_NAME}/dynos"
 HEADERS = {
     "Accept": "application/vnd.heroku+json; version=3",
     "Authorization": f"Bearer {settings.HEROKU_TOKEN}",
@@ -44,25 +44,23 @@ def execute_release_test() -> None:
 
 def get_plans_to_test() -> List[Plan]:
     """Returns all plans related to PlanTemplates that have
-    not opted out of regression testing, and are not of type 'additional'.
+    not opted out of regression testing, and have a tier or 'primary'.
     (See PlanTemplate.regression_test_opt_out)"""
     plan_templates = PlanTemplate.objects.filter(regression_test_opt_out=False)
-    # TODO: Do we only ever need one plan per plan template to test?
-    return [
-        Plan.objects.filter(
-            plan_template=template.pk, tier__in=[Plan.Tier.primary, Plan.Tier.secondary]
-        )
+    plans = [
+        Plan.objects.filter(plan_template=template.pk, tier=Plan.Tier.primary)
         .order_by("-created_at")
         .first()
         for template in plan_templates
     ]
+    return [p for p in plans if p is not None]
 
 
 def check_settings() -> None:
     """Raises an error if we don't have the settings needed to talk to Heroku."""
-    if not settings.HEROKU_WORKER_APP_NAME:
+    if not settings.HEROKU_APP_NAME:
         raise ImproperlyConfigured(
-            "The HEROKU_WORKER_APP_NAME environment variable is required for regression testing."
+            "The HEROKU_APP_NAME environment variable is required for regression testing."
         )
     if not settings.HEROKU_TOKEN:
         raise ImproperlyConfigured(
@@ -84,5 +82,5 @@ class Command(BaseCommand):
     help = "Schedules regression tests to execute after a deploy on Heroku"
 
     def handle(self, *args, **options):  # pragma: no cover
-        scheduler = django_rq.get_scheduler("short")
+        scheduler = django_rq.get_scheduler("default")
         scheduler.enqueue_in(timedelta(minutes=MINUTE_DELAY), execute_release_test)

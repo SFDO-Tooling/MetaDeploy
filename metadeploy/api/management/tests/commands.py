@@ -22,7 +22,6 @@ from metadeploy.api.models import Job, Plan, PreflightResult, ScratchOrg
 @pytest.mark.django_db()
 def test_run_plan(plan_factory):
     plan = plan_factory(preflight_checks=[{"when": "False", "action": "error"}])
-
     org_config = OrgConfig(
         {
             "instance_url": "https://sample.salesforce.org/",
@@ -70,6 +69,20 @@ def test_run_plan__no_plan_exists():
         call_command("run_plan", "abc123")
 
 
+@pytest.mark.django_db()
+@mock.patch("metadeploy.api.management.commands.run_plan.setup_scratch_org")
+def test_run_plan__scratch_org_creation_fails(setup_scratch_org, plan_factory, caplog):
+    caplog.set_level(logging.INFO)
+    setup_scratch_org.side_effect = Exception("Scratch org creation failed")
+    plan = plan_factory(preflight_checks=[{"when": "False", "action": "error"}])
+
+    with pytest.raises(Exception, match="Scratch org creation failed"):
+        call_command("run_plan", str(plan.id))
+
+    expected_output = "INFO     metadeploy.api.management.commands.run_plan:run_plan.py:37 Scratch org creation failed.\n"
+    assert caplog.text == expected_output
+
+
 @pytest.mark.django_db
 def test_schedule_release_test__no_plans_to_test(caplog):
     caplog.set_level(logging.INFO)
@@ -99,7 +112,7 @@ def test_get_plans_to_test(plan_template_factory, plan_factory):
     plan_factory(tier=Plan.Tier.primary, plan_template=template_opted_out)
 
     plans_to_test = get_plans_to_test()
-    assert len(plans_to_test) == 2
+    assert len(plans_to_test) == 1
 
 
 @pytest.mark.django_db
@@ -130,10 +143,10 @@ def test_schedule_release_test__no_heroku_worker_app_name(
     template = plan_template_factory()
     plan_factory(plan_template=template)
 
-    with mock.patch.object(settings, "HEROKU_WORKER_APP_NAME", None):
+    with mock.patch.object(settings, "HEROKU_APP_NAME", None):
         with pytest.raises(
             ImproperlyConfigured,
-            match="The HEROKU_WORKER_APP_NAME environment variable is required for regression testing.",
+            match="The HEROKU_APP_NAME environment variable is required for regression testing.",
         ):
             execute_release_test()
 

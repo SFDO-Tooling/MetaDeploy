@@ -387,7 +387,7 @@ if not SFDX_CLIENT_ID:
 environ["SFDX_CLIENT_ID"] = SFDX_CLIENT_ID
 environ["SFDX_HUB_KEY"] = SFDX_HUB_KEY
 
-HEROKU_WORKER_APP_NAME = env("HEROKU_WORKER_APP_NAME", default=None)
+HEROKU_APP_NAME = env("HEROKU_APP_NAME", default=None)
 HEROKU_TOKEN = env("HEROKU_TOKEN", default=None)
 
 GITHUB_TOKEN = env("GITHUB_TOKEN", default=None)
@@ -415,6 +415,7 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 ACCOUNT_EMAIL_VERIFICATION = "none"
 SOCIALACCOUNT_ADAPTER = "sfdo_template_helpers.oauth2.adapter.SFDOSocialAccountAdapter"
+SOCIALACCOUNT_LOGIN_ON_GET = True
 
 JS_REVERSE_JS_VAR_NAME = "api_urls"
 JS_REVERSE_EXCLUDE_NAMESPACES = ["admin", "admin_rest"]
