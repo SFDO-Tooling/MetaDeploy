@@ -1,6 +1,5 @@
 import logging
 from datetime import timedelta
-from typing import List
 
 import django_rq
 import requests
@@ -42,7 +41,7 @@ def execute_release_test() -> None:
             raise HTTPError("An internal server error occurred.")
 
 
-def get_plans_to_test() -> List[Plan]:
+def get_plans_to_test() -> list[Plan]:
     """Returns all plans related to PlanTemplates that have
     not opted out of regression testing, and have a tier or 'primary'.
     (See PlanTemplate.regression_test_opt_out)"""

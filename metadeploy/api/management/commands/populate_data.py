@@ -25,7 +25,7 @@ class Sleep(BaseTask):
 
     def _run_task(self):  # pragma: nocover
         seconds = int(self.options["seconds"])
-        self.logger.info("Sleeping for {} seconds".format(seconds))
+        self.logger.info(f"Sleeping for {seconds} seconds")
         for t in range(seconds):
             time.sleep(1)
             self.logger.info(str(t + 1))
@@ -100,7 +100,7 @@ class Command(BaseCommand):
 
     def create_plan(self, version, title="Full Install", tier="primary", **kwargs):
         plan_template = PlanTemplate.objects.create(
-            name="{} for {}".format(title, version),
+            name=f"{title} for {version}",
             preflight_message=(
                 "Preflight message consists of generic product message and "
                 "step pre-check info — run in one operation before the "
