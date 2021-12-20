@@ -79,8 +79,7 @@ def test_run_plan__scratch_org_creation_fails(setup_scratch_org, plan_factory, c
     with pytest.raises(Exception, match="Scratch org creation failed"):
         call_command("run_plan", str(plan.id))
 
-    expected_output = "INFO     metadeploy.api.management.commands.run_plan:run_plan.py:37 Scratch org creation failed.\n"
-    assert caplog.text == expected_output
+    assert "Scratch org creation failed" in caplog.text
 
 
 @pytest.mark.django_db
