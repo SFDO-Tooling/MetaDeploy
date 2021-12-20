@@ -9,8 +9,8 @@
     "url": "https://github.com/SFDO-Tooling/MetaDeploy.git"
   },
   "engines": {
-    "node": "16.13.1",
-    "yarn": "1.22.5"
+    "node": "^16",
+    "yarn": "^1.22"
   },
   "scripts": {
     "webpack:serve": "webpack serve --config webpack.dev.js",

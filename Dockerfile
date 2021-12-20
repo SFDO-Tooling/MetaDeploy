@@ -22,7 +22,7 @@ ENV NODE_VERSION 16.13.1
 COPY ./utility/install_node.sh utility/install_node.sh
 RUN /bin/sh utility/install_node.sh
 # declaring necessary node and yarn versions
-ENV YARN_VERSION 1.22.5
+ENV YARN_VERSION 1.22.17
 # installing yarn
 COPY ./utility/install_yarn.sh utility/install_yarn.sh
 RUN /bin/sh utility/install_yarn.sh

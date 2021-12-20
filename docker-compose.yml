@@ -10,13 +10,13 @@ services:
       POSTGRES_PASSWORD: sample_db_password
     volumes:
       - ./postgres:/var/lib/postgresql/data:delegated
-    image: postgres:12.3
+    image: postgres:12.9
     ports:
       - '5432:5432/tcp'
     restart: always
 
   redis:
-    image: redis:6
+    image: redis:6.2
     ports:
       - '6379:6379'
 
