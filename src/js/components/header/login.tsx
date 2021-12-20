@@ -1,6 +1,6 @@
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import withLanguageDirection from '@salesforce/design-system-react/components/utilities/UNSAFE_direction/private/language-direction';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import * as React from 'react';
 
 import CustomDomainModal from '@/js/components/header/customDomainModal';
@@ -64,12 +64,12 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
   static getMenuOpts(): (MenuOption | MenuDivider)[] {
     return [
       {
-        label: i18n.t('Production or Developer Org'),
+        label: t('Production or Developer Org'),
         login_domain: 'login',
         disabled: false,
       },
       {
-        label: i18n.t('Sandbox or Scratch Org'),
+        label: t('Sandbox or Scratch Org'),
         login_domain: 'test',
         disabled: false,
       },
@@ -77,7 +77,7 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
         type: 'divider',
       },
       {
-        label: i18n.t('Use Custom Domain'),
+        label: t('Use Custom Domain'),
         login_domain: '',
         disabled: false,
       },
@@ -109,7 +109,7 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
       <>
         <Dropdown
           id={id}
-          label={label === undefined ? i18n.t('Log In') : label}
+          label={label === undefined ? t('Log In') : label}
           className="slds-dropdown_actions"
           triggerClassName={triggerClassName}
           buttonClassName={buttonClassName}

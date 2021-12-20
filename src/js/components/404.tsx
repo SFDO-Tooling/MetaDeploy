@@ -1,4 +1,4 @@
-import i18n from 'i18next';
+import { t } from 'i18next';
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
 import { Trans } from 'react-i18next';
@@ -31,7 +31,7 @@ const FourOhFour = ({
 }: {
   message?: React.ReactNode;
 } & RouteComponentProps) => (
-  <DocumentTitle title={`${i18n.t('404')} | ${window.SITE_NAME}`}>
+  <DocumentTitle title={`${t('404')} | ${window.SITE_NAME}`}>
     <>
       <Header history={history} />
       <EmptyIllustration

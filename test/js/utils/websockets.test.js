@@ -142,7 +142,7 @@ describe('createSocket', () => {
     sockets.createSocket(opts);
 
     expect(Sockette).toHaveBeenCalledTimes(1);
-    expect(Sockette.mock.calls[0][0]).toEqual('/my/url');
+    expect(Sockette.mock.calls[0][0]).toBe('/my/url');
   });
 
   describe('events', () => {

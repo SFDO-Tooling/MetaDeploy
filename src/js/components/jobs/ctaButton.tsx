@@ -1,5 +1,5 @@
 import Icon from '@salesforce/design-system-react/components/icon';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -33,8 +33,8 @@ const CtaButton = ({
             <LabelWithSpinner
               label={
                 canceling
-                  ? i18n.t('Canceling Installation…')
-                  : i18n.t('Installation In Progress…')
+                  ? t('Canceling Installation…')
+                  : t('Installation In Progress…')
               }
             />
           }
@@ -43,9 +43,7 @@ const CtaButton = ({
       );
     case STATUS.COMPLETE: {
       if (isScratchOrg) {
-        return (
-          <ActionBtn label={i18n.t('View Scratch Org')} onClick={openModal} />
-        );
+        return <ActionBtn label={t('View Scratch Org')} onClick={openModal} />;
       }
       if (job.instance_url) {
         return (
@@ -62,7 +60,7 @@ const CtaButton = ({
               size="x-small"
               inverse
             />
-            {i18n.t('View Org')}
+            {t('View Org')}
           </a>
         );
       }
@@ -73,8 +71,8 @@ const CtaButton = ({
       return (
         <Link to={linkToPlan} className={btnClasses}>
           {preflightRequired
-            ? i18n.t('Return to Pre-Install Validation')
-            : i18n.t('Return to Plan')}
+            ? t('Return to Pre-Install Validation')
+            : t('Return to Plan')}
         </Link>
       );
     }

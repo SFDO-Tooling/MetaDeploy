@@ -1,3 +1,5 @@
+@use 'sass:list';
+
 // Z-Index
 // =======
 
@@ -34,16 +36,16 @@ $z-index: ('global-header', 'logs');
 /// @return {number} -
 ///   The z-index value associated with the given layer in your configuration.
 @function z-index($layer) {
-  $index: index($z-index, $layer);
+  $index: list.index($z-index, $layer);
   $nested: null;
 
   @if $index {
     @return $index;
   } @else {
     @for $i from 1 through length($z-index) {
-      $stack: nth($z-index, $i);
+      $stack: list.nth($z-index, $i);
       $index: $i;
-      $nested: index($stack, $layer);
+      $nested: list.index($stack, $layer);
 
       @if type-of($nested) == 'number' {
         @if $nested == 1 {

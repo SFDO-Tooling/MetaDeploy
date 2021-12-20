@@ -1,5 +1,5 @@
 import Card from '@salesforce/design-system-react/components/card';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -37,7 +37,7 @@ const PlanCard = ({
         to={routes.plan_detail(productSlug, versionLabel, plan.slug)}
         className="slds-button slds-button_brand"
       >
-        {i18n.t('View Details')}
+        {t('View Details')}
       </Link>
     </Card>
   </div>

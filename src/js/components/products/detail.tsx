@@ -1,4 +1,4 @@
-import i18n from 'i18next';
+import { t } from 'i18next';
 import { sortBy } from 'lodash';
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
@@ -227,7 +227,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
       <>
         {!productDescriptionHasTitle && !isCardLayout && (
           <h2 className="slds-text-heading_small">
-            {i18n.t('About {{title}}', { title: product.title })}
+            {t('About {{title}}', { title: product.title })}
           </h2>
         )}
         {product.image ? (
@@ -328,7 +328,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                             slds-button_brand
                             slds-size_full"
                         >
-                          {i18n.t('{{title}} - View Details', {
+                          {t('{{title}} - View Details', {
                             title: primary_plan.title,
                           })}
                         </Link>
@@ -346,7 +346,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                             slds-button_outline-brand
                             slds-size_full"
                         >
-                          {i18n.t('{{title}} - View Details', {
+                          {t('{{title}} - View Details', {
                             title: secondary_plan.title,
                           })}
                         </Link>
@@ -355,14 +355,14 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                   </>
                 )}
                 <BackLink
-                  label={i18n.t('Select a different product')}
+                  label={t('Select a different product')}
                   url={routes.product_list()}
                 />
                 {!isCardLayout && additionalPlansSorted.length ? (
                   <div className="slds-p-top_x-large">
                     {visiblePrimaryPlan || visibleSecondaryPlan ? (
                       <h2 className="slds-text-heading_small">
-                        {i18n.t('Additional Plans')}
+                        {t('Additional Plans')}
                       </h2>
                     ) : null}
                     {additionalPlansSorted.map((plan) => (

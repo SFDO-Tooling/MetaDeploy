@@ -1,5 +1,5 @@
 import SLDSProgressIndicator from '@salesforce/design-system-react/components/progress-indicator';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import * as React from 'react';
 
 import { CONSTANTS } from '@/js/store/plans/reducer';
@@ -9,14 +9,14 @@ export const getSteps = (
   supportedOrgs: SupportedOrgs,
   preflightRequired: boolean,
 ) => {
-  let initialLabel = i18n.t('Log in');
+  let initialLabel = t('Log in');
   switch (supportedOrgs) {
     case SUPPORTED_ORGS.Scratch: {
-      initialLabel = i18n.t('Create Scratch Org');
+      initialLabel = t('Create Scratch Org');
       break;
     }
     case SUPPORTED_ORGS.Both: {
-      initialLabel = i18n.t('Log In or Create Scratch Org');
+      initialLabel = t('Log In or Create Scratch Org');
       break;
     }
   }
@@ -29,11 +29,11 @@ export const getSteps = (
       },
       {
         id: 1,
-        label: i18n.t('Run pre-install validation'),
+        label: t('Run pre-install validation'),
       },
       {
         id: 2,
-        label: i18n.t('Install'),
+        label: t('Install'),
       },
     ];
   }
@@ -44,7 +44,7 @@ export const getSteps = (
     },
     {
       id: 1,
-      label: i18n.t('Install'),
+      label: t('Install'),
     },
   ];
 };
