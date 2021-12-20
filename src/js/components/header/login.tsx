@@ -1,6 +1,7 @@
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import withLanguageDirection from '@salesforce/design-system-react/components/utilities/UNSAFE_direction/private/language-direction';
 import i18n from 'i18next';
+import cookies from 'js-cookie';
 import * as React from 'react';
 
 import CustomDomainModal from '@/js/components/header/customDomainModal';
@@ -25,6 +26,12 @@ type MenuOption = {
 };
 type MenuDivider = { type: string };
 
+interface LoginFormElements extends HTMLFormControlsCollection {
+  csrfmiddlewaretoken: HTMLInputElement;
+  next: HTMLInputElement;
+  custom_domain: HTMLInputElement;
+}
+
 class Login extends React.Component<Props, { modalOpen: boolean }> {
   static defaultProps = {
     id: 'login',
@@ -36,6 +43,8 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
     flipped: false,
     redirectParams: {},
   };
+
+  private formRef = React.createRef<HTMLFormElement>();
 
   constructor(props: Props) {
     super(props);
@@ -52,13 +61,12 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
       this.toggleModal(true);
       return;
     }
-    const { redirectParams } = this.props;
-    window.location.assign(
-      addUrlParams(window.api_urls.salesforce_login(), {
-        custom_domain: login_domain,
-        next: addUrlParams(window.location.href, redirectParams),
-      }),
-    );
+    const form = this.formRef.current;
+    if (form) {
+      const elements = form.elements as LoginFormElements;
+      elements.custom_domain.value = login_domain;
+      form.submit();
+    }
   };
 
   static getMenuOpts(): (MenuOption | MenuDivider)[] {
@@ -128,6 +136,30 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
           toggleModal={this.toggleModal}
           redirectParams={redirectParams}
         />
+        {/* POSTing instead of redirecting to the login endpoint is more secure */}
+        <form
+          method="POST"
+          action={window.api_urls.salesforce_login()}
+          ref={this.formRef}
+        >
+          <input
+            type="hidden"
+            name="csrfmiddlewaretoken"
+            value={cookies.get('csrftoken')}
+          />
+          <input
+            type="hidden"
+            name="next"
+            value={addUrlParams(window.location.href, redirectParams)}
+            data-testid="login-next"
+          />
+          <input
+            type="hidden"
+            name="custom_domain"
+            value={'' /* Actual value will be set handleSelect */}
+            data-testid="custom-domain"
+          />
+        </form>
       </>
     );
   }

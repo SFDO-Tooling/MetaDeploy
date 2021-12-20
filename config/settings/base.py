@@ -415,7 +415,6 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 ACCOUNT_EMAIL_VERIFICATION = "none"
 SOCIALACCOUNT_ADAPTER = "sfdo_template_helpers.oauth2.adapter.SFDOSocialAccountAdapter"
-SOCIALACCOUNT_LOGIN_ON_GET = True
 
 JS_REVERSE_JS_VAR_NAME = "api_urls"
 JS_REVERSE_EXCLUDE_NAMESPACES = ["admin", "admin_rest"]

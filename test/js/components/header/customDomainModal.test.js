@@ -2,7 +2,6 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
 import CustomDomainModal from '@/js/components/header/customDomainModal';
-import { addUrlParams } from '@/js/utils/api';
 
 import { render } from './../../utils';
 
@@ -46,43 +45,33 @@ describe('<CustomDomainModal />', () => {
     expect(getByTestId('custom-domain')).toHaveTextContent('foobar');
   });
 
-  test('updates window.location.href on submit', () => {
-    const { getByLabelText, getByText } = setup();
-
-    jest.spyOn(window.location, 'assign');
+  test('enables button when input is valid', () => {
+    const { getByLabelText, getByTestId } = setup();
     const input = getByLabelText('Custom Domain');
+
+    expect(getByTestId('continue-btn')).not.toBeEnabled();
+
     fireEvent.change(input, { target: { value: ' ' } });
-    fireEvent.click(getByText('Continue'));
 
-    expect(window.location.assign).not.toHaveBeenCalled();
+    expect(getByTestId('continue-btn')).not.toBeEnabled();
 
-    fireEvent.change(input, { target: { value: 'foobar' } });
-    fireEvent.click(getByText('Continue'));
-    const baseUrl = window.api_urls.salesforce_login();
-    const expected = addUrlParams(baseUrl, {
-      custom_domain: 'foobar',
-      next: window.location.pathname,
+    fireEvent.change(input, { target: { value: ' foobar' } });
+
+    expect(getByTestId('continue-btn')).toBeEnabled();
+
+    fireEvent.change(input, {
+      target: { value: 'https://foobar.my.salesforce.com' },
     });
 
-    expect(window.location.assign).toHaveBeenCalledWith(expected);
+    expect(getByTestId('continue-btn')).toBeEnabled();
   });
 
   test('adds redirectParams, if exist', () => {
-    const { getByLabelText, getByText } = setup({
+    const { getByTestId } = setup({
       redirectParams: { foo: 'bar' },
     });
 
-    jest.spyOn(window.location, 'assign');
-    const input = getByLabelText('Custom Domain');
-    fireEvent.change(input, { target: { value: 'foobar' } });
-    fireEvent.click(getByText('Continue'));
-    const baseUrl = window.api_urls.salesforce_login();
-    const expected = addUrlParams(baseUrl, {
-      custom_domain: 'foobar',
-      next: addUrlParams(window.location.pathname, { foo: 'bar' }),
-    });
-
-    expect(window.location.assign).toHaveBeenCalledWith(expected);
+    expect(getByTestId('custom-login-next')).toHaveValue('/?foo=bar');
   });
 
   describe('cancel', () => {
