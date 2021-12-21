@@ -1,4 +1,4 @@
-import i18n from 'i18next';
+import { t } from 'i18next';
 import * as React from 'react';
 import { Trans } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -25,9 +25,7 @@ const JobNotFound = ({
     <div className="slds-align_absolute-center">
       <Login
         id="job-404-login"
-        label={
-          isLoggedIn ? i18n.t('Log In With a Different Org') : i18n.t('Log In')
-        }
+        label={isLoggedIn ? t('Log In With a Different Org') : t('Log In')}
         buttonClassName="slds-p-horizontal_xxx-small"
         buttonVariant="base"
       />

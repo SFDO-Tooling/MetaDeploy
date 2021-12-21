@@ -1,6 +1,6 @@
 import Toast from '@salesforce/design-system-react/components/toast';
 import ToastContainer from '@salesforce/design-system-react/components/toast/container';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import * as React from 'react';
 
 import { removeError } from '@/js/store/errors/actions';
@@ -19,8 +19,8 @@ const ErrorToast = ({
 }) => (
   <Toast
     labels={{
-      heading: i18n.t("Uh oh, we've encountered an error. You may need to "),
-      headingLink: i18n.t('reload the page.'),
+      heading: t("Uh oh, we've encountered an error. You may need to "),
+      headingLink: t('reload the page.'),
       details: error.message,
     }}
     variant="error"

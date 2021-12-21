@@ -105,8 +105,8 @@ describe('fetchJob', () => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
-        expect(allActions[1].type).toEqual('ERROR_ADDED');
-        expect(allActions[1].payload.message).toEqual('Internal Server Error');
+        expect(allActions[1].type).toBe('ERROR_ADDED');
+        expect(allActions[1].payload.message).toBe('Internal Server Error');
         expect(allActions[2]).toEqual(failed);
         expect(window.console.error).toHaveBeenCalled();
       });
@@ -314,8 +314,8 @@ describe('updateJob', () => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
-        expect(allActions[1].type).toEqual('ERROR_ADDED');
-        expect(allActions[1].payload.message).toEqual('Nope.');
+        expect(allActions[1].type).toBe('ERROR_ADDED');
+        expect(allActions[1].payload.message).toBe('Nope.');
         expect(allActions[2]).toEqual(failed);
         expect(window.console.error).toHaveBeenCalled();
       });
@@ -367,8 +367,8 @@ describe('requestCancelJob', () => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
-        expect(allActions[1].type).toEqual('ERROR_ADDED');
-        expect(allActions[1].payload.message).toEqual('Oops.');
+        expect(allActions[1].type).toBe('ERROR_ADDED');
+        expect(allActions[1].payload.message).toBe('Oops.');
         expect(allActions[2]).toEqual(failed);
         expect(window.console.error).toHaveBeenCalled();
       });

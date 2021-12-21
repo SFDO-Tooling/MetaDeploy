@@ -291,7 +291,7 @@ describe('<PlanDetail />', () => {
     test('redirects to plan_detail with new slug', () => {
       const { context } = setup({ productSlug: 'old-product' });
 
-      expect(context.action).toEqual('REPLACE');
+      expect(context.action).toBe('REPLACE');
       expect(context.url).toEqual(
         routes.plan_detail('product-1', '1.0.0', 'my-plan'),
       );
@@ -549,7 +549,7 @@ describe('<PlanDetail />', () => {
     test('redirects to plan_detail with new slug', () => {
       const { context } = setup({ planSlug: 'old-plan' });
 
-      expect(context.action).toEqual('REPLACE');
+      expect(context.action).toBe('REPLACE');
       expect(context.url).toEqual(
         routes.plan_detail('product-1', '1.0.0', 'my-plan'),
       );
@@ -563,7 +563,7 @@ describe('<PlanDetail />', () => {
         planSlug: 'old-plan',
       });
 
-      expect(context.action).toEqual('REPLACE');
+      expect(context.action).toBe('REPLACE');
       expect(context.url).toEqual(
         routes.plan_detail('product-1', '1.0.0', 'my-plan'),
       );

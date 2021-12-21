@@ -65,7 +65,7 @@ class LogfmtFormatter(ServerFormatter):
                 if isinstance(v, (dict, object)):
                     v = str(v)
                 v = quote_logvalue(v)
-            out.append("{}={}".format(k, v))
+            out.append(f"{k}={v}")
         return " ".join(out)
 
     def _get_time(self, record):

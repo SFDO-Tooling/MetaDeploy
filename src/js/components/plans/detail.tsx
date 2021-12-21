@@ -1,4 +1,4 @@
-import i18n from 'i18next';
+import { t } from 'i18next';
 import { find } from 'lodash';
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
@@ -297,13 +297,13 @@ class PlanDetail extends React.Component<Props, State> {
           <div className="slds-p-bottom_xx-small">
             <ErrorIcon />
             <span className="slds-text-color_error">
-              {i18n.t(
+              {t(
                 'Oops! It looks like you don’t have permissions to run an installation on this org.',
               )}
             </span>
           </div>
           <p>
-            {i18n.t(
+            {t(
               'Please contact an Admin within your org or use the button below to log in with a different org.',
             )}
           </p>
@@ -347,9 +347,7 @@ class PlanDetail extends React.Component<Props, State> {
         <p>
           <WarningIcon />
           <span>
-            {i18n.t(
-              'A pre-install validation is currently running on this org.',
-            )}
+            {t('A pre-install validation is currently running on this org.')}
           </span>
         </p>
       );
@@ -507,7 +505,7 @@ class PlanDetail extends React.Component<Props, State> {
                 cta={this.getCTA(selectedSteps)}
                 backLink={
                   <BackLink
-                    label={i18n.t('Select a different plan')}
+                    label={t('Select a different plan')}
                     url={routes.version_detail(
                       product.slug,
                       getVersionLabel(product, version),

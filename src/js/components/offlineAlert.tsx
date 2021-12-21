@@ -1,6 +1,6 @@
 import Alert from '@salesforce/design-system-react/components/alert';
 import AlertContainer from '@salesforce/design-system-react/components/alert/container';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import * as React from 'react';
 
 const reloadPage = (): void => {
@@ -11,10 +11,10 @@ const OfflineAlert = () => (
   <AlertContainer className="offline-alert">
     <Alert
       labels={{
-        heading: i18n.t(
+        heading: t(
           'You are in offline mode. We are trying to reconnect, but you may need to',
         ),
-        headingLink: i18n.t('reload the page.'),
+        headingLink: t('reload the page.'),
       }}
       onClickHeadingLink={reloadPage}
       variant="offline"

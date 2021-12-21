@@ -1,6 +1,6 @@
 import Alert from '@salesforce/design-system-react/components/alert';
 import AlertContainer from '@salesforce/design-system-react/components/alert/container';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import * as React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
@@ -29,9 +29,9 @@ class CurrentJobAlert extends React.Component<Props> {
     const { currentJob } = this.props;
     const { plan_average_duration } = currentJob;
     const duration = getDuration(plan_average_duration);
-    let heading = i18n.t('An installation is currently running on this org.');
+    let heading = t('An installation is currently running on this org.');
     if (duration) {
-      heading = `${heading} ${i18n.t('Average install time is {{duration}}.', {
+      heading = `${heading} ${t('Average install time is {{duration}}.', {
         duration,
       })}`;
     }
@@ -40,7 +40,7 @@ class CurrentJobAlert extends React.Component<Props> {
         <Alert
           labels={{
             heading,
-            headingLink: i18n.t('View installation.'),
+            headingLink: t('View installation.'),
           }}
           onClickHeadingLink={this.redirectToJob}
         />

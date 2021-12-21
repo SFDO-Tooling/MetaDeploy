@@ -1,7 +1,7 @@
 import Card from '@salesforce/design-system-react/components/card';
 import Icon from '@salesforce/design-system-react/components/icon';
 import { format, parseISO } from 'date-fns';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import * as React from 'react';
 import { Trans } from 'react-i18next';
 
@@ -20,7 +20,7 @@ const LoggedOut = () => (
       dangerouslySetInnerHTML={{ __html: noConnectionSvg }}
     />
     <h3 className="slds-illustration__header slds-text-heading_medium">
-      {i18n.t('Not Connected to Salesforce')}
+      {t('Not Connected to Salesforce')}
     </h3>
   </div>
 );
@@ -30,7 +30,7 @@ const Footer = () => (
     Is this the correct org? If not, please{' '}
     <Login
       id="user-info-login"
-      label={i18n.t('log in with a different org')}
+      label={t('log in with a different org')}
       buttonClassName="slds-p-horizontal_xxx-small"
       buttonVariant="base"
     />
@@ -68,7 +68,7 @@ const UserInfo = ({
     contents = (
       <Card
         bodyClassName="slds-card__body_inner"
-        heading={i18n.t('Connected to Salesforce')}
+        heading={t('Connected to Salesforce')}
         hasNoHeader={!hasValidToken}
         icon={<Icon category="utility" name="connected_apps" />}
         empty={hasValidToken ? null : <LoggedOut />}
@@ -77,17 +77,17 @@ const UserInfo = ({
         <ul>
           {username ? (
             <li>
-              <strong>{i18n.t('User:')}</strong> {username}
+              <strong>{t('User:')}</strong> {username}
             </li>
           ) : null}
           {org_name ? (
             <li>
-              <strong>{i18n.t('Org:')}</strong> {org_name}
+              <strong>{t('Org:')}</strong> {org_name}
             </li>
           ) : null}
           {org_type ? (
             <li>
-              <strong>{i18n.t('Type:')}</strong> {org_type}
+              <strong>{t('Type:')}</strong> {org_type}
             </li>
           ) : null}
         </ul>

@@ -379,7 +379,7 @@ class Version(HashIdMixin, TranslatableModel):
         return (self.product, self.label)
 
     def __str__(self):
-        return "{}, Version {}".format(self.product, self.label)
+        return f"{self.product}, Version {self.label}"
 
     @property
     def primary_plan(self):
@@ -562,7 +562,7 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
         return (self.version, self.title)
 
     def __str__(self):
-        return "{}, Plan {}".format(self.version, self.title)
+        return f"{self.version}, Plan {self.title}"
 
     @property
     def requires_preflight(self):
@@ -899,9 +899,7 @@ class PreflightResult(models.Model):
 
     def has_any_errors(self):
         for results in self.results.values():
-            if any(
-                (result for result in results if result.get("status", None) == ERROR)
-            ):
+            if any(result for result in results if result.get("status", None) == ERROR):
                 return True
         return False
 

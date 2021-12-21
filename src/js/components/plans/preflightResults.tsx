@@ -1,5 +1,5 @@
 import Icon from '@salesforce/design-system-react/components/icon';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import * as React from 'react';
 import { Trans } from 'react-i18next';
 
@@ -14,7 +14,7 @@ export const ErrorIcon = ({
   containerClassName?: string;
 }) => (
   <Icon
-    assistiveText={{ label: i18n.t('Error') }}
+    assistiveText={{ label: t('Error') }}
     category="utility"
     name="error"
     colorVariant="error"
@@ -26,7 +26,7 @@ export const ErrorIcon = ({
 
 export const WarningIcon = () => (
   <Icon
-    assistiveText={{ label: i18n.t('Warning') }}
+    assistiveText={{ label: t('Warning') }}
     category="utility"
     name="warning"
     colorVariant="warning"
@@ -105,19 +105,19 @@ export const getErrorInfo = ({
     // Show errors/warnings
     const errorCount = currentJob.error_count || 0;
     const warningCount = currentJob.warning_count || 0;
-    let msg = i18n.t('errors');
+    let msg = t('errors');
     const errorDefault = `${errorCount} error${errorCount === 1 ? '' : 's'}`;
     const warningDefault = `${warningCount} warning${
       warningCount === 1 ? '' : 's'
     }`;
-    const errorMsg = i18n.t('errorMsg', errorDefault, {
+    const errorMsg = t('errorMsg', errorDefault, {
       count: errorCount,
     });
-    const warningMsg = i18n.t('warningMsg', warningDefault, {
+    const warningMsg = t('warningMsg', warningDefault, {
       count: warningCount,
     });
     if (errorCount > 0 && warningCount > 0) {
-      msg = i18n.t('{{item1}} and {{item2}}', {
+      msg = t('{{item1}} and {{item2}}', {
         item1: errorMsg,
         item2: warningMsg,
       });
@@ -134,12 +134,12 @@ export const getErrorInfo = ({
     if (preflight) {
       info.message =
         !preflight.is_valid && !failed
-          ? i18n.t('Pre-install validation has expired; please run it again.')
-          : i18n.t('Pre-install validation encountered {{errorSummary}}.', {
+          ? t('Pre-install validation has expired; please run it again.')
+          : t('Pre-install validation encountered {{errorSummary}}.', {
               errorSummary: msg,
             });
     } else {
-      info.message = i18n.t('Installation encountered {{errorSummary}}.', {
+      info.message = t('Installation encountered {{errorSummary}}.', {
         errorSummary: msg,
       });
     }
@@ -167,7 +167,7 @@ const PreflightResults = ({ preflight }: { preflight: Preflight }) => {
         </p>
         {failed ? (
           <p>
-            {i18n.t(
+            {t(
               'After resolving all errors, run the pre-install validation again.',
             )}
           </p>
@@ -181,7 +181,7 @@ const PreflightResults = ({ preflight }: { preflight: Preflight }) => {
     return (
       <p>
         <WarningIcon />
-        {i18n.t('Pre-install validation has expired; please run it again.')}
+        {t('Pre-install validation has expired; please run it again.')}
       </p>
     );
   }
@@ -191,7 +191,7 @@ const PreflightResults = ({ preflight }: { preflight: Preflight }) => {
   return (
     <>
       <p className="slds-text-color_success">
-        {i18n.t('Pre-install validation completed successfully.')}
+        {t('Pre-install validation completed successfully.')}
       </p>
       <p>
         <Trans i18nKey="preflightValidTime" count={preflight_minutes}>
