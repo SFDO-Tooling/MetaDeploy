@@ -62,6 +62,7 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
       return;
     }
     const form = this.formRef.current;
+    /* istanbul ignore else */
     if (form) {
       const elements = form.elements as LoginFormElements;
       elements.custom_domain.value = login_domain;
