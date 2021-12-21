@@ -389,7 +389,7 @@ service-identity==21.1.0
     # via
     #   -r requirements/prod.in
     #   twisted
-sfdo-template-helpers @ https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.19.0.tar.gz
+sfdo-template-helpers @ https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.20.0.tar.gz
     # via -r requirements/prod.in
 simple-salesforce==1.11.4
     # via
