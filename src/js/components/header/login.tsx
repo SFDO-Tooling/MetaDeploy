@@ -141,6 +141,7 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
           method="POST"
           action={window.api_urls.salesforce_login()}
           ref={this.formRef}
+          data-testid="login-form"
         >
           <input
             type="hidden"

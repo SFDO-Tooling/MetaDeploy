@@ -49,7 +49,6 @@ class CustomDomainModal extends React.Component<
         variant="brand"
         onClick={this.handleSubmit}
         disabled={!this.state.customDomain}
-        data-testid="continue-btn"
       />,
     ];
     return (
@@ -66,6 +65,7 @@ class CustomDomainModal extends React.Component<
           className="slds-p-around_large"
           action={window.api_urls.salesforce_login()}
           ref={this.formRef}
+          data-testid="modal-form"
         >
           <div className="slds-form-element__help slds-p-bottom_small">
             {t(

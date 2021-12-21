@@ -46,24 +46,37 @@ describe('<CustomDomainModal />', () => {
   });
 
   test('enables button when input is valid', () => {
-    const { getByLabelText, getByTestId } = setup();
+    const { getByLabelText, getByText } = setup();
     const input = getByLabelText('Custom Domain');
 
-    expect(getByTestId('continue-btn')).not.toBeEnabled();
+    expect(getByText('Continue')).not.toBeEnabled();
 
     fireEvent.change(input, { target: { value: ' ' } });
 
-    expect(getByTestId('continue-btn')).not.toBeEnabled();
+    expect(getByText('Continue')).not.toBeEnabled();
 
     fireEvent.change(input, { target: { value: ' foobar' } });
 
-    expect(getByTestId('continue-btn')).toBeEnabled();
+    expect(getByText('Continue')).toBeEnabled();
 
     fireEvent.change(input, {
       target: { value: 'https://foobar.my.salesforce.com' },
     });
 
-    expect(getByTestId('continue-btn')).toBeEnabled();
+    expect(getByText('Continue')).toBeEnabled();
+  });
+
+  test('submits form', () => {
+    const { getByTestId, getByText, getByLabelText } = setup();
+    const form = getByTestId('modal-form');
+    form.onsubmit = jest.fn();
+
+    fireEvent.change(getByLabelText('Custom Domain'), {
+      target: { value: 'foobar' },
+    });
+    fireEvent.click(getByText('Continue'));
+
+    expect(form.onsubmit).toHaveBeenCalled();
   });
 
   test('adds redirectParams, if exist', () => {

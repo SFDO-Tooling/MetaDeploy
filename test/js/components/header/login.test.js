@@ -25,6 +25,17 @@ describe('<Login />', () => {
 
       expect(getByTestId('login-next')).toHaveValue('/?foo=bar');
     });
+
+    test('submits form', () => {
+      const { getByText, getByTestId } = render(<Login />);
+      const form = getByTestId('login-form');
+      form.onsubmit = jest.fn();
+
+      fireEvent.click(getByText('Log In'));
+      fireEvent.click(getByText('Production or Developer Org'));
+
+      expect(form.onsubmit).toHaveBeenCalled();
+    });
   });
 
   describe('custom domain click', () => {
