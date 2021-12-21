@@ -124,7 +124,7 @@ describe('<ProductDetail />', () => {
   test('redirects to version_detail', () => {
     const { context } = setup();
 
-    expect(context.action).toEqual('REPLACE');
+    expect(context.action).toBe('REPLACE');
     expect(context.url).toEqual(
       routes.version_detail('product-1', LATEST_VERSION),
     );
@@ -134,7 +134,7 @@ describe('<ProductDetail />', () => {
     test('redirects to product_detail with new slug', () => {
       const { context } = setup({ productSlug: 'old-slug' });
 
-      expect(context.action).toEqual('REPLACE');
+      expect(context.action).toBe('REPLACE');
       expect(context.url).toEqual(routes.product_detail('product-1'));
     });
   });
@@ -266,7 +266,7 @@ describe('<VersionDetail />', () => {
     test('redirects to version_detail with new slug', () => {
       const { context } = setup({ productSlug: 'old-slug' });
 
-      expect(context.action).toEqual('REPLACE');
+      expect(context.action).toBe('REPLACE');
       expect(context.url).toEqual(routes.version_detail('product-1', '1.0.0'));
     });
   });
@@ -284,7 +284,7 @@ describe('<VersionDetail />', () => {
           versionLabel: 'my-secondary-plan',
         });
 
-        expect(context.action).toEqual('REPLACE');
+        expect(context.action).toBe('REPLACE');
         expect(context.url).toEqual(
           routes.plan_detail('product-1', LATEST_VERSION, 'my-secondary-plan'),
         );

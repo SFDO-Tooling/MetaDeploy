@@ -1,5 +1,5 @@
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import * as React from 'react';
 
 import { getDuration } from '@/js/utils/dates';
@@ -32,11 +32,11 @@ const Intro = ({
         {duration ? (
           <div className="slds-m-bottom_small">
             <strong>
-              {i18n.t('Average Install Time: {{duration}}.', { duration })}
+              {t('Average Install Time: {{duration}}.', { duration })}
             </strong>
             {isProductionOrg ? (
               <Tooltip
-                content={i18n.t(
+                content={t(
                   'Install times in production orgs will vary depending on how many tests need to be run.',
                 )}
                 assistiveText={{ triggerLearnMoreIcon: 'Disclaimer' }}

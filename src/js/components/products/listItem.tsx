@@ -1,5 +1,5 @@
 import Card from '@salesforce/design-system-react/components/card';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -27,7 +27,7 @@ const ProductItem = ({ item }: { item: Product }) => {
         bodyClassName="slds-card__body_inner"
       >
         <div className="slds-text-title">
-          {i18n.t('Version {{version}}', { version: label })}
+          {t('Version {{version}}', { version: label })}
         </div>
         {item.short_description ? (
           <div className="slds-p-top_x-small">{item.short_description}</div>

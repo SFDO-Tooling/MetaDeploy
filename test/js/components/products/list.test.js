@@ -262,7 +262,7 @@ describe('<Products />', () => {
         fireEvent.click(communityTab);
         const actual = window.sessionStorage.getItem('activeProductsTab');
 
-        expect(actual).toEqual('community');
+        expect(actual).toBe('community');
       });
 
       test('changes active tab onSelect', () => {

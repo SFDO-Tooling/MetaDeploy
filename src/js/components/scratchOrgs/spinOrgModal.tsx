@@ -2,7 +2,7 @@ import Button from '@salesforce/design-system-react/components/button';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { useCallback, useState } from 'react';
 
 type Props = {
@@ -67,7 +67,7 @@ const SpinOrg = ({
 
   const pages = [
     {
-      heading: i18n.t('Product Terms of Use and Licenses'),
+      heading: t('Product Terms of Use and Licenses'),
       content: clickThroughAgreement ? (
         <>
           <div
@@ -83,7 +83,7 @@ const SpinOrg = ({
             checked={confirmed}
             required
             labels={{
-              label: i18n.t(
+              label: t(
                 'I confirm I have read and agree to these product terms of use and licenses.',
               ),
             }}
@@ -93,21 +93,21 @@ const SpinOrg = ({
       ) : null,
     },
     {
-      heading: i18n.t('Enter Your Email Address'),
+      heading: t('Enter Your Email Address'),
       content: (
         <form className="slds-p-around_large" onSubmit={handleSubmit}>
           <div
             id="scratch-org-email-help"
             className="slds-form-element__help slds-p-bottom_small"
           >
-            {i18n.t(
+            {t(
               'This email will be used as the admin of the scratch org that is created.',
             )}
           </div>
           <Input
             id="scratch-org-email"
             type="email"
-            label={i18n.t('Email')}
+            label={t('Email')}
             value={email}
             required
             onChange={handleEmailChange}
@@ -125,16 +125,10 @@ const SpinOrg = ({
       size="medium"
       heading={pages[currentPage].heading}
       footer={[
-        <Button
-          key="cancel"
-          label={i18n.t('Cancel')}
-          onClick={resetAndClose}
-        />,
+        <Button key="cancel" label={t('Cancel')} onClick={resetAndClose} />,
         <Button
           key="confirm"
-          label={
-            currentPage === 0 ? i18n.t('Confirm & Next') : i18n.t('Confirm')
-          }
+          label={currentPage === 0 ? t('Confirm & Next') : t('Confirm')}
           variant="brand"
           onClick={handleSubmit}
           disabled={
