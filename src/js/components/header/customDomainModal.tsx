@@ -29,8 +29,15 @@ class CustomDomainModal extends React.Component<
     this.props.toggleModal(false);
   };
 
-  handleSubmit = () => {
+  handleSubmitClicked = () => {
     this.formRef.current?.submit();
+  };
+
+  handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    /* istanbul ignore if */
+    if (!this.state.customDomain) {
+      event.preventDefault();
+    }
   };
 
   handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,7 +54,7 @@ class CustomDomainModal extends React.Component<
         key="submit"
         label={t('Continue')}
         variant="brand"
-        onClick={this.handleSubmit}
+        onClick={this.handleSubmitClicked}
         disabled={!this.state.customDomain}
       />,
     ];
@@ -66,6 +73,7 @@ class CustomDomainModal extends React.Component<
           action={window.api_urls.salesforce_login()}
           ref={this.formRef}
           data-testid="modal-form"
+          onSubmit={this.handleSubmit}
         >
           <div className="slds-form-element__help slds-p-bottom_small">
             {t(
