@@ -1,6 +1,6 @@
 import Toast from '@salesforce/design-system-react/components/toast';
 import ToastContainer from '@salesforce/design-system-react/components/toast/container';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
@@ -35,10 +35,10 @@ class OldVersionWarning extends React.Component<Props, State> {
           <ToastContainer>
             <Toast
               labels={{
-                heading: i18n.t(
+                heading: t(
                   'This is not the most recent version of this product.',
                 ),
-                headingLink: i18n.t('Go to the most recent version.'),
+                headingLink: t('Go to the most recent version.'),
               }}
               variant="warning"
               onClickHeadingLink={this.linkClicked}

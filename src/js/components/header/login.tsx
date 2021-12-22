@@ -1,6 +1,7 @@
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import withLanguageDirection from '@salesforce/design-system-react/components/utilities/UNSAFE_direction/private/language-direction';
-import i18n from 'i18next';
+import { t } from 'i18next';
+import cookies from 'js-cookie';
 import * as React from 'react';
 
 import CustomDomainModal from '@/js/components/header/customDomainModal';
@@ -25,6 +26,12 @@ type MenuOption = {
 };
 type MenuDivider = { type: string };
 
+interface LoginFormElements extends HTMLFormControlsCollection {
+  csrfmiddlewaretoken: HTMLInputElement;
+  next: HTMLInputElement;
+  custom_domain: HTMLInputElement;
+}
+
 class Login extends React.Component<Props, { modalOpen: boolean }> {
   static defaultProps = {
     id: 'login',
@@ -36,6 +43,8 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
     flipped: false,
     redirectParams: {},
   };
+
+  private formRef = React.createRef<HTMLFormElement>();
 
   constructor(props: Props) {
     super(props);
@@ -52,24 +61,24 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
       this.toggleModal(true);
       return;
     }
-    const { redirectParams } = this.props;
-    window.location.assign(
-      addUrlParams(window.api_urls.salesforce_login(), {
-        custom_domain: login_domain,
-        next: addUrlParams(window.location.href, redirectParams),
-      }),
-    );
+    const form = this.formRef.current;
+    /* istanbul ignore else */
+    if (form) {
+      const elements = form.elements as LoginFormElements;
+      elements.custom_domain.value = login_domain;
+      form.submit();
+    }
   };
 
   static getMenuOpts(): (MenuOption | MenuDivider)[] {
     return [
       {
-        label: i18n.t('Production or Developer Org'),
+        label: t('Production or Developer Org'),
         login_domain: 'login',
         disabled: false,
       },
       {
-        label: i18n.t('Sandbox or Scratch Org'),
+        label: t('Sandbox or Scratch Org'),
         login_domain: 'test',
         disabled: false,
       },
@@ -77,7 +86,7 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
         type: 'divider',
       },
       {
-        label: i18n.t('Use Custom Domain'),
+        label: t('Use Custom Domain'),
         login_domain: '',
         disabled: false,
       },
@@ -109,7 +118,7 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
       <>
         <Dropdown
           id={id}
-          label={label === undefined ? i18n.t('Log In') : label}
+          label={label === undefined ? t('Log In') : label}
           className="slds-dropdown_actions"
           triggerClassName={triggerClassName}
           buttonClassName={buttonClassName}
@@ -128,6 +137,31 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
           toggleModal={this.toggleModal}
           redirectParams={redirectParams}
         />
+        {/* POSTing instead of redirecting to the login endpoint is more secure */}
+        <form
+          method="POST"
+          action={window.api_urls.salesforce_login()}
+          ref={this.formRef}
+          data-testid="login-form"
+        >
+          <input
+            type="hidden"
+            name="csrfmiddlewaretoken"
+            value={cookies.get('csrftoken')}
+          />
+          <input
+            type="hidden"
+            name="next"
+            value={addUrlParams(window.location.href, redirectParams)}
+            data-testid="login-next"
+          />
+          <input
+            type="hidden"
+            name="custom_domain"
+            value={'' /* Actual value will be set handleSelect */}
+            data-testid="custom-domain"
+          />
+        </form>
       </>
     );
   }

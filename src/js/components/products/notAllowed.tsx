@@ -1,4 +1,4 @@
-import i18n from 'i18next';
+import { t } from 'i18next';
 import * as React from 'react';
 import { Trans } from 'react-i18next';
 
@@ -25,7 +25,7 @@ const NotAllowed = ({
         dangerouslySetInnerHTML={{ __html: svgPath }}
       />
       <h3 className="slds-illustration__header slds-text-heading_medium">
-        {i18n.t('Restricted Access')}
+        {t('Restricted Access')}
       </h3>
     </div>
     {message ? (
@@ -46,11 +46,7 @@ const NotAllowed = ({
           {' or '}
           <Login
             id="product-not-allowed-login"
-            label={
-              isLoggedIn
-                ? i18n.t('log in with a different org')
-                : i18n.t('log in')
-            }
+            label={isLoggedIn ? t('log in with a different org') : t('log in')}
             buttonClassName="slds-p-horizontal_xxx-small"
             buttonVariant="base"
           />

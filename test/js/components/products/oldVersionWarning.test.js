@@ -35,7 +35,7 @@ describe('<OldVersionWarning/>', () => {
     const { context, getByText } = setup({ link: 'foobar' });
     fireEvent.click(getByText('Go to the most recent version.'));
 
-    expect(context.action).toEqual('PUSH');
-    expect(context.url).toEqual('foobar');
+    expect(context.action).toBe('PUSH');
+    expect(context.url).toBe('foobar');
   });
 });

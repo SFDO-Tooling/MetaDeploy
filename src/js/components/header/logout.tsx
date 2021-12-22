@@ -3,7 +3,7 @@ import Button from '@salesforce/design-system-react/components/button';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import DropdownTrigger from '@salesforce/design-system-react/components/menu-dropdown/button-trigger';
 import UNSAFE_DirectionSettings from '@salesforce/design-system-react/components/utilities/UNSAFE_direction';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import * as React from 'react';
 
 import { FetchOrgJobsSucceeded } from '@/js/store/org/actions';
@@ -30,7 +30,7 @@ const Logout = ({
             },
             { type: 'divider' },
             {
-              label: i18n.t('Log Out'),
+              label: t('Log Out'),
               leftIcon: {
                 name: 'logout',
                 category: 'utility',

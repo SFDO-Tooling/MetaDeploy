@@ -288,7 +288,7 @@ describe('<JobDetail />', () => {
     test('redirects to job_detail with new slug', () => {
       const { context } = setup({ productSlug: 'old-product' });
 
-      expect(context.action).toEqual('REPLACE');
+      expect(context.action).toBe('REPLACE');
       expect(context.url).toEqual(
         routes.job_detail('product-1', '1.0.0', 'my-plan', 'job-1'),
       );
@@ -299,7 +299,7 @@ describe('<JobDetail />', () => {
     test('redirects to job_detail with new slug', () => {
       const { context } = setup({ planSlug: 'old-plan' });
 
-      expect(context.action).toEqual('REPLACE');
+      expect(context.action).toBe('REPLACE');
       expect(context.url).toEqual(
         routes.job_detail('product-1', '1.0.0', 'my-plan', 'job-1'),
       );
@@ -313,7 +313,7 @@ describe('<JobDetail />', () => {
         planSlug: 'old-plan',
       });
 
-      expect(context.action).toEqual('REPLACE');
+      expect(context.action).toBe('REPLACE');
       expect(context.url).toEqual(
         routes.job_detail('product-1', '1.0.0', 'my-plan', 'job-1'),
       );

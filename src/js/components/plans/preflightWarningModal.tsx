@@ -1,7 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Modal from '@salesforce/design-system-react/components/modal';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import * as React from 'react';
 
 import { SelectedSteps } from '@/js/components/plans/detail';
@@ -83,14 +83,10 @@ class PreflightWarningModal extends React.Component<Props, State> {
     const { isOpen, results, steps, selectedSteps } = this.props;
     const { confirmed } = this.state;
     const footer = [
-      <Button
-        key="cancel"
-        label={i18n.t('Cancel')}
-        onClick={this.handleClose}
-      />,
+      <Button key="cancel" label={t('Cancel')} onClick={this.handleClose} />,
       <Button
         key="submit"
-        label={i18n.t('Confirm')}
+        label={t('Confirm')}
         variant="brand"
         onClick={this.handleSubmit}
         disabled={!confirmed}
@@ -99,8 +95,8 @@ class PreflightWarningModal extends React.Component<Props, State> {
     return (
       <Modal
         isOpen={isOpen}
-        heading={i18n.t('Potential Issues')}
-        tagline={i18n.t('(confirm to continue)')}
+        heading={t('Potential Issues')}
+        tagline={t('(confirm to continue)')}
         size="medium"
         onRequestClose={this.handleClose}
         footer={footer}
@@ -126,7 +122,7 @@ class PreflightWarningModal extends React.Component<Props, State> {
             className="slds-p-top_x-small"
             checked={this.state.confirmed}
             labels={{
-              label: i18n.t(
+              label: t(
                 'I understand these warnings, and want to continue with installation.',
               ),
             }}

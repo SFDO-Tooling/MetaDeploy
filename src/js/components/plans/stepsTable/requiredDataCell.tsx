@@ -1,6 +1,6 @@
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import classNames from 'classnames';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import * as React from 'react';
 
 import { DataCellProps } from '@/js/components/plans/stepsTable';
@@ -32,11 +32,11 @@ const RequiredDataCell = (props: DataCellProps) => {
   const classes = classNames('slds-align-middle', 'slds-badge', {
     'slds-badge_lightest': !required,
   });
-  let text = i18n.t('Optional');
+  let text = t('Optional');
   if (skipped) {
-    text = i18n.t('Skipped');
+    text = t('Skipped');
   } else if (required) {
-    text = i18n.t('Required');
+    text = t('Required');
   }
   return (
     <DataTableCell

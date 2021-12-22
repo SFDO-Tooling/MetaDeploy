@@ -1,15 +1,12 @@
 import logging
-import requests
 from datetime import timedelta
-from typing import List
 
-from requests.exceptions import HTTPError
-
+import django_rq
+import requests
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management.base import BaseCommand
-
-import django_rq
+from requests.exceptions import HTTPError
 
 from metadeploy.api.models import Plan, PlanTemplate
 
@@ -44,7 +41,7 @@ def execute_release_test() -> None:
             raise HTTPError("An internal server error occurred.")
 
 
-def get_plans_to_test() -> List[Plan]:
+def get_plans_to_test() -> list[Plan]:
     """Returns all plans related to PlanTemplates that have
     not opted out of regression testing, and have a tier or 'primary'.
     (See PlanTemplate.regression_test_opt_out)"""

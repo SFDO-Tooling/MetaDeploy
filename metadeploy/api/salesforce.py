@@ -90,7 +90,7 @@ def _get_org_details(*, cci, org_name, project_path):
     scratch_org_definition_path = os.path.join(
         project_path, scratch_org_config.config_file
     )
-    with open(scratch_org_definition_path, "r") as f:
+    with open(scratch_org_definition_path) as f:
         scratch_org_definition = json.load(f)
 
     return (scratch_org_config, scratch_org_definition)

@@ -1,6 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
 import { connect, ConnectedProps } from 'react-redux';
@@ -265,7 +265,7 @@ class JobDetail extends React.Component<Props, State> {
           <Button
             label={
               <LabelWithSpinner
-                label={i18n.t('Canceling Installation…')}
+                label={t('Canceling Installation…')}
                 variant="base"
                 size="x-small"
               />
@@ -276,7 +276,7 @@ class JobDetail extends React.Component<Props, State> {
       }
       return (
         <Button
-          label={i18n.t('Cancel Installation')}
+          label={t('Cancel Installation')}
           variant="text-destructive"
           onClick={this.requestCancelJob}
         />
@@ -289,7 +289,7 @@ class JobDetail extends React.Component<Props, State> {
     const { job } = this.props;
     return job?.status === CONSTANTS.STATUS.COMPLETE ? null : (
       <Button
-        label={i18n.t('Share Installation')}
+        label={t('Share Installation')}
         iconCategory="utility"
         iconName="share"
         iconPosition="left"
@@ -308,7 +308,7 @@ class JobDetail extends React.Component<Props, State> {
   /** Returns false if _any_ results for the given step
    * have a status of "hide". True otherwise.
    */
-  stepIsVisible = (stepId: string, job: Job) => {
+  static stepIsVisible = (stepId: string, job: Job) => {
     let visible = true;
     const stepResults = job.results[stepId];
     if (stepResults) {
@@ -365,13 +365,13 @@ class JobDetail extends React.Component<Props, State> {
     );
     const { canceling } = this.state;
     const steps = plan.steps
-      ? plan.steps.filter((step) => this.stepIsVisible(step.id, job))
+      ? plan.steps.filter((step) => JobDetail.stepIsVisible(step.id, job))
       : [];
     return (
       <DocumentTitle
-        title={`${i18n.t('Installation')} | ${plan.title} | ${
-          product.title
-        } | ${window.SITE_NAME}`}
+        title={`${t('Installation')} | ${plan.title} | ${product.title} | ${
+          window.SITE_NAME
+        }`}
       >
         <>
           <Header history={history} jobId={jobId} hideLogin={isScratchOrg} />
@@ -410,7 +410,7 @@ class JobDetail extends React.Component<Props, State> {
               backLink={
                 job.status === CONSTANTS.STATUS.STARTED ? null : (
                   <BackLink
-                    label={i18n.t('Install another product')}
+                    label={t('Install another product')}
                     url={routes.product_list()}
                     className="slds-p-top_small"
                   />

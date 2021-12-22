@@ -42,4 +42,4 @@ class Command(rqscheduler.Command):
     def handle(self, *args, **kw):
         queue_name = kw.get("queue") or "short"
         register_cron_jobs(settings.CRON_JOBS, queue_name)
-        super(Command, self).handle(*args, **kw)
+        super().handle(*args, **kw)

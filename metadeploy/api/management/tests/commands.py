@@ -1,23 +1,22 @@
-import pytest
 import logging
 import re
-
 from contextlib import ExitStack
-from requests.exceptions import HTTPError
 from unittest import mock
 from unittest.mock import patch
 
+import pytest
+from cumulusci.core.config import OrgConfig
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.core.management.base import CommandError
 from django.core.management import call_command
+from django.core.management.base import CommandError
+from requests.exceptions import HTTPError
 
-from cumulusci.core.config import OrgConfig
-from metadeploy.api.models import Job, PreflightResult, ScratchOrg, Plan
 from metadeploy.api.management.commands.schedule_release_test import (
     execute_release_test,
     get_plans_to_test,
 )
+from metadeploy.api.models import Job, Plan, PreflightResult, ScratchOrg
 
 
 @pytest.mark.django_db()
@@ -80,8 +79,7 @@ def test_run_plan__scratch_org_creation_fails(setup_scratch_org, plan_factory, c
     with pytest.raises(Exception, match="Scratch org creation failed"):
         call_command("run_plan", str(plan.id))
 
-    expected_output = "INFO     metadeploy.api.management.commands.run_plan:run_plan.py:37 Scratch org creation failed.\n"
-    assert caplog.text == expected_output
+    assert "Scratch org creation failed" in caplog.text
 
 
 @pytest.mark.django_db

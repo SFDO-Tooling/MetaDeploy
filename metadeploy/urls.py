@@ -18,6 +18,7 @@ from urllib.parse import urljoin
 from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path, re_path
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import RedirectView, TemplateView
 
 from .routing import websockets
@@ -41,12 +42,17 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     path("api/", include("metadeploy.api.urls")),
     # These paths render the frontend SPA
+    # Ensure the CSRF token is always present via a cookie to be read by JS
     re_path(
         r"^products",
-        TemplateView.as_view(template_name="index.html"),
+        ensure_csrf_cookie(TemplateView.as_view(template_name="index.html")),
         name="frontend",
     ),
-    path("", TemplateView.as_view(template_name="index.html"), name="home"),
+    path(
+        "",
+        ensure_csrf_cookie(TemplateView.as_view(template_name="index.html")),
+        name="home",
+    ),
     # Add WebSocket routes so that non-HTTP paths can be accessible by
     # `reverse` in Python and `window.api_urls` in JavaScript. These will
     # usually only be the path component, not a full URL, and so the caller

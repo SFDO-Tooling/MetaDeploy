@@ -17,9 +17,9 @@ import logging
 import os
 import sys
 import traceback
-from typing import Union, List, Type
 import uuid
 from datetime import timedelta
+from typing import Union
 
 from asgiref.sync import async_to_sync
 from cumulusci.core.config import OrgConfig, ServiceConfig
@@ -180,8 +180,8 @@ def prepend_python_path(path):
 def run_flows(
     *,
     plan: Plan,
-    skip_steps: List[str],
-    result_class: Union[Type[Job], Type[PreflightResult]],
+    skip_steps: list[str],
+    result_class: Union[type[Job], type[PreflightResult]],
     result_id: int,
 ):
     """

@@ -13,7 +13,6 @@ import json
 from ipaddress import IPv4Network
 from os import environ
 from pathlib import Path
-from typing import List
 
 import dj_database_url
 import sentry_sdk
@@ -27,7 +26,7 @@ def boolish(val: str) -> bool:
     return val in BOOLS
 
 
-def ipv4_networks(val: str) -> List[IPv4Network]:
+def ipv4_networks(val: str) -> list[IPv4Network]:
     return [IPv4Network(s.strip()) for s in val.split(",")]
 
 
@@ -415,7 +414,6 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 ACCOUNT_EMAIL_VERIFICATION = "none"
 SOCIALACCOUNT_ADAPTER = "sfdo_template_helpers.oauth2.adapter.SFDOSocialAccountAdapter"
-SOCIALACCOUNT_LOGIN_ON_GET = True
 
 JS_REVERSE_JS_VAR_NAME = "api_urls"
 JS_REVERSE_EXCLUDE_NAMESPACES = ["admin", "admin_rest"]
@@ -423,7 +421,7 @@ JS_REVERSE_EXCLUDE_NAMESPACES = ["admin", "admin_rest"]
 
 # Redis configuration:
 
-REDIS_LOCATION = "{0}/{1}".format(env("REDIS_URL", default="redis://localhost:6379"), 0)
+REDIS_LOCATION = "{}/{}".format(env("REDIS_URL", default="redis://localhost:6379"), 0)
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",

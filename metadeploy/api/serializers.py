@@ -519,7 +519,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         required_steps = set(plan.required_step_ids)
         if preflight:
             required_steps -= set(preflight.optional_step_ids)
-        return not set(required_steps) - set(s.id for s in steps)
+        return not set(required_steps) - {s.id for s in steps}
 
     def _pending_job_exists(self, *, org_id):
         return Job.objects.filter(status=Job.Status.started, org_id=org_id).first()

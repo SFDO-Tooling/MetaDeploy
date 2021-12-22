@@ -7,7 +7,7 @@ import doctypeSprite from '@salesforce-ux/design-system/assets/icons/doctype-spr
 import standardSprite from '@salesforce-ux/design-system/assets/icons/standard-sprite/svg/symbols.svg';
 import utilitySprite from '@salesforce-ux/design-system/assets/icons/utility-sprite/svg/symbols.svg';
 import { createBrowserHistory } from 'history';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
 import * as ReactDOM from 'react-dom';
@@ -133,7 +133,7 @@ init_i18n((i18nError?: string) => {
       logError(err);
     }
     window.GLOBALS = GLOBALS;
-    window.SITE_NAME = window.GLOBALS.SITE?.name || i18n.t('MetaDeploy');
+    window.SITE_NAME = window.GLOBALS.SITE?.name || t('MetaDeploy');
 
     // Get JS context
     let JS_CONTEXT = {};

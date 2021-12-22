@@ -1,5 +1,5 @@
 import PageHeader from '@salesforce/design-system-react/components/page-header';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import * as React from 'react';
 import { Trans } from 'react-i18next';
 
@@ -19,7 +19,7 @@ const Header = ({
     title={
       product.layout === PRODUCT_LAYOUTS.Card
         ? product.title
-        : i18n.t('Select a Plan')
+        : t('Select a Plan')
     }
     trail={
       product.layout === PRODUCT_LAYOUTS.Card
