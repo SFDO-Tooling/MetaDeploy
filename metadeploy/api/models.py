@@ -1110,6 +1110,7 @@ class SiteProfile(TranslatableModel):
         name=models.CharField(max_length=64),
         company_name=models.CharField(max_length=64, blank=True),
         welcome_text=MarkdownField(),
+        master_agreement=MarkdownField(),
         copyright_notice=MarkdownField(),
     )
 
@@ -1120,6 +1121,10 @@ class SiteProfile(TranslatableModel):
     @property
     def welcome_text_markdown(self):
         return self._get_translated_model(use_fallback=True).welcome_text_markdown
+
+    @property
+    def master_agreement_markdown(self):
+        return self._get_translated_model(use_fallback=True).master_agreement_markdown
 
     @property
     def copyright_notice_markdown(self):

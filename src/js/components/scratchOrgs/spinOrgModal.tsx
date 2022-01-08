@@ -18,13 +18,24 @@ const SpinOrg = ({
   toggleModal,
   doSpinOrg,
 }: Props) => {
+  const masterAgreement = window.GLOBALS.SITE?.master_agreement;
   const [confirmed, setConfirmed] = useState(!clickThroughAgreement);
-  const [currentPage, setCurrentPage] = useState(clickThroughAgreement ? 0 : 1);
+  const [msaConfirmed, setMsaConfirmed] = useState(!masterAgreement);
+  const [currentPage, setCurrentPage] = useState(
+    masterAgreement ? 0 : clickThroughAgreement ? 1 : 2,
+  );
   const [email, setEmail] = useState('');
 
   const nextPage = useCallback(() => {
-    setCurrentPage(currentPage + 1);
-  }, [currentPage]);
+    switch (currentPage) {
+      case 0:
+        setCurrentPage(confirmed ? 2 : 1);
+        break;
+      case 1:
+        setCurrentPage(2);
+        break;
+    }
+  }, [currentPage, confirmed, msaConfirmed]);
 
   const resetAndClose = useCallback(() => {
     setConfirmed(!clickThroughAgreement);
@@ -35,15 +46,24 @@ const SpinOrg = ({
 
   const handleSubmit = useCallback(() => {
     /* istanbul ignore next */
-    if (confirmed) {
-      if (currentPage === 0) {
-        nextPage();
-      } /* istanbul ignore else */ else if (email) {
-        doSpinOrg(email);
-        resetAndClose();
-      }
+    if (
+      (currentPage === 0 && msaConfirmed) ||
+      (currentPage === 1 && confirmed)
+    ) {
+      nextPage();
+    } /* istanbul ignore else */ else if (email && confirmed && msaConfirmed) {
+      doSpinOrg(email);
+      resetAndClose();
     }
-  }, [confirmed, currentPage, doSpinOrg, email, nextPage, resetAndClose]);
+  }, [
+    confirmed,
+    msaConfirmed,
+    currentPage,
+    doSpinOrg,
+    email,
+    nextPage,
+    resetAndClose,
+  ]);
 
   const handleConfirmChange = useCallback(
     (
@@ -51,6 +71,16 @@ const SpinOrg = ({
       { checked }: { checked: boolean },
     ) => {
       setConfirmed(checked);
+    },
+    [],
+  );
+
+  const handleConfirmMsaChange = useCallback(
+    (
+      event: React.ChangeEvent<HTMLInputElement>,
+      { checked }: { checked: boolean },
+    ) => {
+      setMsaConfirmed(checked);
     },
     [],
   );
@@ -66,6 +96,32 @@ const SpinOrg = ({
   );
 
   const pages = [
+    {
+      heading: t('Master Services Agreement'),
+      content: masterAgreement ? (
+        <>
+          <div
+            className="slds-text-longform slds-scrollable_y slds-box markdown"
+            style={{ maxHeight: '250px' }}
+            dangerouslySetInnerHTML={{
+              __html: masterAgreement,
+            }}
+          />
+          <Checkbox
+            id="click-through-confirm"
+            className="slds-p-top_medium"
+            checked={msaConfirmed}
+            required
+            labels={{
+              label: t(
+                'I confirm I have read and agree to these terms of use and licenses.',
+              ),
+            }}
+            onChange={handleConfirmMsaChange}
+          />
+        </>
+      ) : null,
+    },
     {
       heading: t('Product Terms of Use and Licenses'),
       content: clickThroughAgreement ? (
@@ -128,11 +184,13 @@ const SpinOrg = ({
         <Button key="cancel" label={t('Cancel')} onClick={resetAndClose} />,
         <Button
           key="confirm"
-          label={currentPage === 0 ? t('Confirm & Next') : t('Confirm')}
+          label={currentPage !== 2 ? t('Confirm & Next') : t('Confirm')}
           variant="brand"
           onClick={handleSubmit}
           disabled={
-            (currentPage === 0 && !confirmed) || (currentPage === 1 && !email)
+            (currentPage === 0 && !msaConfirmed) ||
+            (currentPage === 1 && !confirmed) ||
+            (currentPage === 2 && !email)
           }
         />,
       ]}
