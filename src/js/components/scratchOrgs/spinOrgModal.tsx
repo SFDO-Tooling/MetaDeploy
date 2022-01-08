@@ -21,9 +21,14 @@ const SpinOrg = ({
   const masterAgreement = window.GLOBALS.SITE?.master_agreement;
   const [confirmed, setConfirmed] = useState(!clickThroughAgreement);
   const [msaConfirmed, setMsaConfirmed] = useState(!masterAgreement);
-  const [currentPage, setCurrentPage] = useState(
-    masterAgreement ? 0 : clickThroughAgreement ? 1 : 2,
-  );
+  let startPage = 2;
+
+  if (masterAgreement) {
+    startPage = 0;
+  } else if (clickThroughAgreement) {
+    startPage = 1;
+  }
+  const [currentPage, setCurrentPage] = useState(startPage);
   const [email, setEmail] = useState('');
 
   const nextPage = useCallback(() => {
@@ -35,7 +40,7 @@ const SpinOrg = ({
         setCurrentPage(2);
         break;
     }
-  }, [currentPage, confirmed, msaConfirmed]);
+  }, [currentPage, confirmed]);
 
   const resetAndClose = useCallback(() => {
     setConfirmed(!clickThroughAgreement);
@@ -184,7 +189,7 @@ const SpinOrg = ({
         <Button key="cancel" label={t('Cancel')} onClick={resetAndClose} />,
         <Button
           key="confirm"
-          label={currentPage !== 2 ? t('Confirm & Next') : t('Confirm')}
+          label={currentPage === 2 ? t('Confirm') : t('Confirm & Next')}
           variant="brand"
           onClick={handleSubmit}
           disabled={
