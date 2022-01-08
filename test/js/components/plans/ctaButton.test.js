@@ -904,5 +904,29 @@ describe('<CtaButton /> with MSA', () => {
       ).toBeVisible();
       expect(getByText('Confirm & Next')).toBeVisible();
     });
+    test('opens modal with MSA without CTA', () => {
+      const { getByText, getByLabelText } = setup({
+        plan: scratchOrgPlan,
+        scratchOrg: null,
+        clickThroughAgreement: null,
+        user: null,
+      });
+
+      fireEvent.click(getByText('Create Scratch Org'));
+
+      expect(getByText('Master Services Agreement')).toBeVisible();
+      expect(getByText('Contract goes here.')).toBeVisible();
+      expect(
+        getByLabelText('I confirm I have read', { exact: false }),
+      ).toBeVisible();
+      expect(getByText('Confirm & Next')).toBeVisible();
+
+      fireEvent.click(
+        getByLabelText('I confirm I have read', { exact: false }),
+      );
+      fireEvent.click(getByText('Confirm & Next'));
+
+      expect(getByText('Confirm')).toBeVisible();
+    });
   });
 });
