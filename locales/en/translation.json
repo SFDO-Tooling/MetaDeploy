@@ -98,7 +98,7 @@
   "Salesforce Org Information": "Salesforce Org Information",
   "Sandbox or Scratch Org": "Sandbox or Scratch Org",
   "Scratch Org": "Scratch Org",
-  "Select a Plan": "Select a Plan",
+  "Select a Plan": "Select an option below, either click on the blue button to install or click the ‘Product Upgrade’ option to update your app.",
   "Select a Product to Install": "Select an Application to Install into your Salesforce Environment",
   "Select a different plan": "Select a different plan",
   "Select a different product": "Select a different product",
@@ -241,5 +241,5 @@
   "warningMsg_5": "{{count}} warnings",
   "{{item1}} and {{item2}}": "{{item1}} and {{item2}}",
   "{{percent}}% Complete": "{{percent}}% Complete",
-  "{{title}} - View Details": "{{title}} - View Details"
+  "{{title}} - View Details": "{{title}} - Click Here for Details"
 }
