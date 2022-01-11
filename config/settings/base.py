@@ -103,8 +103,6 @@ ALLOWED_HOSTS = [
     "localhost",
     "localhost:8000",
     "localhost:8080",
-    "candyshop.blackthorn.io",
-    "deploy.blackthorn.io",
 ] + [
     el.strip()
     for el in env("DJANGO_ALLOWED_HOSTS", default="", type_=lambda x: x.split(","))
