@@ -99,7 +99,7 @@ SFDX_CLIENT_SECRET:
     Consumer secret of the connected app.
 
 DOCKER_SFDX_HUB_KEY:
-    This represents the private key (with newlines encoded as `\n` for Docker) corresponding to a certificate that was uploaded to the "Use digital signatures" setting of the Salesforce connected app. Only required if you enable scratch orgs for a plan.
+    This represents the private key (with newlines encoded as ``\n`` for Docker) corresponding to a certificate that was uploaded to the "Use digital signatures" setting of the Salesforce connected app. Only required if you enable scratch orgs for a plan.
 
 
 
