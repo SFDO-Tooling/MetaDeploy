@@ -21,12 +21,16 @@ const SpinOrg = ({
   const masterAgreement = window.GLOBALS.SITE?.master_agreement;
   const [confirmed, setConfirmed] = useState(!clickThroughAgreement);
   const [msaConfirmed, setMsaConfirmed] = useState(!masterAgreement);
-  let startPage = 2;
+  const EMAIL_PAGE = 2;
+  const CLICKTHROUGH_PAGE = 1;
+  const MSA_PAGE = 0;
+
+  let startPage = EMAIL_PAGE;
 
   if (masterAgreement) {
-    startPage = 0;
+    startPage = MSA_PAGE;
   } else if (clickThroughAgreement) {
-    startPage = 1;
+    startPage = CLICKTHROUGH_PAGE;
   }
   const [currentPage, setCurrentPage] = useState(startPage);
   const [email, setEmail] = useState('');
@@ -34,26 +38,29 @@ const SpinOrg = ({
   const nextPage = useCallback(() => {
     switch (currentPage) {
       case 0:
-        setCurrentPage(confirmed ? 2 : 1);
+        // If `confirmed` is truthy, either there is no clickthrough
+        // or the user already approved it.
+        setCurrentPage(confirmed ? EMAIL_PAGE : CLICKTHROUGH_PAGE);
         break;
       case 1:
-        setCurrentPage(2);
+        setCurrentPage(EMAIL_PAGE);
         break;
     }
   }, [currentPage, confirmed]);
 
   const resetAndClose = useCallback(() => {
     setConfirmed(!clickThroughAgreement);
+    setMsaConfirmed(!masterAgreement);
     setEmail('');
-    setCurrentPage(clickThroughAgreement ? 0 : 1);
+    setCurrentPage(startPage);
     toggleModal(false);
-  }, [clickThroughAgreement, toggleModal]);
+  }, [startPage, clickThroughAgreement, masterAgreement, toggleModal]);
 
   const handleSubmit = useCallback(() => {
     /* istanbul ignore next */
     if (
-      (currentPage === 0 && msaConfirmed) ||
-      (currentPage === 1 && confirmed)
+      (currentPage === MSA_PAGE && msaConfirmed) ||
+      (currentPage === CLICKTHROUGH_PAGE && confirmed)
     ) {
       nextPage();
     } /* istanbul ignore else */ else if (email && confirmed && msaConfirmed) {

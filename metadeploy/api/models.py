@@ -763,6 +763,7 @@ class Job(HashIdMixin, models.Model):
 
     @property
     def is_scratch(self):
+        """Returns whether this is a job generating a scratch org."""
         return bool(not self.user and self.org_id)
 
     def get_absolute_url(self):
@@ -1130,7 +1131,9 @@ class SiteProfile(TranslatableModel):
         name=models.CharField(max_length=64),
         company_name=models.CharField(max_length=64, blank=True),
         welcome_text=MarkdownField(),
-        master_agreement=MarkdownField(),
+        master_agreement=MarkdownField(
+            help_text="Markdown is supported. Shown only for builds that create a scratch org."
+        ),
         copyright_notice=MarkdownField(),
     )
 
