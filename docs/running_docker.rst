@@ -102,7 +102,7 @@ DEVHUB_USERNAME:
     The username associated with your Dev Hub. If you have the Salesforce CLI setup it should be the username with the ``(D)`` next to it when running ``sfdx force:org:list``.
 
 DOCKER_SFDX_HUB_KEY:
-    This represents the private key (with newlines encoded as ``\n`` for Docker) corresponding to a certificate that was uploaded to the "Use digital signatures" setting of the Salesforce connected app. Only required if you enable scratch orgs for a plan.
+    This represents the private key (with newlines encoded as ``\n`` for Docker) corresponding to a certificate that was uploaded to the "Use digital signatures" setting of the Salesforce connected app. Ensure a newline char (``\n``) comes after ``-----END PRIVATE KEY-----``. Only required if you enable scratch orgs for a plan.
 
 
 
