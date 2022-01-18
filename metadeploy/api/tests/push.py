@@ -9,6 +9,7 @@ from ..push import (
     notify_org_changed,
     notify_org_result_changed,
     report_error,
+    notify_org,
 )
 
 
@@ -53,12 +54,31 @@ async def test_notify_org_result_changed(
 
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
-async def test_notify_org_changed(mocker, scratch_org_factory):
+async def test_notify_org_changed__error(mocker, scratch_org_factory):
     scratch_org_factory = sync_to_async(scratch_org_factory)
     soj = await scratch_org_factory()
     gcl = mocker.patch("metadeploy.api.push.get_channel_layer", wraps=get_channel_layer)
     await notify_org_changed(soj, "error!")
     gcl.assert_called()
+
+
+@pytest.mark.django_db(transaction=True)
+@pytest.mark.asyncio
+async def test_notify_org_changed__async(mocker, scratch_org_factory):
+    from ..serializers import ScratchOrgSerializer
+
+    scratch_org_factory = sync_to_async(scratch_org_factory)
+    soj = await scratch_org_factory()
+
+    notify_org_mock = mocker.patch("metadeploy.api.push.notify_org")
+
+    await notify_org_changed(soj)
+
+    expected_payload = ScratchOrgSerializer(soj).data
+    notify_org_mock.assert_called_once_with(
+        soj, "SCRATCH_ORG_UPDATED", expected_payload
+    )
+    breakpoint()
 
 
 @pytest.mark.django_db(transaction=True)
