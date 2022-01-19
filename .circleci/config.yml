@@ -8,7 +8,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - metadeploy-py-{{ checksum "requirements/prod.txt" }}-{{ checksum
+            - metadeploy-py3-{{ checksum "requirements/prod.txt" }}-{{ checksum
               "requirements/dev.txt" }}
       - restore_cache:
           keys:

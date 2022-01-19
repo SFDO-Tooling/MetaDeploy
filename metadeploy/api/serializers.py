@@ -683,6 +683,7 @@ class OrgSerializer(serializers.Serializer):
 class SiteSerializer(serializers.ModelSerializer):
     welcome_text = serializers.CharField(source="welcome_text_markdown")
     copyright_notice = serializers.CharField(source="copyright_notice_markdown")
+    master_agreement = serializers.CharField(source="master_agreement_markdown")
 
     class Meta:
         model = SiteProfile
@@ -690,6 +691,7 @@ class SiteSerializer(serializers.ModelSerializer):
             "name",
             "company_name",
             "welcome_text",
+            "master_agreement",
             "copyright_notice",
             "show_metadeploy_wordmark",
             "company_logo",

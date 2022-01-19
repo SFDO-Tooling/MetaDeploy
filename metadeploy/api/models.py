@@ -743,6 +743,12 @@ class Job(HashIdMixin, models.Model):
     click_through_agreement = models.ForeignKey(
         ClickThroughAgreement, on_delete=models.PROTECT, null=True
     )
+    master_service_agreement = models.ForeignKey(
+        ClickThroughAgreement,
+        on_delete=models.PROTECT,
+        null=True,
+        related_name="msa_jobs",
+    )
     is_release_test = models.BooleanField(default=False)
 
     @property
@@ -754,6 +760,11 @@ class Job(HashIdMixin, models.Model):
     def instance_url(self):
         if self.user:
             return self.user.instance_url
+
+    @property
+    def is_scratch(self):
+        """Returns whether this is a job generating a scratch org."""
+        return bool(not self.user and self.org_id)
 
     def get_absolute_url(self):
         # See src/js/utils/routes.ts
@@ -801,6 +812,16 @@ class Job(HashIdMixin, models.Model):
                 text=self.plan.version.product.click_through_agreement
             )
             self.click_through_agreement = ctt
+
+            # If this is a scratch org job and we have an MSA configured,
+            # persist that too.
+            if self.is_scratch:
+                profile = SiteProfile.objects.first()
+                if profile and profile.master_agreement:
+                    msa, _ = ClickThroughAgreement.objects.get_or_create(
+                        text=profile.master_agreement
+                    )
+                    self.master_service_agreement = msa
 
         ret = super().save(*args, **kwargs)
 
@@ -1110,6 +1131,9 @@ class SiteProfile(TranslatableModel):
         name=models.CharField(max_length=64),
         company_name=models.CharField(max_length=64, blank=True),
         welcome_text=MarkdownField(),
+        master_agreement=MarkdownField(
+            help_text="Markdown is supported. Shown only for builds that create a scratch org."
+        ),
         copyright_notice=MarkdownField(),
     )
 
@@ -1120,6 +1144,10 @@ class SiteProfile(TranslatableModel):
     @property
     def welcome_text_markdown(self):
         return self._get_translated_model(use_fallback=True).welcome_text_markdown
+
+    @property
+    def master_agreement_markdown(self):
+        return self._get_translated_model(use_fallback=True).master_agreement_markdown
 
     @property
     def copyright_notice_markdown(self):
