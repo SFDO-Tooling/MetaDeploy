@@ -9,7 +9,6 @@ from ..push import (
     notify_org_changed,
     notify_org_result_changed,
     report_error,
-    notify_org,
 )
 
 
