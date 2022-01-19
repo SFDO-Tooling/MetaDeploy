@@ -818,3 +818,115 @@ describe('<CtaButton />', () => {
     });
   });
 });
+
+// This test needs to be in a separate `describe()`
+// because it cannot run in parallel with other CtaButton tests
+// due to mutating window-global state, and window state
+// must be set before initializing the CtaButton.
+
+describe('<CtaButton /> with MSA', () => {
+  const setup = (options) => {
+    const defaults = {
+      plan: defaultPlan,
+      user: { valid_token_for: 'foo', org_type: 'Developer Edition' },
+      preflight: defaultPreflight,
+      preventAction: false,
+      clickThroughAgreement: null,
+      selectedSteps,
+      scratchOrg: null,
+    };
+    const opts = { ...defaults, ...options };
+
+    window.GLOBALS.SCRATCH_ORGS_AVAILABLE = true;
+    window.GLOBALS.SITE = {
+      master_agreement: '<p>Contract goes here.</p>',
+    };
+
+    const renderFn = opts.rerenderFn ? rerenderWithI18n : render;
+    return renderFn(
+      <CtaButton
+        history={opts.history}
+        user={opts.user}
+        productSlug="product"
+        clickThroughAgreement={opts.clickThroughAgreement}
+        versionLabel="version"
+        plan={opts.plan}
+        preflight={opts.preflight}
+        selectedSteps={opts.selectedSteps}
+        scratchOrg={opts.scratchOrg}
+        preventAction={opts.preventAction}
+        doStartPreflight={opts.doStartPreflight}
+        doStartJob={opts.doStartJob}
+        doSpinScratchOrg={opts.doSpinScratchOrg}
+        doLogout={opts.doLogout}
+      />,
+      opts.rerenderFn,
+    );
+  };
+
+  afterAll(() => {
+    window.GLOBALS = {};
+  });
+
+  describe('create-org click with MSA', () => {
+    const scratchOrgPlan = {
+      ...defaultPlan,
+      supported_orgs: SUPPORTED_ORGS.Scratch,
+      requires_preflight: false,
+    };
+
+    test('opens modal with MSA', () => {
+      const { getByText, getByLabelText } = setup({
+        plan: scratchOrgPlan,
+        scratchOrg: null,
+        clickThroughAgreement: '<p>Please and thank you.</p>',
+        user: null,
+      });
+
+      fireEvent.click(getByText('Create Scratch Org'));
+
+      expect(getByText('Master Services Agreement')).toBeVisible();
+      expect(getByText('Contract goes here.')).toBeVisible();
+      expect(
+        getByLabelText('I confirm I have read', { exact: false }),
+      ).toBeVisible();
+      expect(getByText('Confirm & Next')).toBeVisible();
+
+      fireEvent.click(
+        getByLabelText('I confirm I have read', { exact: false }),
+      );
+      fireEvent.click(getByText('Confirm & Next'));
+
+      expect(getByText('Product Terms of Use and Licenses')).toBeVisible();
+      expect(getByText('Please and thank you.')).toBeVisible();
+      expect(
+        getByLabelText('I confirm I have read', { exact: false }),
+      ).toBeVisible();
+      expect(getByText('Confirm & Next')).toBeVisible();
+    });
+    test('opens modal with MSA without CTA', () => {
+      const { getByText, getByLabelText } = setup({
+        plan: scratchOrgPlan,
+        scratchOrg: null,
+        clickThroughAgreement: null,
+        user: null,
+      });
+
+      fireEvent.click(getByText('Create Scratch Org'));
+
+      expect(getByText('Master Services Agreement')).toBeVisible();
+      expect(getByText('Contract goes here.')).toBeVisible();
+      expect(
+        getByLabelText('I confirm I have read', { exact: false }),
+      ).toBeVisible();
+      expect(getByText('Confirm & Next')).toBeVisible();
+
+      fireEvent.click(
+        getByLabelText('I confirm I have read', { exact: false }),
+      );
+      fireEvent.click(getByText('Confirm & Next'));
+
+      expect(getByText('Confirm')).toBeVisible();
+    });
+  });
+});

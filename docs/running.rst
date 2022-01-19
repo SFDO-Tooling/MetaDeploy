@@ -149,3 +149,24 @@ You can do that easily via the ``promote_superuser`` management
 command::
 
     python manage.py promote_superuser <your email>
+
+Connecting to CumulusCI
+=======================
+
+To connect your CumulusCI to your local MetaDeploy instance, first create a superuser as described above.
+Then, log in to the Django admin UI at http://localhost:8000/admin. Create a Token for your superuser.
+
+In your terminal, connect the MetaDeploy service::
+
+    cci service connect metadeploy local
+
+For the ``Url``, enter ``http://localhost:8000/admin/rest``. Note that ``http://localhost:8000/api`` is the non-admin
+API, and will not work. Then enter the Token you created above. You can allow CumulusCI to set this service as the
+default MetaDeploy service if you wish. If you use multiple MetaDeploy services, you can always activate your local
+service with::
+
+    cci service default metadeploy local
+
+Once your local MetaDeploy service is connected, you can publish plans with::
+
+    cci task run metadeploy_publish

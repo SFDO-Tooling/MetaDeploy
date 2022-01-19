@@ -1,3 +1,4 @@
+from django.contrib.sites.models import Site
 import factory
 import factory.fuzzy
 import pytest
@@ -19,6 +20,7 @@ from metadeploy.api.models import (
     ProductCategory,
     ProductSlug,
     ScratchOrg,
+    SiteProfile,
     Step,
     Version,
 )
@@ -189,6 +191,20 @@ class PlanFactory(factory.django.DjangoModelFactory):
     plan_template = factory.SubFactory(
         PlanTemplateFactory, product=factory.SelfAttribute("..version.product")
     )
+
+
+@register
+class SiteProfileFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = SiteProfile
+
+    name = "MetaDeploy"
+    company_name = "Mao-Kwikowski Mercantile"
+    welcome_text = "Welcome to MetaDeploy"
+    master_agreement = "MSA"
+    copyright_notice = "(c) 2022"
+
+    site = factory.Iterator(Site.objects.all())
 
 
 @register
