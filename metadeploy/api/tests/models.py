@@ -573,13 +573,31 @@ class TestJob:
     def test_get_absolute_url(self, job_factory):
         assert job_factory().get_absolute_url().startswith("/")
 
-    def test_job_saves_click_through_text(self, plan_factory, job_factory):
+    def test_job_saves_click_through_text(
+        self, plan_factory, job_factory, site_profile_factory
+    ):
         plan = plan_factory(version__product__click_through_agreement="Test")
+        _ = site_profile_factory()
         job = job_factory(plan=plan, org_id="00Dxxxxxxxxxxxxxxx")
 
         job.refresh_from_db()
-
+        assert not job.is_scratch
+        assert not job.master_service_agreement
         assert job.click_through_agreement.text == "Test"
+
+    def test_job_saves_master_service_agreement(
+        self, plan_factory, job_factory, site_profile_factory
+    ):
+        plan = plan_factory(version__product__click_through_agreement="Test")
+        _ = site_profile_factory()
+        job = job_factory(plan=plan, org_id="00Dxxxxxxxxxxxxxxx", user=None)
+
+        assert job.is_scratch
+
+        job.refresh_from_db()
+
+        assert job.master_service_agreement
+        assert job.master_service_agreement.text == "MSA"
 
     def test_skip_steps(self, plan_factory, step_factory, job_factory):
         plan = plan_factory()
