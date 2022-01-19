@@ -65,20 +65,30 @@ async def test_notify_org_changed__error(mocker, scratch_org_factory):
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_notify_org_changed__async(mocker, scratch_org_factory):
+
     from ..serializers import ScratchOrgSerializer
 
     scratch_org_factory = sync_to_async(scratch_org_factory)
-    soj = await scratch_org_factory()
+    await scratch_org_factory()
+    # Need to query from DB correctly so the plan is fetched in serializer
+    soj = await query_scratch_org()
 
     notify_org_mock = mocker.patch("metadeploy.api.push.notify_org")
 
     await notify_org_changed(soj)
 
     expected_payload = ScratchOrgSerializer(soj).data
+
     notify_org_mock.assert_called_once_with(
-        soj, "SCRATCH_ORG_UPDATED", expected_payload
+        soj, "SCRATCH_ORG_UPDATED", payload=expected_payload
     )
-    breakpoint()
+
+
+@sync_to_async
+def query_scratch_org():
+    from metadeploy.api.models import ScratchOrg
+
+    return ScratchOrg.objects.all().first()
 
 
 @pytest.mark.django_db(transaction=True)

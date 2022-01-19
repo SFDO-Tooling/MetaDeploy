@@ -216,13 +216,19 @@ async def notify_org(scratch_org, type_, payload=None, error=None):
 
 
 async def notify_org_changed(scratch_org, error=None, _type=None):
-    from .serializers import ScratchOrgSerializer
 
     if error:
         await notify_org(scratch_org, _type or "SCRATCH_ORG_ERROR", error=error)
     else:
-        payload = ScratchOrgSerializer(scratch_org).data
+        payload = await get_serialized_scratch_org_payload(scratch_org)
         await notify_org(scratch_org, _type or "SCRATCH_ORG_UPDATED", payload=payload)
+
+
+@sync_to_async
+def get_serialized_scratch_org_payload(scratch_org):
+    from .serializers import ScratchOrgSerializer
+
+    return ScratchOrgSerializer(scratch_org).data
 
 
 async def preflight_started(scratch_org, preflight):
