@@ -122,7 +122,7 @@ describe('<ShareModal />', () => {
     expect(getByText('Share Link to Installation Job')).toBeVisible();
     expect(getByText('Copy Link')).toBeVisible();
     expect(input).toBeVisible();
-    expect(input.value).toEqual(`${window.location.origin}${url}`);
+    expect(input.value).toBe(`${window.location.origin}${url}`);
   });
 
   describe('copy link', () => {
