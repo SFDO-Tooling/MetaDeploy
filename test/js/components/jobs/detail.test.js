@@ -453,7 +453,7 @@ describe('<JobDetail />', () => {
 
         expect(getByText('Access Your Scratch Org')).toBeVisible();
         expect(input).toBeVisible();
-        expect(input.value).toEqual(
+        expect(input.value).toBe(
           `${window.location.origin}${url}?scratch_org_id=${scratchOrg.uuid}`,
         );
       });
