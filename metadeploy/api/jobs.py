@@ -259,6 +259,9 @@ def run_flows(
                 "client_secret": settings.SFDX_CLIENT_SECRET,
                 "callback_url": settings.SFDX_CLIENT_CALLBACK_URL,
                 "client_id": settings.SFDX_CLIENT_ID,
+                # Note: login_url is not used when refreshing the existing token,
+                # so it doesn't matter whether it's login vs test
+                "login_url": "https://login.salesforce.com",
             }
         )
         ctx.keychain.set_service("connected_app", "metadeploy", connected_app)
