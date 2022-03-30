@@ -441,7 +441,7 @@ RQ_QUEUES = {
     },
     "short": {
         "USE_REDIS_CACHE": "default",
-        "DEFAULT_TIMEOUT": 300,
+        "DEFAULT_TIMEOUT": 60,
         "DEFAULT_RESULT_TTL": 300,
     },
 }
