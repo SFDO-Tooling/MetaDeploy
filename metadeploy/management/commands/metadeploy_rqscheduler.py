@@ -28,10 +28,14 @@ def register_cron_jobs(jobs: dict, queue_name: str):
         for key in ("cron_string", "func"):
             if key not in kwargs:
                 raise TypeError(f"Scheduled job {job_id} is missing {key}")
-        kwargs["queue_name"] = queue_name
+
+        # jobs can optionally specify the queue they want to be in
+        q_name = kwargs["queue_name"] if "queue_name" in kwargs else queue_name
+
+        kwargs["queue_name"] = q_name
         kwargs["use_local_timezone"] = True
         scheduler.cron(**kwargs)
-        logger.info(f"Scheduled job {job_id}: {kwargs})")
+        logger.info(f"Scheduled job {job_id}: {kwargs}")
 
 
 class Command(rqscheduler.Command):

@@ -470,6 +470,7 @@ CRON_JOBS = {
     "calculate_average_plan_runtimes": {
         "func": "metadeploy.api.jobs.calculate_average_plan_runtime_job",
         "cron_string": "0 0 * * *",  # run daily at midnight
+        "queue_name": "default",
     },
 }
 # There is a default dict of cron jobs,

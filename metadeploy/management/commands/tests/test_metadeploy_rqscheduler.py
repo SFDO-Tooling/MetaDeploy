@@ -28,6 +28,30 @@ class TestMetaDeployRQSchedulerCommand:
             mock_scheduler.cron.assert_called()
             assert "Scheduled job test_job" in caplog.text
 
+    def test_command__success_with_overridden_queue(self, caplog):
+        # add an existing job with unique name to the queue
+        with mock.patch.object(
+            settings,
+            "CRON_JOBS",
+            {
+                "test_job": {
+                    "func": "metadeploy.api.jobs.cleanup_user_data_job",
+                    "cron_string": "* * * * *",
+                    "queue_name": "speedy",
+                }
+            },
+        ):
+            call_command("metadeploy_rqscheduler")
+            mock_scheduler.cancel.assert_called()
+            mock_scheduler.cron.assert_called()
+            expected_output = (
+                "Scheduled job test_job: "
+                "{'func': 'metadeploy.api.jobs.cleanup_user_data_job', "
+                "'cron_string': '* * * * *', 'queue_name': 'speedy', "
+                "'use_local_timezone': True}"
+            )
+            assert expected_output in caplog.text
+
     def test_command__job_missing(self):
         """Test that a missing job attribute raises the expected error"""
         with mock.patch.object(
