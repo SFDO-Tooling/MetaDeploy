@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/metadeploy
     docker:
-      - image: cimg/python:3.9
+      - image: ghcr.io/oddbird/pyjs:py3.9-node16
     steps:
       - checkout
       - restore_cache:
@@ -14,15 +14,6 @@ jobs:
           keys:
             - metadeploy-npm-{{ checksum "yarn.lock" }}
             - metadeploy-npm-
-      - run:
-          name: Install Node & Yarn
-          command: ./bin/unpack-node
-      - run:
-          name: Set $PATH
-          command: |
-            echo 'export PATH=~/metadeploy/node_modules/.bin:$PATH' >> $BASH_ENV
-            echo 'export PATH=~/metadeploy/node/bin:$PATH' >> $BASH_ENV
-            source $BASH_ENV
       - run:
           name: Install Dependencies
           command: |
@@ -56,17 +47,11 @@ jobs:
   lint:
     working_directory: ~/metadeploy
     docker:
-      - image: cimg/python:3.9
+      - image: ghcr.io/oddbird/pyjs:py3.9-node16
     steps:
       - checkout
       - attach_workspace:
           at: .
-      - run:
-          name: Set $PATH
-          command: |
-            echo 'export PATH=~/metadeploy/node_modules/.bin:$PATH' >> $BASH_ENV
-            echo 'export PATH=~/metadeploy/node/bin:$PATH' >> $BASH_ENV
-            source $BASH_ENV
       - run:
           name: Lint
           command: |
@@ -76,17 +61,11 @@ jobs:
   test-client:
     working_directory: ~/metadeploy
     docker:
-      - image: cimg/python:3.9
+      - image: ghcr.io/oddbird/pyjs:py3.9-node16
     steps:
       - checkout
       - attach_workspace:
           at: .
-      - run:
-          name: Set $PATH
-          command: |
-            echo 'export PATH=~/metadeploy/node_modules/.bin:$PATH' >> $BASH_ENV
-            echo 'export PATH=~/metadeploy/node/bin:$PATH' >> $BASH_ENV
-            source $BASH_ENV
       - run:
           name: Test JS
           command: yarn test:js:coverage
@@ -103,7 +82,7 @@ jobs:
   test-python:
     working_directory: ~/metadeploy
     docker:
-      - image: cimg/python:3.9
+      - image: ghcr.io/oddbird/pyjs:py3.9-node16
         environment:
           SFDX_CLIENT_CALLBACK_URL: circle_test
           SFDX_CLIENT_ID: circle_test
@@ -127,19 +106,6 @@ jobs:
       - attach_workspace:
           at: .
       - run:
-          name: Install Dockerize
-          command:
-            wget
-            https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
-            && sudo tar -C /usr/local/bin -xzvf
-            dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm
-            dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
-          environment:
-            DOCKERIZE_VERSION: v0.6.1
-      - run:
-          name: Wait for DB
-          command: dockerize -wait tcp://localhost:5432 -timeout 1m
-      - run:
           name: Run Database Migrations
           command: |
             . venv/bin/activate
@@ -162,19 +128,13 @@ jobs:
   report-test-coverage:
     working_directory: ~/metadeploy
     docker:
-      - image: cimg/python:3.9
+      - image: ghcr.io/oddbird/pyjs:py3.9-node16
     environment:
-      COVERALLS_PARALLEL: true
+      COVERALLS_PARALLEL: 'true'
     steps:
       - checkout
       - attach_workspace:
           at: .
-      - run:
-          name: Set $PATH
-          command: |
-            echo 'export PATH=~/metadeploy/node_modules/.bin:$PATH' >> $BASH_ENV
-            echo 'export PATH=~/metadeploy/node/bin:$PATH' >> $BASH_ENV
-            source $BASH_ENV
       - run:
           name: Report Test Coverage
           command: |
@@ -194,7 +154,7 @@ jobs:
   build-docs:
     working_directory: ~/metadeploy
     docker:
-      - image: cimg/python:3.9
+      - image: ghcr.io/oddbird/pyjs:py3.9-node16
     steps:
       - checkout
       - attach_workspace:
@@ -209,7 +169,7 @@ jobs:
   deploy-storybook:
     working_directory: ~/metadeploy
     docker:
-      - image: cimg/python:3.9
+      - image: ghcr.io/oddbird/pyjs:py3.9-node16
     steps:
       - checkout
       - attach_workspace:
@@ -217,12 +177,6 @@ jobs:
       - add_ssh_keys:
           fingerprints:
             - 'c1:84:57:29:98:26:96:91:21:f4:bf:93:b4:7a:5d:e8'
-      - run:
-          name: Set $PATH
-          command: |
-            echo 'export PATH=~/metadeploy/node_modules/.bin:$PATH' >> $BASH_ENV
-            echo 'export PATH=~/metadeploy/node/bin:$PATH' >> $BASH_ENV
-            source $BASH_ENV
       - run:
           name: Deploy Storybook
           command: |

@@ -116,7 +116,6 @@ postgres/
 # Node and Yarn packages:
 requirements/*.tar.gz
 requirements/*.tar.xz
-.nvmrc
 .yarnrc
 .yarn/
 

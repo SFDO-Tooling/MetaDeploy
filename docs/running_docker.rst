@@ -55,7 +55,7 @@ Below are the following steps necessary to run MetaDeploy on Docker:
 .env File Creation And Variable Declaration
 -------------------------------------------
 
-*Please begin by making a copy of .env.docker.example and renaming it .env in your root project directory*
+*Please begin by making a copy of env.example and renaming it .env in your root project directory*
 
 Local Variables
 ---------------
@@ -119,12 +119,6 @@ BUILD_ENV:
     installing dependencies and populating databases, currently set in docker-compose.yml
     web service ARG variable section. For production this value is set to producion.
     For development purposes set this value to development.
-
-NODE_VERSION:
-    Environment variable used to set node version for download, this variable is set in the Dockerfile
-
-YARN_VERSION:
-    Environment variable used to set yarn version for download, this variable is set in the Dockerfile
 
 PYTHONUNBUFFERED:
     Environment variable set in Dockerfile used to not write .pyc files to Docker container

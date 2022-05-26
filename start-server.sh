@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# running django database migrations 
+# running django database migrations
 python /app/manage.py migrate
 # creating test data if local settings are configured
 if [ "${DJANGO_SETTINGS_MODULE}" = "config.settings.local" ] ; then
