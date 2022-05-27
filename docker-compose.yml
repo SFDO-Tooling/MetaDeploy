@@ -2,8 +2,6 @@ version: '3'
 
 services:
   postgres:
-    env_file:
-      - .env
     environment:
       POSTGRES_DB: metadeploy
       POSTGRES_USER: postgres
