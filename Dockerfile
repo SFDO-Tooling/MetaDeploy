@@ -29,10 +29,8 @@ COPY . /app
 # Avoid building prod assets in development
 RUN if [ "${BUILD_ENV}" = "production" ] || [ -n "${PROD_ASSETS}" ] ; then yarn prod ; else mkdir -p dist/prod ; fi
 
-RUN DATABASE_URL="" \
+RUN \
   DB_ENCRYPTION_KEY="Ul-OySkEawSxUc7Ck13Twu2109IzIFh54C1WXO9KAFE=" \
-  DJANGO_HASHID_SALT="" \
-  DJANGO_SECRET_KEY="sample secret key" \
   GITHUB_TOKEN="sample token" \
   SFDX_CLIENT_SECRET="sample secret" \
   SFDX_CLIENT_CALLBACK_URL="sample callback" \

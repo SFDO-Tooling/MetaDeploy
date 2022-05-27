@@ -17,7 +17,16 @@ from pathlib import Path
 import environ
 import sentry_sdk
 from django.core.exceptions import ImproperlyConfigured
+from django.core.management.utils import get_random_secret_key
 from sentry_sdk.integrations.django import DjangoIntegration
+
+
+def safe_key() -> str:
+    """
+    Generate a secret key, stripping "$" to prevent env var interpolation in the key.
+    """
+    return get_random_secret_key().lstrip("$")
+
 
 # Build paths inside the project like this: str(PROJECT_ROOT / 'some_path')
 PROJECT_ROOT = Path(__file__).absolute().parent.parent.parent
@@ -31,8 +40,8 @@ if env_file.exists():
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env("DJANGO_SECRET_KEY")
-HASHID_FIELD_SALT = env("DJANGO_HASHID_SALT")
+SECRET_KEY = env("DJANGO_SECRET_KEY", default=safe_key())
+HASHID_FIELD_SALT = env("DJANGO_HASHID_SALT", default=safe_key())
 DB_ENCRYPTION_KEY = env("DB_ENCRYPTION_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
