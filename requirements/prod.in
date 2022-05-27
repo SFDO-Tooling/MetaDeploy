@@ -10,10 +10,10 @@ bleach
 boto3
 channels
 channels-redis
-dj-database-url
 django-allauth
 django-colorfield
 django-binary-database-files
+django-environ
 django-filter
 django-hashid-field
 django-js-reverse

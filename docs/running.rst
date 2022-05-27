@@ -13,55 +13,67 @@ Cloning The Project
 Making A Virtual Env
 ====================
 
-MetaDeploy development requires Python v3.8. If ``which python3.8`` returns a
+MetaDeploy development requires Python v3.9. If ``which python3.9`` returns a
 non-empty path, it's already installed and you can continue to the next step. If
-it returns nothing, then install Python v3.8 using ``brew install python``, or
+it returns nothing, then install Python v3.9 using ``brew install python``, or
 from `Python.org`_.
 
 .. _Python.org: https://www.python.org/downloads/
 
-There are a variety of tools that let you set up environment variables
-temporarily for a particular "environment" or directory. We use
-`virtualenvwrapper`_. Assuming you're in the repo root, do the following to
-create a virtualenv (once you have `virtualenvwrapper`_ installed locally)::
+Assuming you're in the repo root, do the following to create a virtualenv (once
+you have `virtualenvwrapper`_ installed locally)::
 
-    mkvirtualenv metadeploy --python=$(which python3.8)
+    mkvirtualenv metadeploy --python=$(which python3.9)
     setvirtualenvproject
 
 Install Python requirements::
 
     make dev-install
 
-Copy the ``.env`` file somewhere that will be sourced when you need it::
+Create an ``.env`` file with the required environment variables::
 
-    cp env.example $VIRTUAL_ENV/bin/postactivate
+    cp env.example .env
 
-Edit this file to change ``DJANGO_SECRET_KEY`` and ``DJANGO_HASHID_SALT`` to any
-two different arbitrary string values. Also set ``DB_ENCRYPTION_KEY``::
+Edit this file to change ``DJANGO_SECRET_KEY`` and ``DJANGO_HASHID_SALT`` to
+any two different arbitrary string values.
 
-    python manage.py shell
-    from cryptography.fernet import Fernet
-    Fernet.generate_key()
+Next, run the following commands to generate a database encryption key::
 
-This will output a bytestring, e.g. ``b'mystring='``. Copy just the contents of
-``'...'``, e.g. ``export DB_ENCRYPTION_KEY='mystring='``.
+    python
+    >>> from cryptography.fernet import Fernet
+    >>> Fernet.generate_key()
 
-Finally, edit the following environment variables (if you're an OddBird, you can
-find these values in the shared Keybase team folder -- ``metadeploy/env``)::
+This will output a bytestring, e.g. ``b'mystring='``. Copy only the contents
+of ``'...'``, and add it to your ``.env`` file as ``DB_ENCRYPTION_KEY``, e.g.
+``DB_ENCRYPTION_KEY="mystring="``.
 
-    export SFDX_CLIENT_SECRET=...
-    export SFDX_CLIENT_CALLBACK_URL=...
-    export SFDX_CLIENT_ID=...
-    export SFDX_HUB_KEY=...
-    export GITHUB_APP_ID=...
-    export GITHUB_APP_KEY=...
+To exit the Python shell, press ``Ctrl-Z`` and then ``Enter`` on Windows, or
+``Ctrl-D`` on OS X or Linux. Alternatively, you could also type the Python
+command ``exit()`` and press ``Enter``.
 
-Now run ``workon metadeploy`` again to set those environment variables.
+Set the following environment variables::
 
-Your ``PATH`` (and environment variables) will be updated when you
-``workon metadeploy`` and restored when you ``deactivate``. This will make sure
-that whenever you are working on MD, you use the MD-specific version of Node
-instead of any system-wide Node you may have.
+    SFDX_CLIENT_SECRET=...
+    SFDX_CLIENT_CALLBACK_URL=...
+    SFDX_CLIENT_ID=...
+    SFDX_HUB_KEY=...
+    DEVHUB_USERNAME=...
+
+Finally, MetaDeploy needs a connection to the GitHub API to fetch repositories
+for installation. This can be set up using a personal GitHub account by
+providing your personal access token as ``GITHUB_TOKEN`` *or* by using a GitHub
+App and setting ``GITHUB_APP_ID`` and ``GITHUB_APP_KEY``.
+
+To use a Personal Access Token (which requires a scope of `repo::public_repo`),
+see:
+https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
+
+    GITHUB_TOKEN=...
+
+Or to use a GitHub App, update::
+
+    GITHUB_APP_ID=...
+    GITHUB_APP_KEY=...
 
 **All of the remaining steps assume that you have the virtualenv activated.**
 (``workon metadeploy``)
@@ -71,22 +83,18 @@ instead of any system-wide Node you may have.
 Installing JavaScript Requirements
 ==================================
 
-The project-local version of `Node.js`_ can be downloaded and unpacked locally
-(in the git-ignored ``node/`` directory), so you don't have to install it
-system-wide (and possibly conflict with other projects wanting other Node
-versions).
+The project uses `nvm`_ to install a specific version of `Node.js`_. Assuming
+you have ``nvm`` already installed and configured, run ``nvm install`` to
+install and activate the Node version specified in ``.nvmrc``. Then use `yarn`_
+to install dependencies::
 
-To download and install the project-local version of Node (and `yarn`_)::
-
-    bin/unpack-node
-
-If you can run ``which node`` and see a path inside your MD repo ending with
-``.../node/bin/node``, then you've got it set up right and can move on.
-
-Then use ``yarn`` to install dependencies::
-
+    nvm use
     yarn
 
+**All of the remaining steps assume that you have the nvm activated.** (``nvm
+use``)
+
+.. _nvm: https://github.com/nvm-sh/nvm
 .. _Node.js: http://nodejs.org
 .. _yarn: https://yarnpkg.com/
 
@@ -97,6 +105,11 @@ Assuming you have `Postgres <https://www.postgresql.org/download/>`_ installed
 and running locally::
 
     createdb metadeploy
+
+Add the database information to the ``.env`` file in URL form (replace USER and
+PASSWORD with your database credentials)::
+
+    DATABASE_URL=postgres://<USER>:<PASSWORD>@localhost:5432/metadeploy
 
 Then run the initial migrations::
 
@@ -109,7 +122,6 @@ If your database has outdated sample data for development, remove it with::
 To populate the database with sample data for development, run::
 
     python manage.py populate_data
-
 
 Creating A Superuser
 ====================

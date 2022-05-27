@@ -13,7 +13,6 @@ services:
     image: postgres:12.9
     ports:
       - '5432:5432/tcp'
-    restart: always
 
   redis:
     image: redis:6.2
@@ -28,7 +27,7 @@ services:
       dockerfile: Dockerfile
     command: |
       /bin/bash -c 'while !</dev/tcp/postgres/5432; do echo "Waiting for postgres database to start..."; /bin/sleep 1; done; \
-      /bin/sh /app/utility/start_server.sh;'
+      /bin/sh /app/start-server.sh;'
     ports:
       - '8080:8080'
       - '8000:8000'
@@ -41,8 +40,6 @@ services:
       - redis
     links:
       - redis
-    env_file:
-      - .env
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.local
       DATABASE_URL: postgres://postgres:sample_db_password@postgres:5432/metadeploy
