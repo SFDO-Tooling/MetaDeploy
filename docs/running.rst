@@ -20,10 +20,8 @@ from `Python.org`_.
 
 .. _Python.org: https://www.python.org/downloads/
 
-There are a variety of tools that let you set up environment variables
-temporarily for a particular "environment" or directory. We use
-`virtualenvwrapper`_. Assuming you're in the repo root, do the following to
-create a virtualenv (once you have `virtualenvwrapper`_ installed locally)::
+Assuming you're in the repo root, do the following to create a virtualenv (once
+you have `virtualenvwrapper`_ installed locally)::
 
     mkvirtualenv metadeploy --python=$(which python3.9)
     setvirtualenvproject
