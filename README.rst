@@ -5,8 +5,8 @@ MetaDeploy
      :target: https://github.com/SFDO-Tooling/MetaDeploy/actions/workflows/test.yml
      :alt: Build Status
 
-.. image:: https://coveralls.io/repos/github/SFDO-Tooling/metadeploy/badge.svg?branch=master
-     :target: https://coveralls.io/github/SFDO-Tooling/MetaDeploy?branch=master
+.. image:: https://coveralls.io/repos/github/SFDO-Tooling/metadeploy/badge.svg?branch=main
+     :target: https://coveralls.io/github/SFDO-Tooling/MetaDeploy?branch=main
      :alt: Test Coverage
 
 Development
