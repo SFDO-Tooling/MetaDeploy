@@ -35,7 +35,7 @@ jobs:
             - ./node
       - save_cache:
           key:
-            metadeploy-py-{{ checksum "requirements/prod.txt" }}-{{ checksum
+            metadeploy-py3-{{ checksum "requirements/prod.txt" }}-{{ checksum
             "requirements/dev.txt" }}
           paths:
             - ./venv
