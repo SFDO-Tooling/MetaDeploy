@@ -41,7 +41,6 @@ any two different arbitrary string values.
 
 Next, run the following commands to generate a database encryption key::
 
-    pip install cryptography
     python
     >>> from cryptography.fernet import Fernet
     >>> Fernet.generate_key()
@@ -62,7 +61,7 @@ Set the following environment variables::
     SFDX_HUB_KEY=...
     DEVHUB_USERNAME=...
 
-Finall, MetaDeploy needs a connection to the GitHub API to fetch repositories
+Finally, MetaDeploy needs a connection to the GitHub API to fetch repositories
 for installation. This can be set up using a personal GitHub account by
 providing your personal access token as ``GITHUB_TOKEN`` *or* by using a GitHub
 App and setting ``GITHUB_APP_ID`` and ``GITHUB_APP_KEY``.
