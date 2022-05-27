@@ -54,14 +54,27 @@ To exit the Python shell, press ``Ctrl-Z`` and then ``Enter`` on Windows, or
 ``Ctrl-D`` on OS X or Linux. Alternatively, you could also type the Python
 command ``exit()`` and press ``Enter``.
 
-Finally, set the following environment variables (if you're an OddBird, you
-can find these values in the shared Keybase team folder --
-``metadeploy/env``)::
+Set the following environment variables::
 
     SFDX_CLIENT_SECRET=...
     SFDX_CLIENT_CALLBACK_URL=...
     SFDX_CLIENT_ID=...
     SFDX_HUB_KEY=...
+    DEVHUB_USERNAME=...
+
+Finall, MetaDeploy needs a connection to the GitHub API to fetch repositories
+for installation. This can be set up using a personal GitHub account by
+providing your personal access token as ``GITHUB_TOKEN`` *or* by using a GitHub
+App and setting ``GITHUB_APP_ID`` and ``GITHUB_APP_KEY``.
+
+To use a Personal Access Token (which requires a scope of `repo::public_repo`),
+see:
+https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
+
+    GITHUB_TOKEN=...
+
+Or to use a GitHub App, update::
+
     GITHUB_APP_ID=...
     GITHUB_APP_KEY=...
 
@@ -74,9 +87,9 @@ Installing JavaScript Requirements
 ==================================
 
 The project uses `nvm`_ to install a specific version of `Node.js`_. Assuming
-you have ``nvm`` already installed and configured, run ``nvm use`` to install
-and activate the Node version specified in ``.nvmrc``. Then use `yarn`_ to
-install dependencies::
+you have ``nvm`` already installed and configured, run ``nvm install`` to
+install and activate the Node version specified in ``.nvmrc``. Then use `yarn`_
+to install dependencies::
 
     nvm use
     yarn
@@ -112,7 +125,6 @@ If your database has outdated sample data for development, remove it with::
 To populate the database with sample data for development, run::
 
     python manage.py populate_data
-
 
 Creating A Superuser
 ====================

@@ -330,7 +330,9 @@ HEROKU_TOKEN = env("HEROKU_TOKEN", default=None)
 
 GITHUB_TOKEN = env("GITHUB_TOKEN", default=None)
 GITHUB_APP_ID = env("GITHUB_APP_ID", default=None)
-GITHUB_APP_KEY = env("GITHUB_APP_KEY", default=None)
+# Ugly hack to fix https://github.com/moby/moby/issues/12997
+DOCKER_GITHUB_APP_KEY = env("DOCKER_GITHUB_APP_KEY", default="").replace("\\n", "\n")
+GITHUB_APP_KEY = env("GITHUB_APP_KEY", default=DOCKER_GITHUB_APP_KEY)
 
 
 if not GITHUB_TOKEN and not GITHUB_APP_ID and not GITHUB_APP_KEY:

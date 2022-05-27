@@ -24,9 +24,9 @@ To run these tests with Docker first run the following commands,
     docker-compose up -d
     docker-compose exec web bash
 
-If you are not using Docker or are using the VS Code integrated terminal
-inside the Docker container simply execute the commands in your project's
-root directory:
+If you are not using Docker or are using the VS Code integrated terminal inside
+the Docker container simply execute the commands in your project's root
+directory:
 
 - ``yarn serve``: starts development server (with watcher) at
   `<http://localhost:8080/>`_ (assets are served from ``dist/`` dir)
@@ -61,12 +61,11 @@ automatically prepended to commit messages):
 Writing integration tests
 -------------------------
 
-For now, our Salesforce integration tests do not modify state on the
-Salesforce side; they only test that they *could*. As such, we don't
-need to generate scratch orgs to test against.
+For now, our Salesforce integration tests do not modify state on the Salesforce
+side; they only test that they *could*. As such, we don't need to generate
+scratch orgs to test against.
 
-Instead, we will use some stable testing credentials for a stable test
-org. If you are part of OddBirds, you can find them in keybase.
+Instead, we will use some stable testing credentials for a stable test org.
 
 Internationalization
 --------------------
@@ -99,11 +98,10 @@ translations to ``locales/<language>/translation.json``.
 Storybook Development Workflow
 ------------------------------
 
-When doing development for the component library in Storybook,
-use one of these two commands::
+When doing development for the component library in Storybook, use the following
+command::
 
-    $ ./derrick storybook  # if running outside of container
-    $ yarn storybook  # if working in a remote container in VS Code
+    $ yarn storybook
 
-After running one of these commands, you can view the Storybook at
-`<http://localhost:6006/>`_ in your browser.
+After running, you can view the Storybook at `<http://localhost:6006/>`_ in your
+browser.
