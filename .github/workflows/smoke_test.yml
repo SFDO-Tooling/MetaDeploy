@@ -56,7 +56,7 @@ jobs:
 
       - name: Store robot results
         if: failure()
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: robot
           path: robot/results
