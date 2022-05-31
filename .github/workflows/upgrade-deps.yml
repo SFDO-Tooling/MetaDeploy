@@ -31,6 +31,7 @@ jobs:
         # prettier-ignore
         run: >
           docker-compose run --no-deps web /bin/sh -c '
+          pip install --upgrade pip pip-tools &&
           pip-compile --upgrade -o requirements/prod.txt requirements/prod.in &&
           pip-compile --upgrade -o requirements/dev.txt requirements/dev.in
           '
