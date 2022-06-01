@@ -2,6 +2,7 @@ from allauth.socialaccount.admin import SocialTokenAdmin
 from allauth.socialaccount.models import SocialToken
 from django.conf import settings
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.postgres.fields import ArrayField
 from django.forms.widgets import CheckboxSelectMultiple
 from django.shortcuts import redirect
@@ -260,13 +261,12 @@ class StepAdmin(MetadeployTranslatableAdmin, PlanMixin):
 
 
 @admin.register(User)
-class UserAdmin(AdminHelpTextMixin, admin.ModelAdmin):
+class UserAdmin(AdminHelpTextMixin, BaseUserAdmin):
     help_text = _(
         "GDPR reminder: The username, name, and email are personally identifiable information. "
         "They must be used for support/debugging purposes only, and not exported from this system."
     )
     list_display = ("username", "is_active", "is_staff", "is_superuser", "date_joined")
-    search_fields = ("username",)
 
 
 @admin.register(Version)
