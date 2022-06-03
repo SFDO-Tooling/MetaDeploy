@@ -10,15 +10,50 @@ from django.utils import timezone
 
 from config.settings.base import MINIMUM_JOBS_FOR_AVERAGE
 
+from ...multitenancy import disable_site_filtering, override_current_site_id
 from ..models import (
     SUPPORTED_ORG_TYPES,
     Job,
+    PlanSlug,
     PreflightResult,
+    ProductSlug,
     ScratchOrg,
     SiteProfile,
     Step,
     Version,
 )
+
+
+def assert_multi_tenancy(factory, extra_site: Site):
+    """
+    Generic test for factories/models that should support multi-tenancy
+    """
+    Model = factory._meta.model
+    obj1 = factory()
+    with override_current_site_id(extra_site.id):
+        obj2 = factory()
+
+    assert (
+        Model.objects.get().id == obj1.id
+    ), f"Expected {Model} to return {obj1} for the default site"
+
+    with override_current_site_id(extra_site.id):
+        assert (
+            Model.objects.get().id == obj2.id
+        ), f"Expected {Model} to return {obj2} for the extra site"
+
+    with disable_site_filtering():
+        assert [obj.id for obj in Model.objects.all()] == [
+            obj1.id,
+            obj2.id,
+        ], f"Expected {Model} to return both objects when site-filtering is disabled via context manager"
+
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setenv("DJANGO_SITE_FILTERING_DISABLED", "true")
+        assert [obj.id for obj in Model.objects.all()] == [
+            obj1.id,
+            obj2.id,
+        ], f"Expected {Model} to return both objects when site-filtering is disabled via env var"
 
 
 @pytest.mark.django_db
@@ -120,6 +155,9 @@ class TestAllowedListOrg:
 
 @pytest.mark.django_db
 class TestUser:
+    def test_multi_tenancy(self, user_factory, extra_site):
+        assert_multi_tenancy(user_factory, extra_site)
+
     def test_org_name(self, user_factory):
         user = user_factory()
         assert user.org_name == "Sample Org"
@@ -245,6 +283,15 @@ class TestIconProperty:
 
 @pytest.mark.django_db
 class TestVersion:
+    def test_multi_tenancy(self, version_factory, extra_site):
+        assert_multi_tenancy(version_factory, extra_site)
+
+    def test_str(self, product_factory, version_factory):
+        product = product_factory(title="My Product")
+        version = version_factory(label="v0.1.0", product=product)
+
+        assert str(version) == "My Product, Version v0.1.0"
+
     def test_get_absolute_url(self, version_factory):
         assert version_factory().get_absolute_url().startswith("/")
 
@@ -284,15 +331,35 @@ class TestVersion:
         )
         assert list(version.additional_plans) == [plan2]
 
+    def test_natural_key(self, version_factory):
+        version = version_factory(label="v0.1.0")
+
+        assert version.natural_key() == (version.product, "v0.1.0")
+
+    def test_get_by_natural_key(self, version_factory):
+        v1 = version_factory(label="v0.1.0")
+        version_factory(product=v1.product, label="v0.2.0")
+
+        assert (
+            Version.objects.get_by_natural_key(product=v1.product, label="v0.1.0") == v1
+        )
+
 
 @pytest.mark.django_db
-def test_product_category_str(product_category_factory):
-    product_category = product_category_factory(title="My Category")
-    assert str(product_category) == "My Category"
+class TestProductCategory:
+    def test_multi_tenancy(self, product_category_factory, extra_site):
+        assert_multi_tenancy(product_category_factory, extra_site)
+
+    def test_str(self, product_category_factory):
+        product_category = product_category_factory(title="My Category")
+        assert str(product_category) == "My Category"
 
 
 @pytest.mark.django_db
 class TestProduct:
+    def test_multi_tenancy(self, product_factory, extra_site):
+        assert_multi_tenancy(product_factory, extra_site)
+
     def test_str(self, product_factory):
         product = product_factory(title="My Product")
         assert str(product) == "My Product"
@@ -300,9 +367,43 @@ class TestProduct:
     def test_get_absolute_url(self, product_factory):
         assert product_factory().get_absolute_url().startswith("/")
 
+    def test_most_recent_version(self, product_factory, version_factory):
+        product = product_factory()
+        version_factory(label="v0.1.0", product=product)
+        v2 = version_factory(label="v0.2.0", product=product)
+
+        assert product.most_recent_version == v2
+
+    def test_most_recent_version__delisted(self, product_factory, version_factory):
+        product = product_factory()
+        v1 = version_factory(label="v0.1.0", product=product)
+        version_factory(label="v0.2.0", product=product, is_listed=False)
+
+        assert product.most_recent_version == v1
+
 
 @pytest.mark.django_db
 class TestProductSlug:
+    def test_multi_tenancy(self, product_factory, extra_site):
+        """
+        Can't use `assert_multi_tenancy` directly because slugs are never created by
+        themselves, they alway come as part of the parent model
+        """
+        product1 = product_factory()
+        with override_current_site_id(extra_site.id):
+            product2 = product_factory()
+
+        assert ProductSlug.objects.get().slug == product1.slug
+
+        with override_current_site_id(extra_site.id):
+            assert ProductSlug.objects.get().slug == product2.slug
+
+        with disable_site_filtering():
+            assert [s.slug for s in ProductSlug.objects.all()] == [
+                product2.slug,
+                product1.slug,
+            ]
+
     def test_present(self, product_factory, product_slug_factory):
         product = product_factory(title="a product")
         product.productslug_set.all().delete()
@@ -333,25 +434,10 @@ class TestProductSlug:
 
 
 @pytest.mark.django_db
-def test_product_most_recent_version(product_factory, version_factory):
-    product = product_factory()
-    version_factory(label="v0.1.0", product=product)
-    v2 = version_factory(label="v0.2.0", product=product)
-
-    assert product.most_recent_version == v2
-
-
-@pytest.mark.django_db
-def test_product_most_recent_version__delisted(product_factory, version_factory):
-    product = product_factory()
-    v1 = version_factory(label="v0.1.0", product=product)
-    version_factory(label="v0.2.0", product=product, is_listed=False)
-
-    assert product.most_recent_version == v1
-
-
-@pytest.mark.django_db
 class TestPlanTemplate:
+    def test_multi_tenancy(self, plan_template_factory, extra_site):
+        assert_multi_tenancy(plan_template_factory, extra_site)
+
     def test_str(self, plan_template_factory):
         plan_template = plan_template_factory()
         assert str(plan_template) == f"{plan_template.product.title}: install"
@@ -359,6 +445,23 @@ class TestPlanTemplate:
 
 @pytest.mark.django_db
 class TestPlanSlug:
+    def test_multi_tenancy(self, plan_factory, extra_site):
+        """
+        Can't use `assert_multi_tenancy` directly because slugs are never created by
+        themselves, they alway come as part of the parent model
+        """
+        plan1 = plan_factory()
+        with override_current_site_id(extra_site.id):
+            plan2 = plan_factory()
+
+        assert PlanSlug.objects.get().slug == plan1.slug
+
+        with override_current_site_id(extra_site.id):
+            assert PlanSlug.objects.get().slug == plan2.slug
+
+        with disable_site_filtering():
+            assert [s.slug for s in PlanSlug.objects.all()] == [plan2.slug, plan1.slug]
+
     def test_present(self, plan_factory, plan_slug_factory):
         plan = plan_factory(title="a plan")
         plan.plan_template.planslug_set.all().delete()
@@ -410,6 +513,9 @@ class TestPlanSlug:
 
 @pytest.mark.django_db
 class TestPlan:
+    def test_multi_tenancy(self, plan_factory, extra_site):
+        assert_multi_tenancy(plan_factory, extra_site)
+
     def test_natural_key(self, plan_factory):
         plan = plan_factory(title="My Plan")
         assert plan.natural_key() == (plan.version, "My Plan")
@@ -499,6 +605,9 @@ class TestPlan:
 
 @pytest.mark.django_db
 class TestStep:
+    def test_multi_tenancy(self, step_factory, extra_site):
+        assert_multi_tenancy(step_factory, extra_site)
+
     def test_str(self, step_factory):
         step = step_factory(name="Test step", step_num="3.1", plan__title="The Plan")
         assert str(step) == "Step Test step of The Plan (3.1)"
@@ -547,29 +656,10 @@ class TestStepKindIcon:
 
 
 @pytest.mark.django_db
-class TestVersionNaturalKey:
-    def test_version_natural_key(self, version_factory):
-        version = version_factory(label="v0.1.0")
-
-        assert version.natural_key() == (version.product, "v0.1.0")
-
-    def test_version_get_by_natural_key(self, version_factory):
-        v1 = version_factory(label="v0.1.0")
-        version_factory(product=v1.product, label="v0.2.0")
-
-        assert (
-            Version.objects.get_by_natural_key(product=v1.product, label="v0.1.0") == v1
-        )
-
-    def test_version_str(self, product_factory, version_factory):
-        product = product_factory(title="My Product")
-        version = version_factory(label="v0.1.0", product=product)
-
-        assert str(version) == "My Product, Version v0.1.0"
-
-
-@pytest.mark.django_db
 class TestJob:
+    def test_multi_tenancy(self, job_factory, extra_site):
+        assert_multi_tenancy(job_factory, extra_site)
+
     def test_get_absolute_url(self, job_factory):
         assert job_factory().get_absolute_url().startswith("/")
 
@@ -622,6 +712,9 @@ class TestJob:
 
 @pytest.mark.django_db
 class TestScratchOrg:
+    def test_multi_tenancy(self, scratch_org_factory, extra_site):
+        assert_multi_tenancy(scratch_org_factory, extra_site)
+
     def test_get_login_url(self, scratch_org_factory):
         with ExitStack() as stack:
             refresh_access_token = stack.enter_context(
@@ -685,6 +778,9 @@ class TestSiteProfile:
 
 @pytest.mark.django_db
 class TestPreflightResult:
+    def test_multi_tenancy(self, preflight_result_factory, extra_site):
+        assert_multi_tenancy(preflight_result_factory, extra_site)
+
     def test_has_any_errors(self, user_factory, plan_factory, preflight_result_factory):
         user = user_factory()
         plan = plan_factory()

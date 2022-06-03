@@ -17,7 +17,6 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
 from django.contrib.postgres.fields import ArrayField
-from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
@@ -32,6 +31,7 @@ from sfdo_template_helpers.crypto import fernet_decrypt
 from sfdo_template_helpers.fields import MarkdownField as BaseMarkdownField
 from sfdo_template_helpers.slugs import AbstractSlug, SlugMixin
 
+from ..multitenancy.models import CurrentSiteManager, SiteRelated
 from .belvedere_utils import convert_to_18
 from .constants import ERROR, HIDE, OPTIONAL, ORGANIZATION_DETAILS, SKIP
 from .flows import JobFlowCallback, PreflightFlowCallback
@@ -142,11 +142,20 @@ class AllowedListAccessMixin(models.Model):
         )
 
 
-class UserManager(BaseUserManager):
-    pass
+class UserManager(CurrentSiteManager, BaseUserManager):
+    def get_queryset(self):
+        """
+        Return users on the current Site + superusers across all sites
+        """
+        lookup = self.get_site_lookup()
+        qs = BaseUserManager.get_queryset(self)
+
+        if lookup is None:
+            return qs
+        return qs.filter(Q(**lookup) | Q(is_superuser=True))
 
 
-class User(HashIdMixin, AbstractUser):
+class User(HashIdMixin, SiteRelated, AbstractUser):
     objects = UserManager()
 
     def subscribable_by(self, user, session):
@@ -223,7 +232,7 @@ class User(HashIdMixin, AbstractUser):
         return None
 
 
-class ProductCategory(TranslatableModel):
+class ProductCategory(SiteRelated, TranslatableModel):
     class Meta:
         verbose_name_plural = "product categories"
         ordering = ("order_key",)
@@ -235,6 +244,8 @@ class ProductCategory(TranslatableModel):
         title=models.CharField(max_length=256),
         description=MarkdownField(),
     )
+
+    objects = CurrentSiteManager.from_queryset(TranslatableQuerySet)()
 
     @property
     def description_markdown(self):
@@ -249,6 +260,8 @@ class ProductCategory(TranslatableModel):
 
 class ProductSlug(AbstractSlug):
     parent = models.ForeignKey("Product", on_delete=models.CASCADE)
+
+    objects = CurrentSiteManager(site_field="parent__category__site")
 
 
 class ProductQuerySet(TranslatableQuerySet):
@@ -273,7 +286,9 @@ class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel)
     class Meta:
         ordering = ("category__order_key", "order_key")
 
-    objects = ProductQuerySet.as_manager()
+    objects = CurrentSiteManager.from_queryset(ProductQuerySet)(
+        site_field="category__site"
+    )
 
     translations = TranslatedFields(
         title=models.CharField(max_length=256),
@@ -355,7 +370,9 @@ class VersionQuerySet(TranslatableQuerySet):
 
 
 class Version(HashIdMixin, TranslatableModel):
-    objects = VersionQuerySet.as_manager()
+    objects = CurrentSiteManager.from_queryset(VersionQuerySet)(
+        site_field="product__category__site"
+    )
 
     translations = TranslatedFields(description=models.TextField(blank=True))
 
@@ -416,6 +433,8 @@ class PlanSlug(AbstractSlug):
     slug = models.SlugField()
     parent = models.ForeignKey("PlanTemplate", on_delete=models.CASCADE)
 
+    objects = CurrentSiteManager(site_field="parent__product__category__site")
+
     def validate_unique(self, *args, **kwargs):
         super().validate_unique(*args, **kwargs)
         qs = PlanSlug.objects.filter(
@@ -444,6 +463,10 @@ class PlanTemplate(SlugMixin, TranslatableModel):
     regression_test_opt_out = models.BooleanField(default=False)
 
     slug_class = PlanSlug
+
+    objects = CurrentSiteManager.from_queryset(TranslatableQuerySet)(
+        site_field="product__category__site"
+    )
 
     @property
     def preflight_message_markdown(self):
@@ -517,6 +540,10 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
 
     slug_class = PlanSlug
     slug_field_name = "title"
+
+    objects = CurrentSiteManager.from_queryset(TranslatableQuerySet)(
+        site_field="plan_template__product__category__site"
+    )
 
     @property
     def preflight_message_additional_markdown(self):
@@ -658,6 +685,10 @@ class Step(HashIdMixin, TranslatableModel):
     task_config = JSONField(default=dict, blank=True)
     source = JSONField(blank=True, null=True)
 
+    objects = CurrentSiteManager.from_queryset(TranslatableQuerySet)(
+        site_field="plan__plan_template__product__category__site"
+    )
+
     class Meta:
         ordering = (DottedArray(F("step_num")),)
 
@@ -701,11 +732,11 @@ class Step(HashIdMixin, TranslatableModel):
         update_translations(self)
 
 
-class ClickThroughAgreement(models.Model):
+class ClickThroughAgreement(SiteRelated):
     text = models.TextField()
 
 
-class Job(HashIdMixin, models.Model):
+class Job(HashIdMixin, SiteRelated):
     Status = Choices("started", "complete", "failed", "canceled")
     tracker = FieldTracker(fields=("results", "status"))
 
@@ -873,7 +904,9 @@ class PreflightResult(models.Model):
 
     tracker = FieldTracker(fields=("status", "is_valid"))
 
-    objects = PreflightResultQuerySet.as_manager()
+    objects = CurrentSiteManager.from_queryset(PreflightResultQuerySet)(
+        site_field="plan__plan_template__product__category__site"
+    )
 
     org_id = models.CharField(null=True, blank=True, max_length=18)
     user = models.ForeignKey(
@@ -1042,7 +1075,9 @@ class ScratchOrg(HashIdMixin, models.Model):
     org_id = models.CharField(null=True, blank=True, max_length=18)
     expires_at = models.DateTimeField(null=True, blank=True)
 
-    objects = ScratchOrgQuerySet.as_manager()
+    objects = CurrentSiteManager.from_queryset(ScratchOrgQuerySet)(
+        site_field="plan__plan_template__product__category__site"
+    )
 
     def clean_config(self):
         banned_keys = {"email", "access_token", "refresh_token"}
@@ -1125,7 +1160,7 @@ class ScratchOrg(HashIdMixin, models.Model):
 
 
 class SiteProfile(TranslatableModel):
-    site = models.OneToOneField(Site, on_delete=models.CASCADE)
+    site = models.OneToOneField("sites.Site", on_delete=models.CASCADE)
 
     translations = TranslatedFields(
         name=models.CharField(max_length=64),

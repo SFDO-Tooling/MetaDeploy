@@ -13,6 +13,11 @@ from metadeploy.api.models import SUPPORTED_ORG_TYPES
 from metadeploy.api.serializers import get_from_data_or_instance
 
 
+class ProductCategorySerializer(AdminAPISerializer):
+    class Meta:
+        exclude = ("site",)
+
+
 class ProductSerializer(AdminAPISerializer):
     title = serializers.CharField()
     short_description = serializers.CharField()
@@ -135,6 +140,7 @@ class VersionViewSet(AdminAPIViewSet):
 
 class ProductCategoryViewSet(AdminAPIViewSet):
     model_name = "ProductCategory"
+    serializer_base = ProductCategorySerializer
 
 
 class AllowedListViewSet(AdminAPIViewSet):

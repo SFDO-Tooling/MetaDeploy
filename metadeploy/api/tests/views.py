@@ -13,11 +13,17 @@ from ..models import SUPPORTED_ORG_TYPES, Job, Plan, PreflightResult, ScratchOrg
 
 
 @pytest.mark.django_db
-def test_user_view(client):
-    response = client.get(reverse("user"))
+class TestUserView:
+    def test_ok(self, client):
+        response = client.get(reverse("user"))
 
-    assert response.status_code == 200
-    assert response.json()["username"].endswith("@example.com")
+        assert response.status_code == 200
+        assert response.json()["username"].endswith("@example.com")
+
+    def test_current_site(self, client, extra_site):
+        response = client.get(reverse("user"), SERVER_NAME=extra_site.domain)
+
+        assert response.status_code == 401
 
 
 @pytest.mark.django_db
@@ -28,6 +34,15 @@ class TestJobViewset:
 
         assert response.status_code == 404
         assert response.json() == {"detail": "Not found."}
+
+    def test_job__current_site(self, client, user_factory, job_factory, extra_site):
+        staff_user = user_factory(is_staff=True)
+        client.force_login(staff_user)
+        job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
+        url = reverse("job-detail", kwargs={"pk": job.id})
+
+        response = client.get(url, SERVER_NAME=extra_site.domain)
+        assert response.status_code == 404
 
     def test_job__is_staff(self, client, user_factory, job_factory):
         staff_user = user_factory(is_staff=True)
@@ -485,6 +500,7 @@ class TestPreflight:
         )
         preflight = preflight_result_factory(
             plan=plan,
+            user=None,
             org_id=org.org_id,
         )
         session = anon_client.session
@@ -579,6 +595,7 @@ class TestOrgViewset:
         plan = plan_factory()
         preflight = preflight_result_factory(
             plan=plan,
+            user=None,
             org_id=client.user.org_id,
         )
         response = client.get(reverse("org-list"))

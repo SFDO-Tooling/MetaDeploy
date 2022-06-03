@@ -95,6 +95,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "metadeploy.multitenancy.middleware.CurrentRequestMiddleware",
     "metadeploy.logging_middleware.LoggingMiddleware",
     "sfdo_template_helpers.admin.middleware.AdminRestrictMiddleware",
     "django.middleware.security.SecurityMiddleware",

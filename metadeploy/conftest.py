@@ -36,6 +36,16 @@ def format_timestamp(value):
 
 
 @register
+class SiteFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Site
+        django_get_or_create = ("domain",)
+
+    domain = "testserver"
+    name = factory.SelfAttribute("domain")
+
+
+@register
 class SocialAppFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = SocialApp
@@ -266,10 +276,27 @@ class PreflightResultFactory(factory.django.DjangoModelFactory):
         model = PreflightResult
 
     plan = factory.SubFactory(PlanFactory)
+    user = factory.SubFactory(UserFactory)
+    org_id = factory.SelfAttribute("user.org_id")
 
 
 @pytest.fixture
-def client(user_factory):
+def adjust_site_domain():
+    """Adjust the default Site instance to match the test Client host"""
+    site = Site.objects.get()
+    site.domain = "testserver"
+    site.save()
+
+
+@pytest.fixture
+def extra_site(settings, site_factory):
+    site = site_factory(domain="extra-site.test")
+    settings.ALLOWED_HOSTS += ["extra-site.test"]
+    return site
+
+
+@pytest.fixture
+def client(user_factory, adjust_site_domain):
     user = user_factory()
     client = APIClient()
     client.force_login(user)
@@ -278,7 +305,7 @@ def client(user_factory):
 
 
 @pytest.fixture
-def admin_api_client(user_factory):
+def admin_api_client(user_factory, adjust_site_domain):
     user = user_factory(is_superuser=True)
     client = APIClient()
     client.force_login(user)
@@ -287,5 +314,5 @@ def admin_api_client(user_factory):
 
 
 @pytest.fixture
-def anon_client():
+def anon_client(adjust_site_domain):
     return APIClient()
