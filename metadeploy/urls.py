@@ -21,6 +21,7 @@ from django.urls import include, path, re_path
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import RedirectView, TemplateView
 
+from . import views
 from .routing import websockets
 
 PREFIX = settings.ADMIN_AREA_PREFIX
@@ -39,6 +40,7 @@ urlpatterns = [
     # Put this after all other things using `PREFIX`:
     re_path(PREFIX.rstrip("/") + "$", RedirectView.as_view(url=f"/{PREFIX}")),
     path(PREFIX, admin.site.urls),
+    path("set-site/", views.set_site, name="set_site"),
     path("accounts/", include("allauth.urls")),
     path("api/", include("metadeploy.api.urls")),
     # These paths render the frontend SPA

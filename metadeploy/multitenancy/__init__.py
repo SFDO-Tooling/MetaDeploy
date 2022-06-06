@@ -8,6 +8,9 @@ from django.contrib.sites.models import Site
 from django.core.cache import cache
 from django.http import Http404, HttpRequest
 
+ADMIN_PREFIX = f"/{settings.ADMIN_AREA_PREFIX}/".replace("//", "/")
+
+
 state = local()
 
 
@@ -78,7 +81,9 @@ def current_site_id() -> int:
     request = current_request()
     site_id = getattr(request, "site_id", None)
     if request and not site_id:
-        if request.path.startswith(settings.ADMIN_AREA_PREFIX):
+        is_admin = request.path.startswith(ADMIN_PREFIX)
+        is_admin_rest = request.path.startswith(f"{ADMIN_PREFIX}rest/")
+        if is_admin and not is_admin_rest:
             site_id = request.session.get("site_id", None)
         if not site_id:
             domain = request.get_host().lower()
