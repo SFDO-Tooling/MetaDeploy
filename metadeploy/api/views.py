@@ -146,7 +146,14 @@ class JobViewSet(
 
 class ProductCategoryViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ProductCategorySerializer
-    queryset = ProductCategory.objects.all()
+
+    def get_queryset(self):
+        # Usually we would simply define `queryset = ProductCategory.objects.all()`
+        # directly on the class, but that would "freeze" the queryset on the instances
+        # that belong to the Site that is active during class definition. By using a
+        # method instead we make sure site-filtering is applied correctly on each
+        # request.
+        return ProductCategory.objects.all()
 
 
 class ProductViewSet(

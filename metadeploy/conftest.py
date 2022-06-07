@@ -316,3 +316,22 @@ def admin_api_client(user_factory, adjust_site_domain):
 @pytest.fixture
 def anon_client(adjust_site_domain):
     return APIClient()
+
+
+@pytest.fixture
+def assert_multi_tenancy(client, extra_site):
+    def _do_assert(url):
+        response = client.get(url)
+        assert response.status_code == 200, (
+            f"Expected to get 200 when visiting {url} on the default Site. "
+            "This request should succeed to establish a baseline for the multi-tenancy test."
+        )
+
+        response = client.get(url, SERVER_NAME=extra_site.domain)
+        assert response.status_code == 404, (
+            f"Expected to get 404 when visiting {url} on the non-default Site. "
+            "This probably means per-site filtering is not working on that endpoint."
+        )
+
+    _do_assert.client = client
+    return _do_assert

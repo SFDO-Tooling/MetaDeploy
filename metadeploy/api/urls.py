@@ -18,6 +18,6 @@ router.register("products", ProductViewSet, basename="product")
 router.register("versions", VersionViewSet, basename="version")
 router.register("plans", PlanViewSet, basename="plan")
 router.register("orgs", OrgViewSet, basename="org")
-router.register("categories", ProductCategoryViewSet)
+router.register("categories", ProductCategoryViewSet, basename="productcategory")
 router.register("scratch-orgs", ScratchOrgViewSet, basename="scratch-org")
 urlpatterns = router.urls + [path("user/", UserView.as_view(), name="user")]

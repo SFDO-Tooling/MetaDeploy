@@ -20,10 +20,12 @@ class TestUserView:
         assert response.status_code == 200
         assert response.json()["username"].endswith("@example.com")
 
-    def test_current_site(self, client, extra_site):
+    def test_multi_tenancy(self, client, extra_site):
         response = client.get(reverse("user"), SERVER_NAME=extra_site.domain)
 
-        assert response.status_code == 401
+        assert (
+            response.status_code == 401
+        ), "User should get an authentication error when trying to access a Site they don't belong to"
 
 
 @pytest.mark.django_db
@@ -35,14 +37,12 @@ class TestJobViewset:
         assert response.status_code == 404
         assert response.json() == {"detail": "Not found."}
 
-    def test_job__current_site(self, client, user_factory, job_factory, extra_site):
-        staff_user = user_factory(is_staff=True)
-        client.force_login(staff_user)
+    def test_job__multi_tenancy(self, job_factory, assert_multi_tenancy):
+        assert_multi_tenancy.client.user.is_staff = True
+        assert_multi_tenancy.client.user.save()
         job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
-        url = reverse("job-detail", kwargs={"pk": job.id})
 
-        response = client.get(url, SERVER_NAME=extra_site.domain)
-        assert response.status_code == 404
+        assert_multi_tenancy(reverse("job-detail", args=[job.id]))
 
     def test_job__is_staff(self, client, user_factory, job_factory):
         staff_user = user_factory(is_staff=True)
@@ -278,6 +278,10 @@ class TestBasicGetViews:
             "next": None,
         }
 
+    def test_product__multi_tenancy(self, version, assert_multi_tenancy):
+        assert_multi_tenancy.client.logout()
+        assert_multi_tenancy(reverse("product-detail", args=[version.product_id]))
+
     def test_version(self, client, version_factory):
         version = version_factory()
         response = client.get(reverse("version-detail", kwargs={"pk": version.id}))
@@ -293,6 +297,9 @@ class TestBasicGetViews:
             "secondary_plan": None,
             "is_listed": True,
         }
+
+    def test_version__multi_tenancy(self, version, assert_multi_tenancy):
+        assert_multi_tenancy(reverse("version-detail", args=[version.pk]))
 
     def test_plan(self, client, plan_factory, settings):
         plan = plan_factory()
@@ -317,6 +324,9 @@ class TestBasicGetViews:
             "supported_orgs": "Persistent",
             "scratch_org_duration": settings.SCRATCH_ORG_DURATION_DAYS,
         }
+
+    def test_plan__multi_tenancy(self, plan, assert_multi_tenancy):
+        assert_multi_tenancy(reverse("plan-detail", args=[plan.pk]))
 
     def test_plan__not_visible(
         self, client, allowed_list_factory, plan_factory, settings
@@ -412,6 +422,13 @@ class TestBasicGetViews:
             "supported_orgs": "Persistent",
             "scratch_org_duration": settings.SCRATCH_ORG_DURATION_DAYS,
         }
+
+    def test_product_category__multi_tenancy(
+        self, product_category, assert_multi_tenancy
+    ):
+        assert_multi_tenancy(
+            reverse("productcategory-detail", args=[product_category.pk])
+        )
 
 
 @pytest.mark.django_db
