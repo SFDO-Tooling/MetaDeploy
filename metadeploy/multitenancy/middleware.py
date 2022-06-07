@@ -42,7 +42,7 @@ class CurrentSiteMiddleware:
                     site = Site.objects.get(domain__iexact=domain)
                 except Site.DoesNotExist:
                     msg = f"{request.get_host()} doesn't match any known sites"
-                    if settings.DEBUG:
+                    if settings.DEBUG:  # pragma: nocover
                         sites = ", ".join(Site.objects.values_list("domain", flat=True))
                         msg = f"{msg}. Known sites are: {sites}."
                     raise Http404(msg)

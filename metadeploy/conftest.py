@@ -282,7 +282,10 @@ class PreflightResultFactory(factory.django.DjangoModelFactory):
 
 @pytest.fixture
 def adjust_site_domain():
-    """Adjust the default Site instance to match the test Client host"""
+    """
+    Adjust the default Site instance to match the test Client host. Required by
+    CurrentSiteMiddleware to detect the default Site as expected.
+    """
     site = Site.objects.get()
     site.domain = "testserver"
     site.save()

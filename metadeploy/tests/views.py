@@ -57,6 +57,19 @@ def test_custom_500_view__ip_restricted_error(render):
 
 
 @pytest.mark.django_db
+def test_multi_tenancy_middleware_unknown_site(client, settings):
+    url = reverse("admin:login")
+    response = client.get(url)
+    assert response.status_code == 200
+
+    settings.ALLOWED_HOSTS += ["not-a-known-site.com"]
+    response = client.get(url, SERVER_NAME="not-a-known-site.com")
+    assert (
+        response.status_code == 404
+    ), "Expected a 404 when visiting a host that is allowed but doesn't have a matching Site record in the DB"
+
+
+@pytest.mark.django_db
 class TestSetSite:
     def test_superuser_required(self, client):
         client.user.is_staff = True
@@ -136,4 +149,4 @@ class TestSetSite:
         response = client.get(url)
         assert (
             response.data["id"] in ids
-        ), "Visiting the set-site view shouldn't affect site-filtering for API views"
+        ), f"Visiting the set-site view shouldn't affect site-filtering for {url}"

@@ -146,6 +146,10 @@ class ProductCategoryViewSet(AdminAPIViewSet):
 class AllowedListViewSet(AdminAPIViewSet):
     model_name = "AllowedList"
 
+    # `AdminAPIViewSet` includes all fields by default, but `org_id` causes an exception
+    # because its an `ArrayField`, so we exclude it for now
+    filterset_fields = ("title", "description", "list_for_allowed_by_orgs")
+
 
 class AllowedListOrgSerializer(AdminAPISerializer):
     created_by = serializers.StringRelatedField()

@@ -1,7 +1,17 @@
 import pytest
+from django.urls import reverse
 from rest_framework.test import APIClient
 
-from metadeploy.api.models import SUPPORTED_ORG_TYPES
+from metadeploy.api.models import SUPPORTED_ORG_TYPES, ProductSlug
+
+
+@pytest.fixture(name="assert_admin_api_multi_tenancy")
+def _multi_tenancy(assert_multi_tenancy):
+    # Ensure the multi-tenancy client is a superuser, which is required by all these tests
+    assert_multi_tenancy.client.user.is_staff = True
+    assert_multi_tenancy.client.user.is_superuser = True
+    assert_multi_tenancy.client.user.save()
+    return assert_multi_tenancy
 
 
 @pytest.mark.django_db
@@ -43,9 +53,36 @@ class TestProductViewSet:
             "meta": {"page": {"total": 1}},
         }
 
+    def test_multi_tenancy(self, product, assert_admin_api_multi_tenancy):
+        assert_admin_api_multi_tenancy(
+            reverse("admin_rest:product-detail", args=[product.pk])
+        )
+
+
+@pytest.mark.django_db
+class TestProductSlugViewSet:
+    def test_multi_tenancy(self, product, assert_admin_api_multi_tenancy):
+        slug = ProductSlug.objects.get(parent=product)
+        assert_admin_api_multi_tenancy(
+            reverse("admin_rest:productslug-detail", args=[slug.pk])
+        )
+
+
+@pytest.mark.django_db
+class TestPlanTemplateViewSet:
+    def test_multi_tenancy(self, plan_template, assert_admin_api_multi_tenancy):
+        assert_admin_api_multi_tenancy(
+            reverse("admin_rest:plantemplate-detail", args=[plan_template.pk])
+        )
+
 
 @pytest.mark.django_db
 class TestPlanViewSet:
+    def test_multi_tenancy(self, plan, assert_admin_api_multi_tenancy):
+        assert_admin_api_multi_tenancy(
+            reverse("admin_rest:plan-detail", args=[plan.pk])
+        )
+
     def test_list(self, admin_api_client, plan_factory):
         plan = plan_factory()
 
@@ -284,7 +321,49 @@ class TestPlanViewSet:
 
 
 @pytest.mark.django_db
+class TestPlanSlugViewSet:
+    def test_multi_tenancy(self, plan_slug, assert_admin_api_multi_tenancy):
+        assert_admin_api_multi_tenancy(
+            reverse("admin_rest:planslug-detail", args=[plan_slug.pk])
+        )
+
+
+@pytest.mark.django_db
+class TestVersionViewSet:
+    def test_multi_tenancy(self, version, assert_admin_api_multi_tenancy):
+        assert_admin_api_multi_tenancy(
+            reverse("admin_rest:version-detail", args=[version.pk])
+        )
+
+
+@pytest.mark.django_db
+class TestProductCategoryViewSet:
+    def test_multi_tenancy(self, product_category, assert_admin_api_multi_tenancy):
+        assert_admin_api_multi_tenancy(
+            reverse("admin_rest:productcategory-detail", args=[product_category.pk])
+        )
+
+
+@pytest.mark.django_db
+class TestAllowedListViewSet:
+    @pytest.mark.xfail(reason="AllowedList is not a per-site model")
+    def test_multi_tenancy(self, allowed_list, assert_admin_api_multi_tenancy):
+        assert_admin_api_multi_tenancy(
+            reverse("admin_rest:allowedlist-detail", args=[allowed_list.pk])
+        )
+
+
+@pytest.mark.django_db
 class TestAllowedListOrgViewSet:
+    @pytest.mark.xfail(reason="AllowedListOrg is not a per-site model")
+    def test_multi_tenancy(
+        self, allowed_list_org_factory, assert_admin_api_multi_tenancy
+    ):
+        org = allowed_list_org_factory()
+        assert_admin_api_multi_tenancy(
+            reverse("admin_rest:allowedlistorg-detail", args=[org.pk])
+        )
+
     def test_get(self, admin_api_client, allowed_list_org_factory):
         allowed_list_org_factory()
 

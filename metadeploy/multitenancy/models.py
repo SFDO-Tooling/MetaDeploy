@@ -18,7 +18,7 @@ class CurrentSiteManager(models.Manager):
         if not site_filtering_enabled():
             return None
 
-        # The existence of `self.instance` tells use we are in a related field lookup.
+        # The existence of `self.instance` tells us we are in a related field lookup.
         # This means `__init__` was called without arguments by Django to create an
         # on-the-fly related manager. We can't trust the value of `_site_field_name`, so
         # we copy it from the default manager that was instantiated with the correct
