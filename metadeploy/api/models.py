@@ -22,6 +22,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
 from django.db.models import Count, F, Func, JSONField, Q
+from django.template.defaultfilters import truncatechars
 from django.utils.translation import gettext_lazy as _
 from hashid_field import HashidAutoField
 from model_utils import Choices, FieldTracker
@@ -734,6 +735,9 @@ class Step(HashIdMixin, TranslatableModel):
 
 class ClickThroughAgreement(SiteRelated):
     text = models.TextField()
+
+    def __str__(self):
+        return truncatechars(self.text, 80)
 
 
 class Job(HashIdMixin, SiteRelated):

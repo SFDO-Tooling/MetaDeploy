@@ -11,6 +11,7 @@ from sfdo_template_helpers.crypto import fernet_encrypt
 from metadeploy.api.models import (
     AllowedList,
     AllowedListOrg,
+    ClickThroughAgreement,
     Job,
     Plan,
     PlanSlug,
@@ -236,6 +237,14 @@ class PlanSlugFactory(factory.django.DjangoModelFactory):
 
     slug = factory.Sequence("this-is-a-slug-{}".format)
     parent = factory.SubFactory(PlanTemplateFactory)
+
+
+@register
+class ClickTroughAgreementFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = ClickThroughAgreement
+
+    text = factory.Sequence("Text for Agreement {}".format)
 
 
 @register

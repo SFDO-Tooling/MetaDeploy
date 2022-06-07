@@ -13,6 +13,7 @@ from config.settings.base import MINIMUM_JOBS_FOR_AVERAGE
 from ...multitenancy import disable_site_filtering, override_current_site_id
 from ..models import (
     SUPPORTED_ORG_TYPES,
+    ClickThroughAgreement,
     Job,
     PlanSlug,
     PreflightResult,
@@ -653,6 +654,19 @@ class TestStepKindIcon:
     def test_unknown(self, step_factory):
         step = step_factory(kind="unknown")
         assert step.kind_icon is None
+
+
+@pytest.mark.django_db
+class TestClickThroughAgreement:
+    def test_str(self):
+        agreement = ClickThroughAgreement(text="Hello world " * 100)
+        assert (
+            str(agreement)
+            == "Hello world Hello world Hello world Hello world Hello world Hello world Hello w…"
+        )
+
+    def test_multi_tenancy(self, click_trough_agreement_factory, extra_site):
+        assert_multi_tenancy(click_trough_agreement_factory, extra_site)
 
 
 @pytest.mark.django_db
