@@ -95,12 +95,12 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    "metadeploy.multitenancy.middleware.CurrentRequestMiddleware",
     "metadeploy.logging_middleware.LoggingMiddleware",
     "sfdo_template_helpers.admin.middleware.AdminRestrictMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "metadeploy.multitenancy.middleware.CurrentSiteMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",

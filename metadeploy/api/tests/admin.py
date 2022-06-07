@@ -126,9 +126,11 @@ def test_superuser_multi_tenancy(client, extra_site):
     response = client.get(url, SERVER_NAME=extra_site.domain)
     assert (
         response.status_code == 302
-    ), "Regular staff users should not have access to other sites"
+    ), "Regular staff users should not have access to other admin sites"
 
     user.is_superuser = True
     user.save()
     response = client.get(url, SERVER_NAME=extra_site.domain)
-    assert response.status_code == 200, "Superusers should have access to all sites"
+    assert (
+        response.status_code == 200
+    ), "Superusers should have access to all admin sites"

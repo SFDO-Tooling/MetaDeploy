@@ -136,4 +136,4 @@ class TestSetSite:
         response = client.get(url)
         assert (
             response.data["id"] in ids
-        ), "Visiting the set-site view shouldn't affect site-filtering for regular API views"
+        ), "Visiting the set-site view shouldn't affect site-filtering for API views"
