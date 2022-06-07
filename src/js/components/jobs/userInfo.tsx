@@ -1,8 +1,8 @@
 import Card from '@salesforce/design-system-react/components/card';
 import Icon from '@salesforce/design-system-react/components/icon';
 import { format, parseISO } from 'date-fns';
-import { t } from 'i18next';
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import ScratchOrgInfo from '@/js/components/scratchOrgs/scratchOrgInfo';
 import { Job } from '@/js/store/jobs/reducer';
@@ -15,6 +15,8 @@ const UserInfo = ({
   job: Job;
   scratchOrg?: ScratchOrg | null;
 }) => {
+  const { t } = useTranslation();
+
   let contents = null;
   if (scratchOrg?.expires_at) {
     const date = format(parseISO(scratchOrg.expires_at), 'PP');

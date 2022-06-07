@@ -1,12 +1,14 @@
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import Icon from '@salesforce/design-system-react/components/icon';
 import classNames from 'classnames';
-import { t } from 'i18next';
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { DataCellProps } from '@/js/components/plans/stepsTable';
 
 const KindDataCell = (props: DataCellProps) => {
+  const { t } = useTranslation();
+
   /* istanbul ignore if */
   if (!props.item) {
     return null;

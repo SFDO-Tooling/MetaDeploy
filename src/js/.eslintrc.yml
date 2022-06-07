@@ -6,6 +6,7 @@ parserOptions:
   ecmaFeatures:
     jsx: true
   project: ./tsconfig.json
+  warnOnUnsupportedTypeScriptVersion: false
 env:
   browser: true
   node: false
@@ -19,8 +20,11 @@ rules:
   '@typescript-eslint/explicit-module-boundary-types': 0
   '@typescript-eslint/no-empty-function': 0
   '@typescript-eslint/no-explicit-any': 0
+  '@typescript-eslint/no-use-before-define': 2
 
   # Import
   simple-import-sort/imports: 1
   import/order: 0
   import/no-duplicates: 0
+
+  no-use-before-define: 0

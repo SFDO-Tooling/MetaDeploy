@@ -1,5 +1,5 @@
 import Spinner from '@salesforce/design-system-react/components/spinner';
-import * as React from 'react';
+import React, { Component, useEffect, useRef } from 'react';
 import { Redirect } from 'react-router-dom';
 
 import JobNotFound from '@/js/components/jobs/job404';
@@ -32,7 +32,7 @@ export const withTransientMessage = function <Props>(
   const opts = { ...defaults, ...options };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  return class WithTransientMessage extends React.Component<
+  return class WithTransientMessage extends Component<
     Props,
     TransientMessageState
   > {
@@ -224,4 +224,20 @@ export const getLoadingOrNotFound = ({
     );
   }
   return false;
+};
+
+// This is often considered an anti-pattern in React, but we consider it
+// acceptable in cases where we don't want to cancel or cleanup an asynchronous
+// action on unmount -- we just want to prevent a post-unmount state update
+// after the action finishes.
+// https://reactjs.org/blog/2015/12/16/ismounted-antipattern.html
+export const useIsMounted = () => {
+  const isMounted = useRef(true);
+  useEffect(
+    () => () => {
+      isMounted.current = false;
+    },
+    [],
+  );
+  return isMounted;
 };

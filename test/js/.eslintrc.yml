@@ -18,4 +18,6 @@ rules:
   # Import
   simple-import-sort/imports: 1
   import/order: 0
+
+  # Jest
   jest/no-conditional-expect: 0

@@ -1,5 +1,5 @@
-import { t } from 'i18next';
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Trans } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
@@ -12,25 +12,29 @@ const JobNotFound = ({
 }: {
   url: string;
   isLoggedIn?: boolean;
-}) => (
-  <>
-    <FourOhFour
-      message={
-        <Trans i18nKey="installationNotFound">
-          We can’t find the installation you’re looking for. Try{' '}
-          <Link to={url}>starting a new installation</Link>?
-        </Trans>
-      }
-    />
-    <div className="slds-align_absolute-center">
-      <Login
-        id="job-404-login"
-        label={isLoggedIn ? t('Log In With a Different Org') : t('Log In')}
-        buttonClassName="slds-p-horizontal_xxx-small"
-        buttonVariant="base"
+}) => {
+  const { t } = useTranslation();
+
+  return (
+    <>
+      <FourOhFour
+        message={
+          <Trans i18nKey="installationNotFound">
+            We can’t find the installation you’re looking for. Try{' '}
+            <Link to={url}>starting a new installation</Link>?
+          </Trans>
+        }
       />
-    </div>
-  </>
-);
+      <div className="slds-align_absolute-center">
+        <Login
+          id="job-404-login"
+          label={isLoggedIn ? t('Log In With a Different Org') : t('Log In')}
+          buttonClassName="slds-p-horizontal_xxx-small"
+          buttonVariant="base"
+        />
+      </div>
+    </>
+  );
+};
 
 export default JobNotFound;

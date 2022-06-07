@@ -1,8 +1,8 @@
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
-import { t } from 'i18next';
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
+import { WithTranslation, withTranslation } from 'react-i18next';
 import { connect, ConnectedProps } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { Job } from 'src/js/store/jobs/reducer';
@@ -76,7 +76,7 @@ const connector = connect(select, actions);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
-type Props = PropsFromRedux & RouteComponentProps;
+type Props = PropsFromRedux & RouteComponentProps & WithTranslation;
 
 type State = {
   modalOpen: boolean;
@@ -252,7 +252,7 @@ class JobDetail extends React.Component<Props, State> {
   };
 
   getCancelBtn() {
-    const { user, job } = this.props;
+    const { t, user, job } = this.props;
 
     /* istanbul ignore if */
     if (!job) {
@@ -286,7 +286,7 @@ class JobDetail extends React.Component<Props, State> {
   }
 
   getShareBtn() {
-    const { job } = this.props;
+    const { t, job } = this.props;
     return job?.status === CONSTANTS.STATUS.COMPLETE ? null : (
       <Button
         label={t('Share Installation')}
@@ -324,6 +324,7 @@ class JobDetail extends React.Component<Props, State> {
 
   render() {
     const {
+      t,
       user,
       product,
       productSlug,
@@ -429,6 +430,6 @@ class JobDetail extends React.Component<Props, State> {
   }
 }
 
-const WrappedJobDetail = connector(withRouter(JobDetail));
+const WrappedJobDetail = connector(withRouter(withTranslation()(JobDetail)));
 
 export default WrappedJobDetail;

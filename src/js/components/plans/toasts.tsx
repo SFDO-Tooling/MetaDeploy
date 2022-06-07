@@ -1,7 +1,7 @@
 import Toast from '@salesforce/design-system-react/components/toast';
 import ToastContainer from '@salesforce/design-system-react/components/toast/container';
-import { t } from 'i18next';
 import * as React from 'react';
+import { WithTranslation, withTranslation } from 'react-i18next';
 
 import { Job } from '@/js/store/jobs/reducer';
 import { CONSTANTS, Preflight } from '@/js/store/plans/reducer';
@@ -10,7 +10,7 @@ type Props = {
   job?: Job;
   preflight?: Preflight;
   label: string;
-};
+} & WithTranslation;
 
 type State = {
   isOpen: boolean;
@@ -29,6 +29,7 @@ class Toasts extends React.Component<Props, State> {
   };
 
   getToastComponent(label: string, variant = 'error') {
+    const { t } = this.props;
     return (
       <Toast
         labels={{
@@ -107,4 +108,4 @@ class Toasts extends React.Component<Props, State> {
   }
 }
 
-export default Toasts;
+export default withTranslation()(Toasts as React.ComponentClass<Props, State>);

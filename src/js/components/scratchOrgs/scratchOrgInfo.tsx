@@ -1,6 +1,6 @@
 import Card from '@salesforce/design-system-react/components/card';
-import { t } from 'i18next';
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Trans } from 'react-i18next';
 
 const ScratchOrgInfo = ({
@@ -10,6 +10,8 @@ const ScratchOrgInfo = ({
   date: string | null;
   days?: number;
 }) => {
+  const { t } = useTranslation();
+
   if (!date && !days) {
     return null;
   }

@@ -39,9 +39,9 @@ bleach==5.0.0
     # via
     #   -r requirements/prod.in
     #   sfdo-template-helpers
-boto3==1.24.2
+boto3==1.24.3
     # via -r requirements/prod.in
-botocore==1.27.2
+botocore==1.27.3
     # via
     #   boto3
     #   s3transfer
@@ -119,7 +119,7 @@ django==3.2.13
     #   django-storages
     #   djangorestframework
     #   sfdo-template-helpers
-django-allauth==0.50.0
+django-allauth==0.51.0
     # via -r requirements/prod.in
 django-binary-database-files==1.0.15
     # via -r requirements/prod.in

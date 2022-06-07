@@ -1,6 +1,6 @@
 import Icon from '@salesforce/design-system-react/components/icon';
-import { t } from 'i18next';
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import {
   ErrorIcon,
@@ -16,6 +16,8 @@ const JobResults = ({
   job: Job;
   openModal: () => void;
 }) => {
+  const { t } = useTranslation();
+
   if (
     job.status !== CONSTANTS.STATUS.COMPLETE &&
     job.status !== CONSTANTS.STATUS.FAILED &&
@@ -24,7 +26,7 @@ const JobResults = ({
     return null;
   }
 
-  const { message } = getErrorInfo({ job });
+  const { message } = getErrorInfo({ t, job });
   if (message !== null) {
     const title = t('View Installation Error Details & Link');
     return (

@@ -1,11 +1,12 @@
 import SLDSProgressIndicator from '@salesforce/design-system-react/components/progress-indicator';
-import { t } from 'i18next';
 import * as React from 'react';
+import { useTranslation, WithTranslation } from 'react-i18next';
 
 import { CONSTANTS } from '@/js/store/plans/reducer';
 import { SUPPORTED_ORGS, SupportedOrgs } from '@/js/utils/constants';
 
 export const getSteps = (
+  t: WithTranslation['t'],
   supportedOrgs: SupportedOrgs,
   preflightRequired: boolean,
 ) => {
@@ -66,6 +67,8 @@ const ProgressIndicator = ({
   supportedOrgs: SupportedOrgs;
   preflightRequired: boolean;
 }) => {
+  const { t } = useTranslation();
+
   let activeStep = 0;
   let initialActionComplete = userLoggedIn;
   switch (supportedOrgs) {
@@ -85,7 +88,7 @@ const ProgressIndicator = ({
     }
   }
 
-  const steps = getSteps(supportedOrgs, preflightRequired);
+  const steps = getSteps(t, supportedOrgs, preflightRequired);
 
   const completedSteps = steps.slice(0, activeStep);
   const errorSteps =

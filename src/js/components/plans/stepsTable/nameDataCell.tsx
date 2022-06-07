@@ -4,8 +4,8 @@ import DataTableCell from '@salesforce/design-system-react/components/data-table
 import Icon from '@salesforce/design-system-react/components/icon';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
-import { t } from 'i18next';
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { JobError } from '@/js/components/plans/preflightResults';
 import { DataCellProps } from '@/js/components/plans/stepsTable';
@@ -19,6 +19,7 @@ type Props = DataCellProps & {
 };
 
 const NameDataCell = (props: Props) => {
+  const { t } = useTranslation();
   const {
     preflight,
     job,

@@ -2,8 +2,8 @@ import Button from '@salesforce/design-system-react/components/button';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
-import { t } from 'i18next';
 import React, { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   isOpen: boolean;
@@ -18,6 +18,7 @@ const SpinOrg = ({
   toggleModal,
   doSpinOrg,
 }: Props) => {
+  const { t } = useTranslation();
   const masterAgreement = window.GLOBALS.SITE?.master_agreement;
   const [confirmed, setConfirmed] = useState(!clickThroughAgreement);
   const [msaConfirmed, setMsaConfirmed] = useState(!masterAgreement);
@@ -189,6 +190,7 @@ const SpinOrg = ({
   return (
     <Modal
       isOpen={isOpen}
+      dismissOnClickOutside={false}
       onRequestClose={resetAndClose}
       size="medium"
       heading={pages[currentPage].heading}

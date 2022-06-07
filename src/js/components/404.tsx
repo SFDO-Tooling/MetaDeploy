@@ -1,6 +1,6 @@
-import { t } from 'i18next';
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
+import { useTranslation } from 'react-i18next';
 import { Trans } from 'react-i18next';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 
@@ -30,24 +30,28 @@ const FourOhFour = ({
   history,
 }: {
   message?: React.ReactNode;
-} & RouteComponentProps) => (
-  <DocumentTitle title={`${t('404')} | ${window.SITE_NAME}`}>
-    <>
-      <Header history={history} />
-      <EmptyIllustration
-        message={
-          message === undefined ? (
-            <Trans i18nKey="pageCannotBeFound">
-              That page cannot be found. Try the{' '}
-              <Link to={routes.home()}>home page</Link>?
-            </Trans>
-          ) : (
-            message
-          )
-        }
-      />
-    </>
-  </DocumentTitle>
-);
+} & RouteComponentProps) => {
+  const { t } = useTranslation();
+
+  return (
+    <DocumentTitle title={`${t('404')} | ${window.SITE_NAME}`}>
+      <>
+        <Header history={history} />
+        <EmptyIllustration
+          message={
+            message === undefined ? (
+              <Trans i18nKey="pageCannotBeFound">
+                That page cannot be found. Try the{' '}
+                <Link to={routes.home()}>home page</Link>?
+              </Trans>
+            ) : (
+              message
+            )
+          }
+        />
+      </>
+    </DocumentTitle>
+  );
+};
 
 export default withRouter(FourOhFour);

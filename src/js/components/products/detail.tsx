@@ -1,7 +1,7 @@
-import { t } from 'i18next';
 import { sortBy } from 'lodash';
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
+import { WithTranslation, withTranslation } from 'react-i18next';
 import { Trans } from 'react-i18next';
 import { connect, ConnectedProps } from 'react-redux';
 import {
@@ -81,7 +81,9 @@ type ProductPropsFromRedux = ConnectedProps<typeof productConnector>;
 type VersionPropsFromRedux = ConnectedProps<typeof versionConnector>;
 
 type ProductDetailProps = ProductPropsFromRedux;
-type VersionDetailProps = VersionPropsFromRedux & RouteComponentProps;
+type VersionDetailProps = VersionPropsFromRedux &
+  RouteComponentProps &
+  WithTranslation;
 
 class ProductDetail extends React.Component<ProductDetailProps> {
   fetchProductIfMissing() {
@@ -217,7 +219,8 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     }
   }
 
-  static getProductDescription(product: Product) {
+  getProductDescription(product: Product) {
+    const { t } = this.props;
     const isCardLayout = product.layout === PRODUCT_LAYOUTS.Card;
     const productDescriptionHasTitle =
       product.description?.startsWith('<h1>') ||
@@ -252,6 +255,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
 
   render() {
     const {
+      t,
       user,
       product,
       productSlug,
@@ -312,7 +316,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                 />
               ) : null}
               <BodySection>
-                {isCardLayout && VersionDetail.getProductDescription(product)}
+                {isCardLayout && this.getProductDescription(product)}
                 <p>{version.description}</p>
                 {!isCardLayout && (
                   <>
@@ -393,9 +397,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                   />
                 </div>
               ) : (
-                <BodySection>
-                  {VersionDetail.getProductDescription(product)}
-                </BodySection>
+                <BodySection>{this.getProductDescription(product)}</BodySection>
               )}
             </BodyContainer>
           ) : (
@@ -417,7 +419,9 @@ class VersionDetail extends React.Component<VersionDetailProps> {
 }
 
 const WrappedProductDetail = productConnector(ProductDetail);
-const WrappedVersionDetail = versionConnector(withRouter(VersionDetail));
+const WrappedVersionDetail = versionConnector(
+  withRouter(withTranslation()(VersionDetail)),
+);
 
 export {
   WrappedProductDetail as ProductDetail,

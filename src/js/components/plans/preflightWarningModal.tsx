@@ -1,8 +1,8 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Modal from '@salesforce/design-system-react/components/modal';
-import { t } from 'i18next';
 import * as React from 'react';
+import { WithTranslation, withTranslation } from 'react-i18next';
 
 import { SelectedSteps } from '@/js/components/plans/detail';
 import { WarningIcon } from '@/js/components/plans/preflightResults';
@@ -20,7 +20,7 @@ type Props = {
   results: PlanResults;
   steps: Step[];
   selectedSteps: SelectedSteps;
-};
+} & WithTranslation;
 type State = {
   confirmed: boolean;
 };
@@ -80,7 +80,7 @@ class PreflightWarningModal extends React.Component<Props, State> {
   };
 
   render() {
-    const { isOpen, results, steps, selectedSteps } = this.props;
+    const { t, isOpen, results, steps, selectedSteps } = this.props;
     const { confirmed } = this.state;
     const footer = [
       <Button key="cancel" label={t('Cancel')} onClick={this.handleClose} />,
@@ -98,6 +98,7 @@ class PreflightWarningModal extends React.Component<Props, State> {
         heading={t('Potential Issues')}
         tagline={t('(confirm to continue)')}
         size="medium"
+        dismissOnClickOutside={false}
         onRequestClose={this.handleClose}
         footer={footer}
       >
@@ -134,4 +135,4 @@ class PreflightWarningModal extends React.Component<Props, State> {
   }
 }
 
-export default PreflightWarningModal;
+export default withTranslation()(PreflightWarningModal);

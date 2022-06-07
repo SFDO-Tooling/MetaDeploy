@@ -1,9 +1,9 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
-import { t } from 'i18next';
 import cookies from 'js-cookie';
 import * as React from 'react';
+import { WithTranslation, withTranslation } from 'react-i18next';
 
 import { addUrlParams, extractCustomDomain, UrlParams } from '@/js/utils/api';
 
@@ -11,7 +11,7 @@ type Props = {
   isOpen: boolean;
   toggleModal: (open: boolean) => void;
   redirectParams: UrlParams;
-};
+} & WithTranslation;
 
 class CustomDomainModal extends React.Component<
   Props,
@@ -48,6 +48,7 @@ class CustomDomainModal extends React.Component<
   };
 
   render() {
+    const { t } = this.props;
     const footer = [
       <Button key="cancel" label={t('Cancel')} onClick={this.handleClose} />,
       <Button
@@ -63,6 +64,7 @@ class CustomDomainModal extends React.Component<
         isOpen={this.props.isOpen}
         heading={t('Use Custom Domain')}
         size="small"
+        dismissOnClickOutside={false}
         onRequestClose={this.handleClose}
         footer={footer}
       >
@@ -123,4 +125,4 @@ class CustomDomainModal extends React.Component<
   }
 }
 
-export default CustomDomainModal;
+export default withTranslation()(CustomDomainModal);
