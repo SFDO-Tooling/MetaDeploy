@@ -126,6 +126,7 @@ class JobAdmin(AdminHelpTextMixin, admin.ModelAdmin, PlanMixin):
     )
     list_select_related = ("user", "plan", "plan__version", "plan__version__product")
     search_fields = ("job_id", "org_id", "exception")
+    exclude = ("site",)
 
 
 @admin.register(ScratchOrg)
@@ -229,6 +230,7 @@ class ProductCategoryAdmin(MetadeployTranslatableAdmin):
     list_editable = ("is_listed", "order_key")
     list_filter = ("is_listed",)
     search_fields = ("translations__title", "translations__description")
+    exclude = ("site",)
 
 
 @admin.register(ProductSlug)
@@ -279,7 +281,7 @@ class VersionAdmin(admin.ModelAdmin):
 
 @admin.register(ClickThroughAgreement)
 class ClickThroughAgreementAdmin(admin.ModelAdmin):
-    pass
+    exclude = ("site",)
 
 
 @admin.register(SiteProfile)
