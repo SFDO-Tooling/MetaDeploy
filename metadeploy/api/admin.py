@@ -4,11 +4,13 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.postgres.fields import ArrayField
+from django.contrib.sites.admin import SiteAdmin as BaseSiteAdmin
+from django.contrib.sites.models import Site
 from django.forms.widgets import CheckboxSelectMultiple
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from parler.admin import TranslatableAdmin
+from parler.admin import TranslatableAdmin, TranslatableStackedInline
 from parler.utils.views import TabsList
 
 from .models import (
@@ -74,14 +76,22 @@ class AdminHelpTextMixin:
         return super().changelist_view(request, extra_context)
 
 
-class MetadeployTranslatableAdmin(TranslatableAdmin):
+class SingleTabMixin:
     def get_language_tabs(self, request, obj, available_languages, css_class=None):
-        # Prevent showing other language tabs"""
+        """Prevent showing other language tabs"""
         tabs = TabsList(css_class=css_class)
         current_language = self.get_form_language(request, obj)
         tabs.current_is_translated = current_language in available_languages
         tabs.allow_deletion = False
         return tabs
+
+
+class MetadeployTranslatableAdmin(SingleTabMixin, TranslatableAdmin):
+    pass
+
+
+class MetadeployTranslatableInlineAdmin(SingleTabMixin, TranslatableStackedInline):
+    pass
 
 
 @admin.register(AllowedList)
@@ -285,17 +295,27 @@ class ClickThroughAgreementAdmin(admin.ModelAdmin):
     exclude = ("site",)
 
 
-@admin.register(SiteProfile)
-class SiteProfileAdmin(MetadeployTranslatableAdmin):
-    list_display = ("name", "site")
-
-
 @admin.register(Translation)
 class TranslationAdmin(admin.ModelAdmin):
     list_display = ("lang", "context", "slug", "text")
     list_filter = ("lang",)
     search_fields = ("context", "slug")
     exclude = ("site",)
+
+
+# Inline the SiteProfile with Site instances (they are 1-on-1 anyways)
+class SiteProfileInlineAdmin(MetadeployTranslatableInlineAdmin):
+    model = SiteProfile
+    min_num = 1
+    max_num = 1
+
+
+admin.site.unregister(Site)
+
+
+@admin.register(Site)
+class SiteAdmin(BaseSiteAdmin):
+    inlines = (SiteProfileInlineAdmin,)
 
 
 # Disable editing SocialTokens
