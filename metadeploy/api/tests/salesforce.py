@@ -2,6 +2,7 @@ from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
 import pytest
+from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.test import override_settings
 from requests.exceptions import HTTPError
@@ -9,6 +10,7 @@ from requests.exceptions import HTTPError
 from ..salesforce import (
     ScratchOrgError,
     _get_devhub_api,
+    _get_org_result,
     delete_scratch_org,
     refresh_access_token,
 )
@@ -90,3 +92,64 @@ def test_delete_org(scratch_org_factory):
         delete_scratch_org(scratch_org)
 
         assert devhub_api.ActiveScratchOrg.delete.called
+
+
+@pytest.mark.django_db
+def test_get_org_result():
+    scratch_org_info_id = "2SR4p000000DTAaGAO"
+    cci = MagicMock()
+    cci.project_config.project__package__namespace = "protogen"
+    devhub_api = MagicMock()
+    scratch_org_config = MagicMock()
+    scratch_org_config.namespaced = True
+    devhub_api.ScratchOrgInfo.create.return_value = {
+        "id": scratch_org_info_id
+    }
+    devhub_api.ScratchOrgInfo.get.return_value = {
+        "Id": scratch_org_info_id, "Name": "MetaDeploy Scratch Org"
+    }
+    devhub_api.ScratchOrgInfo.describe.return_value = {
+        "fields": [
+            {"name": "FooField", "createable": True}
+        ]
+    }
+
+    scratch_org_definition = {
+        "features": ["Communities", "MarketingUser"],
+        "description": "foo",
+        "template": "0TTxxxxxxxxxxxx",
+        "fooField": "barValue",
+        "settings": {
+            "FooSettings": {
+                "UseFoo": True
+            }
+        }
+    }
+
+    result = _get_org_result(
+        email="jpmao@mao-kwikowski.luna",
+        repo_owner="Protogen",
+        repo_name="Caliban",
+        repo_branch="feature/experiment",
+        duration=3,
+        scratch_org_config=scratch_org_config,
+        scratch_org_definition=scratch_org_definition,
+        cci=cci,
+        devhub_api=devhub_api
+    )
+    assert result == devhub_api.ScratchOrgInfo.get.return_value
+    devhub_api.ScratchOrgInfo.create.assert_called_once_with({
+        'AdminEmail': 'jpmao@mao-kwikowski.luna',
+        'ConnectedAppConsumerKey': settings.SFDX_CLIENT_ID,
+        'ConnectedAppCallbackUrl': settings.SFDX_CLIENT_CALLBACK_URL,
+        # Defaulted - should ignore the value in the definition
+        # lack of `description` as a key proves case-insensitivity
+        'Description': 'Protogen/Caliban feature/experiment',
+        'DurationDays': 3,
+        # From schema of ScratchOrgInfo
+        'FooField': 'barValue',
+        'Features': 'Communities;MarketingUser',
+        'Namespace': 'protogen',
+        'OrgName': 'MetaDeploy Scratch Org',
+        'HasSampleData': False
+    })
