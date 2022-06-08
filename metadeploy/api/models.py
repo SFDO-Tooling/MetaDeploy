@@ -72,7 +72,7 @@ class MarkdownField(BaseMarkdownField):
         super().__init__(*args, **kwargs)
 
 
-class AllowedList(models.Model):
+class AllowedList(SiteRelated):
     title = models.CharField(max_length=128, unique=True)
     description = MarkdownField()
     org_type = ArrayField(
@@ -107,6 +107,11 @@ class AllowedListOrg(models.Model):
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL
     )
     created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = CurrentSiteManager(site_field="allowed_list__site")
+
+    def __str__(self):
+        return self.org_id
 
     def save(self, *args, **kwargs):
         if len(self.org_id) == 15:
@@ -1199,7 +1204,7 @@ class SiteProfile(TranslatableModel):
         return "fields", "siteprofile"
 
 
-class Translation(models.Model):
+class Translation(SiteRelated):
     """Holds a generic catalog of translated text.
 
     Used when a new Plan is published to populate the django-parler translation tables.
@@ -1212,4 +1217,4 @@ class Translation(models.Model):
     lang = models.CharField(max_length=5)
 
     class Meta:
-        unique_together = (("context", "slug", "lang"),)
+        unique_together = (("site", "context", "slug", "lang"),)

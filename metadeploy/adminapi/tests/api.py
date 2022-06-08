@@ -346,9 +346,6 @@ class TestProductCategoryViewSet:
 
 @pytest.mark.django_db
 class TestAllowedListViewSet:
-    @pytest.mark.xfail(
-        reason="AllowedList is not a per-site model", raises=AssertionError
-    )
     def test_multi_tenancy(self, allowed_list, assert_admin_api_multi_tenancy):
         assert_admin_api_multi_tenancy(
             reverse("admin_rest:allowedlist-detail", args=[allowed_list.pk])
@@ -357,9 +354,6 @@ class TestAllowedListViewSet:
 
 @pytest.mark.django_db
 class TestAllowedListOrgViewSet:
-    @pytest.mark.xfail(
-        reason="AllowedListOrg is not a per-site model", raises=AssertionError
-    )
     def test_multi_tenancy(
         self, allowed_list_org_factory, assert_admin_api_multi_tenancy
     ):

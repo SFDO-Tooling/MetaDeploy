@@ -13,7 +13,7 @@ from metadeploy.api.models import SUPPORTED_ORG_TYPES
 from metadeploy.api.serializers import get_from_data_or_instance
 
 
-class ProductCategorySerializer(AdminAPISerializer):
+class ExcludeSiteSerializer(AdminAPISerializer):
     class Meta:
         exclude = ("site",)
 
@@ -140,11 +140,12 @@ class VersionViewSet(AdminAPIViewSet):
 
 class ProductCategoryViewSet(AdminAPIViewSet):
     model_name = "ProductCategory"
-    serializer_base = ProductCategorySerializer
+    serializer_base = ExcludeSiteSerializer
 
 
 class AllowedListViewSet(AdminAPIViewSet):
     model_name = "AllowedList"
+    serializer_base = ExcludeSiteSerializer
 
     # `AdminAPIViewSet` includes all fields by default, but `org_id` causes an exception
     # because its an `ArrayField`, so we exclude it for now

@@ -63,9 +63,19 @@ class TestAllowedList:
         allowed_list = allowed_list_factory(title="A title")
         assert str(allowed_list) == "A title"
 
+    def test_multi_tenancy(self, allowed_list_org_factory, extra_site):
+        assert_multi_tenancy(allowed_list_org_factory, extra_site)
+
 
 @pytest.mark.django_db
 class TestAllowedListOrg:
+    def test_str(self, allowed_list_org_factory):
+        org = allowed_list_org_factory(org_id="abc123")
+        assert str(org) == "abc123"
+
+    def test_multi_tenancy(self, allowed_list_org_factory, extra_site):
+        assert_multi_tenancy(allowed_list_org_factory, extra_site)
+
     def test_save(self, allowed_list_factory, allowed_list_org_factory):
         allowed_list = allowed_list_factory(title="A title")
         org_id = "00D1F0000009GpnUAE"
@@ -809,3 +819,9 @@ class TestPreflightResult:
 
         preflight_result.results = {"plan": [{"status": "warn"}, {"status": "error"}]}
         assert preflight_result.has_any_errors()
+
+
+@pytest.mark.django_db
+class TestTranslation:
+    def test_multi_tenancy(self, translation_factory, extra_site):
+        assert_multi_tenancy(translation_factory, extra_site)

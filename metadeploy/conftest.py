@@ -23,6 +23,7 @@ from metadeploy.api.models import (
     ScratchOrg,
     SiteProfile,
     Step,
+    Translation,
     Version,
 )
 
@@ -287,6 +288,14 @@ class PreflightResultFactory(factory.django.DjangoModelFactory):
     plan = factory.SubFactory(PlanFactory)
     user = factory.SubFactory(UserFactory)
     org_id = factory.SelfAttribute("user.org_id")
+
+
+@register
+class TranslationFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Translation
+
+    slug = factory.Sequence("translation-{}".format)
 
 
 @pytest.fixture
