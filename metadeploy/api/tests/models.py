@@ -10,6 +10,7 @@ from django.utils import timezone
 
 from config.settings.base import MINIMUM_JOBS_FOR_AVERAGE
 
+from ... import conftest
 from ...multitenancy import disable_site_filtering, override_current_site_id
 from ..models import (
     SUPPORTED_ORG_TYPES,
@@ -25,36 +26,42 @@ from ..models import (
 )
 
 
-def assert_multi_tenancy(factory, extra_site: Site):
+@pytest.fixture(name="assert_model_multi_tenancy")
+def _multi_tenancy(extra_site):
     """
     Generic test for factories/models that should support multi-tenancy
     """
-    Model = factory._meta.model
-    obj1 = factory()
-    with override_current_site_id(extra_site.id):
-        obj2 = factory()
 
-    assert (
-        Model.objects.get().id == obj1.id
-    ), f"Expected {Model} to return {obj1} for the default site"
+    def _do_assert(factory_name):
+        factory = getattr(conftest, factory_name)
+        Model = factory._meta.model
+        obj1 = factory()
+        with override_current_site_id(extra_site.id):
+            obj2 = factory()
 
-    with override_current_site_id(extra_site.id):
         assert (
-            Model.objects.get().id == obj2.id
-        ), f"Expected {Model} to return {obj2} for the extra site"
+            Model.objects.get().id == obj1.id
+        ), f"Expected {Model} to return {obj1} for the default site"
 
-    with disable_site_filtering():
-        assert [obj.id for obj in Model.objects.all()] == [
-            obj1.id,
-            obj2.id,
-        ], f"Expected {Model} to return both objects when site-filtering is disabled via context manager"
+        with override_current_site_id(extra_site.id):
+            assert (
+                Model.objects.get().id == obj2.id
+            ), f"Expected {Model} to return {obj2} for the extra site"
 
-    with pytest.MonkeyPatch.context() as mp:
-        mp.setenv("DJANGO_SITE_FILTERING_DISABLED", "true")
-        assert [obj.id for obj in Model.objects.all()] == [
-            obj1.id,
-            obj2.id,
-        ], f"Expected {Model} to return both objects when site-filtering is disabled via env var"
+        with disable_site_filtering():
+            assert [obj.id for obj in Model.objects.all()] == [
+                obj1.id,
+                obj2.id,
+            ], f"Expected {Model} to return both objects when site-filtering is disabled via context manager"
+
+        with pytest.MonkeyPatch.context() as mp:
+            mp.setenv("DJANGO_SITE_FILTERING_DISABLED", "true")
+            assert [obj.id for obj in Model.objects.all()] == [
+                obj1.id,
+                obj2.id,
+            ], f"Expected {Model} to return both objects when site-filtering is disabled via env var"
+
+    return _do_assert
 
 
 @pytest.mark.django_db
@@ -63,8 +70,8 @@ class TestAllowedList:
         allowed_list = allowed_list_factory(title="A title")
         assert str(allowed_list) == "A title"
 
-    def test_multi_tenancy(self, allowed_list_org_factory, extra_site):
-        assert_multi_tenancy(allowed_list_org_factory, extra_site)
+    def test_multi_tenancy(sel, assert_model_multi_tenancy):
+        assert_model_multi_tenancy("AllowedListFactory")
 
 
 @pytest.mark.django_db
@@ -73,8 +80,8 @@ class TestAllowedListOrg:
         org = allowed_list_org_factory(org_id="abc123")
         assert str(org) == "abc123"
 
-    def test_multi_tenancy(self, allowed_list_org_factory, extra_site):
-        assert_multi_tenancy(allowed_list_org_factory, extra_site)
+    def test_multi_tenancy(self, assert_model_multi_tenancy):
+        assert_model_multi_tenancy("AllowedListOrgFactory")
 
     def test_save(self, allowed_list_factory, allowed_list_org_factory):
         allowed_list = allowed_list_factory(title="A title")
@@ -166,8 +173,8 @@ class TestAllowedListOrg:
 
 @pytest.mark.django_db
 class TestUser:
-    def test_multi_tenancy(self, user_factory, extra_site):
-        assert_multi_tenancy(user_factory, extra_site)
+    def test_multi_tenancy(self, assert_model_multi_tenancy):
+        assert_model_multi_tenancy("UserFactory")
 
     def test_org_name(self, user_factory):
         user = user_factory()
@@ -294,8 +301,8 @@ class TestIconProperty:
 
 @pytest.mark.django_db
 class TestVersion:
-    def test_multi_tenancy(self, version_factory, extra_site):
-        assert_multi_tenancy(version_factory, extra_site)
+    def test_multi_tenancy(self, assert_model_multi_tenancy):
+        assert_model_multi_tenancy("VersionFactory")
 
     def test_str(self, product_factory, version_factory):
         product = product_factory(title="My Product")
@@ -358,8 +365,8 @@ class TestVersion:
 
 @pytest.mark.django_db
 class TestProductCategory:
-    def test_multi_tenancy(self, product_category_factory, extra_site):
-        assert_multi_tenancy(product_category_factory, extra_site)
+    def test_multi_tenancy(self, assert_model_multi_tenancy):
+        assert_model_multi_tenancy("ProductCategoryFactory")
 
     def test_str(self, product_category_factory):
         product_category = product_category_factory(title="My Category")
@@ -368,8 +375,8 @@ class TestProductCategory:
 
 @pytest.mark.django_db
 class TestProduct:
-    def test_multi_tenancy(self, product_factory, extra_site):
-        assert_multi_tenancy(product_factory, extra_site)
+    def test_multi_tenancy(self, assert_model_multi_tenancy):
+        assert_model_multi_tenancy("ProductFactory")
 
     def test_str(self, product_factory):
         product = product_factory(title="My Product")
@@ -397,7 +404,7 @@ class TestProduct:
 class TestProductSlug:
     def test_multi_tenancy(self, product_factory, extra_site):
         """
-        Can't use `assert_multi_tenancy` directly because slugs are never created by
+        Can't use `assert_model_multi_tenancy` directly because slugs are never created by
         themselves, they alway come as part of the parent model
         """
         product1 = product_factory()
@@ -446,8 +453,8 @@ class TestProductSlug:
 
 @pytest.mark.django_db
 class TestPlanTemplate:
-    def test_multi_tenancy(self, plan_template_factory, extra_site):
-        assert_multi_tenancy(plan_template_factory, extra_site)
+    def test_multi_tenancy(self, assert_model_multi_tenancy):
+        assert_model_multi_tenancy("PlanTemplateFactory")
 
     def test_str(self, plan_template_factory):
         plan_template = plan_template_factory()
@@ -458,7 +465,7 @@ class TestPlanTemplate:
 class TestPlanSlug:
     def test_multi_tenancy(self, plan_factory, extra_site):
         """
-        Can't use `assert_multi_tenancy` directly because slugs are never created by
+        Can't use `assert_model_multi_tenancy` directly because slugs are never created by
         themselves, they alway come as part of the parent model
         """
         plan1 = plan_factory()
@@ -524,8 +531,8 @@ class TestPlanSlug:
 
 @pytest.mark.django_db
 class TestPlan:
-    def test_multi_tenancy(self, plan_factory, extra_site):
-        assert_multi_tenancy(plan_factory, extra_site)
+    def test_multi_tenancy(self, assert_model_multi_tenancy):
+        assert_model_multi_tenancy("PlanFactory")
 
     def test_natural_key(self, plan_factory):
         plan = plan_factory(title="My Plan")
@@ -616,8 +623,8 @@ class TestPlan:
 
 @pytest.mark.django_db
 class TestStep:
-    def test_multi_tenancy(self, step_factory, extra_site):
-        assert_multi_tenancy(step_factory, extra_site)
+    def test_multi_tenancy(self, assert_model_multi_tenancy):
+        assert_model_multi_tenancy("StepFactory")
 
     def test_str(self, step_factory):
         step = step_factory(name="Test step", step_num="3.1", plan__title="The Plan")
@@ -675,14 +682,14 @@ class TestClickThroughAgreement:
             == "Hello world Hello world Hello world Hello world Hello world Hello world Hello w…"
         )
 
-    def test_multi_tenancy(self, click_trough_agreement_factory, extra_site):
-        assert_multi_tenancy(click_trough_agreement_factory, extra_site)
+    def test_multi_tenancy(self, assert_model_multi_tenancy):
+        assert_model_multi_tenancy("ClickTroughAgreementFactory")
 
 
 @pytest.mark.django_db
 class TestJob:
-    def test_multi_tenancy(self, job_factory, extra_site):
-        assert_multi_tenancy(job_factory, extra_site)
+    def test_multi_tenancy(self, assert_model_multi_tenancy):
+        assert_model_multi_tenancy("JobFactory")
 
     def test_get_absolute_url(self, job_factory):
         assert job_factory().get_absolute_url().startswith("/")
@@ -736,8 +743,8 @@ class TestJob:
 
 @pytest.mark.django_db
 class TestScratchOrg:
-    def test_multi_tenancy(self, scratch_org_factory, extra_site):
-        assert_multi_tenancy(scratch_org_factory, extra_site)
+    def test_multi_tenancy(self, assert_model_multi_tenancy):
+        assert_model_multi_tenancy("ScratchOrgFactory")
 
     def test_get_login_url(self, scratch_org_factory):
         with ExitStack() as stack:
@@ -802,8 +809,8 @@ class TestSiteProfile:
 
 @pytest.mark.django_db
 class TestPreflightResult:
-    def test_multi_tenancy(self, preflight_result_factory, extra_site):
-        assert_multi_tenancy(preflight_result_factory, extra_site)
+    def test_multi_tenancy(self, assert_model_multi_tenancy):
+        assert_model_multi_tenancy("PreflightResultFactory")
 
     def test_has_any_errors(self, user_factory, plan_factory, preflight_result_factory):
         user = user_factory()
@@ -823,5 +830,5 @@ class TestPreflightResult:
 
 @pytest.mark.django_db
 class TestTranslation:
-    def test_multi_tenancy(self, translation_factory, extra_site):
-        assert_multi_tenancy(translation_factory, extra_site)
+    def test_multi_tenancy(self, assert_model_multi_tenancy):
+        assert_model_multi_tenancy("TranslationFactory")
