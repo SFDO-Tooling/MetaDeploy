@@ -204,13 +204,14 @@ def run_flows(
 
     # This means we're in a ScratchOrg.
     if not result.user:
-        if len(result.org_id) == 15:
-            # we've seen a bug where the front-end will pass back a 15 char org-id
-            # when re-running preflight checks on a scratch org.
-            # See W-10330033 for additional context
-            scratch_org = ScratchOrg.objects.filter(org_id__startswith=result.org_id)[0]
-        else:
-            scratch_org = ScratchOrg.objects.get(org_id=result.org_id)
+        # we've seen a bug where the front-end will pass back a 15 char org-id
+        # when re-running preflight checks on a scratch org.
+        # See W-10330033 for additional context
+        scratch_org = (
+            ScratchOrg.objects.filter(org_id__startswith=result.org_id)[0]
+            if len(result.org_id) == 15
+            else ScratchOrg.objects.get(org_id=result.org_id)
+        )
 
     repo_url = plan.version.product.repo_url
     commit_ish = plan.commit_ish or plan.version.commit_ish
