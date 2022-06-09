@@ -148,20 +148,11 @@ class AllowedListAccessMixin(models.Model):
         )
 
 
-class UserManager(CurrentSiteManager, BaseUserManager):
-    def get_queryset(self):
-        """
-        Return users on the current Site + superusers across all sites
-        """
-        lookup = self.get_site_lookup()
-        qs = BaseUserManager.get_queryset(self)
-
-        if lookup is None:
-            return qs
-        return qs.filter(Q(**lookup) | Q(is_superuser=True))
+class UserManager(BaseUserManager):
+    pass
 
 
-class User(HashIdMixin, SiteRelated, AbstractUser):
+class User(HashIdMixin, AbstractUser):
     objects = UserManager()
 
     def subscribable_by(self, user, session):

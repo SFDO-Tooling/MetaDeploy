@@ -24,8 +24,8 @@ class TestUserView:
         response = client.get(reverse("user"), SERVER_NAME=extra_site.domain)
 
         assert (
-            response.status_code == 401
-        ), "User should get an authentication error when trying to access a Site they don't belong to"
+            response.status_code == 200
+        ), "Users should be able to authenticate on all Sites using sessions"
 
 
 @pytest.mark.django_db

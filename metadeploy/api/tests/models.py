@@ -22,6 +22,7 @@ from ..models import (
     ScratchOrg,
     SiteProfile,
     Step,
+    User,
     Version,
 )
 
@@ -173,6 +174,10 @@ class TestAllowedListOrg:
 
 @pytest.mark.django_db
 class TestUser:
+    @pytest.mark.xfail(
+        reason="User should not be scoped by tenant",
+        raises=User.MultipleObjectsReturned,
+    )
     def test_multi_tenancy(self, assert_model_multi_tenancy):
         assert_model_multi_tenancy("UserFactory")
 

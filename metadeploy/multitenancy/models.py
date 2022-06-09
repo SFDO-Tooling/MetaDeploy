@@ -20,9 +20,9 @@ class CurrentSiteManager(models.Manager):
 
         # The existence of `self.instance` tells us we are in a related field lookup.
         # This means `__init__` was called without arguments by Django to create an
-        # on-the-fly related manager. We can't trust the value of `_site_field_name`, so
+        # on-the-fly related manager. We can't trust the value of `self._site_field`, so
         # we copy it from the default manager that was instantiated with the correct
-        # `field_name` in the model definition
+        # `site_field` in the model definition
         if hasattr(self, "instance"):
             self._site_field = self.model._default_manager._site_field
 

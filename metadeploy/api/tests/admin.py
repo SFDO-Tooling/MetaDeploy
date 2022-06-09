@@ -111,26 +111,3 @@ class TestSocialTokenAdmin:
         # redirected back to model list
         assert response.status_code == 302
         assert response.url == "/admin/socialaccount/socialtoken/"
-
-
-@pytest.mark.django_db
-def test_superuser_multi_tenancy(client, extra_site):
-    url = reverse("admin:index")
-    user = client.user
-    user.is_staff = True
-    user.save()
-
-    response = client.get(url)
-    assert response.status_code == 200
-
-    response = client.get(url, SERVER_NAME=extra_site.domain)
-    assert (
-        response.status_code == 302
-    ), "Regular staff users should not have access to other admin sites"
-
-    user.is_superuser = True
-    user.save()
-    response = client.get(url, SERVER_NAME=extra_site.domain)
-    assert (
-        response.status_code == 200
-    ), "Superusers should have access to all admin sites"
