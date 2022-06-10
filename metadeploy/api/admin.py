@@ -29,6 +29,7 @@ from .models import (
     ScratchOrg,
     SiteProfile,
     Step,
+    Token,
     Translation,
     User,
     Version,
@@ -280,6 +281,13 @@ class UserAdmin(AdminHelpTextMixin, BaseUserAdmin):
         "They must be used for support/debugging purposes only, and not exported from this system."
     )
     list_display = ("username", "is_active", "is_staff", "is_superuser", "date_joined")
+
+
+@admin.register(Token)
+class TokenAdmin(admin.ModelAdmin):
+    list_display = ("key", "user", "created")
+    fields = ("user",)
+    ordering = ("-created",)
 
 
 @admin.register(Version)

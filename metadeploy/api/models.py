@@ -28,6 +28,8 @@ from hashid_field import HashidAutoField
 from model_utils import Choices, FieldTracker
 from parler.managers import TranslatableQuerySet
 from parler.models import TranslatableModel, TranslatedFields
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.authtoken.models import Token as BaseToken
 from sfdo_template_helpers.crypto import fernet_decrypt
 from sfdo_template_helpers.fields import MarkdownField as BaseMarkdownField
 from sfdo_template_helpers.slugs import AbstractSlug, SlugMixin
@@ -227,6 +229,22 @@ class User(HashIdMixin, AbstractUser):
         if all(self.token) and self.org_id:
             return self.org_id
         return None
+
+
+class Token(SiteRelated, BaseToken):
+    """
+    Identical to DRF's Token, but allows users to have one token per Site, instead of
+    one token in general.
+    """
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ("user", "site")
+
+
+# Patch DRF token authentication to use our own model
+TokenAuthentication.model = Token
 
 
 class ProductCategory(SiteRelated, TranslatableModel):

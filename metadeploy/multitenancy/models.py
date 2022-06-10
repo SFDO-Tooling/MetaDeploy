@@ -48,6 +48,6 @@ class SiteRelated(models.Model):
         Set the `site` to the current Site when the record is first created, or the
         `update_site` argument is explicitly set to `True`.
         """
-        if update_site or (self.pk is None and self.site_id is None):
+        if update_site or (not self.pk and not self.site_id):
             self.site_id = current_site_id()
         super().save(*args, **kwargs)

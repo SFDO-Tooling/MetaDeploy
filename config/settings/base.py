@@ -84,7 +84,6 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "colorfield",
     "rest_framework",
-    "rest_framework.authtoken",
     "django_filters",
     "parler",
     "sfdo_template_helpers.oauth2.salesforce",
