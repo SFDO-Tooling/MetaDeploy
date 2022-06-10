@@ -1,7 +1,6 @@
 import pytest
 from django.contrib.admin.sites import AdminSite
 from django.test import RequestFactory
-from django.urls import reverse
 
 from ..admin import (
     AllowedListOrgAdmin,
