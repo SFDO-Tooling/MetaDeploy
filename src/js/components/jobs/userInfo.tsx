@@ -1,7 +1,7 @@
 import Card from '@salesforce/design-system-react/components/card';
 import Icon from '@salesforce/design-system-react/components/icon';
 import { format, parseISO } from 'date-fns';
-import * as React from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import ScratchOrgInfo from '@/js/components/scratchOrgs/scratchOrgInfo';

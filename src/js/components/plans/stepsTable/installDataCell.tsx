@@ -4,7 +4,7 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
-import * as React from 'react';
+import React, { ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ErrorIcon } from '@/js/components/plans/preflightResults';
@@ -172,7 +172,7 @@ const PreflightCell = (props: DataCellProps) => {
   const { t } = useTranslation();
 
   const handleChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
+    event: ChangeEvent<HTMLInputElement>,
     { checked }: { checked: boolean },
   ) => {
     /* istanbul ignore else */

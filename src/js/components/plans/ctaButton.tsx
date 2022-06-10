@@ -1,6 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Spinner from '@salesforce/design-system-react/components/spinner';
-import * as React from 'react';
+import React, { Component, ReactNode } from 'react';
 import { WithTranslation, withTranslation } from 'react-i18next';
 import { RouteComponentProps } from 'react-router-dom';
 
@@ -96,7 +96,7 @@ export const ActionBtn = ({
   btnVariant,
   className,
 }: {
-  label: string | React.ReactNode;
+  label: string | ReactNode;
   disabled?: boolean;
   onClick?: () => void;
   btnVariant?: string;
@@ -111,7 +111,7 @@ export const ActionBtn = ({
   />
 );
 
-class CtaButton extends React.Component<
+class CtaButton extends Component<
   Props,
   {
     preflightModalOpen: boolean;
@@ -676,10 +676,14 @@ class CtaButton extends React.Component<
 
     return (
       <>
-        {canUsePersistentOrg && !hasValidScratchOrg
-          ? this.getPersistentOrgCTA()
-          : null}
-        {canUseScratchOrg ? this.getScratchOrgCTA() : null}
+        {canUsePersistentOrg && !hasValidScratchOrg ? (
+          <div className="slds-m-bottom_small">
+            {this.getPersistentOrgCTA()}
+          </div>
+        ) : null}
+        {canUseScratchOrg ? (
+          <div className="slds-m-bottom_small">{this.getScratchOrgCTA()}</div>
+        ) : null}
       </>
     );
   }

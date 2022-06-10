@@ -1,6 +1,6 @@
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import classNames from 'classnames';
-import * as React from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { DataCellProps } from '@/js/components/plans/stepsTable';

@@ -1,6 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
-import * as React from 'react';
+import React, { Component } from 'react';
 import DocumentTitle from 'react-document-title';
 import { WithTranslation, withTranslation } from 'react-i18next';
 import { connect, ConnectedProps } from 'react-redux';
@@ -83,7 +83,7 @@ type State = {
   canceling: boolean;
 };
 
-class JobDetail extends React.Component<Props, State> {
+class JobDetail extends Component<Props, State> {
   // unmount -- we just want to prevent a post-unmount state update after the
   // action finishes.
   // https://reactjs.org/blog/2015/12/16/ismounted-antipattern.html

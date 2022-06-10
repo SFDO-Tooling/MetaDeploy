@@ -1,6 +1,6 @@
 import Alert from '@salesforce/design-system-react/components/alert';
 import AlertContainer from '@salesforce/design-system-react/components/alert/container';
-import * as React from 'react';
+import React, { Component } from 'react';
 import { WithTranslation, withTranslation } from 'react-i18next';
 import { RouteComponentProps } from 'react-router-dom';
 
@@ -13,7 +13,7 @@ type Props = {
   history?: RouteComponentProps['history'];
 } & WithTranslation;
 
-class CurrentJobAlert extends React.Component<Props> {
+class CurrentJobAlert extends Component<Props> {
   redirectToJob = () => {
     const { currentJob, history } = this.props;
     const { product_slug, version_label, plan_slug, id } = currentJob;

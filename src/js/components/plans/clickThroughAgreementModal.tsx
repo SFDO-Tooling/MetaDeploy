@@ -1,7 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Modal from '@salesforce/design-system-react/components/modal';
-import * as React from 'react';
+import React, { ChangeEvent, Component } from 'react';
 import { WithTranslation, withTranslation } from 'react-i18next';
 
 type Props = {
@@ -14,7 +14,7 @@ type State = {
   confirmed: boolean;
 };
 
-class ClickThroughAgreementModal extends React.Component<Props, State> {
+class ClickThroughAgreementModal extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = { confirmed: false };
@@ -32,7 +32,7 @@ class ClickThroughAgreementModal extends React.Component<Props, State> {
   };
 
   handleChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
+    event: ChangeEvent<HTMLInputElement>,
     { checked }: { checked: boolean },
   ) => {
     this.setState({ confirmed: checked });

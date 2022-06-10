@@ -1,6 +1,6 @@
 import Alert from '@salesforce/design-system-react/components/alert';
 import AlertContainer from '@salesforce/design-system-react/components/alert/container';
-import * as React from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 const reloadPage = (): void => {

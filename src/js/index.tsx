@@ -8,7 +8,7 @@ import standardSprite from '@salesforce-ux/design-system/assets/icons/standard-s
 import utilitySprite from '@salesforce-ux/design-system/assets/icons/utility-sprite/svg/symbols.svg';
 import { createBrowserHistory } from 'history';
 import { t } from 'i18next';
-import * as React from 'react';
+import React from 'react';
 import DocumentTitle from 'react-document-title';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';

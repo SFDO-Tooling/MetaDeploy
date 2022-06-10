@@ -1,5 +1,5 @@
 import Icon from '@salesforce/design-system-react/components/icon';
-import * as React from 'react';
+import React from 'react';
 import { useTranslation, WithTranslation } from 'react-i18next';
 import { Trans } from 'react-i18next';
 

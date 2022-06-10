@@ -1,6 +1,6 @@
 import Toast from '@salesforce/design-system-react/components/toast';
 import ToastContainer from '@salesforce/design-system-react/components/toast/container';
-import * as React from 'react';
+import React, { Component } from 'react';
 import { WithTranslation, withTranslation } from 'react-i18next';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
@@ -13,7 +13,7 @@ type State = {
   isOpen: boolean;
 };
 
-class OldVersionWarning extends React.Component<Props, State> {
+class OldVersionWarning extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = { isOpen: true };

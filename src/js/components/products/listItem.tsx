@@ -1,5 +1,5 @@
 import Card from '@salesforce/design-system-react/components/card';
-import * as React from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 

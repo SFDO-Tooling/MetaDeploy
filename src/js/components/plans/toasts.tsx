@@ -1,6 +1,6 @@
 import Toast from '@salesforce/design-system-react/components/toast';
 import ToastContainer from '@salesforce/design-system-react/components/toast/container';
-import * as React from 'react';
+import React, { Component, ComponentClass } from 'react';
 import { WithTranslation, withTranslation } from 'react-i18next';
 
 import { Job } from '@/js/store/jobs/reducer';
@@ -18,7 +18,7 @@ type State = {
 
 const { STATUS } = CONSTANTS;
 
-class Toasts extends React.Component<Props, State> {
+class Toasts extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = { isOpen: false };
@@ -108,4 +108,4 @@ class Toasts extends React.Component<Props, State> {
   }
 }
 
-export default withTranslation()(Toasts as React.ComponentClass<Props, State>);
+export default withTranslation()(Toasts as ComponentClass<Props, State>);

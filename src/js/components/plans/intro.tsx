@@ -1,5 +1,5 @@
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
-import * as React from 'react';
+import React, { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { getDuration } from '@/js/utils/dates';
@@ -15,11 +15,11 @@ const Intro = ({
 }: {
   averageDuration: string | null;
   isProductionOrg: boolean;
-  results: React.ReactNode;
-  cta: React.ReactNode;
-  preMessage?: React.ReactNode;
-  postMessage?: React.ReactNode;
-  backLink?: React.ReactNode;
+  results: ReactNode;
+  cta: ReactNode;
+  preMessage?: ReactNode;
+  postMessage?: ReactNode;
+  backLink?: ReactNode;
 }) => {
   const { t } = useTranslation();
 

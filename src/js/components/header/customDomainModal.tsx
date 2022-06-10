@@ -2,7 +2,7 @@ import Button from '@salesforce/design-system-react/components/button';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import cookies from 'js-cookie';
-import * as React from 'react';
+import React, { ChangeEvent, Component, createRef, FormEvent } from 'react';
 import { WithTranslation, withTranslation } from 'react-i18next';
 
 import { addUrlParams, extractCustomDomain, UrlParams } from '@/js/utils/api';
@@ -13,11 +13,11 @@ type Props = {
   redirectParams: UrlParams;
 } & WithTranslation;
 
-class CustomDomainModal extends React.Component<
+class CustomDomainModal extends Component<
   Props,
   { url: string; customDomain: string }
 > {
-  private formRef = React.createRef<HTMLFormElement>();
+  private formRef = createRef<HTMLFormElement>();
 
   constructor(props: Props) {
     super(props);
@@ -33,14 +33,14 @@ class CustomDomainModal extends React.Component<
     this.formRef.current?.submit();
   };
 
-  handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     /* istanbul ignore if */
     if (!this.state.customDomain) {
       event.preventDefault();
     }
   };
 
-  handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     this.setState({
       url: event.target.value,
       customDomain: extractCustomDomain(event.target.value.trim()),

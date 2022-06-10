@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { ReactNode } from 'react';
 import DocumentTitle from 'react-document-title';
 import { useTranslation } from 'react-i18next';
 import { Trans } from 'react-i18next';
@@ -8,11 +8,7 @@ import desertSvg from '@/img/desert.svg?raw';
 import Header from '@/js/components/header';
 import routes from '@/js/utils/routes';
 
-export const EmptyIllustration = ({
-  message,
-}: {
-  message: React.ReactNode;
-}) => (
+export const EmptyIllustration = ({ message }: { message: ReactNode }) => (
   <div className="slds-illustration slds-illustration_large">
     <div
       className="slds-m-vertical_xx-large"
@@ -29,7 +25,7 @@ const FourOhFour = ({
   message,
   history,
 }: {
-  message?: React.ReactNode;
+  message?: ReactNode;
 } & RouteComponentProps) => {
   const { t } = useTranslation();
 

@@ -1,5 +1,5 @@
 import SLDSProgressIndicator from '@salesforce/design-system-react/components/progress-indicator';
-import * as React from 'react';
+import React from 'react';
 import { useTranslation, WithTranslation } from 'react-i18next';
 
 import { CONSTANTS } from '@/js/store/plans/reducer';

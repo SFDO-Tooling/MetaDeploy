@@ -3,7 +3,7 @@ import Button from '@salesforce/design-system-react/components/button';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import DropdownTrigger from '@salesforce/design-system-react/components/menu-dropdown/button-trigger';
 import UNSAFE_DirectionSettings from '@salesforce/design-system-react/components/utilities/UNSAFE_direction';
-import * as React from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { FetchOrgJobsSucceeded } from '@/js/store/org/actions';

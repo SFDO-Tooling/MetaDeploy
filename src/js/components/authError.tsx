@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import DocumentTitle from 'react-document-title';
 import { useTranslation } from 'react-i18next';
 import { Trans } from 'react-i18next';

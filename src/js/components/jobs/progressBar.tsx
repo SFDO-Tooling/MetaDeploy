@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import * as React from 'react';
+import React, { Component } from 'react';
 import { WithTranslation, withTranslation } from 'react-i18next';
 
 import { Job } from '@/js/store/jobs/reducer';
@@ -17,7 +17,7 @@ const DEFAULTS = {
   PROGRESS_MAX: 0.8, // progress bar stops if step is [x] complete (out of `1`)
 };
 
-class ProgressBar extends React.Component<Props, State> {
+class ProgressBar extends Component<Props, State> {
   interval: NodeJS.Timeout | null | undefined;
 
   constructor(props: Props) {

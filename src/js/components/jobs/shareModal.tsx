@@ -4,7 +4,7 @@ import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import Radio from '@salesforce/design-system-react/components/radio-group/radio';
-import * as React from 'react';
+import React, { ChangeEvent, Component } from 'react';
 import { WithTranslation, withTranslation } from 'react-i18next';
 import { Trans } from 'react-i18next';
 
@@ -33,7 +33,7 @@ type Props = {
 };
 type WrappedProps = Props & TransientMessageProps & WithTranslation;
 
-class ShareModal extends React.Component<WrappedProps> {
+class ShareModal extends Component<WrappedProps> {
   input: HTMLInputElement | null | undefined;
 
   handleClose = () => {
@@ -63,7 +63,7 @@ class ShareModal extends React.Component<WrappedProps> {
     }
   };
 
-  handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { job, updateJob } = this.props;
     updateJob({ id: job.id, is_public: event.target.value });
   };

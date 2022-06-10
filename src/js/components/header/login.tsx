@@ -1,7 +1,7 @@
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import withLanguageDirection from '@salesforce/design-system-react/components/utilities/UNSAFE_direction/private/language-direction';
 import cookies from 'js-cookie';
-import * as React from 'react';
+import React, { Component, createRef, ReactNode } from 'react';
 import { WithTranslation, withTranslation } from 'react-i18next';
 
 import CustomDomainModal from '@/js/components/header/customDomainModal';
@@ -9,7 +9,7 @@ import { addUrlParams, UrlParams } from '@/js/utils/api';
 
 type Props = {
   id: string;
-  label?: string | React.ReactNode;
+  label?: string | ReactNode;
   buttonClassName: string;
   buttonVariant: string;
   triggerClassName?: string;
@@ -32,7 +32,7 @@ interface LoginFormElements extends HTMLFormControlsCollection {
   custom_domain: HTMLInputElement;
 }
 
-class Login extends React.Component<Props, { modalOpen: boolean }> {
+class Login extends Component<Props, { modalOpen: boolean }> {
   static defaultProps = {
     id: 'login',
     buttonClassName: 'slds-button_outline-brand',
@@ -44,7 +44,7 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
     redirectParams: {},
   };
 
-  private formRef = React.createRef<HTMLFormElement>();
+  private formRef = createRef<HTMLFormElement>();
 
   constructor(props: Props) {
     super(props);

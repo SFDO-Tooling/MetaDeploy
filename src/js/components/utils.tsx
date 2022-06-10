@@ -1,5 +1,5 @@
 import Spinner from '@salesforce/design-system-react/components/spinner';
-import React, { Component, useEffect, useRef } from 'react';
+import React, { Component, ComponentType, useEffect, useRef } from 'react';
 import { Redirect } from 'react-router-dom';
 
 import JobNotFound from '@/js/components/jobs/job404';
@@ -23,7 +23,7 @@ export type TransientMessageProps = {
 };
 
 export const withTransientMessage = function <Props>(
-  WrappedComponent: React.ComponentType<Props & TransientMessageProps>,
+  WrappedComponent: ComponentType<Props & TransientMessageProps>,
   options?: { duration?: number },
 ) {
   const defaults = {

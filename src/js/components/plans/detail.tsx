@@ -1,5 +1,5 @@
 import { find } from 'lodash';
-import * as React from 'react';
+import React, { Component } from 'react';
 import DocumentTitle from 'react-document-title';
 import { WithTranslation, withTranslation } from 'react-i18next';
 import { Trans } from 'react-i18next';
@@ -100,7 +100,7 @@ type State = {
 
 const { RESULT_STATUS } = CONSTANTS;
 
-class PlanDetail extends React.Component<Props, State> {
+class PlanDetail extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = { changedSteps: new Map() };
@@ -511,7 +511,6 @@ class PlanDetail extends React.Component<Props, State> {
                       product.slug,
                       getVersionLabel(product, version),
                     )}
-                    className="slds-p-top_small"
                   />
                 }
               />

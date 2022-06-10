@@ -1,6 +1,6 @@
 import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
-import * as React from 'react';
+import React, { Component } from 'react';
 import { WithTranslation, withTranslation } from 'react-i18next';
 
 import { SelectedSteps } from '@/js/components/plans/detail';
@@ -39,7 +39,7 @@ type State = {
   expandedPanels: Set<string>;
 };
 
-class StepsTable extends React.Component<Props, State> {
+class StepsTable extends Component<Props, State> {
   state = { showLogs: false, expandedPanels: new Set<string>() };
 
   componentDidUpdate(prevProps: Props) {

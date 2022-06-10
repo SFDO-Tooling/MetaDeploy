@@ -1,5 +1,5 @@
 import { sortBy } from 'lodash';
-import * as React from 'react';
+import React, { Component, ReactNode } from 'react';
 import DocumentTitle from 'react-document-title';
 import { WithTranslation, withTranslation } from 'react-i18next';
 import { Trans } from 'react-i18next';
@@ -85,7 +85,7 @@ type VersionDetailProps = VersionPropsFromRedux &
   RouteComponentProps &
   WithTranslation;
 
-class ProductDetail extends React.Component<ProductDetailProps> {
+class ProductDetail extends Component<ProductDetailProps> {
   fetchProductIfMissing() {
     const { product, productSlug, doFetchProduct } = this.props;
     if (product === undefined && productSlug) {
@@ -131,7 +131,7 @@ class ProductDetail extends React.Component<ProductDetailProps> {
   }
 }
 
-const BodySection = ({ children }: { children?: React.ReactNode }) => (
+const BodySection = ({ children }: { children?: ReactNode }) => (
   <div
     className="slds-text-longform
       slds-p-around_medium
@@ -142,7 +142,7 @@ const BodySection = ({ children }: { children?: React.ReactNode }) => (
   </div>
 );
 
-class VersionDetail extends React.Component<VersionDetailProps> {
+class VersionDetail extends Component<VersionDetailProps> {
   fetchProductIfMissing() {
     const { product, productSlug, doFetchProduct } = this.props;
     if (product === undefined && productSlug) {
