@@ -87,8 +87,8 @@ class Header extends Component<Props & PropsFromRedux> {
                 <img
                   className="site-logo"
                   src={logoSrc}
-                  alt={window.SITE_NAME}
-                  title={window.SITE_NAME}
+                  alt={window.GLOBALS.SITE.company_name}
+                  title={window.GLOBALS.SITE.company_name}
                 />
               ) : null}
             </Link>
