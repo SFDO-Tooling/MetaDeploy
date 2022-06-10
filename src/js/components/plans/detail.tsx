@@ -1,7 +1,7 @@
-import { t } from 'i18next';
 import { find } from 'lodash';
-import * as React from 'react';
+import React, { Component } from 'react';
 import DocumentTitle from 'react-document-title';
+import { WithTranslation, withTranslation } from 'react-i18next';
 import { Trans } from 'react-i18next';
 import { connect, ConnectedProps } from 'react-redux';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
@@ -93,14 +93,14 @@ const connector = connect(select, actions);
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
 export type SelectedSteps = Set<string>;
-type Props = PropsFromRedux & RouteComponentProps;
+type Props = PropsFromRedux & RouteComponentProps & WithTranslation;
 type State = {
   changedSteps: Map<string, boolean>;
 };
 
 const { RESULT_STATUS } = CONSTANTS;
 
-class PlanDetail extends React.Component<Props, State> {
+class PlanDetail extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = { changedSteps: new Map() };
@@ -283,7 +283,7 @@ class PlanDetail extends React.Component<Props, State> {
   }
 
   getPostMessage() {
-    const { user, product, version, plan, orgs } = this.props;
+    const { t, user, product, version, plan, orgs } = this.props;
 
     /* istanbul ignore if */
     if (!product || !version || !plan) {
@@ -410,6 +410,7 @@ class PlanDetail extends React.Component<Props, State> {
 
   render() {
     const {
+      t,
       user,
       product,
       productSlug,
@@ -510,7 +511,6 @@ class PlanDetail extends React.Component<Props, State> {
                       product.slug,
                       getVersionLabel(product, version),
                     )}
-                    className="slds-p-top_small"
                   />
                 }
               />
@@ -552,6 +552,6 @@ class PlanDetail extends React.Component<Props, State> {
   }
 }
 
-const WrappedPlanDetail = connector(withRouter(PlanDetail));
+const WrappedPlanDetail = connector(withRouter(withTranslation()(PlanDetail)));
 
 export default WrappedPlanDetail;

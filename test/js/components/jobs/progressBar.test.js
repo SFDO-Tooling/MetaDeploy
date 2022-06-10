@@ -17,10 +17,7 @@ describe('<ProgressBar />', () => {
       job: defaultJob,
     };
     const opts = { ...defaults, ...options };
-    const { getByText, queryByText, rerender } = render(
-      <ProgressBar job={opts.job} />,
-    );
-    return { getByText, queryByText, rerender };
+    return render(<ProgressBar job={opts.job} />);
   };
 
   test('renders progress bar', () => {
@@ -35,20 +32,18 @@ describe('<ProgressBar />', () => {
       jest.spyOn(window, 'clearInterval');
     });
 
+    afterEach(() => {
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+    });
+
     test('shows incremental progress within steps', () => {
       const job = { ...defaultJob };
       const { getByText, queryByText, rerender } = setup({ job });
 
       expect(getByText('25% Complete')).toBeVisible();
 
-      jest.advanceTimersByTime(10 * 1000);
-
-      expect(getByText('38% Complete')).toBeVisible();
-
-      jest.advanceTimersByTime(10 * 1000);
-
-      expect(getByText('45% Complete')).toBeVisible();
-
+      jest.advanceTimersByTime(20 * 1000);
       job.results['2'] = [{ status: 'ok' }];
       rerenderWithI18n(<ProgressBar job={job} />, rerender);
 
