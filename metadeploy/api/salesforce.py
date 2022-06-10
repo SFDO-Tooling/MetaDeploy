@@ -6,6 +6,7 @@ Salesforce utilities
 import json
 import os
 from datetime import datetime
+import time
 
 from cumulusci.core.config import OrgConfig, TaskConfig
 from cumulusci.core.runtime import BaseCumulusCI
@@ -16,7 +17,6 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import gettext_lazy as _
 from requests.exceptions import HTTPError
-from requests.structures import CaseInsensitiveDict
 from rq import get_current_job
 from simple_salesforce import Salesforce as SimpleSalesforce
 
@@ -150,51 +150,61 @@ def _get_org_result(
     """
     # Schema for ScratchOrgInfo object:
     # https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_objects_scratchorginfo.htm  # noqa: B950
-    scratch_org_definition = CaseInsensitiveDict(scratch_org_definition)
-    features = scratch_org_definition.get("features", [])
 
+    scratch_org_definition = {k.lower(): v for k, v in scratch_org_definition.items()}
+    features = scratch_org_definition.get("features", [])
     # Map between fields in the scratch org definition and fields on the ScratchOrgInfo object.
     # Start with fields that have special handling outside the .json.
-    create_args = CaseInsensitiveDict({
-        "AdminEmail": email,
-        "ConnectedAppConsumerKey": SF_CLIENT_ID,
-        "ConnectedAppCallbackUrl": SF_CALLBACK_URL,
-        "Description": f"{repo_owner}/{repo_name} {repo_branch}",
+    create_args = {
+        "adminemail": email,
+        "connectedappconsumerkey": SF_CLIENT_ID,
+        "connectedappcallbackurl": SF_CALLBACK_URL,
+        "description": f"{repo_owner}/{repo_name} {repo_branch}",
         # Override whatever is in scratch_org_config.days:
-        "DurationDays": duration,
-        "Features": ";".join(features) if isinstance(features, list) else features,
-        "Namespace": (
+        "durationdays": duration,
+        "features": ";".join(features) if isinstance(features, list) else features,
+        "namespace": (
             cci.project_config.project__package__namespace
             if scratch_org_config.namespaced
             else None
         ),
-    })
+    }
     # Loop over remaining fields from the ScratchOrgInfo schema and map to
     # data from the org definition.
     fields = [
         f["name"]
         for f in devhub_api.ScratchOrgInfo.describe()["fields"]
-        if f["createable"] and f["name"] not in create_args
+        if f["createable"] and f["name"].lower() not in create_args
     ]
 
     # Note that the special fields `objectSettings` and `settings`
     # are not in the ScratchOrgInfo schema.
     for field in fields:
-        if field in scratch_org_definition:
-            create_args[field] = scratch_org_definition[field]
+        field_name = field.lower()
+        if field_name in scratch_org_definition:
+            create_args[field_name] = scratch_org_definition[field_name]
 
     # Lastly, populate default items.
-    # Note that requests' CaseInsensitiveDict does not support setdefault()
-    if "OrgName" not in create_args:
-        create_args["OrgName"] = "MetaDeploy Scratch Org"
-    if "HasSampleData" not in create_args:
-        create_args["HasSampleData"] = False
+    create_args.setdefault("orgname", "MetaDeploy Scratch Org")
+    create_args.setdefault("hassampledata", False)
+
     if SFDX_SIGNUP_INSTANCE:  # pragma: nocover
-        create_args["Instance"] = SFDX_SIGNUP_INSTANCE
+        create_args["instance"] = SFDX_SIGNUP_INSTANCE
     response = devhub_api.ScratchOrgInfo.create(create_args)
 
     # Get details and update scratch org config
     return devhub_api.ScratchOrgInfo.get(response["id"])
+
+
+def _poll_for_scratch_org_completion(devhub_api, org_result):
+    while org_result["Status"] in ["New", "Creating"]:
+        time.sleep(10)
+        org_result = devhub_api.ScratchOrgInfo.get(org_result["Id"])
+
+    if org_result["Status"] != "Active":
+        raise ScratchOrgError(f"Scratch org creation failed: {org_result['ErrorCode']}")
+
+    return org_result
 
 
 def _mutate_scratch_org(*, scratch_org_config, org_result, email, duration):
@@ -289,6 +299,7 @@ def create_scratch_org(
         scratch_org_config=scratch_org_config,
         scratch_org_definition=scratch_org_definition,
     )
+    org_result = _poll_for_scratch_org_completion(devhub_api, org_result)
     _mutate_scratch_org(
         # Passed in to create_scratch_org:
         email=email,

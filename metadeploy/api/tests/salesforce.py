@@ -11,6 +11,7 @@ from ..salesforce import (
     ScratchOrgError,
     _get_devhub_api,
     _get_org_result,
+    _poll_for_scratch_org_completion,
     delete_scratch_org,
     refresh_access_token,
 )
@@ -139,17 +140,41 @@ def test_get_org_result():
     )
     assert result == devhub_api.ScratchOrgInfo.get.return_value
     devhub_api.ScratchOrgInfo.create.assert_called_once_with({
-        'AdminEmail': 'jpmao@mao-kwikowski.luna',
-        'ConnectedAppConsumerKey': settings.SFDX_CLIENT_ID,
-        'ConnectedAppCallbackUrl': settings.SFDX_CLIENT_CALLBACK_URL,
+        'adminemail': 'jpmao@mao-kwikowski.luna',
+        'connectedappconsumerkey': settings.SFDX_CLIENT_ID,
+        'connectedappcallbackurl': settings.SFDX_CLIENT_CALLBACK_URL,
         # Defaulted - should ignore the value in the definition
         # lack of `description` as a key proves case-insensitivity
-        'Description': 'Protogen/Caliban feature/experiment',
-        'DurationDays': 3,
+        'description': 'Protogen/Caliban feature/experiment',
+        'durationdays': 3,
         # From schema of ScratchOrgInfo
-        'FooField': 'barValue',
-        'Features': 'Communities;MarketingUser',
-        'Namespace': 'protogen',
-        'OrgName': 'MetaDeploy Scratch Org',
-        'HasSampleData': False
+        'foofield': 'barValue',
+        'features': 'Communities;MarketingUser',
+        'namespace': 'protogen',
+        'orgname': 'MetaDeploy Scratch Org',
+        'hassampledata': False
     })
+
+
+@patch("metadeploy.api.salesforce.time.sleep")
+def test_poll_for_scratch_org_completion__success(sleep):
+    scratch_org_info_id = "2SR4p000000DTAaGAO"
+    devhub_api = MagicMock()
+    initial_result = {"Id": scratch_org_info_id, "Status": "Creating", "ErrorCode": None}
+    end_result = {"Id": scratch_org_info_id, "Status": "Active", "ErrorCode": None}
+    devhub_api.ScratchOrgInfo.get.side_effect = [initial_result, end_result]
+
+    org_result = _poll_for_scratch_org_completion(devhub_api, initial_result)
+    assert org_result == end_result
+
+
+@patch("metadeploy.api.salesforce.time.sleep")
+def test_poll_for_scratch_org_completion__failure(sleep):
+    scratch_org_info_id = "2SR4p000000DTAaGAO"
+    devhub_api = MagicMock()
+    initial_result = {"Id": scratch_org_info_id, "Status": "Creating", "ErrorCode": None}
+    end_result = {"Id": scratch_org_info_id, "Status": "Failed", "ErrorCode": "Foo"}
+    devhub_api.ScratchOrgInfo.get.side_effect = [initial_result, end_result]
+
+    with pytest.raises(ScratchOrgError, match="Scratch org creation failed"):
+        _poll_for_scratch_org_completion(devhub_api, initial_result)
