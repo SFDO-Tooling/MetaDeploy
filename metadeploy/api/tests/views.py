@@ -14,26 +14,23 @@ from ..models import SUPPORTED_ORG_TYPES, Job, Plan, PreflightResult, ScratchOrg
 
 
 @pytest.mark.django_db
-def test_token_multi_tenancy(client, extra_site):
+def test_token_multi_tenancy(anon_client, user_factory, extra_site):
+    user = user_factory()
     url = reverse("user")
-    token1 = Token.objects.create(user=client.user)
+    token1 = Token.objects.create(user=user)
     with override_current_site_id(extra_site.id):
-        token2 = Token.objects.create(user=client.user)
+        token2 = Token.objects.create(user=user)
 
-    client.logout()  # Get rid of session auth, we'll use tokens instead
-    response = client.get(url)
-    assert response.status_code == 401
-
-    response = client.get(url, HTTP_AUTHORIZATION=f"Token {token1}")
+    response = anon_client.get(url, HTTP_AUTHORIZATION=f"Token {token1}")
     assert response.status_code == 200, "Token 1 should work on the default site"
-    response = client.get(url, HTTP_AUTHORIZATION=f"Token {token2}")
+    response = anon_client.get(url, HTTP_AUTHORIZATION=f"Token {token2}")
     assert response.status_code == 401, "Token 2 should not work on the default site"
 
-    response = client.get(
+    response = anon_client.get(
         url, SERVER_NAME=extra_site.domain, HTTP_AUTHORIZATION=f"Token {token2}"
     )
     assert response.status_code == 200, "Token 2 should work on the extra site"
-    response = client.get(
+    response = anon_client.get(
         url, SERVER_NAME=extra_site.domain, HTTP_AUTHORIZATION=f"Token {token1}"
     )
     assert response.status_code == 401, "Token 1 should not work on the extra site"
