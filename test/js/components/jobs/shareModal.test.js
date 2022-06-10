@@ -1,4 +1,4 @@
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import ShareModal from '@/js/components/jobs/shareModal';
@@ -52,7 +52,7 @@ describe('<ShareModal />', () => {
       plan: defaultPlan,
     };
     const opts = { ...defaults, ...options };
-    const { getByLabelText, getByText, queryByText, baseElement } = render(
+    return render(
       <ShareModal
         isOpen={true}
         job={opts.job}
@@ -61,12 +61,16 @@ describe('<ShareModal />', () => {
         updateJob={opts.updateJob}
       />,
     );
-    return { getByLabelText, getByText, queryByText, baseElement };
   };
 
   beforeEach(() => {
     jest.useFakeTimers();
     jest.spyOn(window, 'setTimeout');
+  });
+
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
   });
 
   describe('with error', () => {
@@ -130,7 +134,7 @@ describe('<ShareModal />', () => {
       document.execCommand = jest.fn();
     });
 
-    test('copies link to clipboard', () => {
+    test('copies link to clipboard', async () => {
       const { getByText, queryByText } = setup();
       fireEvent.click(getByText('Copy Link'));
 
@@ -138,9 +142,11 @@ describe('<ShareModal />', () => {
       expect(getByText('Copied to clipboard')).toBeVisible();
       expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), 5000);
 
-      jest.runAllTimers();
+      jest.runOnlyPendingTimers();
 
-      expect(queryByText('Copied to clipboard')).toBeNull();
+      await waitFor(() =>
+        expect(queryByText('Copied to clipboard')).toBeNull(),
+      );
     });
   });
 

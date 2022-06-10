@@ -1,4 +1,4 @@
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
@@ -613,9 +613,8 @@ describe('<JobDetail />', () => {
   });
 
   describe('cancel btn click', () => {
-    test('calls requestCancelJob', () => {
-      const canceled = Promise.resolve({});
-      requestCancelJob.mockReturnValue(() => canceled);
+    test('calls requestCancelJob', async () => {
+      requestCancelJob.mockReturnValue(() => Promise.resolve({}));
       const id = 'job-1';
       const { getAllByText } = setup({
         initialState: {
@@ -631,11 +630,11 @@ describe('<JobDetail />', () => {
       });
       fireEvent.click(getAllByText('Cancel Installation')[0]);
 
-      expect.assertions(2);
       expect(requestCancelJob).toHaveBeenCalledWith('job-1');
-      return canceled.then(() => {
-        expect(getAllByText('Canceling Installation…')[0]).toBeVisible();
-      });
+
+      await waitFor(() =>
+        expect(getAllByText('Canceling Installation…')[0]).toBeVisible(),
+      );
     });
   });
 

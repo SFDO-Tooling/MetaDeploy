@@ -1,7 +1,7 @@
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import { find } from 'lodash';
-import * as React from 'react';
+import React, { Component, ReactNode } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Link, RouteComponentProps } from 'react-router-dom';
 
@@ -42,10 +42,10 @@ const connector = connect(select, actions);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
-class Header extends React.Component<Props & PropsFromRedux> {
+class Header extends Component<Props & PropsFromRedux> {
   controls = () => {
     const { user, doLogout, hideLogin } = this.props;
-    let header: React.ReactNode = null;
+    let header: ReactNode = null;
     if (user) {
       header = <Logout user={user} doLogout={doLogout} />;
     } else if (!hideLogin) {
@@ -87,8 +87,8 @@ class Header extends React.Component<Props & PropsFromRedux> {
                 <img
                   className="site-logo"
                   src={logoSrc}
-                  alt={window.SITE_NAME}
-                  title={window.SITE_NAME}
+                  alt={window.GLOBALS.SITE.company_name}
+                  title={window.GLOBALS.SITE.company_name}
                 />
               ) : null}
             </Link>

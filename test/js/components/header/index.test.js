@@ -26,6 +26,7 @@ describe('<Header />', () => {
       window.SITE_NAME = 'My Site';
       window.GLOBALS.SITE = {
         company_logo: 'my/logo.png',
+        company_name: 'My Company',
       };
     });
 
@@ -37,7 +38,7 @@ describe('<Header />', () => {
     test('renders logo', () => {
       const { getByAltText } = setup();
 
-      expect(getByAltText('My Site')).toBeVisible();
+      expect(getByAltText('My Company')).toBeVisible();
     });
   });
 

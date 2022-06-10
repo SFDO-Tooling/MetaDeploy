@@ -1,20 +1,20 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Modal from '@salesforce/design-system-react/components/modal';
-import { t } from 'i18next';
-import * as React from 'react';
+import React, { ChangeEvent, Component } from 'react';
+import { WithTranslation, withTranslation } from 'react-i18next';
 
 type Props = {
   isOpen: boolean;
   text: string;
   toggleModal: (open: boolean) => void;
   startJob: () => void;
-};
+} & WithTranslation;
 type State = {
   confirmed: boolean;
 };
 
-class ClickThroughAgreementModal extends React.Component<Props, State> {
+class ClickThroughAgreementModal extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = { confirmed: false };
@@ -32,14 +32,14 @@ class ClickThroughAgreementModal extends React.Component<Props, State> {
   };
 
   handleChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
+    event: ChangeEvent<HTMLInputElement>,
     { checked }: { checked: boolean },
   ) => {
     this.setState({ confirmed: checked });
   };
 
   render() {
-    const { isOpen, text } = this.props;
+    const { t, isOpen, text } = this.props;
     const { confirmed } = this.state;
     const footer = [
       <Button key="cancel" label={t('Cancel')} onClick={this.handleClose} />,
@@ -56,6 +56,7 @@ class ClickThroughAgreementModal extends React.Component<Props, State> {
         isOpen={isOpen}
         heading={t('Product Terms of Use and Licenses')}
         size="medium"
+        dismissOnClickOutside={false}
         onRequestClose={this.handleClose}
         footer={footer}
       >
@@ -86,4 +87,4 @@ class ClickThroughAgreementModal extends React.Component<Props, State> {
   }
 }
 
-export default ClickThroughAgreementModal;
+export default withTranslation()(ClickThroughAgreementModal);

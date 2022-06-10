@@ -967,7 +967,8 @@ class PreflightResult(models.Model):
         if user.is_staff or self.user == user:
             return True
         scratch_org = ScratchOrg.objects.get_from_session(session)
-        return scratch_org and scratch_org.org_id == self.org_id
+        # ScratchOrg.org_id is either 15 or 18, so just truncate everything incase
+        return scratch_org and scratch_org.org_id[:15] == self.org_id[:15]
 
     def has_any_errors(self):
         for results in self.results.values():

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 
 import { Job } from '@/js/store/jobs/reducer';
 import { CONSTANTS } from '@/js/store/plans/reducer';

@@ -1,11 +1,11 @@
 import classNames from 'classnames';
-import { t } from 'i18next';
-import * as React from 'react';
+import React, { Component } from 'react';
+import { WithTranslation, withTranslation } from 'react-i18next';
 
 import { Job } from '@/js/store/jobs/reducer';
 import { CONSTANTS } from '@/js/store/plans/reducer';
 
-type Props = { job: Job };
+type Props = { job: Job } & WithTranslation;
 type State = {
   stepProgressPercent: number;
   completedSteps: number;
@@ -17,7 +17,7 @@ const DEFAULTS = {
   PROGRESS_MAX: 0.8, // progress bar stops if step is [x] complete (out of `1`)
 };
 
-class ProgressBar extends React.Component<Props, State> {
+class ProgressBar extends Component<Props, State> {
   interval: NodeJS.Timeout | null | undefined;
 
   constructor(props: Props) {
@@ -107,7 +107,7 @@ class ProgressBar extends React.Component<Props, State> {
   }
 
   render() {
-    const { job } = this.props;
+    const { t, job } = this.props;
     const isRunning = job.status === CONSTANTS.STATUS.STARTED;
     const isFailed =
       job.status === CONSTANTS.STATUS.FAILED ||
@@ -177,4 +177,4 @@ class ProgressBar extends React.Component<Props, State> {
   }
 }
 
-export default ProgressBar;
+export default withTranslation()(ProgressBar);

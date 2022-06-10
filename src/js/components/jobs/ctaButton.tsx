@@ -1,6 +1,6 @@
 import Icon from '@salesforce/design-system-react/components/icon';
-import { t } from 'i18next';
-import * as React from 'react';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 import { ActionBtn, LabelWithSpinner } from '@/js/components/plans/ctaButton';
@@ -25,6 +25,8 @@ const CtaButton = ({
   preflightRequired: boolean;
   openModal: () => void;
 }) => {
+  const { t } = useTranslation();
+
   switch (job.status) {
     case STATUS.STARTED:
       return (
