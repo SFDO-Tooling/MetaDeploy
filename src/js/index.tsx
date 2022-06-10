@@ -47,7 +47,7 @@ const history = createBrowserHistory();
 
 const App = () => (
   <DocumentTitle title={window.SITE_NAME}>
-    <div className="slds-grid slds-grid_frame slds-grid_vertical">
+    <div className="slds-grid slds-grid_frame slds-grid_vertical metadeploy-frame">
       <ErrorBoundary>
         <div className="slds-grow slds-shrink-none">
           <ErrorBoundary>
