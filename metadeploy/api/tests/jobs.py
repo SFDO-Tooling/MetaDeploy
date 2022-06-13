@@ -412,6 +412,7 @@ class TestCreateScratchOrg:
                         "ScratchOrg": "abc123",
                         "SignupUsername": "test",
                         "AuthCode": "abc123",
+                        "Status": "Active"
                     }
                 }
             )
@@ -508,6 +509,7 @@ class TestCreateScratchOrg:
                         "ScratchOrg": "abc123",
                         "SignupUsername": "test",
                         "AuthCode": "abc123",
+                        "Status": "Active"
                     }
                 }
             )
