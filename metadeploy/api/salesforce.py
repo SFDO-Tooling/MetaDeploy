@@ -197,12 +197,21 @@ def _get_org_result(
 
 
 def _poll_for_scratch_org_completion(devhub_api, org_result):
-    while org_result["Status"] in ["New", "Creating"]:
+    total_time_waiting = 0
+    # Don't allow waiting more than the default job timeout.
+    while (
+        org_result["Status"] in ["New", "Creating"]
+        and total_time_waiting < settings.METADEPLOY_JOB_TIMEOUT
+    ):
         time.sleep(10)
+        total_time_waiting += 10
         org_result = devhub_api.ScratchOrgInfo.get(org_result["Id"])
 
     if org_result["Status"] != "Active":
-        raise ScratchOrgError(f"Scratch org creation failed: {org_result['ErrorCode']}")
+        error = org_result['ErrorCode'] or _('Org creation timed out')
+        raise ScratchOrgError(
+            f"Scratch org creation failed: {error}"
+        )
 
     return org_result
 
