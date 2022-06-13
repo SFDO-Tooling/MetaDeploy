@@ -127,6 +127,9 @@ class ProgressBar extends React.Component<Props, State> {
           <span>
             <strong>
               {t('Installation Progress')}
+              <span className="slds-assistive-text">
+                {t('{{percent}}% Complete', { percent: progressRounded })}
+              </span>
               {isFailed ? (
                 <>
                   :{' '}
@@ -166,11 +169,7 @@ class ProgressBar extends React.Component<Props, State> {
               'progress-bar-failed': isFailed,
             })}
             style={{ width: `${progress}%` }}
-          >
-            <span className="slds-assistive-text">
-              {t('Progress: {{percent}}%', { percent: progressRounded })}
-            </span>
-          </span>
+          ></span>
         </div>
       </div>
     );
