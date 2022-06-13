@@ -149,7 +149,7 @@ django-rq==2.5.1
     # via
     #   -r requirements/prod.in
     #   django-rq-scheduler
-django-rq-scheduler==2022.5.1
+django-rq-scheduler==2022.6.1
     # via -r requirements/prod.in
 django-storages==1.12.3
     # via -r requirements/prod.in
