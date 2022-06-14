@@ -97,7 +97,9 @@ def _get_org_details(*, cci, org_name, project_path):
     return (scratch_org_config, scratch_org_definition)
 
 
-def refresh_access_token(*, scratch_org, config, org_name, keychain=None):
+def refresh_access_token(
+    *, scratch_org, config, org_name, keychain=None, sbx_login=False
+):
     """Refresh the JWT.
 
     Construct a new OrgConfig because ScratchOrgConfig tries to use sfdx
@@ -123,6 +125,7 @@ def _deploy_org_settings(*, cci, org_name, scratch_org_config, scratch_org):
         config=scratch_org_config.config,
         org_name=org_name,
         keychain=cci.keychain,
+        sbx_login=True,
     )
     path = os.path.join(cci.project_config.repo_root, scratch_org_config.config_file)
     task_config = TaskConfig({"options": {"definition_file": path}})
@@ -208,10 +211,8 @@ def _poll_for_scratch_org_completion(devhub_api, org_result):
         org_result = devhub_api.ScratchOrgInfo.get(org_result["Id"])
 
     if org_result["Status"] != "Active":
-        error = org_result['ErrorCode'] or _('Org creation timed out')
-        raise ScratchOrgError(
-            f"Scratch org creation failed: {error}"
-        )
+        error = org_result["ErrorCode"] or _("Org creation timed out")
+        raise ScratchOrgError(f"Scratch org creation failed: {error}")
 
     return org_result
 

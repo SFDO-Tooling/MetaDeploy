@@ -1117,6 +1117,7 @@ class ScratchOrg(HashIdMixin, models.Model):
             config=self.config,
             org_name=org_name or self.plan.org_config_name,
             keychain=keychain,
+            sbx_login=True,
         )
         return org_config
 
