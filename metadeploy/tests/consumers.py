@@ -229,25 +229,12 @@ async def test_push_notification_consumer__subscribe_preflight(
     await communicator.disconnect()
 
 
-# Test for a bug we found where ord ids differ in length
-# between ScratchOrg.org_id and Preflight.org_id.
-# Org Id length seems to vary on ScratchOrg.org_id
-# so that's the value we alter
-id_15 = "00D" + 12 * "x"
-id_18 = "00D" + 15 * "x"
-test_ids = [(id_18, id_18), (id_15, id_18)]
-
-
-@pytest.mark.parametrize("scratch_org_id,preflight_org_id", test_ids)
 @pytest.mark.django_db
 @pytest.mark.asyncio
 async def test_push_notification_consumer__subscribe_preflight_scratch_org(
-    scratch_org_id,
-    preflight_org_id,
-    scratch_org_factory,
-    preflight_result_factory,
-    plan_factory,
+    scratch_org_factory, preflight_result_factory, plan_factory
 ):
+    org_id = "00Dxxxxxxxxxxxxxxx"
     uuid = str(uuid4())
     plan = await generate_model(plan_factory)
     await generate_model(
@@ -255,14 +242,14 @@ async def test_push_notification_consumer__subscribe_preflight_scratch_org(
         uuid=uuid,
         status=ScratchOrg.Status.complete,
         enqueued_at=timezone.now(),
-        org_id=scratch_org_id,
+        org_id=org_id,
     )
     preflight = await generate_model(
         preflight_result_factory,
         user=None,
         status=PreflightResult.Status.complete,
         plan=plan,
-        org_id=preflight_org_id,
+        org_id=org_id,
     )
 
     communicator = WebsocketCommunicator(
