@@ -359,6 +359,7 @@ def create_scratch_org(org_pk):
         preflight_result = run_preflight_checks_sync(org)
         async_to_sync(preflight_started)(org, preflight_result)
 
+    print(f"{preflight_result.org_id=}")
     if plan.required_step_ids.count() == plan.steps.count():
         # Start installation job automatically if both:
         # - Plan has no preflight
@@ -402,6 +403,8 @@ calculate_average_plan_runtime_job = job(calculate_average_plan_runtime)
 
 def run_preflight_checks_sync(org: ScratchOrg, release_test=False):
     """Runs the preflight checks of the given plan against an org synchronously"""
+    print(f"{org.org_id=}")
+
     preflight_result = PreflightResult.objects.create(
         user=None,
         plan=org.plan,
@@ -470,6 +473,7 @@ def setup_scratch_org(org_pk: str):
             org.fail(e)
             raise
 
+    print(f"{scratch_org_config=}")
     # this stores some values on the scratch
     # org model in the db
     org.complete(scratch_org_config)

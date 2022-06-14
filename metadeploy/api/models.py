@@ -1106,7 +1106,10 @@ class ScratchOrg(HashIdMixin, models.Model):
     def complete(self, org_config):
         self.status = ScratchOrg.Status.complete
         self.config = org_config.config
-        self.org_id = convert_to_18(org_config.org_id)
+        print(f"{org_config.org_id=}")
+        converted_org_id = convert_to_18(org_config.org_id)
+        print(f"18 org_id: {converted_org_id}")
+        self.org_id = converted_org_id
         self.expires_at = org_config.expires
         self.save()
         async_to_sync(notify_org_changed)(self, _type="SCRATCH_ORG_CREATED")
@@ -1117,6 +1120,7 @@ class ScratchOrg(HashIdMixin, models.Model):
             config=self.config,
             org_name=org_name or self.plan.org_config_name,
             keychain=keychain,
+            sbx_login=True,
         )
         return org_config
 
