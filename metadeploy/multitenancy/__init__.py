@@ -12,7 +12,7 @@ def override_current_site_id(site_id: int):
     """
     Allow filtering for objects on other sites
     """
-    previous = getattr(state, "site_id", None)
+    previous = getattr(state, "site_id_override", None)
     state.site_id_override = site_id
     try:
         yield

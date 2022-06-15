@@ -4,6 +4,7 @@ import pytest
 from allauth.socialaccount.models import SocialAccount, SocialApp, SocialToken
 from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
+from django.core.cache import cache
 from pytest_factoryboy import register
 from rest_framework.test import APIClient
 from sfdo_template_helpers.crypto import fernet_encrypt
@@ -313,6 +314,8 @@ def adjust_site_domain():
 def extra_site(settings, site_factory):
     site = site_factory(domain="extra-site.test")
     settings.ALLOWED_HOSTS += ["extra-site.test"]
+    # Ensure CurrentSiteMiddleware doesn't get a stale ID for the site with this domain
+    cache.delete(f"SITE_ID:{site.domain}")
     return site
 
 
