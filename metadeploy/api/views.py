@@ -10,6 +10,7 @@ from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, mixins, status, viewsets
+from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -25,6 +26,7 @@ from .models import (
     Product,
     ProductCategory,
     ScratchOrg,
+    Token,
     Version,
 )
 from .paginators import ProductPaginator
@@ -98,11 +100,18 @@ class UserView(generics.RetrieveAPIView):
     serializer_class = FullUserSerializer
     permission_classes = (IsAuthenticated,)
 
-    def get_queryset(self):
-        return self.model.objects.filter(id=self.request.user.id)
-
     def get_object(self):
-        return self.get_queryset().get()
+        return self.request.user
+
+
+class ObtainTokenView(ObtainAuthToken):
+    def post(self, request, *args, **kwargs):
+        """Identical to DRF's implementation, but querying our own model instead"""
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data["user"]
+        token, _ = Token.objects.get_or_create(user=user)
+        return Response({"token": token.key})
 
 
 class JobViewSet(

@@ -14,7 +14,7 @@ from ..models import SUPPORTED_ORG_TYPES, Job, Plan, PreflightResult, ScratchOrg
 
 
 @pytest.mark.django_db
-def test_token_multi_tenancy(anon_client, user_factory, extra_site):
+def test_auth_multi_tenancy(anon_client, user_factory, extra_site):
     user = user_factory()
     url = reverse("user")
     token1 = Token.objects.create(user=user)
@@ -50,6 +50,23 @@ class TestUserView:
         assert (
             response.status_code == 200
         ), "Users should be able to authenticate on all Sites using sessions"
+
+
+@pytest.mark.django_db
+class TestObtainTokenView:
+    def test_multi_tenancy(self, anon_client, user_factory, extra_site):
+        url = reverse("token")
+        user = user_factory()
+        data = {"username": user.username, "password": "foobar"}
+        token1 = Token.objects.create(user=user)
+        with override_current_site_id(extra_site.id):
+            token2 = Token.objects.create(user=user)
+
+        response = anon_client.post(url, data=data)
+        assert response.data.get("token") == token1.key
+
+        response = anon_client.post(url, data=data, SERVER_NAME=extra_site.domain)
+        assert response.data.get("token") == token2.key
 
 
 @pytest.mark.django_db

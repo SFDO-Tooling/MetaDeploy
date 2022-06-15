@@ -3,6 +3,7 @@ from rest_framework import routers
 
 from .views import (
     JobViewSet,
+    ObtainTokenView,
     OrgViewSet,
     PlanViewSet,
     ProductCategoryViewSet,
@@ -20,4 +21,7 @@ router.register("plans", PlanViewSet, basename="plan")
 router.register("orgs", OrgViewSet, basename="org")
 router.register("categories", ProductCategoryViewSet, basename="productcategory")
 router.register("scratch-orgs", ScratchOrgViewSet, basename="scratch-org")
-urlpatterns = router.urls + [path("user/", UserView.as_view(), name="user")]
+urlpatterns = router.urls + [
+    path("user/", UserView.as_view(), name="user"),
+    path("token/", ObtainTokenView.as_view(), name="token"),
+]
