@@ -14,7 +14,7 @@ from ..models import SUPPORTED_ORG_TYPES, Job, Plan, PreflightResult, ScratchOrg
 
 
 @pytest.mark.django_db
-def test_auth_multi_tenancy(anon_client, user_factory, extra_site):
+def test_token_auth_multi_tenancy(anon_client, user_factory, extra_site):
     user = user_factory()
     url = reverse("user")
     token1 = Token.objects.create(user=user)
