@@ -1,21 +1,52 @@
-import pytest
-from django.contrib.sites.shortcuts import get_current_site
-from django.test import override_settings
+from datetime import datetime
 
-from ..api.models import SiteProfile
-from ..context_processors import env
+import pytest
 
 
 @pytest.mark.django_db
-@override_settings(SENTRY_DSN="https://example.com")
-def test_env(rf):
-    request = rf.get("/")
-    site_profile = SiteProfile(site_id=1)
-    site_profile.save()
-    site = get_current_site(request)
-    site.siteprofile = site_profile
-    result = env(request)
+def test_env(settings, anon_client, site_profile_factory, extra_site):
+    year = datetime.utcnow().year
+    settings.DEVHUB_USERNAME = "abc"
+    settings.TOKEN_LIFETIME_MINUTES = 5
+    settings.PREFLIGHT_LIFETIME_MINUTES = 15
+    settings.SENTRY_DSN = "https://example.com"
+    site_profile_factory(welcome_text="Default")
+    site_profile_factory(welcome_text="Extra", site=extra_site)
 
-    assert "GLOBALS" in result
-    assert "SENTRY_DSN" in result["GLOBALS"]
-    assert "SITE" in result["GLOBALS"]
+    response = anon_client.get("/")
+    assert response.context["GLOBALS"] == {
+        "PREFLIGHT_LIFETIME_MINUTES": 15,
+        "TOKEN_LIFETIME_MINUTES": 5,
+        "SITE": {
+            "name": "MetaDeploy",
+            "company_name": "Mao-Kwikowski Mercantile",
+            "welcome_text": "<p>Default</p>",
+            "master_agreement": "<p>MSA</p>",
+            "copyright_notice": "<p>(c) 2022</p>",
+            "show_metadeploy_wordmark": True,
+            "company_logo": None,
+            "favicon": None,
+        },
+        "YEAR": year,
+        "SENTRY_DSN": "https://example.com",
+        "SCRATCH_ORGS_AVAILABLE": True,
+    }
+
+    response = anon_client.get("/", SERVER_NAME=extra_site.domain)
+    assert response.context["GLOBALS"] == {
+        "PREFLIGHT_LIFETIME_MINUTES": 15,
+        "TOKEN_LIFETIME_MINUTES": 5,
+        "SITE": {
+            "name": "MetaDeploy",
+            "company_name": "Mao-Kwikowski Mercantile",
+            "welcome_text": "<p>Extra</p>",
+            "master_agreement": "<p>MSA</p>",
+            "copyright_notice": "<p>(c) 2022</p>",
+            "show_metadeploy_wordmark": True,
+            "company_logo": None,
+            "favicon": None,
+        },
+        "YEAR": year,
+        "SENTRY_DSN": "https://example.com",
+        "SCRATCH_ORGS_AVAILABLE": True,
+    }

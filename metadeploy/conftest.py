@@ -217,7 +217,7 @@ class SiteProfileFactory(factory.django.DjangoModelFactory):
     master_agreement = "MSA"
     copyright_notice = "(c) 2022"
 
-    site = factory.Iterator(Site.objects.all())
+    site = factory.SubFactory(SiteFactory)
 
 
 @register
