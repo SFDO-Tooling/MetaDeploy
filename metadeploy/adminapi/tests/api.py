@@ -316,7 +316,7 @@ class TestPlanViewSet:
         assert plan.tier == Plan.Tier.secondary
         # plan default tier is primary utilizing planfactory settings.
         response = admin_api_client.post(
-            f"http://testserver/admin/rest/plans",
+            "http://testserver/admin/rest/plans",
             {
                 "title": "Sample plan",
                 "order_key": 0,
