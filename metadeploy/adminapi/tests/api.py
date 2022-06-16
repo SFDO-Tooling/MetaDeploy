@@ -1,4 +1,3 @@
-from django.forms import ChoiceField
 import pytest
 from rest_framework.test import APIClient
 
@@ -244,7 +243,7 @@ class TestPlanViewSet:
             format="json",
         )
         assert response.status_code == 400
-        assert response.json()[0] == "Updating steps not supported."
+        assert response.json() == ["Updating steps not supported."]
 
     def test_update_primary(self, admin_api_client, plan_factory):
         plan = plan_factory()
@@ -263,7 +262,7 @@ class TestPlanViewSet:
         plan = plan_factory()
         assert plan.tier == Plan.Tier.primary
         response = admin_api_client.post(
-            f"http://testserver/admin/rest/plans",
+            "http://testserver/admin/rest/plans",
             {
                 "title": "Sample plan",
                 "order_key": 0,

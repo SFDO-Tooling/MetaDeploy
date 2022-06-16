@@ -9,7 +9,7 @@ from sfdo_template_helpers.admin.views import AdminAPIViewSet
 
 from metadeploy.adminapi.translations import update_all_translations
 from metadeploy.api import models
-from metadeploy.api.models import SUPPORTED_ORG_TYPES, Plan, Version
+from metadeploy.api.models import SUPPORTED_ORG_TYPES, Plan
 from metadeploy.api.serializers import get_from_data_or_instance
 
 
@@ -91,7 +91,6 @@ class PlanSerializer(AdminAPISerializer):
                 get_from_data_or_instance(self.instance, data, "tier")
                 or Plan.Tier.primary
             )
-            plan_id = get_from_data_or_instance(self.instance, data, "id")
             plan_version = get_from_data_or_instance(self.instance, data, "version")
             if tier == Plan.Tier.primary and plan_version.primary_plan:
                 raise serializers.ValidationError(
