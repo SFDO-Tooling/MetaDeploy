@@ -52,7 +52,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/setup-docker-compose
+      - id: setup
+        uses: ./.github/setup-docker-compose
+      - name: Copy index.html for Django templates
+        run: |
+          mkdir -p dist
+          docker cp $(docker create ${{ steps.setup.outputs.tag }}):/app/dist/prod/index.html ./dist/
       - name: Test backend
         # prettier-ignore
         run: >
