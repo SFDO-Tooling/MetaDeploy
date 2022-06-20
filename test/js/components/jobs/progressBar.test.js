@@ -21,9 +21,9 @@ describe('<ProgressBar />', () => {
   };
 
   test('renders progress bar', () => {
-    const { getByText } = setup();
+    const { getAllByText } = setup();
 
-    expect(getByText('25% Complete')).toBeVisible();
+    expect(getAllByText('25% Complete')).not.toBeNull();
   });
 
   describe('step progress', () => {
@@ -39,27 +39,27 @@ describe('<ProgressBar />', () => {
 
     test('shows incremental progress within steps', () => {
       const job = { ...defaultJob };
-      const { getByText, queryByText, rerender } = setup({ job });
+      const { getAllByText, queryAllByText, rerender } = setup({ job });
 
-      expect(getByText('25% Complete')).toBeVisible();
+      expect(getAllByText('25% Complete')).toHaveLength(2);
 
       jest.advanceTimersByTime(20 * 1000);
       job.results['2'] = [{ status: 'ok' }];
       rerenderWithI18n(<ProgressBar job={job} />, rerender);
 
-      expect(getByText('50% Complete')).toBeVisible();
+      expect(getAllByText('50% Complete')).toHaveLength(2);
 
       job.status = 'failed';
       rerenderWithI18n(<ProgressBar job={job} />, rerender);
 
       expect(clearInterval).toHaveBeenCalledTimes(2);
-      expect(queryByText('50% Complete')).toBeNull();
+      expect(queryAllByText('50% Complete')).toHaveLength(0);
     });
   });
 
   describe('complete', () => {
     test('renders complete progress bar', () => {
-      const { getByText } = setup({
+      const { getAllByText } = setup({
         job: {
           ...defaultJob,
           results: {
@@ -72,13 +72,13 @@ describe('<ProgressBar />', () => {
         },
       });
 
-      expect(getByText('100% Complete')).toBeVisible();
+      expect(getAllByText('100% Complete')).toHaveLength(2);
     });
   });
 
   describe('failed', () => {
     test('renders failed progress bar', () => {
-      const { getByText, queryByText } = setup({
+      const { getByText, queryAllByText } = setup({
         job: {
           ...defaultJob,
           results: {
@@ -90,13 +90,13 @@ describe('<ProgressBar />', () => {
       });
 
       expect(getByText('Failed')).toBeVisible();
-      expect(queryByText('100% Complete')).toBeNull();
+      expect(queryAllByText('100% Complete')).toHaveLength(1);
     });
   });
 
   describe('canceled', () => {
     test('renders canceled progress bar', () => {
-      const { getByText, queryByText } = setup({
+      const { getByText, queryAllByText } = setup({
         job: {
           ...defaultJob,
           results: {
@@ -108,7 +108,7 @@ describe('<ProgressBar />', () => {
       });
 
       expect(getByText('Canceled')).toBeVisible();
-      expect(queryByText('100% Complete')).toBeNull();
+      expect(queryAllByText('100% Complete')).toHaveLength(1);
     });
   });
 });
