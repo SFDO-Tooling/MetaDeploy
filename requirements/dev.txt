@@ -16,7 +16,7 @@ attrs==21.4.0
     # via
     #   -c requirements/prod.txt
     #   pytest
-babel==2.10.1
+babel==2.10.3
     # via sphinx
 backcall==0.2.0
     # via ipython
@@ -172,7 +172,7 @@ pytest-cov==3.0.0
     # via -r requirements/dev.in
 pytest-django==4.5.2
     # via -r requirements/dev.in
-pytest-factoryboy==2.4.0
+pytest-factoryboy==2.5.0
     # via -r requirements/dev.in
 pytest-mock==3.7.0
     # via -r requirements/dev.in
@@ -202,7 +202,7 @@ six==1.16.0
     #   vcrpy
 snowballstemmer==2.2.0
     # via sphinx
-sphinx==5.0.1
+sphinx==5.0.2
     # via
     #   -r requirements/dev.in
     #   myst-parser
@@ -225,7 +225,7 @@ sqlparse==0.4.2
     # via
     #   -c requirements/prod.txt
     #   django
-stack-data==0.2.0
+stack-data==0.3.0
     # via ipython
 tomli==2.0.1
     # via
@@ -233,7 +233,7 @@ tomli==2.0.1
     #   coverage
     #   pep517
     #   pytest
-traitlets==5.2.2.post1
+traitlets==5.3.0
     # via
     #   ipython
     #   matplotlib-inline
