@@ -1,7 +1,7 @@
 import pytest
 from rest_framework.test import APIClient
 
-from metadeploy.api.models import SUPPORTED_ORG_TYPES
+from metadeploy.api.models import SUPPORTED_ORG_TYPES, Plan
 
 
 @pytest.mark.django_db
@@ -220,7 +220,7 @@ class TestPlanViewSet:
         }
         assert response.json() == expected
 
-    def test_update(self, admin_api_client, plan_factory):
+    def test_update_no_steps_error(self, admin_api_client, plan_factory):
         plan = plan_factory()
 
         response = admin_api_client.put(
@@ -243,6 +243,114 @@ class TestPlanViewSet:
             format="json",
         )
         assert response.status_code == 400
+        assert response.json() == ["Updating steps not supported."]
+
+    def test_update_primary(self, admin_api_client, plan_factory):
+        plan = plan_factory()
+        assert plan.tier == Plan.Tier.primary
+        response = admin_api_client.put(
+            f"http://testserver/admin/rest/plans/{plan.id}",
+            {
+                "title": "Sample plan",
+                "version": f"http://testserver/admin/rest/versions/{plan.version.id}",
+            },
+            format="json",
+        )
+        assert response.status_code == 200, response.json()
+
+    def test_create_another_primary(self, admin_api_client, plan_factory):
+        plan = plan_factory()
+        assert plan.tier == Plan.Tier.primary
+        response = admin_api_client.post(
+            "http://testserver/admin/rest/plans",
+            {
+                "title": "Sample plan",
+                "order_key": 0,
+                "plan_template": (
+                    f"http://testserver/admin/rest/plantemplates/{plan.plan_template.id}"
+                ),
+                "preflight_message_additional": "",
+                "post_install_message_additional": "",
+                "steps": [
+                    {
+                        "path": "task1",
+                        "name": "Task 1",
+                        "step_num": "1.0",
+                        "task_class": "cumulusci.core.tests.test_tasks._TaskHasResult",
+                    },
+                    {
+                        "path": "task2",
+                        "name": "Task 2",
+                        "step_num": "1.3",
+                        "task_class": "cumulusci.core.tests.test_tasks._TaskHasResult",
+                    },
+                ],
+                "version": f"http://testserver/admin/rest/versions/{plan.version.id}",
+                "supported_orgs": "Persistent",
+                "org_config_name": "release",
+                "scratch_org_duration_override": None,
+            },
+            format="json",
+        )
+        assert response.status_code == 400
+        assert response.json() == {
+            "version": ["You must not have more than one primary plan per version"]
+        }
+
+    def test_update_secondary(self, admin_api_client, plan_factory):
+        plan = plan_factory(tier=Plan.Tier.secondary)
+        assert plan.tier == Plan.Tier.secondary
+
+        response = admin_api_client.put(
+            f"http://testserver/admin/rest/plans/{plan.id}",
+            {
+                "title": "Sample plan",
+                "version": f"http://testserver/admin/rest/versions/{plan.version.id}",
+            },
+            format="json",
+        )
+        assert response.status_code == 200, response.json()
+
+    def test_create_another_secondary(self, admin_api_client, plan_factory):
+        plan = plan_factory(tier=Plan.Tier.secondary)
+        assert plan.tier == Plan.Tier.secondary
+        # plan default tier is primary utilizing planfactory settings.
+        response = admin_api_client.post(
+            "http://testserver/admin/rest/plans",
+            {
+                "title": "Sample plan",
+                "order_key": 0,
+                "plan_template": (
+                    f"http://testserver/admin/rest/plantemplates/{plan.plan_template.id}"
+                ),
+                "preflight_message_additional": "",
+                "post_install_message_additional": "",
+                "steps": [
+                    {
+                        "path": "task1",
+                        "name": "Task 1",
+                        "step_num": "1.0",
+                        "task_class": "cumulusci.core.tests.test_tasks._TaskHasResult",
+                    },
+                    {
+                        "path": "task2",
+                        "name": "Task 2",
+                        "step_num": "1.3",
+                        "task_class": "cumulusci.core.tests.test_tasks._TaskHasResult",
+                    },
+                ],
+                "version": f"http://testserver/admin/rest/versions/{plan.version.id}",
+                "supported_orgs": "Persistent",
+                "org_config_name": "release",
+                "scratch_org_duration_override": None,
+                "tier": "secondary",
+            },
+            format="json",
+        )
+        assert response.status_code == 400
+        assert response.json() == {
+            "version": ["You must not have more than one secondary plan per version"]
+        }
 
     def test_ipaddress_restriction(self, user_factory, plan_factory):
         client = APIClient(REMOTE_ADDR="8.8.8.8")
