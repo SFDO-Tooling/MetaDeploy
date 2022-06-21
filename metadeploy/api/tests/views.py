@@ -1,15 +1,30 @@
 from contextlib import ExitStack
 from datetime import datetime
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
 import django_rq
 import pytest
+from django.core.management import call_command
 from django.urls import reverse
 
 from metadeploy.conftest import format_timestamp
 
 from ..models import SUPPORTED_ORG_TYPES, Job, Plan, PreflightResult, ScratchOrg
+
+
+def test_openapi_schema(tmp_path):
+    schema_file = Path("docs/api/schema.yml")
+    temp_file = tmp_path / "schema.yml"
+
+    cmd = "spectacular --file {} --validate --fail-on-warn"
+    call_command(*cmd.format(temp_file).split())
+
+    assert schema_file.read_text() == temp_file.read_text(), (
+        "The OpenAPI schema is outdated. Run `python manage.py "
+        f"{cmd.format(schema_file)}` and commit the results."
+    )
 
 
 @pytest.mark.django_db

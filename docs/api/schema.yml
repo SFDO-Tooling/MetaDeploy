@@ -1,0 +1,1310 @@
+openapi: 3.0.3
+info:
+  title: MetaDeploy
+  version: 0.1.0
+  description: 2019-2022, Salesforce.org
+paths:
+  /api/categories/:
+    get:
+      operationId: categories_list
+      description: A `Category` is an organizing principle associated with `Products`.
+      tags:
+      - categories
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductCategory'
+          description: ''
+  /api/categories/{id}/:
+    get:
+      operationId: categories_retrieve
+      description: A `Category` is an organizing principle associated with `Products`.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this product category.
+        required: true
+      tags:
+      - categories
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductCategory'
+          description: ''
+  /api/jobs/:
+    post:
+      operationId: jobs_create
+      description: This is a constrained endpoint. You cannot list or meaningfully
+        update.
+      tags:
+      - jobs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Job'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Job'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Job'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+          description: ''
+  /api/jobs/{id}/:
+    get:
+      operationId: jobs_retrieve
+      description: This is a constrained endpoint. You cannot list or meaningfully
+        update.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this job.
+        required: true
+      tags:
+      - jobs
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+          description: ''
+    put:
+      operationId: jobs_update
+      description: This is a constrained endpoint. You cannot list or meaningfully
+        update.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this job.
+        required: true
+      tags:
+      - jobs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Job'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Job'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Job'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+          description: ''
+    patch:
+      operationId: jobs_partial_update
+      description: This is a constrained endpoint. You cannot list or meaningfully
+        update.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this job.
+        required: true
+      tags:
+      - jobs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedJob'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedJob'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedJob'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+          description: ''
+    delete:
+      operationId: jobs_destroy
+      description: This is a constrained endpoint. You cannot list or meaningfully
+        update.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this job.
+        required: true
+      tags:
+      - jobs
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/orgs/:
+    get:
+      operationId: orgs_retrieve
+      description: |-
+        This will return data on the user's current org(s). It is not a
+        list endpoint, but does not take a pk, so we have to implement
+        it this way.
+      tags:
+      - orgs
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/plans/:
+    get:
+      operationId: plans_list
+      description: |-
+        A `Version` has many `Plans`, which detail the concrete steps to go through to apply
+        metadata to an org. Put another way, a `Plan` is like a particular set of options
+        for the `Version`.
+      parameters:
+      - in: query
+        name: product
+        schema:
+          type: string
+      - in: query
+        name: slug
+        schema:
+          type: string
+      - in: query
+        name: version
+        schema:
+          type: string
+          format: HashID
+      tags:
+      - plans
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Plan'
+          description: ''
+  /api/plans/{id}/:
+    get:
+      operationId: plans_retrieve
+      description: |-
+        A `Version` has many `Plans`, which detail the concrete steps to go through to apply
+        metadata to an org. Put another way, a `Plan` is like a particular set of options
+        for the `Version`.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this plan.
+        required: true
+      tags:
+      - plans
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plan'
+          description: ''
+  /api/plans/{id}/preflight/:
+    get:
+      operationId: plans_preflight_retrieve
+      description: |-
+        A `Version` has many `Plans`, which detail the concrete steps to go through to apply
+        metadata to an org. Put another way, a `Plan` is like a particular set of options
+        for the `Version`.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this plan.
+        required: true
+      tags:
+      - plans
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreflightResult'
+          description: ''
+    post:
+      operationId: plans_preflight_create
+      description: |-
+        A `Version` has many `Plans`, which detail the concrete steps to go through to apply
+        metadata to an org. Put another way, a `Plan` is like a particular set of options
+        for the `Version`.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this plan.
+        required: true
+      tags:
+      - plans
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreflightResult'
+          description: ''
+  /api/plans/{id}/scratch_org/:
+    get:
+      operationId: plans_scratch_org_retrieve
+      description: |-
+        A `Version` has many `Plans`, which detail the concrete steps to go through to apply
+        metadata to an org. Put another way, a `Plan` is like a particular set of options
+        for the `Version`.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this plan.
+        required: true
+      tags:
+      - plans
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScratchOrg'
+          description: ''
+    post:
+      operationId: plans_scratch_org_create
+      description: |-
+        A `Version` has many `Plans`, which detail the concrete steps to go through to apply
+        metadata to an org. Put another way, a `Plan` is like a particular set of options
+        for the `Version`.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this plan.
+        required: true
+      tags:
+      - plans
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScratchOrg'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ScratchOrg'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ScratchOrg'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScratchOrg'
+          description: ''
+  /api/plans/get_one/:
+    get:
+      operationId: plans_get_one_retrieve
+      description: |-
+        This takes a set of filters and returns a single entry if
+        there's one entry that results from their application, and a 404
+        otherwise.
+      tags:
+      - plans
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plan'
+          description: ''
+  /api/products/:
+    get:
+      operationId: products_list
+      description: A `Product` is a set of `Versions` of metadata for your Salesforce
+        org.
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: integer
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: slug
+        schema:
+          type: string
+      tags:
+      - products
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProductList'
+          description: ''
+  /api/products/{id}/:
+    get:
+      operationId: products_retrieve
+      description: A `Product` is a set of `Versions` of metadata for your Salesforce
+        org.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this product.
+        required: true
+      tags:
+      - products
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+          description: ''
+  /api/products/get_one/:
+    get:
+      operationId: products_get_one_retrieve
+      description: |-
+        This takes a set of filters and returns a single entry if
+        there's one entry that results from their application, and a 404
+        otherwise.
+      tags:
+      - products
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+          description: ''
+  /api/scratch-orgs/{id}/redirect/:
+    get:
+      operationId: scratch_orgs_redirect_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this scratch org.
+        required: true
+      tags:
+      - scratch-orgs
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '302':
+          description: No response body
+  /api/user/:
+    get:
+      operationId: user_retrieve
+      description: This is a degenerate endpoint that just shows some details of the
+        current user.
+      tags:
+      - user
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FullUser'
+          description: ''
+  /api/versions/:
+    get:
+      operationId: versions_list
+      description: A `Version` is a specific iteration of a `Product`.
+      parameters:
+      - in: query
+        name: label
+        schema:
+          type: string
+      - in: query
+        name: product
+        schema:
+          type: string
+          format: HashID
+      tags:
+      - versions
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Version'
+          description: ''
+  /api/versions/{id}/:
+    get:
+      operationId: versions_retrieve
+      description: A `Version` is a specific iteration of a `Product`.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this version.
+        required: true
+      tags:
+      - versions
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Version'
+          description: ''
+  /api/versions/{id}/additional_plans/:
+    get:
+      operationId: versions_additional_plans_list
+      description: A `Version` is a specific iteration of a `Product`.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this version.
+        required: true
+      - in: query
+        name: label
+        schema:
+          type: string
+      - in: query
+        name: product
+        schema:
+          type: string
+          format: HashID
+      tags:
+      - versions
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Plan'
+          description: ''
+  /api/versions/get_one/:
+    get:
+      operationId: versions_get_one_retrieve
+      description: |-
+        This takes a set of filters and returns a single entry if
+        there's one entry that results from their application, and a 404
+        otherwise.
+      tags:
+      - versions
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Version'
+          description: ''
+components:
+  schemas:
+    FullUser:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        valid_token_for:
+          type: string
+          nullable: true
+          readOnly: true
+        org_name:
+          type: string
+          nullable: true
+          readOnly: true
+        org_type:
+          type: string
+          nullable: true
+          readOnly: true
+        is_production_org:
+          type: boolean
+          readOnly: true
+        is_staff:
+          type: boolean
+          title: Staff status
+          description: Designates whether the user can log into this admin site.
+      required:
+      - id
+      - is_production_org
+      - org_name
+      - org_type
+      - username
+      - valid_token_for
+    Job:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        creator:
+          allOf:
+          - $ref: '#/components/schemas/LimitedUser'
+          nullable: true
+          readOnly: true
+        plan:
+          type: string
+          format: HashID
+        steps:
+          type: array
+          items:
+            type: string
+            format: HashID
+        instance_url:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        org_id:
+          type: string
+          nullable: true
+          readOnly: true
+        results:
+          type: object
+          example:
+            Lw7K5wK:
+            - status: ok
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        edited_at:
+          type: string
+          format: date-time
+          readOnly: true
+        enqueued_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        job_id:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusEnum'
+          readOnly: true
+        org_name:
+          type: string
+          nullable: true
+          readOnly: true
+        org_type:
+          type: string
+          readOnly: true
+        is_production_org:
+          type: boolean
+          readOnly: true
+        product_slug:
+          type: string
+          readOnly: true
+        version_label:
+          type: string
+          readOnly: true
+        version_is_most_recent:
+          type: boolean
+          readOnly: true
+        plan_slug:
+          type: string
+          readOnly: true
+        error_count:
+          type: integer
+          readOnly: true
+        warning_count:
+          type: integer
+          readOnly: true
+        is_public:
+          type: boolean
+        user_can_edit:
+          type: boolean
+          readOnly: true
+        message:
+          type: string
+          readOnly: true
+        error_message:
+          type: string
+          readOnly: true
+      required:
+      - created_at
+      - creator
+      - edited_at
+      - enqueued_at
+      - error_count
+      - error_message
+      - id
+      - instance_url
+      - is_production_org
+      - job_id
+      - message
+      - org_id
+      - org_name
+      - org_type
+      - plan
+      - plan_slug
+      - product_slug
+      - results
+      - status
+      - steps
+      - user_can_edit
+      - version_is_most_recent
+      - version_label
+      - warning_count
+    LayoutEnum:
+      enum:
+      - Default
+      - Card
+      type: string
+    LimitedUser:
+      type: object
+      properties:
+        username:
+          type: string
+        is_staff:
+          type: boolean
+          title: Staff status
+          description: Designates whether the user can log into this admin site.
+      required:
+      - username
+    PaginatedProductList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+    PatchedJob:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        creator:
+          allOf:
+          - $ref: '#/components/schemas/LimitedUser'
+          nullable: true
+          readOnly: true
+        plan:
+          type: string
+          format: HashID
+        steps:
+          type: array
+          items:
+            type: string
+            format: HashID
+        instance_url:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        org_id:
+          type: string
+          nullable: true
+          readOnly: true
+        results:
+          type: object
+          example:
+            Lw7K5wK:
+            - status: ok
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        edited_at:
+          type: string
+          format: date-time
+          readOnly: true
+        enqueued_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        job_id:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusEnum'
+          readOnly: true
+        org_name:
+          type: string
+          nullable: true
+          readOnly: true
+        org_type:
+          type: string
+          readOnly: true
+        is_production_org:
+          type: boolean
+          readOnly: true
+        product_slug:
+          type: string
+          readOnly: true
+        version_label:
+          type: string
+          readOnly: true
+        version_is_most_recent:
+          type: boolean
+          readOnly: true
+        plan_slug:
+          type: string
+          readOnly: true
+        error_count:
+          type: integer
+          readOnly: true
+        warning_count:
+          type: integer
+          readOnly: true
+        is_public:
+          type: boolean
+        user_can_edit:
+          type: boolean
+          readOnly: true
+        message:
+          type: string
+          readOnly: true
+        error_message:
+          type: string
+          readOnly: true
+    Plan:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        title:
+          type: string
+        version:
+          type: string
+          format: HashID
+          readOnly: true
+        preflight_message:
+          type: string
+          readOnly: true
+        tier:
+          $ref: '#/components/schemas/TierEnum'
+        slug:
+          type: string
+          readOnly: true
+        old_slugs:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        order_key:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/Step'
+        is_allowed:
+          type: boolean
+          readOnly: true
+        is_listed:
+          type: boolean
+        not_allowed_instructions:
+          type: string
+          readOnly: true
+        average_duration:
+          type: integer
+          readOnly: true
+        requires_preflight:
+          type: boolean
+          readOnly: true
+        supported_orgs:
+          $ref: '#/components/schemas/SupportedOrgsEnum'
+        scratch_org_duration:
+          type: integer
+          readOnly: true
+      required:
+      - average_duration
+      - id
+      - is_allowed
+      - not_allowed_instructions
+      - old_slugs
+      - preflight_message
+      - requires_preflight
+      - scratch_org_duration
+      - slug
+      - title
+      - version
+    PreflightResult:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        instance_url:
+          type: string
+          format: uri
+          readOnly: true
+          nullable: true
+        org_id:
+          type: string
+          readOnly: true
+          nullable: true
+        user:
+          type: string
+          format: HashID
+          readOnly: true
+        plan:
+          type: string
+          format: HashID
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        edited_at:
+          type: string
+          format: date-time
+          readOnly: true
+        is_valid:
+          type: boolean
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusEnum'
+          readOnly: true
+        results:
+          type: object
+          example:
+            Lw7K5wK:
+            - status: ok
+          readOnly: true
+        error_count:
+          type: integer
+          readOnly: true
+        warning_count:
+          type: integer
+          readOnly: true
+        is_ready:
+          type: boolean
+          readOnly: true
+      required:
+      - created_at
+      - edited_at
+      - error_count
+      - id
+      - instance_url
+      - is_ready
+      - is_valid
+      - org_id
+      - plan
+      - results
+      - status
+      - user
+      - warning_count
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        title:
+          type: string
+        description:
+          type: string
+        short_description:
+          type: string
+        click_through_agreement:
+          type: string
+        category:
+          type: string
+        color:
+          type: string
+          pattern: ^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$
+          maxLength: 18
+        icon:
+          type: object
+          additionalProperties:
+            type: string
+          nullable: true
+          readOnly: true
+        image:
+          type: string
+          format: uri
+        most_recent_version:
+          $ref: '#/components/schemas/Version'
+        slug:
+          type: string
+          readOnly: true
+        old_slugs:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        is_allowed:
+          type: boolean
+          readOnly: true
+        is_listed:
+          type: boolean
+          readOnly: true
+        order_key:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        not_allowed_instructions:
+          type: string
+          nullable: true
+          readOnly: true
+        layout:
+          $ref: '#/components/schemas/LayoutEnum'
+      required:
+      - category
+      - click_through_agreement
+      - description
+      - icon
+      - id
+      - is_allowed
+      - is_listed
+      - most_recent_version
+      - not_allowed_instructions
+      - old_slugs
+      - short_description
+      - slug
+      - title
+    ProductCategory:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+        description:
+          type: string
+        is_listed:
+          type: boolean
+        first_page:
+          properties:
+            count:
+              type: number
+              format: int
+            next:
+              type: string
+              format: uri
+            previous:
+              type: string
+              format: uri
+            results:
+              type: array
+              items:
+                $ref: '#/components/schemas/Product'
+          readOnly: true
+      required:
+      - description
+      - first_page
+      - id
+      - title
+    ScratchOrg:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        plan:
+          type: string
+          format: HashID
+        email:
+          type: string
+          format: email
+          writeOnly: true
+          nullable: true
+          maxLength: 254
+        enqueued_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        edited_at:
+          type: string
+          format: date-time
+          readOnly: true
+        expires_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusEnum'
+          readOnly: true
+        org_id:
+          type: string
+          readOnly: true
+          nullable: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+      required:
+      - created_at
+      - edited_at
+      - email
+      - enqueued_at
+      - expires_at
+      - id
+      - org_id
+      - plan
+      - status
+      - uuid
+    StatusEnum:
+      enum:
+      - started
+      - complete
+      - failed
+      - canceled
+      type: string
+    Step:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        name:
+          type: string
+        description:
+          type: string
+        is_required:
+          type: boolean
+        is_recommended:
+          type: boolean
+        kind:
+          type: string
+        kind_icon:
+          type: string
+          nullable: true
+          readOnly: true
+      required:
+      - description
+      - id
+      - kind
+      - kind_icon
+      - name
+    SupportedOrgsEnum:
+      enum:
+      - Persistent
+      - Scratch
+      - Both
+      type: string
+    TierEnum:
+      enum:
+      - primary
+      - secondary
+      - additional
+      type: string
+    Version:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        product:
+          type: string
+          format: HashID
+          readOnly: true
+        label:
+          type: string
+          pattern: ^[a-zA-Z0-9._+-]+$
+          maxLength: 1024
+        description:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        primary_plan:
+          $ref: '#/components/schemas/Plan'
+        secondary_plan:
+          $ref: '#/components/schemas/Plan'
+        is_listed:
+          type: boolean
+      required:
+      - created_at
+      - description
+      - id
+      - label
+      - primary_plan
+      - product
+      - secondary_plan
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    tokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Token-based authentication with required prefix "Token"
