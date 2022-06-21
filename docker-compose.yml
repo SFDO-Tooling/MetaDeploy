@@ -3,6 +3,7 @@ version: '3'
 services:
   postgres:
     environment:
+      POSTGRES_DB: metadeploy
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: sample_db_password
     volumes:

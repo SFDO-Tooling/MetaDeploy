@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 import factory
 import factory.fuzzy
 import pytest
@@ -277,6 +279,7 @@ class ScratchOrgFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = ScratchOrg
 
+    enqueued_at = datetime.now(tz=timezone.utc)
     email = "test@example.com"
     plan = factory.SubFactory(PlanFactory)
 

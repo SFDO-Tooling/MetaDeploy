@@ -369,6 +369,7 @@ SOCIALACCOUNT_STORE_TOKENS = True
 JS_REVERSE_JS_VAR_NAME = "api_urls"
 JS_REVERSE_EXCLUDE_NAMESPACES = ["admin", "admin_rest"]
 
+METADEPLOY_JOB_TIMEOUT = env.int("METADEPLOY_JOB_TIMEOUT", default=3600)
 
 # Redis configuration:
 
@@ -386,7 +387,7 @@ CACHES = {
 RQ_QUEUES = {
     "default": {
         "USE_REDIS_CACHE": "default",
-        "DEFAULT_TIMEOUT": env.int("METADEPLOY_JOB_TIMEOUT", default=3600),
+        "DEFAULT_TIMEOUT": METADEPLOY_JOB_TIMEOUT,
         "DEFAULT_RESULT_TTL": 720,
     },
     "short": {

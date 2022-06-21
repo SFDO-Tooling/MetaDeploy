@@ -967,8 +967,7 @@ class PreflightResult(models.Model):
         if user.is_staff or self.user == user:
             return True
         scratch_org = ScratchOrg.objects.get_from_session(session)
-        # ScratchOrg.org_id is either 15 or 18, so just truncate everything incase
-        return scratch_org and scratch_org.org_id[:15] == self.org_id[:15]
+        return scratch_org and scratch_org.org_id == self.org_id
 
     def has_any_errors(self):
         for results in self.results.values():
@@ -1170,6 +1169,7 @@ class ScratchOrg(HashIdMixin, models.Model):
             config=self.config,
             org_name=org_name or self.plan.org_config_name,
             keychain=keychain,
+            sbx_login=True,
         )
         return org_config
 

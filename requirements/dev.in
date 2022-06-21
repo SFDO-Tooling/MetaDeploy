@@ -12,6 +12,7 @@ factory_boy
 flake8
 ipython
 isort
+myst-parser
 pip-tools
 pytest-asyncio
 pytest-cov
