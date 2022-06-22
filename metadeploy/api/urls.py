@@ -19,10 +19,12 @@ router.register("jobs", JobViewSet, basename="job")
 router.register("products", ProductViewSet, basename="product")
 router.register("versions", VersionViewSet, basename="version")
 router.register("plans", PlanViewSet, basename="plan")
-router.register("orgs", OrgViewSet, basename="org")
 router.register("categories", ProductCategoryViewSet)
 router.register("scratch-orgs", ScratchOrgViewSet, basename="scratch-org")
-urlpatterns = router.urls + [path("user/", UserView.as_view(), name="user")]
+urlpatterns = router.urls + [
+    path("user/", UserView.as_view(), name="user"),
+    path("orgs/", OrgViewSet.as_view(), name="org-list"),
+]
 
 if settings.API_DOCS_ENABLED:  # pragma: nocover
     urlpatterns += [

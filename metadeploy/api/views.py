@@ -360,7 +360,7 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
             return self.scratch_org_post(request)
 
 
-class OrgViewSet(viewsets.ViewSet):
+class OrgViewSet(generics.RetrieveAPIView):
     permission_classes = (AllowAny,)
 
     @staticmethod
@@ -379,13 +379,12 @@ class OrgViewSet(viewsets.ViewSet):
             }
         ).data
 
-    # TODO: refactor or find a way to document this endpoint. The trick is that the
-    # response can have variable keys
-    def list(self, request):
+    @extend_schema(
+        responses={200: {"type": "object", "additionalProperties": {"type": "object"}}}
+    )
+    def get(self, request):
         """
-        This will return data on the user's current org(s). It is not a
-        list endpoint, but does not take a pk, so we have to implement
-        it this way.
+        This will return data on the user's current org(s).
         """
         response = {}
 

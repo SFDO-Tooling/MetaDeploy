@@ -195,10 +195,7 @@ paths:
   /api/orgs/:
     get:
       operationId: orgs_retrieve
-      description: |-
-        This will return data on the user's current org(s). It is not a
-        list endpoint, but does not take a pk, so we have to implement
-        it this way.
+      description: This will return data on the user's current org(s).
       tags:
       - orgs
       security:
@@ -207,7 +204,13 @@ paths:
       - {}
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: object
+          description: ''
   /api/plans/:
     get:
       operationId: plans_list
@@ -793,7 +796,6 @@ components:
       - plan
       - plan_slug
       - product_slug
-      - results
       - status
       - steps
       - user_can_edit
