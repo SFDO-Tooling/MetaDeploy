@@ -417,7 +417,7 @@ class JobSerializer(ErrorWarningCountMixin, HashIdModelSerializer):
     version_label = serializers.CharField(source="plan.version.label", read_only=True)
     version_is_most_recent = serializers.SerializerMethodField()
     plan_slug = serializers.CharField(source="plan.slug", read_only=True)
-    results = StepResultsField()
+    results = StepResultsField(required=False)
 
     plan = serializers.PrimaryKeyRelatedField(
         queryset=Plan.objects.all(), pk_field=serializers.CharField()
