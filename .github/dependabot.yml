@@ -1,14 +1,8 @@
 version: 2
 updates:
-  - package-ecosystem: pip
+  - package-ecosystem: github-actions
     directory: '/'
     schedule:
       interval: weekly
-      day: wednesday
-    open-pull-requests-limit: 0
-  - package-ecosystem: npm
-    directory: '/'
-    schedule:
-      interval: weekly
-      day: wednesday
-    open-pull-requests-limit: 0
+      time: '05:00'
+      timezone: America/New_York

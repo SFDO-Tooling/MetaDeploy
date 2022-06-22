@@ -9,7 +9,7 @@ Retrieve
 --------
 
 .. sourcecode:: http
-   
+
    GET /api/user/ HTTP/1.1
 
 .. sourcecode:: http
@@ -18,10 +18,10 @@ Retrieve
 
    {
      "id": "3Lw7OwK",
-     "username": "kit@oddbird.net",
-     "email": "kit@oddbird.net",
+     "username": "foo@example.com",
+     "email": "foo@example.com",
      "valid_token_for": "00Dxxxxxxxxxxxxxxx",
-     "org_name": "Oddbird",
+     "org_name": "OddBird",
      "org_type": "Developer Edition",
      "is_staff": true
    }

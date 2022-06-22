@@ -1,6 +1,6 @@
 import Icon from '@salesforce/design-system-react/components/icon';
 import UNSAFE_DirectionSettings from '@salesforce/design-system-react/components/utilities/UNSAFE_direction';
-import * as React from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 
 const BackLink = ({

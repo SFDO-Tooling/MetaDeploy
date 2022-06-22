@@ -4,8 +4,8 @@ import DataTableCell from '@salesforce/design-system-react/components/data-table
 import Icon from '@salesforce/design-system-react/components/icon';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
-import { t } from 'i18next';
-import * as React from 'react';
+import React, { ReactNode, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { JobError } from '@/js/components/plans/preflightResults';
 import { DataCellProps } from '@/js/components/plans/stepsTable';
@@ -19,6 +19,7 @@ type Props = DataCellProps & {
 };
 
 const NameDataCell = (props: Props) => {
+  const { t } = useTranslation();
   const {
     preflight,
     job,
@@ -33,7 +34,7 @@ const NameDataCell = (props: Props) => {
 
   const itemId = item?.id;
 
-  const onTogglePanel = React.useCallback(() => {
+  const onTogglePanel = useCallback(() => {
     /* istanbul ignore else */
     if (itemId) {
       togglePanel(itemId);
@@ -66,7 +67,7 @@ const NameDataCell = (props: Props) => {
     optionalMsg = optional?.message || '';
     logs = job ? result.logs : null;
   }
-  let display: React.ReactNode = name;
+  let display: ReactNode = name;
   if (optionalMsg) {
     display = `${name} — ${optionalMsg}`;
   }

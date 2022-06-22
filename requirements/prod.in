@@ -1,4 +1,6 @@
-
+# Dependencies are kept up-to-date automatically in *.txt files by the
+# upgrade-deps.yml workflow. Avoid pinning specific versions here unless required
+# for stability.
 
 https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.20.0.tar.gz
 coloredlogs
@@ -10,10 +12,10 @@ bleach
 boto3
 channels
 channels-redis
-dj-database-url
 django-allauth
 django-colorfield
 django-binary-database-files
+django-environ
 django-filter
 django-hashid-field
 django-js-reverse

@@ -4,8 +4,8 @@ import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import Radio from '@salesforce/design-system-react/components/radio-group/radio';
-import { t } from 'i18next';
-import * as React from 'react';
+import React, { ChangeEvent, Component } from 'react';
+import { WithTranslation, withTranslation } from 'react-i18next';
 import { Trans } from 'react-i18next';
 
 import JobMessage from '@/js/components/jobs/jobMessage';
@@ -31,9 +31,9 @@ type Props = {
     readonly id: string;
   }) => Promise<JobUpdated>;
 };
-type WrappedProps = Props & TransientMessageProps;
+type WrappedProps = Props & TransientMessageProps & WithTranslation;
 
-class ShareModal extends React.Component<WrappedProps> {
+class ShareModal extends Component<WrappedProps> {
   input: HTMLInputElement | null | undefined;
 
   handleClose = () => {
@@ -63,7 +63,7 @@ class ShareModal extends React.Component<WrappedProps> {
     }
   };
 
-  handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { job, updateJob } = this.props;
     updateJob({ id: job.id, is_public: event.target.value });
   };
@@ -74,7 +74,7 @@ class ShareModal extends React.Component<WrappedProps> {
   };
 
   getErrorMessage() {
-    const { job, plan } = this.props;
+    const { t, job, plan } = this.props;
     const hasError = job.error_count !== undefined && job.error_count > 0;
     const isFailed = job.status === CONSTANTS.STATUS.FAILED;
     const showError = hasError || isFailed;
@@ -135,7 +135,7 @@ class ShareModal extends React.Component<WrappedProps> {
   }
 
   getScratchOrgInfo() {
-    const { job, scratchOrg } = this.props;
+    const { t, job, scratchOrg } = this.props;
     if (scratchOrg && job.status === CONSTANTS.STATUS.COMPLETE) {
       return (
         <div
@@ -167,7 +167,7 @@ class ShareModal extends React.Component<WrappedProps> {
   }
 
   getFooter() {
-    const { job, scratchOrg } = this.props;
+    const { t, job, scratchOrg } = this.props;
     if (
       scratchOrg &&
       job.status === CONSTANTS.STATUS.COMPLETE &&
@@ -197,7 +197,7 @@ class ShareModal extends React.Component<WrappedProps> {
   }
 
   getShareForm() {
-    const { job, transientMessageVisible, scratchOrg } = this.props;
+    const { t, job, transientMessageVisible, scratchOrg } = this.props;
     const isCompleteOnScratchOrg = Boolean(
       scratchOrg && job.status === CONSTANTS.STATUS.COMPLETE,
     );
@@ -284,7 +284,7 @@ class ShareModal extends React.Component<WrappedProps> {
   }
 
   render() {
-    const { scratchOrg, job } = this.props;
+    const { t, scratchOrg, job } = this.props;
     const isCompleteOnScratchOrg = Boolean(
       scratchOrg && job.status === CONSTANTS.STATUS.COMPLETE,
     );
@@ -307,6 +307,7 @@ class ShareModal extends React.Component<WrappedProps> {
           )
         }
         footer={this.getFooter()}
+        dismissOnClickOutside={false}
         onRequestClose={this.handleClose}
       >
         <div
@@ -328,6 +329,6 @@ class ShareModal extends React.Component<WrappedProps> {
   }
 }
 
-const WrappedShareModal = withTransientMessage(ShareModal);
+const WrappedShareModal = withTranslation()(withTransientMessage(ShareModal));
 
 export default WrappedShareModal;

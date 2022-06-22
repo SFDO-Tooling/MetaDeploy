@@ -5,8 +5,8 @@ Salesforce utilities
 
 import json
 import os
-from datetime import datetime
 import time
+from datetime import datetime
 
 from cumulusci.core.config import OrgConfig, TaskConfig
 from cumulusci.core.runtime import BaseCumulusCI
