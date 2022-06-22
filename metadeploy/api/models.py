@@ -75,7 +75,7 @@ class MarkdownField(BaseMarkdownField):
 
 
 class AllowedList(SiteRelated):
-    title = models.CharField(max_length=128, unique=True)
+    title = models.CharField(max_length=128)
     description = MarkdownField()
     org_type = ArrayField(
         models.CharField(max_length=64, choices=ORG_TYPES),
@@ -92,6 +92,9 @@ class AllowedList(SiteRelated):
             "know the address."
         ),
     )
+
+    class Meta:
+        unique_together = ("site", "title")
 
     def __str__(self):
         return self.title
@@ -274,9 +277,23 @@ class ProductCategory(SiteRelated, TranslatableModel):
 
 
 class ProductSlug(AbstractSlug):
+    slug = models.SlugField()
     parent = models.ForeignKey("Product", on_delete=models.CASCADE)
 
     objects = CurrentSiteManager(site_field="parent__category__site")
+
+    def validate_unique(self, *args, **kwargs):
+        """
+        Ensure slugs are unique per-site instead of globally
+        """
+        super().validate_unique(*args, **kwargs)
+        qs = ProductSlug.objects.filter(
+            parent__category__site=self.parent.category.site, slug=self.slug
+        )
+        if qs.exists():
+            raise ValidationError(
+                {"slug": _("This must be unique for the current site")}
+            )
 
 
 class ProductQuerySet(TranslatableQuerySet):

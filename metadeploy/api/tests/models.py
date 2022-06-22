@@ -455,6 +455,17 @@ class TestProductSlug:
         product_slug = product_slug_factory(slug="a-slug")
         assert str(product_slug) == "a-slug"
 
+    def test_unique_per_site(self, product_slug_factory, product_factory, extra_site):
+        product_slug_factory(slug="test")
+
+        slug = product_slug_factory.build(slug="test", parent=product_factory())
+        with pytest.raises(ValidationError):
+            slug.validate_unique()
+
+        with override_current_site_id(extra_site.id):
+            slug = product_slug_factory.build(slug="test", parent=product_factory())
+            slug.validate_unique()
+
 
 @pytest.mark.django_db
 class TestPlanTemplate:
