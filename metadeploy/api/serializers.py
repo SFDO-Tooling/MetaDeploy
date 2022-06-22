@@ -202,6 +202,7 @@ class PlanSerializer(CircumspectSerializerMixin, HashIdModelSerializer):
     preflight_message = serializers.SerializerMethodField()
     not_allowed_instructions = serializers.SerializerMethodField()
     requires_preflight = serializers.BooleanField(read_only=True)
+    # Prefer the already calculated value instead of the expensive `Plan.average_duration`
     average_duration = serializers.IntegerField(
         source="calculated_average_duration", read_only=True
     )
