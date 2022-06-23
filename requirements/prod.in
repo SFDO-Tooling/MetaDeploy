@@ -27,6 +27,7 @@ django-rq-scheduler
 django-rq
 django-storages
 djangorestframework
+drf-spectacular
 github3.py
 honcho
 logfmt

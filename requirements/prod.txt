@@ -25,6 +25,7 @@ async-timeout==4.0.2
 attrs==21.4.0
     # via
     #   automat
+    #   jsonschema
     #   service-identity
     #   twisted
 authlib==1.0.1
@@ -118,6 +119,7 @@ django==3.2.13
     #   django-rq-scheduler
     #   django-storages
     #   djangorestframework
+    #   drf-spectacular
     #   sfdo-template-helpers
 django-allauth==0.51.0
     # via -r requirements/prod.in
@@ -156,9 +158,12 @@ django-storages==1.12.3
 djangorestframework==3.13.1
     # via
     #   -r requirements/prod.in
+    #   drf-spectacular
     #   sfdo-template-helpers
 docutils==0.16
     # via cumulusci
+drf-spectacular==0.22.1
+    # via -r requirements/prod.in
 faker==12.3.3
     # via
     #   cumulusci
@@ -204,6 +209,8 @@ importlib-metadata==4.11.4
     #   markdown
 incremental==21.3.0
     # via twisted
+inflection==0.5.1
+    # via drf-spectacular
 jeepney==0.8.0
     # via
     #   cumulusci
@@ -217,6 +224,8 @@ jmespath==1.0.1
     # via
     #   boto3
     #   botocore
+jsonschema==4.6.0
+    # via drf-spectacular
 keyring==23.0.1
     # via cumulusci
 logfmt==0.4
@@ -275,6 +284,8 @@ pyopenssl==22.0.0
     # via twisted
 pyparsing==3.0.9
     # via packaging
+pyrsistent==0.18.1
+    # via jsonschema
 python-baseconv==1.2.2
     # via
     #   cumulusci
@@ -299,6 +310,7 @@ pytz==2022.1
 pyyaml==6.0
     # via
     #   cumulusci
+    #   drf-spectacular
     #   snowfakery
 redis==4.3.3
     # via
@@ -416,6 +428,7 @@ unicodecsv==0.14.1
 uritemplate==4.1.1
     # via
     #   cumulusci
+    #   drf-spectacular
     #   github3-py
 urllib3==1.26.9
     # via

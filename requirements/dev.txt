@@ -80,7 +80,9 @@ importlib-metadata==4.11.4
     #   -c requirements/prod.txt
     #   sphinx
 inflection==0.5.1
-    # via pytest-factoryboy
+    # via
+    #   -c requirements/prod.txt
+    #   pytest-factoryboy
 iniconfig==1.1.1
     # via pytest
 ipython==8.4.0
