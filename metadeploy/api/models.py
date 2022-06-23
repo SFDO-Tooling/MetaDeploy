@@ -1,7 +1,7 @@
 import logging
 import uuid
 from statistics import median
-from typing import Union
+from typing import Optional, Union
 
 from asgiref.sync import async_to_sync
 from colorfield.fields import ColorField
@@ -164,21 +164,21 @@ class User(HashIdMixin, AbstractUser):
             return None
 
     @property
-    def org_id(self):
+    def org_id(self) -> Optional[str]:
         if self.social_account:
             return self.social_account.extra_data.get("organization_id")
 
     @property
-    def oauth_id(self):
+    def oauth_id(self) -> Optional[str]:
         if self.social_account:
             return self.social_account.extra_data.get("id")
 
     @property
-    def org_name(self):
+    def org_name(self) -> Optional[str]:
         return self._get_org_property("Name")
 
     @property
-    def org_type(self):
+    def org_type(self) -> Optional[str]:
         return self._get_org_property("OrganizationType")
 
     @property
@@ -217,7 +217,7 @@ class User(HashIdMixin, AbstractUser):
         return self.socialaccount_set.first()
 
     @property
-    def valid_token_for(self):
+    def valid_token_for(self) -> Optional[str]:
         if all(self.token) and self.org_id:
             return self.org_id
         return None
@@ -330,7 +330,7 @@ class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel)
         return self.version_set.exclude(is_listed=False).order_by("-created_at").first()
 
     @property
-    def icon(self):
+    def icon(self) -> Optional[dict[str, str]]:
         if self.icon_url:
             return {"type": "url", "url": self.icon_url}
         if self.slds_icon_name and self.slds_icon_category:
@@ -555,7 +555,7 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
         return median(durations).total_seconds()
 
     @property
-    def scratch_org_duration(self):
+    def scratch_org_duration(self) -> int:
         return self.scratch_org_duration_override or settings.SCRATCH_ORG_DURATION_DAYS
 
     def natural_key(self):
@@ -662,7 +662,7 @@ class Step(HashIdMixin, TranslatableModel):
         ordering = (DottedArray(F("step_num")),)
 
     @property
-    def kind_icon(self):
+    def kind_icon(self) -> Optional[str]:
         if self.kind == self.Kind.metadata:
             return "package"
         if self.kind == self.Kind.onetime:
@@ -835,7 +835,7 @@ class Job(HashIdMixin, models.Model):
         return ret
 
     @property
-    def error_message(self):
+    def error_message(self) -> str:
         return (
             self.plan.plan_template.error_message_markdown
             or self.plan.version.product.error_message_markdown
