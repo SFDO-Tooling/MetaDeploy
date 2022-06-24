@@ -317,6 +317,9 @@ class SiteProfileInlineAdmin(MetadeployTranslatableInlineAdmin):
     min_num = 1
     max_num = 1
 
+    def has_delete_permission(self, *args, **kwargs):
+        return False
+
 
 admin.site.unregister(Site)
 
