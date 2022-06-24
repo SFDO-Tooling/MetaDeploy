@@ -186,7 +186,11 @@ class PlanAdmin(MetadeployTranslatableAdmin):
         "created_at",
     )
     list_select_related = ("version", "version__product")
-    search_fields = ("translations__title", "version", "version__product")
+    search_fields = (
+        "translations__title",
+        "version__label",
+        "version__product__translations__title",
+    )
     readonly_fields = ("created_at",)
 
     def product(self, obj):
@@ -266,9 +270,9 @@ class StepAdmin(MetadeployTranslatableAdmin, PlanMixin):
     list_filter = ("plan__version__product",)
     search_fields = (
         "translations__name",
-        "plan__title",
+        "plan__translations__title",
         "plan__version__label",
-        "plan__version__product",
+        "plan__version__product__translations__title",
         "step_num",
         "path",
     )
@@ -295,7 +299,7 @@ class VersionAdmin(admin.ModelAdmin):
     list_filter = ("product", "is_production", "is_listed")
     list_editable = ("is_production", "is_listed")
     list_display = ("label", "product", "is_production", "is_listed", "commit_ish")
-    search_fields = ("label", "product")
+    search_fields = ("label", "product__translations__title")
 
 
 @admin.register(ClickThroughAgreement)
