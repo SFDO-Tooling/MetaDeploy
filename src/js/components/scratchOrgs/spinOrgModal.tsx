@@ -2,8 +2,8 @@ import Button from '@salesforce/design-system-react/components/button';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
-import { t } from 'i18next';
-import React, { useCallback, useState } from 'react';
+import React, { ChangeEvent, useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   isOpen: boolean;
@@ -18,6 +18,7 @@ const SpinOrg = ({
   toggleModal,
   doSpinOrg,
 }: Props) => {
+  const { t } = useTranslation();
   const masterAgreement = window.GLOBALS.SITE?.master_agreement;
   const [confirmed, setConfirmed] = useState(!clickThroughAgreement);
   const [msaConfirmed, setMsaConfirmed] = useState(!masterAgreement);
@@ -79,7 +80,7 @@ const SpinOrg = ({
 
   const handleConfirmChange = useCallback(
     (
-      event: React.ChangeEvent<HTMLInputElement>,
+      event: ChangeEvent<HTMLInputElement>,
       { checked }: { checked: boolean },
     ) => {
       setConfirmed(checked);
@@ -89,7 +90,7 @@ const SpinOrg = ({
 
   const handleConfirmMsaChange = useCallback(
     (
-      event: React.ChangeEvent<HTMLInputElement>,
+      event: ChangeEvent<HTMLInputElement>,
       { checked }: { checked: boolean },
     ) => {
       setMsaConfirmed(checked);
@@ -98,10 +99,7 @@ const SpinOrg = ({
   );
 
   const handleEmailChange = useCallback(
-    (
-      event: React.ChangeEvent<HTMLInputElement>,
-      { value }: { value: string },
-    ) => {
+    (event: ChangeEvent<HTMLInputElement>, { value }: { value: string }) => {
       setEmail(value);
     },
     [],
@@ -189,6 +187,7 @@ const SpinOrg = ({
   return (
     <Modal
       isOpen={isOpen}
+      dismissOnClickOutside={false}
       onRequestClose={resetAndClose}
       size="medium"
       heading={pages[currentPage].heading}

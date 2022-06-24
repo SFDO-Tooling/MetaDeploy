@@ -103,16 +103,13 @@ def test_get_org_result():
     devhub_api = MagicMock()
     scratch_org_config = MagicMock()
     scratch_org_config.namespaced = True
-    devhub_api.ScratchOrgInfo.create.return_value = {
-        "id": scratch_org_info_id
-    }
+    devhub_api.ScratchOrgInfo.create.return_value = {"id": scratch_org_info_id}
     devhub_api.ScratchOrgInfo.get.return_value = {
-        "Id": scratch_org_info_id, "Name": "MetaDeploy Scratch Org"
+        "Id": scratch_org_info_id,
+        "Name": "MetaDeploy Scratch Org",
     }
     devhub_api.ScratchOrgInfo.describe.return_value = {
-        "fields": [
-            {"name": "FooField", "createable": True}
-        ]
+        "fields": [{"name": "FooField", "createable": True}]
     }
 
     scratch_org_definition = {
@@ -120,11 +117,7 @@ def test_get_org_result():
         "description": "foo",
         "template": "0TTxxxxxxxxxxxx",
         "fooField": "barValue",
-        "settings": {
-            "FooSettings": {
-                "UseFoo": True
-            }
-        }
+        "settings": {"FooSettings": {"UseFoo": True}},
     }
 
     result = _get_org_result(
@@ -136,31 +129,37 @@ def test_get_org_result():
         scratch_org_config=scratch_org_config,
         scratch_org_definition=scratch_org_definition,
         cci=cci,
-        devhub_api=devhub_api
+        devhub_api=devhub_api,
     )
     assert result == devhub_api.ScratchOrgInfo.get.return_value
-    devhub_api.ScratchOrgInfo.create.assert_called_once_with({
-        'adminemail': 'jpmao@mao-kwikowski.luna',
-        'connectedappconsumerkey': settings.SFDX_CLIENT_ID,
-        'connectedappcallbackurl': settings.SFDX_CLIENT_CALLBACK_URL,
-        # Defaulted - should ignore the value in the definition
-        # lack of `description` as a key proves case-insensitivity
-        'description': 'Protogen/Caliban feature/experiment',
-        'durationdays': 3,
-        # From schema of ScratchOrgInfo
-        'foofield': 'barValue',
-        'features': 'Communities;MarketingUser',
-        'namespace': 'protogen',
-        'orgname': 'MetaDeploy Scratch Org',
-        'hassampledata': False
-    })
+    devhub_api.ScratchOrgInfo.create.assert_called_once_with(
+        {
+            "adminemail": "jpmao@mao-kwikowski.luna",
+            "connectedappconsumerkey": settings.SFDX_CLIENT_ID,
+            "connectedappcallbackurl": settings.SFDX_CLIENT_CALLBACK_URL,
+            # Defaulted - should ignore the value in the definition
+            # lack of `description` as a key proves case-insensitivity
+            "description": "Protogen/Caliban feature/experiment",
+            "durationdays": 3,
+            # From schema of ScratchOrgInfo
+            "foofield": "barValue",
+            "features": "Communities;MarketingUser",
+            "namespace": "protogen",
+            "orgname": "MetaDeploy Scratch Org",
+            "hassampledata": False,
+        }
+    )
 
 
 @patch("metadeploy.api.salesforce.time.sleep")
 def test_poll_for_scratch_org_completion__success(sleep):
     scratch_org_info_id = "2SR4p000000DTAaGAO"
     devhub_api = MagicMock()
-    initial_result = {"Id": scratch_org_info_id, "Status": "Creating", "ErrorCode": None}
+    initial_result = {
+        "Id": scratch_org_info_id,
+        "Status": "Creating",
+        "ErrorCode": None,
+    }
     end_result = {"Id": scratch_org_info_id, "Status": "Active", "ErrorCode": None}
     devhub_api.ScratchOrgInfo.get.side_effect = [initial_result, end_result]
 
@@ -172,7 +171,11 @@ def test_poll_for_scratch_org_completion__success(sleep):
 def test_poll_for_scratch_org_completion__failure(sleep):
     scratch_org_info_id = "2SR4p000000DTAaGAO"
     devhub_api = MagicMock()
-    initial_result = {"Id": scratch_org_info_id, "Status": "Creating", "ErrorCode": None}
+    initial_result = {
+        "Id": scratch_org_info_id,
+        "Status": "Creating",
+        "ErrorCode": None,
+    }
     end_result = {"Id": scratch_org_info_id, "Status": "Failed", "ErrorCode": "Foo"}
     devhub_api.ScratchOrgInfo.get.side_effect = [initial_result, end_result]
 

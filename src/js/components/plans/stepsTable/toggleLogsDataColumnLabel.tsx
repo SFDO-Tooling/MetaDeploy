@@ -1,7 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
-import { t } from 'i18next';
-import * as React from 'react';
+import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   logsExpanded: boolean;
@@ -10,9 +10,10 @@ type Props = {
 };
 
 const ToggleLogsDataColumnLabel = (props: Props) => {
+  const { t } = useTranslation();
   const { logsExpanded, hasLogs, toggleLogs } = props;
 
-  const handleToggle = React.useCallback(() => {
+  const handleToggle = useCallback(() => {
     toggleLogs(logsExpanded);
   }, [logsExpanded, toggleLogs]);
 

@@ -1,3 +1,4 @@
+import useScrollPosition from '@react-hook/window-scroll';
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
@@ -11,14 +12,10 @@ import {
   storeWithApi,
 } from './../../utils';
 
-jest.mock('react-fns', () => ({
-  withScroll(Component) {
-    // eslint-disable-next-line react/display-name
-    return (props) => <Component x={0} y={0} {...props} />;
-  },
-}));
+jest.mock('@react-hook/window-scroll');
 jest.mock('@/js/store/products/actions');
 fetchMoreProducts.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+useScrollPosition.mockReturnValue(0);
 
 afterEach(() => {
   fetchMoreProducts.mockClear();
@@ -29,12 +26,11 @@ describe('<Products />', () => {
     initialState = {
       products: { products: [], notFound: [], categories: [] },
     },
-    props = {},
     rerenderFn = null,
   ) => {
     const ui = (
       <MemoryRouter>
-        <ProductsList {...props} />
+        <ProductsList />
       </MemoryRouter>
     );
     if (rerenderFn) {
@@ -356,8 +352,8 @@ describe('<Products />', () => {
       window.sessionStorage.setItem('activeProductsTab', 'community');
       const { rerender, getByText } = setup(initialState);
       const activeTab = getByText('community');
-
-      setup(initialState, { y: 1000 }, rerender);
+      useScrollPosition.mockReturnValueOnce(1000);
+      setup(initialState, rerender);
 
       expect(activeTab).toHaveClass('slds-is-active');
       expect(getByText('Loading…')).toBeVisible();
@@ -370,8 +366,8 @@ describe('<Products />', () => {
     test('fetches next page of products for first tab by default', () => {
       const { rerender, getByText } = setup(initialState);
       const activeTab = getByText('salesforce');
-
-      setup(initialState, { y: 1000 }, rerender);
+      useScrollPosition.mockReturnValueOnce(1000);
+      setup(initialState, rerender);
 
       expect(activeTab).toHaveClass('slds-is-active');
       expect(getByText('Loading…')).toBeVisible();
@@ -398,8 +394,8 @@ describe('<Products />', () => {
         },
       };
       const { rerender, queryByText } = setup(state);
-
-      setup(state, { y: 1000 }, rerender);
+      useScrollPosition.mockReturnValueOnce(1000);
+      setup(state, rerender);
 
       expect(queryByText('Loading…')).toBeNull();
       expect(fetchMoreProducts).not.toHaveBeenCalled();

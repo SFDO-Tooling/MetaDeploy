@@ -1,6 +1,6 @@
-import { t } from 'i18next';
-import * as React from 'react';
+import React from 'react';
 import DocumentTitle from 'react-document-title';
+import { useTranslation } from 'react-i18next';
 import { Trans } from 'react-i18next';
 import { connect } from 'react-redux';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
@@ -15,6 +15,8 @@ import routes from '@/js/utils/routes';
 
 const AuthError = withRouter(
   ({ user, history }: { user: User } & RouteComponentProps) => {
+    const { t } = useTranslation();
+
     const message = (window.JS_CONTEXT || {}).error_message || (
       <Trans i18nKey="errorWithAccount">
         An error occurred with your account. Try the{' '}

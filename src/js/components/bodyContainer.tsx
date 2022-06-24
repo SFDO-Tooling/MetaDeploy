@@ -1,9 +1,9 @@
-import * as React from 'react';
+import React, { ReactNode } from 'react';
 
 const BodyContainer = ({
   children,
 }: {
-  children: React.ReactNode | null | undefined;
+  children: ReactNode | null | undefined;
 }) => (
   <div className="slds-p-around_medium slds-grid slds-wrap">{children}</div>
 );
