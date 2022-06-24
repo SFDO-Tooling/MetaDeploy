@@ -18,7 +18,7 @@ Retrieve
    {
      "id": "9wORq4Z",
      "creator": {
-       "username": "kit@oddbird.net",
+       "username": "foo@example.com",
        "is_staff": true
      },
      "plan": "owEgDlm",

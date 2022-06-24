@@ -46,9 +46,6 @@ rules:
   # Prettier
   prettier/prettier:
     - 2
-    - singleQuote: true
-      trailingComma: all
-      proseWrap: always
 
   # Import
   import/default: 0
@@ -131,6 +128,7 @@ rules:
   no-shadow: 2
   no-shadow-restricted-names: 2
   no-undef-init: 2
+  no-use-before-define: 2
 
   # Node.js and CommonJS
   global-require: 2
