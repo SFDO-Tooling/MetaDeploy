@@ -1,39 +1,40 @@
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
-import Login from '@/components/header/login';
-import { addUrlParams } from '@/utils/api';
+import Login from '@/js/components/header/login';
 
 import { render } from './../../utils';
 
 describe('<Login />', () => {
   describe('login click', () => {
-    test('updates `window.location.href` on login click', () => {
-      const { getByText } = render(<Login />);
-      jest.spyOn(window.location, 'assign');
+    test('updates custom_domain on login click', () => {
+      const { getByText, getByTestId } = render(<Login />);
       fireEvent.click(getByText('Log In'));
       fireEvent.click(getByText('Sandbox or Scratch Org'));
-      const base = window.api_urls.salesforce_login();
-      const expected = addUrlParams(base, {
-        custom_domain: 'test',
-        next: window.location.pathname,
-      });
 
-      expect(window.location.assign).toHaveBeenCalledWith(expected);
+      expect(getByTestId('custom-domain')).toHaveValue('test');
+
+      fireEvent.click(getByText('Log In'));
+      fireEvent.click(getByText('Production or Developer Org'));
+
+      expect(getByTestId('custom-domain')).toHaveValue('login');
     });
 
     test('adds redirectParams, if exist', () => {
-      const { getByText } = render(<Login redirectParams={{ foo: 'bar' }} />);
-      jest.spyOn(window.location, 'assign');
-      fireEvent.click(getByText('Log In'));
-      fireEvent.click(getByText('Sandbox or Scratch Org'));
-      const base = window.api_urls.salesforce_login();
-      const expected = addUrlParams(base, {
-        custom_domain: 'test',
-        next: addUrlParams(window.location.pathname, { foo: 'bar' }),
-      });
+      const { getByTestId } = render(<Login redirectParams={{ foo: 'bar' }} />);
 
-      expect(window.location.assign).toHaveBeenCalledWith(expected);
+      expect(getByTestId('login-next')).toHaveValue('/?foo=bar');
+    });
+
+    test('submits form', () => {
+      const { getByText, getByTestId } = render(<Login />);
+      const form = getByTestId('login-form');
+      form.onsubmit = jest.fn();
+
+      fireEvent.click(getByText('Log In'));
+      fireEvent.click(getByText('Production or Developer Org'));
+
+      expect(form.onsubmit).toHaveBeenCalled();
     });
   });
 

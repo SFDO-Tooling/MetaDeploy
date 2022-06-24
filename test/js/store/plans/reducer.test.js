@@ -1,4 +1,4 @@
-import reducer from '@/store/plans/reducer';
+import reducer from '@/js/store/plans/reducer';
 
 describe('reducer', () => {
   test('returns initial state', () => {

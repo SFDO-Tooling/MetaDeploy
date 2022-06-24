@@ -4,8 +4,10 @@ from uuid import uuid4
 import pytest
 from django.utils import timezone
 
+from config.settings.base import MINIMUM_JOBS_FOR_AVERAGE
 from metadeploy.conftest import format_timestamp
 
+from ..jobs import calculate_average_plan_runtime
 from ..models import SUPPORTED_ORG_TYPES, Job, PreflightResult, ScratchOrg
 from ..serializers import (
     JobSerializer,
@@ -615,7 +617,7 @@ class TestJob:
         data = {
             "plan": str(plan.id),
             "steps": [str(step1.id)],
-            "results": {str(step1.id): {"status": "ok"}},
+            "results": {str(step1.id): [{"status": "ok"}]},
         }
         serializer = JobSerializer(data=data, context=dict(request=request))
 
@@ -653,7 +655,7 @@ class TestJobSummarySerializer:
         )
         assert JobSummarySerializer(job).data["plan_average_duration"] is None
 
-        for _ in range(4):
+        for _ in range(MINIMUM_JOBS_FOR_AVERAGE - 1):
             job_factory(
                 plan=plan,
                 status=Job.Status.complete,
@@ -661,7 +663,14 @@ class TestJobSummarySerializer:
                 enqueued_at=start,
                 org_id="00Dxxxxxxxxxxxxxxx",
             )
-        assert JobSummarySerializer(job).data["plan_average_duration"] == "30.0"
+
+        assert JobSummarySerializer(job).data["plan_average_duration"] is None
+
+        # run the cron job that sets this value
+        calculate_average_plan_runtime()
+        job.refresh_from_db()
+
+        assert JobSummarySerializer(job).data["plan_average_duration"] == 30
 
 
 @pytest.mark.django_db
@@ -670,20 +679,22 @@ class TestProductCategorySerializer:
         request = rf.get("")
         request.query_params = {}
         request.user = user_factory()
-        product = product_factory(is_listed=True)
-        version = version_factory(product=product)
-        category = product.category
+        product1 = product_factory(is_listed=True, order_key=1)
+        version1 = version_factory(product=product1)
+        category = product1.category
+        product2 = product_factory(category=category, is_listed=True, order_key=0)
+        version2 = version_factory(product=product2)
         serializer = ProductCategorySerializer(category, context={"request": request})
         results = serializer.data["first_page"].pop("results")
         assert serializer.data["first_page"] == {
-            "count": 1,
+            "count": 2,
             "previous": None,
             "next": None,
         }
         expected = [
             {
-                "id": str(product.id),
-                "title": product.title,
+                "id": str(product2.id),
+                "title": product2.title,
                 "description": "<p>This is a sample product.</p>",
                 "short_description": "",
                 "click_through_agreement": "",
@@ -692,23 +703,51 @@ class TestProductCategorySerializer:
                 "icon": None,
                 "image": None,
                 "most_recent_version": {
-                    "id": str(version.id),
-                    "product": str(product.id),
-                    "label": str(version.label),
+                    "id": str(version2.id),
+                    "product": str(product2.id),
+                    "label": str(version2.label),
                     "description": "A sample version.",
-                    "created_at": format_timestamp(version.created_at),
+                    "created_at": format_timestamp(version2.created_at),
                     "primary_plan": None,
                     "secondary_plan": None,
                     "is_listed": True,
                 },
-                "slug": product.slug,
+                "slug": product2.slug,
                 "old_slugs": [],
                 "is_allowed": True,
                 "is_listed": True,
                 "order_key": 0,
                 "not_allowed_instructions": None,
                 "layout": "Default",
-            }
+            },
+            {
+                "id": str(product1.id),
+                "title": product1.title,
+                "description": "<p>This is a sample product.</p>",
+                "short_description": "",
+                "click_through_agreement": "",
+                "category": "salesforce",
+                "color": "#FFFFFF",
+                "icon": None,
+                "image": None,
+                "most_recent_version": {
+                    "id": str(version1.id),
+                    "product": str(product1.id),
+                    "label": str(version1.label),
+                    "description": "A sample version.",
+                    "created_at": format_timestamp(version1.created_at),
+                    "primary_plan": None,
+                    "secondary_plan": None,
+                    "is_listed": True,
+                },
+                "slug": product1.slug,
+                "old_slugs": [],
+                "is_allowed": True,
+                "is_listed": True,
+                "order_key": 1,
+                "not_allowed_instructions": None,
+                "layout": "Default",
+            },
         ]
         assert results == expected
 

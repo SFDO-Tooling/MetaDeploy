@@ -25,7 +25,7 @@ class MetaDeploy:
         trans_path = (
             pathlib.Path(__file__).parent.parent / f"locales/{lang}/translation.json"
         ).absolute()
-        with open(trans_path, "r") as f:
+        with open(trans_path) as f:
             self.translations = json.load(f)
 
     @property

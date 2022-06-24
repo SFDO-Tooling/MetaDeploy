@@ -1,7 +1,7 @@
-import i18n from 'i18next';
 import { sortBy } from 'lodash';
-import * as React from 'react';
+import React, { Component, ReactNode } from 'react';
 import DocumentTitle from 'react-document-title';
+import { WithTranslation, withTranslation } from 'react-i18next';
 import { Trans } from 'react-i18next';
 import { connect, ConnectedProps } from 'react-redux';
 import {
@@ -11,34 +11,38 @@ import {
   withRouter,
 } from 'react-router-dom';
 
-import BackLink from '@/components/backLink';
-import BodyContainer from '@/components/bodyContainer';
-import Header from '@/components/header';
-import PageHeader from '@/components/products/header';
-import ProductNotAllowed from '@/components/products/notAllowed';
-import OldVersionWarning from '@/components/products/oldVersionWarning';
-import PlanCards from '@/components/products/planCards';
-import ProductNotFound from '@/components/products/product404';
-import VersionNotFound from '@/components/products/version404';
-import { getLoadingOrNotFound, shouldFetchVersion } from '@/components/utils';
-import { AppState } from '@/store';
-import { Plan } from '@/store/plans/reducer';
+import BackLink from '@/js/components/backLink';
+import BodyContainer from '@/js/components/bodyContainer';
+import Header from '@/js/components/header';
+import PageHeader from '@/js/components/products/header';
+import ProductNotAllowed from '@/js/components/products/notAllowed';
+import OldVersionWarning from '@/js/components/products/oldVersionWarning';
+import PlanCards from '@/js/components/products/planCards';
+import ProductNotFound from '@/js/components/products/product404';
+import VersionNotFound from '@/js/components/products/version404';
+import {
+  getLoadingOrNotFound,
+  shouldFetchVersion,
+} from '@/js/components/utils';
+import { AppState } from '@/js/store';
+import { Plan } from '@/js/store/plans/reducer';
 import {
   fetchAdditionalPlans,
   fetchPlan,
   fetchProduct,
   fetchVersion,
-} from '@/store/products/actions';
-import { Product } from '@/store/products/reducer';
+} from '@/js/store/products/actions';
+import { Product } from '@/js/store/products/reducer';
 import {
   selectProduct,
   selectProductSlug,
   selectVersion,
   selectVersionLabelOrPlanSlug,
-} from '@/store/products/selectors';
-import { selectUserState } from '@/store/user/selectors';
-import { PRODUCT_LAYOUTS } from '@/utils/constants';
-import routes from '@/utils/routes';
+} from '@/js/store/products/selectors';
+import { selectUserState } from '@/js/store/user/selectors';
+import { LATEST_VERSION, PRODUCT_LAYOUTS } from '@/js/utils/constants';
+import { getVersionLabel } from '@/js/utils/helpers';
+import routes from '@/js/utils/routes';
 
 const selectProductDetail = (
   appState: AppState,
@@ -77,9 +81,11 @@ type ProductPropsFromRedux = ConnectedProps<typeof productConnector>;
 type VersionPropsFromRedux = ConnectedProps<typeof versionConnector>;
 
 type ProductDetailProps = ProductPropsFromRedux;
-type VersionDetailProps = VersionPropsFromRedux & RouteComponentProps;
+type VersionDetailProps = VersionPropsFromRedux &
+  RouteComponentProps &
+  WithTranslation;
 
-class ProductDetail extends React.Component<ProductDetailProps> {
+class ProductDetail extends Component<ProductDetailProps> {
   fetchProductIfMissing() {
     const { product, productSlug, doFetchProduct } = this.props;
     if (product === undefined && productSlug) {
@@ -111,8 +117,6 @@ class ProductDetail extends React.Component<ProductDetailProps> {
     if (loadingOrNotFound !== false) {
       return loadingOrNotFound;
     }
-    // This redundant check is required to satisfy Flow:
-    // https://flow.org/en/docs/lang/refinements/#toc-refinement-invalidations
 
     /* istanbul ignore if */
     if (!product) {
@@ -121,12 +125,13 @@ class ProductDetail extends React.Component<ProductDetailProps> {
     if (!product.most_recent_version) {
       return <VersionNotFound product={product} />;
     }
-    const version = product.most_recent_version;
-    return <Redirect to={routes.version_detail(product.slug, version.label)} />;
+    return (
+      <Redirect to={routes.version_detail(product.slug, LATEST_VERSION)} />
+    );
   }
 }
 
-const BodySection = ({ children }: { children?: React.ReactNode }) => (
+const BodySection = ({ children }: { children?: ReactNode }) => (
   <div
     className="slds-text-longform
       slds-p-around_medium
@@ -137,7 +142,7 @@ const BodySection = ({ children }: { children?: React.ReactNode }) => (
   </div>
 );
 
-class VersionDetail extends React.Component<VersionDetailProps> {
+class VersionDetail extends Component<VersionDetailProps> {
   fetchProductIfMissing() {
     const { product, productSlug, doFetchProduct } = this.props;
     if (product === undefined && productSlug) {
@@ -147,12 +152,8 @@ class VersionDetail extends React.Component<VersionDetailProps> {
   }
 
   fetchVersionIfMissing() {
-    const {
-      product,
-      version,
-      versionLabelAndPlanSlug,
-      doFetchVersion,
-    } = this.props;
+    const { product, version, versionLabelAndPlanSlug, doFetchVersion } =
+      this.props;
     const { label, slug } = versionLabelAndPlanSlug;
     // If we have a plan slug, do not try to fetch version
     // (redirect to plan-detail instead)
@@ -196,12 +197,8 @@ class VersionDetail extends React.Component<VersionDetailProps> {
   }
 
   componentDidUpdate(prevProps: VersionDetailProps) {
-    const {
-      product,
-      productSlug,
-      version,
-      versionLabelAndPlanSlug,
-    } = this.props;
+    const { product, productSlug, version, versionLabelAndPlanSlug } =
+      this.props;
     const { label, slug, maybeVersion, maybeSlug } = versionLabelAndPlanSlug;
     const productChanged =
       product !== prevProps.product || productSlug !== prevProps.productSlug;
@@ -222,7 +219,8 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     }
   }
 
-  static getProductDescription(product: Product) {
+  getProductDescription(product: Product) {
+    const { t } = this.props;
     const isCardLayout = product.layout === PRODUCT_LAYOUTS.Card;
     const productDescriptionHasTitle =
       product.description?.startsWith('<h1>') ||
@@ -232,7 +230,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
       <>
         {!productDescriptionHasTitle && !isCardLayout && (
           <h2 className="slds-text-heading_small">
-            {i18n.t('About {{title}}', { title: product.title })}
+            {t('About {{title}}', { title: product.title })}
           </h2>
         )}
         {product.image ? (
@@ -257,6 +255,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
 
   render() {
     const {
+      t,
       user,
       product,
       productSlug,
@@ -278,8 +277,6 @@ class VersionDetail extends React.Component<VersionDetailProps> {
     if (loadingOrNotFound !== false) {
       return loadingOrNotFound;
     }
-    // this redundant check is required to satisfy Flow:
-    // https://flow.org/en/docs/lang/refinements/#toc-refinement-invalidations
 
     /* istanbul ignore if */
     if (!product || !version) {
@@ -315,14 +312,11 @@ class VersionDetail extends React.Component<VersionDetailProps> {
             <BodyContainer>
               {product.most_recent_version && !isMostRecent ? (
                 <OldVersionWarning
-                  link={routes.version_detail(
-                    product.slug,
-                    product.most_recent_version.label,
-                  )}
+                  link={routes.version_detail(product.slug, LATEST_VERSION)}
                 />
               ) : null}
               <BodySection>
-                {isCardLayout && VersionDetail.getProductDescription(product)}
+                {isCardLayout && this.getProductDescription(product)}
                 <p>{version.description}</p>
                 {!isCardLayout && (
                   <>
@@ -331,14 +325,14 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                         <Link
                           to={routes.plan_detail(
                             product.slug,
-                            version.label,
+                            getVersionLabel(product, version),
                             primary_plan.slug,
                           )}
                           className="slds-button
                             slds-button_brand
                             slds-size_full"
                         >
-                          {i18n.t('{{title}} - View Details', {
+                          {t('{{title}} - View Details', {
                             title: primary_plan.title,
                           })}
                         </Link>
@@ -349,14 +343,14 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                         <Link
                           to={routes.plan_detail(
                             product.slug,
-                            version.label,
+                            getVersionLabel(product, version),
                             secondary_plan.slug,
                           )}
                           className="slds-button
                             slds-button_outline-brand
                             slds-size_full"
                         >
-                          {i18n.t('{{title}} - View Details', {
+                          {t('{{title}} - View Details', {
                             title: secondary_plan.title,
                           })}
                         </Link>
@@ -365,14 +359,14 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                   </>
                 )}
                 <BackLink
-                  label={i18n.t('Select a different product')}
+                  label={t('Select a different product')}
                   url={routes.product_list()}
                 />
                 {!isCardLayout && additionalPlansSorted.length ? (
                   <div className="slds-p-top_x-large">
                     {visiblePrimaryPlan || visibleSecondaryPlan ? (
                       <h2 className="slds-text-heading_small">
-                        {i18n.t('Additional Plans')}
+                        {t('Additional Plans')}
                       </h2>
                     ) : null}
                     {additionalPlansSorted.map((plan) => (
@@ -380,7 +374,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                         <Link
                           to={routes.plan_detail(
                             product.slug,
-                            version.label,
+                            getVersionLabel(product, version),
                             plan.slug,
                           )}
                         >
@@ -403,9 +397,7 @@ class VersionDetail extends React.Component<VersionDetailProps> {
                   />
                 </div>
               ) : (
-                <BodySection>
-                  {VersionDetail.getProductDescription(product)}
-                </BodySection>
+                <BodySection>{this.getProductDescription(product)}</BodySection>
               )}
             </BodyContainer>
           ) : (
@@ -427,7 +419,9 @@ class VersionDetail extends React.Component<VersionDetailProps> {
 }
 
 const WrappedProductDetail = productConnector(ProductDetail);
-const WrappedVersionDetail = versionConnector(withRouter(VersionDetail));
+const WrappedVersionDetail = versionConnector(
+  withRouter(withTranslation()(VersionDetail)),
+);
 
 export {
   WrappedProductDetail as ProductDetail,

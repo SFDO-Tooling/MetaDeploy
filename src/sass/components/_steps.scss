@@ -45,7 +45,7 @@ $step-ending-columns-min: $step-type-min + $step-badge-min + $step-install-min;
   }
 
   thead {
-    background-color: $color-gray-2;
+    background-color: $color-background;
   }
 
   .slds-accordion__section {
@@ -54,6 +54,7 @@ $step-ending-columns-min: $step-type-min + $step-badge-min + $step-install-min;
 
   .slds-accordion__summary-heading {
     @include constrain-label;
+
     font-size: $font-size-medium;
   }
 
@@ -72,6 +73,7 @@ $step-ending-columns-min: $step-type-min + $step-badge-min + $step-install-min;
     // protect overlapping steps without an accordion with long names
     > div {
       @include constrain-label;
+
       display: flex;
     }
   }
@@ -127,6 +129,7 @@ $step-ending-columns-min: $step-type-min + $step-badge-min + $step-install-min;
 
   .plan-step-badge-container {
     grid-area: badge;
+
     // decreasing container padding for better vertical alignment
     // badges have more internal padding
     padding-bottom: 0;
@@ -157,15 +160,18 @@ $step-ending-columns-min: $step-type-min + $step-badge-min + $step-install-min;
 
   .slds-is-open > .slds-accordion__content {
     @include z-index('logs');
+
     background: $brand-dark;
     color: $color-text-brand-primary;
     margin-bottom: $spacing-small * -1;
     margin-left: $spacing-large * -1;
     margin-top: 1.25rem;
     overflow: auto;
+
     // transform added to move this accordion content above table tr
     // allows for the tr:hover bg color to not overlap the logs bg color
     transform: scale(1);
+
     // full width of the page minus padding ===
     // full width of table so scroll goes edge to edge
     width: calc(100vw - 4rem);

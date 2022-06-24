@@ -11,10 +11,13 @@ from django.utils import timezone
 from django.utils.timezone import make_aware
 from rq.worker import StopRequested
 
+from config.settings.base import MINIMUM_JOBS_FOR_AVERAGE
 from metadeploy.api.belvedere_utils import convert_to_18
+from metadeploy.api.constants import ERROR
 
 from ..flows import StopFlowException
 from ..jobs import (
+    calculate_average_plan_runtime,
     create_scratch_org,
     delete_org_on_error,
     delete_scratch_org,
@@ -185,7 +188,7 @@ def test_delete_org_on_error(scratch_org_factory):
 
 
 @pytest.mark.django_db
-def test_finalize_result_worker_died(job_factory):
+def test_finalize_result_worker_died(job_factory, caplog):
     """
     Why do we raise and then catch a StopRequested you might ask? Well, because it's
     what RQ will internally raise on a SIGTERM, so we're essentially faking the "I got a
@@ -193,7 +196,11 @@ def test_finalize_result_worker_died(job_factory):
     and kill the tests. But we do want the context manager's except block to be
     triggered, so we can test its behavior.
     """
-    job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
+    job = job_factory(
+        org_id="00Dxxxxxxxxxxxxxxx",
+        plan__version__product__title="Test Product",
+        plan__version__label="1.0",
+    )
     try:
         with finalize_result(job):
             raise StopRequested()
@@ -201,25 +208,49 @@ def test_finalize_result_worker_died(job_factory):
         pass
     assert job.status == job.Status.canceled
 
+    log_record = next(r for r in caplog.records if "interrupted" in r.message)
+
+    assert log_record.message == f"Job {job.id} interrupted by dyno restart"
+    assert log_record.context["event"] == "job"
+    assert log_record.context["context"] == "test-product/1.0/sample-plan"
+    assert log_record.context["status"] == "terminated"
+    assert "duration" in log_record.context
+
 
 @pytest.mark.django_db
-def test_finalize_result_canceled_job(job_factory):
+def test_finalize_result_canceled_job(job_factory, caplog):
     # User-requested job cancellation.
     # Unlike cancelation due to the worker restarting,
     # this kind doesn't propagate the exception.
-    job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
+    job = job_factory(
+        org_id="00Dxxxxxxxxxxxxxxx",
+        plan__version__product__title="Test Product",
+        plan__version__label="1.0",
+    )
     with finalize_result(job):
         raise StopFlowException()
     assert job.status == job.Status.canceled
 
+    log_record = next(r for r in caplog.records if "canceled" in r.message)
+
+    assert log_record.message == f"Job {job.id} canceled"
+    assert log_record.context["event"] == "job"
+    assert log_record.context["context"] == "test-product/1.0/sample-plan"
+    assert log_record.context["status"] == "canceled"
+    assert "duration" in log_record.context
+
 
 @pytest.mark.django_db
 def test_finalize_result_preflight_worker_died(
-    user_factory, plan_factory, preflight_result_factory
+    user_factory, plan_factory, preflight_result_factory, caplog
 ):
     user = user_factory()
-    plan = plan_factory()
-    preflight = preflight_result_factory(user=user, plan=plan, org_id=user.org_id)
+    preflight = preflight_result_factory(
+        user=user,
+        plan__version__product__title="Test Product",
+        plan__version__label="1.0",
+        org_id=user.org_id,
+    )
     try:
         with finalize_result(preflight):
             raise StopRequested()
@@ -227,10 +258,48 @@ def test_finalize_result_preflight_worker_died(
         pass
     assert preflight.status == preflight.Status.canceled
 
+    log_record = next(r for r in caplog.records if "interrupted" in r.message)
+
+    assert (
+        log_record.message
+        == f"PreflightResult {preflight.id} interrupted by dyno restart"
+    )
+    assert log_record.context["event"] == "preflight"
+    assert log_record.context["context"] == "test-product/1.0/sample-plan"
+    assert log_record.context["status"] == "terminated"
+    assert "duration" in log_record.context
+
 
 @pytest.mark.django_db
-def test_finalize_result_mdapi_error(job_factory):
-    job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
+def test_finalize_result_preflight_failed(
+    user_factory, plan_factory, preflight_result_factory, caplog
+):
+    user = user_factory()
+    preflight = preflight_result_factory(
+        user=user,
+        plan__version__product__title="Test Product",
+        plan__version__label="1.0",
+        org_id=user.org_id,
+    )
+    with finalize_result(preflight):
+        preflight.results["foo"] = [{"status": ERROR}]
+
+    log_record = next(r for r in caplog.records if "failed" in r.message)
+
+    assert log_record.message == f"PreflightResult {preflight.id} failed"
+    assert log_record.context["event"] == "preflight"
+    assert log_record.context["context"] == "test-product/1.0/sample-plan"
+    assert log_record.context["status"] == "failure"
+    assert "duration" in log_record.context
+
+
+@pytest.mark.django_db
+def test_finalize_result_mdapi_error(job_factory, caplog):
+    job = job_factory(
+        org_id="00Dxxxxxxxxxxxxxxx",
+        plan__version__product__title="Test Product",
+        plan__version__label="1.0",
+    )
     response = MagicMock(text="text")
     try:
         with finalize_result(job):
@@ -238,7 +307,35 @@ def test_finalize_result_mdapi_error(job_factory):
     except MetadataParseError:
         pass
     assert job.status == job.Status.failed
-    assert job.exception == "MDAPI error\ntext"
+    assert "finalize_result" in job.exception  # includes traceback
+    assert "MDAPI error\ntext" in job.exception
+
+    log_record = next(r for r in caplog.records if "errored" in r.message)
+
+    assert log_record.message == f"Job {job.id} errored"
+    assert log_record.context["event"] == "job"
+    assert log_record.context["context"] == "test-product/1.0/sample-plan"
+    assert log_record.context["status"] == "error"
+    assert "duration" in log_record.context
+
+
+@pytest.mark.django_db
+def test_finalize_result_job_success(job_factory, caplog):
+    job = job_factory(
+        org_id="00Dxxxxxxxxxxxxxxx",
+        plan__version__product__title="Test Product",
+        plan__version__label="1.0",
+    )
+    with finalize_result(job):
+        pass
+
+    log_record = next(r for r in caplog.records if "succeeded" in r.message)
+
+    assert log_record.message == f"Job {job.id} succeeded"
+    assert log_record.context["event"] == "job"
+    assert log_record.context["context"] == "test-product/1.0/sample-plan"
+    assert log_record.context["status"] == "success"
+    assert "duration" in log_record.context
 
 
 class MockDict(dict):
@@ -315,15 +412,16 @@ class TestCreateScratchOrg:
                         "ScratchOrg": "abc123",
                         "SignupUsername": "test",
                         "AuthCode": "abc123",
+                        "Status": "Active",
                     }
                 }
             )
-            SalesforceOAuth2 = stack.enter_context(
-                patch("metadeploy.api.salesforce.SalesforceOAuth2")
+            OAuth2Client = stack.enter_context(
+                patch("metadeploy.api.salesforce.OAuth2Client")
             )
-            SalesforceOAuth2.return_value = MagicMock(
+            OAuth2Client.return_value = MagicMock(
                 **{
-                    "get_token.return_value": MagicMock(
+                    "auth_code_grant.return_value": MagicMock(
                         **{
                             "json.return_value": {
                                 "access_token": "abc123",
@@ -411,15 +509,16 @@ class TestCreateScratchOrg:
                         "ScratchOrg": "abc123",
                         "SignupUsername": "test",
                         "AuthCode": "abc123",
+                        "Status": "Active",
                     }
                 }
             )
-            SalesforceOAuth2 = stack.enter_context(
-                patch("metadeploy.api.salesforce.SalesforceOAuth2")
+            OAuth2Client = stack.enter_context(
+                patch("metadeploy.api.salesforce.OAuth2Client")
             )
-            SalesforceOAuth2.return_value = MagicMock(
+            OAuth2Client.return_value = MagicMock(
                 **{
-                    "get_token.return_value": MagicMock(
+                    "auth_code_grant.return_value": MagicMock(
                         **{
                             "json.return_value": {
                                 "access_token": "abc123",
@@ -492,7 +591,7 @@ class TestCreateScratchOrg:
                 }
             )
             stack.enter_context(patch("metadeploy.api.salesforce.SimpleSalesforce"))
-            stack.enter_context(patch("metadeploy.api.salesforce.SalesforceOAuth2"))
+            stack.enter_context(patch("metadeploy.api.salesforce.OAuth2Client"))
             BaseCumulusCI = stack.enter_context(
                 patch("metadeploy.api.salesforce.BaseCumulusCI")
             )
@@ -504,4 +603,46 @@ class TestCreateScratchOrg:
                 plan=plan,
                 enqueued_at=datetime(2020, 9, 4, 12),
             )
-            create_scratch_org(scratch_org.id)
+            with pytest.raises(TypeError):
+                create_scratch_org(str(scratch_org.id))
+
+
+@pytest.mark.django_db
+class TestCalculateAveragePlanRuntime:
+    def test_calculate_average_plan_runtime(self, plan_factory, job_factory):
+        plan = plan_factory()
+        plan.save()
+        for _ in range(MINIMUM_JOBS_FOR_AVERAGE):
+            job = job_factory(
+                plan=plan,
+                status="complete",
+                # give a runtime of one hour
+                enqueued_at=datetime(2020, 1, 1, 0, 0, 0),
+                success_at=datetime(2020, 1, 1, 1, 0, 0),
+            )
+            job.save()
+
+        assert plan.calculated_average_duration is None
+        calculate_average_plan_runtime()
+        plan.refresh_from_db()
+        assert plan.calculated_average_duration == 3600
+
+    def test_calculate_average_plan_runtime__minimum_jobs_not_present(
+        self, plan_factory, job_factory
+    ):
+        plan = plan_factory()
+        plan.save()
+        for _ in range(MINIMUM_JOBS_FOR_AVERAGE - 1):
+            job = job_factory(
+                plan=plan,
+                status="complete",
+                # give a runtime of one hour
+                enqueued_at=datetime(2020, 1, 1, 0, 0, 0),
+                success_at=datetime(2020, 1, 1, 1, 0, 0),
+            )
+            job.save()
+
+        assert plan.calculated_average_duration is None
+        calculate_average_plan_runtime()
+        plan.refresh_from_db()
+        assert plan.calculated_average_duration is None

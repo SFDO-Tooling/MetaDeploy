@@ -1,52 +1,53 @@
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
-import i18n from 'i18next';
-import * as React from 'react';
+import React, { Component } from 'react';
 import DocumentTitle from 'react-document-title';
+import { WithTranslation, withTranslation } from 'react-i18next';
 import { connect, ConnectedProps } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { Job } from 'src/js/store/jobs/reducer';
 
-import BackLink from '@/components/backLink';
-import BodyContainer from '@/components/bodyContainer';
-import Header from '@/components/header';
-import CtaButton from '@/components/jobs/ctaButton';
-import JobMessage from '@/components/jobs/jobMessage';
-import JobResults from '@/components/jobs/jobResults';
-import ProgressBar from '@/components/jobs/progressBar';
-import ShareModal from '@/components/jobs/shareModal';
-import UserInfo from '@/components/jobs/userInfo';
-import { LabelWithSpinner } from '@/components/plans/ctaButton';
-import PageHeader from '@/components/plans/header';
-import Intro from '@/components/plans/intro';
-import StepsTable from '@/components/plans/stepsTable';
-import Toasts from '@/components/plans/toasts';
-import ProductNotFound from '@/components/products/product404';
+import BackLink from '@/js/components/backLink';
+import BodyContainer from '@/js/components/bodyContainer';
+import Header from '@/js/components/header';
+import CtaButton from '@/js/components/jobs/ctaButton';
+import JobMessage from '@/js/components/jobs/jobMessage';
+import JobResults from '@/js/components/jobs/jobResults';
+import ProgressBar from '@/js/components/jobs/progressBar';
+import ShareModal from '@/js/components/jobs/shareModal';
+import UserInfo from '@/js/components/jobs/userInfo';
+import { LabelWithSpinner } from '@/js/components/plans/ctaButton';
+import PageHeader from '@/js/components/plans/header';
+import Intro from '@/js/components/plans/intro';
+import StepsTable from '@/js/components/plans/stepsTable';
+import Toasts from '@/js/components/plans/toasts';
+import ProductNotFound from '@/js/components/products/product404';
 import {
   getLoadingOrNotFound,
   shouldFetchPlan,
   shouldFetchVersion,
-} from '@/components/utils';
-import { AppState } from '@/store';
-import { fetchJob, requestCancelJob, updateJob } from '@/store/jobs/actions';
-import { selectJob, selectJobId } from '@/store/jobs/selectors';
-import { CONSTANTS } from '@/store/plans/reducer';
-import { selectPlan, selectPlanSlug } from '@/store/plans/selectors';
+} from '@/js/components/utils';
+import { AppState } from '@/js/store';
+import { fetchJob, requestCancelJob, updateJob } from '@/js/store/jobs/actions';
+import { selectJob, selectJobId } from '@/js/store/jobs/selectors';
+import { CONSTANTS } from '@/js/store/plans/reducer';
+import { selectPlan, selectPlanSlug } from '@/js/store/plans/selectors';
 import {
   fetchPlan,
   fetchProduct,
   fetchVersion,
-} from '@/store/products/actions';
+} from '@/js/store/products/actions';
 import {
   selectProduct,
   selectProductSlug,
   selectVersion,
   selectVersionLabel,
-} from '@/store/products/selectors';
-import { fetchScratchOrg } from '@/store/scratchOrgs/actions';
-import { selectScratchOrg } from '@/store/scratchOrgs/selectors';
-import { selectUserState } from '@/store/user/selectors';
-import routes from '@/utils/routes';
+} from '@/js/store/products/selectors';
+import { fetchScratchOrg } from '@/js/store/scratchOrgs/actions';
+import { selectScratchOrg } from '@/js/store/scratchOrgs/selectors';
+import { selectUserState } from '@/js/store/user/selectors';
+import { getVersionLabel } from '@/js/utils/helpers';
+import routes from '@/js/utils/routes';
 
 const select = (appState: AppState, props: RouteComponentProps) => ({
   user: selectUserState(appState),
@@ -75,14 +76,14 @@ const connector = connect(select, actions);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
-type Props = PropsFromRedux & RouteComponentProps;
+type Props = PropsFromRedux & RouteComponentProps & WithTranslation;
 
 type State = {
   modalOpen: boolean;
   canceling: boolean;
 };
 
-class JobDetail extends React.Component<Props, State> {
+class JobDetail extends Component<Props, State> {
   // unmount -- we just want to prevent a post-unmount state update after the
   // action finishes.
   // https://reactjs.org/blog/2015/12/16/ismounted-antipattern.html
@@ -251,7 +252,7 @@ class JobDetail extends React.Component<Props, State> {
   };
 
   getCancelBtn() {
-    const { user, job } = this.props;
+    const { t, user, job } = this.props;
 
     /* istanbul ignore if */
     if (!job) {
@@ -264,7 +265,7 @@ class JobDetail extends React.Component<Props, State> {
           <Button
             label={
               <LabelWithSpinner
-                label={i18n.t('Canceling Installation…')}
+                label={t('Canceling Installation…')}
                 variant="base"
                 size="x-small"
               />
@@ -275,7 +276,7 @@ class JobDetail extends React.Component<Props, State> {
       }
       return (
         <Button
-          label={i18n.t('Cancel Installation')}
+          label={t('Cancel Installation')}
           variant="text-destructive"
           onClick={this.requestCancelJob}
         />
@@ -285,10 +286,10 @@ class JobDetail extends React.Component<Props, State> {
   }
 
   getShareBtn() {
-    const { job } = this.props;
+    const { t, job } = this.props;
     return job?.status === CONSTANTS.STATUS.COMPLETE ? null : (
       <Button
-        label={i18n.t('Share Installation')}
+        label={t('Share Installation')}
         iconCategory="utility"
         iconName="share"
         iconPosition="left"
@@ -307,7 +308,7 @@ class JobDetail extends React.Component<Props, State> {
   /** Returns false if _any_ results for the given step
    * have a status of "hide". True otherwise.
    */
-  stepIsVisible = (stepId: string, job: Job) => {
+  static stepIsVisible = (stepId: string, job: Job) => {
     let visible = true;
     const stepResults = job.results[stepId];
     if (stepResults) {
@@ -323,6 +324,7 @@ class JobDetail extends React.Component<Props, State> {
 
   render() {
     const {
+      t,
       user,
       product,
       productSlug,
@@ -351,8 +353,6 @@ class JobDetail extends React.Component<Props, State> {
     if (loadingOrNotFound !== false) {
       return loadingOrNotFound;
     }
-    // this redundant check is required to satisfy Flow:
-    // https://flow.org/en/docs/lang/refinements/#toc-refinement-invalidations
 
     /* istanbul ignore if */
     if (!product || !version || !plan || !job) {
@@ -361,18 +361,18 @@ class JobDetail extends React.Component<Props, State> {
     const isScratchOrg = Boolean(job.org_id && !job.creator);
     const linkToPlan = routes.plan_detail(
       product.slug,
-      version.label,
+      getVersionLabel(product, version),
       plan.slug,
     );
     const { canceling } = this.state;
     const steps = plan.steps
-      ? plan.steps.filter((step) => this.stepIsVisible(step.id, job))
+      ? plan.steps.filter((step) => JobDetail.stepIsVisible(step.id, job))
       : [];
     return (
       <DocumentTitle
-        title={`${i18n.t('Installation')} | ${plan.title} | ${
-          product.title
-        } | ${window.SITE_NAME}`}
+        title={`${t('Installation')} | ${plan.title} | ${product.title} | ${
+          window.SITE_NAME
+        }`}
       >
         <>
           <Header history={history} jobId={jobId} hideLogin={isScratchOrg} />
@@ -411,7 +411,7 @@ class JobDetail extends React.Component<Props, State> {
               backLink={
                 job.status === CONSTANTS.STATUS.STARTED ? null : (
                   <BackLink
-                    label={i18n.t('Install another product')}
+                    label={t('Install another product')}
                     url={routes.product_list()}
                     className="slds-p-top_small"
                   />
@@ -430,6 +430,6 @@ class JobDetail extends React.Component<Props, State> {
   }
 }
 
-const WrappedJobDetail = connector(withRouter(JobDetail));
+const WrappedJobDetail = connector(withRouter(withTranslation()(JobDetail)));
 
 export default WrappedJobDetail;

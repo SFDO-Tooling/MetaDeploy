@@ -1,59 +1,67 @@
-import i18n from 'i18next';
 import { find } from 'lodash';
-import * as React from 'react';
+import React, { Component } from 'react';
 import DocumentTitle from 'react-document-title';
+import { WithTranslation, withTranslation } from 'react-i18next';
 import { Trans } from 'react-i18next';
 import { connect, ConnectedProps } from 'react-redux';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 
-import BackLink from '@/components/backLink';
-import BodyContainer from '@/components/bodyContainer';
-import Header from '@/components/header';
-import CtaButton from '@/components/plans/ctaButton';
-import PageHeader from '@/components/plans/header';
-import Intro from '@/components/plans/intro';
+import BackLink from '@/js/components/backLink';
+import BodyContainer from '@/js/components/bodyContainer';
+import Header from '@/js/components/header';
+import CtaButton from '@/js/components/plans/ctaButton';
+import PageHeader from '@/js/components/plans/header';
+import Intro from '@/js/components/plans/intro';
 import PreflightResults, {
   ErrorIcon,
   WarningIcon,
-} from '@/components/plans/preflightResults';
-import StepsTable from '@/components/plans/stepsTable';
-import Toasts from '@/components/plans/toasts';
-import UserInfo from '@/components/plans/userInfo';
-import PlanNotAllowed from '@/components/products/notAllowed';
-import OldVersionWarning from '@/components/products/oldVersionWarning';
-import ProductNotFound from '@/components/products/product404';
+} from '@/js/components/plans/preflightResults';
+import StepsTable from '@/js/components/plans/stepsTable';
+import Toasts from '@/js/components/plans/toasts';
+import UserInfo from '@/js/components/plans/userInfo';
+import PlanNotAllowed from '@/js/components/products/notAllowed';
+import OldVersionWarning from '@/js/components/products/oldVersionWarning';
+import ProductNotFound from '@/js/components/products/product404';
 import {
   getLoadingOrNotFound,
   shouldFetchPlan,
   shouldFetchVersion,
-} from '@/components/utils';
-import { AppState } from '@/store';
-import { startJob } from '@/store/jobs/actions';
-import { selectOrgs } from '@/store/org/selectors';
-import { fetchPreflight, startPreflight } from '@/store/plans/actions';
-import { CONSTANTS, Step } from '@/store/plans/reducer';
+} from '@/js/components/utils';
+import { AppState } from '@/js/store';
+import { startJob } from '@/js/store/jobs/actions';
+import { selectOrgs } from '@/js/store/org/selectors';
+import { fetchPreflight, startPreflight } from '@/js/store/plans/actions';
+import { CONSTANTS, Step } from '@/js/store/plans/reducer';
 import {
   selectPlan,
   selectPlanSlug,
   selectPreflight,
-} from '@/store/plans/selectors';
+} from '@/js/store/plans/selectors';
 import {
   fetchPlan,
   fetchProduct,
   fetchVersion,
-} from '@/store/products/actions';
+} from '@/js/store/products/actions';
 import {
   selectProduct,
   selectProductSlug,
   selectVersion,
   selectVersionLabel,
-} from '@/store/products/selectors';
-import { fetchScratchOrg, spinScratchOrg } from '@/store/scratchOrgs/actions';
-import { selectScratchOrg } from '@/store/scratchOrgs/selectors';
-import { logout } from '@/store/user/actions';
-import { selectUserState } from '@/store/user/selectors';
-import { SCRATCH_ORG_STATUSES, SUPPORTED_ORGS } from '@/utils/constants';
-import routes from '@/utils/routes';
+} from '@/js/store/products/selectors';
+import {
+  fetchScratchOrg,
+  spinScratchOrg,
+} from '@/js/store/scratchOrgs/actions';
+import { selectScratchOrg } from '@/js/store/scratchOrgs/selectors';
+import { logout } from '@/js/store/user/actions';
+import { selectUserState } from '@/js/store/user/selectors';
+import {
+  LATEST_VERSION,
+  SCRATCH_ORG_STATUSES,
+  SUPPORTED_ORGS,
+} from '@/js/utils/constants';
+import { getVersionLabel } from '@/js/utils/helpers';
+import routes from '@/js/utils/routes';
 
 const select = (appState: AppState, props: RouteComponentProps) => ({
   user: selectUserState(appState),
@@ -85,14 +93,14 @@ const connector = connect(select, actions);
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
 export type SelectedSteps = Set<string>;
-type Props = PropsFromRedux & RouteComponentProps;
+type Props = PropsFromRedux & RouteComponentProps & WithTranslation;
 type State = {
   changedSteps: Map<string, boolean>;
 };
 
 const { RESULT_STATUS } = CONSTANTS;
 
-class PlanDetail extends React.Component<Props, State> {
+class PlanDetail extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = { changedSteps: new Map() };
@@ -275,7 +283,7 @@ class PlanDetail extends React.Component<Props, State> {
   }
 
   getPostMessage() {
-    const { user, product, version, plan, orgs } = this.props;
+    const { t, user, product, version, plan, orgs } = this.props;
 
     /* istanbul ignore if */
     if (!product || !version || !plan) {
@@ -289,13 +297,13 @@ class PlanDetail extends React.Component<Props, State> {
           <div className="slds-p-bottom_xx-small">
             <ErrorIcon />
             <span className="slds-text-color_error">
-              {i18n.t(
+              {t(
                 'Oops! It looks like you don’t have permissions to run an installation on this org.',
               )}
             </span>
           </div>
           <p>
-            {i18n.t(
+            {t(
               'Please contact an Admin within your org or use the button below to log in with a different org.',
             )}
           </p>
@@ -303,10 +311,14 @@ class PlanDetail extends React.Component<Props, State> {
       );
     }
 
-    const currentJob = find(orgs, (org) => org.current_job !== null)
-      ?.current_job;
-    const currentPreflight = find(orgs, (org) => org.current_preflight !== null)
-      ?.current_preflight;
+    const currentJob = find(
+      orgs,
+      (org) => org.current_job !== null,
+    )?.current_job;
+    const currentPreflight = find(
+      orgs,
+      (org) => org.current_preflight !== null,
+    )?.current_preflight;
     if (currentJob) {
       const { product_slug, version_label, plan_slug, id } = currentJob;
       return (
@@ -335,9 +347,7 @@ class PlanDetail extends React.Component<Props, State> {
         <p>
           <WarningIcon />
           <span>
-            {i18n.t(
-              'A pre-install validation is currently running on this org.',
-            )}
+            {t('A pre-install validation is currently running on this org.')}
           </span>
         </p>
       );
@@ -400,6 +410,7 @@ class PlanDetail extends React.Component<Props, State> {
 
   render() {
     const {
+      t,
       user,
       product,
       productSlug,
@@ -423,8 +434,6 @@ class PlanDetail extends React.Component<Props, State> {
     if (loadingOrNotFound !== false) {
       return loadingOrNotFound;
     }
-    // this redundant check is required to satisfy Flow:
-    // https://flow.org/en/docs/lang/refinements/#toc-refinement-invalidations
 
     /* istanbul ignore if */
     if (!product || !version || !plan) {
@@ -468,10 +477,7 @@ class PlanDetail extends React.Component<Props, State> {
             <BodyContainer>
               {product.most_recent_version && !isMostRecent ? (
                 <OldVersionWarning
-                  link={routes.version_detail(
-                    product.slug,
-                    product.most_recent_version.label,
-                  )}
+                  link={routes.version_detail(product.slug, LATEST_VERSION)}
                 />
               ) : null}
               {preflight && (scratchOrg || user) ? (
@@ -500,9 +506,11 @@ class PlanDetail extends React.Component<Props, State> {
                 cta={this.getCTA(selectedSteps)}
                 backLink={
                   <BackLink
-                    label={i18n.t('Select a different plan')}
-                    url={routes.version_detail(product.slug, version.label)}
-                    className="slds-p-top_small"
+                    label={t('Select a different plan')}
+                    url={routes.version_detail(
+                      product.slug,
+                      getVersionLabel(product, version),
+                    )}
                   />
                 }
               />
@@ -525,7 +533,12 @@ class PlanDetail extends React.Component<Props, State> {
               link={
                 <Trans i18nKey="planNotAllowed">
                   Try{' '}
-                  <Link to={routes.version_detail(product.slug, version.label)}>
+                  <Link
+                    to={routes.version_detail(
+                      product.slug,
+                      getVersionLabel(product, version),
+                    )}
+                  >
                     another plan
                   </Link>{' '}
                   from that product version
@@ -539,6 +552,6 @@ class PlanDetail extends React.Component<Props, State> {
   }
 }
 
-const WrappedPlanDetail = connector(withRouter(PlanDetail));
+const WrappedPlanDetail = connector(withRouter(withTranslation()(PlanDetail)));
 
 export default WrappedPlanDetail;

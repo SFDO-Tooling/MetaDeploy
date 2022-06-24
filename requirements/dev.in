@@ -1,0 +1,24 @@
+# Dependencies are kept up-to-date automatically in *.txt files by the
+# upgrade-deps.yml workflow. Avoid pinning specific versions here unless required
+# for stability.
+
+-c prod.txt
+
+Sphinx
+black
+coveralls
+django-extensions
+factory_boy
+flake8
+ipython
+isort
+myst-parser
+pip-tools
+pytest-asyncio
+pytest-cov
+pytest-django
+pytest-factoryboy
+pytest-mock
+pytest
+sphinxcontrib-httpdomain
+vcrpy

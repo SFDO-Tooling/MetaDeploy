@@ -1,7 +1,7 @@
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
-import Errors from '@/components/apiErrors';
+import Errors from '@/js/components/apiErrors';
 
 import { render } from './../utils';
 

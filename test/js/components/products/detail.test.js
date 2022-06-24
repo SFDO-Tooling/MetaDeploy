@@ -1,19 +1,19 @@
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import { ProductDetail, VersionDetail } from '@/components/products/detail';
+import { ProductDetail, VersionDetail } from '@/js/components/products/detail';
 import {
   fetchAdditionalPlans,
   fetchPlan,
   fetchProduct,
   fetchVersion,
-} from '@/store/products/actions';
-import { PRODUCT_LAYOUTS } from '@/utils/constants';
-import routes from '@/utils/routes';
+} from '@/js/store/products/actions';
+import { LATEST_VERSION, PRODUCT_LAYOUTS } from '@/js/utils/constants';
+import routes from '@/js/utils/routes';
 
 import { renderWithRedux, reRenderWithRedux } from './../../utils';
 
-jest.mock('@/store/products/actions');
+jest.mock('@/js/store/products/actions');
 
 fetchAdditionalPlans.mockReturnValue({ type: 'TEST' });
 fetchPlan.mockReturnValue({ type: 'TEST' });
@@ -124,15 +124,17 @@ describe('<ProductDetail />', () => {
   test('redirects to version_detail', () => {
     const { context } = setup();
 
-    expect(context.action).toEqual('REPLACE');
-    expect(context.url).toEqual(routes.version_detail('product-1', '1.0.0'));
+    expect(context.action).toBe('REPLACE');
+    expect(context.url).toEqual(
+      routes.version_detail('product-1', LATEST_VERSION),
+    );
   });
 
   describe('product has old_slug', () => {
     test('redirects to product_detail with new slug', () => {
       const { context } = setup({ productSlug: 'old-slug' });
 
-      expect(context.action).toEqual('REPLACE');
+      expect(context.action).toBe('REPLACE');
       expect(context.url).toEqual(routes.product_detail('product-1'));
     });
   });
@@ -216,13 +218,8 @@ describe('<VersionDetail />', () => {
       versionLabel: '1.0.0',
     };
     const opts = Object.assign({}, defaults, options);
-    const {
-      productSlug,
-      versionLabel,
-      rerenderFn,
-      customStore,
-      initialState,
-    } = opts;
+    const { productSlug, versionLabel, rerenderFn, customStore, initialState } =
+      opts;
     const context = {};
     const ui = (
       <StaticRouter context={context}>
@@ -269,7 +266,7 @@ describe('<VersionDetail />', () => {
     test('redirects to version_detail with new slug', () => {
       const { context } = setup({ productSlug: 'old-slug' });
 
-      expect(context.action).toEqual('REPLACE');
+      expect(context.action).toBe('REPLACE');
       expect(context.url).toEqual(routes.version_detail('product-1', '1.0.0'));
     });
   });
@@ -287,9 +284,9 @@ describe('<VersionDetail />', () => {
           versionLabel: 'my-secondary-plan',
         });
 
-        expect(context.action).toEqual('REPLACE');
+        expect(context.action).toBe('REPLACE');
         expect(context.url).toEqual(
-          routes.plan_detail('product-1', '1.0.0', 'my-secondary-plan'),
+          routes.plan_detail('product-1', LATEST_VERSION, 'my-secondary-plan'),
         );
       });
     });

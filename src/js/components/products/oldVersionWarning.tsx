@@ -1,18 +1,19 @@
 import Toast from '@salesforce/design-system-react/components/toast';
 import ToastContainer from '@salesforce/design-system-react/components/toast/container';
-import i18n from 'i18next';
-import * as React from 'react';
+import React, { Component } from 'react';
+import { WithTranslation, withTranslation } from 'react-i18next';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 type Props = {
   link: string;
-} & RouteComponentProps;
+} & RouteComponentProps &
+  WithTranslation;
 
 type State = {
   isOpen: boolean;
 };
 
-class OldVersionWarning extends React.Component<Props, State> {
+class OldVersionWarning extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = { isOpen: true };
@@ -28,6 +29,7 @@ class OldVersionWarning extends React.Component<Props, State> {
   };
 
   render() {
+    const { t } = this.props;
     const { isOpen } = this.state;
     return (
       <>
@@ -35,10 +37,10 @@ class OldVersionWarning extends React.Component<Props, State> {
           <ToastContainer>
             <Toast
               labels={{
-                heading: i18n.t(
+                heading: t(
                   'This is not the most recent version of this product.',
                 ),
-                headingLink: i18n.t('Go to the most recent version.'),
+                headingLink: t('Go to the most recent version.'),
               }}
               variant="warning"
               onClickHeadingLink={this.linkClicked}
@@ -51,4 +53,4 @@ class OldVersionWarning extends React.Component<Props, State> {
   }
 }
 
-export default withRouter(OldVersionWarning);
+export default withRouter(withTranslation()(OldVersionWarning));

@@ -1,8 +1,11 @@
+from datetime import datetime, timezone
+
 import factory
 import factory.fuzzy
 import pytest
 from allauth.socialaccount.models import SocialAccount, SocialApp, SocialToken
 from django.contrib.auth import get_user_model
+from django.contrib.sites.models import Site
 from pytest_factoryboy import register
 from rest_framework.test import APIClient
 from sfdo_template_helpers.crypto import fernet_encrypt
@@ -19,6 +22,7 @@ from metadeploy.api.models import (
     ProductCategory,
     ProductSlug,
     ScratchOrg,
+    SiteProfile,
     Step,
     Version,
 )
@@ -192,6 +196,20 @@ class PlanFactory(factory.django.DjangoModelFactory):
 
 
 @register
+class SiteProfileFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = SiteProfile
+
+    name = "MetaDeploy"
+    company_name = "Mao-Kwikowski Mercantile"
+    welcome_text = "Welcome to MetaDeploy"
+    master_agreement = "MSA"
+    copyright_notice = "(c) 2022"
+
+    site = factory.Iterator(Site.objects.all())
+
+
+@register
 class StepFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Step
@@ -240,6 +258,7 @@ class ScratchOrgFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = ScratchOrg
 
+    enqueued_at = datetime.now(tz=timezone.utc)
     email = "test@example.com"
     plan = factory.SubFactory(PlanFactory)
 
@@ -248,6 +267,8 @@ class ScratchOrgFactory(factory.django.DjangoModelFactory):
 class PreflightResultFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = PreflightResult
+
+    plan = factory.SubFactory(PlanFactory)
 
 
 @pytest.fixture

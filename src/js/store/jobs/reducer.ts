@@ -1,6 +1,6 @@
-import { JobsAction } from '@/store/jobs/actions';
-import { PlanResults } from '@/store/plans/reducer';
-import { LogoutAction } from '@/store/user/actions';
+import { JobsAction } from '@/js/store/jobs/actions';
+import { PlanResults } from '@/js/store/plans/reducer';
+import { LogoutAction } from '@/js/store/user/actions';
 
 export type Job = {
   id: string;
@@ -20,6 +20,7 @@ export type Job = {
   is_production_org: boolean;
   product_slug: string;
   version_label: string;
+  version_is_most_recent: boolean;
   plan_slug: string;
   instance_url: string | null;
   error_count: number;

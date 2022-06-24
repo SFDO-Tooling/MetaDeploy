@@ -14,11 +14,11 @@
   // Add the IDs of extensions you want installed when the container is created in the array below.
   "extensions": [
     "bibhasdn.django-html",
-    "coenraads.bracket-pair-colorizer-2",
     "csstools.postcss",
     "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
     "formulahendry.auto-rename-tag",
-    "lextudio.restructuredtext",
+    "jounqin.vscode-mdx",
     "ms-azuretools.vscode-docker",
     "ms-python.python",
     "ms-python.vscode-pylance",
@@ -35,22 +35,29 @@
   // Use 'settings' to set *default* container specific settings.json values on container create.
   // You can edit these settings after create using File > Preferences > Settings > Remote.
   "settings": {
-    // This will ignore your local shell user setting for Linux since shells like zsh are typically
-    // not in base container images. You can also update this to an specific shell to ensure VS Code
-    // uses the right one for terminals and tasks. For example, /bin/bash (or /bin/ash for Alpine).
-    "terminal.integrated.shell.linux": null,
+    "terminal.integrated.profiles.linux": {
+      "bash": {
+        "path": "/bin/bash"
+      }
+    },
+    "terminal.integrated.defaultProfile.linux": "bash",
+    "editor.bracketPairColorization.enabled": true,
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": true
     },
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true,
     "editor.tabSize": 2,
+    "eslint.options": {
+      "extensions": [".js", ".jsx", ".md", ".mdx", ".ts", ".tsx"]
+    },
     "files.insertFinalNewline": true,
     "files.trimFinalNewlines": true,
     "files.trimTrailingWhitespace": true,
     "javascript.suggestionActions.enabled": false,
     "typescript.preferences.quoteStyle": "single",
     "python.formatting.provider": "black",
+    "python.formatting.blackPath": "black",
     "python.languageServer": "Pylance",
     "python.linting.flake8Enabled": true,
     "python.linting.pylintEnabled": false,
@@ -59,8 +66,7 @@
     "remote.extensionKind": {
       "ms-azuretools.vscode-docker": "workspace"
     },
-    "restructuredtext.linter.extraArgs": ["--max-line-length 80"],
-    "restructuredtext.confPath": "${workspaceFolder}/docs",
+    "typescript.tsdk": "node_modules/typescript/lib",
     "[javascript]": {
       "editor.rulers": [80]
     },
@@ -68,6 +74,9 @@
       "editor.rulers": [80]
     },
     "[markdown]": {
+      "editor.rulers": [80]
+    },
+    "[mdx]": {
       "editor.rulers": [80]
     },
     "[html]": {
@@ -83,7 +92,9 @@
       "editor.rulers": [80]
     },
     "[python]": {
-      "editor.rulers": [88]
+      "editor.rulers": [88],
+      "editor.tabSize": 4,
+      "editor.defaultFormatter": "ms-python.python"
     },
     "[scss]": {
       "editor.rulers": [80],

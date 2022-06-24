@@ -1,41 +1,49 @@
 import Card from '@salesforce/design-system-react/components/card';
 import Icon from '@salesforce/design-system-react/components/icon';
 import { format, parseISO } from 'date-fns';
-import i18n from 'i18next';
-import * as React from 'react';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Trans } from 'react-i18next';
 
-import noConnectionSvg from '!svg-inline-loader!images/no-connection.svg';
-import Login from '@/components/header/login';
-import ScratchOrgInfo from '@/components/scratchOrgs/scratchOrgInfo';
-import { Plan } from '@/store/plans/reducer';
-import { ScratchOrg } from '@/store/scratchOrgs/reducer';
-import { User } from '@/store/user/reducer';
-import { SUPPORTED_ORGS } from '@/utils/constants';
+import noConnectionSvg from '@/img/no-connection.svg?raw';
+import Login from '@/js/components/header/login';
+import ScratchOrgInfo from '@/js/components/scratchOrgs/scratchOrgInfo';
+import { Plan } from '@/js/store/plans/reducer';
+import { ScratchOrg } from '@/js/store/scratchOrgs/reducer';
+import { User } from '@/js/store/user/reducer';
+import { SUPPORTED_ORGS } from '@/js/utils/constants';
 
-const LoggedOut = () => (
-  <div className="slds-illustration slds-illustration_small">
-    <div
-      className="slds-m-vertical_medium"
-      dangerouslySetInnerHTML={{ __html: noConnectionSvg }}
-    />
-    <h3 className="slds-illustration__header slds-text-heading_medium">
-      {i18n.t('Not Connected to Salesforce')}
-    </h3>
-  </div>
-);
+const LoggedOut = () => {
+  const { t } = useTranslation();
 
-const Footer = () => (
-  <Trans i18nKey="switchOrg">
-    Is this the correct org? If not, please{' '}
-    <Login
-      id="user-info-login"
-      label={i18n.t('log in with a different org')}
-      buttonClassName="slds-p-horizontal_xxx-small"
-      buttonVariant="base"
-    />
-  </Trans>
-);
+  return (
+    <div className="slds-illustration slds-illustration_small">
+      <div
+        className="slds-m-vertical_medium"
+        dangerouslySetInnerHTML={{ __html: noConnectionSvg }}
+      />
+      <h3 className="slds-illustration__header slds-text-heading_medium">
+        {t('Not Connected to Salesforce')}
+      </h3>
+    </div>
+  );
+};
+
+const Footer = () => {
+  const { t } = useTranslation();
+
+  return (
+    <Trans i18nKey="switchOrg">
+      Is this the correct org? If not, please{' '}
+      <Login
+        id="user-info-login"
+        label={t('log in with a different org')}
+        buttonClassName="slds-p-horizontal_xxx-small"
+        buttonVariant="base"
+      />
+    </Trans>
+  );
+};
 
 const UserInfo = ({
   user,
@@ -46,6 +54,8 @@ const UserInfo = ({
   plan: Plan;
   scratchOrg?: ScratchOrg | null;
 }) => {
+  const { t } = useTranslation();
+
   const hasValidToken = Boolean(user?.valid_token_for);
   const username = user?.username;
   const org_name = user?.org_name;
@@ -68,7 +78,7 @@ const UserInfo = ({
     contents = (
       <Card
         bodyClassName="slds-card__body_inner"
-        heading={i18n.t('Connected to Salesforce')}
+        heading={t('Connected to Salesforce')}
         hasNoHeader={!hasValidToken}
         icon={<Icon category="utility" name="connected_apps" />}
         empty={hasValidToken ? null : <LoggedOut />}
@@ -77,17 +87,17 @@ const UserInfo = ({
         <ul>
           {username ? (
             <li>
-              <strong>{i18n.t('User:')}</strong> {username}
+              <strong>{t('User:')}</strong> {username}
             </li>
           ) : null}
           {org_name ? (
             <li>
-              <strong>{i18n.t('Org:')}</strong> {org_name}
+              <strong>{t('Org:')}</strong> {org_name}
             </li>
           ) : null}
           {org_type ? (
             <li>
-              <strong>{i18n.t('Type:')}</strong> {org_type}
+              <strong>{t('Type:')}</strong> {org_type}
             </li>
           ) : null}
         </ul>

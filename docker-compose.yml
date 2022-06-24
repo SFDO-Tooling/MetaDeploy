@@ -2,36 +2,30 @@ version: '3'
 
 services:
   postgres:
-    env_file:
-      - .env
     environment:
       POSTGRES_DB: metadeploy
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: sample_db_password
     volumes:
       - ./postgres:/var/lib/postgresql/data:delegated
-    image: postgres:12.3
-    ports:
-      - '5432:5432/tcp'
+    image: postgres:12.9
     restart: always
 
   redis:
-    image: redis:5.0
-    ports:
-      - '6379:6379'
+    image: redis:6.2
 
   web:
     build:
       context: .
-      args:
-        - BUILD_ENV=development
       dockerfile: Dockerfile
     command: |
       /bin/bash -c 'while !</dev/tcp/postgres/5432; do echo "Waiting for postgres database to start..."; /bin/sleep 1; done; \
-      /bin/sh /app/utility/start_server.sh;'
+      /bin/sh /app/start-server.sh;'
     ports:
       - '8080:8080'
       - '8000:8000'
+      # Storybook server
+      - '6006:6006'
     stdin_open: true
     tty: true
     depends_on:
@@ -39,8 +33,6 @@ services:
       - redis
     links:
       - redis
-    env_file:
-      - .env
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.local
       DATABASE_URL: postgres://postgres:sample_db_password@postgres:5432/metadeploy

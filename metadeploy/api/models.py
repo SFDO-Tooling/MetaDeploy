@@ -16,13 +16,13 @@ from cumulusci.core.utils import import_class
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
-from django.contrib.postgres.fields import ArrayField, JSONField
+from django.contrib.postgres.fields import ArrayField
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
-from django.db.models import Count, F, Func, Q
+from django.db.models import Count, F, Func, JSONField, Q
 from django.utils.translation import gettext_lazy as _
 from hashid_field import HashidAutoField
 from model_utils import Choices, FieldTracker
@@ -33,7 +33,7 @@ from sfdo_template_helpers.fields import MarkdownField as BaseMarkdownField
 from sfdo_template_helpers.slugs import AbstractSlug, SlugMixin
 
 from .belvedere_utils import convert_to_18
-from .constants import ERROR, HIDE, OPTIONAL, ORGANIZATION_DETAILS
+from .constants import ERROR, HIDE, OPTIONAL, ORGANIZATION_DETAILS, SKIP
 from .flows import JobFlowCallback, PreflightFlowCallback
 from .push import (
     notify_org_changed,
@@ -253,8 +253,10 @@ class ProductSlug(AbstractSlug):
 
 class ProductQuerySet(TranslatableQuerySet):
     def published(self):
-        return self.annotate(version__count=Count("version")).filter(
-            version__count__gte=1
+        return (
+            self.annotate(version__count=Count("version"))
+            .filter(version__count__gte=1)
+            .order_by("order_key")
         )
 
 
@@ -342,6 +344,10 @@ class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel)
     def get_translation_strategy(self):
         return "fields", f"{self.slug}:product"
 
+    def get_absolute_url(self):
+        # See src/js/utils/routes.ts
+        return f"/products/{self.slug}"
+
 
 class VersionQuerySet(TranslatableQuerySet):
     def get_by_natural_key(self, *, product, label):
@@ -373,7 +379,7 @@ class Version(HashIdMixin, TranslatableModel):
         return (self.product, self.label)
 
     def __str__(self):
-        return "{}, Version {}".format(self.product, self.label)
+        return f"{self.product}, Version {self.label}"
 
     @property
     def primary_plan(self):
@@ -400,6 +406,10 @@ class Version(HashIdMixin, TranslatableModel):
 
     def get_translation_strategy(self):
         return "fields", f"{self.product.slug}:version:{self.label}"
+
+    def get_absolute_url(self):
+        # See src/js/utils/routes.ts
+        return f"/products/{self.product.slug}/{self.label}"
 
 
 class PlanSlug(AbstractSlug):
@@ -428,6 +438,10 @@ class PlanTemplate(SlugMixin, TranslatableModel):
         error_message=MarkdownField(),
     )
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    # When true, the latest version of the associated product Plan
+    # will be run against a scratch org in a one-off dyno after
+    # a production release on Heroku.
+    regression_test_opt_out = models.BooleanField(default=False)
 
     slug_class = PlanSlug
 
@@ -491,6 +505,13 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
         help_text="Lifetime of Scratch Orgs created for this plan. Will inherit the "
         "global default value if left blank.",
     )
+    calculated_average_duration = models.IntegerField(
+        "Average duration of a plan (seconds)",
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0)],
+        help_text="The duration between the enqueueing of a job and its successful completion.",
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -531,7 +552,7 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
         ]
         if len(durations) < settings.MINIMUM_JOBS_FOR_AVERAGE:
             return None
-        return median(durations)
+        return median(durations).total_seconds()
 
     @property
     def scratch_org_duration(self):
@@ -541,7 +562,7 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
         return (self.version, self.title)
 
     def __str__(self):
-        return "{}, Plan {}".format(self.version, self.title)
+        return f"{self.version}, Plan {self.title}"
 
     @property
     def requires_preflight(self):
@@ -556,6 +577,10 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
             "fields",
             f"{self.plan_template.product.slug}:plan:{self.plan_template.name}",
         )
+
+    def get_absolute_url(self):
+        # See src/js/utils/routes.ts
+        return f"/products/{self.version.product.slug}/{self.version.label}/{self.slug}"
 
     def is_visible_to(self, *args, **kwargs):
         if self.supported_orgs != SUPPORTED_ORG_TYPES.Persistent:
@@ -603,7 +628,9 @@ class Step(HashIdMixin, TranslatableModel):
     Kind = Choices(
         ("metadata", _("Metadata")),
         ("onetime", _("One Time Apex")),
-        ("managed", _("Managed Package")),
+        # This is used for package installation steps regardless of package type,
+        # but the internal value is "managed" for backwards-compatibility
+        ("managed", _("Package")),
         ("data", _("Data")),
         ("other", _("Other")),
     )
@@ -716,6 +743,13 @@ class Job(HashIdMixin, models.Model):
     click_through_agreement = models.ForeignKey(
         ClickThroughAgreement, on_delete=models.PROTECT, null=True
     )
+    master_service_agreement = models.ForeignKey(
+        ClickThroughAgreement,
+        on_delete=models.PROTECT,
+        null=True,
+        related_name="msa_jobs",
+    )
+    is_release_test = models.BooleanField(default=False)
 
     @property
     def org_name(self):
@@ -726,6 +760,18 @@ class Job(HashIdMixin, models.Model):
     def instance_url(self):
         if self.user:
             return self.user.instance_url
+
+    @property
+    def is_scratch(self):
+        """Returns whether this is a job generating a scratch org."""
+        return bool(not self.user and self.org_id)
+
+    def get_absolute_url(self):
+        # See src/js/utils/routes.ts
+        return (
+            f"/products/{self.plan.version.product.slug}/{self.plan.version.label}/"
+            f"{self.plan.slug}/jobs/{self.id}"
+        )
 
     def subscribable_by(self, user, session):
         # Restrict this to public Jobs, staff users, Job owners, or users who have a
@@ -767,13 +813,23 @@ class Job(HashIdMixin, models.Model):
             )
             self.click_through_agreement = ctt
 
+            # If this is a scratch org job and we have an MSA configured,
+            # persist that too.
+            if self.is_scratch:
+                profile = SiteProfile.objects.first()
+                if profile and profile.master_agreement:
+                    msa, _ = ClickThroughAgreement.objects.get_or_create(
+                        text=profile.master_agreement
+                    )
+                    self.master_service_agreement = msa
+
         ret = super().save(*args, **kwargs)
 
         try:
             self.push_to_org_subscribers(is_new, changed)
             self.push_if_results_changed(changed)
             self.push_if_has_stopped_running(changed)
-        except RuntimeError as error:
+        except RuntimeError as error:  # pragma: no cover
             logger.warn(f"RuntimeError: {error}")
 
         return ret
@@ -847,6 +903,7 @@ class PreflightResult(models.Model):
     # }
 
     exception = models.TextField(null=True)
+    is_release_test = models.BooleanField(default=False)
 
     @property
     def instance_url(self):
@@ -863,9 +920,7 @@ class PreflightResult(models.Model):
 
     def has_any_errors(self):
         for results in self.results.values():
-            if any(
-                (result for result in results if result.get("status", None) == ERROR)
-            ):
+            if any(result for result in results if result.get("status", None) == ERROR):
                 return True
         return False
 
@@ -884,7 +939,7 @@ class PreflightResult(models.Model):
         optional_step_pks = []
         for step_id, results in self.results.items():
             for result in results:
-                if result["status"] in (OPTIONAL, HIDE):
+                if result["status"] in (OPTIONAL, HIDE, SKIP):
                     optional_step_pks.append(step_id)
 
         return optional_step_pks
@@ -1061,6 +1116,7 @@ class ScratchOrg(HashIdMixin, models.Model):
             config=self.config,
             org_name=org_name or self.plan.org_config_name,
             keychain=keychain,
+            sbx_login=True,
         )
         return org_config
 
@@ -1076,6 +1132,9 @@ class SiteProfile(TranslatableModel):
         name=models.CharField(max_length=64),
         company_name=models.CharField(max_length=64, blank=True),
         welcome_text=MarkdownField(),
+        master_agreement=MarkdownField(
+            help_text="Markdown is supported. Shown only for builds that create a scratch org."
+        ),
         copyright_notice=MarkdownField(),
     )
 
@@ -1088,11 +1147,18 @@ class SiteProfile(TranslatableModel):
         return self._get_translated_model(use_fallback=True).welcome_text_markdown
 
     @property
+    def master_agreement_markdown(self):
+        return self._get_translated_model(use_fallback=True).master_agreement_markdown
+
+    @property
     def copyright_notice_markdown(self):
         return self._get_translated_model(use_fallback=True).copyright_notice_markdown
 
     def __str__(self):
         return self.name
+
+    def get_translation_strategy(self):  # pragma: no cover
+        return "fields", "siteprofile"
 
 
 class Translation(models.Model):

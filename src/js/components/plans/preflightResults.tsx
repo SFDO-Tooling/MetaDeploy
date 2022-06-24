@@ -1,10 +1,10 @@
 import Icon from '@salesforce/design-system-react/components/icon';
-import i18n from 'i18next';
-import * as React from 'react';
+import React from 'react';
+import { useTranslation, WithTranslation } from 'react-i18next';
 import { Trans } from 'react-i18next';
 
-import { Job } from '@/store/jobs/reducer';
-import { CONSTANTS, Preflight, StepResult } from '@/store/plans/reducer';
+import { Job } from '@/js/store/jobs/reducer';
+import { CONSTANTS, Preflight, StepResult } from '@/js/store/plans/reducer';
 
 export const ErrorIcon = ({
   size,
@@ -12,42 +12,50 @@ export const ErrorIcon = ({
 }: {
   size?: string;
   containerClassName?: string;
-}) => (
-  <Icon
-    assistiveText={{ label: i18n.t('Error') }}
-    category="utility"
-    name="error"
-    colorVariant="error"
-    size={size || 'x-small'}
-    className="slds-m-bottom_xxx-small"
-    containerClassName={containerClassName || 'slds-m-right_x-small'}
-  />
-);
+}) => {
+  const { t } = useTranslation();
 
-export const WarningIcon = () => (
-  <Icon
-    assistiveText={{ label: i18n.t('Warning') }}
-    category="utility"
-    name="warning"
-    colorVariant="warning"
-    size="x-small"
-    className="slds-m-bottom_xxx-small"
-    containerClassName="slds-m-right_x-small"
-  />
-);
+  return (
+    <Icon
+      assistiveText={{ label: t('Error') }}
+      category="utility"
+      name="error"
+      colorVariant="error"
+      size={size || 'x-small'}
+      className="slds-m-bottom_xxx-small"
+      containerClassName={containerClassName || 'slds-m-right_x-small'}
+    />
+  );
+};
+
+export const WarningIcon = () => {
+  const { t } = useTranslation();
+
+  return (
+    <Icon
+      assistiveText={{ label: t('Warning') }}
+      category="utility"
+      name="warning"
+      colorVariant="warning"
+      size="x-small"
+      className="slds-m-bottom_xxx-small"
+      containerClassName="slds-m-right_x-small"
+    />
+  );
+};
 
 // Job "error" or "warning" message
 export const JobError = ({ errors }: { errors: StepResult[] }) => {
   const errorList = [];
   const warnList = [];
   let listItem = null;
-  for (const err of errors) {
+  for (const [idx, err] of errors.entries()) {
     /* istanbul ignore else */
     if (err.message) {
       switch (err.status) {
         case CONSTANTS.RESULT_STATUS.ERROR:
           listItem = (
-            <li>
+            <li key={idx}>
               <ErrorIcon />
               {/* These messages are pre-cleaned by the API */}
               <span
@@ -60,7 +68,7 @@ export const JobError = ({ errors }: { errors: StepResult[] }) => {
           break;
         case CONSTANTS.RESULT_STATUS.WARN:
           listItem = (
-            <li>
+            <li key={idx}>
               <WarningIcon />
               {/* These messages are pre-cleaned by the API */}
               <span dangerouslySetInnerHTML={{ __html: err.message }} />
@@ -76,9 +84,11 @@ export const JobError = ({ errors }: { errors: StepResult[] }) => {
 };
 
 export const getErrorInfo = ({
+  t,
   job,
   preflight,
 }: {
+  t: WithTranslation['t'];
   job?: Job;
   preflight?: Preflight;
 }) => {
@@ -105,19 +115,19 @@ export const getErrorInfo = ({
     // Show errors/warnings
     const errorCount = currentJob.error_count || 0;
     const warningCount = currentJob.warning_count || 0;
-    let msg = i18n.t('errors');
+    let msg = t('errors');
     const errorDefault = `${errorCount} error${errorCount === 1 ? '' : 's'}`;
     const warningDefault = `${warningCount} warning${
       warningCount === 1 ? '' : 's'
     }`;
-    const errorMsg = i18n.t('errorMsg', errorDefault, {
+    const errorMsg = t('errorMsg', errorDefault, {
       count: errorCount,
     });
-    const warningMsg = i18n.t('warningMsg', warningDefault, {
+    const warningMsg = t('warningMsg', warningDefault, {
       count: warningCount,
     });
     if (errorCount > 0 && warningCount > 0) {
-      msg = i18n.t('{{item1}} and {{item2}}', {
+      msg = t('{{item1}} and {{item2}}', {
         item1: errorMsg,
         item2: warningMsg,
       });
@@ -134,12 +144,12 @@ export const getErrorInfo = ({
     if (preflight) {
       info.message =
         !preflight.is_valid && !failed
-          ? i18n.t('Pre-install validation has expired; please run it again.')
-          : i18n.t('Pre-install validation encountered {{errorSummary}}.', {
+          ? t('Pre-install validation has expired; please run it again.')
+          : t('Pre-install validation encountered {{errorSummary}}.', {
               errorSummary: msg,
             });
     } else {
-      info.message = i18n.t('Installation encountered {{errorSummary}}.', {
+      info.message = t('Installation encountered {{errorSummary}}.', {
         errorSummary: msg,
       });
     }
@@ -148,6 +158,8 @@ export const getErrorInfo = ({
 };
 
 const PreflightResults = ({ preflight }: { preflight: Preflight }) => {
+  const { t } = useTranslation();
+
   if (
     preflight.status !== CONSTANTS.STATUS.COMPLETE &&
     preflight.status !== CONSTANTS.STATUS.FAILED &&
@@ -156,7 +168,7 @@ const PreflightResults = ({ preflight }: { preflight: Preflight }) => {
     return null;
   }
 
-  const { failed, message } = getErrorInfo({ preflight });
+  const { failed, message } = getErrorInfo({ t, preflight });
   const planErrors = preflight.results?.plan || [];
   if (message !== null) {
     return (
@@ -167,7 +179,7 @@ const PreflightResults = ({ preflight }: { preflight: Preflight }) => {
         </p>
         {failed ? (
           <p>
-            {i18n.t(
+            {t(
               'After resolving all errors, run the pre-install validation again.',
             )}
           </p>
@@ -181,7 +193,7 @@ const PreflightResults = ({ preflight }: { preflight: Preflight }) => {
     return (
       <p>
         <WarningIcon />
-        {i18n.t('Pre-install validation has expired; please run it again.')}
+        {t('Pre-install validation has expired; please run it again.')}
       </p>
     );
   }
@@ -191,7 +203,7 @@ const PreflightResults = ({ preflight }: { preflight: Preflight }) => {
   return (
     <>
       <p className="slds-text-color_success">
-        {i18n.t('Pre-install validation completed successfully.')}
+        {t('Pre-install validation completed successfully.')}
       </p>
       <p>
         <Trans i18nKey="preflightValidTime" count={preflight_minutes}>

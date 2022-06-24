@@ -1,6 +1,6 @@
 import Card from '@salesforce/design-system-react/components/card';
-import i18n from 'i18next';
-import * as React from 'react';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Trans } from 'react-i18next';
 
 const ScratchOrgInfo = ({
@@ -10,18 +10,20 @@ const ScratchOrgInfo = ({
   date: string | null;
   days?: number;
 }) => {
+  const { t } = useTranslation();
+
   if (!date && !days) {
     return null;
   }
   const expiration = date
-    ? i18n.t('Your scratch org will expire on {{date}}.', { date })
-    : i18n.t(
+    ? t('Your scratch org will expire on {{date}}.', { date })
+    : t(
         'scratchOrgDuration',
         'Your scratch org will expire after {{count}} days.',
         { count: days },
       );
   return (
-    <Card bodyClassName="slds-card__body_inner" heading={i18n.t('Scratch Org')}>
+    <Card bodyClassName="slds-card__body_inner" heading={t('Scratch Org')}>
       <div className="slds-text-longform">
         <p>
           <strong>{expiration}</strong>

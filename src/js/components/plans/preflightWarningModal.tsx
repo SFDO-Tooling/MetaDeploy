@@ -1,17 +1,17 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Modal from '@salesforce/design-system-react/components/modal';
-import i18n from 'i18next';
-import * as React from 'react';
+import React, { ChangeEvent, Component } from 'react';
+import { WithTranslation, withTranslation } from 'react-i18next';
 
-import { SelectedSteps } from '@/components/plans/detail';
-import { WarningIcon } from '@/components/plans/preflightResults';
+import { SelectedSteps } from '@/js/components/plans/detail';
+import { WarningIcon } from '@/js/components/plans/preflightResults';
 import {
   CONSTANTS,
   PlanResults,
   Step,
   StepResult,
-} from '@/store/plans/reducer';
+} from '@/js/store/plans/reducer';
 
 type Props = {
   isOpen: boolean;
@@ -20,7 +20,7 @@ type Props = {
   results: PlanResults;
   steps: Step[];
   selectedSteps: SelectedSteps;
-};
+} & WithTranslation;
 type State = {
   confirmed: boolean;
 };
@@ -55,7 +55,7 @@ const Warning = ({
   return null;
 };
 
-class PreflightWarningModal extends React.Component<Props, State> {
+class PreflightWarningModal extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = { confirmed: false };
@@ -73,24 +73,20 @@ class PreflightWarningModal extends React.Component<Props, State> {
   };
 
   handleChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
+    event: ChangeEvent<HTMLInputElement>,
     { checked }: { checked: boolean },
   ) => {
     this.setState({ confirmed: checked });
   };
 
   render() {
-    const { isOpen, results, steps, selectedSteps } = this.props;
+    const { t, isOpen, results, steps, selectedSteps } = this.props;
     const { confirmed } = this.state;
     const footer = [
-      <Button
-        key="cancel"
-        label={i18n.t('Cancel')}
-        onClick={this.handleClose}
-      />,
+      <Button key="cancel" label={t('Cancel')} onClick={this.handleClose} />,
       <Button
         key="submit"
-        label={i18n.t('Confirm')}
+        label={t('Confirm')}
         variant="brand"
         onClick={this.handleSubmit}
         disabled={!confirmed}
@@ -99,9 +95,10 @@ class PreflightWarningModal extends React.Component<Props, State> {
     return (
       <Modal
         isOpen={isOpen}
-        heading={i18n.t('Potential Issues')}
-        tagline={i18n.t('(confirm to continue)')}
+        heading={t('Potential Issues')}
+        tagline={t('(confirm to continue)')}
         size="medium"
+        dismissOnClickOutside={false}
         onRequestClose={this.handleClose}
         footer={footer}
       >
@@ -126,7 +123,7 @@ class PreflightWarningModal extends React.Component<Props, State> {
             className="slds-p-top_x-small"
             checked={this.state.confirmed}
             labels={{
-              label: i18n.t(
+              label: t(
                 'I understand these warnings, and want to continue with installation.',
               ),
             }}
@@ -138,4 +135,4 @@ class PreflightWarningModal extends React.Component<Props, State> {
   }
 }
 
-export default PreflightWarningModal;
+export default withTranslation()(PreflightWarningModal);

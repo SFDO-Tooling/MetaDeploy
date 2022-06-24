@@ -1,7 +1,7 @@
 import fetchMock from 'fetch-mock';
 
-import * as actions from '@/store/products/actions';
-import { addUrlParams } from '@/utils/api';
+import * as actions from '@/js/store/products/actions';
+import { addUrlParams } from '@/js/utils/api';
 
 import { storeWithApi } from './../../utils';
 
@@ -64,8 +64,8 @@ describe('fetchProducts', () => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
-        expect(allActions[1].type).toEqual('ERROR_ADDED');
-        expect(allActions[1].payload.message).toEqual('Internal Server Error');
+        expect(allActions[1].type).toBe('ERROR_ADDED');
+        expect(allActions[1].payload.message).toBe('Internal Server Error');
         expect(allActions[2]).toEqual(failed);
         expect(window.console.error).toHaveBeenCalled();
       });
@@ -140,10 +140,8 @@ describe('fetchMoreProducts', () => {
         .catch(() => {
           const allActions = store.getActions();
           expect(allActions[0]).toEqual(started);
-          expect(allActions[1].type).toEqual('ERROR_ADDED');
-          expect(allActions[1].payload.message).toEqual(
-            'Internal Server Error',
-          );
+          expect(allActions[1].type).toBe('ERROR_ADDED');
+          expect(allActions[1].payload.message).toBe('Internal Server Error');
           expect(allActions[2]).toEqual(failed);
           expect(window.console.error).toHaveBeenCalled();
         });
@@ -218,8 +216,8 @@ describe('fetchProduct', () => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
-        expect(allActions[1].type).toEqual('ERROR_ADDED');
-        expect(allActions[1].payload.message).toEqual('Internal Server Error');
+        expect(allActions[1].type).toBe('ERROR_ADDED');
+        expect(allActions[1].payload.message).toBe('Internal Server Error');
         expect(allActions[2]).toEqual(failed);
         expect(window.console.error).toHaveBeenCalled();
       });
@@ -294,8 +292,8 @@ describe('fetchVersion', () => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
-        expect(allActions[1].type).toEqual('ERROR_ADDED');
-        expect(allActions[1].payload.message).toEqual('Internal Server Error');
+        expect(allActions[1].type).toBe('ERROR_ADDED');
+        expect(allActions[1].payload.message).toBe('Internal Server Error');
         expect(allActions[2]).toEqual(failed);
         expect(window.console.error).toHaveBeenCalled();
       });
@@ -367,7 +365,7 @@ describe('fetchAdditionalPlans', () => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
-        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].type).toBe('ERROR_ADDED');
         expect(allActions[1].payload.message).toEqual(['Foobar']);
         expect(allActions[2]).toEqual(failed);
         expect(window.console.error).toHaveBeenCalled();
@@ -441,8 +439,8 @@ describe('fetchPlan', () => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
-        expect(allActions[1].type).toEqual('ERROR_ADDED');
-        expect(allActions[1].payload.message).toEqual('Internal Server Error');
+        expect(allActions[1].type).toBe('ERROR_ADDED');
+        expect(allActions[1].payload.message).toBe('Internal Server Error');
         expect(allActions[2]).toEqual(failed);
         expect(window.console.error).toHaveBeenCalled();
       });

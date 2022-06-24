@@ -1,8 +1,9 @@
 import fetchMock from 'fetch-mock';
 
-import * as actions from '@/store/jobs/actions';
-import { addUrlParams } from '@/utils/api';
-import routes from '@/utils/routes';
+import * as actions from '@/js/store/jobs/actions';
+import { addUrlParams } from '@/js/utils/api';
+import { LATEST_VERSION } from '@/js/utils/constants';
+import routes from '@/js/utils/routes';
 
 import { getStoreWithHistory, storeWithApi } from './../../utils';
 
@@ -104,8 +105,8 @@ describe('fetchJob', () => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
-        expect(allActions[1].type).toEqual('ERROR_ADDED');
-        expect(allActions[1].payload.message).toEqual('Internal Server Error');
+        expect(allActions[1].type).toBe('ERROR_ADDED');
+        expect(allActions[1].payload.message).toBe('Internal Server Error');
         expect(allActions[2]).toEqual(failed);
         expect(window.console.error).toHaveBeenCalled();
       });
@@ -188,7 +189,7 @@ describe('createJob', () => {
       Reflect.deleteProperty(window, 'socket');
     });
 
-    test('dispatches JOB_STARTED action and subscribes to ws events', () => {
+    test('dispatches JOB_STARTED action subscribes to ws events, redirects', () => {
       const push = jest.fn();
       const store = getStoreWithHistory({
         location: {
@@ -202,6 +203,7 @@ describe('createJob', () => {
         steps: ['step-1'],
         product_slug: 'product-1',
         version_label: 'version-1',
+        version_is_most_recent: false,
         plan_slug: 'plan-1',
       };
       const started = {
@@ -218,6 +220,29 @@ describe('createJob', () => {
 
       expect(store.getActions()).toEqual([started]);
       expect(window.socket.subscribe).toHaveBeenCalledWith(expected);
+      expect(push).toHaveBeenCalledWith(url);
+    });
+
+    test('redirects if on "latest" plan URL', () => {
+      const push = jest.fn();
+      const store = getStoreWithHistory({
+        location: {
+          pathname: routes.plan_detail('product-1', LATEST_VERSION, 'plan-1'),
+        },
+        push,
+      })({});
+      const job = {
+        id: 'job-1',
+        plan: 'plan-1',
+        steps: ['step-1'],
+        product_slug: 'product-1',
+        version_label: 'version-1',
+        version_is_most_recent: true,
+        plan_slug: 'plan-1',
+      };
+      const url = routes.job_detail('product-1', 'version-1', 'plan-1', job.id);
+      store.dispatch(actions.createJob(job));
+
       expect(push).toHaveBeenCalledWith(url);
     });
   });
@@ -289,8 +314,8 @@ describe('updateJob', () => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
-        expect(allActions[1].type).toEqual('ERROR_ADDED');
-        expect(allActions[1].payload.message).toEqual('Nope.');
+        expect(allActions[1].type).toBe('ERROR_ADDED');
+        expect(allActions[1].payload.message).toBe('Nope.');
         expect(allActions[2]).toEqual(failed);
         expect(window.console.error).toHaveBeenCalled();
       });
@@ -342,8 +367,8 @@ describe('requestCancelJob', () => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
-        expect(allActions[1].type).toEqual('ERROR_ADDED');
-        expect(allActions[1].payload.message).toEqual('Oops.');
+        expect(allActions[1].type).toBe('ERROR_ADDED');
+        expect(allActions[1].payload.message).toBe('Oops.');
         expect(allActions[2]).toEqual(failed);
         expect(window.console.error).toHaveBeenCalled();
       });

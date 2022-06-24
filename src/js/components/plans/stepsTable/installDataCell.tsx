@@ -4,44 +4,49 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
-import i18n from 'i18next';
-import * as React from 'react';
+import React, { ChangeEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 
-import { ErrorIcon } from '@/components/plans/preflightResults';
-import { DataCellProps } from '@/components/plans/stepsTable';
-import { CONSTANTS } from '@/store/plans/reducer';
+import { ErrorIcon } from '@/js/components/plans/preflightResults';
+import { DataCellProps } from '@/js/components/plans/stepsTable';
+import { CONSTANTS } from '@/js/store/plans/reducer';
 
 const { STATUS, RESULT_STATUS } = CONSTANTS;
 
-export const InstallDataColumnLabel = () => (
-  <>
-    <span title={i18n.t('Install')}>{i18n.t('Install')}</span>
-    <Tooltip
-      align="top right"
-      content={
-        <span className="step-column-tooltip">
-          {i18n.t('Select steps to install.')}
-        </span>
-      }
-      triggerClassName="slds-p-left_x-small"
-      position="overflowBoundaryElement"
-    >
-      <a>
-        <Icon
-          category="utility"
-          name="info"
-          assistiveText={{
-            label: i18n.t('Learn More'),
-          }}
-          size="xx-small"
-        />
-      </a>
-    </Tooltip>
-  </>
-);
+export const InstallDataColumnLabel = () => {
+  const { t } = useTranslation();
+
+  return (
+    <>
+      <span title={t('Install')}>{t('Install')}</span>
+      <Tooltip
+        align="top right"
+        content={
+          <span className="step-column-tooltip">
+            {t('Select steps to install.')}
+          </span>
+        }
+        triggerClassName="slds-p-left_x-small"
+        position="overflowBoundaryElement"
+      >
+        <a>
+          <Icon
+            category="utility"
+            name="info"
+            assistiveText={{
+              label: t('Learn More'),
+            }}
+            size="xx-small"
+          />
+        </a>
+      </Tooltip>
+    </>
+  );
+};
 
 const JobCell = (props: DataCellProps) => {
   const { item, job, activeJobStep, className, ...otherProps } = props;
+  const { t } = useTranslation();
 
   /* istanbul ignore if */
   if (!item || !job) {
@@ -58,7 +63,7 @@ const JobCell = (props: DataCellProps) => {
     }
   }
   if (!job.steps.includes(id)) {
-    title = i18n.t('Skipped');
+    title = t('Skipped');
     contents = (
       <Icon
         category="utility"
@@ -72,7 +77,7 @@ const JobCell = (props: DataCellProps) => {
       />
     );
   } else if (complete) {
-    title = i18n.t('completed', 'Completed');
+    title = t('completed', 'Completed');
     contents = (
       <div className="is-completed">
         <Icon
@@ -87,7 +92,7 @@ const JobCell = (props: DataCellProps) => {
       </div>
     );
   } else if (error) {
-    title = i18n.t('Error');
+    title = t('Error');
     contents = (
       <>
         <ErrorIcon
@@ -99,7 +104,7 @@ const JobCell = (props: DataCellProps) => {
     );
   } else if (job.status === STATUS.STARTED) {
     if (isActive) {
-      title = i18n.t('installing', 'Installing');
+      title = t('installing', 'Installing');
       contents = (
         <>
           <span
@@ -109,11 +114,11 @@ const JobCell = (props: DataCellProps) => {
           >
             <Spinner size="small" />
           </span>
-          {i18n.t('Installing…')}
+          {t('Installing…')}
         </>
       );
     } else {
-      title = i18n.t('waiting to install', 'Waiting to install');
+      title = t('waiting to install', 'Waiting to install');
       contents = (
         <Icon
           category="utility"
@@ -128,7 +133,7 @@ const JobCell = (props: DataCellProps) => {
       );
     }
   } else {
-    title = i18n.t('not installed', 'Not installed');
+    title = t('not installed', 'Not installed');
     contents = (
       <Icon
         category="utility"
@@ -155,97 +160,95 @@ const JobCell = (props: DataCellProps) => {
   );
 };
 
-class PreflightCell extends React.Component<DataCellProps> {
-  handleChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
+const PreflightCell = (props: DataCellProps) => {
+  const {
+    preflight,
+    item,
+    selectedSteps,
+    className,
+    handleStepsChange,
+    ...otherProps
+  } = props;
+  const { t } = useTranslation();
+
+  const handleChange = (
+    event: ChangeEvent<HTMLInputElement>,
     { checked }: { checked: boolean },
   ) => {
-    const { item, handleStepsChange } = this.props;
-
     /* istanbul ignore else */
     if (handleStepsChange && item) {
       handleStepsChange(item.id, checked);
     }
   };
 
-  render() {
-    const {
-      preflight,
-      item,
-      selectedSteps,
-      className,
-      ...otherProps
-    } = this.props;
-
-    /* istanbul ignore if */
-    if (!item) {
-      return null;
-    }
-    const { id } = item;
-    const results = preflight?.results?.[id];
-    let skipped, optional, content;
-    if (results) {
-      for (const result of results) {
-        if (!skipped) {
-          skipped = result.status === RESULT_STATUS.SKIP ? result : null;
-        }
-        if (!optional) {
-          optional = result.status === RESULT_STATUS.OPTIONAL ? result : null;
-        }
+  /* istanbul ignore if */
+  if (!item) {
+    return null;
+  }
+  const { id } = item;
+  const results = preflight?.results?.[id];
+  let skipped, optional, content;
+  if (results) {
+    for (const result of results) {
+      if (!skipped) {
+        skipped = result.status === RESULT_STATUS.SKIP ? result : null;
+      }
+      if (!optional) {
+        optional = result.status === RESULT_STATUS.OPTIONAL ? result : null;
       }
     }
-    const required = item.is_required && !optional;
-    const recommended = !required && item.is_recommended;
-    let title = i18n.t('Optional');
-    if (skipped) {
-      title = skipped.message || i18n.t('Skipped');
-    } else if (required) {
-      title = i18n.t('Required');
-    } else if (recommended) {
-      title = i18n.t('recommended', 'Recommended');
-    }
-    let label = '';
-    if (skipped?.message) {
-      label = skipped.message;
-    } else if (recommended) {
-      label = i18n.t('recommended', 'Recommended');
-    }
-    if (skipped || required) {
-      content = (
-        <Icon
-          category="utility"
-          name={skipped ? 'dash' : 'check'}
-          assistiveText={{
-            label: title,
-          }}
-          size="x-small"
-          colorVariant="light"
-        />
-      );
-    } else {
-      content = (
-        <Checkbox
-          id={`step-${id}`}
-          checked={selectedSteps?.has(id)}
-          labels={{ label }}
-          assistiveText={{
-            label: title,
-          }}
-          onChange={this.handleChange}
-        />
-      );
-    }
-    return (
-      <DataTableCell
-        {...otherProps}
-        title={title}
-        className={classNames(className, 'plan-step-item', 'plan-step-options')}
-      >
-        {content}
-      </DataTableCell>
+  }
+  const required = item.is_required && !optional;
+  const recommended = !required && item.is_recommended;
+  let title = t('Optional');
+  if (skipped) {
+    title = skipped.message || t('Skipped');
+  } else if (required) {
+    title = t('Required');
+  } else if (recommended) {
+    title = t('recommended', 'Recommended');
+  }
+  let label = '';
+  if (skipped?.message) {
+    label = skipped.message;
+  } else if (recommended) {
+    label = t('recommended', 'Recommended');
+  }
+  if (skipped || required) {
+    content = (
+      <Icon
+        category="utility"
+        name={skipped ? 'dash' : 'check'}
+        assistiveText={{
+          label: title,
+        }}
+        size="x-small"
+        colorVariant="light"
+      />
+    );
+  } else {
+    content = (
+      <Checkbox
+        id={`step-${id}`}
+        checked={selectedSteps?.has(id)}
+        labels={{ label }}
+        assistiveText={{
+          label: title,
+        }}
+        onChange={handleChange}
+      />
     );
   }
-}
+  return (
+    <DataTableCell
+      {...otherProps}
+      title={title}
+      className={classNames(className, 'plan-step-item', 'plan-step-options')}
+    >
+      {content}
+    </DataTableCell>
+  );
+};
 
 const InstallDataCell = (props: DataCellProps) => {
   if (props.job) {

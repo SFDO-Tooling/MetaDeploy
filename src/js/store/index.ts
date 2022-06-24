@@ -2,14 +2,14 @@ import { History } from 'history';
 import { AnyAction, combineReducers } from 'redux';
 import { ThunkAction, ThunkDispatch as ReduxThunkDispatch } from 'redux-thunk';
 
-import errors, { ErrorType } from '@/store/errors/reducer';
-import jobs, { JobsState } from '@/store/jobs/reducer';
-import orgs, { Orgs } from '@/store/org/reducer';
-import preflights, { PreflightsState } from '@/store/plans/reducer';
-import products, { ProductsState } from '@/store/products/reducer';
-import scratchOrgs, { ScratchOrgState } from '@/store/scratchOrgs/reducer';
-import socket, { Socket } from '@/store/socket/reducer';
-import user, { User } from '@/store/user/reducer';
+import errors, { ErrorType } from '@/js/store/errors/reducer';
+import jobs, { JobsState } from '@/js/store/jobs/reducer';
+import orgs, { Orgs } from '@/js/store/org/reducer';
+import preflights, { PreflightsState } from '@/js/store/plans/reducer';
+import products, { ProductsState } from '@/js/store/products/reducer';
+import scratchOrgs, { ScratchOrgState } from '@/js/store/scratchOrgs/reducer';
+import socket, { Socket } from '@/js/store/socket/reducer';
+import user, { User } from '@/js/store/user/reducer';
 
 export type AppState = {
   readonly user: User;

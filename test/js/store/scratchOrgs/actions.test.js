@@ -1,6 +1,6 @@
 import fetchMock from 'fetch-mock';
 
-import * as actions from '@/store/scratchOrgs/actions';
+import * as actions from '@/js/store/scratchOrgs/actions';
 
 import { storeWithApi } from './../../utils';
 
@@ -79,8 +79,8 @@ describe('fetchScratchOrg', () => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
-        expect(allActions[1].type).toEqual('ERROR_ADDED');
-        expect(allActions[1].payload.message).toEqual('Internal Server Error');
+        expect(allActions[1].type).toBe('ERROR_ADDED');
+        expect(allActions[1].payload.message).toBe('Internal Server Error');
         expect(allActions[2]).toEqual(failed);
         expect(window.console.error).toHaveBeenCalled();
       });
@@ -159,10 +159,8 @@ describe('spinScratchOrg', () => {
           const allActions = store.getActions();
 
           expect(allActions[0]).toEqual(started);
-          expect(allActions[1].type).toEqual('ERROR_ADDED');
-          expect(allActions[1].payload.message).toEqual(
-            'Internal Server Error',
-          );
+          expect(allActions[1].type).toBe('ERROR_ADDED');
+          expect(allActions[1].payload.message).toBe('Internal Server Error');
           expect(allActions[2]).toEqual(failed);
           expect(window.console.error).toHaveBeenCalled();
         });
@@ -209,8 +207,8 @@ describe('failScratchOrg', () => {
     store.dispatch(actions.failScratchOrg(payload));
     const allActions = store.getActions();
 
-    expect(allActions[0].type).toEqual('ERROR_ADDED');
-    expect(allActions[0].payload.message).toEqual('Nope.');
+    expect(allActions[0].type).toBe('ERROR_ADDED');
+    expect(allActions[0].payload.message).toBe('Nope.');
     expect(allActions[1]).toEqual(failed);
   });
 });

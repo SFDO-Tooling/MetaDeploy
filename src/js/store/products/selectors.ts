@@ -1,14 +1,15 @@
 import { RouteComponentProps } from 'react-router-dom';
 import { createSelector } from 'reselect';
 
-import { AppState } from '@/store';
-import { Plan } from '@/store/plans/reducer';
+import { AppState } from '@/js/store';
+import { Plan } from '@/js/store/plans/reducer';
 import {
   Category,
   Product,
   ProductsState,
   Version,
-} from '@/store/products/reducer';
+} from '@/js/store/products/reducer';
+import { LATEST_VERSION } from '@/js/utils/constants';
 
 export type CategoryWithProducts = {
   category: Category;
@@ -101,7 +102,8 @@ const selectVersion = createSelector(
     }
     if (
       product.most_recent_version &&
-      product.most_recent_version.label === versionLabel
+      (versionLabel === LATEST_VERSION ||
+        versionLabel === product.most_recent_version.label)
     ) {
       return product.most_recent_version;
     }

@@ -5,9 +5,6 @@ TAGS
 .idea/
 .livereload
 node_modules/
-node/
-coverage/
-jscache/
 *.orig
 *.swp
 *.swo
@@ -17,8 +14,7 @@ jscache/
 npm-debug.log
 yarn-error.log
 staticfiles/
-dump.rdb
-/env
+webpack-stats.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -30,7 +26,6 @@ __pycache__/
 
 # Distribution / packaging
 .Python
-env/
 build/
 develop-eggs/
 dist/
@@ -68,6 +63,9 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
+coverage/
+jscache/
+robot/results
 
 # Translations
 *.mo
@@ -75,6 +73,9 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/
+
+# Component library documentation
+storybook-static/
 
 # pyenv
 .python-version
@@ -87,11 +88,13 @@ celerybeat-schedule
 
 # dotenv
 .env
+/env
 
 # virtualenv
 .venv
 venv/
 ENV/
+env/
 
 # Spyder project settings
 .spyderproject
@@ -111,13 +114,5 @@ ENV/
 # Database things
 *.sql
 *.dump
-postgres/
-
-# Node and Yarn packages:
-requirements/*.tar.gz
-requirements/*.tar.xz
-.nvmrc
-.yarnrc
-.yarn/
-
-robot/results
+dump.rdb
+/postgres

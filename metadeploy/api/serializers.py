@@ -180,6 +180,7 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
     preflight_message = serializers.SerializerMethodField()
     not_allowed_instructions = serializers.SerializerMethodField()
     requires_preflight = serializers.SerializerMethodField()
+    average_duration = serializers.SerializerMethodField()
 
     class Meta:
         model = Plan
@@ -222,6 +223,11 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
 
     def get_requires_preflight(self, obj):
         return obj.requires_preflight
+
+    def get_average_duration(self, obj):
+        """Plan.average_duration is an expensive query,
+        so we prefer the already calculated value if available."""
+        return obj.calculated_average_duration
 
     def validate(self, data):
         """
@@ -376,6 +382,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
     is_production_org = serializers.SerializerMethodField()
     product_slug = serializers.SerializerMethodField()
     version_label = serializers.SerializerMethodField()
+    version_is_most_recent = serializers.SerializerMethodField()
     plan_slug = serializers.SerializerMethodField()
 
     plan = serializers.PrimaryKeyRelatedField(
@@ -413,6 +420,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             "is_production_org",
             "product_slug",
             "version_label",
+            "version_is_most_recent",
             "plan_slug",
             "error_count",
             "warning_count",
@@ -486,6 +494,9 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
     def get_version_label(self, obj):
         return obj.plan.version.label
 
+    def get_version_is_most_recent(self, obj):
+        return obj.plan.version == obj.plan.version.product.most_recent_version
+
     def get_plan_slug(self, obj):
         return obj.plan.slug
 
@@ -508,7 +519,7 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         required_steps = set(plan.required_step_ids)
         if preflight:
             required_steps -= set(preflight.optional_step_ids)
-        return not set(required_steps) - set(s.id for s in steps)
+        return not set(required_steps) - {s.id for s in steps}
 
     def _pending_job_exists(self, *, org_id):
         return Job.objects.filter(status=Job.Status.started, org_id=org_id).first()
@@ -529,9 +540,10 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
             # results are read-only except during creation
             del data["results"]
         else:
-            # make sure results can't be set initially except to hide steps
-            if any(result["status"] != HIDE for result in data["results"].values()):
-                raise serializers.ValidationError(_("Invalid initial results."))
+            for step_id, results in data["results"].items():
+                # make sure results can't be set initially except to hide steps
+                if any(result["status"] != HIDE for result in results):
+                    raise serializers.ValidationError(_("Invalid initial results."))
 
     def validate(self, data):
         user = get_from_data_or_instance(self.instance, data, "user")
@@ -657,8 +669,8 @@ class JobSummarySerializer(serializers.ModelSerializer):
         )
 
     def get_plan_average_duration(self, obj):
-        if obj.plan.average_duration:
-            return str(obj.plan.average_duration.total_seconds())
+        if obj.plan.calculated_average_duration:
+            return obj.plan.calculated_average_duration
         return None
 
 
@@ -671,6 +683,7 @@ class OrgSerializer(serializers.Serializer):
 class SiteSerializer(serializers.ModelSerializer):
     welcome_text = serializers.CharField(source="welcome_text_markdown")
     copyright_notice = serializers.CharField(source="copyright_notice_markdown")
+    master_agreement = serializers.CharField(source="master_agreement_markdown")
 
     class Meta:
         model = SiteProfile
@@ -678,6 +691,7 @@ class SiteSerializer(serializers.ModelSerializer):
             "name",
             "company_name",
             "welcome_text",
+            "master_agreement",
             "copyright_notice",
             "show_metadeploy_wordmark",
             "company_logo",

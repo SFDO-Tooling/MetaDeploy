@@ -1,10 +1,11 @@
 import SLDSProgressIndicator from '@salesforce/design-system-react/components/progress-indicator';
-import * as React from 'react';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 
-import { getSteps } from '@/components/plans/progressIndicator';
-import { Job } from '@/store/jobs/reducer';
-import { CONSTANTS } from '@/store/plans/reducer';
-import { SupportedOrgs } from '@/utils/constants';
+import { getSteps } from '@/js/components/plans/progressIndicator';
+import { Job } from '@/js/store/jobs/reducer';
+import { CONSTANTS } from '@/js/store/plans/reducer';
+import { SupportedOrgs } from '@/js/utils/constants';
 
 const ProgressIndicator = ({
   job,
@@ -15,7 +16,9 @@ const ProgressIndicator = ({
   supportedOrgs: SupportedOrgs;
   preflightRequired: boolean;
 }) => {
-  const steps = getSteps(supportedOrgs, preflightRequired);
+  const { t } = useTranslation();
+
+  const steps = getSteps(t, supportedOrgs, preflightRequired);
   const completedSteps =
     job.status === CONSTANTS.STATUS.COMPLETE
       ? steps.slice()

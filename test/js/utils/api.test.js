@@ -5,7 +5,7 @@ import apiFetch, {
   extractCustomDomain,
   getUrlParam,
   removeUrlParam,
-} from '@/utils/api';
+} from '@/js/utils/api';
 
 const dispatch = jest.fn();
 
@@ -157,6 +157,13 @@ describe('extractCustomDomain', () => {
   test('extracts custom subdomain from url', () => {
     const input = 'https://foo-bar-01.cs42.my.salesforce.com/';
     const expected = 'foo-bar-01.cs42';
+    const actual = extractCustomDomain(input);
+
+    return expect(actual).toBe(expected);
+  });
+  test('extracts custom subdomain from enhanced url', () => {
+    const input = 'https://foo-bar--sandbox.sandbox.my.salesforce.com/';
+    const expected = 'foo-bar--sandbox';
     const actual = extractCustomDomain(input);
 
     return expect(actual).toBe(expected);

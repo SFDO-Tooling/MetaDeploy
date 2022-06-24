@@ -1,12 +1,12 @@
 import Card from '@salesforce/design-system-react/components/card';
 import Icon from '@salesforce/design-system-react/components/icon';
 import { format, parseISO } from 'date-fns';
-import i18n from 'i18next';
-import * as React from 'react';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 
-import ScratchOrgInfo from '@/components/scratchOrgs/scratchOrgInfo';
-import { Job } from '@/store/jobs/reducer';
-import { ScratchOrg } from '@/store/scratchOrgs/reducer';
+import ScratchOrgInfo from '@/js/components/scratchOrgs/scratchOrgInfo';
+import { Job } from '@/js/store/jobs/reducer';
+import { ScratchOrg } from '@/js/store/scratchOrgs/reducer';
 
 const UserInfo = ({
   job,
@@ -15,6 +15,8 @@ const UserInfo = ({
   job: Job;
   scratchOrg?: ScratchOrg | null;
 }) => {
+  const { t } = useTranslation();
+
   let contents = null;
   if (scratchOrg?.expires_at) {
     const date = format(parseISO(scratchOrg.expires_at), 'PP');
@@ -25,23 +27,23 @@ const UserInfo = ({
     contents = (
       <Card
         bodyClassName="slds-card__body_inner"
-        heading={i18n.t('Salesforce Org Information')}
+        heading={t('Salesforce Org Information')}
         icon={<Icon category="utility" name="user" />}
       >
         <ul>
           {username ? (
             <li>
-              <strong>{i18n.t('User:')}</strong> {username}
+              <strong>{t('User:')}</strong> {username}
             </li>
           ) : null}
           {org_name ? (
             <li>
-              <strong>{i18n.t('Org:')}</strong> {org_name}
+              <strong>{t('Org:')}</strong> {org_name}
             </li>
           ) : null}
           {org_type ? (
             <li>
-              <strong>{i18n.t('Type:')}</strong> {org_type}
+              <strong>{t('Type:')}</strong> {org_type}
             </li>
           ) : null}
         </ul>

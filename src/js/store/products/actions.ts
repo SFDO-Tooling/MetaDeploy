@@ -1,14 +1,14 @@
 import { omit } from 'lodash';
 
-import { ThunkResult } from '@/store';
-import { Plan } from '@/store/plans/reducer';
+import { ThunkResult } from '@/js/store';
+import { Plan } from '@/js/store/plans/reducer';
 import {
   ApiCategory,
   Category,
   Product,
   Version,
-} from '@/store/products/reducer';
-import apiFetch, { addUrlParams, ApiError } from '@/utils/api';
+} from '@/js/store/products/reducer';
+import apiFetch, { addUrlParams, ApiError } from '@/js/utils/api';
 
 type FetchProductsStarted = { type: 'FETCH_PRODUCTS_STARTED' };
 export type FetchProductsSucceeded = {
@@ -112,155 +112,158 @@ export type ProductsAction =
   | FetchPlanSucceeded
   | FetchPlanFailed;
 
-export const fetchProducts = (): ThunkResult<
-  Promise<FetchProductsSucceeded>
-> => async (dispatch) => {
-  dispatch({ type: 'FETCH_PRODUCTS_STARTED' as const });
-  const baseUrl = window.api_urls.productcategory_list();
-  try {
-    const response = await apiFetch(baseUrl, dispatch);
-    if (!Array.isArray(response)) {
-      const error: ApiError = new Error('Invalid response received');
-      error.response = response;
-      throw error;
-    }
-    let products: Product[] = [];
-    let categories: Category[] = [];
-    response.forEach((category: ApiCategory) => {
-      const { first_page } = category;
-      products = products.concat(first_page.results);
-      categories = categories.concat({
-        ...omit(category, 'first_page'),
-        next: first_page.next,
+export const fetchProducts =
+  (): ThunkResult<Promise<FetchProductsSucceeded>> => async (dispatch) => {
+    dispatch({ type: 'FETCH_PRODUCTS_STARTED' as const });
+    const baseUrl = window.api_urls.productcategory_list();
+    try {
+      const response = await apiFetch(baseUrl, dispatch);
+      if (!Array.isArray(response)) {
+        const error: ApiError = new Error('Invalid response received');
+        error.response = response;
+        throw error;
+      }
+      let products: Product[] = [];
+      let categories: Category[] = [];
+      response.forEach((category: ApiCategory) => {
+        const { first_page } = category;
+        products = products.concat(first_page.results);
+        categories = categories.concat({
+          ...omit(category, 'first_page'),
+          next: first_page.next,
+        });
       });
-    });
-    return dispatch({
-      type: 'FETCH_PRODUCTS_SUCCEEDED' as const,
-      payload: { products, categories },
-    });
-  } catch (err) {
-    dispatch({ type: 'FETCH_PRODUCTS_FAILED' as const });
-    throw err;
-  }
-};
-
-export const fetchMoreProducts = ({
-  url,
-  id,
-}: {
-  url: string;
-  id: number;
-}): ThunkResult<Promise<FetchMoreProductsSucceeded>> => async (dispatch) => {
-  dispatch({
-    type: 'FETCH_MORE_PRODUCTS_STARTED' as const,
-    payload: { url, id },
-  });
-  try {
-    const response = await apiFetch(url, dispatch);
-    const products = response.results;
-    if (!Array.isArray(response.results)) {
-      const error: ApiError = new Error('Invalid response received');
-      error.response = response;
-      throw error;
+      return dispatch({
+        type: 'FETCH_PRODUCTS_SUCCEEDED' as const,
+        payload: { products, categories },
+      });
+    } catch (err) {
+      dispatch({ type: 'FETCH_PRODUCTS_FAILED' as const });
+      throw err;
     }
-    return dispatch({
-      type: 'FETCH_MORE_PRODUCTS_SUCCEEDED' as const,
-      payload: { products, category: id, next: response.next },
-    });
-  } catch (err) {
+  };
+
+export const fetchMoreProducts =
+  ({
+    url,
+    id,
+  }: {
+    url: string;
+    id: number;
+  }): ThunkResult<Promise<FetchMoreProductsSucceeded>> =>
+  async (dispatch) => {
     dispatch({
-      type: 'FETCH_MORE_PRODUCTS_FAILED' as const,
+      type: 'FETCH_MORE_PRODUCTS_STARTED' as const,
       payload: { url, id },
     });
-    throw err;
-  }
-};
-
-export const fetchProduct = (
-  filters: ProductFilters,
-): ThunkResult<Promise<FetchProductSucceeded>> => async (dispatch) => {
-  dispatch({ type: 'FETCH_PRODUCT_STARTED' as const, payload: filters });
-  const baseUrl = window.api_urls.product_get_one();
-  try {
-    const response = await apiFetch(
-      addUrlParams(baseUrl, { ...filters }),
-      dispatch,
-    );
-    return dispatch({
-      type: 'FETCH_PRODUCT_SUCCEEDED' as const,
-      payload: { ...filters, product: response || null },
-    });
-  } catch (err) {
-    dispatch({ type: 'FETCH_PRODUCT_FAILED' as const, payload: filters });
-    throw err;
-  }
-};
-
-export const fetchVersion = (
-  filters: VersionFilters,
-): ThunkResult<Promise<FetchVersionSucceeded>> => async (dispatch) => {
-  dispatch({ type: 'FETCH_VERSION_STARTED' as const, payload: filters });
-  const baseUrl = window.api_urls.version_get_one();
-  try {
-    const response = await apiFetch(
-      addUrlParams(baseUrl, { ...filters }),
-      dispatch,
-    );
-    return dispatch({
-      type: 'FETCH_VERSION_SUCCEEDED' as const,
-      payload: { ...filters, version: response || null },
-    });
-  } catch (err) {
-    dispatch({ type: 'FETCH_VERSION_FAILED' as const, payload: filters });
-    throw err;
-  }
-};
-
-export const fetchAdditionalPlans = (filters: {
-  product: string;
-  version: string;
-}): ThunkResult<Promise<FetchAdditionalPlansSucceeded>> => async (dispatch) => {
-  dispatch({
-    type: 'FETCH_ADDITIONAL_PLANS_STARTED' as const,
-    payload: filters,
-  });
-  const baseUrl = window.api_urls.version_additional_plans(filters.version);
-  try {
-    const response = await apiFetch(baseUrl, dispatch);
-    if (!Array.isArray(response)) {
-      const error: ApiError = new Error('Invalid response received');
-      error.response = response;
-      throw error;
+    try {
+      const response = await apiFetch(url, dispatch);
+      const products = response.results;
+      if (!Array.isArray(response.results)) {
+        const error: ApiError = new Error('Invalid response received');
+        error.response = response;
+        throw error;
+      }
+      return dispatch({
+        type: 'FETCH_MORE_PRODUCTS_SUCCEEDED' as const,
+        payload: { products, category: id, next: response.next },
+      });
+    } catch (err) {
+      dispatch({
+        type: 'FETCH_MORE_PRODUCTS_FAILED' as const,
+        payload: { url, id },
+      });
+      throw err;
     }
-    return dispatch({
-      type: 'FETCH_ADDITIONAL_PLANS_SUCCEEDED' as const,
-      payload: { ...filters, plans: response },
-    });
-  } catch (err) {
+  };
+
+export const fetchProduct =
+  (filters: ProductFilters): ThunkResult<Promise<FetchProductSucceeded>> =>
+  async (dispatch) => {
+    dispatch({ type: 'FETCH_PRODUCT_STARTED' as const, payload: filters });
+    const baseUrl = window.api_urls.product_get_one();
+    try {
+      const response = await apiFetch(
+        addUrlParams(baseUrl, { ...filters }),
+        dispatch,
+      );
+      return dispatch({
+        type: 'FETCH_PRODUCT_SUCCEEDED' as const,
+        payload: { ...filters, product: response || null },
+      });
+    } catch (err) {
+      dispatch({ type: 'FETCH_PRODUCT_FAILED' as const, payload: filters });
+      throw err;
+    }
+  };
+
+export const fetchVersion =
+  (filters: VersionFilters): ThunkResult<Promise<FetchVersionSucceeded>> =>
+  async (dispatch) => {
+    dispatch({ type: 'FETCH_VERSION_STARTED' as const, payload: filters });
+    const baseUrl = window.api_urls.version_get_one();
+    try {
+      const response = await apiFetch(
+        addUrlParams(baseUrl, { ...filters }),
+        dispatch,
+      );
+      return dispatch({
+        type: 'FETCH_VERSION_SUCCEEDED' as const,
+        payload: { ...filters, version: response || null },
+      });
+    } catch (err) {
+      dispatch({ type: 'FETCH_VERSION_FAILED' as const, payload: filters });
+      throw err;
+    }
+  };
+
+export const fetchAdditionalPlans =
+  (filters: {
+    product: string;
+    version: string;
+  }): ThunkResult<Promise<FetchAdditionalPlansSucceeded>> =>
+  async (dispatch) => {
     dispatch({
-      type: 'FETCH_ADDITIONAL_PLANS_FAILED' as const,
+      type: 'FETCH_ADDITIONAL_PLANS_STARTED' as const,
       payload: filters,
     });
-    throw err;
-  }
-};
+    const baseUrl = window.api_urls.version_additional_plans(filters.version);
+    try {
+      const response = await apiFetch(baseUrl, dispatch);
+      if (!Array.isArray(response)) {
+        const error: ApiError = new Error('Invalid response received');
+        error.response = response;
+        throw error;
+      }
+      return dispatch({
+        type: 'FETCH_ADDITIONAL_PLANS_SUCCEEDED' as const,
+        payload: { ...filters, plans: response },
+      });
+    } catch (err) {
+      dispatch({
+        type: 'FETCH_ADDITIONAL_PLANS_FAILED' as const,
+        payload: filters,
+      });
+      throw err;
+    }
+  };
 
-export const fetchPlan = (
-  filters: PlanFilters,
-): ThunkResult<Promise<FetchPlanSucceeded>> => async (dispatch) => {
-  dispatch({ type: 'FETCH_PLAN_STARTED' as const, payload: filters });
-  const baseUrl = window.api_urls.plan_get_one();
-  try {
-    const response = await apiFetch(
-      addUrlParams(baseUrl, { ...filters }),
-      dispatch,
-    );
-    return dispatch({
-      type: 'FETCH_PLAN_SUCCEEDED' as const,
-      payload: { ...filters, plan: response || null },
-    });
-  } catch (err) {
-    dispatch({ type: 'FETCH_PLAN_FAILED' as const, payload: filters });
-    throw err;
-  }
-};
+export const fetchPlan =
+  (filters: PlanFilters): ThunkResult<Promise<FetchPlanSucceeded>> =>
+  async (dispatch) => {
+    dispatch({ type: 'FETCH_PLAN_STARTED' as const, payload: filters });
+    const baseUrl = window.api_urls.plan_get_one();
+    try {
+      const response = await apiFetch(
+        addUrlParams(baseUrl, { ...filters }),
+        dispatch,
+      );
+      return dispatch({
+        type: 'FETCH_PLAN_SUCCEEDED' as const,
+        payload: { ...filters, plan: response || null },
+      });
+    } catch (err) {
+      dispatch({ type: 'FETCH_PLAN_FAILED' as const, payload: filters });
+      throw err;
+    }
+  };

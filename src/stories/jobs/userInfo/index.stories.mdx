@@ -1,0 +1,34 @@
+import { Meta, Story } from '@storybook/addon-docs';
+
+<Meta title="Jobs/UserInfo/Docs" />
+
+# UserInfo
+
+** Shows information about the Salesforce Org during an installation Job.**
+
+## Overview
+
+The **UserInfo** component is an
+[SLDS Card](https://react.lightningdesignsystem.com/components/cards/) used to
+display information about the Salesforce Org during an installation **Job**.
+
+## States
+
+If the installation Job is running on a temporary Scratch Org, the card shows
+the expiration date of the Org and displays a message regarding what will happen
+when the Org expires.
+
+<Story
+  id="jobs-userinfo-example--user-info-component&args=scratchOrg:With+Scratch+Org"
+  height="250px"
+/>
+
+If the installation Job is running on an persistent Salesforce Org, the heading
+displays a User profile icon and reads "Salesforce Org Information." The
+component also shows the Org owner's email, Org name, and Org type, if the
+information is provided.
+
+<Story
+  id="jobs-userinfo-example--user-info-component&args=scratchOrg:With+Persistent+Org"
+  height="200px"
+/>

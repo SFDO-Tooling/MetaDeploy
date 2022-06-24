@@ -10,6 +10,8 @@ from log_request_id import (
 from log_request_id.middleware import RequestIDMiddleware
 from sfdo_template_helpers.addresses import get_remote_ip
 
+from .logfmt import quote_logvalue
+
 logger = logging.getLogger(__name__)
 
 
@@ -52,7 +54,7 @@ class LoggingMiddleware(RequestIDMiddleware):
             request.path,
             response.status_code,
             ip_str,
-            repr(request.META.get("HTTP_USER_AGENT", "unknown")),
+            request.META.get("HTTP_USER_AGENT", "unknown"),
             time.time() - local.start_time,
             x_forwarded_for,
         )
@@ -60,6 +62,8 @@ class LoggingMiddleware(RequestIDMiddleware):
         if user_id:
             message += " user=%s"
             args += (user_id,)
+
+        args = [quote_logvalue(v) for v in args]
 
         logger.info(message, *args)
 

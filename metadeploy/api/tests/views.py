@@ -60,6 +60,7 @@ class TestJobViewset:
             "edited_at": format_timestamp(job.edited_at),
             "product_slug": str(job.plan.version.product.slug),
             "version_label": str(job.plan.version.label),
+            "version_is_most_recent": True,
             "plan_slug": str(job.plan.slug),
         }
 
@@ -94,6 +95,7 @@ class TestJobViewset:
             "edited_at": format_timestamp(job.edited_at),
             "product_slug": str(job.plan.version.product.slug),
             "version_label": str(job.plan.version.label),
+            "version_is_most_recent": True,
             "plan_slug": str(job.plan.slug),
         }
 
@@ -126,6 +128,7 @@ class TestJobViewset:
             "edited_at": format_timestamp(job.edited_at),
             "product_slug": str(job.plan.version.product.slug),
             "version_label": str(job.plan.version.label),
+            "version_is_most_recent": True,
             "plan_slug": str(job.plan.slug),
         }
 
@@ -159,6 +162,7 @@ class TestJobViewset:
             "edited_at": format_timestamp(job.edited_at),
             "product_slug": str(job.plan.version.product.slug),
             "version_label": str(job.plan.version.label),
+            "version_is_most_recent": True,
             "plan_slug": str(job.plan.slug),
         }
 
@@ -236,6 +240,7 @@ class TestJobViewset:
             "edited_at": format_timestamp(job.edited_at),
             "product_slug": str(job.plan.version.product.slug),
             "version_label": str(job.plan.version.label),
+            "version_is_most_recent": True,
             "plan_slug": str(job.plan.slug),
         }
 
@@ -403,9 +408,10 @@ class TestPreflight:
             uuid=uuid,
             plan=plan,
             status=ScratchOrg.Status.complete,
+            org_id="00D" + 15 * "x",  # 18 char org_id
             config={
                 "instance_url": "instance_url",
-                "org_id": "org_id",
+                "org_id": "00D" + 12 * "x",  # 15 char org_id from platform
                 "username": "username",
                 "access_token": "token",
                 "refresh_token": "refresh token",

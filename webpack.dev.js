@@ -20,19 +20,23 @@ module.exports = merge(common, {
     filename: '[name].js',
     path: path.join(__dirname, 'dist'),
   },
-  devtool: 'cheap-module-inline-source-map',
+  devtool: 'inline-cheap-module-source-map',
   devServer: {
-    index: '',
-    host: '0.0.0.0',
+    devMiddleware: {
+      index: '',
+      publicPath: '/static/',
+      writeToDisk: true,
+    },
     proxy: {
       '**': 'http://localhost:8000',
-      '/ws': {
+      '/ws/notifications': {
         target: 'http://localhost:8000',
         ws: true,
       },
     },
+    host: '0.0.0.0',
     hot: false,
-    writeToDisk: true,
+    static: false,
   },
   plugins: [
     new MiniCssExtractPlugin({
@@ -80,12 +84,6 @@ module.exports = merge(common, {
               const options = {
                 filename: file.path,
                 presets: ['@babel/preset-typescript'],
-                plugins: [
-                  '@babel/plugin-syntax-jsx',
-                  '@babel/plugin-proposal-class-properties',
-                  '@babel/plugin-proposal-object-rest-spread',
-                  '@babel/plugin-proposal-optional-chaining',
-                ],
                 configFile: false,
               };
 

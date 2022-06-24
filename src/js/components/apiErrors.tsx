@@ -1,10 +1,10 @@
 import Toast from '@salesforce/design-system-react/components/toast';
 import ToastContainer from '@salesforce/design-system-react/components/toast/container';
-import i18n from 'i18next';
-import * as React from 'react';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 
-import { removeError } from '@/store/errors/actions';
-import { ErrorType } from '@/store/errors/reducer';
+import { removeError } from '@/js/store/errors/actions';
+import { ErrorType } from '@/js/store/errors/reducer';
 
 const reloadPage = (): void => {
   window.location.reload();
@@ -16,18 +16,21 @@ const ErrorToast = ({
 }: {
   error: ErrorType;
   doRemoveError: typeof removeError;
-}) => (
-  <Toast
-    labels={{
-      heading: i18n.t("Uh oh, we've encountered an error. You may need to "),
-      headingLink: i18n.t('reload the page.'),
-      details: error.message,
-    }}
-    variant="error"
-    onClickHeadingLink={reloadPage}
-    onRequestClose={() => doRemoveError(error.id)}
-  />
-);
+}) => {
+  const { t } = useTranslation();
+  return (
+    <Toast
+      labels={{
+        heading: t("Uh oh, we've encountered an error. You may need to "),
+        headingLink: t('reload the page.'),
+        details: error.message,
+      }}
+      variant="error"
+      onClickHeadingLink={reloadPage}
+      onRequestClose={() => doRemoveError(error.id)}
+    />
+  );
+};
 
 const Errors = ({
   errors,

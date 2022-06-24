@@ -1,6 +1,6 @@
-import { v4 as uuid } from 'uuid';
+import uuid from 'uuid-random';
 
-import { ErrorType } from '@/store/errors/reducer';
+import { ErrorType } from '@/js/store/errors/reducer';
 
 type AddErrorAction = { type: 'ERROR_ADDED'; payload: ErrorType };
 type RemoveErrorAction = { type: 'ERROR_REMOVED'; payload: string };

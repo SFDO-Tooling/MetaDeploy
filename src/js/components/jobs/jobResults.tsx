@@ -1,10 +1,13 @@
 import Icon from '@salesforce/design-system-react/components/icon';
-import i18n from 'i18next';
-import * as React from 'react';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 
-import { ErrorIcon, getErrorInfo } from '@/components/plans/preflightResults';
-import { Job } from '@/store/jobs/reducer';
-import { CONSTANTS } from '@/store/plans/reducer';
+import {
+  ErrorIcon,
+  getErrorInfo,
+} from '@/js/components/plans/preflightResults';
+import { Job } from '@/js/store/jobs/reducer';
+import { CONSTANTS } from '@/js/store/plans/reducer';
 
 const JobResults = ({
   job,
@@ -13,6 +16,8 @@ const JobResults = ({
   job: Job;
   openModal: () => void;
 }) => {
+  const { t } = useTranslation();
+
   if (
     job.status !== CONSTANTS.STATUS.COMPLETE &&
     job.status !== CONSTANTS.STATUS.FAILED &&
@@ -21,9 +26,9 @@ const JobResults = ({
     return null;
   }
 
-  const { message } = getErrorInfo({ job });
+  const { message } = getErrorInfo({ t, job });
   if (message !== null) {
-    const title = i18n.t('View Installation Error Details & Link');
+    const title = t('View Installation Error Details & Link');
     return (
       <div
         className="slds-box
@@ -40,7 +45,7 @@ const JobResults = ({
             slds-m-left_xx-small"
         >
           <Icon
-            assistiveText={{ label: i18n.t('Error') }}
+            assistiveText={{ label: t('Error') }}
             category="utility"
             name="error"
             colorVariant="error"
@@ -56,7 +61,7 @@ const JobResults = ({
             {title}
           </h2>
           <div className="slds-m-top_small">
-            {message} {i18n.t('View steps to resolve and share link.')}
+            {message} {t('View steps to resolve and share link.')}
           </div>
         </div>
       </div>
@@ -68,7 +73,7 @@ const JobResults = ({
     return (
       <p className="slds-text-color_error">
         <ErrorIcon />
-        {i18n.t('Installation was canceled.')}
+        {t('Installation was canceled.')}
       </p>
     );
   }
@@ -76,7 +81,7 @@ const JobResults = ({
   // Successful job
   return (
     <p className="slds-text-color_success">
-      {i18n.t('Installation completed successfully.')}
+      {t('Installation completed successfully.')}
     </p>
   );
 };

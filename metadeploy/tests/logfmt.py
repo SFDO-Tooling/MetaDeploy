@@ -52,10 +52,9 @@ def test_formatter_format():
     result = LogfmtFormatter().format(record)
     expected = " ".join(
         [
-            "id=unknown",
+            "request_id=unknown",
             "at=INFO",
             f'time="{time}"',
-            "tag=external",
             "module=module",
             'msg="Some message"',
         ]
@@ -67,20 +66,7 @@ def test_formatter_format():
 def test_formatter_format_line():
     extra = {"none": None, "bool": True, "number": 1, "dict": {}}
     result = LogfmtFormatter().format_line(extra)
-    expected = 'none= bool=true number=1 dict="{}"'
-
-    assert result == expected
-
-
-def test_formatter_tag():
-    record = logging.LogRecord(
-        "name", logging.INFO, "module", 1, "Some message", (), None
-    )
-
-    record.tag = "some-tag"
-
-    result = LogfmtFormatter()._get_tag(record)
-    expected = '"some-tag"'
+    expected = "none= bool=true number=1 dict={}"
 
     assert result == expected
 
@@ -96,10 +82,9 @@ def test_parsed_msg():
     result = LogfmtFormatter().format(record)
     expected = " ".join(
         [
-            "id=unknown",
+            "request_id=unknown",
             "at=INFO",
             f'time="{time}"',
-            "tag=external",
             "module=logging_middleware",
             "foo=bar",
             "baz=qux",

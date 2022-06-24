@@ -1,20 +1,20 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Modal from '@salesforce/design-system-react/components/modal';
-import i18n from 'i18next';
-import * as React from 'react';
+import React, { ChangeEvent, Component } from 'react';
+import { WithTranslation, withTranslation } from 'react-i18next';
 
 type Props = {
   isOpen: boolean;
   text: string;
   toggleModal: (open: boolean) => void;
   startJob: () => void;
-};
+} & WithTranslation;
 type State = {
   confirmed: boolean;
 };
 
-class ClickThroughAgreementModal extends React.Component<Props, State> {
+class ClickThroughAgreementModal extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = { confirmed: false };
@@ -32,24 +32,20 @@ class ClickThroughAgreementModal extends React.Component<Props, State> {
   };
 
   handleChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
+    event: ChangeEvent<HTMLInputElement>,
     { checked }: { checked: boolean },
   ) => {
     this.setState({ confirmed: checked });
   };
 
   render() {
-    const { isOpen, text } = this.props;
+    const { t, isOpen, text } = this.props;
     const { confirmed } = this.state;
     const footer = [
-      <Button
-        key="cancel"
-        label={i18n.t('Cancel')}
-        onClick={this.handleClose}
-      />,
+      <Button key="cancel" label={t('Cancel')} onClick={this.handleClose} />,
       <Button
         key="submit"
-        label={i18n.t('Confirm')}
+        label={t('Confirm')}
         variant="brand"
         onClick={this.handleSubmit}
         disabled={!confirmed}
@@ -58,8 +54,9 @@ class ClickThroughAgreementModal extends React.Component<Props, State> {
     return (
       <Modal
         isOpen={isOpen}
-        heading={i18n.t('Product Terms of Use and Licenses')}
+        heading={t('Product Terms of Use and Licenses')}
         size="medium"
+        dismissOnClickOutside={false}
         onRequestClose={this.handleClose}
         footer={footer}
       >
@@ -78,7 +75,7 @@ class ClickThroughAgreementModal extends React.Component<Props, State> {
             checked={this.state.confirmed}
             required
             labels={{
-              label: i18n.t(
+              label: t(
                 'I confirm I have read and agree to these product terms of use and licenses.',
               ),
             }}
@@ -90,4 +87,4 @@ class ClickThroughAgreementModal extends React.Component<Props, State> {
   }
 }
 
-export default ClickThroughAgreementModal;
+export default withTranslation()(ClickThroughAgreementModal);

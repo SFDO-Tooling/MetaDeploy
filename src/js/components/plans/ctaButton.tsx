@@ -1,24 +1,29 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Spinner from '@salesforce/design-system-react/components/spinner';
-import i18n from 'i18next';
-import * as React from 'react';
+import React, { Component, ReactNode } from 'react';
+import { WithTranslation, withTranslation } from 'react-i18next';
 import { RouteComponentProps } from 'react-router-dom';
 
-import Login from '@/components/header/login';
-import ClickThroughAgreementModal from '@/components/plans/clickThroughAgreementModal';
-import { SelectedSteps } from '@/components/plans/detail';
-import PreflightWarningModal from '@/components/plans/preflightWarningModal';
-import SpinOrgModal from '@/components/scratchOrgs/spinOrgModal';
-import { JobData, JobStarted } from '@/store/jobs/actions';
-import { FetchOrgJobsSucceeded } from '@/store/org/actions';
-import { PreflightStarted } from '@/store/plans/actions';
-import { CONSTANTS, Plan, Preflight, StepResult } from '@/store/plans/reducer';
-import { ScratchOrgSpinning } from '@/store/scratchOrgs/actions';
-import { ScratchOrg } from '@/store/scratchOrgs/reducer';
-import { User } from '@/store/user/reducer';
-import { getUrlParam, removeUrlParam, UrlParams } from '@/utils/api';
-import { SCRATCH_ORG_STATUSES, SUPPORTED_ORGS } from '@/utils/constants';
-import routes from '@/utils/routes';
+import Login from '@/js/components/header/login';
+import ClickThroughAgreementModal from '@/js/components/plans/clickThroughAgreementModal';
+import { SelectedSteps } from '@/js/components/plans/detail';
+import PreflightWarningModal from '@/js/components/plans/preflightWarningModal';
+import SpinOrgModal from '@/js/components/scratchOrgs/spinOrgModal';
+import { JobData, JobStarted } from '@/js/store/jobs/actions';
+import { FetchOrgJobsSucceeded } from '@/js/store/org/actions';
+import { PreflightStarted } from '@/js/store/plans/actions';
+import {
+  CONSTANTS,
+  Plan,
+  Preflight,
+  StepResult,
+} from '@/js/store/plans/reducer';
+import { ScratchOrgSpinning } from '@/js/store/scratchOrgs/actions';
+import { ScratchOrg } from '@/js/store/scratchOrgs/reducer';
+import { User } from '@/js/store/user/reducer';
+import { getUrlParam, removeUrlParam, UrlParams } from '@/js/utils/api';
+import { SCRATCH_ORG_STATUSES, SUPPORTED_ORGS } from '@/js/utils/constants';
+import routes from '@/js/utils/routes';
 
 type Props = {
   history: RouteComponentProps['history'];
@@ -38,7 +43,7 @@ type Props = {
     email: string,
   ) => Promise<ScratchOrgSpinning>;
   doLogout: () => Promise<FetchOrgJobsSucceeded>;
-};
+} & WithTranslation;
 
 const { AUTO_START_PREFLIGHT, RESULT_STATUS, STATUS } = CONSTANTS;
 const btnClasses = 'slds-p-vertical_xx-small';
@@ -91,7 +96,7 @@ export const ActionBtn = ({
   btnVariant,
   className,
 }: {
-  label: string | React.ReactNode;
+  label: string | ReactNode;
   disabled?: boolean;
   onClick?: () => void;
   btnVariant?: string;
@@ -106,7 +111,7 @@ export const ActionBtn = ({
   />
 );
 
-class CtaButton extends React.Component<
+class CtaButton extends Component<
   Props,
   {
     preflightModalOpen: boolean;
@@ -312,13 +317,8 @@ class CtaButton extends React.Component<
   }
 
   getPersistentOrgCTA() {
-    const {
-      user,
-      clickThroughAgreement,
-      plan,
-      preflight,
-      selectedSteps,
-    } = this.props;
+    const { t, user, clickThroughAgreement, plan, preflight, selectedSteps } =
+      this.props;
     const { preflightModalOpen } = this.state;
     const usesBothOrgTypes = plan.supported_orgs === SUPPORTED_ORGS.Both;
 
@@ -326,7 +326,7 @@ class CtaButton extends React.Component<
       return (
         <LoginBtn
           id="org-not-allowed-login"
-          label={i18n.t('Log In With a Different Org')}
+          label={t('Log In With a Different Org')}
         />
       );
     }
@@ -338,8 +338,8 @@ class CtaButton extends React.Component<
           <LoginBtn
             label={
               usesBothOrgTypes
-                ? i18n.t('Log In to Existing Org')
-                : i18n.t('Log In to Start Pre-Install Validation')
+                ? t('Log In to Existing Org')
+                : t('Log In to Start Pre-Install Validation')
             }
             redirectParams={{ [AUTO_START_PREFLIGHT]: true }}
           />
@@ -350,10 +350,10 @@ class CtaButton extends React.Component<
         // A `null` preflight means we already fetched and
         // no prior preflight exists
         return this.getLoginOrActionBtn(
-          i18n.t('Start Pre-Install Validation'),
+          t('Start Pre-Install Validation'),
           usesBothOrgTypes
-            ? i18n.t('Log In to Existing Org')
-            : i18n.t('Log In to Start Pre-Install Validation'),
+            ? t('Log In to Existing Org')
+            : t('Log In to Start Pre-Install Validation'),
           this.startPreflight,
           true,
         );
@@ -371,17 +371,17 @@ class CtaButton extends React.Component<
             // Warnings must be confirmed before proceeding
             const btn = hasWarnings
               ? this.getLoginOrActionBtn(
-                  i18n.t('View Warnings to Continue Installation'),
+                  t('View Warnings to Continue Installation'),
                   /* istanbul ignore next */ usesBothOrgTypes
-                    ? i18n.t('Log In to Existing Org')
-                    : i18n.t('Log In to Continue Installation'),
+                    ? t('Log In to Existing Org')
+                    : t('Log In to Continue Installation'),
                   this.openPreflightModal,
                 )
               : this.getLoginOrActionBtn(
-                  i18n.t('Install'),
+                  t('Install'),
                   usesBothOrgTypes
-                    ? i18n.t('Log In to Existing Org')
-                    : i18n.t('Log In to Install'),
+                    ? t('Log In to Existing Org')
+                    : t('Log In to Install'),
                   action,
                 );
             return (
@@ -403,10 +403,10 @@ class CtaButton extends React.Component<
           }
           // Prior preflight exists, but is no longer valid or has errors
           return this.getLoginOrActionBtn(
-            i18n.t('Re-Run Pre-Install Validation'),
+            t('Re-Run Pre-Install Validation'),
             usesBothOrgTypes
-              ? i18n.t('Log In to Existing Org')
-              : i18n.t('Log In to Re-Run Pre-Install Validation'),
+              ? t('Log In to Existing Org')
+              : t('Log In to Re-Run Pre-Install Validation'),
             this.startPreflight,
             true,
           );
@@ -415,10 +415,10 @@ class CtaButton extends React.Component<
         case STATUS.FAILED: {
           // Prior preflight exists, but failed or had plan-level errors
           return this.getLoginOrActionBtn(
-            i18n.t('Re-Run Pre-Install Validation'),
+            t('Re-Run Pre-Install Validation'),
             usesBothOrgTypes
-              ? i18n.t('Log In to Existing Org')
-              : i18n.t('Log In to Re-Run Pre-Install Validation'),
+              ? t('Log In to Existing Org')
+              : t('Log In to Re-Run Pre-Install Validation'),
             this.startPreflight,
             true,
           );
@@ -434,10 +434,10 @@ class CtaButton extends React.Component<
     return (
       <>
         {this.getLoginOrActionBtn(
-          i18n.t('Install'),
+          t('Install'),
           /* istanbul ignore next */ usesBothOrgTypes
-            ? i18n.t('Log In to Existing Org')
-            : i18n.t('Log In to Install'),
+            ? t('Log In to Existing Org')
+            : t('Log In to Install'),
           action,
         )}
         {this.getClickThroughAgreementModal()}
@@ -447,6 +447,7 @@ class CtaButton extends React.Component<
 
   getScratchOrgCTA() {
     const {
+      t,
       user,
       clickThroughAgreement,
       plan,
@@ -468,7 +469,7 @@ class CtaButton extends React.Component<
       // Scratch org is being created
       return (
         <ActionBtn
-          label={<LabelWithSpinner label={i18n.t('Creating Scratch Org…')} />}
+          label={<LabelWithSpinner label={t('Creating Scratch Org…')} />}
           disabled
           btnVariant={btnVariant}
         />
@@ -480,7 +481,7 @@ class CtaButton extends React.Component<
       if (user) {
         return (
           <ActionBtn
-            label={i18n.t('Log Out to Create Scratch Org')}
+            label={t('Log Out to Create Scratch Org')}
             onClick={doLogout}
             btnVariant={btnVariant}
           />
@@ -489,7 +490,7 @@ class CtaButton extends React.Component<
       return (
         <>
           <ActionBtn
-            label={i18n.t('Create Scratch Org')}
+            label={t('Create Scratch Org')}
             onClick={this.openSpinOrgModal}
             disabled={preventAction}
             btnVariant={btnVariant}
@@ -507,7 +508,7 @@ class CtaButton extends React.Component<
     if (user) {
       return (
         <ActionBtn
-          label={i18n.t('Log Out to Use Scratch Org')}
+          label={t('Log Out to Use Scratch Org')}
           onClick={doLogout}
           btnVariant={btnVariant}
         />
@@ -522,8 +523,8 @@ class CtaButton extends React.Component<
           <ActionBtn
             label={
               /* istanbul ignore next */ usesBothOrgTypes
-                ? i18n.t('Start Pre-Install Validation on Scratch Org')
-                : i18n.t('Start Pre-Install Validation')
+                ? t('Start Pre-Install Validation on Scratch Org')
+                : t('Start Pre-Install Validation')
             }
             onClick={this.startPreflight}
             disabled={preventAction}
@@ -542,10 +543,8 @@ class CtaButton extends React.Component<
               <ActionBtn
                 label={
                   /* istanbul ignore next */ usesBothOrgTypes
-                    ? i18n.t(
-                        'View Warnings to Continue Installation on Scratch Org',
-                      )
-                    : i18n.t('View Warnings to Continue Installation')
+                    ? t('View Warnings to Continue Installation on Scratch Org')
+                    : t('View Warnings to Continue Installation')
                 }
                 onClick={this.openPreflightModal}
                 disabled={preventAction}
@@ -555,8 +554,8 @@ class CtaButton extends React.Component<
               <ActionBtn
                 label={
                   /* istanbul ignore next */ usesBothOrgTypes
-                    ? i18n.t('Install on Scratch Org')
-                    : i18n.t('Install')
+                    ? t('Install on Scratch Org')
+                    : t('Install')
                 }
                 onClick={this.startJob}
                 disabled={preventAction}
@@ -584,8 +583,8 @@ class CtaButton extends React.Component<
             <ActionBtn
               label={
                 /* istanbul ignore next */ usesBothOrgTypes
-                  ? i18n.t('Re-Run Pre-Install Validation on Scratch Org')
-                  : i18n.t('Re-Run Pre-Install Validation')
+                  ? t('Re-Run Pre-Install Validation on Scratch Org')
+                  : t('Re-Run Pre-Install Validation')
               }
               onClick={this.startPreflight}
               disabled={preventAction}
@@ -600,8 +599,8 @@ class CtaButton extends React.Component<
             <ActionBtn
               label={
                 /* istanbul ignore next */ usesBothOrgTypes
-                  ? i18n.t('Re-Run Pre-Install Validation on Scratch Org')
-                  : i18n.t('Re-Run Pre-Install Validation')
+                  ? t('Re-Run Pre-Install Validation on Scratch Org')
+                  : t('Re-Run Pre-Install Validation')
               }
               onClick={this.startPreflight}
               disabled={preventAction}
@@ -617,8 +616,8 @@ class CtaButton extends React.Component<
       <ActionBtn
         label={
           /* istanbul ignore next */ usesBothOrgTypes
-            ? i18n.t('Install on Scratch Org')
-            : i18n.t('Install')
+            ? t('Install on Scratch Org')
+            : t('Install')
         }
         onClick={this.startJob}
         disabled={preventAction}
@@ -628,7 +627,7 @@ class CtaButton extends React.Component<
   }
 
   render() {
-    const { plan, preflight, scratchOrg } = this.props;
+    const { t, plan, preflight, scratchOrg } = this.props;
     const canUsePersistentOrg = plan.supported_orgs !== SUPPORTED_ORGS.Scratch;
     const canUseScratchOrg = Boolean(
       window.GLOBALS.SCRATCH_ORGS_AVAILABLE &&
@@ -643,7 +642,7 @@ class CtaButton extends React.Component<
       // An `undefined` org means we don't know whether the org exists
       return (
         <ActionBtn
-          label={<LabelWithSpinner label={i18n.t('Loading…')} />}
+          label={<LabelWithSpinner label={t('Loading…')} />}
           disabled
         />
       );
@@ -654,7 +653,7 @@ class CtaButton extends React.Component<
         // An `undefined` preflight means we don't know whether preflight exists
         return (
           <ActionBtn
-            label={<LabelWithSpinner label={i18n.t('Loading…')} />}
+            label={<LabelWithSpinner label={t('Loading…')} />}
             disabled
           />
         );
@@ -666,7 +665,7 @@ class CtaButton extends React.Component<
           <ActionBtn
             label={
               <LabelWithSpinner
-                label={i18n.t('Pre-Install Validation In Progress…')}
+                label={t('Pre-Install Validation In Progress…')}
               />
             }
             disabled
@@ -677,13 +676,17 @@ class CtaButton extends React.Component<
 
     return (
       <>
-        {canUsePersistentOrg && !hasValidScratchOrg
-          ? this.getPersistentOrgCTA()
-          : null}
-        {canUseScratchOrg ? this.getScratchOrgCTA() : null}
+        {canUsePersistentOrg && !hasValidScratchOrg ? (
+          <div className="slds-m-bottom_small">
+            {this.getPersistentOrgCTA()}
+          </div>
+        ) : null}
+        {canUseScratchOrg ? (
+          <div className="slds-m-bottom_small">{this.getScratchOrgCTA()}</div>
+        ) : null}
       </>
     );
   }
 }
 
-export default CtaButton;
+export default withTranslation()(CtaButton);

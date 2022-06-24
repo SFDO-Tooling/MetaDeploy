@@ -26,6 +26,7 @@ Websocket notifications you can subscribe to:
 """
 import logging
 
+from asgiref.sync import sync_to_async
 from channels.layers import get_channel_layer
 from django.utils.translation import gettext_lazy as _
 
@@ -44,7 +45,7 @@ async def push_message(group_name, message):
     channel_layer = get_channel_layer()
     action_type = message.get("content", {}).get("type")
     if await get_set_message_semaphore(channel_layer, message):
-        logger.info(f"Push message: group={group_name} type={action_type}")
+        logger.debug(f"Push message: group={group_name} type={action_type}")
         await channel_layer.group_send(group_name, message)
 
 
@@ -149,11 +150,27 @@ async def notify_post_job(job):
 
 
 async def notify_org_result_changed(result):
-    from .models import Job, PreflightResult
-    from .serializers import OrgSerializer
 
     type_ = "ORG_CHANGED"
     org_id = result.org_id
+
+    data = await serialize_org(org_id)
+
+    group_name = CHANNELS_GROUP_NAME.format(
+        model="org", id=convert_org_id_to_key(org_id)
+    )
+    message = {
+        "type": "notify",
+        "group": group_name,
+        "content": {"type": type_, "payload": data},
+    }
+    await push_message(group_name, message)
+
+
+@sync_to_async
+def serialize_org(org_id):
+    from .models import Job, PreflightResult
+    from .serializers import OrgSerializer
 
     current_job = Job.objects.filter(org_id=org_id, status=Job.Status.started).first()
     current_preflight = PreflightResult.objects.filter(
@@ -166,15 +183,7 @@ async def notify_org_result_changed(result):
             "current_preflight": current_preflight,
         }
     )
-    group_name = CHANNELS_GROUP_NAME.format(
-        model="org", id=convert_org_id_to_key(org_id)
-    )
-    message = {
-        "type": "notify",
-        "group": group_name,
-        "content": {"type": type_, "payload": serializer.data},
-    }
-    await push_message(group_name, message)
+    return serializer.data
 
 
 async def notify_org(scratch_org, type_, payload=None, error=None):
@@ -207,13 +216,19 @@ async def notify_org(scratch_org, type_, payload=None, error=None):
 
 
 async def notify_org_changed(scratch_org, error=None, _type=None):
-    from .serializers import ScratchOrgSerializer
 
     if error:
         await notify_org(scratch_org, _type or "SCRATCH_ORG_ERROR", error=error)
     else:
-        payload = ScratchOrgSerializer(scratch_org).data
+        payload = await get_serialized_scratch_org_payload(scratch_org)
         await notify_org(scratch_org, _type or "SCRATCH_ORG_UPDATED", payload=payload)
+
+
+@sync_to_async
+def get_serialized_scratch_org_payload(scratch_org):
+    from .serializers import ScratchOrgSerializer
+
+    return ScratchOrgSerializer(scratch_org).data
 
 
 async def preflight_started(scratch_org, preflight):

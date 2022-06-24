@@ -2,9 +2,7 @@ import time
 
 from cumulusci.core.tasks import BaseTask
 from django.core.management.base import BaseCommand
-from django.utils import timezone
 from django.utils.text import slugify
-from scheduler.models import RepeatableJob
 
 from ...models import (
     AllowedList,
@@ -27,7 +25,7 @@ class Sleep(BaseTask):
 
     def _run_task(self):  # pragma: nocover
         seconds = int(self.options["seconds"])
-        self.logger.info("Sleeping for {} seconds".format(seconds))
+        self.logger.info(f"Sleeping for {seconds} seconds")
         for t in range(seconds):
             time.sleep(1)
             self.logger.info(str(t + 1))
@@ -102,7 +100,7 @@ class Command(BaseCommand):
 
     def create_plan(self, version, title="Full Install", tier="primary", **kwargs):
         plan_template = PlanTemplate.objects.create(
-            name="{} for {}".format(title, version),
+            name=f"{title} for {version}",
             preflight_message=(
                 "Preflight message consists of generic product message and "
                 "step pre-check info — run in one operation before the "
@@ -236,42 +234,6 @@ class Command(BaseCommand):
             step_num="9",
         )
 
-    def create_enqueuer_job(self):
-        RepeatableJob.objects.get_or_create(
-            callable="metadeploy.api.jobs.enqueuer_job",
-            defaults=dict(
-                name="Enqueuer",
-                interval=1,
-                interval_unit="minutes",
-                queue="short",
-                scheduled_time=timezone.now(),
-            ),
-        )
-
-    def create_token_expiry_job(self):
-        RepeatableJob.objects.get_or_create(
-            callable="metadeploy.api.jobs.cleanup_user_data_job",
-            defaults=dict(
-                name="Expire User Tokens",
-                interval=1,
-                interval_unit="minutes",
-                queue="short",
-                scheduled_time=timezone.now(),
-            ),
-        )
-
-    def create_preflight_expiry_job(self):
-        RepeatableJob.objects.get_or_create(
-            callable="metadeploy.api.jobs.expire_preflights_job",
-            defaults=dict(
-                name="Expire Preflight Results",
-                interval=1,
-                interval_unit="minutes",
-                queue="short",
-                scheduled_time=timezone.now(),
-            ),
-        )
-
     def create_eda(self, category):
         product = Product.objects.create(
             title="Education Data Architecture (EDA)",
@@ -393,8 +355,6 @@ class Command(BaseCommand):
                             {
                                 "unmanaged": False,
                                 "namespace_inject": "hed",
-                                "namespace_token": "%%%NAMESPACE%%%",
-                                "filename_token": "___NAMESPACE___",
                                 "repo_owner": "SalesforceFoundation",
                                 "repo_name": "EDA",
                                 "ref": "e785195d07a3ac9e395f27829866005dbdcd5bd0",
@@ -419,8 +379,6 @@ class Command(BaseCommand):
                             {
                                 "unmanaged": False,
                                 "namespace_inject": "hed",
-                                "namespace_token": "%%%NAMESPACE%%%",
-                                "filename_token": "___NAMESPACE___",
                                 "repo_owner": "SalesforceFoundation",
                                 "repo_name": "EDA",
                                 "ref": "e785195d07a3ac9e395f27829866005dbdcd5bd0",
@@ -436,9 +394,6 @@ class Command(BaseCommand):
             Step.objects.create(plan=plan, **step)
 
     def handle(self, *args, **options):
-        self.create_enqueuer_job()
-        self.create_token_expiry_job()
-        self.create_preflight_expiry_job()
         sf_category = ProductCategory.objects.create(
             title="Salesforce.org Products",
             order_key=0,

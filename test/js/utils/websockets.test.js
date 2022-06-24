@@ -1,12 +1,12 @@
 import Sockette from 'sockette';
 
-import * as jobActions from '@/store/jobs/actions';
-import { updateOrg } from '@/store/org/actions';
-import * as preflightActions from '@/store/plans/actions';
-import * as scratchOrgActions from '@/store/scratchOrgs/actions';
-import { connectSocket, disconnectSocket } from '@/store/socket/actions';
-import { invalidateToken } from '@/store/user/actions';
-import * as sockets from '@/utils/websockets';
+import * as jobActions from '@/js/store/jobs/actions';
+import { updateOrg } from '@/js/store/org/actions';
+import * as preflightActions from '@/js/store/plans/actions';
+import * as scratchOrgActions from '@/js/store/scratchOrgs/actions';
+import { connectSocket, disconnectSocket } from '@/js/store/socket/actions';
+import { invalidateToken } from '@/js/store/user/actions';
+import * as sockets from '@/js/utils/websockets';
 
 const mockJson = jest.fn();
 const mockClose = jest.fn();
@@ -142,7 +142,7 @@ describe('createSocket', () => {
     sockets.createSocket(opts);
 
     expect(Sockette).toHaveBeenCalledTimes(1);
-    expect(Sockette.mock.calls[0][0]).toEqual('/my/url');
+    expect(Sockette.mock.calls[0][0]).toBe('/my/url');
   });
 
   describe('events', () => {
@@ -239,6 +239,7 @@ describe('createSocket', () => {
 
       test('dispatches disconnectSocket action after 5 seconds', () => {
         jest.useFakeTimers();
+        jest.spyOn(window, 'setTimeout');
         socketInstance.onopen();
         socketInstance.onclose();
 

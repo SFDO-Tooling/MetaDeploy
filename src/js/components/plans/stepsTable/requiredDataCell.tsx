@@ -1,22 +1,17 @@
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import classNames from 'classnames';
-import i18n from 'i18next';
-import * as React from 'react';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 
-import { DataCellProps } from '@/components/plans/stepsTable';
-import { CONSTANTS } from '@/store/plans/reducer';
+import { DataCellProps } from '@/js/components/plans/stepsTable';
+import { CONSTANTS } from '@/js/store/plans/reducer';
 
 const { RESULT_STATUS } = CONSTANTS;
 
 const RequiredDataCell = (props: DataCellProps) => {
-  const {
-    preflight,
-    item,
-    job,
-    className,
-    activeJobStep,
-    ...otherProps
-  } = props;
+  const { t } = useTranslation();
+  const { preflight, item, job, className, activeJobStep, ...otherProps } =
+    props;
 
   /* istanbul ignore if */
   if (!item) {
@@ -38,11 +33,11 @@ const RequiredDataCell = (props: DataCellProps) => {
   const classes = classNames('slds-align-middle', 'slds-badge', {
     'slds-badge_lightest': !required,
   });
-  let text = i18n.t('Optional');
+  let text = t('Optional');
   if (skipped) {
-    text = i18n.t('Skipped');
+    text = t('Skipped');
   } else if (required) {
-    text = i18n.t('Required');
+    text = t('Required');
   }
   return (
     <DataTableCell

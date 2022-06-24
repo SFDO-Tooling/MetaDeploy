@@ -8,14 +8,16 @@ from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
+from config.settings.base import MINIMUM_JOBS_FOR_AVERAGE
+
 from ..models import (
     SUPPORTED_ORG_TYPES,
     Job,
+    PreflightResult,
     ScratchOrg,
     SiteProfile,
     Step,
     Version,
-    PreflightResult,
 )
 
 
@@ -243,6 +245,9 @@ class TestIconProperty:
 
 @pytest.mark.django_db
 class TestVersion:
+    def test_get_absolute_url(self, version_factory):
+        assert version_factory().get_absolute_url().startswith("/")
+
     def test_primary_plan__none(self, version_factory):
         version = version_factory()
         assert version.primary_plan is None
@@ -287,9 +292,13 @@ def test_product_category_str(product_category_factory):
 
 
 @pytest.mark.django_db
-def test_product_str(product_factory):
-    product = product_factory(title="My Product")
-    assert str(product) == "My Product"
+class TestProduct:
+    def test_str(self, product_factory):
+        product = product_factory(title="My Product")
+        assert str(product) == "My Product"
+
+    def test_get_absolute_url(self, product_factory):
+        assert product_factory().get_absolute_url().startswith("/")
 
 
 @pytest.mark.django_db
@@ -411,6 +420,9 @@ class TestPlan:
         plan = plan_factory(title="My Plan", version=version)
         assert str(plan) == "My Product, Version v0.1.0, Plan My Plan"
 
+    def test_get_absolute_url(self, plan_factory):
+        assert plan_factory().get_absolute_url().startswith("/")
+
     def test_is_visible_to(self, allowed_list_factory, plan_factory, user_factory):
         allowed_list = allowed_list_factory(org_type=["Production"])
         plan = plan_factory(
@@ -460,7 +472,7 @@ class TestPlan:
 
         assert plan.average_duration is None
 
-        for _ in range(4):
+        for _ in range(MINIMUM_JOBS_FOR_AVERAGE - 1):
             job_factory(
                 plan=plan,
                 status=Job.Status.complete,
@@ -469,7 +481,7 @@ class TestPlan:
                 org_id="00Dxxxxxxxxxxxxxxx",
             )
 
-        assert plan.average_duration == timedelta(seconds=30)
+        assert plan.average_duration == timedelta(seconds=30).total_seconds()
 
     def test_validation(self, allowed_list_factory, plan_factory):
         allowed_list = allowed_list_factory()
@@ -558,13 +570,34 @@ class TestVersionNaturalKey:
 
 @pytest.mark.django_db
 class TestJob:
-    def test_job_saves_click_through_text(self, plan_factory, job_factory):
+    def test_get_absolute_url(self, job_factory):
+        assert job_factory().get_absolute_url().startswith("/")
+
+    def test_job_saves_click_through_text(
+        self, plan_factory, job_factory, site_profile_factory
+    ):
         plan = plan_factory(version__product__click_through_agreement="Test")
+        _ = site_profile_factory()
         job = job_factory(plan=plan, org_id="00Dxxxxxxxxxxxxxxx")
 
         job.refresh_from_db()
-
+        assert not job.is_scratch
+        assert not job.master_service_agreement
         assert job.click_through_agreement.text == "Test"
+
+    def test_job_saves_master_service_agreement(
+        self, plan_factory, job_factory, site_profile_factory
+    ):
+        plan = plan_factory(version__product__click_through_agreement="Test")
+        _ = site_profile_factory()
+        job = job_factory(plan=plan, org_id="00Dxxxxxxxxxxxxxxx", user=None)
+
+        assert job.is_scratch
+
+        job.refresh_from_db()
+
+        assert job.master_service_agreement
+        assert job.master_service_agreement.text == "MSA"
 
     def test_skip_steps(self, plan_factory, step_factory, job_factory):
         plan = plan_factory()

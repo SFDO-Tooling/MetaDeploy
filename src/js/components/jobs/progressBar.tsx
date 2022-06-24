@@ -1,11 +1,11 @@
 import classNames from 'classnames';
-import i18n from 'i18next';
-import * as React from 'react';
+import React, { Component } from 'react';
+import { WithTranslation, withTranslation } from 'react-i18next';
 
-import { Job } from '@/store/jobs/reducer';
-import { CONSTANTS } from '@/store/plans/reducer';
+import { Job } from '@/js/store/jobs/reducer';
+import { CONSTANTS } from '@/js/store/plans/reducer';
 
-type Props = { job: Job };
+type Props = { job: Job } & WithTranslation;
 type State = {
   stepProgressPercent: number;
   completedSteps: number;
@@ -17,7 +17,7 @@ const DEFAULTS = {
   PROGRESS_MAX: 0.8, // progress bar stops if step is [x] complete (out of `1`)
 };
 
-class ProgressBar extends React.Component<Props, State> {
+class ProgressBar extends Component<Props, State> {
   interval: NodeJS.Timeout | null | undefined;
 
   constructor(props: Props) {
@@ -107,7 +107,7 @@ class ProgressBar extends React.Component<Props, State> {
   }
 
   render() {
-    const { job } = this.props;
+    const { t, job } = this.props;
     const isRunning = job.status === CONSTANTS.STATUS.STARTED;
     const isFailed =
       job.status === CONSTANTS.STATUS.FAILED ||
@@ -126,14 +126,17 @@ class ProgressBar extends React.Component<Props, State> {
         >
           <span>
             <strong>
-              {i18n.t('Installation Progress')}
+              {t('Installation Progress')}
+              <span className="slds-assistive-text">
+                {t('{{percent}}% Complete', { percent: progressRounded })}
+              </span>
               {isFailed ? (
                 <>
                   :{' '}
                   <span className="slds-text-color_error">
                     {job.status === CONSTANTS.STATUS.CANCELED
-                      ? i18n.t('Canceled')
-                      : i18n.t('Failed')}
+                      ? t('Canceled')
+                      : t('Failed')}
                   </span>
                 </>
               ) : null}
@@ -142,7 +145,7 @@ class ProgressBar extends React.Component<Props, State> {
           {isFailed ? null : (
             <span aria-hidden="true">
               <strong>
-                {i18n.t('{{percent}}% Complete', { percent: progressRounded })}
+                {t('{{percent}}% Complete', { percent: progressRounded })}
               </strong>
             </span>
           )}
@@ -166,15 +169,11 @@ class ProgressBar extends React.Component<Props, State> {
               'progress-bar-failed': isFailed,
             })}
             style={{ width: `${progress}%` }}
-          >
-            <span className="slds-assistive-text">
-              {i18n.t('Progress: {{percent}}%', { percent: progressRounded })}
-            </span>
-          </span>
+          ></span>
         </div>
       </div>
     );
   }
 }
 
-export default ProgressBar;
+export default withTranslation()(ProgressBar);

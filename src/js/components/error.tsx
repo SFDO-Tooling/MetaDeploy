@@ -1,20 +1,20 @@
-import * as React from 'react';
+import React, { Component, ReactNode } from 'react';
 import { Trans } from 'react-i18next';
 
-import { EmptyIllustration } from '@/components/404';
-import { logError } from '@/utils/logging';
-import routes from '@/utils/routes';
+import { EmptyIllustration } from '@/js/components/404';
+import { logError } from '@/js/utils/logging';
+import routes from '@/js/utils/routes';
 
-type Props = { children: React.ReactNode };
+type Props = { children: ReactNode };
 
-class ErrorBoundary extends React.Component<Props, { hasError: boolean }> {
+class ErrorBoundary extends Component<Props, { hasError: boolean }> {
   constructor(props: Props) {
     super(props);
     this.state = { hasError: false };
   }
 
   /* istanbul ignore next */
-  componentDidCatch(error: Error, info: any) {
+  componentDidCatch(error: Error, info: { [key: string]: any }) {
     this.setState({ hasError: true });
     logError(error, info);
   }

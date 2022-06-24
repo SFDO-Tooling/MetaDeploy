@@ -1,23 +1,23 @@
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import { find } from 'lodash';
-import * as React from 'react';
+import React, { Component, ReactNode } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Link, RouteComponentProps } from 'react-router-dom';
 
-import Errors from '@/components/apiErrors';
-import Login from '@/components/header/login';
-import Logout from '@/components/header/logout';
-import CurrentJobAlert from '@/components/jobs/currentJobAlert';
-import OfflineAlert from '@/components/offlineAlert';
-import { AppState } from '@/store';
-import { clearErrors, removeError } from '@/store/errors/actions';
-import { selectErrors } from '@/store/errors/selectors';
-import { selectOrgs } from '@/store/org/selectors';
-import { selectSocketState } from '@/store/socket/selectors';
-import { logout } from '@/store/user/actions';
-import { selectUserState } from '@/store/user/selectors';
-import routes from '@/utils/routes';
+import Errors from '@/js/components/apiErrors';
+import Login from '@/js/components/header/login';
+import Logout from '@/js/components/header/logout';
+import CurrentJobAlert from '@/js/components/jobs/currentJobAlert';
+import OfflineAlert from '@/js/components/offlineAlert';
+import { AppState } from '@/js/store';
+import { clearErrors, removeError } from '@/js/store/errors/actions';
+import { selectErrors } from '@/js/store/errors/selectors';
+import { selectOrgs } from '@/js/store/org/selectors';
+import { selectSocketState } from '@/js/store/socket/selectors';
+import { logout } from '@/js/store/user/actions';
+import { selectUserState } from '@/js/store/user/selectors';
+import routes from '@/js/utils/routes';
 
 type Props = {
   history?: RouteComponentProps['history'];
@@ -42,10 +42,10 @@ const connector = connect(select, actions);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
-class Header extends React.Component<Props & PropsFromRedux> {
+class Header extends Component<Props & PropsFromRedux> {
   controls = () => {
     const { user, doLogout, hideLogin } = this.props;
-    let header: React.ReactNode = null;
+    let header: ReactNode = null;
     if (user) {
       header = <Logout user={user} doLogout={doLogout} />;
     } else if (!hideLogin) {
@@ -62,8 +62,10 @@ class Header extends React.Component<Props & PropsFromRedux> {
   render() {
     const { socket, orgs, errors, history, jobId, doRemoveError } = this.props;
     const logoSrc = window.GLOBALS.SITE?.company_logo;
-    const currentJob = find(orgs, (org) => org.current_job !== null)
-      ?.current_job;
+    const currentJob = find(
+      orgs,
+      (org) => org.current_job !== null,
+    )?.current_job;
 
     return (
       <>
@@ -85,8 +87,8 @@ class Header extends React.Component<Props & PropsFromRedux> {
                 <img
                   className="site-logo"
                   src={logoSrc}
-                  alt={window.SITE_NAME}
-                  title={window.SITE_NAME}
+                  alt={window.GLOBALS.SITE.company_name}
+                  title={window.GLOBALS.SITE.company_name}
                 />
               ) : null}
             </Link>

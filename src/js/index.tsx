@@ -7,42 +7,47 @@ import doctypeSprite from '@salesforce-ux/design-system/assets/icons/doctype-spr
 import standardSprite from '@salesforce-ux/design-system/assets/icons/standard-sprite/svg/symbols.svg';
 import utilitySprite from '@salesforce-ux/design-system/assets/icons/utility-sprite/svg/symbols.svg';
 import { createBrowserHistory } from 'history';
-import i18n from 'i18next';
-import * as React from 'react';
+import { t } from 'i18next';
+import React from 'react';
 import DocumentTitle from 'react-document-title';
-import * as ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
+// Consider upgrading to v6: https://github.com/remix-run/react-router/discussions/8753
 import { Redirect, Route, Router, Switch } from 'react-router-dom';
-import { applyMiddleware, createStore } from 'redux';
+import {
+  applyMiddleware,
+  // Consider upgrading to Redux Toolkit: https://github.com/reduxjs/redux/releases/tag/v4.2.0
+  legacy_createStore as createStore,
+} from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import logger from 'redux-logger';
 import thunk from 'redux-thunk';
 
-import FourOhFour from '@/components/404';
-import AuthError from '@/components/authError';
-import ErrorBoundary from '@/components/error';
-import Footer from '@/components/footer';
-import JobDetail from '@/components/jobs/detail';
-import PlanDetail from '@/components/plans/detail';
-import { ProductDetail, VersionDetail } from '@/components/products/detail';
-import ProductsList from '@/components/products/list';
-import init_i18n from '@/i18n';
-import reducer, { ThunkDispatch } from '@/store';
-import { fetchOrgJobs } from '@/store/org/actions';
-import { fetchProducts } from '@/store/products/actions';
-import { login, refetchAllData } from '@/store/user/actions';
-import { User } from '@/store/user/reducer';
-import { getUrlParam, removeUrlParam } from '@/utils/api';
-import { SCRATCH_ORG_QS } from '@/utils/constants';
-import { log, logError } from '@/utils/logging';
-import { routePatterns } from '@/utils/routes';
-import { createSocket } from '@/utils/websockets';
+import FourOhFour from '@/js/components/404';
+import AuthError from '@/js/components/authError';
+import ErrorBoundary from '@/js/components/error';
+import Footer from '@/js/components/footer';
+import JobDetail from '@/js/components/jobs/detail';
+import PlanDetail from '@/js/components/plans/detail';
+import { ProductDetail, VersionDetail } from '@/js/components/products/detail';
+import ProductsList from '@/js/components/products/list';
+import init_i18n from '@/js/i18n';
+import reducer, { ThunkDispatch } from '@/js/store';
+import { fetchOrgJobs } from '@/js/store/org/actions';
+import { fetchProducts } from '@/js/store/products/actions';
+import { login, refetchAllData } from '@/js/store/user/actions';
+import { User } from '@/js/store/user/reducer';
+import { getUrlParam, removeUrlParam } from '@/js/utils/api';
+import { SCRATCH_ORG_QS } from '@/js/utils/constants';
+import { log, logError } from '@/js/utils/logging';
+import { routePatterns } from '@/js/utils/routes';
+import { createSocket } from '@/js/utils/websockets';
 
 const history = createBrowserHistory();
 
 const App = () => (
   <DocumentTitle title={window.SITE_NAME}>
-    <div className="slds-grid slds-grid_frame slds-grid_vertical">
+    <div className="slds-grid slds-grid_frame slds-grid_vertical metadeploy-frame">
       <ErrorBoundary>
         <div className="slds-grow slds-shrink-none">
           <ErrorBoundary>
@@ -129,11 +134,11 @@ init_i18n((i18nError?: string) => {
       if (globalsEl?.textContent) {
         GLOBALS = JSON.parse(globalsEl.textContent);
       }
-    } catch (err) {
+    } catch (err: any) {
       logError(err);
     }
     window.GLOBALS = GLOBALS;
-    window.SITE_NAME = window.GLOBALS.SITE?.name || i18n.t('MetaDeploy');
+    window.SITE_NAME = window.GLOBALS.SITE?.name || t('MetaDeploy');
 
     // Get JS context
     let JS_CONTEXT = {};
@@ -142,7 +147,7 @@ init_i18n((i18nError?: string) => {
       if (contextEl?.textContent) {
         JS_CONTEXT = JSON.parse(contextEl.textContent);
       }
-    } catch (err) {
+    } catch (err: any) {
       logError(err);
     }
     window.JS_CONTEXT = JS_CONTEXT;
@@ -169,7 +174,8 @@ init_i18n((i18nError?: string) => {
     // Fetch products before rendering App
     (appStore.dispatch as ThunkDispatch)(fetchProducts()).finally(() => {
       (appStore.dispatch as ThunkDispatch)(fetchOrgJobs());
-      ReactDOM.render(
+      const root = createRoot(el);
+      root.render(
         <Provider store={appStore}>
           <Router history={history}>
             <UNSAFE_DirectionSettings.Provider value={document.dir || 'ltr'}>
@@ -185,7 +191,6 @@ init_i18n((i18nError?: string) => {
             </UNSAFE_DirectionSettings.Provider>
           </Router>
         </Provider>,
-        el,
       );
     });
   }

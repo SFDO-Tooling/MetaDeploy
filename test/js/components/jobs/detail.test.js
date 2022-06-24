@@ -1,16 +1,16 @@
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import JobDetail from '@/components/jobs/detail';
-import { fetchJob, requestCancelJob } from '@/store/jobs/actions';
+import JobDetail from '@/js/components/jobs/detail';
+import { fetchJob, requestCancelJob } from '@/js/store/jobs/actions';
 import {
   fetchPlan,
   fetchProduct,
   fetchVersion,
-} from '@/store/products/actions';
-import { fetchScratchOrg } from '@/store/scratchOrgs/actions';
-import routes from '@/utils/routes';
+} from '@/js/store/products/actions';
+import { fetchScratchOrg } from '@/js/store/scratchOrgs/actions';
+import routes from '@/js/utils/routes';
 
 import {
   renderWithRedux,
@@ -18,9 +18,9 @@ import {
   storeWithApi,
 } from './../../utils';
 
-jest.mock('@/store/jobs/actions');
-jest.mock('@/store/products/actions');
-jest.mock('@/store/scratchOrgs/actions');
+jest.mock('@/js/store/jobs/actions');
+jest.mock('@/js/store/products/actions');
+jest.mock('@/js/store/scratchOrgs/actions');
 
 fetchScratchOrg.mockReturnValue({ type: 'TEST' });
 fetchJob.mockReturnValue({ type: 'TEST' });
@@ -288,7 +288,7 @@ describe('<JobDetail />', () => {
     test('redirects to job_detail with new slug', () => {
       const { context } = setup({ productSlug: 'old-product' });
 
-      expect(context.action).toEqual('REPLACE');
+      expect(context.action).toBe('REPLACE');
       expect(context.url).toEqual(
         routes.job_detail('product-1', '1.0.0', 'my-plan', 'job-1'),
       );
@@ -299,7 +299,7 @@ describe('<JobDetail />', () => {
     test('redirects to job_detail with new slug', () => {
       const { context } = setup({ planSlug: 'old-plan' });
 
-      expect(context.action).toEqual('REPLACE');
+      expect(context.action).toBe('REPLACE');
       expect(context.url).toEqual(
         routes.job_detail('product-1', '1.0.0', 'my-plan', 'job-1'),
       );
@@ -313,7 +313,7 @@ describe('<JobDetail />', () => {
         planSlug: 'old-plan',
       });
 
-      expect(context.action).toEqual('REPLACE');
+      expect(context.action).toBe('REPLACE');
       expect(context.url).toEqual(
         routes.job_detail('product-1', '1.0.0', 'my-plan', 'job-1'),
       );
@@ -453,7 +453,7 @@ describe('<JobDetail />', () => {
 
         expect(getByText('Access Your Scratch Org')).toBeVisible();
         expect(input).toBeVisible();
-        expect(input.value).toEqual(
+        expect(input.value).toBe(
           `${window.location.origin}${url}?scratch_org_id=${scratchOrg.uuid}`,
         );
       });
@@ -613,9 +613,8 @@ describe('<JobDetail />', () => {
   });
 
   describe('cancel btn click', () => {
-    test('calls requestCancelJob', () => {
-      const canceled = Promise.resolve({});
-      requestCancelJob.mockReturnValue(() => canceled);
+    test('calls requestCancelJob', async () => {
+      requestCancelJob.mockReturnValue(() => Promise.resolve({}));
       const id = 'job-1';
       const { getAllByText } = setup({
         initialState: {
@@ -631,11 +630,11 @@ describe('<JobDetail />', () => {
       });
       fireEvent.click(getAllByText('Cancel Installation')[0]);
 
-      expect.assertions(2);
       expect(requestCancelJob).toHaveBeenCalledWith('job-1');
-      return canceled.then(() => {
-        expect(getAllByText('Canceling Installation…')[0]).toBeVisible();
-      });
+
+      await waitFor(() =>
+        expect(getAllByText('Canceling Installation…')[0]).toBeVisible(),
+      );
     });
   });
 

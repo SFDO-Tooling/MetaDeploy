@@ -1,8 +1,8 @@
 import Avatar from '@salesforce/design-system-react/components/avatar';
 import Icon from '@salesforce/design-system-react/components/icon';
-import * as React from 'react';
+import React, { CSSProperties } from 'react';
 
-import { Product } from '@/store/products/reducer';
+import { Product } from '@/js/store/products/reducer';
 
 const ProductIcon = ({ item }: { item: Product }) => {
   const icon = item.icon;
@@ -33,7 +33,7 @@ const ProductIcon = ({ item }: { item: Product }) => {
   if (item.color) {
     // Standard entity icon (initials) with custom color
     return (
-      <div style={{ '--custom-color': item.color } as React.CSSProperties}>
+      <div style={{ '--custom-color': item.color } as CSSProperties}>
         <Avatar variant="entity" label={item.title} />
       </div>
     );

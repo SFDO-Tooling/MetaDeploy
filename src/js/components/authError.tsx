@@ -1,20 +1,22 @@
-import i18n from 'i18next';
-import * as React from 'react';
+import React from 'react';
 import DocumentTitle from 'react-document-title';
+import { useTranslation } from 'react-i18next';
 import { Trans } from 'react-i18next';
 import { connect } from 'react-redux';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 
-import { EmptyIllustration } from '@/components/404';
-import Header from '@/components/header';
-import Login from '@/components/header/login';
-import { AppState } from '@/store';
-import { User } from '@/store/user/reducer';
-import { selectUserState } from '@/store/user/selectors';
-import routes from '@/utils/routes';
+import { EmptyIllustration } from '@/js/components/404';
+import Header from '@/js/components/header';
+import Login from '@/js/components/header/login';
+import { AppState } from '@/js/store';
+import { User } from '@/js/store/user/reducer';
+import { selectUserState } from '@/js/store/user/selectors';
+import routes from '@/js/utils/routes';
 
 const AuthError = withRouter(
   ({ user, history }: { user: User } & RouteComponentProps) => {
+    const { t } = useTranslation();
+
     const message = (window.JS_CONTEXT || {}).error_message || (
       <Trans i18nKey="errorWithAccount">
         An error occurred with your account. Try the{' '}
@@ -24,7 +26,7 @@ const AuthError = withRouter(
 
     return (
       <DocumentTitle
-        title={`${i18n.t('Authentication Error')} | ${window.SITE_NAME}`}
+        title={`${t('Authentication Error')} | ${window.SITE_NAME}`}
       >
         <>
           <Header history={history} />
@@ -32,9 +34,7 @@ const AuthError = withRouter(
           <div className="slds-align_absolute-center">
             <Login
               id="auth-error-login"
-              label={
-                user ? i18n.t('Log In With a Different Org') : i18n.t('Log In')
-              }
+              label={user ? t('Log In With a Different Org') : t('Log In')}
               buttonClassName="slds-p-horizontal_xxx-small"
               buttonVariant="base"
             />

@@ -1,7 +1,7 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import CtaButton from '@/components/jobs/ctaButton';
+import CtaButton from '@/js/components/jobs/ctaButton';
 
 import { render } from './../../utils';
 

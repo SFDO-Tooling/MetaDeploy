@@ -9,7 +9,7 @@ from sfdo_template_helpers.admin.views import AdminAPIViewSet
 
 from metadeploy.adminapi.translations import update_all_translations
 from metadeploy.api import models
-from metadeploy.api.models import SUPPORTED_ORG_TYPES
+from metadeploy.api.models import SUPPORTED_ORG_TYPES, Plan
 from metadeploy.api.serializers import get_from_data_or_instance
 
 
@@ -61,13 +61,16 @@ class PlanSerializer(AdminAPISerializer):
     )
 
     class Meta:
-        fields = "__all__"
+        exclude = ["calculated_average_duration"]
         extra_kwargs = {"plan_template": {"required": False}}
 
     def validate(self, data):
         """
         Check that restricted plans only support persistent orgs.
+        Also checks that plan with the same version does not have more
+        than one primary or secondary plan.
         """
+
         visible_to = get_from_data_or_instance(self.instance, data, "visible_to")
         supported_orgs = get_from_data_or_instance(
             self.instance,
@@ -83,6 +86,30 @@ class PlanSerializer(AdminAPISerializer):
                     )
                 }
             )
+        if self.context["request"].method == "POST":
+            tier = (
+                get_from_data_or_instance(self.instance, data, "tier")
+                or Plan.Tier.primary
+            )
+            plan_version = get_from_data_or_instance(self.instance, data, "version")
+            if tier == Plan.Tier.primary and plan_version.primary_plan:
+                raise serializers.ValidationError(
+                    {
+                        "version": _(
+                            "You must not have more than one primary plan per version"
+                        )
+                    }
+                )
+
+            elif tier == Plan.Tier.secondary and plan_version.secondary_plan:
+                raise serializers.ValidationError(
+                    {
+                        "version": _(
+                            "You must not have more than one secondary plan per version"
+                        )
+                    }
+                )
+
         return data
 
     def create(self, validated_data):

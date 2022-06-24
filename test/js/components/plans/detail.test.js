@@ -2,15 +2,18 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import PlanDetail from '@/components/plans/detail';
-import { fetchPreflight } from '@/store/plans/actions';
+import PlanDetail from '@/js/components/plans/detail';
+import { fetchPreflight } from '@/js/store/plans/actions';
 import {
   fetchPlan,
   fetchProduct,
   fetchVersion,
-} from '@/store/products/actions';
-import { fetchScratchOrg, spinScratchOrg } from '@/store/scratchOrgs/actions';
-import routes from '@/utils/routes';
+} from '@/js/store/products/actions';
+import {
+  fetchScratchOrg,
+  spinScratchOrg,
+} from '@/js/store/scratchOrgs/actions';
+import routes from '@/js/utils/routes';
 
 import {
   renderWithRedux,
@@ -18,9 +21,9 @@ import {
   storeWithApi,
 } from './../../utils';
 
-jest.mock('@/store/products/actions');
-jest.mock('@/store/plans/actions');
-jest.mock('@/store/scratchOrgs/actions');
+jest.mock('@/js/store/products/actions');
+jest.mock('@/js/store/plans/actions');
+jest.mock('@/js/store/scratchOrgs/actions');
 
 fetchPlan.mockReturnValue({ type: 'TEST' });
 fetchPreflight.mockReturnValue({ type: 'TEST' });
@@ -288,7 +291,7 @@ describe('<PlanDetail />', () => {
     test('redirects to plan_detail with new slug', () => {
       const { context } = setup({ productSlug: 'old-product' });
 
-      expect(context.action).toEqual('REPLACE');
+      expect(context.action).toBe('REPLACE');
       expect(context.url).toEqual(
         routes.plan_detail('product-1', '1.0.0', 'my-plan'),
       );
@@ -546,7 +549,7 @@ describe('<PlanDetail />', () => {
     test('redirects to plan_detail with new slug', () => {
       const { context } = setup({ planSlug: 'old-plan' });
 
-      expect(context.action).toEqual('REPLACE');
+      expect(context.action).toBe('REPLACE');
       expect(context.url).toEqual(
         routes.plan_detail('product-1', '1.0.0', 'my-plan'),
       );
@@ -560,7 +563,7 @@ describe('<PlanDetail />', () => {
         planSlug: 'old-plan',
       });
 
-      expect(context.action).toEqual('REPLACE');
+      expect(context.action).toBe('REPLACE');
       expect(context.url).toEqual(
         routes.plan_detail('product-1', '1.0.0', 'my-plan'),
       );

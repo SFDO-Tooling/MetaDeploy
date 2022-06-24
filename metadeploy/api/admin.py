@@ -124,7 +124,7 @@ class JobAdmin(AdminHelpTextMixin, admin.ModelAdmin, PlanMixin):
         "enqueued_at",
     )
     list_select_related = ("user", "plan", "plan__version", "plan__version__product")
-    search_fields = ("org_id", "exception")
+    search_fields = ("job_id", "org_id", "exception")
 
 
 @admin.register(ScratchOrg)
@@ -211,7 +211,7 @@ class PreflightResult(AdminHelpTextMixin, admin.ModelAdmin, PlanMixin):
         "created_at",
     )
     list_select_related = ("plan", "plan__version", "plan__version__product")
-    search_fields = ("org_id", "plan", "exception")
+    search_fields = ("id", "org_id", "exception")
 
 
 @admin.register(Product)
@@ -291,6 +291,7 @@ class SiteProfileAdmin(MetadeployTranslatableAdmin):
 class TranslationAdmin(admin.ModelAdmin):
     list_display = ("lang", "context", "slug", "text")
     list_filter = ("lang",)
+    search_fields = ("context", "slug")
 
 
 # Disable editing SocialTokens

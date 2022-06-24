@@ -5,11 +5,13 @@ Salesforce utilities
 
 import json
 import os
+import time
 from datetime import datetime
 
 from cumulusci.core.config import OrgConfig, TaskConfig
 from cumulusci.core.runtime import BaseCumulusCI
-from cumulusci.oauth.salesforce import SalesforceOAuth2, jwt_session
+from cumulusci.oauth.client import OAuth2Client, OAuth2ClientConfig
+from cumulusci.oauth.salesforce import jwt_session
 from cumulusci.tasks.salesforce.org_settings import DeployOrgSettings
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
@@ -89,13 +91,15 @@ def _get_org_details(*, cci, org_name, project_path):
     scratch_org_definition_path = os.path.join(
         project_path, scratch_org_config.config_file
     )
-    with open(scratch_org_definition_path, "r") as f:
+    with open(scratch_org_definition_path) as f:
         scratch_org_definition = json.load(f)
 
     return (scratch_org_config, scratch_org_definition)
 
 
-def refresh_access_token(*, scratch_org, config, org_name, keychain=None):
+def refresh_access_token(
+    *, scratch_org, config, org_name, keychain=None, sbx_login=False
+):
     """Refresh the JWT.
 
     Construct a new OrgConfig because ScratchOrgConfig tries to use sfdx
@@ -104,7 +108,7 @@ def refresh_access_token(*, scratch_org, config, org_name, keychain=None):
     """
     try:
         org_config = OrgConfig(config, org_name, keychain=keychain)
-        org_config.refresh_oauth_token(keychain)
+        org_config.refresh_oauth_token(keychain, is_sandbox=sbx_login)
         return org_config
     except HTTPError as err:
         _handle_sf_error(err, scratch_org=scratch_org)
@@ -121,6 +125,7 @@ def _deploy_org_settings(*, cci, org_name, scratch_org_config, scratch_org):
         config=scratch_org_config.config,
         org_name=org_name,
         keychain=cci.keychain,
+        sbx_login=True,
     )
     path = os.path.join(cci.project_config.repo_root, scratch_org_config.config_file)
     task_config = TaskConfig({"options": {"definition_file": path}})
@@ -148,33 +153,68 @@ def _get_org_result(
     """
     # Schema for ScratchOrgInfo object:
     # https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_objects_scratchorginfo.htm  # noqa: B950
+
+    scratch_org_definition = {k.lower(): v for k, v in scratch_org_definition.items()}
     features = scratch_org_definition.get("features", [])
+    # Map between fields in the scratch org definition and fields on the ScratchOrgInfo object.
+    # Start with fields that have special handling outside the .json.
     create_args = {
-        "AdminEmail": email,
-        "ConnectedAppConsumerKey": SF_CLIENT_ID,
-        "ConnectedAppCallbackUrl": SF_CALLBACK_URL,
-        "Description": f"{repo_owner}/{repo_name} {repo_branch}",
+        "adminemail": email,
+        "connectedappconsumerkey": SF_CLIENT_ID,
+        "connectedappcallbackurl": SF_CALLBACK_URL,
+        "description": f"{repo_owner}/{repo_name} {repo_branch}",
         # Override whatever is in scratch_org_config.days:
-        "DurationDays": duration,
-        "Edition": scratch_org_definition["edition"],
-        "Features": ";".join(features) if isinstance(features, list) else features,
-        "HasSampleData": scratch_org_definition.get("hasSampleData", False),
-        "Namespace": (
+        "durationdays": duration,
+        "features": ";".join(features) if isinstance(features, list) else features,
+        "namespace": (
             cci.project_config.project__package__namespace
             if scratch_org_config.namespaced
             else None
         ),
-        "OrgName": scratch_org_definition.get("orgName", "Metecho Task Org"),
-        # should really flesh this out to pass the other
-        # optional fields from the scratch org definition file,
-        # but this will work for a start
     }
+    # Loop over remaining fields from the ScratchOrgInfo schema and map to
+    # data from the org definition.
+    fields = [
+        f["name"]
+        for f in devhub_api.ScratchOrgInfo.describe()["fields"]
+        if f["createable"] and f["name"].lower() not in create_args
+    ]
+
+    # Note that the special fields `objectSettings` and `settings`
+    # are not in the ScratchOrgInfo schema.
+    for field in fields:
+        field_name = field.lower()
+        if field_name in scratch_org_definition:
+            create_args[field_name] = scratch_org_definition[field_name]
+
+    # Lastly, populate default items.
+    create_args.setdefault("orgname", "MetaDeploy Scratch Org")
+    create_args.setdefault("hassampledata", False)
+
     if SFDX_SIGNUP_INSTANCE:  # pragma: nocover
-        create_args["Instance"] = SFDX_SIGNUP_INSTANCE
+        create_args["instance"] = SFDX_SIGNUP_INSTANCE
     response = devhub_api.ScratchOrgInfo.create(create_args)
 
     # Get details and update scratch org config
     return devhub_api.ScratchOrgInfo.get(response["id"])
+
+
+def _poll_for_scratch_org_completion(devhub_api, org_result):
+    total_time_waiting = 0
+    # Don't allow waiting more than the default job timeout.
+    while (
+        org_result["Status"] in ["New", "Creating"]
+        and total_time_waiting < settings.METADEPLOY_JOB_TIMEOUT
+    ):
+        time.sleep(10)
+        total_time_waiting += 10
+        org_result = devhub_api.ScratchOrgInfo.get(org_result["Id"])
+
+    if org_result["Status"] != "Active":
+        error = org_result["ErrorCode"] or _("Org creation timed out")
+        raise ScratchOrgError(f"Scratch org creation failed: {error}")
+
+    return org_result
 
 
 def _mutate_scratch_org(*, scratch_org_config, org_result, email, duration):
@@ -208,10 +248,16 @@ def _get_access_token(*, org_result, scratch_org_config):
     the scratch org is created. This must be completed once in order for
     future access tokens to be obtained using the JWT token flow.
     """
-    oauth = SalesforceOAuth2(
-        SF_CLIENT_ID, SF_CLIENT_SECRET, SF_CALLBACK_URL, scratch_org_config.instance_url
+    oauth2_config = OAuth2ClientConfig(
+        client_id=SF_CLIENT_ID,
+        client_secret=SF_CLIENT_SECRET,
+        redirect_uri=SF_CALLBACK_URL,
+        auth_uri=f"{scratch_org_config.instance_url}/services/oauth2/authorize",
+        token_uri=f"{scratch_org_config.instance_url}/services/oauth2/token",
+        scope="web full refresh_token",
     )
-    auth_result = oauth.get_token(org_result["AuthCode"]).json()
+    oauth2_client = OAuth2Client(oauth2_config)
+    auth_result = oauth2_client.auth_code_grant(org_result["AuthCode"]).json()
     scratch_org_config.config["access_token"] = scratch_org_config._sfdx_info[
         "access_token"
     ] = auth_result["access_token"]
@@ -263,6 +309,7 @@ def create_scratch_org(
         scratch_org_config=scratch_org_config,
         scratch_org_definition=scratch_org_definition,
     )
+    org_result = _poll_for_scratch_org_completion(devhub_api, org_result)
     _mutate_scratch_org(
         # Passed in to create_scratch_org:
         email=email,

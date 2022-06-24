@@ -9,90 +9,43 @@ https://docs.djangoproject.com/en/1.11/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
+import json
 from ipaddress import IPv4Network
-from os import environ
+from os import environ as os_environ
 from pathlib import Path
-from typing import List
 
-import dj_database_url
+import environ
 import sentry_sdk
 from django.core.exceptions import ImproperlyConfigured
+from django.core.management.utils import get_random_secret_key
 from sentry_sdk.integrations.django import DjangoIntegration
 
-BOOLS = ("True", "true", "T", "t", "1", 1)
 
-
-def boolish(val: str) -> bool:
-    return val in BOOLS
-
-
-def ipv4_networks(val: str) -> List[IPv4Network]:
-    return [IPv4Network(s.strip()) for s in val.split(",")]
-
-
-def url_prefix(val: str) -> str:
-    return val.rstrip("/") + "/"
-
-
-class NoDefaultValue:
-    pass
-
-
-def env(name, default=NoDefaultValue, type_=str):
+def safe_key() -> str:
     """
-    Get a configuration value from the environment.
-
-    Arguments
-    ---------
-    name : str
-        The name of the environment variable to pull from for this
-        setting.
-    default : any
-        A default value of the return type in case the intended
-        environment variable is not set. If this argument is not passed,
-        the environment variable is considered to be required, and
-        ``ImproperlyConfigured`` may be raised.
-    type_ : callable
-        A callable that takes a string and returns a value of the return
-        type.
-
-    Returns
-    -------
-    any
-        A value of the type returned by ``type_``.
-
-    Raises
-    ------
-    ImproperlyConfigured
-        If there is no ``default``, and the environment variable is not
-        set.
+    Generate a secret key, stripping "$" to prevent env var interpolation in the key.
     """
-    try:
-        val = environ[name]
-    except KeyError:
-        if default == NoDefaultValue:
-            raise ImproperlyConfigured(f"Missing environment variable: {name}.")
-        elif default is None:
-            return None
-        val = default
-    val = type_(val)
-    return val
+    return get_random_secret_key().lstrip("$")
 
 
 # Build paths inside the project like this: str(PROJECT_ROOT / 'some_path')
 PROJECT_ROOT = Path(__file__).absolute().parent.parent.parent
 
+env = environ.Env()
+env_file = PROJECT_ROOT / ".env"
+if env_file.exists():
+    environ.Env.read_env(env_file)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env("DJANGO_SECRET_KEY")
-HASHID_FIELD_SALT = env("DJANGO_HASHID_SALT")
+SECRET_KEY = env("DJANGO_SECRET_KEY", default=safe_key())
+HASHID_FIELD_SALT = env("DJANGO_HASHID_SALT", default=safe_key())
 DB_ENCRYPTION_KEY = env("DB_ENCRYPTION_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env("DJANGO_DEBUG", default=False, type_=boolish)
+DEBUG = env.bool("DJANGO_DEBUG", default=False)
 
 MODE = env("DJANGO_MODE", default="dev" if DEBUG else "prod")
 
@@ -103,11 +56,7 @@ ALLOWED_HOSTS = [
     "localhost",
     "localhost:8000",
     "localhost:8080",
-] + [
-    el.strip()
-    for el in env("DJANGO_ALLOWED_HOSTS", default="", type_=lambda x: x.split(","))
-    if el.strip()
-]
+] + env.list("DJANGO_ALLOWED_HOSTS", default=[])
 
 # String of IPs (or ranges) shown to the user if
 # we detect the user has Login IP Ranges in place for their profile
@@ -130,7 +79,6 @@ INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "django_rq",
-    "scheduler",
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
@@ -194,7 +142,7 @@ SITE_ID = 1
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
-DATABASES = {"default": dj_database_url.config(default="postgres:///metadeploy")}
+DATABASES = {"default": env.db_url("DATABASE_URL", default="postgres:///metadeploy")}
 
 # Custom User model:
 AUTH_USER_MODEL = "api.User"
@@ -203,11 +151,13 @@ AUTH_USER_MODEL = "api.User"
 # URL configuration:
 ROOT_URLCONF = "metadeploy.urls"
 
-ADMIN_AREA_PREFIX = env("DJANGO_ADMIN_URL", default="admin/", type_=url_prefix)
+ADMIN_AREA_PREFIX = env("DJANGO_ADMIN_URL", default="admin/").rstrip("/") + "/"
 
-ADMIN_API_ALLOWED_SUBNETS = env(
-    "ADMIN_API_ALLOWED_SUBNETS", default="127.0.0.1/32", type_=ipv4_networks
-)
+ADMIN_API_ALLOWED_SUBNETS = [
+    IPv4Network(net)
+    for net in env.list("ADMIN_API_ALLOWED_SUBNETS", default=["127.0.0.1/32"])
+]
+
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
@@ -227,26 +177,21 @@ AUTH_PASSWORD_VALIDATORS = [
 LOGIN_REDIRECT_URL = "/"
 
 # Use HTTPS:
-SECURE_PROXY_SSL_HEADER = env(
+SECURE_PROXY_SSL_HEADER = env.tuple(
     "SECURE_PROXY_SSL_HEADER",
-    default="HTTP_X_FORWARDED_PROTO:https",
-    type_=(lambda v: tuple(v.split(":", 1)) if (v is not None and ":" in v) else None),
+    default=("HTTP_X_FORWARDED_PROTO", "https"),
 )
-SECURE_SSL_REDIRECT = env("SECURE_SSL_REDIRECT", default=True, type_=boolish)
-SESSION_COOKIE_SECURE = env(
-    "SESSION_COOKIE_SECURE", default=SECURE_SSL_REDIRECT, type_=boolish
-)
+SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=True)
+SESSION_COOKIE_SECURE = env.bool("SESSION_COOKIE_SECURE", default=SECURE_SSL_REDIRECT)
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-CSRF_COOKIE_SECURE = env(
-    "CSRF_COOKIE_SECURE", default=SECURE_SSL_REDIRECT, type_=boolish
+CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE", default=SECURE_SSL_REDIRECT)
+SECURE_HSTS_SECONDS = env.int(
+    "SECURE_HSTS_SECONDS", default=3600 if SECURE_SSL_REDIRECT else 0
 )
-SECURE_HSTS_SECONDS = env(
-    "SECURE_HSTS_SECONDS", default=3600 if SECURE_SSL_REDIRECT else 0, type_=int
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env.bool(
+    "SECURE_HSTS_INCLUDE_SUBDOMAINS", default=True
 )
-SECURE_HSTS_INCLUDE_SUBDOMAINS = env(
-    "SECURE_HSTS_INCLUDE_SUBDOMAINS", default=True, type_=boolish
-)
-SECURE_HSTS_PRELOAD = env("SECURE_HSTS_PRELOAD", default=False, type_=boolish)
+SECURE_HSTS_PRELOAD = env.bool("SECURE_HSTS_PRELOAD", default=False)
 
 
 # Internationalization
@@ -257,6 +202,7 @@ LANGUAGES = [
     ("en-us", "English (US)"),
     ("ar", "Arabic"),
     ("bg", "Bulgarian"),
+    {"ca", "Catalan"},
     ("cs", "Czech"),
     ("da", "Danish"),
     ("de", "German"),
@@ -311,6 +257,8 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Media files
 DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
@@ -383,12 +331,17 @@ if not SFDX_CLIENT_ID:
     raise ImproperlyConfigured("Missing environment variable: SFDX_CLIENT_ID.")
 
 # CCI expects these env vars to be set to refresh org oauth tokens
-environ["SFDX_CLIENT_ID"] = SFDX_CLIENT_ID
-environ["SFDX_HUB_KEY"] = SFDX_HUB_KEY
+os_environ["SFDX_CLIENT_ID"] = SFDX_CLIENT_ID
+os_environ["SFDX_HUB_KEY"] = SFDX_HUB_KEY
+
+HEROKU_APP_NAME = env("HEROKU_APP_NAME", default=None)
+HEROKU_TOKEN = env("HEROKU_TOKEN", default=None)
 
 GITHUB_TOKEN = env("GITHUB_TOKEN", default=None)
 GITHUB_APP_ID = env("GITHUB_APP_ID", default=None)
-GITHUB_APP_KEY = env("GITHUB_APP_KEY", default=None)
+# Ugly hack to fix https://github.com/moby/moby/issues/12997
+DOCKER_GITHUB_APP_KEY = env("DOCKER_GITHUB_APP_KEY", default="").replace("\\n", "\n")
+GITHUB_APP_KEY = env("GITHUB_APP_KEY", default=DOCKER_GITHUB_APP_KEY)
 
 
 if not GITHUB_TOKEN and not GITHUB_APP_ID and not GITHUB_APP_KEY:
@@ -411,14 +364,16 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 ACCOUNT_EMAIL_VERIFICATION = "none"
 SOCIALACCOUNT_ADAPTER = "sfdo_template_helpers.oauth2.adapter.SFDOSocialAccountAdapter"
+SOCIALACCOUNT_STORE_TOKENS = True
 
 JS_REVERSE_JS_VAR_NAME = "api_urls"
 JS_REVERSE_EXCLUDE_NAMESPACES = ["admin", "admin_rest"]
 
+METADEPLOY_JOB_TIMEOUT = env.int("METADEPLOY_JOB_TIMEOUT", default=3600)
 
 # Redis configuration:
 
-REDIS_LOCATION = "{0}/{1}".format(env("REDIS_URL", default="redis://localhost:6379"), 0)
+REDIS_LOCATION = "{}/{}".format(env("REDIS_URL", default="redis://localhost:6379"), 0)
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
@@ -432,12 +387,12 @@ CACHES = {
 RQ_QUEUES = {
     "default": {
         "USE_REDIS_CACHE": "default",
-        "DEFAULT_TIMEOUT": env("METADEPLOY_JOB_TIMEOUT", type_=int, default=3600),
+        "DEFAULT_TIMEOUT": METADEPLOY_JOB_TIMEOUT,
         "DEFAULT_RESULT_TTL": 720,
     },
     "short": {
         "USE_REDIS_CACHE": "default",
-        "DEFAULT_TIMEOUT": 10,
+        "DEFAULT_TIMEOUT": 60,
         "DEFAULT_RESULT_TTL": 300,
     },
 }
@@ -448,7 +403,44 @@ CHANNEL_LAYERS = {
         "CONFIG": {"hosts": [REDIS_LOCATION]},
     }
 }
-MAX_QUEUE_LENGTH = env("MAX_QUEUE_LENGTH", default=15, type_=int)
+MAX_QUEUE_LENGTH = env.int("MAX_QUEUE_LENGTH", default=15)
+
+CRON_JOBS = {
+    "cleanup_user_data": {
+        "func": "metadeploy.api.jobs.cleanup_user_data_job",
+        "cron_string": "* * * * *",
+    },
+    "enqueue_jobs": {
+        "func": "metadeploy.api.jobs.enqueuer_job",
+        "cron_string": "* * * * *",
+    },
+    "expire_preflight_results": {
+        "func": "metadeploy.api.jobs.expire_preflights_job",
+        "cron_string": "* * * * *",
+    },
+    "calculate_average_plan_runtimes": {
+        "func": "metadeploy.api.jobs.calculate_average_plan_runtime_job",
+        "cron_string": "0 0 * * *",  # run daily at midnight
+        "queue_name": "default",
+    },
+}
+# There is a default dict of cron jobs,
+# and the cron_string can be optionally overridden
+# using JSON in the CRON_SCHEDULE environment variable.
+# CRON_SCHEDULE is a mapping from a name identifying the job
+# to a cron string specifying the schedule for the job,
+# or null to disable the job.
+cron_overrides = json.loads(env("CRON_SCHEDULE", default="{}"))
+if not isinstance(cron_overrides, dict):
+    raise TypeError("CRON_SCHEDULE must be a JSON object")
+for key, cron_string in cron_overrides.items():
+    if key in CRON_JOBS:
+        if cron_string is None:
+            del CRON_JOBS[key]
+        else:
+            CRON_JOBS[key]["cron_string"] = cron_string
+    else:
+        raise KeyError(key)
 
 # Rest Framework settings:
 REST_FRAMEWORK = {
@@ -462,14 +454,14 @@ REST_FRAMEWORK = {
 }
 
 # Token expiration
-TOKEN_LIFETIME_MINUTES = env("TOKEN_LIFETIME_MINUTES", type_=int, default=10)
-PREFLIGHT_LIFETIME_MINUTES = env("PREFLIGHT_LIFETIME_MINUTES", type_=int, default=10)
+TOKEN_LIFETIME_MINUTES = env.int("TOKEN_LIFETIME_MINUTES", default=10)
+PREFLIGHT_LIFETIME_MINUTES = env.int("PREFLIGHT_LIFETIME_MINUTES", default=10)
 
 # Displaying average job completion time
-MINIMUM_JOBS_FOR_AVERAGE = env("MINIMUM_JOBS_FOR_AVERAGE", type_=int, default=5)
-AVERAGE_JOB_WINDOW = env("AVERAGE_JOB_WINDOW", type_=int, default=20)
+MINIMUM_JOBS_FOR_AVERAGE = env.int("MINIMUM_JOBS_FOR_AVERAGE", default=5)
+AVERAGE_JOB_WINDOW = env.int("AVERAGE_JOB_WINDOW", default=20)
 
-API_PRODUCT_PAGE_SIZE = env("API_PRODUCT_PAGE_SIZE", type_=int, default=25)
+API_PRODUCT_PAGE_SIZE = env.int("API_PRODUCT_PAGE_SIZE", default=25)
 
 LOG_REQUESTS = True
 LOG_REQUEST_ID_HEADER = "HTTP_X_REQUEST_ID"
@@ -478,7 +470,7 @@ REQUEST_ID_RESPONSE_HEADER = "X-Request-ID"
 
 # Settings needed for creating scratch orgs
 DEVHUB_USERNAME = env("DEVHUB_USERNAME", default=None)
-SCRATCH_ORG_DURATION_DAYS = env("SCRATCH_ORG_DURATION_DAYS", type_=int, default=30)
+SCRATCH_ORG_DURATION_DAYS = env.int("SCRATCH_ORG_DURATION_DAYS", default=30)
 
 LOGGING = {
     "version": 1,
@@ -533,11 +525,11 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
-        "rq.worker": {"handlers": ["rq_console"], "level": "DEBUG"},
-        "metadeploy": {"handlers": ["console"], "level": "DEBUG"},
+        "rq.worker": {"handlers": ["rq_console"], "level": "INFO"},
+        "metadeploy": {"handlers": ["console"], "level": "INFO"},
         "metadeploy.logging_middleware": {
             "handlers": ["console"],
-            "level": "DEBUG",
+            "level": "INFO",
             "propagate": False,
         },
     },

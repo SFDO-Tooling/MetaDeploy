@@ -1,11 +1,11 @@
 import Icon from '@salesforce/design-system-react/components/icon';
-import i18n from 'i18next';
-import * as React from 'react';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
-import { ActionBtn, LabelWithSpinner } from '@/components/plans/ctaButton';
-import { Job } from '@/store/jobs/reducer';
-import { CONSTANTS } from '@/store/plans/reducer';
+import { ActionBtn, LabelWithSpinner } from '@/js/components/plans/ctaButton';
+import { Job } from '@/js/store/jobs/reducer';
+import { CONSTANTS } from '@/js/store/plans/reducer';
 
 const { STATUS } = CONSTANTS;
 const btnClasses = 'slds-button slds-button_brand slds-p-vertical_xx-small';
@@ -25,6 +25,8 @@ const CtaButton = ({
   preflightRequired: boolean;
   openModal: () => void;
 }) => {
+  const { t } = useTranslation();
+
   switch (job.status) {
     case STATUS.STARTED:
       return (
@@ -33,8 +35,8 @@ const CtaButton = ({
             <LabelWithSpinner
               label={
                 canceling
-                  ? i18n.t('Canceling Installation…')
-                  : i18n.t('Installation In Progress…')
+                  ? t('Canceling Installation…')
+                  : t('Installation In Progress…')
               }
             />
           }
@@ -43,9 +45,7 @@ const CtaButton = ({
       );
     case STATUS.COMPLETE: {
       if (isScratchOrg) {
-        return (
-          <ActionBtn label={i18n.t('View Scratch Org')} onClick={openModal} />
-        );
+        return <ActionBtn label={t('View Scratch Org')} onClick={openModal} />;
       }
       if (job.instance_url) {
         return (
@@ -62,7 +62,7 @@ const CtaButton = ({
               size="x-small"
               inverse
             />
-            {i18n.t('View Org')}
+            {t('View Org')}
           </a>
         );
       }
@@ -73,8 +73,8 @@ const CtaButton = ({
       return (
         <Link to={linkToPlan} className={btnClasses}>
           {preflightRequired
-            ? i18n.t('Return to Pre-Install Validation')
-            : i18n.t('Return to Plan')}
+            ? t('Return to Pre-Install Validation')
+            : t('Return to Plan')}
         </Link>
       );
     }

@@ -1,18 +1,18 @@
 import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
-import i18n from 'i18next';
-import * as React from 'react';
+import React, { Component } from 'react';
+import { WithTranslation, withTranslation } from 'react-i18next';
 
-import { SelectedSteps } from '@/components/plans/detail';
+import { SelectedSteps } from '@/js/components/plans/detail';
 import InstallDataCell, {
   InstallDataColumnLabel,
-} from '@/components/plans/stepsTable/installDataCell';
-import KindDataCell from '@/components/plans/stepsTable/kindDataCell';
-import NameDataCell from '@/components/plans/stepsTable/nameDataCell';
-import RequiredDataCell from '@/components/plans/stepsTable/requiredDataCell';
-import ToggleLogsDataColumnLabel from '@/components/plans/stepsTable/toggleLogsDataColumnLabel';
-import { Job } from '@/store/jobs/reducer';
-import { CONSTANTS, Plan, Preflight, Step } from '@/store/plans/reducer';
+} from '@/js/components/plans/stepsTable/installDataCell';
+import KindDataCell from '@/js/components/plans/stepsTable/kindDataCell';
+import NameDataCell from '@/js/components/plans/stepsTable/nameDataCell';
+import RequiredDataCell from '@/js/components/plans/stepsTable/requiredDataCell';
+import ToggleLogsDataColumnLabel from '@/js/components/plans/stepsTable/toggleLogsDataColumnLabel';
+import { Job } from '@/js/store/jobs/reducer';
+import { CONSTANTS, Plan, Preflight, Step } from '@/js/store/plans/reducer';
 
 export type DataCellProps = {
   item?: Step;
@@ -27,19 +27,19 @@ export type DataCellProps = {
 type Props = {
   plan: Plan;
   preflight?: Preflight | null | undefined;
+  job?: Job;
   steps: Step[] | null;
   selectedSteps?: SelectedSteps;
   canInstall?: boolean;
-  job?: Job;
   handleStepsChange?: (id: string, checked: boolean) => void;
-};
+} & WithTranslation;
 
 type State = {
   showLogs: boolean;
   expandedPanels: Set<string>;
 };
 
-class StepsTable extends React.Component<Props, State> {
+class StepsTable extends Component<Props, State> {
   state = { showLogs: false, expandedPanels: new Set<string>() };
 
   componentDidUpdate(prevProps: Props) {
@@ -55,8 +55,8 @@ class StepsTable extends React.Component<Props, State> {
       // Remove auto-expand when job status changes
       updates.showLogs = false;
     }
-    const previousActiveJob = this.getActiveStep(prevProps.job);
-    const currentActiveJob = this.getActiveStep(job);
+    const previousActiveJob = StepsTable.getActiveStep(prevProps.job);
+    const currentActiveJob = StepsTable.getActiveStep(job);
     const activeJobChanged = previousActiveJob !== currentActiveJob;
     if (showLogs && activeJobChanged) {
       const newPanels = new Set([...expandedPanels]);
@@ -84,12 +84,12 @@ class StepsTable extends React.Component<Props, State> {
     }
   }
 
-  getActiveStep = (job?: Job): string | null => {
+  static getActiveStep = (job?: Job): string | null => {
     // Get the currently-running step
     let activeJobStepId = null;
-    if (job && this.jobIsRunning(job)) {
+    if (job && StepsTable.jobIsRunning(job)) {
       for (const stepId of job.steps) {
-        if (this.isActiveStep(stepId, job)) {
+        if (StepsTable.isActiveStep(stepId, job)) {
           activeJobStepId = stepId;
           break;
         }
@@ -103,7 +103,7 @@ class StepsTable extends React.Component<Props, State> {
    * (1) There are no results for the step yet
    * (2) There are results but a "status" is not present.
    */
-  isActiveStep = (stepId: string, job: Job) => {
+  static isActiveStep = (stepId: string, job: Job) => {
     if (!job.results[stepId]) {
       return true;
     }
@@ -115,7 +115,7 @@ class StepsTable extends React.Component<Props, State> {
     return false;
   };
 
-  jobIsRunning = (job?: Job): boolean =>
+  static jobIsRunning = (job?: Job): boolean =>
     Boolean(job?.status === CONSTANTS.STATUS.STARTED);
 
   jobHasLogs = (): boolean => {
@@ -127,7 +127,7 @@ class StepsTable extends React.Component<Props, State> {
       return hasLogs;
     }
     for (const stepId of job.steps) {
-      hasLogs = this.stepHasLogs(stepId, job);
+      hasLogs = StepsTable.stepHasLogs(stepId, job);
       if (hasLogs) {
         hasLogs = true;
         break;
@@ -136,7 +136,7 @@ class StepsTable extends React.Component<Props, State> {
     return hasLogs;
   };
 
-  stepHasLogs = (stepId: string, job: Job) => {
+  static stepHasLogs = (stepId: string, job: Job) => {
     if (job.results[stepId]?.[0].logs) {
       return true;
     }
@@ -148,7 +148,7 @@ class StepsTable extends React.Component<Props, State> {
     let { showLogs } = this.state;
     const { job } = this.props;
     const newPanels = new Set([...expandedPanels]);
-    const activeJobStepId = this.getActiveStep(job);
+    const activeJobStepId = StepsTable.getActiveStep(job);
     if (newPanels.has(id)) {
       newPanels.delete(id);
       if (activeJobStepId && activeJobStepId === id) {
@@ -171,11 +171,11 @@ class StepsTable extends React.Component<Props, State> {
     if (hide) {
       // Collapse all step-logs
       this.setState({ showLogs: false, expandedPanels: new Set() });
-    } else if (this.jobIsRunning(job)) {
+    } else if (StepsTable.jobIsRunning(job)) {
       // Expand currently-running step-log
       const { expandedPanels } = this.state;
       const panels = new Set([...expandedPanels]);
-      const activeJobStepId = this.getActiveStep(job);
+      const activeJobStepId = StepsTable.getActiveStep(job);
 
       /* istanbul ignore else */
       if (activeJobStepId) {
@@ -190,6 +190,7 @@ class StepsTable extends React.Component<Props, State> {
 
   render() {
     const {
+      t,
       plan,
       preflight,
       steps,
@@ -199,7 +200,7 @@ class StepsTable extends React.Component<Props, State> {
       handleStepsChange,
     } = this.props;
     const { expandedPanels } = this.state;
-    const activeJobStepId = this.getActiveStep(job);
+    const activeJobStepId = StepsTable.getActiveStep(job);
 
     const hasReadyPreflight = !plan.requires_preflight || preflight?.is_ready;
     const logsExpanded = expandedPanels.size > 0;
@@ -217,7 +218,7 @@ class StepsTable extends React.Component<Props, State> {
                     toggleLogs={this.toggleLogs}
                   />
                 ) : (
-                  i18n.t('Steps')
+                  t('Steps')
                 )
               }
               property="name"
@@ -234,7 +235,7 @@ class StepsTable extends React.Component<Props, State> {
                 expandedPanels={expandedPanels}
               />
             </DataTableColumn>
-            <DataTableColumn key="kind" label={i18n.t('Type')} property="kind">
+            <DataTableColumn key="kind" label={t('Type')} property="kind">
               <KindDataCell activeJobStep={activeJobStepId} />
             </DataTableColumn>
             <DataTableColumn key="is_required" property="is_required">
@@ -247,7 +248,7 @@ class StepsTable extends React.Component<Props, State> {
             {job || (canInstall && hasReadyPreflight) ? (
               <DataTableColumn
                 key="is_recommended"
-                label={job ? i18n.t('Install') : <InstallDataColumnLabel />}
+                label={job ? t('Install') : <InstallDataColumnLabel />}
                 property="is_recommended"
               >
                 <InstallDataCell
@@ -266,4 +267,4 @@ class StepsTable extends React.Component<Props, State> {
   }
 }
 
-export default StepsTable;
+export default withTranslation()(StepsTable);

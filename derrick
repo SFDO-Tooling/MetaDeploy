@@ -48,8 +48,15 @@ case "$1" in
     "test:js")
         dcrq yarn test:js "${@:2}"
         ;;
+    "storybook")
+        docker-compose run --rm --no-deps --service-ports web yarn storybook "${@:2}"
+        ;;
     "add:js")
         dcrq yarn add "${@:2}"
+        ;;
+    "lock:py")
+        dcrq pip-compile --upgrade --output-file=requirements/prod.txt requirements/prod.in
+        dcrq pip-compile --upgrade --output-file=requirements/dev.txt requirements/dev.in
         ;;
     "migrate")
         dcr python manage.py migrate "${@:2}"

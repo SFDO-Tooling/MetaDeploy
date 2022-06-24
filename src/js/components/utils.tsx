@@ -1,15 +1,17 @@
 import Spinner from '@salesforce/design-system-react/components/spinner';
-import * as React from 'react';
+import React, { Component, ComponentType, useEffect, useRef } from 'react';
 import { Redirect } from 'react-router-dom';
 
-import JobNotFound from '@/components/jobs/job404';
-import PlanNotFound from '@/components/plans/plan404';
-import ProductNotFound from '@/components/products/product404';
-import VersionNotFound from '@/components/products/version404';
-import { Job } from '@/store/jobs/reducer';
-import { Plan } from '@/store/plans/reducer';
-import { Product, Version } from '@/store/products/reducer';
-import routes from '@/utils/routes';
+import JobNotFound from '@/js/components/jobs/job404';
+import PlanNotFound from '@/js/components/plans/plan404';
+import ProductNotFound from '@/js/components/products/product404';
+import VersionNotFound from '@/js/components/products/version404';
+import { Job } from '@/js/store/jobs/reducer';
+import { Plan } from '@/js/store/plans/reducer';
+import { Product, Version } from '@/js/store/products/reducer';
+import { LATEST_VERSION } from '@/js/utils/constants';
+import { getVersionLabel } from '@/js/utils/helpers';
+import routes from '@/js/utils/routes';
 
 type TransientMessageState = {
   transientMessageVisible: boolean;
@@ -21,7 +23,7 @@ export type TransientMessageProps = {
 };
 
 export const withTransientMessage = function <Props>(
-  WrappedComponent: React.ComponentType<Props & TransientMessageProps>,
+  WrappedComponent: ComponentType<Props & TransientMessageProps>,
   options?: { duration?: number },
 ) {
   const defaults = {
@@ -30,7 +32,7 @@ export const withTransientMessage = function <Props>(
   const opts = { ...defaults, ...options };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  return class WithTransientMessage extends React.Component<
+  return class WithTransientMessage extends Component<
     Props,
     TransientMessageState
   > {
@@ -165,7 +167,9 @@ export const getLoadingOrNotFound = ({
   // If we have a plan slug but no plan, redirect to that plan detail page
   if (planSlug && versionLabel && plan === undefined) {
     return (
-      <Redirect to={routes.plan_detail(product.slug, versionLabel, planSlug)} />
+      <Redirect
+        to={routes.plan_detail(product.slug, LATEST_VERSION, planSlug)}
+      />
     );
   }
   if (version === null) {
@@ -190,9 +194,11 @@ export const getLoadingOrNotFound = ({
     if (job === null) {
       return (
         <JobNotFound
-          product={product}
-          version={version}
-          plan={plan}
+          url={routes.plan_detail(
+            product.slug,
+            getVersionLabel(product, version),
+            plan.slug,
+          )}
           isLoggedIn={isLoggedIn}
         />
       );
@@ -218,4 +224,20 @@ export const getLoadingOrNotFound = ({
     );
   }
   return false;
+};
+
+// This is often considered an anti-pattern in React, but we consider it
+// acceptable in cases where we don't want to cancel or cleanup an asynchronous
+// action on unmount -- we just want to prevent a post-unmount state update
+// after the action finishes.
+// https://reactjs.org/blog/2015/12/16/ismounted-antipattern.html
+export const useIsMounted = () => {
+  const isMounted = useRef(true);
+  useEffect(
+    () => () => {
+      isMounted.current = false;
+    },
+    [],
+  );
+  return isMounted;
 };

@@ -1,8 +1,8 @@
 import cookies from 'js-cookie';
 import { ThunkDispatch } from 'redux-thunk';
 
-import { addError } from '@/store/errors/actions';
-import { logError } from '@/utils/logging';
+import { addError } from '@/js/store/errors/actions';
+import { logError } from '@/js/utils/logging';
 
 export type UrlParams = {
   [key: string]: string | number | boolean;
@@ -120,7 +120,7 @@ export const removeUrlParam = (key: string, search?: string): string => {
 
 export const extractCustomDomain = (url: string): string => {
   const protocol = /(http(s?)):\/\//;
-  const domain = /\.my\.salesforce\.com(\/?)/;
+  const domain = /(\.sandbox)?\.my\.salesforce\.com(\/?)/;
   return url.replace(protocol, '').replace(domain, '');
 };
 

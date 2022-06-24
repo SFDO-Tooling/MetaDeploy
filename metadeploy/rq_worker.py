@@ -17,7 +17,7 @@ def wrap_job_as_background_task(Job):
 wrap_job_as_background_task(Job)
 
 
-class ConnectionClosingWorkerMixin(object):
+class ConnectionClosingWorkerMixin:
     """Mixin for rq workers to ensure db connections are closed."""
 
     def close_database(self):

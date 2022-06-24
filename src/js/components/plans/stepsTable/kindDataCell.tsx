@@ -1,12 +1,14 @@
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import Icon from '@salesforce/design-system-react/components/icon';
 import classNames from 'classnames';
-import i18n from 'i18next';
-import * as React from 'react';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 
-import { DataCellProps } from '@/components/plans/stepsTable';
+import { DataCellProps } from '@/js/components/plans/stepsTable';
 
 const KindDataCell = (props: DataCellProps) => {
+  const { t } = useTranslation();
+
   /* istanbul ignore if */
   if (!props.item) {
     return null;
@@ -18,7 +20,7 @@ const KindDataCell = (props: DataCellProps) => {
   return (
     <DataTableCell
       {...otherProps}
-      title={i18n.t(value)}
+      title={t(value)}
       className={classNames(className, 'plan-step-item', 'plan-step-type', {
         'is-installing': isActive,
       })}
@@ -29,12 +31,12 @@ const KindDataCell = (props: DataCellProps) => {
           category="utility"
           name={iconName}
           assistiveText={{
-            label: i18n.t(value),
+            label: t(value),
           }}
           size="x-small"
         />
       ) : null}
-      <span>{i18n.t(value)}</span>
+      <span>{t(value)}</span>
     </DataTableCell>
   );
 };

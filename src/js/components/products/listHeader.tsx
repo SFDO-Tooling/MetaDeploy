@@ -1,12 +1,16 @@
 import PageHeader from '@salesforce/design-system-react/components/page-header';
-import i18n from 'i18next';
-import * as React from 'react';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 
-const Header = () => (
-  <PageHeader
-    className="page-header slds-p-around_x-large"
-    title={i18n.t('Select a Product to Install')}
-  />
-);
+const Header = () => {
+  const { t } = useTranslation();
+
+  return (
+    <PageHeader
+      className="page-header slds-p-around_x-large"
+      title={t('Select a Product to Install')}
+    />
+  );
+};
 
 export default Header;

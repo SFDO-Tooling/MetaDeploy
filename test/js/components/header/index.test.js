@@ -2,7 +2,7 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import Header from '@/components/header';
+import Header from '@/js/components/header';
 
 import { renderWithRedux } from './../../utils';
 
@@ -11,18 +11,13 @@ describe('<Header />', () => {
     const defaultState = { user: null, socket: false, org: null, errors: [] };
     const initialState = { ...defaultState, ...state };
     const initialProps = props || {};
-    const {
-      container,
-      getByLabelText,
-      getByText,
-      getByAltText,
-      queryByText,
-    } = renderWithRedux(
-      <MemoryRouter>
-        <Header {...initialProps} />
-      </MemoryRouter>,
-      initialState,
-    );
+    const { container, getByLabelText, getByText, getByAltText, queryByText } =
+      renderWithRedux(
+        <MemoryRouter>
+          <Header {...initialProps} />
+        </MemoryRouter>,
+        initialState,
+      );
     return { container, getByLabelText, getByText, getByAltText, queryByText };
   };
 
@@ -31,6 +26,7 @@ describe('<Header />', () => {
       window.SITE_NAME = 'My Site';
       window.GLOBALS.SITE = {
         company_logo: 'my/logo.png',
+        company_name: 'My Company',
       };
     });
 
@@ -42,7 +38,7 @@ describe('<Header />', () => {
     test('renders logo', () => {
       const { getByAltText } = setup();
 
-      expect(getByAltText('My Site')).toBeVisible();
+      expect(getByAltText('My Company')).toBeVisible();
     });
   });
 

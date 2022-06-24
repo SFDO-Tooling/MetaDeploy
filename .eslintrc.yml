@@ -23,7 +23,8 @@ settings:
             - static
             - node_modules
           alias:
-            '@': js
+            '@/js': js
+            '@/img': images
   react:
     version: 'detect'
 plugins:
@@ -35,7 +36,6 @@ extends:
   - eslint:recommended
   - plugin:import/recommended
   - plugin:import/typescript
-  - prettier/react
   - plugin:prettier/recommended
   - plugin:react/recommended
 rules:
@@ -46,8 +46,6 @@ rules:
   # Prettier
   prettier/prettier:
     - 2
-    - singleQuote: true
-      trailingComma: all
 
   # Import
   import/default: 0
@@ -130,6 +128,7 @@ rules:
   no-shadow: 2
   no-shadow-restricted-names: 2
   no-undef-init: 2
+  no-use-before-define: 2
 
   # Node.js and CommonJS
   global-require: 2

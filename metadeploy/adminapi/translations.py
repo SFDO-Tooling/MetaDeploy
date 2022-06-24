@@ -17,8 +17,6 @@ INSTALL_VERSION_RE = re.compile(r"^Install .*\d$")
 def update_all_translations(lang):
     """Update all objects' translations from the Translation model"""
     for model in TranslatableModel.__subclasses__():
-        if not hasattr(model, "get_translation_strategy"):
-            continue
         for obj in model.objects.all():
             update_translations(obj, [lang])
 

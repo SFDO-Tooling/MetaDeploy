@@ -1,19 +1,19 @@
 import Alert from '@salesforce/design-system-react/components/alert';
 import AlertContainer from '@salesforce/design-system-react/components/alert/container';
-import i18n from 'i18next';
-import * as React from 'react';
+import React, { Component } from 'react';
+import { WithTranslation, withTranslation } from 'react-i18next';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { CurrentJob } from '@/store/org/reducer';
-import { getDuration } from '@/utils/dates';
-import routes from '@/utils/routes';
+import { CurrentJob } from '@/js/store/org/reducer';
+import { getDuration } from '@/js/utils/dates';
+import routes from '@/js/utils/routes';
 
 type Props = {
   currentJob: CurrentJob;
   history?: RouteComponentProps['history'];
-};
+} & WithTranslation;
 
-class CurrentJobAlert extends React.Component<Props> {
+class CurrentJobAlert extends Component<Props> {
   redirectToJob = () => {
     const { currentJob, history } = this.props;
     const { product_slug, version_label, plan_slug, id } = currentJob;
@@ -26,12 +26,12 @@ class CurrentJobAlert extends React.Component<Props> {
   };
 
   render() {
-    const { currentJob } = this.props;
+    const { t, currentJob } = this.props;
     const { plan_average_duration } = currentJob;
     const duration = getDuration(plan_average_duration);
-    let heading = i18n.t('An installation is currently running on this org.');
+    let heading = t('An installation is currently running on this org.');
     if (duration) {
-      heading = `${heading} ${i18n.t('Average install time is {{duration}}.', {
+      heading = `${heading} ${t('Average install time is {{duration}}.', {
         duration,
       })}`;
     }
@@ -40,7 +40,7 @@ class CurrentJobAlert extends React.Component<Props> {
         <Alert
           labels={{
             heading,
-            headingLink: i18n.t('View installation.'),
+            headingLink: t('View installation.'),
           }}
           onClickHeadingLink={this.redirectToJob}
         />
@@ -49,4 +49,4 @@ class CurrentJobAlert extends React.Component<Props> {
   }
 }
 
-export default CurrentJobAlert;
+export default withTranslation()(CurrentJobAlert);

@@ -1,6 +1,6 @@
-import { PlansAction } from '@/store/plans/actions';
-import { LogoutAction } from '@/store/user/actions';
-import { SupportedOrgs } from '@/utils/constants';
+import { PlansAction } from '@/js/store/plans/actions';
+import { LogoutAction } from '@/js/store/user/actions';
+import { SupportedOrgs } from '@/js/utils/constants';
 
 export type Step = {
   id: string;
@@ -29,7 +29,7 @@ export type Plan = {
 };
 
 export type StepResult = {
-  status: 'ok' | 'warn' | 'error' | 'skip' | 'optional' | 'hide';
+  status?: 'ok' | 'warn' | 'error' | 'skip' | 'optional' | 'hide';
   message?: string;
   logs?: string;
 };

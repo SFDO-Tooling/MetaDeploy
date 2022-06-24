@@ -5,8 +5,9 @@ import {
   getLoadingOrNotFound,
   shouldFetchPlan,
   shouldFetchVersion,
-} from '@/components/utils';
-import routes from '@/utils/routes';
+} from '@/js/components/utils';
+import { LATEST_VERSION } from '@/js/utils/constants';
+import routes from '@/js/utils/routes';
 
 import { renderWithRedux } from './../utils';
 
@@ -167,9 +168,9 @@ describe('getLoadingOrNotFound', () => {
         planSlug: 'plan-1',
       });
 
-      expect(context.action).toEqual('REPLACE');
+      expect(context.action).toBe('REPLACE');
       expect(context.url).toEqual(
-        routes.plan_detail('product-1', '1.0.0', 'plan-1'),
+        routes.plan_detail('product-1', LATEST_VERSION, 'plan-1'),
       );
     });
   });
@@ -282,7 +283,7 @@ describe('getLoadingOrNotFound', () => {
         route: 'product_detail',
       });
 
-      expect(context.action).toEqual('REPLACE');
+      expect(context.action).toBe('REPLACE');
       expect(context.url).toEqual(routes.product_detail('product-1'));
     });
   });
@@ -298,7 +299,7 @@ describe('getLoadingOrNotFound', () => {
         route: 'plan_detail',
       });
 
-      expect(context.action).toEqual('REPLACE');
+      expect(context.action).toBe('REPLACE');
       expect(context.url).toEqual(
         routes.plan_detail('product-1', '1.0.0', 'my-plan'),
       );
@@ -316,7 +317,7 @@ describe('getLoadingOrNotFound', () => {
         route: 'plan_detail',
       });
 
-      expect(context.action).toEqual('REPLACE');
+      expect(context.action).toBe('REPLACE');
       expect(context.url).toEqual(
         routes.plan_detail('product-1', '1.0.0', 'my-plan'),
       );

@@ -4,21 +4,21 @@ import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import Radio from '@salesforce/design-system-react/components/radio-group/radio';
-import i18n from 'i18next';
-import * as React from 'react';
+import React, { ChangeEvent, Component } from 'react';
+import { WithTranslation, withTranslation } from 'react-i18next';
 import { Trans } from 'react-i18next';
 
-import JobMessage from '@/components/jobs/jobMessage';
+import JobMessage from '@/js/components/jobs/jobMessage';
 import {
   TransientMessageProps,
   withTransientMessage,
-} from '@/components/utils';
-import { JobUpdated } from '@/store/jobs/actions';
-import { Job } from '@/store/jobs/reducer';
-import { CONSTANTS, Plan } from '@/store/plans/reducer';
-import { ScratchOrg } from '@/store/scratchOrgs/reducer';
-import { addUrlParams } from '@/utils/api';
-import routes from '@/utils/routes';
+} from '@/js/components/utils';
+import { JobUpdated } from '@/js/store/jobs/actions';
+import { Job } from '@/js/store/jobs/reducer';
+import { CONSTANTS, Plan } from '@/js/store/plans/reducer';
+import { ScratchOrg } from '@/js/store/scratchOrgs/reducer';
+import { addUrlParams } from '@/js/utils/api';
+import routes from '@/js/utils/routes';
 
 type Props = {
   isOpen: boolean;
@@ -31,9 +31,9 @@ type Props = {
     readonly id: string;
   }) => Promise<JobUpdated>;
 };
-type WrappedProps = Props & TransientMessageProps;
+type WrappedProps = Props & TransientMessageProps & WithTranslation;
 
-class ShareModal extends React.Component<WrappedProps> {
+class ShareModal extends Component<WrappedProps> {
   input: HTMLInputElement | null | undefined;
 
   handleClose = () => {
@@ -63,7 +63,7 @@ class ShareModal extends React.Component<WrappedProps> {
     }
   };
 
-  handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { job, updateJob } = this.props;
     updateJob({ id: job.id, is_public: event.target.value });
   };
@@ -74,7 +74,7 @@ class ShareModal extends React.Component<WrappedProps> {
   };
 
   getErrorMessage() {
-    const { job, plan } = this.props;
+    const { t, job, plan } = this.props;
     const hasError = job.error_count !== undefined && job.error_count > 0;
     const isFailed = job.status === CONSTANTS.STATUS.FAILED;
     const showError = hasError || isFailed;
@@ -104,7 +104,7 @@ class ShareModal extends React.Component<WrappedProps> {
       return (
         <div>
           <p className="slds-m-bottom_small">
-            {i18n.t('Oh no! This installation encountered an error.')}
+            {t('Oh no! This installation encountered an error.')}
           </p>
           {stepName && stepError ? (
             <p className="slds-m-bottom_small">
@@ -123,7 +123,7 @@ class ShareModal extends React.Component<WrappedProps> {
             />
           ) : (
             <p>
-              {i18n.t(
+              {t(
                 'Don’t panic. If you’re not sure what to do about this error, you can share the link below.',
               )}
             </p>
@@ -135,7 +135,7 @@ class ShareModal extends React.Component<WrappedProps> {
   }
 
   getScratchOrgInfo() {
-    const { job, scratchOrg } = this.props;
+    const { t, job, scratchOrg } = this.props;
     if (scratchOrg && job.status === CONSTANTS.STATUS.COMPLETE) {
       return (
         <div
@@ -144,7 +144,7 @@ class ShareModal extends React.Component<WrappedProps> {
             slds-p-bottom_medium"
         >
           <p className="slds-text-color_success">
-            {i18n.t('Installation completed successfully.')}
+            {t('Installation completed successfully.')}
           </p>
           <JobMessage job={job} />
           {job.user_can_edit && (
@@ -167,18 +167,14 @@ class ShareModal extends React.Component<WrappedProps> {
   }
 
   getFooter() {
-    const { job, scratchOrg } = this.props;
+    const { t, job, scratchOrg } = this.props;
     if (
       scratchOrg &&
       job.status === CONSTANTS.STATUS.COMPLETE &&
       job.user_can_edit
     ) {
       return [
-        <Button
-          key="cancel"
-          label={i18n.t('Cancel')}
-          onClick={this.handleClose}
-        />,
+        <Button key="cancel" label={t('Cancel')} onClick={this.handleClose} />,
         <a
           key="view-org"
           href={window.api_urls.scratch_org_redirect(scratchOrg.id)}
@@ -193,7 +189,7 @@ class ShareModal extends React.Component<WrappedProps> {
             size="x-small"
             inverse
           />
-          {i18n.t('View Scratch Org')}
+          {t('View Scratch Org')}
         </a>,
       ];
     }
@@ -201,7 +197,7 @@ class ShareModal extends React.Component<WrappedProps> {
   }
 
   getShareForm() {
-    const { job, transientMessageVisible, scratchOrg } = this.props;
+    const { t, job, transientMessageVisible, scratchOrg } = this.props;
     const isCompleteOnScratchOrg = Boolean(
       scratchOrg && job.status === CONSTANTS.STATUS.COMPLETE,
     );
@@ -232,7 +228,7 @@ class ShareModal extends React.Component<WrappedProps> {
           readOnly
           fixedTextRight={
             <Button
-              label={i18n.t('Copy Link')}
+              label={t('Copy Link')}
               variant="brand"
               onClick={this.handleCopy}
               style={{ whiteSpace: 'nowrap' }}
@@ -242,7 +238,7 @@ class ShareModal extends React.Component<WrappedProps> {
           onFocus={this.handleFocus}
         >
           <div className="slds-form-element__help slds-text-color_success">
-            {transientMessageVisible ? i18n.t('Copied to clipboard') : ''}
+            {transientMessageVisible ? t('Copied to clipboard') : ''}
             {/* Space added to preserve height even when empty. */}
             &nbsp;
           </div>
@@ -251,14 +247,14 @@ class ShareModal extends React.Component<WrappedProps> {
         {!isCompleteOnScratchOrg && job.user_can_edit && (
           <div className="slds-p-top_small">
             <RadioGroup
-              labels={{ label: i18n.t('Who can access this shared link?') }}
+              labels={{ label: t('Who can access this shared link?') }}
               name="is_public"
               onChange={this.handleChange}
             >
               <Radio
                 id="is_public-false"
                 labels={{
-                  label: i18n.t(
+                  label: t(
                     'Only I and Salesforce staff can view this installation job.',
                   ),
                 }}
@@ -268,7 +264,7 @@ class ShareModal extends React.Component<WrappedProps> {
               <Radio
                 id="is_public-true"
                 labels={{
-                  label: i18n.t(
+                  label: t(
                     'Anyone with the link can view this installation job.',
                   ),
                 }}
@@ -277,7 +273,7 @@ class ShareModal extends React.Component<WrappedProps> {
               />
             </RadioGroup>
             <p className="slds-text-body_small slds-p-top_small">
-              {i18n.t(
+              {t(
                 'Access to view the installation job does not provide access to your Salesforce org.',
               )}
             </p>
@@ -288,14 +284,14 @@ class ShareModal extends React.Component<WrappedProps> {
   }
 
   render() {
-    const { scratchOrg, job } = this.props;
+    const { t, scratchOrg, job } = this.props;
     const isCompleteOnScratchOrg = Boolean(
       scratchOrg && job.status === CONSTANTS.STATUS.COMPLETE,
     );
     const heading =
       isCompleteOnScratchOrg && job.user_can_edit
-        ? i18n.t('Access Your Scratch Org')
-        : i18n.t('Share Link to Installation Job');
+        ? t('Access Your Scratch Org')
+        : t('Share Link to Installation Job');
     const errorMsg = this.getErrorMessage();
     return (
       <Modal
@@ -304,13 +300,14 @@ class ShareModal extends React.Component<WrappedProps> {
         heading={
           errorMsg ? (
             <span className="slds-text-color_error">
-              {i18n.t('Resolve Installation Error')}
+              {t('Resolve Installation Error')}
             </span>
           ) : (
             heading
           )
         }
         footer={this.getFooter()}
+        dismissOnClickOutside={false}
         onRequestClose={this.handleClose}
       >
         <div
@@ -332,6 +329,6 @@ class ShareModal extends React.Component<WrappedProps> {
   }
 }
 
-const WrappedShareModal = withTransientMessage(ShareModal);
+const WrappedShareModal = withTranslation()(withTransientMessage(ShareModal));
 
 export default WrappedShareModal;

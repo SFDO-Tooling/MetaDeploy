@@ -1,10 +1,10 @@
 import { RouteComponentProps } from 'react-router-dom';
 import { createSelector } from 'reselect';
 
-import { AppState } from '@/store';
-import { Job, JobsState } from '@/store/jobs/reducer';
-import { Plan } from '@/store/plans/reducer';
-import { selectPlan } from '@/store/plans/selectors';
+import { AppState } from '@/js/store';
+import { Job, JobsState } from '@/js/store/jobs/reducer';
+import { Plan } from '@/js/store/plans/reducer';
+import { selectPlan } from '@/js/store/plans/selectors';
 
 export const selectJobsState = (appState: AppState): JobsState => appState.jobs;
 

@@ -6,37 +6,40 @@ process.env.BROWSERSLIST_CONFIG = './.browserslistrc';
 
 const path = require('path');
 
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
   context: path.join(__dirname, 'src', 'js'),
   entry: {
-    app: ['whatwg-fetch', './index', 'app.scss'],
     sentry: './sentry',
+    app: ['whatwg-fetch', './index', 'app.scss'],
   },
   resolve: {
     modules: ['src', 'src/sass', 'static', 'node_modules'],
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
     alias: {
-      '@': path.join(__dirname, 'src', 'js'),
+      '@/js': path.join(__dirname, 'src', 'js'),
+      '@/img': path.join(__dirname, 'static', 'images'),
     },
   },
   output: {
     publicPath: '/static/',
   },
   optimization: {
+    minimizer: ['...', new CssMinimizerPlugin()],
     runtimeChunk: 'single',
     splitChunks: {
       cacheGroups: {
-        vendor: {
+        defaultVendors: {
           name: 'vendors',
           test: /[\\/]node_modules[\\/](?!@sentry)/,
           chunks: 'all',
         },
         styles: {
           name: 'styles',
-          test: /\.css$/,
+          type: 'css/mini-extract',
           chunks: 'all',
           enforce: true,
         },
@@ -45,6 +48,11 @@ module.exports = {
   },
   module: {
     rules: [
+      // Use `?raw` query on imports to bypass loaders and import raw file
+      {
+        resourceQuery: /raw/,
+        type: 'asset/source',
+      },
       {
         test: /\.(j|t)sx?$/,
         include: [
@@ -73,7 +81,7 @@ module.exports = {
           {
             loader: 'css-loader',
             options: {
-              url: (url) => !url.startsWith('/'),
+              url: { filter: (url) => !url.startsWith('/') },
               sourceMap: true,
               importLoaders: 2,
             },
@@ -89,29 +97,26 @@ module.exports = {
         ],
       },
       {
-        test: /\.(svg|gif|jpe?g|png)$/,
-        use: [
-          {
-            loader: 'url-loader',
-            options: { limit: 10000 },
-          },
-        ],
+        test: /\.(gif|jpe?g|png)$/,
+        type: 'asset',
       },
       {
         test: /\.(eot|woff|woff2|ttf)$/,
-        use: [
-          {
-            loader: 'url-loader',
-            options: { limit: 30 },
-          },
-        ],
+        type: 'asset',
+      },
+      {
+        test: /\.svg$/i,
+        resourceQuery: { not: [/raw/] },
+        type: 'asset/resource',
       },
     ],
   },
   plugins: [
     new HtmlWebpackPlugin({
-      inject: false,
       template: path.join(__dirname, 'src', 'index.html'),
     }),
   ],
+  performance: {
+    hints: false,
+  },
 };

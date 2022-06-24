@@ -1,7 +1,7 @@
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
-import StepsTable from '@/components/plans/stepsTable';
+import StepsTable from '@/js/components/plans/stepsTable';
 
 import { render, rerenderWithI18n } from './../../utils';
 
@@ -98,7 +98,7 @@ describe('<StepsTable />', () => {
         let activeLog = container.querySelector('[aria-hidden="false"] code');
 
         // Active log is expanded
-        expect(activeLog.innerHTML).toEqual('Test log 1');
+        expect(activeLog.innerHTML).toBe('Test log 1');
 
         job = {
           ...job,
@@ -120,7 +120,7 @@ describe('<StepsTable />', () => {
         activeLog = container.querySelector('[aria-hidden="false"] code');
 
         // Newly-active log is expanded
-        expect(activeLog.innerHTML).toEqual('Test log 1 and more');
+        expect(activeLog.innerHTML).toBe('Test log 1 and more');
 
         job = {
           ...job,
@@ -143,7 +143,7 @@ describe('<StepsTable />', () => {
         activeLog = container.querySelector('[aria-hidden="false"] code');
 
         // Newly-active log is expanded
-        expect(activeLog.innerHTML).toEqual('Test log 2');
+        expect(activeLog.innerHTML).toBe('Test log 2');
       });
     });
 
@@ -173,7 +173,7 @@ describe('<StepsTable />', () => {
         log = container.querySelector('[aria-hidden="false"] code');
 
         // Final log is expanded
-        expect(log.innerHTML).toEqual('Test log 3');
+        expect(log.innerHTML).toBe('Test log 3');
 
         const changedJob = {
           ...job,
@@ -310,7 +310,7 @@ describe('<StepsTable />', () => {
         fireEvent.click(getByText('Step 1'));
         const log = container.querySelector('[aria-hidden="false"] code');
 
-        expect(log.innerHTML).toEqual('Test log 1');
+        expect(log.innerHTML).toBe('Test log 1');
       });
     });
 
@@ -337,7 +337,7 @@ describe('<StepsTable />', () => {
       log = container.querySelector('[aria-hidden="false"] code');
 
       // Clicked log is expanded
-      expect(log.innerHTML).toEqual('Test log 1');
+      expect(log.innerHTML).toBe('Test log 1');
 
       fireEvent.click(getByText('Step 1'));
       log = container.querySelector('[aria-hidden="false"] code');
@@ -365,7 +365,7 @@ describe('<StepsTable />', () => {
       let activeLog = container.querySelector('[aria-hidden="false"] code');
 
       // Active log is expanded
-      expect(activeLog.innerHTML).toEqual('Test log 2');
+      expect(activeLog.innerHTML).toBe('Test log 2');
 
       fireEvent.click(getByText('Step 2'));
       activeLog = container.querySelector('[aria-hidden="false"] code');

@@ -1,6 +1,7 @@
 from collections import namedtuple
 from importlib import import_module
 
+from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.apps import apps
 from django.conf import settings
@@ -76,19 +77,21 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
             await self.send_json(event["content"])
             return
         if "serializer" in event and "instance" in event and "inner_type" in event:
-            instance = self.get_instance(**event["instance"])
-            with translation.override(self.lang):
-                serializer = self.get_serializer(event["serializer"])
-                payload = serializer(
-                    instance=instance,
-                    context=user_context(self.scope["user"], self.scope["session"]),
-                ).data
-                message = {
-                    "payload": payload,
-                    "type": event["inner_type"],
-                }
+            message = await self.serialize_instance_as_message(event)
             await self.send_json(message)
             return
+
+    @sync_to_async
+    def serialize_instance_as_message(self, event):
+        instance = self.get_instance(**event["instance"])
+        with translation.override(self.lang):
+            SerializerClass = self.get_serializer(event["serializer"])
+            context = user_context(self.scope["user"], self.scope["session"])
+            data = SerializerClass(instance=instance, context=context).data
+            return {
+                "payload": data,
+                "type": event["inner_type"],
+            }
 
     def get_instance(self, *, model, id):
         Model = apps.get_model("api", model)
@@ -110,9 +113,9 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         scratch_org_id = self.scope["session"].get("scratch_org_id", None)
         if uuid and uuid != scratch_org_id:
             self.scope["session"]["scratch_org_id"] = uuid
-            self.scope["session"].save()
+            await sync_to_async(self.scope["session"].save)()
 
-        has_good_permissions = self.has_good_permissions(content)
+        has_good_permissions = await self.has_good_permissions(content)
         all_good = is_valid and is_known_model and has_good_permissions
         if not all_good:
             await self.send_json({"error": _("Invalid subscription.")})
@@ -140,6 +143,7 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
     def is_known_model(self, model):
         return model in KNOWN_MODELS
 
+    @sync_to_async
     def has_good_permissions(self, content):
         if content["model"] == "org":
             return self.handle_org_special_case(content)

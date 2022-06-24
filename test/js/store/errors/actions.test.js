@@ -1,12 +1,12 @@
-import * as actions from '@/store/errors/actions';
+import * as actions from '@/js/store/errors/actions';
 
 describe('addError', () => {
   test('returns AddErrorAction', () => {
     const actual = actions.addError('error message');
 
-    expect(actual.type).toEqual('ERROR_ADDED');
-    expect(typeof actual.payload.id).toEqual('string');
-    expect(actual.payload.message).toEqual('error message');
+    expect(actual.type).toBe('ERROR_ADDED');
+    expect(typeof actual.payload.id).toBe('string');
+    expect(actual.payload.message).toBe('error message');
   });
 });
 
