@@ -111,7 +111,10 @@ class UserView(generics.RetrieveAPIView):
 
 class ObtainTokenView(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
-        """Identical to DRF's implementation, but querying our own model instead"""
+        """
+        Allow users to specify their credentials in exchange for an auth token. Tokens
+        are unique per site.
+        """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data["user"]
