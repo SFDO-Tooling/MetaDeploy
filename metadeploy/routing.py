@@ -1,10 +1,16 @@
 from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
-from channels.sessions import SessionMiddlewareStack
 from django.core.asgi import get_asgi_application
 from django.urls import path
 
+from metadeploy.multitenancy.middleware import ChannelsCurrentSiteMiddleware
+
 from .consumers import PushNotificationConsumer
+
+
+def metadeploy_stack(inner):
+    return ChannelsCurrentSiteMiddleware(AuthMiddlewareStack(inner))
+
 
 websockets = URLRouter(
     [
@@ -20,6 +26,6 @@ websockets = URLRouter(
 application = ProtocolTypeRouter(
     {
         "http": get_asgi_application(),
-        "websocket": SessionMiddlewareStack(AuthMiddlewareStack(websockets)),
+        "websocket": metadeploy_stack(websockets),
     }
 )
