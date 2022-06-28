@@ -47,17 +47,26 @@ class IdOnlyField(serializers.Field):
         return self.model.objects.get(pk=data)
 
 
+def result_has_status(result: dict, status_name: str) -> bool:
+    has_status = False
+    try:
+        if result["status"] == status_name:
+            has_status = True
+    except (KeyError, TypeError):
+        # KeyError is thrown for results of cancelled jobs in certain states
+        pass
+    return has_status
+
+
 class ErrorWarningCountMixin:
     @staticmethod
     def _count_status_in_results(results, status_name):
         count = 0
         for results_list in results.values():
             for result in results_list:
-                try:
-                    if result["status"] == status_name:
-                        count += 1
-                except TypeError:
-                    pass
+                has_status = result_has_status(result, status_name)
+                if has_status:
+                    count += 1
         return count
 
     def get_error_count(self, obj):
