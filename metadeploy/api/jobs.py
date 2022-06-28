@@ -118,7 +118,7 @@ def finalize_result(result: Union[Job, PreflightResult]):
         log_msg = f"{result.__class__.__name__} {result.id} errored"
         result.exception = "".join(traceback.format_tb(e.__traceback__))
         result.exception += "\n" + f"{e.__class__.__name__}: {e}"
-        if hasattr(e, "response"):
+        if getattr(e, "response", None) is not None:
             result.exception += "\n" + e.response.text
         raise
     finally:
