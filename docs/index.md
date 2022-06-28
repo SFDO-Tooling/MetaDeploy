@@ -6,6 +6,7 @@
 
 tutorial
 troubleshooting
+admin
 api/index
 ```
 
