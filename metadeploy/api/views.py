@@ -140,8 +140,12 @@ class JobViewSet(
 
         return Job.objects.filter(filters)
 
-    def perform_destroy(self, instance):
-        cache.set(REDIS_JOB_CANCEL_KEY.format(id=instance.id), True)
+    def perform_destroy(self, job: Job):
+        """Overrides DestroyModelMixin.perform_destroy.
+        The record *is not* deleted from the database.
+        This cache value is checked for before each task in a flow executes.
+        When set to True, it halts the current flows execution."""
+        cache.set(REDIS_JOB_CANCEL_KEY.format(id=job.id), True)
 
 
 class ProductCategoryViewSet(viewsets.ReadOnlyModelViewSet):
