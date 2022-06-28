@@ -48,7 +48,7 @@ class IdOnlyField(serializers.Field):
 
 
 def result_has_status(result: dict, status_name: str) -> bool:
-    has_status = False
+    has_status: bool = False
     try:
         if result["status"] == status_name:
             has_status = True
