@@ -5,12 +5,15 @@ from asgiref.sync import async_to_sync
 from django.conf import settings
 from django.utils import timezone
 
+from metadeploy.multitenancy import disable_site_filtering
+
 from .models import Job, PreflightResult, User
 from .push import user_token_expired
 
 
+@disable_site_filtering()
 def cleanup_user_data():
-    """Remove old records with PII and other sensitive data."""
+    """Remove old records with PII and other sensitive data across all sites"""
     # fix status of dead jobs that got left as started
     fix_dead_jobs_status()
 

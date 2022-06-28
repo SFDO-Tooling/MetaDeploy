@@ -31,6 +31,8 @@ from django_rq import job as django_rq_job
 from rq.exceptions import ShutDownImminentException
 from rq.worker import StopRequested
 
+from metadeploy.multitenancy import disable_site_filtering, override_current_site_id
+
 from .cci_configs import MetaDeployCCI, extract_user_and_repo
 from .cleanup import cleanup_user_data
 from .flows import StopFlowException
@@ -199,16 +201,19 @@ def run_flows(
             appropriate.
         result_id (int): the PK of the result instance to get.
     """
-    result = result_class.objects.get(pk=result_id)
-    scratch_org = None
-    if not result.user:
-        # This means we're in a ScratchOrg.
-        scratch_org = ScratchOrg.objects.get(org_id=result.org_id)
-
-    repo_url = plan.version.product.repo_url
-    commit_ish = plan.commit_ish or plan.version.commit_ish
-
     with contextlib.ExitStack() as stack:
+        # Scope all DB operations to the Plan's site
+        stack.enter_context(override_current_site_id(plan.site_id))
+
+        result = result_class.objects.get(pk=result_id)
+        scratch_org = None
+        if not result.user:
+            # This means we're in a ScratchOrg.
+            scratch_org = ScratchOrg.objects.get(org_id=result.org_id)
+
+        repo_url = plan.version.product.repo_url
+        commit_ish = plan.commit_ish or plan.version.commit_ish
+
         stack.enter_context(finalize_result(result))
         if result.user:
             stack.enter_context(report_errors_to(result.user))
@@ -281,6 +286,7 @@ def run_flows(
 run_flows_job = job(run_flows)
 
 
+@disable_site_filtering()
 def enqueuer():
     logger.debug("Enqueuer live")
     for j in Job.objects.filter(enqueued_at=None):
@@ -306,7 +312,10 @@ expire_user_tokens_job = cleanup_user_data_job = job(cleanup_user_data)
 def preflight(preflight_result_id):
     # Because the FieldTracker interferes with transparently serializing models across
     # the Redis boundary, we have to pass a primitive value to this function,
-    preflight_result = PreflightResult.objects.get(pk=preflight_result_id)
+
+    # Disable site filtering because the ID could come from any Site
+    with disable_site_filtering():
+        preflight_result = PreflightResult.objects.get(pk=preflight_result_id)
     run_flows(
         plan=preflight_result.plan,
         skip_steps=[],
@@ -318,6 +327,7 @@ def preflight(preflight_result_id):
 preflight_job = job(preflight)
 
 
+@disable_site_filtering()
 def expire_preflights():
     now = timezone.now()
     preflight_lifetime_ago = now - timedelta(
@@ -347,36 +357,39 @@ def create_scratch_org(org_pk):
     """
     org, plan = setup_scratch_org(org_pk)
 
-    if plan.requires_preflight:
-        preflight_result = run_preflight_checks_sync(org)
-        async_to_sync(preflight_started)(org, preflight_result)
+    with override_current_site_id(plan.site_id):
+        if plan.requires_preflight:
+            preflight_result = run_preflight_checks_sync(org)
+            async_to_sync(preflight_started)(org, preflight_result)
 
-    if plan.required_step_ids.count() == plan.steps.count():
-        # Start installation job automatically if both:
-        # - Plan has no preflight
-        # - All plan steps are required
-        job = run_plan_steps(org, release_test=False)
-        # This is already called on `save()`, but the new Job isn't in the
-        # database yet because it's in an atomic transaction.
-        job.push_to_org_subscribers(is_new=True, changed={})
-        async_to_sync(job_started)(org, job)
+        if plan.required_step_ids.count() == plan.steps.count():
+            # Start installation job automatically if both:
+            # - Plan has no preflight
+            # - All plan steps are required
+            job = run_plan_steps(org, release_test=False)
+            # This is already called on `save()`, but the new Job isn't in the
+            # database yet because it's in an atomic transaction.
+            job.push_to_org_subscribers(is_new=True, changed={})
+            async_to_sync(job_started)(org, job)
 
 
 create_scratch_org_job = job(create_scratch_org)
 
 
 def delete_scratch_org(scratch_org, should_delete_locally=True):
-    try:
-        scratch_org.refresh_from_db()
-        delete_scratch_org_on_sf(scratch_org)
-    finally:
-        if should_delete_locally:
-            scratch_org.delete(should_delete_on_sf=False, should_notify=False)
+    with override_current_site_id(scratch_org.plan.site_id):
+        try:
+            scratch_org.refresh_from_db()
+            delete_scratch_org_on_sf(scratch_org)
+        finally:
+            if should_delete_locally:
+                scratch_org.delete(should_delete_on_sf=False, should_notify=False)
 
 
 delete_scratch_org_job = job(delete_scratch_org)
 
 
+@disable_site_filtering()
 def calculate_average_plan_runtime():
     """Plan.average_duration is a slow query, so we
     get its value for each plan via this method and store its value
@@ -430,40 +443,44 @@ def setup_scratch_org(org_pk: str):
     checkout the source at the given commit from the associated plan
     and create a scratch org from Salesforce with code from the given
     commit."""
-    org = ScratchOrg.objects.get(pk=org_pk)
-    plan = org.plan
-    email = org.email
-    org.email = None
-    org.save()
-    repo_url = plan.version.product.repo_url
-    repo_owner, repo_name = extract_user_and_repo(repo_url)
-    commit_ish = plan.commit_ish
+    # Disable site filtering because `org_pk` could come from any Site
+    with disable_site_filtering():
+        org = ScratchOrg.objects.get(pk=org_pk)
+        plan = org.plan
 
-    if settings.METADEPLOY_FAST_FORWARD:  # pragma: no cover
-        fake_org_id = str(uuid.uuid4())[:18]
-        scratch_org_config = OrgConfig({"org_id": fake_org_id}, "scratch")
-    else:
-        try:
-            with local_github_checkout(
-                repo_owner, repo_name, commit_ish=commit_ish
-            ) as repo_root:
-                scratch_org_config, _, org_config = create_scratch_org_on_sf(
-                    repo_owner=repo_owner,
-                    repo_name=repo_name,
-                    repo_url=repo_url,
-                    repo_branch=commit_ish,
-                    email=email,
-                    project_path=repo_root,
-                    scratch_org=org,
-                    org_name=plan.org_config_name,
-                    duration=plan.scratch_org_duration,
-                )
-        except Exception as e:
-            org.fail(e)
-            raise
+    with override_current_site_id(plan.site_id):
+        email = org.email
+        org.email = None
+        org.save()
+        repo_url = plan.version.product.repo_url
+        repo_owner, repo_name = extract_user_and_repo(repo_url)
+        commit_ish = plan.commit_ish
 
-    # this stores some values on the scratch
-    # org model in the db
-    org.complete(scratch_org_config)
+        if settings.METADEPLOY_FAST_FORWARD:  # pragma: no cover
+            fake_org_id = str(uuid.uuid4())[:18]
+            scratch_org_config = OrgConfig({"org_id": fake_org_id}, "scratch")
+        else:
+            try:
+                with local_github_checkout(
+                    repo_owner, repo_name, commit_ish=commit_ish
+                ) as repo_root:
+                    scratch_org_config, _, org_config = create_scratch_org_on_sf(
+                        repo_owner=repo_owner,
+                        repo_name=repo_name,
+                        repo_url=repo_url,
+                        repo_branch=commit_ish,
+                        email=email,
+                        project_path=repo_root,
+                        scratch_org=org,
+                        org_name=plan.org_config_name,
+                        duration=plan.scratch_org_duration,
+                    )
+            except Exception as e:
+                org.fail(e)
+                raise
 
-    return org, plan
+        # this stores some values on the scratch
+        # org model in the db
+        org.complete(scratch_org_config)
+
+        return org, plan

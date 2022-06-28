@@ -578,6 +578,10 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
     )
 
     @property
+    def site_id(self):
+        return self.plan_template.product.category.site_id
+
+    @property
     def preflight_message_additional_markdown(self):
         return self._get_translated_model(
             use_fallback=True
