@@ -302,15 +302,12 @@ class TranslationFactory(factory.django.DjangoModelFactory):
     slug = factory.Sequence("translation-{}".format)
 
 
-@pytest.fixture
 def adjust_site_domain():
     """
     Adjust the default Site instance to match the test Client host. Required by
     CurrentSiteMiddleware to detect the default Site as expected.
     """
-    site = Site.objects.get()
-    site.domain = "testserver"
-    site.save()
+    Site.objects.filter(domain="example.com").update(domain="testserver")
 
 
 @pytest.fixture
@@ -323,7 +320,8 @@ def extra_site(settings, site_factory):
 
 
 @pytest.fixture
-def client(user_factory, adjust_site_domain):
+def client(user_factory):
+    adjust_site_domain()
     user = user_factory()
     client = APIClient()
     client.force_login(user)
@@ -332,7 +330,8 @@ def client(user_factory, adjust_site_domain):
 
 
 @pytest.fixture
-def admin_api_client(user_factory, adjust_site_domain):
+def admin_api_client(user_factory):
+    adjust_site_domain()
     user = user_factory(is_superuser=True)
     client = APIClient()
     client.force_login(user)
@@ -341,7 +340,8 @@ def admin_api_client(user_factory, adjust_site_domain):
 
 
 @pytest.fixture
-def anon_client(adjust_site_domain):
+def anon_client():
+    adjust_site_domain()
     return APIClient()
 
 

@@ -1,5 +1,4 @@
 from collections import namedtuple
-from contextlib import ExitStack
 from importlib import import_module
 
 from asgiref.sync import sync_to_async

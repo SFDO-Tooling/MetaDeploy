@@ -51,16 +51,18 @@ async def get_communicator(db):
     """
     communicator = None
 
-    async def _inner(session=None, user=None):
-        site = await database_sync_to_async(Site.objects.first)()
-        assert site is not None
+    async def _inner(path, *, session=None, user=None, host=None):
+        if host is None:
+            site = await database_sync_to_async(Site.objects.first)()
+            assert site is not None
+            host = site.domain
 
         # Tuples are required by spec
         # See https://github.com/django/asgiref/blob/main/specs/www.rst#http-connection-scope
-        headers = [(b"host", bytes(site.domain, encoding="utf-8"))]
+        headers = [(b"host", bytes(host, encoding="utf-8"))]
 
         nonlocal communicator
-        communicator = WebsocketCommunicator(application, "/ws/notifications/", headers)
+        communicator = WebsocketCommunicator(application, path, headers)
 
         communicator.scope["session"] = session or Session()
         if user is not None:
@@ -97,6 +99,50 @@ def generate_model(model_factory, **kwargs):
 
 
 @pytest.mark.django_db
+async def test_push_notification_consumer__multi_tenancy(
+    scratch_org_factory, site_factory, get_communicator
+):
+    uuid = str(uuid4())
+    scratch_org = await generate_model(
+        scratch_org_factory,
+        uuid=uuid,
+        enqueued_at=timezone.now(),
+    )
+    extra_site = await generate_model(site_factory, domain="extra.com")
+    scratch_org.plan.plan_template.product.category.site_id = extra_site.id
+    await database_sync_to_async(scratch_org.plan.plan_template.product.category.save)()
+
+    communicator = await get_communicator(
+        "/ws/notifications/", session=Session(scratch_org_id=uuid)
+    )
+    await communicator.send_json_to({"model": "scratchorg", "id": scratch_org.id})
+    response = await communicator.receive_json_from()
+    assert (
+        "Invalid subscription" in response["error"]
+    ), "Subscription should be invalid when trying to subscribe to an org in `extra_site` from the default site"
+
+    communicator = await get_communicator(
+        "/ws/notifications/", session=Session(scratch_org_id=uuid), host="unknown.com"
+    )
+    await communicator.send_json_to({"model": "scratchorg", "id": scratch_org.id})
+    response = await communicator.receive_json_from()
+    assert (
+        "Invalid subscription" in response["error"]
+    ), "Subscription should be invalid when trying to subscribe to an org in `extra_site` from an unknown site"
+
+    communicator = await get_communicator(
+        "/ws/notifications/",
+        session=Session(scratch_org_id=uuid),
+        host=extra_site.domain,
+    )
+    await communicator.send_json_to({"model": "scratchorg", "id": scratch_org.id})
+    response = await communicator.receive_json_from()
+    assert (
+        "ok" in response
+    ), "Subscription should be valid when trying to subscribe to an org in `extra_site` from the extra site"
+
+
+@pytest.mark.django_db
 async def test_push_notification_consumer__subscribe_scratch_org(
     scratch_org_factory, get_communicator
 ):
@@ -104,7 +150,9 @@ async def test_push_notification_consumer__subscribe_scratch_org(
     scratch_org = await generate_model(
         scratch_org_factory, uuid=uuid, enqueued_at=timezone.now()
     )
-    communicator = await get_communicator(session=Session(scratch_org_id=uuid))
+    communicator = await get_communicator(
+        "/ws/notifications/", session=Session(scratch_org_id=uuid)
+    )
 
     scratch_org_id = str(scratch_org.id)
     await communicator.send_json_to({"model": "scratchorg", "id": scratch_org_id})
@@ -122,7 +170,7 @@ async def test_push_notification_consumer__subscribe_scratch_org_staff(
 ):
     user = await generate_model(user_factory, is_staff=True)
     scratch_org = await generate_model(scratch_org_factory, enqueued_at=timezone.now())
-    communicator = await get_communicator(user=user)
+    communicator = await get_communicator("/ws/notifications/", user=user)
 
     await communicator.send_json_to({"model": "scratchorg", "id": str(scratch_org.id)})
     response = await communicator.receive_json_from()
@@ -145,7 +193,9 @@ async def test_push_notification_consumer__scratch_org_job_started(
     job = await generate_model(
         job_factory, user=None, status=Job.Status.complete, org_id=org_id
     )
-    communicator = await get_communicator(session=Session(scratch_org_id=uuid))
+    communicator = await get_communicator(
+        "/ws/notifications/", session=Session(scratch_org_id=uuid)
+    )
 
     await communicator.send_json_to({"model": "scratchorg", "id": str(scratch_org.id)})
     response = await communicator.receive_json_from()
@@ -161,7 +211,7 @@ async def test_push_notification_consumer__user_token_invalid(
     user_factory, get_communicator
 ):
     user = await generate_model(user_factory)
-    communicator = await get_communicator(user=user)
+    communicator = await get_communicator("/ws/notifications/", user=user)
 
     await communicator.send_json_to({"model": "user", "id": str(user.id)})
     response = await communicator.receive_json_from()
@@ -191,7 +241,7 @@ async def test_push_notification_consumer__subscribe_preflight(
         plan=plan,
         org_id=org_id,
     )
-    communicator = await get_communicator(user=user)
+    communicator = await get_communicator("/ws/notifications/", user=user)
 
     await communicator.send_json_to(
         {"model": "preflightresult", "id": str(preflight.id)}
@@ -231,7 +281,9 @@ async def test_push_notification_consumer__subscribe_preflight_scratch_org(
         plan=plan,
         org_id=org_id,
     )
-    communicator = await get_communicator(session=Session(scratch_org_id=uuid))
+    communicator = await get_communicator(
+        "/ws/notifications/", session=Session(scratch_org_id=uuid)
+    )
 
     await communicator.send_json_to(
         {"model": "preflightresult", "id": str(preflight.id)}
@@ -249,7 +301,7 @@ async def test_push_notification_consumer__subscribe_job(
     job = await generate_model(
         job_factory, user=user, status=Job.Status.complete, org_id=org_id
     )
-    communicator = await get_communicator(user=user)
+    communicator = await get_communicator("/ws/notifications/", user=user)
 
     await communicator.send_json_to({"model": "job", "id": str(job.id)})
     response = await communicator.receive_json_from()
@@ -273,7 +325,7 @@ async def test_push_notification_consumer__subscribe_job__bad(
     job = await generate_model(
         job_factory, status=Job.Status.complete, org_id="00Dxxxxxxxxxxxxxxx"
     )
-    communicator = await get_communicator(user=user)
+    communicator = await get_communicator("/ws/notifications/", user=user)
 
     await communicator.send_json_to({"model": "job", "id": str(job.id)})
     response = await communicator.receive_json_from()
@@ -288,7 +340,7 @@ async def test_push_notification_consumer__subscribe_job__missing(
     user_factory, get_communicator
 ):
     user = await generate_model(user_factory)
-    communicator = await get_communicator(user=user)
+    communicator = await get_communicator("/ws/notifications/", user=user)
 
     await communicator.send_json_to({"model": "job", "id": "missingjob"})
     response = await communicator.receive_json_from()
@@ -323,7 +375,7 @@ async def test_push_notification_consumer__subscribe_org(
         plan=plan,
         org_id=org_id,
     )
-    communicator = await get_communicator(user=user)
+    communicator = await get_communicator("/ws/notifications/", user=user)
 
     await communicator.send_json_to({"model": "org", "id": org_id})
     response = await communicator.receive_json_from()
@@ -380,7 +432,7 @@ async def test_push_notification_consumer__anon_subscribe_org(
         org_id=org_id,
     )
 
-    communicator = await get_communicator()
+    communicator = await get_communicator("/ws/notifications/")
 
     await communicator.send_json_to({"model": "org", "id": org_id, "uuid": uuid})
     response = await communicator.receive_json_from()
@@ -407,7 +459,7 @@ async def test_push_notification_consumer__subscribe_org_bad(
     user_factory, get_communicator
 ):
     user = await generate_model(user_factory)
-    communicator = await get_communicator(user=user)
+    communicator = await get_communicator("/ws/notifications/", user=user)
 
     await communicator.send_json_to({"model": "org", "id": "missingorg"})
     response = await communicator.receive_json_from()

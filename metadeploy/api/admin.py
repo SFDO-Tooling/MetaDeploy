@@ -321,7 +321,8 @@ class SiteProfileInlineAdmin(MetadeployTranslatableInlineAdmin):
     min_num = 1
     max_num = 1
 
-    def has_delete_permission(self, *args, **kwargs):
+    def has_delete_permission(self, *args, **kwargs):  # pragma: nocover
+        """Disable deleting profile inlines, we always want one per Site"""
         return False
 
 
