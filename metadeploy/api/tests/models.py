@@ -723,18 +723,20 @@ class TestJob:
         assert job.click_through_agreement.text == "Test"
 
     def test_job_saves_master_service_agreement(
-        self, plan_factory, job_factory, site_profile_factory
+        self, plan_factory, job_factory, site_profile_factory, extra_site
     ):
-        plan = plan_factory(version__product__click_through_agreement="Test")
-        _ = site_profile_factory()
-        job = job_factory(plan=plan, org_id="00Dxxxxxxxxxxxxxxx", user=None)
+        site_profile_factory()  # Default profile on the default Site
+        site_profile_factory(site=extra_site, master_agreement="Extra Site MSA")
+        with override_current_site_id(extra_site.id):
+            plan = plan_factory(version__product__click_through_agreement="Test")
+            job = job_factory(plan=plan, org_id="00Dxxxxxxxxxxxxxxx", user=None)
 
         assert job.is_scratch
 
         job.refresh_from_db()
 
         assert job.master_service_agreement
-        assert job.master_service_agreement.text == "MSA"
+        assert job.master_service_agreement.text == "Extra Site MSA"
 
     def test_skip_steps(self, plan_factory, step_factory, job_factory):
         plan = plan_factory()

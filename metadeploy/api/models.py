@@ -34,6 +34,8 @@ from sfdo_template_helpers.crypto import fernet_decrypt
 from sfdo_template_helpers.fields import MarkdownField as BaseMarkdownField
 from sfdo_template_helpers.slugs import AbstractSlug, SlugMixin
 
+from metadeploy.multitenancy import current_site_id
+
 from ..multitenancy.models import CurrentSiteManager, SiteRelated
 from .belvedere_utils import convert_to_18
 from .constants import ERROR, HIDE, OPTIONAL, ORGANIZATION_DETAILS, SKIP
@@ -886,7 +888,7 @@ class Job(HashIdMixin, SiteRelated):
             # If this is a scratch org job and we have an MSA configured,
             # persist that too.
             if self.is_scratch:
-                profile = SiteProfile.objects.first()
+                profile = SiteProfile.objects.filter(site_id=current_site_id()).first()
                 if profile and profile.master_agreement:
                     msa, _ = ClickThroughAgreement.objects.get_or_create(
                         text=profile.master_agreement
