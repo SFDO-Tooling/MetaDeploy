@@ -221,5 +221,5 @@ class TranslationViewSet(viewsets.ViewSet):
                 record.text = message["message"]
                 record.save()
 
-        update_all_translations.delay(lang)
+        update_all_translations.delay(lang, request.site_id)
         return Response({})
