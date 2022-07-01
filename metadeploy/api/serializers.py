@@ -721,7 +721,7 @@ class SiteSerializer(serializers.ModelSerializer):
             "welcome_text",
             "master_agreement",
             "copyright_notice",
-            # "show_plan_tags",
+            "show_product_tags",
             "show_metadeploy_wordmark",
             "company_logo",
             "favicon",
