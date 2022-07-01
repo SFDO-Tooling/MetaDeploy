@@ -79,6 +79,7 @@ class TestProductViewSet:
                     "slds_icon_name": "",
                     "slug": "sample-product-0",
                     "title": "Sample Product 0",
+                    "tags": [],
                     "url": f"{url}/products/{product.id}",
                     "visible_to": None,
                     "layout": "Default",

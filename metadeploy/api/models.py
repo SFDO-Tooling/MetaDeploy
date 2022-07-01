@@ -326,6 +326,7 @@ class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel)
 
     translations = TranslatedFields(
         title=models.CharField(max_length=256),
+        tags=models.JSONField(default=list),
         short_description=models.TextField(blank=True),
         description=MarkdownField(),
         click_through_agreement=MarkdownField(),
@@ -1214,6 +1215,7 @@ class SiteProfile(TranslatableModel):
         copyright_notice=MarkdownField(),
     )
 
+    # show_product_tags = models.BooleanField(default=True)
     show_metadeploy_wordmark = models.BooleanField(default=True)
     company_logo = models.ImageField(blank=True)
     favicon = models.ImageField(blank=True)
