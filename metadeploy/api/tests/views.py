@@ -415,6 +415,27 @@ class TestBasicGetViews:
 
 
 @pytest.mark.django_db
+def test_product_search(anon_client, version_factory):
+    url = reverse("product-list")
+    # Create Versions because Products need at least one Version to show up
+    version_factory(product__title="My custom title")
+    version_factory(product__tags=["custom tag", "another tag"])
+
+    response = anon_client.get(url, {"search": "CUSTOM TITLE"})
+    assert response.data["count"] == 1
+    assert (
+        response.data["results"][0]["title"] == "My custom title"
+    ), "Expected Products to be searchable by `title`"
+
+    response = anon_client.get(url, {"search": "CUSTOM TAG"})
+    assert response.data["count"] == 1
+    assert response.data["results"][0]["tags"] == [
+        "custom tag",
+        "another tag",
+    ], "Expected Products to be searchable by `tags`"
+
+
+@pytest.mark.django_db
 class TestPreflight:
     def test_post__anon(self, anon_client, plan_factory, scratch_org_factory):
         uuid = str(uuid4())

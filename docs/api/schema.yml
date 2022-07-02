@@ -434,6 +434,11 @@ paths:
         schema:
           type: integer
       - in: query
+        name: search
+        schema:
+          type: string
+        description: Search
+      - in: query
         name: slug
         schema:
           type: string
