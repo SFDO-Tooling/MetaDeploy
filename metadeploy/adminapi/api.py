@@ -34,7 +34,9 @@ class ExcludeSiteSerializer(AdminAPISerializer):
 
 class ProductSerializer(AdminAPISerializer):
     title = serializers.CharField()
-    tags = serializers.ListField(child=serializers.CharField(), allow_empty=True)
+    tags = serializers.ListField(
+        child=serializers.CharField(), allow_empty=True, required=False
+    )
     short_description = serializers.CharField()
     description = serializers.CharField()
     click_through_agreement = serializers.CharField()

@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="producttranslation",
             name="tags",
-            field=models.JSONField(default=list),
+            field=models.JSONField(default=list, help_text="JSON array of strings"),
         ),
         migrations.AddField(
             model_name="siteprofile",
