@@ -277,7 +277,7 @@ class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel)
 
     translations = TranslatedFields(
         title=models.CharField(max_length=256),
-        tags=models.JSONField(default=list),
+        tags=models.JSONField(default=list, help_text=_("JSON array of strings")),
         short_description=models.TextField(blank=True),
         description=MarkdownField(),
         click_through_agreement=MarkdownField(),
