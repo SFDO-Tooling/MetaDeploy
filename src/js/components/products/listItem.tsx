@@ -1,3 +1,4 @@
+import { Pill } from '@salesforce/design-system-react';
 import Card from '@salesforce/design-system-react/components/card';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -32,6 +33,14 @@ const ProductItem = ({ item }: { item: Product }) => {
         >
           <div className="slds-text-title">
             {t('Version {{version}}', { version: label })}
+            {item.tags
+              ? item.tags.map((tag) => (
+                  <Pill
+                    variant="option"
+                    labels={{ label: tag, removeTitle: null }}
+                  />
+                ))
+              : ''}
           </div>
           {item.short_description ? (
             <div className="slds-p-top_x-small">{item.short_description}</div>

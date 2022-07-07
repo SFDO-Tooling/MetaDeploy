@@ -41,6 +41,7 @@ export type Product = {
   not_allowed_instructions: string | null;
   click_through_agreement: string;
   layout: ProductLayouts;
+  tags: string[];
 };
 export type Category = {
   id: number;
