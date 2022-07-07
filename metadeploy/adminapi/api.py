@@ -1,7 +1,8 @@
 from django.conf import settings
+from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from django_filters import rest_framework as filters
-from rest_framework import serializers, status, viewsets
+from rest_framework import generics, serializers, status, viewsets
 from rest_framework.response import Response
 from sfdo_template_helpers.admin.permissions import IsAPIUser
 from sfdo_template_helpers.admin.serializers import AdminAPISerializer
@@ -186,6 +187,27 @@ class AllowedListOrgSerializer(AdminAPISerializer):
 class AllowedListOrgViewSet(AdminAPIViewSet):
     model_name = "AllowedListOrg"
     serializer_base = AllowedListOrgSerializer
+
+
+class SiteProfileSerializer(serializers.ModelSerializer):
+    # django-parler fields need to be declared explicitly
+    name = serializers.CharField()
+    company_name = serializers.CharField()
+    welcome_text = serializers.CharField()
+    master_agreement = serializers.CharField()
+    copyright_notice = serializers.CharField()
+
+    class Meta:
+        model = models.SiteProfile
+        exclude = ("id", "site")
+
+
+class SiteProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class = SiteProfileSerializer
+
+    def get_object(self):
+        """Admin API users should only be able to edit the current SiteProfile"""
+        return get_object_or_404(models.SiteProfile, site_id=self.request.site_id)
 
 
 class TranslationViewSet(viewsets.ViewSet):

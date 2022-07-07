@@ -477,3 +477,10 @@ class TestAllowedListOrgViewSet:
         response = admin_api_client.get(url)
         assert response.status_code == 200
         assert len(response.json()["data"]) == 1
+
+
+@pytest.mark.django_db
+class TestSiteProfileView:
+    def test_multi_tenancy(self, site_profile_factory, assert_admin_api_multi_tenancy):
+        site_profile_factory()
+        assert_admin_api_multi_tenancy(reverse("admin_rest:siteprofile"))
