@@ -27,6 +27,7 @@ def _permissions(client):
             codename=f"view_{model_name}",
         )
         user = client.user
+
         response = client.get(url)
         assert (
             response.status_code == 403
@@ -550,3 +551,74 @@ class TestSiteProfileView:
     def test_permissions(self, site_profile_factory, assert_permissions):
         profile = site_profile_factory()
         assert_permissions(profile.__class__, url=reverse("admin_rest:siteprofile"))
+
+
+@pytest.mark.django_db
+class TestTranslationViewSet:
+    def test_ok(self, mocker, admin_api_client, plan_factory, step_factory):
+        plan = plan_factory(version__product__title="Example")
+        step_factory(name="Foo", plan=plan)
+        step_factory(name="Install Example 1.0", plan=plan)
+        update_job = mocker.patch(
+            "metadeploy.adminapi.api.update_all_translations", autospec=True
+        )
+
+        response = admin_api_client.patch(
+            reverse("admin_rest:translation-detail", args=["es"]),
+            {
+                "example:product": {"title": {"message": "Ejemplo"}},
+                "example:steps": {
+                    "Install {product} {version}": {
+                        "message": "Instalar {product} {version}"
+                    },
+                    "Foo": {"message": "Fú"},
+                },
+            },
+            format="json",
+        )
+
+        assert response.status_code == 200
+        update_job.delay.assert_called_once_with("es", 1)
+
+    def test_invalid_lang(self, admin_api_client):
+        response = admin_api_client.patch(
+            reverse("admin_rest:translation-detail", args=["es-bogus"]), {}
+        )
+        assert response.status_code == 404
+
+    def test_multi_tenancy(self, mocker, admin_api_client, extra_site):
+        update_job = mocker.patch(
+            "metadeploy.adminapi.api.update_all_translations", autospec=True
+        )
+        admin_api_client.patch(
+            reverse("admin_rest:translation-detail", args=["es"]),
+            {},
+            SERVER_NAME=extra_site.domain,
+        )
+        update_job.delay.assert_called_once_with("es", extra_site.id)
+
+    def test_permissions(self, client):
+        url = reverse("admin_rest:translation-detail", args=["es"])
+        perm = Permission.objects.get(
+            content_type=ContentType.objects.get_for_model(models.Translation),
+            codename=f"change_{models.Translation._meta.model_name}",
+        )
+        user = client.user
+
+        response = client.patch(url, data={})
+        assert (
+            response.status_code == 403
+        ), f"Expected to get 403 when PATCHing {url} as a non-staff user"
+
+        user.is_staff = True
+        user.save()
+        response = client.patch(url, data={})
+        assert (
+            response.status_code == 403
+        ), f"Expected to get 403 when PATCHing {url} as a staff user with no permissions"
+
+        user.user_permissions.add(perm)
+        response = client.patch(url, data={})
+        assert (
+            response.status_code == 200
+        ), f"Expected to get 200 when PATCHing {url} as a staff user with permission '{perm}'"
