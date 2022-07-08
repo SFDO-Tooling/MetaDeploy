@@ -33,9 +33,10 @@ const ProductItem = ({ item }: { item: Product }) => {
         >
           <div className="slds-text-title">
             {t('Version {{version}}', { version: label })}
-            {item.tags
+            {item.tags && window.GLOBALS.SITE.show_product_tags
               ? item.tags.map((tag) => (
                   <Pill
+                    key={item.id}
                     variant="option"
                     labels={{ label: tag, removeTitle: null }}
                   />
