@@ -332,7 +332,7 @@ def client(user_factory):
 @pytest.fixture
 def admin_api_client(user_factory):
     adjust_site_domain()
-    user = user_factory(is_superuser=True)
+    user = user_factory(is_staff=True, is_superuser=True)
     client = APIClient()
     client.force_login(user)
     client.user = user

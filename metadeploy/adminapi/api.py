@@ -2,16 +2,29 @@ from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from django_filters import rest_framework as filters
-from rest_framework import generics, serializers, status, viewsets
+from rest_framework import generics, permissions, serializers, status, viewsets
 from rest_framework.response import Response
-from sfdo_template_helpers.admin.permissions import IsAPIUser
 from sfdo_template_helpers.admin.serializers import AdminAPISerializer
-from sfdo_template_helpers.admin.views import AdminAPIViewSet
+from sfdo_template_helpers.admin.views import AdminAPIViewSet as BaseAdminAPIViewSet
 
 from metadeploy.adminapi.translations import update_all_translations
 from metadeploy.api import models
 from metadeploy.api.models import SUPPORTED_ORG_TYPES, Plan
 from metadeploy.api.serializers import get_from_data_or_instance
+
+
+class StrictDjangoModelPermissions(permissions.DjangoModelPermissions):
+    """
+    Extends `DjangoModelPermissions` to enforce the "view" permission as well
+    """
+
+    perms_map = permissions.DjangoModelPermissions.perms_map | {
+        "GET": ["%(app_label)s.view_%(model_name)s"],
+    }
+
+
+class AdminAPIViewSet(BaseAdminAPIViewSet):
+    permission_classes = [permissions.IsAdminUser, StrictDjangoModelPermissions]
 
 
 class ExcludeSiteSerializer(AdminAPISerializer):
@@ -204,6 +217,8 @@ class SiteProfileSerializer(serializers.ModelSerializer):
 
 class SiteProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = SiteProfileSerializer
+    permission_classes = AdminAPIViewSet.permission_classes
+    queryset = models.SiteProfile.objects  # Required by `permission_classes`
 
     def get_object(self):
         """Admin API users should only be able to edit the current SiteProfile"""
@@ -225,8 +240,9 @@ class TranslationViewSet(viewsets.ViewSet):
     }
     """
 
-    permission_classes = [IsAPIUser]
     model_name = "Translation"
+    permission_classes = AdminAPIViewSet.permission_classes
+    queryset = models.Translation.objects  # Required by `permission_classes`
 
     def partial_update(self, request, pk=None):
         # Add or update a Translation record for each message
