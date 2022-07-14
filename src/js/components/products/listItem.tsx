@@ -1,5 +1,5 @@
-import { Pill } from '@salesforce/design-system-react';
 import Card from '@salesforce/design-system-react/components/card';
+import Pill from '@salesforce/design-system-react/components/pill';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -31,20 +31,25 @@ const ProductItem = ({ item }: { item: Product }) => {
           icon={<ProductIcon item={item} />}
           bodyClassName="slds-card__body_inner"
         >
-          <div className="slds-text-title">
-            {t('Version {{version}}', { version: label })}
-            {item.tags && window.GLOBALS.SITE.show_product_tags
-              ? item.tags.map((tag) => (
+          <div>
+            <span className="slds-text-title slds-m-right_xx-small">
+              {t('Version {{version}}', { version: label })}
+            </span>
+            {window.GLOBALS.SITE?.show_product_tags &&
+              item.tags.map((tag, idx) => (
+                <span key={idx}>
                   <Pill
-                    key={item.id}
+                    className="slds-p-around_xx-small
+                      slds-m-vertical_xx-small
+                      slds-m-right_xx-small"
                     variant="option"
-                    labels={{ label: tag, removeTitle: null }}
+                    labels={{ label: tag }}
                   />
-                ))
-              : ''}
+                </span>
+              ))}
           </div>
           {item.short_description ? (
-            <div className="slds-p-top_x-small">{item.short_description}</div>
+            <div className="slds-p-top_xx-small">{item.short_description}</div>
           ) : (
             item.description && (
               <div
