@@ -4,6 +4,6 @@
 // Remove Hover State for Unlinked Pills
 .slds-pill {
   &:hover {
-    --slds-c-pill-color-background: var(--slds-c-pill-color-background, #fff);
+    --slds-c-pill-color-background: var(--slds-c-pill-color-background, white);
   }
 }
