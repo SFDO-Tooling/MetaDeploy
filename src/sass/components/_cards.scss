@@ -1,0 +1,14 @@
+// Product Cards
+// =============
+
+.md-product-meta {
+  row-gap: $spacing-xx-small;
+}
+
+// make version numbers font sizing match pills so card info lines up
+// whether products have tags or not
+.md-product-meta-title {
+  border: 1px solid transparent;
+  font-size: $font-size-3;
+  line-height: 1.5;
+}
