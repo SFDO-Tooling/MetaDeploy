@@ -230,7 +230,7 @@ commands, open an
 [integrated terminal](https://code.visualstudio.com/docs/editor/integrated-terminal)
 in VS Code (`Ctrl-`\`) and use any of the development commands (this terminal
 runs inside the Docker container and can run all the commands that can be run in
-RUNNING.RST and CONTRIBUTING.RST):
+RUNNING.MD and CONTRIBUTING.MD):
 
     $ python manage.py migrate  # run database migrations
     $ yarn serve  # start the development server/watcher
@@ -248,3 +248,43 @@ app at <http://localhost:8080/> in your browser.
 
 For more detailed instructions and options, see the
 [VS Code documentation](https://code.visualstudio.com/docs/remote/containers).
+
+## Troubleshooting
+If you encounter errors with starting the Postgres database service, sometimes it can help to remove the databse, rebuild the container, and restart the service with the following commands:
+
+**Note** - this will delete any local data such as products or users that exist in the database.
+
+1. Stop any existing containers with `docker compose down` or with selecting "Reopen Folder Locally" from VS Code.
+2. Open a [integrated terminal](https://code.visualstudio.com/docs/editor/integrated-terminal)
+in VS Code (`Ctrl-`\`).
+3. Remove the `postgres` database folder that was creating
+```bash
+rm -rf postgres
+```
+4. Rebuild the containers - this will take a few minutes.
+```bash
+docker compose build
+```
+5. Start the containers, either with "Reopen in Container" in VS Code or `docker compose up`.
+6. To confirm the Postgres database is up and running correctly, in a new terminal in the container, run the database migration command below:
+```
+python manage.py migrate
+```
+If successful, the output should from the command should resemble this:
+```bash
+root@f795226068a4:/app# python manage.py migrate
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying api.0001_initial... OK
+  ....
+```
