@@ -230,7 +230,7 @@ commands, open an
 [integrated terminal](https://code.visualstudio.com/docs/editor/integrated-terminal)
 in VS Code (`Ctrl-`\`) and use any of the development commands (this terminal
 runs inside the Docker container and can run all the commands that can be run in
-RUNNING.RST and CONTRIBUTING.RST):
+RUNNING.MD and CONTRIBUTING.MD):
 
     $ python manage.py migrate  # run database migrations
     $ yarn serve  # start the development server/watcher
@@ -248,3 +248,36 @@ app at <http://localhost:8080/> in your browser.
 
 For more detailed instructions and options, see the
 [VS Code documentation](https://code.visualstudio.com/docs/remote/containers).
+
+## Troubleshooting
+
+If you encounter errors starting the Postgres database service, sometimes
+it can help to restart the containers:
+
+```bash
+docker compose down
+docker compose up
+```
+
+If that doesn't resolve the issue, try removing the database, rebuilding the
+container, and restarting the service with the following commands:
+
+**Note** - this will delete any local data such as products or users that exist
+in the database.
+
+1. Stop any existing containers with `docker compose down` or with selecting
+   "Reopen Folder Locally" from VS Code.
+2. Remove the `postgres` database folder that was created:
+
+```bash
+rm -rf postgres
+```
+
+3. Rebuild the containers - this will take a few minutes.
+
+```bash
+docker compose build
+```
+
+4. Start the containers, either with "Reopen in Container" in VS Code or `docker
+   compose up`.
