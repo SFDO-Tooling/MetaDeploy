@@ -405,6 +405,7 @@ class Command(BaseCommand):
         )
         product1 = self.create_product(
             title="Product With Useful Data",
+            tags=["Demo Product"],
             repo_url="https://github.com/SFDO-Tooling/CumulusCI-Test",
             category=sf_category,
             order_key=0,
@@ -477,6 +478,7 @@ class Command(BaseCommand):
 
         product2 = self.create_product(
             title="Red Salesforce Product",
+            tags=["Salesforce", "Demo Product"],
             description="This product should have a red icon.",
             category=sf_category,
             color="#c23934",
@@ -495,6 +497,7 @@ class Command(BaseCommand):
 
         product3 = self.create_product(
             title="Custom Icon Salesforce Product",
+            tags=["Salesforce", "Demo Product"],
             description="This product should have a custom icon.",
             category=sf_category,
             icon_url=("https://lightningdesignsystem.com/assets/images" "/avatar3.jpg"),

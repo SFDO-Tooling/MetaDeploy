@@ -679,7 +679,7 @@ class TestProductCategorySerializer:
         request = rf.get("")
         request.query_params = {}
         request.user = user_factory()
-        product1 = product_factory(is_listed=True, order_key=1)
+        product1 = product_factory(is_listed=True, order_key=1, tags=["a", "b", "c"])
         version1 = version_factory(product=product1)
         category = product1.category
         product2 = product_factory(category=category, is_listed=True, order_key=0)
@@ -695,6 +695,7 @@ class TestProductCategorySerializer:
             {
                 "id": str(product2.id),
                 "title": product2.title,
+                "tags": [],
                 "description": "<p>This is a sample product.</p>",
                 "short_description": "",
                 "click_through_agreement": "",
@@ -723,6 +724,7 @@ class TestProductCategorySerializer:
             {
                 "id": str(product1.id),
                 "title": product1.title,
+                "tags": ["a", "b", "c"],
                 "description": "<p>This is a sample product.</p>",
                 "short_description": "",
                 "click_through_agreement": "",

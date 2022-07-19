@@ -1071,6 +1071,10 @@ components:
           readOnly: true
         title:
           type: string
+        tags:
+          type: array
+          items:
+            type: string
         description:
           type: string
         short_description:
@@ -1131,6 +1135,7 @@ components:
       - old_slugs
       - short_description
       - slug
+      - tags
       - title
     ProductCategory:
       type: object

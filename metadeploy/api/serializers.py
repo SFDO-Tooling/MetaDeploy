@@ -364,6 +364,7 @@ class ProductSerializer(CircumspectSerializerMixin, HashIdModelSerializer):
         source="click_through_agreement_markdown"
     )
     title = serializers.CharField()
+    tags = StringListField()
     short_description = serializers.CharField()
     not_allowed_instructions = serializers.SerializerMethodField()
     is_listed = serializers.SerializerMethodField()
@@ -373,6 +374,7 @@ class ProductSerializer(CircumspectSerializerMixin, HashIdModelSerializer):
         fields = (
             "id",
             "title",
+            "tags",
             "description",
             "short_description",
             "click_through_agreement",
@@ -719,6 +721,7 @@ class SiteSerializer(serializers.ModelSerializer):
             "welcome_text",
             "master_agreement",
             "copyright_notice",
+            "show_product_tags",
             "show_metadeploy_wordmark",
             "company_logo",
             "favicon",
