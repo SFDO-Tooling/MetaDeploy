@@ -2,7 +2,7 @@
 // =====
 
 // Remove Hover State for Unlinked Pills
-.slds-pill {
+.md-pill-plain {
   &:hover {
     --slds-c-pill-color-background: var(--slds-c-pill-color-background, white);
   }
