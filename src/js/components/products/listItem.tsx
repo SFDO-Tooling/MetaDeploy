@@ -31,8 +31,8 @@ const ProductItem = ({ item }: { item: Product }) => {
           icon={<ProductIcon item={item} />}
           bodyClassName="slds-card__body_inner"
         >
-          <div className="md-product-meta slds-grid slds-wrap slds-grid_vertical-align-center">
-            <span className="slds-text-title slds-m-right_small slds-p-vertical_xx-small md-product-meta-title">
+          <div>
+            <span className="slds-text-title slds-m-right_small">
               {t('Version {{version}}', { version: label })}
             </span>
             {window.GLOBALS.SITE?.show_product_tags &&
@@ -41,6 +41,7 @@ const ProductItem = ({ item }: { item: Product }) => {
                   <Pill
                     className="slds-p-around_xx-small
                       slds-m-right_small
+                      slds-m-vertical_xxx-small
                       md-pill-plain"
                     variant="option"
                     labels={{ label: tag }}
