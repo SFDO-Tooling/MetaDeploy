@@ -263,9 +263,8 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
 
         kwargs = None
         if scratch_org:
-            config = scratch_org.config
             kwargs = {
-                "org_id": config["org_id"],
+                "org_id": scratch_org.org_id,
             }
 
         if request.user.is_authenticated:
