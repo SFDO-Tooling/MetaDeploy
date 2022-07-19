@@ -16,6 +16,7 @@ export type Version = {
   };
   is_listed: boolean;
 };
+
 export type Product = {
   id: string;
   slug: string;
@@ -41,7 +42,9 @@ export type Product = {
   not_allowed_instructions: string | null;
   click_through_agreement: string;
   layout: ProductLayouts;
+  tags: string[];
 };
+
 export type Category = {
   id: number;
   title: string;
@@ -49,6 +52,7 @@ export type Category = {
   is_listed: boolean;
   next: string | null;
 };
+
 export interface ApiCategory extends Omit<Category, 'next'> {
   first_page: {
     count: number;
@@ -57,6 +61,7 @@ export interface ApiCategory extends Omit<Category, 'next'> {
     results: Product[];
   };
 }
+
 export type ProductsState = {
   products: Product[];
   notFound: string[];

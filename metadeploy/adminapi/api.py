@@ -15,6 +15,9 @@ from metadeploy.api.serializers import get_from_data_or_instance
 
 class ProductSerializer(AdminAPISerializer):
     title = serializers.CharField()
+    tags = serializers.ListField(
+        child=serializers.CharField(), allow_empty=True, required=False
+    )
     short_description = serializers.CharField()
     description = serializers.CharField()
     click_through_agreement = serializers.CharField()
