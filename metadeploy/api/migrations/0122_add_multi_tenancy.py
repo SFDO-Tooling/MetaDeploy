@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("sites", "0002_alter_domain_unique"),
-        ("api", "0120_auto_20220527_1507"),
+        ("api", "0121_add_product_tags"),
     ]
 
     operations = [
