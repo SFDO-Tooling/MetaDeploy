@@ -6,6 +6,7 @@ from django.contrib.sites.models import Site
 from django.core.management.base import BaseCommand
 from django.utils.text import slugify
 
+from ....multitenancy import current_site_id
 from ...models import (
     AllowedList,
     Plan,
@@ -14,6 +15,7 @@ from ...models import (
     Product,
     ProductCategory,
     ProductSlug,
+    SiteProfile,
     Step,
     Version,
 )
@@ -409,6 +411,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.adjust_site_domain()
+        SiteProfile.objects.get_or_create(
+            site_id=current_site_id(), defaults={"name": "Example"}
+        )
 
         sf_category = ProductCategory.objects.create(
             title="Salesforce.org Products",
