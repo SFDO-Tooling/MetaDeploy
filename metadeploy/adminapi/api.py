@@ -1,16 +1,35 @@
 from django.conf import settings
+from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from django_filters import rest_framework as filters
-from rest_framework import serializers, status, viewsets
+from rest_framework import generics, permissions, serializers, status, viewsets
 from rest_framework.response import Response
-from sfdo_template_helpers.admin.permissions import IsAPIUser
 from sfdo_template_helpers.admin.serializers import AdminAPISerializer
-from sfdo_template_helpers.admin.views import AdminAPIViewSet
+from sfdo_template_helpers.admin.views import AdminAPIViewSet as BaseAdminAPIViewSet
 
 from metadeploy.adminapi.translations import update_all_translations
 from metadeploy.api import models
 from metadeploy.api.models import SUPPORTED_ORG_TYPES, Plan
 from metadeploy.api.serializers import get_from_data_or_instance
+
+
+class StrictDjangoModelPermissions(permissions.DjangoModelPermissions):
+    """
+    Extends `DjangoModelPermissions` to enforce the "view" permission as well
+    """
+
+    perms_map = permissions.DjangoModelPermissions.perms_map | {
+        "GET": ["%(app_label)s.view_%(model_name)s"],
+    }
+
+
+class AdminAPIViewSet(BaseAdminAPIViewSet):
+    permission_classes = [permissions.IsAdminUser, StrictDjangoModelPermissions]
+
+
+class ExcludeSiteSerializer(AdminAPISerializer):
+    class Meta:
+        exclude = ("site",)
 
 
 class ProductSerializer(AdminAPISerializer):
@@ -165,10 +184,16 @@ class VersionViewSet(AdminAPIViewSet):
 
 class ProductCategoryViewSet(AdminAPIViewSet):
     model_name = "ProductCategory"
+    serializer_base = ExcludeSiteSerializer
 
 
 class AllowedListViewSet(AdminAPIViewSet):
     model_name = "AllowedList"
+    serializer_base = ExcludeSiteSerializer
+
+    # `AdminAPIViewSet` includes all fields by default, but `org_id` causes an exception
+    # because its an `ArrayField`, so we exclude it for now
+    filterset_fields = ("title", "description", "list_for_allowed_by_orgs")
 
 
 class AllowedListOrgSerializer(AdminAPISerializer):
@@ -178,6 +203,29 @@ class AllowedListOrgSerializer(AdminAPISerializer):
 class AllowedListOrgViewSet(AdminAPIViewSet):
     model_name = "AllowedListOrg"
     serializer_base = AllowedListOrgSerializer
+
+
+class SiteProfileSerializer(serializers.ModelSerializer):
+    # django-parler fields need to be declared explicitly
+    name = serializers.CharField()
+    company_name = serializers.CharField()
+    welcome_text = serializers.CharField()
+    master_agreement = serializers.CharField()
+    copyright_notice = serializers.CharField()
+
+    class Meta:
+        model = models.SiteProfile
+        exclude = ("id", "site")
+
+
+class SiteProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class = SiteProfileSerializer
+    permission_classes = AdminAPIViewSet.permission_classes
+    queryset = models.SiteProfile.objects  # Required by `permission_classes`
+
+    def get_object(self):
+        """Admin API users should only be able to edit the current SiteProfile"""
+        return get_object_or_404(models.SiteProfile, site_id=self.request.site_id)
 
 
 class TranslationViewSet(viewsets.ViewSet):
@@ -195,8 +243,9 @@ class TranslationViewSet(viewsets.ViewSet):
     }
     """
 
-    permission_classes = [IsAPIUser]
     model_name = "Translation"
+    permission_classes = AdminAPIViewSet.permission_classes
+    queryset = models.Translation.objects  # Required by `permission_classes`
 
     def partial_update(self, request, pk=None):
         # Add or update a Translation record for each message
@@ -213,5 +262,5 @@ class TranslationViewSet(viewsets.ViewSet):
                 record.text = message["message"]
                 record.save()
 
-        update_all_translations.delay(lang)
+        update_all_translations.delay(lang, request.site_id)
         return Response({})

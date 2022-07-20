@@ -1,0 +1,13 @@
+<form action="{% url 'set_site' %}">
+  <input type="hidden" name="next" value="{{ request.path }}">
+  <select name="site_id" onchange="this.form.submit()">
+    {% for site in sites %}
+      <option
+        value="{{ site.id }}"
+        {% if request.site_id == site.id %}selected{% endif %}
+      >
+        {{ site.name|default:site.domain }}
+      </option>
+    {% endfor %}
+  </select>
+</form>

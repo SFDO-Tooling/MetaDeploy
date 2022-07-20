@@ -10,8 +10,9 @@ from django.core.management import call_command
 from django.urls import reverse
 
 from metadeploy.conftest import format_timestamp
+from metadeploy.multitenancy import override_current_site_id
 
-from ..models import SUPPORTED_ORG_TYPES, Job, Plan, PreflightResult, ScratchOrg
+from ..models import SUPPORTED_ORG_TYPES, Job, Plan, PreflightResult, ScratchOrg, Token
 
 
 def test_openapi_schema(tmp_path):
@@ -28,21 +29,76 @@ def test_openapi_schema(tmp_path):
 
 
 @pytest.mark.django_db
-def test_user_view(client):
-    response = client.get(reverse("user"))
+def test_token_auth_multi_tenancy(anon_client, user_factory, extra_site):
+    user = user_factory()
+    url = reverse("user")
+    token1 = Token.objects.create(user=user)
+    with override_current_site_id(extra_site.id):
+        token2 = Token.objects.create(user=user)
 
-    assert response.status_code == 200
-    assert response.json()["username"].endswith("@example.com")
+    response = anon_client.get(url, HTTP_AUTHORIZATION=f"Token {token1}")
+    assert response.status_code == 200, "Token 1 should work on the default site"
+    response = anon_client.get(url, HTTP_AUTHORIZATION=f"Token {token2}")
+    assert response.status_code == 401, "Token 2 should not work on the default site"
+
+    response = anon_client.get(
+        url, SERVER_NAME=extra_site.domain, HTTP_AUTHORIZATION=f"Token {token2}"
+    )
+    assert response.status_code == 200, "Token 2 should work on the extra site"
+    response = anon_client.get(
+        url, SERVER_NAME=extra_site.domain, HTTP_AUTHORIZATION=f"Token {token1}"
+    )
+    assert response.status_code == 401, "Token 1 should not work on the extra site"
 
 
 @pytest.mark.django_db
-class TestJobViewset:
+class TestUserView:
+    def test_ok(self, client):
+        response = client.get(reverse("user"))
+
+        assert response.status_code == 200
+        assert response.json()["username"].endswith("@example.com")
+
+    def test_multi_tenancy(self, client, extra_site):
+        response = client.get(reverse("user"), SERVER_NAME=extra_site.domain)
+
+        assert (
+            response.status_code == 200
+        ), "Users should be able to authenticate on all Sites using sessions"
+
+
+@pytest.mark.django_db
+class TestObtainTokenView:
+    def test_multi_tenancy(self, anon_client, user_factory, extra_site):
+        url = reverse("token")
+        user = user_factory()
+        data = {"username": user.username, "password": "foobar"}
+        token1 = Token.objects.create(user=user)
+        with override_current_site_id(extra_site.id):
+            token2 = Token.objects.create(user=user)
+
+        response = anon_client.post(url, data=data)
+        assert response.data.get("token") == token1.key
+
+        response = anon_client.post(url, data=data, SERVER_NAME=extra_site.domain)
+        assert response.data.get("token") == token2.key
+
+
+@pytest.mark.django_db
+class TestJobViewSet:
     def test_job__cannot_see(self, client, job_factory):
         job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
         response = client.get(reverse("job-detail", kwargs={"pk": job.id}))
 
         assert response.status_code == 404
         assert response.json() == {"detail": "Not found."}
+
+    def test_job__multi_tenancy(self, job_factory, assert_multi_tenancy):
+        assert_multi_tenancy.client.user.is_staff = True
+        assert_multi_tenancy.client.user.save()
+        job = job_factory(org_id="00Dxxxxxxxxxxxxxxx")
+
+        assert_multi_tenancy(reverse("job-detail", args=[job.id]))
 
     def test_job__is_staff(self, client, user_factory, job_factory):
         staff_user = user_factory(is_staff=True)
@@ -261,10 +317,16 @@ class TestJobViewset:
 
 
 @pytest.mark.django_db
-class TestBasicGetViews:
-    def test_product(
-        self, client, allowed_list_factory, product_factory, version_factory
-    ):
+class TestProductCategoryViewSet:
+    def test_multi_tenancy(self, product_category, assert_multi_tenancy):
+        assert_multi_tenancy(
+            reverse("productcategory-detail", args=[product_category.pk])
+        )
+
+
+@pytest.mark.django_db
+class TestProductViewSet:
+    def test_ok(self, client, allowed_list_factory, product_factory, version_factory):
         allowed_list = allowed_list_factory(org_type=["Developer"])
         product = product_factory(visible_to=allowed_list)
         version_factory(product=product)
@@ -278,7 +340,25 @@ class TestBasicGetViews:
             "next": None,
         }
 
-    def test_version(self, client, version_factory):
+    def test_multi_tenancy(self, version, assert_multi_tenancy):
+        assert_multi_tenancy.client.logout()
+        assert_multi_tenancy(reverse("product-detail", args=[version.product_id]))
+
+    def test_unlisted(self, client, product_factory, version_factory):
+        product1 = product_factory()
+        version_factory(product=product1)
+        product2 = product_factory(is_listed=False)
+        version_factory(product=product2)
+
+        response = client.get(reverse("product-get-one"), {"slug": product2.slug})
+
+        assert response.status_code == 200
+        assert response.json()["id"] == product2.id
+
+
+@pytest.mark.django_db
+class TestVersionViewSet:
+    def test_ok(self, client, version_factory):
         version = version_factory()
         response = client.get(reverse("version-detail", kwargs={"pk": version.id}))
 
@@ -294,7 +374,54 @@ class TestBasicGetViews:
             "is_listed": True,
         }
 
-    def test_plan(self, client, plan_factory, settings):
+    def test_multi_tenancy(self, version, assert_multi_tenancy):
+        assert_multi_tenancy(reverse("version-detail", args=[version.pk]))
+
+    def test_additional_plans(self, client, plan_factory, settings):
+        plan = plan_factory(tier=Plan.Tier.additional)
+        response = client.get(
+            reverse("version-additional-plans", kwargs={"pk": plan.version.id})
+        )
+
+        assert response.status_code == 200
+        assert response.json() == [
+            {
+                "id": str(plan.id),
+                "title": str(plan.title),
+                "version": str(plan.version.id),
+                "preflight_message": "",
+                "tier": "additional",
+                "slug": str(plan.slug),
+                "old_slugs": [],
+                "order_key": 0,
+                "steps": [],
+                "is_allowed": True,
+                "is_listed": True,
+                "not_allowed_instructions": None,
+                "requires_preflight": False,
+                "average_duration": None,
+                "supported_orgs": "Persistent",
+                "scratch_org_duration": settings.SCRATCH_ORG_DURATION_DAYS,
+            }
+        ]
+
+    def test_unlisted(self, client, product_factory, version_factory):
+        product = product_factory()
+        version_factory(product=product)
+        version = version_factory(product=product, is_listed=False)
+
+        response = client.get(
+            reverse("version-get-one"),
+            {"label": version.label, "product": product.slug},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["id"] == version.id
+
+
+@pytest.mark.django_db
+class TestPlanViewSet:
+    def test_ok(self, client, plan_factory, settings):
         plan = plan_factory()
         response = client.get(reverse("plan-detail", kwargs={"pk": plan.id}))
 
@@ -318,9 +445,10 @@ class TestBasicGetViews:
             "scratch_org_duration": settings.SCRATCH_ORG_DURATION_DAYS,
         }
 
-    def test_plan__not_visible(
-        self, client, allowed_list_factory, plan_factory, settings
-    ):
+    def test_multi_tenancy(self, plan, assert_multi_tenancy):
+        assert_multi_tenancy(reverse("plan-detail", args=[plan.pk]))
+
+    def test_not_visible(self, client, allowed_list_factory, plan_factory, settings):
         allowed_list = allowed_list_factory(description="Sample instructions.")
         plan = plan_factory(visible_to=allowed_list)
         response = client.get(reverse("plan-detail", kwargs={"pk": plan.id}))
@@ -345,7 +473,7 @@ class TestBasicGetViews:
             "scratch_org_duration": settings.SCRATCH_ORG_DURATION_DAYS,
         }
 
-    def test_plan__visible(
+    def test_visible(
         self,
         client,
         allowed_list_factory,
@@ -384,7 +512,7 @@ class TestBasicGetViews:
             "scratch_org_duration": settings.SCRATCH_ORG_DURATION_DAYS,
         }
 
-    def test_plan__visible_superuser(
+    def test_visible_superuser(
         self, client, allowed_list_factory, plan_factory, user_factory, settings
     ):
         allowed_list = allowed_list_factory(description="Sample instructions.")
@@ -413,10 +541,7 @@ class TestBasicGetViews:
             "scratch_org_duration": settings.SCRATCH_ORG_DURATION_DAYS,
         }
 
-
-@pytest.mark.django_db
-class TestPreflight:
-    def test_post__anon(self, anon_client, plan_factory, scratch_org_factory):
+    def test_preflight_post__anon(self, anon_client, plan_factory, scratch_org_factory):
         uuid = str(uuid4())
         plan = plan_factory()
         scratch_org_factory(
@@ -439,7 +564,7 @@ class TestPreflight:
 
         assert response.status_code == 201
 
-    def test_post__anon__bad(self, anon_client, plan_factory):
+    def test_preflight_post__anon__bad(self, anon_client, plan_factory):
         uuid = str(uuid4())
         plan = plan_factory()
         session = anon_client.session
@@ -449,13 +574,13 @@ class TestPreflight:
 
         assert response.status_code == 403
 
-    def test_post(self, client, plan_factory):
+    def test_preflight_post(self, client, plan_factory):
         plan = plan_factory()
         response = client.post(reverse("plan-preflight", kwargs={"pk": plan.id}))
 
         assert response.status_code == 201
 
-    def test_get__good(self, client, plan_factory, preflight_result_factory):
+    def test_preflight_get__good(self, client, plan_factory, preflight_result_factory):
         plan = plan_factory()
         preflight = preflight_result_factory(
             plan=plan,
@@ -481,7 +606,7 @@ class TestPreflight:
             "edited_at": format_timestamp(preflight.edited_at),
         }
 
-    def test_get__anon(
+    def test_preflight_get__anon(
         self, anon_client, plan_factory, scratch_org_factory, preflight_result_factory
     ):
         uuid = str(uuid4())
@@ -501,6 +626,7 @@ class TestPreflight:
         )
         preflight = preflight_result_factory(
             plan=plan,
+            user=None,
             org_id=org.org_id,
         )
         session = anon_client.session
@@ -511,26 +637,28 @@ class TestPreflight:
         assert response.status_code == 200
         assert response.json()["id"] == str(preflight.id)
 
-    def test_get__bad(self, anon_client, plan_factory):
+    def test_preflight_get__bad(self, anon_client, plan_factory):
         plan = plan_factory()
         response = anon_client.get(reverse("plan-preflight", kwargs={"pk": plan.id}))
 
         assert response.status_code == 404
 
-    def test_get__bad__anon(self, client, plan_factory):
+    def test_preflight_get__bad__anon(self, client, plan_factory):
         plan = plan_factory()
         response = client.get(reverse("plan-preflight", kwargs={"pk": plan.id}))
 
         assert response.status_code == 404
 
-    def test_post__unallowed(self, client, plan_factory, allowed_list_factory):
+    def test_preflight_post__unallowed(
+        self, client, plan_factory, allowed_list_factory
+    ):
         allowed_list = allowed_list_factory()
         plan = plan_factory(visible_to=allowed_list)
         response = client.post(reverse("plan-preflight", kwargs={"pk": plan.id}))
 
         assert response.status_code == 403
 
-    def test_preflight_where_plan_not_listed(
+    def test_preflight__where_plan_not_listed(
         self, client, plan_factory, preflight_result_factory
     ):
         plan = plan_factory()
@@ -549,215 +677,6 @@ class TestPreflight:
         post_response = client.post(reverse("plan-preflight", kwargs={"pk": plan.id}))
         assert post_response.status_code == 201
 
-
-@pytest.mark.django_db
-class TestOrgViewset:
-    def test_get_job__anonymous(self, anon_client, job_factory, plan_factory):
-        plan = plan_factory()
-        job_factory(plan=plan)
-        response = anon_client.get(reverse("org-list"))
-
-        assert response.status_code == 200
-        assert response.json() == {}
-
-    def test_get_job__uuid(
-        self, anon_client, job_factory, plan_factory, scratch_org_factory
-    ):
-        uuid = str(uuid4())
-        plan = plan_factory()
-        org = scratch_org_factory(
-            plan=plan,
-            uuid=uuid,
-            org_id="00Dxxxxxxxxxxxxxxx",
-            status=ScratchOrg.Status.complete,
-        )
-        job = job_factory(plan=plan, org_id=org.org_id)
-        session = anon_client.session
-        session["scratch_org_id"] = uuid
-        session.save()
-        response = anon_client.get(reverse("org-list"))
-
-        assert response.json()[org.org_id]["current_job"]["id"] == str(job.id)
-        assert response.json()[org.org_id]["current_preflight"] is None
-
-    def test_get_job(self, client, job_factory, plan_factory):
-        plan = plan_factory()
-        job = job_factory(
-            plan=plan,
-            org_id=client.user.org_id,
-        )
-        response = client.get(reverse("org-list"))
-
-        assert response.json()[client.user.org_id]["current_job"]["id"] == str(job.id)
-        assert response.json()[client.user.org_id]["current_preflight"] is None
-
-    def test_get_preflight(self, client, preflight_result_factory, plan_factory):
-        plan = plan_factory()
-        preflight = preflight_result_factory(
-            plan=plan,
-            org_id=client.user.org_id,
-        )
-        response = client.get(reverse("org-list"))
-
-        assert response.json()[client.user.org_id]["current_job"] is None
-        assert response.json()[client.user.org_id]["current_preflight"] == str(
-            preflight.id
-        )
-
-    def test_get_none(self, anon_client):
-        response = anon_client.get(reverse("org-list"))
-
-        assert response.json() == {}
-
-
-@pytest.mark.django_db
-class TestVersionAdditionalPlans:
-    def test_get__good(self, client, plan_factory, settings):
-        plan = plan_factory(tier=Plan.Tier.additional)
-        response = client.get(
-            reverse("version-additional-plans", kwargs={"pk": plan.version.id})
-        )
-
-        assert response.status_code == 200
-        assert response.json() == [
-            {
-                "id": str(plan.id),
-                "title": str(plan.title),
-                "version": str(plan.version.id),
-                "preflight_message": "",
-                "tier": "additional",
-                "slug": str(plan.slug),
-                "old_slugs": [],
-                "order_key": 0,
-                "steps": [],
-                "is_allowed": True,
-                "is_listed": True,
-                "not_allowed_instructions": None,
-                "requires_preflight": False,
-                "average_duration": None,
-                "supported_orgs": "Persistent",
-                "scratch_org_duration": settings.SCRATCH_ORG_DURATION_DAYS,
-            }
-        ]
-
-
-@pytest.mark.django_db
-class TestUnlisted:
-    def test_product(self, client, product_factory, version_factory):
-        product1 = product_factory()
-        version_factory(product=product1)
-        product2 = product_factory(is_listed=False)
-        version_factory(product=product2)
-
-        response = client.get(reverse("product-get-one"), {"slug": product2.slug})
-
-        assert response.status_code == 200
-        assert response.json()["id"] == product2.id
-
-    def test_version(self, client, product_factory, version_factory):
-        product = product_factory()
-        version_factory(product=product)
-        version = version_factory(product=product, is_listed=False)
-
-        response = client.get(
-            reverse("version-get-one"),
-            {"label": version.label, "product": product.slug},
-        )
-
-        assert response.status_code == 200
-        assert response.json()["id"] == version.id
-
-    def test_plan(
-        self,
-        client,
-        product_factory,
-        version_factory,
-        plan_template_factory,
-        plan_factory,
-    ):
-        product = product_factory()
-        version = version_factory(product=product)
-        plan_template1 = plan_template_factory(product=product)
-        plan_template2 = plan_template_factory(product=product)
-        plan_factory(version=version, plan_template=plan_template1)
-        plan = plan_factory(
-            version=version,
-            plan_template=plan_template2,
-            is_listed=False,
-            tier="additional",
-        )
-
-        response = client.get(
-            reverse("plan-get-one"),
-            {"slug": plan.slug, "version": str(version.id), "product": str(product.id)},
-        )
-
-        assert response.status_code == 200
-        assert response.json()["id"] == plan.id
-
-    def test_plan__missing_param(
-        self,
-        client,
-        product_factory,
-        version_factory,
-        plan_template_factory,
-        plan_factory,
-    ):
-        product = product_factory()
-        version = version_factory(product=product)
-        plan_template1 = plan_template_factory(product=product)
-        plan_template2 = plan_template_factory(product=product)
-        plan_factory(version=version, plan_template=plan_template1)
-        plan = plan_factory(
-            version=version,
-            plan_template=plan_template2,
-            is_listed=False,
-            tier="additional",
-        )
-
-        response = client.get(
-            reverse("plan-get-one"), {"slug": plan.slug, "product": str(product.id)}
-        )
-
-        assert response.status_code == 404
-
-    def test_plan__multiple(
-        self,
-        client,
-        product_factory,
-        version_factory,
-        plan_template_factory,
-        plan_factory,
-    ):
-        # If there are multiple plans for the same version/plan template,
-        # we expect to get the most recently created one.
-        product = product_factory()
-        version = version_factory(product=product)
-        plan_template = plan_template_factory(product=product)
-        plan_factory(
-            version=version,
-            plan_template=plan_template,
-            is_listed=False,
-            tier="additional",
-        )
-        plan = plan_factory(
-            version=version,
-            plan_template=plan_template,
-            is_listed=False,
-            tier="additional",
-        )
-
-        response = client.get(
-            reverse("plan-get-one"),
-            {"slug": plan.slug, "version": str(version.id), "product": str(product.id)},
-        )
-
-        assert response.status_code == 200
-        assert response.json()["id"] == plan.id
-
-
-@pytest.mark.django_db
-class TestPlanView:
     def test_scratch_org_get(self, client, plan_factory, scratch_org_factory):
         plan = plan_factory()
         uuid = str(uuid4())
@@ -858,6 +777,155 @@ class TestPlanView:
             )
             assert response.status_code == 202
             assert create_scratch_org_job.delay.called
+
+    def test_unlisted(
+        self,
+        client,
+        product_factory,
+        version_factory,
+        plan_template_factory,
+        plan_factory,
+    ):
+        product = product_factory()
+        version = version_factory(product=product)
+        plan_template1 = plan_template_factory(product=product)
+        plan_template2 = plan_template_factory(product=product)
+        plan_factory(version=version, plan_template=plan_template1)
+        plan = plan_factory(
+            version=version,
+            plan_template=plan_template2,
+            is_listed=False,
+            tier="additional",
+        )
+
+        response = client.get(
+            reverse("plan-get-one"),
+            {"slug": plan.slug, "version": str(version.id), "product": str(product.id)},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["id"] == plan.id
+
+    def test_unlisted__missing_param(
+        self,
+        client,
+        product_factory,
+        version_factory,
+        plan_template_factory,
+        plan_factory,
+    ):
+        product = product_factory()
+        version = version_factory(product=product)
+        plan_template1 = plan_template_factory(product=product)
+        plan_template2 = plan_template_factory(product=product)
+        plan_factory(version=version, plan_template=plan_template1)
+        plan = plan_factory(
+            version=version,
+            plan_template=plan_template2,
+            is_listed=False,
+            tier="additional",
+        )
+
+        response = client.get(
+            reverse("plan-get-one"), {"slug": plan.slug, "product": str(product.id)}
+        )
+
+        assert response.status_code == 404
+
+    def test_unlisted__multiple(
+        self,
+        client,
+        product_factory,
+        version_factory,
+        plan_template_factory,
+        plan_factory,
+    ):
+        # If there are multiple plans for the same version/plan template,
+        # we expect to get the most recently created one.
+        product = product_factory()
+        version = version_factory(product=product)
+        plan_template = plan_template_factory(product=product)
+        plan_factory(
+            version=version,
+            plan_template=plan_template,
+            is_listed=False,
+            tier="additional",
+        )
+        plan = plan_factory(
+            version=version,
+            plan_template=plan_template,
+            is_listed=False,
+            tier="additional",
+        )
+
+        response = client.get(
+            reverse("plan-get-one"),
+            {"slug": plan.slug, "version": str(version.id), "product": str(product.id)},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["id"] == plan.id
+
+
+@pytest.mark.django_db
+class TestOrgViewSet:
+    def test_get_job__anonymous(self, anon_client, job_factory, plan_factory):
+        plan = plan_factory()
+        job_factory(plan=plan)
+        response = anon_client.get(reverse("org-list"))
+
+        assert response.status_code == 200
+        assert response.json() == {}
+
+    def test_get_job__uuid(
+        self, anon_client, job_factory, plan_factory, scratch_org_factory
+    ):
+        uuid = str(uuid4())
+        plan = plan_factory()
+        org = scratch_org_factory(
+            plan=plan,
+            uuid=uuid,
+            org_id="00Dxxxxxxxxxxxxxxx",
+            status=ScratchOrg.Status.complete,
+        )
+        job = job_factory(plan=plan, org_id=org.org_id)
+        session = anon_client.session
+        session["scratch_org_id"] = uuid
+        session.save()
+        response = anon_client.get(reverse("org-list"))
+
+        assert response.json()[org.org_id]["current_job"]["id"] == str(job.id)
+        assert response.json()[org.org_id]["current_preflight"] is None
+
+    def test_get_job(self, client, job_factory, plan_factory):
+        plan = plan_factory()
+        job = job_factory(
+            plan=plan,
+            org_id=client.user.org_id,
+        )
+        response = client.get(reverse("org-list"))
+
+        assert response.json()[client.user.org_id]["current_job"]["id"] == str(job.id)
+        assert response.json()[client.user.org_id]["current_preflight"] is None
+
+    def test_get_preflight(self, client, preflight_result_factory, plan_factory):
+        plan = plan_factory()
+        preflight = preflight_result_factory(
+            plan=plan,
+            user=None,
+            org_id=client.user.org_id,
+        )
+        response = client.get(reverse("org-list"))
+
+        assert response.json()[client.user.org_id]["current_job"] is None
+        assert response.json()[client.user.org_id]["current_preflight"] == str(
+            preflight.id
+        )
+
+    def test_get_none(self, anon_client):
+        response = anon_client.get(reverse("org-list"))
+
+        assert response.json() == {}
 
 
 @pytest.mark.django_db

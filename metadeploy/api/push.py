@@ -30,6 +30,8 @@ from asgiref.sync import sync_to_async
 from channels.layers import get_channel_layer
 from django.utils.translation import gettext_lazy as _
 
+from metadeploy.multitenancy import disable_site_filtering
+
 from ..consumer_utils import get_set_message_semaphore
 from .constants import CHANNELS_GROUP_NAME
 from .hash_url import convert_org_id_to_key
@@ -168,6 +170,7 @@ async def notify_org_result_changed(result):
 
 
 @sync_to_async
+@disable_site_filtering()
 def serialize_org(org_id):
     from .models import Job, PreflightResult
     from .serializers import OrgSerializer

@@ -1,14 +1,14 @@
 from datetime import datetime
 
 from django.conf import settings
-from django.contrib.sites.shortcuts import get_current_site
 from django.utils.translation import get_language
 
+from metadeploy.api.models import SiteProfile
 from metadeploy.api.serializers import SiteSerializer
 
 
 def env(request):
-    site_profile = getattr(get_current_site(request), "siteprofile", None)
+    site_profile = SiteProfile.objects.filter(site_id=request.site_id).first()
     if site_profile:
         site_profile.set_current_language(get_language())
         site_profile.refresh_from_db()

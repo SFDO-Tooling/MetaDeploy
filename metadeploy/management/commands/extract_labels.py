@@ -1,8 +1,10 @@
 import json
+import os
 
 from django.apps import apps
+from django.contrib.sites.models import Site
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
 
 class Command(BaseCommand):
@@ -65,6 +67,13 @@ class Command(BaseCommand):
     }
 
     def handle(self, *args, **options):
+        # Ensure the site env var is set so `CurrentSiteManager` reads from it. This is
+        # just to make callers explicitly specify the site to run the command on
+        if Site.objects.count() > 1 and os.environ.get("DJANGO_SITE_ID") is None:
+            raise CommandError(
+                "Multiple Sites detected. Set the `DJANGO_SITE_ID` env var to your desired Site ID."
+            )
+
         translatable_labels = {}
         for obj in self.translatable_objects:
             model = apps.get_model("api", obj)

@@ -17,21 +17,26 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
 from django.contrib.postgres.fields import ArrayField
-from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
 from django.db.models import Count, F, Func, JSONField, Q
+from django.template.defaultfilters import truncatechars
 from django.utils.translation import gettext_lazy as _
 from hashid_field import HashidAutoField
 from model_utils import Choices, FieldTracker
 from parler.managers import TranslatableQuerySet
 from parler.models import TranslatableModel, TranslatedFields
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.authtoken.models import Token as BaseToken
 from sfdo_template_helpers.crypto import fernet_decrypt
 from sfdo_template_helpers.fields import MarkdownField as BaseMarkdownField
 from sfdo_template_helpers.slugs import AbstractSlug, SlugMixin
 
+from metadeploy.multitenancy import current_site_id
+
+from ..multitenancy.models import CurrentSiteManager, SiteRelated
 from .belvedere_utils import convert_to_18
 from .constants import ERROR, HIDE, OPTIONAL, ORGANIZATION_DETAILS, SKIP
 from .flows import JobFlowCallback, PreflightFlowCallback
@@ -71,8 +76,8 @@ class MarkdownField(BaseMarkdownField):
         super().__init__(*args, **kwargs)
 
 
-class AllowedList(models.Model):
-    title = models.CharField(max_length=128, unique=True)
+class AllowedList(SiteRelated):
+    title = models.CharField(max_length=128)
     description = MarkdownField()
     org_type = ArrayField(
         models.CharField(max_length=64, choices=ORG_TYPES),
@@ -90,6 +95,9 @@ class AllowedList(models.Model):
         ),
     )
 
+    class Meta:
+        unique_together = ("site", "title")
+
     def __str__(self):
         return self.title
 
@@ -106,6 +114,11 @@ class AllowedListOrg(models.Model):
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL
     )
     created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = CurrentSiteManager(site_field="allowed_list__site")
+
+    def __str__(self):
+        return self.org_id
 
     def save(self, *args, **kwargs):
         if len(self.org_id) == 15:
@@ -223,7 +236,23 @@ class User(HashIdMixin, AbstractUser):
         return None
 
 
-class ProductCategory(TranslatableModel):
+class Token(SiteRelated, BaseToken):
+    """
+    Identical to DRF's Token, but allows users to have one token per Site, instead of
+    one token in general.
+    """
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ("user", "site")
+
+
+# Patch DRF token authentication to use our own model
+TokenAuthentication.model = Token
+
+
+class ProductCategory(SiteRelated, TranslatableModel):
     class Meta:
         verbose_name_plural = "product categories"
         ordering = ("order_key",)
@@ -235,6 +264,8 @@ class ProductCategory(TranslatableModel):
         title=models.CharField(max_length=256),
         description=MarkdownField(),
     )
+
+    objects = CurrentSiteManager.from_queryset(TranslatableQuerySet)()
 
     @property
     def description_markdown(self):
@@ -248,7 +279,23 @@ class ProductCategory(TranslatableModel):
 
 
 class ProductSlug(AbstractSlug):
+    slug = models.SlugField()
     parent = models.ForeignKey("Product", on_delete=models.CASCADE)
+
+    objects = CurrentSiteManager(site_field="parent__category__site")
+
+    def validate_unique(self, *args, **kwargs):
+        """
+        Ensure slugs are unique per-site instead of globally
+        """
+        super().validate_unique(*args, **kwargs)
+        qs = ProductSlug.objects.filter(
+            parent__category__site=self.parent.category.site, slug=self.slug
+        )
+        if qs.exists():
+            raise ValidationError(
+                {"slug": _("This must be unique for the current site")}
+            )
 
 
 class ProductQuerySet(TranslatableQuerySet):
@@ -273,7 +320,9 @@ class Product(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel)
     class Meta:
         ordering = ("category__order_key", "order_key")
 
-    objects = ProductQuerySet.as_manager()
+    objects = CurrentSiteManager.from_queryset(ProductQuerySet)(
+        site_field="category__site"
+    )
 
     translations = TranslatedFields(
         title=models.CharField(max_length=256),
@@ -356,7 +405,9 @@ class VersionQuerySet(TranslatableQuerySet):
 
 
 class Version(HashIdMixin, TranslatableModel):
-    objects = VersionQuerySet.as_manager()
+    objects = CurrentSiteManager.from_queryset(VersionQuerySet)(
+        site_field="product__category__site"
+    )
 
     translations = TranslatedFields(description=models.TextField(blank=True))
 
@@ -417,6 +468,8 @@ class PlanSlug(AbstractSlug):
     slug = models.SlugField()
     parent = models.ForeignKey("PlanTemplate", on_delete=models.CASCADE)
 
+    objects = CurrentSiteManager(site_field="parent__product__category__site")
+
     def validate_unique(self, *args, **kwargs):
         super().validate_unique(*args, **kwargs)
         qs = PlanSlug.objects.filter(
@@ -445,6 +498,10 @@ class PlanTemplate(SlugMixin, TranslatableModel):
     regression_test_opt_out = models.BooleanField(default=False)
 
     slug_class = PlanSlug
+
+    objects = CurrentSiteManager.from_queryset(TranslatableQuerySet)(
+        site_field="product__category__site"
+    )
 
     @property
     def preflight_message_markdown(self):
@@ -518,6 +575,14 @@ class Plan(HashIdMixin, SlugMixin, AllowedListAccessMixin, TranslatableModel):
 
     slug_class = PlanSlug
     slug_field_name = "title"
+
+    objects = CurrentSiteManager.from_queryset(TranslatableQuerySet)(
+        site_field="plan_template__product__category__site"
+    )
+
+    @property
+    def site_id(self):
+        return self.plan_template.product.category.site_id
 
     @property
     def preflight_message_additional_markdown(self):
@@ -659,6 +724,10 @@ class Step(HashIdMixin, TranslatableModel):
     task_config = JSONField(default=dict, blank=True)
     source = JSONField(blank=True, null=True)
 
+    objects = CurrentSiteManager.from_queryset(TranslatableQuerySet)(
+        site_field="plan__plan_template__product__category__site"
+    )
+
     class Meta:
         ordering = (DottedArray(F("step_num")),)
 
@@ -702,11 +771,14 @@ class Step(HashIdMixin, TranslatableModel):
         update_translations(self)
 
 
-class ClickThroughAgreement(models.Model):
+class ClickThroughAgreement(SiteRelated):
     text = models.TextField()
 
+    def __str__(self):
+        return truncatechars(self.text, 80)
 
-class Job(HashIdMixin, models.Model):
+
+class Job(HashIdMixin, SiteRelated):
     Status = Choices("started", "complete", "failed", "canceled")
     tracker = FieldTracker(fields=("results", "status"))
 
@@ -817,7 +889,7 @@ class Job(HashIdMixin, models.Model):
             # If this is a scratch org job and we have an MSA configured,
             # persist that too.
             if self.is_scratch:
-                profile = SiteProfile.objects.first()
+                profile = SiteProfile.objects.filter(site_id=current_site_id()).first()
                 if profile and profile.master_agreement:
                     msa, _ = ClickThroughAgreement.objects.get_or_create(
                         text=profile.master_agreement
@@ -874,7 +946,9 @@ class PreflightResult(models.Model):
 
     tracker = FieldTracker(fields=("status", "is_valid"))
 
-    objects = PreflightResultQuerySet.as_manager()
+    objects = CurrentSiteManager.from_queryset(PreflightResultQuerySet)(
+        site_field="plan__plan_template__product__category__site"
+    )
 
     org_id = models.CharField(null=True, blank=True, max_length=18)
     user = models.ForeignKey(
@@ -1043,7 +1117,9 @@ class ScratchOrg(HashIdMixin, models.Model):
     org_id = models.CharField(null=True, blank=True, max_length=18)
     expires_at = models.DateTimeField(null=True, blank=True)
 
-    objects = ScratchOrgQuerySet.as_manager()
+    objects = CurrentSiteManager.from_queryset(ScratchOrgQuerySet)(
+        site_field="plan__plan_template__product__category__site"
+    )
 
     def clean_config(self):
         banned_keys = {"email", "access_token", "refresh_token"}
@@ -1127,7 +1203,7 @@ class ScratchOrg(HashIdMixin, models.Model):
 
 
 class SiteProfile(TranslatableModel):
-    site = models.OneToOneField(Site, on_delete=models.CASCADE)
+    site = models.OneToOneField("sites.Site", on_delete=models.CASCADE)
 
     translations = TranslatedFields(
         name=models.CharField(max_length=64),
@@ -1163,7 +1239,7 @@ class SiteProfile(TranslatableModel):
         return "fields", "siteprofile"
 
 
-class Translation(models.Model):
+class Translation(SiteRelated):
     """Holds a generic catalog of translated text.
 
     Used when a new Plan is published to populate the django-parler translation tables.
@@ -1176,4 +1252,4 @@ class Translation(models.Model):
     lang = models.CharField(max_length=5)
 
     class Meta:
-        unique_together = (("context", "slug", "lang"),)
+        unique_together = (("site", "context", "slug", "lang"),)
