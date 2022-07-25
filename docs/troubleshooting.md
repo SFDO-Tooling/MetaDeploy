@@ -18,3 +18,9 @@
       Template.
     - If the plan has a value for "Visible to", make sure that Allowed List
       allows either the specified org you're testing, or its org type.
+
+## I am unable to connect a Salesforce Org
+
+1. Check the Callback URL
+   - The registered Callback-Url should look somethin like this: https://YOURAPPNAMEHERE.herokuapp.com/accounts/salesforce/login/callback/
+2. Check the granted OAuth App Scopes. It should contain : full, refesh_token, web
