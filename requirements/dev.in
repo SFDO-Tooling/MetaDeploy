@@ -6,7 +6,6 @@
 
 Sphinx
 black
-coveralls
 django-extensions
 factory_boy
 flake8

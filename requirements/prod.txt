@@ -40,9 +40,9 @@ bleach==5.0.1
     # via
     #   -r requirements/prod.in
     #   sfdo-template-helpers
-boto3==1.24.31
+boto3==1.24.36
     # via -r requirements/prod.in
-botocore==1.27.31
+botocore==1.27.36
     # via
     #   boto3
     #   s3transfer
@@ -94,7 +94,7 @@ cryptography==37.0.4
     #   secretstorage
     #   service-identity
     #   sfdo-template-helpers
-cumulusci==3.61.1
+cumulusci==3.62.0
     # via -r requirements/prod.in
 daphne==3.0.2
     # via channels
@@ -102,7 +102,7 @@ defusedxml==0.7.1
     # via python3-openid
 deprecated==1.2.13
     # via redis
-django==3.2.14
+django==4.0.6
     # via
     #   -r requirements/prod.in
     #   channels
@@ -123,9 +123,9 @@ django==3.2.14
     #   sfdo-template-helpers
 django-allauth==0.51.0
     # via -r requirements/prod.in
-django-binary-database-files==1.0.16
+django-binary-database-files==1.0.17
     # via -r requirements/prod.in
-django-colorfield==0.7.1
+django-colorfield==0.7.2
     # via -r requirements/prod.in
 django-environ==0.9.0
     # via -r requirements/prod.in
@@ -135,7 +135,7 @@ django-filter==22.1
     #   sfdo-template-helpers
 django-hashid-field==3.3.5
     # via -r requirements/prod.in
-django-js-reverse==0.9.1
+django-js-reverse @ https://github.com/ierror/django-js-reverse/archive/7cab78c4531780ab4b32033d5104ccd5be1a246a.tar.gz
     # via -r requirements/prod.in
 django-log-request-id==2.0.0
     # via -r requirements/prod.in
@@ -243,7 +243,7 @@ markupsafe==2.0.1
     #   snowfakery
 msgpack==1.0.4
     # via channels-redis
-newrelic==7.14.0.177
+newrelic==7.16.0.178
     # via -r requirements/prod.in
 oauthlib==3.2.0
     # via requests-oauthlib
@@ -304,7 +304,6 @@ python3-openid==3.2.0
 pytz==2022.1
     # via
     #   cumulusci
-    #   django
     #   django-rq-scheduler
     #   djangorestframework
 pyyaml==6.0
@@ -332,7 +331,7 @@ requests-futures==1.0.0
     # via cumulusci
 requests-oauthlib==1.3.1
     # via django-allauth
-rich==12.4.4
+rich==12.5.1
     # via cumulusci
 robotframework==4.1.3
     # via
@@ -344,7 +343,7 @@ robotframework==4.1.3
     #   robotframework-stacktrace
 robotframework-lint==1.1
     # via cumulusci
-robotframework-pabot==2.5.3
+robotframework-pabot==2.5.4
     # via cumulusci
 robotframework-pythonlibcore==3.0.0
     # via
@@ -381,7 +380,7 @@ selenium==3.141.0
     # via
     #   cumulusci
     #   robotframework-seleniumlibrary
-sentry-sdk==1.7.2
+sentry-sdk==1.8.0
     # via -r requirements/prod.in
 service-identity==21.1.0
     # via
@@ -448,7 +447,7 @@ wrapt==1.14.1
     # via deprecated
 xmltodict==0.13.0
     # via cumulusci
-zipp==3.8.0
+zipp==3.8.1
     # via
     #   cumulusci
     #   importlib-metadata
