@@ -18,7 +18,7 @@ django-binary-database-files
 django-environ
 django-filter
 django-hashid-field
-django-js-reverse
+django-js-reverse @ https://github.com/ierror/django-js-reverse/archive/7cab78c4531780ab4b32033d5104ccd5be1a246a.tar.gz
 django-log-request-id
 django-model-utils
 django-parler
