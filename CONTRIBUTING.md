@@ -12,7 +12,7 @@ provided in [./docs/running.md](./docs/running.md).
 
 ## Development Tasks
 
-To run these tests with Docker first run the following commands,
+To run these tasks with Docker first run the following commands:
 
     docker-compose up -d
     docker-compose exec web bash
