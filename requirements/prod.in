@@ -36,5 +36,6 @@ psycopg2-binary
 rq
 sentry-sdk
 service_identity
-werkzeug
+# pin until cumulusci allows newer versions of markupsafe
+werkzeug==2.1.2
 whitenoise
