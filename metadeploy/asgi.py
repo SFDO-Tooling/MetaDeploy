@@ -15,7 +15,7 @@ if "pytest_cov" not in sys.modules:  # pragma: no cover
     agent.initialize()
     agent.wrap_web_transaction("django.core.handlers.base", "BaseHandler.get_response")
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.base")
 
 django.setup()
 

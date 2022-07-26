@@ -7,7 +7,10 @@ import { render } from './../../utils';
 
 describe('<ProductItem />', () => {
   const setup = (initialState) => {
-    const { getByText, queryByText } = render(
+    window.GLOBALS.SITE = {
+      show_product_tags: true,
+    };
+    return render(
       <MemoryRouter>
         <>
           {initialState.products.products.map((item) => (
@@ -16,8 +19,11 @@ describe('<ProductItem />', () => {
         </>
       </MemoryRouter>,
     );
-    return { getByText, queryByText };
   };
+
+  afterAll(() => {
+    window.GLOBALS = {};
+  });
 
   test('renders product', () => {
     const initialState = {
@@ -43,6 +49,7 @@ describe('<ProductItem />', () => {
                 title: 'My Plan',
               },
             },
+            tags: ['Tag 1'],
           },
           {
             id: 'p2',
@@ -50,6 +57,7 @@ describe('<ProductItem />', () => {
             description: 'This is a test product.',
             category: 'salesforce',
             most_recent_version: null,
+            tags: [],
           },
         ],
         notFound: [],
@@ -59,6 +67,7 @@ describe('<ProductItem />', () => {
 
     expect(getByText('Product 1')).toBeVisible();
     expect(getByText('I am short.')).toBeVisible();
+    expect(getByText('Tag 1')).toBeVisible();
     expect(queryByText('Product 2')).toBeNull();
     expect(queryByText('This is a test product')).toBeNull();
   });

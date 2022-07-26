@@ -1,4 +1,5 @@
 import Card from '@salesforce/design-system-react/components/card';
+import Pill from '@salesforce/design-system-react/components/pill';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -30,8 +31,23 @@ const ProductItem = ({ item }: { item: Product }) => {
           icon={<ProductIcon item={item} />}
           bodyClassName="slds-card__body_inner"
         >
-          <div className="slds-text-title">
-            {t('Version {{version}}', { version: label })}
+          <div>
+            <span className="slds-text-title slds-m-right_small">
+              {t('Version {{version}}', { version: label })}
+            </span>
+            {window.GLOBALS.SITE?.show_product_tags &&
+              item.tags.map((tag, idx) => (
+                <span key={idx}>
+                  <Pill
+                    className="slds-p-around_xx-small
+                      slds-m-right_small
+                      slds-m-vertical_xxx-small
+                      md-pill-plain"
+                    variant="option"
+                    labels={{ label: tag }}
+                  />
+                </span>
+              ))}
           </div>
           {item.short_description ? (
             <div className="slds-p-top_x-small">{item.short_description}</div>

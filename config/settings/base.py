@@ -87,7 +87,6 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "colorfield",
     "rest_framework",
-    "rest_framework.authtoken",
     "django_filters",
     "parler",
     "sfdo_template_helpers.oauth2.salesforce",
@@ -104,6 +103,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "metadeploy.multitenancy.middleware.CurrentSiteMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -257,8 +257,6 @@ PARLER_LANGUAGES = {
 TIME_ZONE = "UTC"
 
 USE_I18N = True
-
-USE_L10N = True
 
 USE_TZ = True
 

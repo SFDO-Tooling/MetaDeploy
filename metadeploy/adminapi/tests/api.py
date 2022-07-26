@@ -1,7 +1,52 @@
 import pytest
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
+from django.urls import reverse
 from rest_framework.test import APIClient
 
-from metadeploy.api.models import SUPPORTED_ORG_TYPES, Plan
+from metadeploy.api import models
+
+
+@pytest.fixture(name="assert_admin_api_multi_tenancy")
+def _multi_tenancy(assert_multi_tenancy):
+    # Ensure the multi-tenancy client is a superuser, which is required by all these tests
+    assert_multi_tenancy.client.user.is_staff = True
+    assert_multi_tenancy.client.user.is_superuser = True
+    assert_multi_tenancy.client.user.save()
+    return assert_multi_tenancy
+
+
+@pytest.fixture(name="assert_permissions")
+def _permissions(client):
+    def _inner(model, url=None):
+        model_name = model._meta.model_name
+        if url is None:
+            url = reverse(f"admin_rest:{model_name}-list")
+        perm = Permission.objects.get(
+            content_type=ContentType.objects.get_for_model(model),
+            codename=f"view_{model_name}",
+        )
+        user = client.user
+
+        response = client.get(url)
+        assert (
+            response.status_code == 403
+        ), f"Expected to get 403 when visiting {url} as a non-staff user"
+
+        user.is_staff = True
+        user.save()
+        response = client.get(url)
+        assert (
+            response.status_code == 403
+        ), f"Expected to get 403 when visiting {url} as a staff user with no permissions"
+
+        user.user_permissions.add(perm)
+        response = client.get(url)
+        assert (
+            response.status_code == 200
+        ), f"Expected to get 200 when visiting {url} as a staff user with permission '{perm}'"
+
+    return _inner
 
 
 @pytest.mark.django_db
@@ -44,9 +89,48 @@ class TestProductViewSet:
             "meta": {"page": {"total": 1}},
         }
 
+    def test_multi_tenancy(self, product, assert_admin_api_multi_tenancy):
+        assert_admin_api_multi_tenancy(
+            reverse("admin_rest:product-detail", args=[product.pk])
+        )
+
+    def test_permissions(self, assert_permissions):
+        assert_permissions(models.Product)
+
+
+@pytest.mark.django_db
+class TestProductSlugViewSet:
+    def test_multi_tenancy(self, product, assert_admin_api_multi_tenancy):
+        slug = models.ProductSlug.objects.get(parent=product)
+        assert_admin_api_multi_tenancy(
+            reverse("admin_rest:productslug-detail", args=[slug.pk])
+        )
+
+    def test_permissions(self, assert_permissions):
+        assert_permissions(models.ProductSlug)
+
+
+@pytest.mark.django_db
+class TestPlanTemplateViewSet:
+    def test_multi_tenancy(self, plan_template, assert_admin_api_multi_tenancy):
+        assert_admin_api_multi_tenancy(
+            reverse("admin_rest:plantemplate-detail", args=[plan_template.pk])
+        )
+
+    def test_permissions(self, assert_permissions):
+        assert_permissions(models.PlanTemplate)
+
 
 @pytest.mark.django_db
 class TestPlanViewSet:
+    def test_multi_tenancy(self, plan, assert_admin_api_multi_tenancy):
+        assert_admin_api_multi_tenancy(
+            reverse("admin_rest:plan-detail", args=[plan.pk])
+        )
+
+    def test_permissions(self, assert_permissions):
+        assert_permissions(models.Plan)
+
     def test_list(self, admin_api_client, plan_factory):
         plan = plan_factory()
 
@@ -248,7 +332,7 @@ class TestPlanViewSet:
 
     def test_update_primary(self, admin_api_client, plan_factory):
         plan = plan_factory()
-        assert plan.tier == Plan.Tier.primary
+        assert plan.tier == models.Plan.Tier.primary
         response = admin_api_client.put(
             f"http://testserver/admin/rest/plans/{plan.id}",
             {
@@ -261,7 +345,7 @@ class TestPlanViewSet:
 
     def test_create_another_primary(self, admin_api_client, plan_factory):
         plan = plan_factory()
-        assert plan.tier == Plan.Tier.primary
+        assert plan.tier == models.Plan.Tier.primary
         response = admin_api_client.post(
             "http://testserver/admin/rest/plans",
             {
@@ -299,8 +383,8 @@ class TestPlanViewSet:
         }
 
     def test_update_secondary(self, admin_api_client, plan_factory):
-        plan = plan_factory(tier=Plan.Tier.secondary)
-        assert plan.tier == Plan.Tier.secondary
+        plan = plan_factory(tier=models.Plan.Tier.secondary)
+        assert plan.tier == models.Plan.Tier.secondary
 
         response = admin_api_client.put(
             f"http://testserver/admin/rest/plans/{plan.id}",
@@ -313,8 +397,8 @@ class TestPlanViewSet:
         assert response.status_code == 200, response.json()
 
     def test_create_another_secondary(self, admin_api_client, plan_factory):
-        plan = plan_factory(tier=Plan.Tier.secondary)
-        assert plan.tier == Plan.Tier.secondary
+        plan = plan_factory(tier=models.Plan.Tier.secondary)
+        assert plan.tier == models.Plan.Tier.secondary
         # plan default tier is primary utilizing planfactory settings.
         response = admin_api_client.post(
             "http://testserver/admin/rest/plans",
@@ -367,7 +451,8 @@ class TestPlanViewSet:
     def test_update_bad(self, admin_api_client, allowed_list_factory, plan_factory):
         allowed_list = allowed_list_factory()
         plan = plan_factory(
-            visible_to=allowed_list, supported_orgs=SUPPORTED_ORG_TYPES.Persistent
+            visible_to=allowed_list,
+            supported_orgs=models.SUPPORTED_ORG_TYPES.Persistent,
         )
 
         response = admin_api_client.put(
@@ -385,7 +470,7 @@ class TestPlanViewSet:
             {
                 "title": "Sample plan",
                 "version": f"http://testserver/admin/rest/versions/{plan.version.id}",
-                "supported_orgs": SUPPORTED_ORG_TYPES.Scratch,
+                "supported_orgs": models.SUPPORTED_ORG_TYPES.Scratch,
             },
             format="json",
         )
@@ -393,7 +478,62 @@ class TestPlanViewSet:
 
 
 @pytest.mark.django_db
+class TestPlanSlugViewSet:
+    def test_multi_tenancy(self, plan_slug, assert_admin_api_multi_tenancy):
+        assert_admin_api_multi_tenancy(
+            reverse("admin_rest:planslug-detail", args=[plan_slug.pk])
+        )
+
+    def test_permissions(self, assert_permissions):
+        assert_permissions(models.PlanSlug)
+
+
+@pytest.mark.django_db
+class TestVersionViewSet:
+    def test_multi_tenancy(self, version, assert_admin_api_multi_tenancy):
+        assert_admin_api_multi_tenancy(
+            reverse("admin_rest:version-detail", args=[version.pk])
+        )
+
+    def test_permissions(self, assert_permissions):
+        assert_permissions(models.Version)
+
+
+@pytest.mark.django_db
+class TestProductCategoryViewSet:
+    def test_multi_tenancy(self, product_category, assert_admin_api_multi_tenancy):
+        assert_admin_api_multi_tenancy(
+            reverse("admin_rest:productcategory-detail", args=[product_category.pk])
+        )
+
+    def test_permissions(self, assert_permissions):
+        assert_permissions(models.ProductCategory)
+
+
+@pytest.mark.django_db
+class TestAllowedListViewSet:
+    def test_multi_tenancy(self, allowed_list, assert_admin_api_multi_tenancy):
+        assert_admin_api_multi_tenancy(
+            reverse("admin_rest:allowedlist-detail", args=[allowed_list.pk])
+        )
+
+    def test_permissions(self, assert_permissions):
+        assert_permissions(models.AllowedList)
+
+
+@pytest.mark.django_db
 class TestAllowedListOrgViewSet:
+    def test_multi_tenancy(
+        self, allowed_list_org_factory, assert_admin_api_multi_tenancy
+    ):
+        org = allowed_list_org_factory()
+        assert_admin_api_multi_tenancy(
+            reverse("admin_rest:allowedlistorg-detail", args=[org.pk])
+        )
+
+    def test_permissions(self, assert_permissions):
+        assert_permissions(models.AllowedListOrg)
+
     def test_get(self, admin_api_client, allowed_list_org_factory):
         allowed_list_org_factory()
 
@@ -401,3 +541,85 @@ class TestAllowedListOrgViewSet:
         response = admin_api_client.get(url)
         assert response.status_code == 200
         assert len(response.json()["data"]) == 1
+
+
+@pytest.mark.django_db
+class TestSiteProfileView:
+    def test_multi_tenancy(self, site_profile_factory, assert_admin_api_multi_tenancy):
+        site_profile_factory()
+        assert_admin_api_multi_tenancy(reverse("admin_rest:siteprofile"))
+
+    def test_permissions(self, site_profile_factory, assert_permissions):
+        profile = site_profile_factory()
+        assert_permissions(profile.__class__, url=reverse("admin_rest:siteprofile"))
+
+
+@pytest.mark.django_db
+class TestTranslationViewSet:
+    def test_ok(self, mocker, admin_api_client, plan_factory, step_factory):
+        plan = plan_factory(version__product__title="Example")
+        step_factory(name="Foo", plan=plan)
+        step_factory(name="Install Example 1.0", plan=plan)
+        update_job = mocker.patch(
+            "metadeploy.adminapi.api.update_all_translations", autospec=True
+        )
+
+        response = admin_api_client.patch(
+            reverse("admin_rest:translation-detail", args=["es"]),
+            {
+                "example:product": {"title": {"message": "Ejemplo"}},
+                "example:steps": {
+                    "Install {product} {version}": {
+                        "message": "Instalar {product} {version}"
+                    },
+                    "Foo": {"message": "Fú"},
+                },
+            },
+            format="json",
+        )
+
+        assert response.status_code == 200
+        update_job.delay.assert_called_once_with("es", 1)
+
+    def test_invalid_lang(self, admin_api_client):
+        response = admin_api_client.patch(
+            reverse("admin_rest:translation-detail", args=["es-bogus"]), {}
+        )
+        assert response.status_code == 404
+
+    def test_multi_tenancy(self, mocker, admin_api_client, extra_site):
+        update_job = mocker.patch(
+            "metadeploy.adminapi.api.update_all_translations", autospec=True
+        )
+        admin_api_client.patch(
+            reverse("admin_rest:translation-detail", args=["es"]),
+            {},
+            SERVER_NAME=extra_site.domain,
+        )
+        update_job.delay.assert_called_once_with("es", extra_site.id)
+
+    def test_permissions(self, client):
+        url = reverse("admin_rest:translation-detail", args=["es"])
+        perm = Permission.objects.get(
+            content_type=ContentType.objects.get_for_model(models.Translation),
+            codename=f"change_{models.Translation._meta.model_name}",
+        )
+        user = client.user
+
+        response = client.patch(url, data={})
+        assert (
+            response.status_code == 403
+        ), f"Expected to get 403 when PATCHing {url} as a non-staff user"
+
+        user.is_staff = True
+        user.save()
+        response = client.patch(url, data={})
+        assert (
+            response.status_code == 403
+        ), f"Expected to get 403 when PATCHing {url} as a staff user with no permissions"
+
+        user.user_permissions.add(perm)
+        response = client.patch(url, data={})
+        assert (
+            response.status_code == 200
+        ), f"Expected to get 200 when PATCHing {url} as a staff user with permission '{perm}'"

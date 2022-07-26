@@ -1,3 +1,4 @@
+from django.urls import path
 from rest_framework import routers
 
 from .api import (
@@ -9,6 +10,7 @@ from .api import (
     ProductCategoryViewSet,
     ProductSlugViewSet,
     ProductViewSet,
+    SiteProfileView,
     TranslationViewSet,
     VersionViewSet,
 )
@@ -31,4 +33,6 @@ router.register(r"products", ProductViewSet)
 router.register(r"productslug", ProductSlugViewSet)
 router.register(r"versions", VersionViewSet)
 router.register(r"translations", TranslationViewSet)
-urlpatterns = router.urls
+urlpatterns = router.urls + [
+    path("siteprofile", SiteProfileView.as_view(), name="siteprofile")
+]

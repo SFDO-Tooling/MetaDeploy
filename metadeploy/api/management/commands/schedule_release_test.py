@@ -9,6 +9,7 @@ from django.core.management.base import BaseCommand
 from requests.exceptions import HTTPError
 
 from metadeploy.api.models import Plan, PlanTemplate
+from metadeploy.multitenancy import disable_site_filtering
 
 MINUTE_DELAY = 5
 TIME_TO_LIVE = 86400
@@ -41,6 +42,7 @@ def execute_release_test() -> None:
             raise HTTPError("An internal server error occurred.")
 
 
+@disable_site_filtering()
 def get_plans_to_test() -> list[Plan]:
     """Returns all plans related to PlanTemplates that have
     not opted out of regression testing, and have a tier or 'primary'.

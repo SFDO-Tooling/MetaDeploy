@@ -3,6 +3,8 @@ from datetime import timedelta
 import pytest
 from django.utils import timezone
 
+from metadeploy.multitenancy import override_current_site_id
+
 from ..cleanup import (
     cleanup_user_data,
     clear_old_exceptions,
@@ -74,6 +76,22 @@ def test_clear_old_exceptions(job_factory):
 
 
 @pytest.mark.django_db
+def test_clear_old_exceptions__multi_tenancy(job_factory, extra_site):
+    half_year_ago = timezone.now() - timedelta(days=180)
+    with override_current_site_id(extra_site.id):
+        old_job = job_factory(exception="Danger!")
+        old_job.created_at = half_year_ago
+        old_job.save()
+
+    clear_old_exceptions()
+    old_job.refresh_from_db()
+
+    assert (
+        old_job.exception is None
+    ), "Expected `clear_old_exceptions` to support Jobs from all Sites"
+
+
+@pytest.mark.django_db
 def test_fix_dead_jobs_status(job_factory):
     two_hours_ago = timezone.now() - timedelta(hours=2)
     old_job = job_factory(status="started")
@@ -84,3 +102,19 @@ def test_fix_dead_jobs_status(job_factory):
 
     old_job.refresh_from_db()
     assert old_job.status == "canceled"
+
+
+@pytest.mark.django_db
+def test_fix_dead_jobs_status__multi_tenancy(job_factory, extra_site):
+    two_hours_ago = timezone.now() - timedelta(hours=2)
+    with override_current_site_id(extra_site.id):
+        old_job = job_factory(status="started")
+        old_job.enqueued_at = two_hours_ago
+        old_job.save()
+
+    fix_dead_jobs_status()
+    old_job.refresh_from_db()
+
+    assert (
+        old_job.status == "canceled"
+    ), "Expected `fix_dead_job_status` to support Jobs from all Sites"

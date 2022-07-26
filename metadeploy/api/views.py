@@ -11,6 +11,7 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics, mixins, status, viewsets
+from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -26,6 +27,7 @@ from .models import (
     Product,
     ProductCategory,
     ScratchOrg,
+    Token,
     Version,
 )
 from .paginators import ProductPaginator
@@ -103,11 +105,21 @@ class UserView(generics.RetrieveAPIView):
     serializer_class = FullUserSerializer
     permission_classes = (IsAuthenticated,)
 
-    def get_queryset(self):
-        return self.model.objects.filter(id=self.request.user.id)
-
     def get_object(self):
-        return self.get_queryset().get()
+        return self.request.user
+
+
+class ObtainTokenView(ObtainAuthToken):
+    def post(self, request, *args, **kwargs):
+        """
+        Allow users to specify their credentials in exchange for an auth token. Tokens
+        are unique per site.
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data["user"]
+        token, _ = Token.objects.get_or_create(user=user)
+        return Response({"token": token.key})
 
 
 class JobViewSet(
@@ -162,7 +174,14 @@ class ProductCategoryViewSet(viewsets.ReadOnlyModelViewSet):
     """
 
     serializer_class = ProductCategorySerializer
-    queryset = ProductCategory.objects.all()
+
+    def get_queryset(self):
+        # Usually we would simply define `queryset = ProductCategory.objects.all()`
+        # directly on the class, but that would "freeze" the queryset on the instances
+        # that belong to the Site that is active during class definition. By using a
+        # method instead we make sure site-filtering is applied correctly on each
+        # request.
+        return ProductCategory.objects.all()
 
 
 class ProductViewSet(
@@ -263,9 +282,8 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
 
         kwargs = None
         if scratch_org:
-            config = scratch_org.config
             kwargs = {
-                "org_id": config["org_id"],
+                "org_id": scratch_org.org_id,
             }
 
         if request.user.is_authenticated:
