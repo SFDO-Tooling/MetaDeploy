@@ -560,7 +560,6 @@ class TestPlanViewSet:
             "scratch_org_duration": settings.SCRATCH_ORG_DURATION_DAYS,
         }
 
-
     def test_preflight_post__anon(self, anon_client, plan_factory, scratch_org_factory):
         uuid = str(uuid4())
         plan = plan_factory()
