@@ -355,6 +355,25 @@ class TestProductViewSet:
         assert response.status_code == 200
         assert response.json()["id"] == product2.id
 
+    def test_product_search(self, anon_client, version_factory):
+        url = reverse("product-list")
+        # Create Versions because Products need at least one Version to show up
+        version_factory(product__title="My custom title")
+        version_factory(product__tags=["custom tag", "another tag"])
+
+        response = anon_client.get(url, {"search": "CUSTOM TITLE"})
+        assert response.data["count"] == 1
+        assert (
+            response.data["results"][0]["title"] == "My custom title"
+        ), "Expected Products to be searchable by `title`"
+
+        response = anon_client.get(url, {"search": "CUSTOM TAG"})
+        assert response.data["count"] == 1
+        assert response.data["results"][0]["tags"] == [
+            "custom tag",
+            "another tag",
+        ], "Expected Products to be searchable by `tags`"
+
 
 @pytest.mark.django_db
 class TestVersionViewSet:
