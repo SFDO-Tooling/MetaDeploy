@@ -80,14 +80,16 @@ def test_error_handling(getattr, product):
 
 @pytest.mark.django_db
 def test_multi_tenancy__ok(extra_site, monkeypatch):
+    """Command should run if `DJANGO_SITE_ID` is set while `extra_site` is present"""
     monkeypatch.setenv("DJANGO_SITE_ID", str(extra_site.id))
-    call_command(
-        "extract_labels"
-    ), "Expected command to run when `DJANGO_SITE_ID` is set"
+    call_command("extract_labels")
 
 
 @pytest.mark.django_db
 def test_multi_tenancy__bad(extra_site):
     with pytest.raises(CommandError, match="Multiple Sites detected"):
         call_command("extract_labels")
-        pytest.fail("Expected command to fail if `DJANGO_SITE_ID` is not set")
+        pytest.fail(
+            "Expected command to fail if `DJANGO_SITE_ID` is not set while "
+            "`extra_site` is present"
+        )
