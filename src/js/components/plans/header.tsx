@@ -56,23 +56,6 @@ const Header = ({
       icon={<ProductIcon item={product} />}
       variant="object-home"
     />
-    {job ? (
-      <JobProgressIndicator
-        job={job}
-        supportedOrgs={plan.supported_orgs}
-        preflightRequired={plan.requires_preflight}
-      />
-    ) : (
-      <PlanProgressIndicator
-        userLoggedIn={userLoggedIn}
-        scratchOrgCreated={scratchOrgCreated}
-        preflightStatus={preflightStatus}
-        preflightIsValid={preflightIsValid}
-        preflightIsReady={preflightIsReady}
-        supportedOrgs={plan.supported_orgs}
-        preflightRequired={plan.requires_preflight}
-      />
-    )}
   </>
 );
 
