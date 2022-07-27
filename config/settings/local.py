@@ -2,8 +2,8 @@ from .base import *  # NOQA
 from .base import env
 
 # Default token expiration to 1 hr
-TOKEN_LIFETIME_MINUTES = env("TOKEN_LIFETIME_MINUTES", type_=int, default=60)
-PREFLIGHT_LIFETIME_MINUTES = env("PREFLIGHT_LIFETIME_MINUTES", type_=int, default=60)
+TOKEN_LIFETIME_MINUTES = env.int("TOKEN_LIFETIME_MINUTES", default=60)
+PREFLIGHT_LIFETIME_MINUTES = env.int("PREFLIGHT_LIFETIME_MINUTES", default=60)
 
 INSTALLED_APPS = INSTALLED_APPS + ["django_extensions"]  # NOQA
 
@@ -11,4 +11,4 @@ INSTALLED_APPS = INSTALLED_APPS + ["django_extensions"]  # NOQA
 
 # REDIS_STORAGE_CONFIG = {"USE_REDIS_CACHE": "default"}
 
-METADEPLOY_FAST_FORWARD = env("METADEPLOY_FAST_FORWARD", type_=bool, default=False)
+METADEPLOY_FAST_FORWARD = env.bool("METADEPLOY_FAST_FORWARD", default=False)

@@ -1,7 +1,7 @@
 import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
-import { t } from 'i18next';
-import * as React from 'react';
+import React, { Component } from 'react';
+import { WithTranslation, withTranslation } from 'react-i18next';
 
 import { SelectedSteps } from '@/js/components/plans/detail';
 import InstallDataCell, {
@@ -32,14 +32,14 @@ type Props = {
   selectedSteps?: SelectedSteps;
   canInstall?: boolean;
   handleStepsChange?: (id: string, checked: boolean) => void;
-};
+} & WithTranslation;
 
 type State = {
   showLogs: boolean;
   expandedPanels: Set<string>;
 };
 
-class StepsTable extends React.Component<Props, State> {
+class StepsTable extends Component<Props, State> {
   state = { showLogs: false, expandedPanels: new Set<string>() };
 
   componentDidUpdate(prevProps: Props) {
@@ -190,6 +190,7 @@ class StepsTable extends React.Component<Props, State> {
 
   render() {
     const {
+      t,
       plan,
       preflight,
       steps,
@@ -266,4 +267,4 @@ class StepsTable extends React.Component<Props, State> {
   }
 }
 
-export default StepsTable;
+export default withTranslation()(StepsTable);

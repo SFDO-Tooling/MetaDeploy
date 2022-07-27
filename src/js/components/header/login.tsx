@@ -1,15 +1,15 @@
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import withLanguageDirection from '@salesforce/design-system-react/components/utilities/UNSAFE_direction/private/language-direction';
-import { t } from 'i18next';
 import cookies from 'js-cookie';
-import * as React from 'react';
+import React, { Component, createRef, ReactNode } from 'react';
+import { WithTranslation, withTranslation } from 'react-i18next';
 
 import CustomDomainModal from '@/js/components/header/customDomainModal';
 import { addUrlParams, UrlParams } from '@/js/utils/api';
 
 type Props = {
   id: string;
-  label?: string | React.ReactNode;
+  label?: string | ReactNode;
   buttonClassName: string;
   buttonVariant: string;
   triggerClassName?: string;
@@ -18,7 +18,7 @@ type Props = {
   menuPosition: string;
   flipped: boolean;
   redirectParams: UrlParams;
-};
+} & WithTranslation;
 type MenuOption = {
   label: string;
   login_domain: string;
@@ -32,7 +32,7 @@ interface LoginFormElements extends HTMLFormControlsCollection {
   custom_domain: HTMLInputElement;
 }
 
-class Login extends React.Component<Props, { modalOpen: boolean }> {
+class Login extends Component<Props, { modalOpen: boolean }> {
   static defaultProps = {
     id: 'login',
     buttonClassName: 'slds-button_outline-brand',
@@ -44,7 +44,7 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
     redirectParams: {},
   };
 
-  private formRef = React.createRef<HTMLFormElement>();
+  private formRef = createRef<HTMLFormElement>();
 
   constructor(props: Props) {
     super(props);
@@ -70,7 +70,8 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
     }
   };
 
-  static getMenuOpts(): (MenuOption | MenuDivider)[] {
+  getMenuOpts(): (MenuOption | MenuDivider)[] {
+    const { t } = this.props;
     return [
       {
         label: t('Production or Developer Org'),
@@ -94,8 +95,9 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
   }
 
   render() {
-    const menuOpts = Login.getMenuOpts();
+    const menuOpts = this.getMenuOpts();
     const {
+      t,
       id,
       label,
       triggerClassName,
@@ -167,4 +169,4 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
   }
 }
 
-export default withLanguageDirection(Login);
+export default withTranslation()(withLanguageDirection(Login));

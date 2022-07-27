@@ -1,9 +1,11 @@
-from django.contrib.sites.models import Site
+from datetime import datetime, timezone
+
 import factory
 import factory.fuzzy
 import pytest
 from allauth.socialaccount.models import SocialAccount, SocialApp, SocialToken
 from django.contrib.auth import get_user_model
+from django.contrib.sites.models import Site
 from pytest_factoryboy import register
 from rest_framework.test import APIClient
 from sfdo_template_helpers.crypto import fernet_encrypt
@@ -256,6 +258,7 @@ class ScratchOrgFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = ScratchOrg
 
+    enqueued_at = datetime.now(tz=timezone.utc)
     email = "test@example.com"
     plan = factory.SubFactory(PlanFactory)
 
