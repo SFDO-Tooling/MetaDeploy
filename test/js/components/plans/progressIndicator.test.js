@@ -133,7 +133,7 @@ describe('<ProgressIndicator />', () => {
       });
 
       expect(getByText('Step 1: Log in')).toBeVisible();
-      expect(getByText('Step 3: Install')).toBeVisible();
+      expect(getByText('Step 2: Install')).toBeVisible();
     });
   });
 });
