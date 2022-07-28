@@ -3,8 +3,6 @@ import * as React from 'react';
 import { Trans } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
-import JobProgressIndicator from '@/js/components/jobs/progressIndicator';
-import PlanProgressIndicator from '@/js/components/plans/progressIndicator';
 import ProductIcon from '@/js/components/products/icon';
 import { Job } from '@/js/store/jobs/reducer';
 import { Plan } from '@/js/store/plans/reducer';
@@ -17,12 +15,6 @@ const Header = ({
   version,
   plan,
   onRenderActions,
-  job,
-  userLoggedIn,
-  scratchOrgCreated,
-  preflightStatus,
-  preflightIsValid,
-  preflightIsReady,
 }: {
   product: Product;
   version: Version;
