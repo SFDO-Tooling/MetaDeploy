@@ -130,6 +130,7 @@ describe('<ProgressIndicator />', () => {
     test('Do not show pre-install step', () => {
       const { getByText } = setup({
         preflightRequired: false,
+        userLoggedIn: false,
       });
 
       expect(getByText('Step 1: Log in')).toBeVisible();
