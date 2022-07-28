@@ -10,11 +10,11 @@ env:
 jobs:
   production_smoke_test:
     name: 'Production Post-Deploy Smoke Test'
-    runs-on: ubuntu-latest
+    runs-on: sfdc-ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python 3.8
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4
         with:
           python-version: 3.8
 
@@ -56,7 +56,7 @@ jobs:
 
       - name: Store robot results
         if: failure()
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: robot
           path: robot/results

@@ -1,6 +1,6 @@
 import Icon from '@salesforce/design-system-react/components/icon';
-import { t } from 'i18next';
-import * as React from 'react';
+import React from 'react';
+import { useTranslation, WithTranslation } from 'react-i18next';
 import { Trans } from 'react-i18next';
 
 import { Job } from '@/js/store/jobs/reducer';
@@ -12,29 +12,37 @@ export const ErrorIcon = ({
 }: {
   size?: string;
   containerClassName?: string;
-}) => (
-  <Icon
-    assistiveText={{ label: t('Error') }}
-    category="utility"
-    name="error"
-    colorVariant="error"
-    size={size || 'x-small'}
-    className="slds-m-bottom_xxx-small"
-    containerClassName={containerClassName || 'slds-m-right_x-small'}
-  />
-);
+}) => {
+  const { t } = useTranslation();
 
-export const WarningIcon = () => (
-  <Icon
-    assistiveText={{ label: t('Warning') }}
-    category="utility"
-    name="warning"
-    colorVariant="warning"
-    size="x-small"
-    className="slds-m-bottom_xxx-small"
-    containerClassName="slds-m-right_x-small"
-  />
-);
+  return (
+    <Icon
+      assistiveText={{ label: t('Error') }}
+      category="utility"
+      name="error"
+      colorVariant="error"
+      size={size || 'x-small'}
+      className="slds-m-bottom_xxx-small"
+      containerClassName={containerClassName || 'slds-m-right_x-small'}
+    />
+  );
+};
+
+export const WarningIcon = () => {
+  const { t } = useTranslation();
+
+  return (
+    <Icon
+      assistiveText={{ label: t('Warning') }}
+      category="utility"
+      name="warning"
+      colorVariant="warning"
+      size="x-small"
+      className="slds-m-bottom_xxx-small"
+      containerClassName="slds-m-right_x-small"
+    />
+  );
+};
 
 // Job "error" or "warning" message
 export const JobError = ({ errors }: { errors: StepResult[] }) => {
@@ -76,9 +84,11 @@ export const JobError = ({ errors }: { errors: StepResult[] }) => {
 };
 
 export const getErrorInfo = ({
+  t,
   job,
   preflight,
 }: {
+  t: WithTranslation['t'];
   job?: Job;
   preflight?: Preflight;
 }) => {
@@ -148,6 +158,8 @@ export const getErrorInfo = ({
 };
 
 const PreflightResults = ({ preflight }: { preflight: Preflight }) => {
+  const { t } = useTranslation();
+
   if (
     preflight.status !== CONSTANTS.STATUS.COMPLETE &&
     preflight.status !== CONSTANTS.STATUS.FAILED &&
@@ -156,7 +168,7 @@ const PreflightResults = ({ preflight }: { preflight: Preflight }) => {
     return null;
   }
 
-  const { failed, message } = getErrorInfo({ preflight });
+  const { failed, message } = getErrorInfo({ t, preflight });
   const planErrors = preflight.results?.plan || [];
   if (message !== null) {
     return (

@@ -118,7 +118,7 @@ def finalize_result(result: Union[Job, PreflightResult]):
         log_msg = f"{result.__class__.__name__} {result.id} errored"
         result.exception = "".join(traceback.format_tb(e.__traceback__))
         result.exception += "\n" + f"{e.__class__.__name__}: {e}"
-        if hasattr(e, "response"):
+        if getattr(e, "response", None) is not None:
             result.exception += "\n" + e.response.text
         raise
     finally:
@@ -201,17 +201,9 @@ def run_flows(
     """
     result = result_class.objects.get(pk=result_id)
     scratch_org = None
-
-    # This means we're in a ScratchOrg.
     if not result.user:
-        # we've seen a bug where the front-end will pass back a 15 char org-id
-        # when re-running preflight checks on a scratch org.
-        # See W-10330033 for additional context
-        scratch_org = (
-            ScratchOrg.objects.filter(org_id__startswith=result.org_id)[0]
-            if len(result.org_id) == 15
-            else ScratchOrg.objects.get(org_id=result.org_id)
-        )
+        # This means we're in a ScratchOrg.
+        scratch_org = ScratchOrg.objects.get(org_id=result.org_id)
 
     repo_url = plan.version.product.repo_url
     commit_ish = plan.commit_ish or plan.version.commit_ish

@@ -8,12 +8,17 @@ import standardSprite from '@salesforce-ux/design-system/assets/icons/standard-s
 import utilitySprite from '@salesforce-ux/design-system/assets/icons/utility-sprite/svg/symbols.svg';
 import { createBrowserHistory } from 'history';
 import { t } from 'i18next';
-import * as React from 'react';
+import React from 'react';
 import DocumentTitle from 'react-document-title';
-import * as ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
+// Consider upgrading to v6: https://github.com/remix-run/react-router/discussions/8753
 import { Redirect, Route, Router, Switch } from 'react-router-dom';
-import { applyMiddleware, createStore } from 'redux';
+import {
+  applyMiddleware,
+  // Consider upgrading to Redux Toolkit: https://github.com/reduxjs/redux/releases/tag/v4.2.0
+  legacy_createStore as createStore,
+} from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import logger from 'redux-logger';
 import thunk from 'redux-thunk';
@@ -42,7 +47,7 @@ const history = createBrowserHistory();
 
 const App = () => (
   <DocumentTitle title={window.SITE_NAME}>
-    <div className="slds-grid slds-grid_frame slds-grid_vertical">
+    <div className="slds-grid slds-grid_frame slds-grid_vertical metadeploy-frame">
       <ErrorBoundary>
         <div className="slds-grow slds-shrink-none">
           <ErrorBoundary>
@@ -169,7 +174,8 @@ init_i18n((i18nError?: string) => {
     // Fetch products before rendering App
     (appStore.dispatch as ThunkDispatch)(fetchProducts()).finally(() => {
       (appStore.dispatch as ThunkDispatch)(fetchOrgJobs());
-      ReactDOM.render(
+      const root = createRoot(el);
+      root.render(
         <Provider store={appStore}>
           <Router history={history}>
             <UNSAFE_DirectionSettings.Provider value={document.dir || 'ltr'}>
@@ -185,7 +191,6 @@ init_i18n((i18nError?: string) => {
             </UNSAFE_DirectionSettings.Provider>
           </Router>
         </Provider>,
-        el,
       );
     });
   }
