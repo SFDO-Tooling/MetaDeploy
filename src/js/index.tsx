@@ -177,7 +177,6 @@ init_i18n((i18nError?: string) => {
 
     // Set App element (used for react-SLDS modals)
     settings.setAppElement(el);
-    
     console.log('>>> about to fetch products');
     // Fetch products before rendering App
     (appStore.dispatch as ThunkDispatch)(fetchProducts()).finally(() => {
