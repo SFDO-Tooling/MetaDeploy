@@ -5,12 +5,14 @@ from asgiref.sync import async_to_sync
 from django.conf import settings
 from django.utils import timezone
 
+from metadeploy.multitenancy import disable_site_filtering
+
 from .models import Job, PreflightResult, User
 from .push import user_token_expired
 
 
 def cleanup_user_data():
-    """Remove old records with PII and other sensitive data."""
+    """Remove old records with PII and other sensitive data"""
     # fix status of dead jobs that got left as started
     fix_dead_jobs_status()
 
@@ -64,6 +66,7 @@ def delete_old_users():
     User.objects.filter(is_staff=False, last_login__lte=month_ago).delete()
 
 
+@disable_site_filtering()
 def clear_old_exceptions():
     """Update Job and PreflightRecords over 90 days old to clear the exception field.
 
@@ -78,6 +81,7 @@ def clear_old_exceptions():
     ).update(exception=None)
 
 
+@disable_site_filtering()
 def fix_dead_jobs_status():
     """Fix the status of any jobs which were started but are past their timeout.
 

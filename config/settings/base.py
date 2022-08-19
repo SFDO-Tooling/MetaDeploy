@@ -41,8 +41,9 @@ if env_file.exists():
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env("DJANGO_SECRET_KEY", default=safe_key())
-HASHID_FIELD_SALT = env("DJANGO_HASHID_SALT", default=safe_key())
 DB_ENCRYPTION_KEY = env("DB_ENCRYPTION_KEY")
+HASHID_FIELD_SALT = env("DJANGO_HASHID_SALT", default=safe_key())
+HASHID_FIELD_ENABLE_HASHID_OBJECT = False  # Use plain strings
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool("DJANGO_DEBUG", default=False)
@@ -65,6 +66,8 @@ IP_RESTRICTED_MESSAGE = env(
     default="Unable to access this org because your user has IP Login Ranges that block access.",
 )
 
+API_DOCS_ENABLED = env.bool("API_DOCS_ENABLED", default=DEBUG)
+
 
 # Application definition
 
@@ -84,7 +87,6 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "colorfield",
     "rest_framework",
-    "rest_framework.authtoken",
     "django_filters",
     "parler",
     "sfdo_template_helpers.oauth2.salesforce",
@@ -92,6 +94,7 @@ INSTALLED_APPS = [
     "metadeploy.api",
     "metadeploy.adminapi.apps.AdminapiConfig",
     "django_js_reverse",
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -100,6 +103,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "metadeploy.multitenancy.middleware.CurrentSiteMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -451,6 +455,16 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.TokenAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+# API docs settings
+SPECTACULAR_SETTINGS = {
+    "TITLE": "MetaDeploy",
+    "DESCRIPTION": "2019-2022, Salesforce.org",
+    "VERSION": "0.1.0",
+    "SERVE_INCLUDE_SCHEMA": False,  # Don't include schema view in docs
+    "DEFAULT_GENERATOR_CLASS": "metadeploy.api.schema.MetaDeploySchemaGenerator",
 }
 
 # Token expiration

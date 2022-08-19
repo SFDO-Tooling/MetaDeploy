@@ -12,6 +12,7 @@ from metadeploy.api.jobs import (
     setup_scratch_org,
 )
 from metadeploy.api.models import Plan, ScratchOrg
+from metadeploy.multitenancy import disable_site_filtering
 
 logger = getLogger(__name__)
 
@@ -23,6 +24,7 @@ class Command(BaseCommand):
         parser.add_argument("plan_id", type=str)
         return super().add_arguments(parser)
 
+    @disable_site_filtering()
     def handle(self, *args, **options):
         plan_id: str = options["plan_id"]
         try:
