@@ -164,6 +164,9 @@ def test_expire_preflights(user_factory, plan_factory, preflight_result_factory)
     preflight3 = preflight_result_factory(
         user=user, plan=plan, status=PreflightResult.Status.complete, org_id=user.org_id
     )
+    preflight4 = preflight_result_factory(
+        user=user, plan=plan, status=PreflightResult.Status.started, org_id=user.org_id
+    )
 
     expire_preflights()
 
@@ -172,9 +175,9 @@ def test_expire_preflights(user_factory, plan_factory, preflight_result_factory)
     preflight3.refresh_from_db()
 
     assert not preflight1.is_valid
-    assert preflight2.is_valid
+    assert not preflight2.is_valid
     assert preflight3.is_valid
-
+    assert preflight4.is_valid
 
 @pytest.mark.django_db
 def test_delete_org_on_error(scratch_org_factory):
