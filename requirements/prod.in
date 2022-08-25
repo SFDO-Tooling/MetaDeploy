@@ -30,7 +30,6 @@ djangorestframework
 github3.py
 honcho
 logfmt
-newrelic
 psycopg2-binary
 rq
 sentry-sdk
