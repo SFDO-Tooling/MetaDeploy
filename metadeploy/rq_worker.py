@@ -3,19 +3,6 @@ from rq.job import Job
 from rq.worker import HerokuWorker, Worker
 
 
-def wrap_job_as_background_task(Job):
-    orig = Job.perform
-
-    def wrapper(self):
-        with agent.BackgroundTask(agent.application(), self.func_name):
-            return orig(self)
-
-    Job.perform = wrapper
-
-
-wrap_job_as_background_task(Job)
-
-
 class ConnectionClosingWorkerMixin:
     """Mixin for rq workers to ensure db connections are closed."""
 
