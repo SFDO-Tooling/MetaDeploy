@@ -1,5 +1,4 @@
 from django.db import DatabaseError, InterfaceError, connections
-from rq.job import Job
 from rq.worker import HerokuWorker, Worker
 
 
