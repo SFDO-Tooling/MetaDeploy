@@ -31,7 +31,6 @@ drf-spectacular
 github3.py
 honcho
 logfmt
-newrelic==7.12.0.176
 psycopg2-binary
 rq
 sentry-sdk
