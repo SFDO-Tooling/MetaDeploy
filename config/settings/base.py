@@ -345,6 +345,8 @@ GITHUB_APP_ID = env("GITHUB_APP_ID", default=None)
 DOCKER_GITHUB_APP_KEY = env("DOCKER_GITHUB_APP_KEY", default="").replace("\\n", "\n")
 GITHUB_APP_KEY = env("GITHUB_APP_KEY", default=DOCKER_GITHUB_APP_KEY)
 
+# CCI expects this env var to be set to connect to GitHub
+os_environ["GITHUB_APP_KEY"] = GITHUB_APP_KEY
 
 if not GITHUB_TOKEN and not GITHUB_APP_ID and not GITHUB_APP_KEY:
     raise ImproperlyConfigured(

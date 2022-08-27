@@ -17,10 +17,10 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from .constants import REDIS_JOB_CANCEL_KEY
-from .filters import PlanFilter, ProductFilter, VersionFilter
-from .jobs import preflight_job
-from .models import (
+from metadeploy.api.constants import REDIS_JOB_CANCEL_KEY
+from metadeploy.api.filters import PlanFilter, ProductFilter, VersionFilter
+from metadeploy.api.jobs import preflight_job
+from metadeploy.api.models import (
     SUPPORTED_ORG_TYPES,
     Job,
     Plan,
@@ -31,9 +31,9 @@ from .models import (
     Token,
     Version,
 )
-from .paginators import ProductPaginator
-from .permissions import HasOrgOrReadOnly
-from .serializers import (
+from metadeploy.api.paginators import ProductPaginator
+from metadeploy.api.permissions import HasOrgOrReadOnly
+from metadeploy.api.serializers import (
     FullUserSerializer,
     JobSerializer,
     OrgSerializer,
