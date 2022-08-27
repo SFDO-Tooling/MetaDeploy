@@ -11,7 +11,7 @@ ansi2html
 bleach
 boto3
 channels
-channels-redis==4.0.0b1
+channels-redis
 django-allauth
 django-colorfield
 django-binary-database-files
