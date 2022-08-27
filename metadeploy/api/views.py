@@ -109,7 +109,6 @@ class UserView(generics.RetrieveAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get_object(self):
-        logger.info(">>> UserView.get_object()")
         return self.request.user
 
 
