@@ -242,8 +242,6 @@ markupsafe==2.0.1
     #   snowfakery
 msgpack==1.0.4
     # via channels-redis
-newrelic==7.16.0.178
-    # via -r requirements/prod.in
 oauthlib==3.2.0
     # via requests-oauthlib
 packaging==21.3
