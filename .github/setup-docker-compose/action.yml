@@ -43,7 +43,7 @@ runs:
         tags: ${{ env.TAG }}
         cache-from: ${{ inputs.cache-from }}
         cache-to: ${{ inputs.cache-to }}
-        build-args: PROD_ASSETS=1 OMNIOUT_TOKEN=${{ inputs.omniout-token }}
+        build-args: PROD_ASSETS=1 OMNIOUT_TOKEN=$OMNIOUT_TOKEN
     - name: Add tag alias for compose
       id: tag
       shell: bash
