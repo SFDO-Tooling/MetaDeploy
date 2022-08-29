@@ -18,7 +18,7 @@ from .api.constants import CHANNELS_GROUP_NAME
 from .api.hash_url import convert_org_id_to_key
 from .api.models import ScratchOrg
 from .consumer_utils import clear_message_semaphore
-from .multitenancy import override_current_site_id
+from .multitenancy import disable_site_filtering, override_current_site_id
 
 Request = namedtuple("Request", ["user", "session"])
 
@@ -82,7 +82,11 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
             await self.send_json(message)
             return
 
+    # When jobs save model instances we don't have the Site instance they belong to in
+    # scope. We use `disable_site_filtering` to ensure serialization doesn't fail and
+    # the WS connection is not broken.
     @sync_to_async
+    @disable_site_filtering()
     def serialize_instance_as_message(self, event):
         instance = self.get_instance(**event["instance"])
         with translation.override(self.lang):
