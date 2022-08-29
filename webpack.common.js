@@ -2,7 +2,7 @@
 
 'use strict';
 
-process.env.BROWSERSLIST_CONFIG = './.browserslistrc';
+process.env.BROWSERSLIST_CONFIG = './package.json';
 
 const path = require('path');
 

@@ -171,5 +171,14 @@
     "gitUsername": "Storybook Deployer Bot",
     "gitEmail": "dev-ops@oddbird.net",
     "commitMessage": "Deploy Storybook [skip ci]"
-  }
+  },
+  "browserslist": [
+    "> 0.5",
+    "last 2 versions",
+    "Firefox ESR",
+    "not dead",
+    "not ie 11",
+    "not ie_mob",
+    "not op_mini all"
+  ]
 }
