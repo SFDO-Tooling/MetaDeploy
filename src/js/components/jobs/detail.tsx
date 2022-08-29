@@ -270,6 +270,7 @@ class JobDetail extends Component<Props, State> {
                 size="x-small"
               />
             }
+            className="v-align-center"
             disabled
           />
         );
@@ -277,6 +278,7 @@ class JobDetail extends Component<Props, State> {
       return (
         <Button
           label={t('Cancel Installation')}
+          className="v-align-center"
           variant="text-destructive"
           onClick={this.requestCancelJob}
         />
@@ -290,6 +292,7 @@ class JobDetail extends Component<Props, State> {
     return job?.status === CONSTANTS.STATUS.COMPLETE ? null : (
       <Button
         label={t('Share Installation')}
+        className="v-align-center"
         iconCategory="utility"
         iconName="share"
         iconPosition="left"
