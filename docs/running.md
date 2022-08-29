@@ -1,6 +1,6 @@
 # Local Machine Development Setup
 
-## Cloning The Project
+## Cloning the project
 
     git clone git@github.com:SFDO-Tooling/MetaDeploy
     cd MetaDeploy

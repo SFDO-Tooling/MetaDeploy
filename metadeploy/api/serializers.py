@@ -422,11 +422,16 @@ class JobSerializer(ErrorWarningCountMixin, HashIdModelSerializer):
     plan_slug = serializers.CharField(source="plan.slug", read_only=True)
     results = StepResultsField(required=False)
 
+    # Why `objects` instead of `objects.all()`? The call to `.all()` seems to "freeze"
+    # the resulting queryset when this file is imported. At that point it returns the
+    # objects from the default Site, which means validation fails later when the
+    # serializer is executed on other Site instances. Leaving out `.all()` makes DRF
+    # always re-run the queryset to get fresh objects for each Site.
     plan = serializers.PrimaryKeyRelatedField(
-        queryset=Plan.objects.all(), pk_field=serializers.CharField()
+        queryset=Plan.objects, pk_field=serializers.CharField()
     )
     steps = serializers.PrimaryKeyRelatedField(
-        queryset=Step.objects.all(), many=True, pk_field=serializers.CharField()
+        queryset=Step.objects, many=True, pk_field=serializers.CharField()
     )
     error_count = serializers.SerializerMethodField()
     warning_count = serializers.SerializerMethodField()
