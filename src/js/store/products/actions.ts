@@ -123,6 +123,7 @@ export const fetchProducts =
         error.response = response;
         throw error;
       }
+      console.log(`>>> ${response}`);
       let products: Product[] = [];
       let categories: Category[] = [];
       response.forEach((category: ApiCategory) => {
@@ -133,6 +134,7 @@ export const fetchProducts =
           next: first_page.next,
         });
       });
+      console.log('>>> dispatching FETCH_PRODUCTS_SUCCEEDED');
       return dispatch({
         type: 'FETCH_PRODUCTS_SUCCEEDED' as const,
         payload: { products, categories },

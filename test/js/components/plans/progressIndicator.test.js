@@ -125,4 +125,16 @@ describe('<ProgressIndicator />', () => {
       expect(getByText('Step 3: Install')).toBeVisible();
     });
   });
+
+  describe('Preflight Not required', () => {
+    test('Do not show pre-install step', () => {
+      const { getByText } = setup({
+        preflightRequired: false,
+        userLoggedIn: false,
+      });
+
+      expect(getByText('Step 1: Log in')).toBeVisible();
+      expect(getByText('Step 2: Install')).toBeVisible();
+    });
+  });
 });
