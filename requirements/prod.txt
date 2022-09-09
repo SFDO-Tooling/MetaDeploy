@@ -93,7 +93,7 @@ cryptography==37.0.4
     #   secretstorage
     #   service-identity
     #   sfdo-template-helpers
-cumulusci @ git+https://github.com/SFDO-Tooling/cumulusci@feature/omniscript-logging-and-error-handling
+cumulusci==3.65.0.dev1
     # via -r requirements/prod.in
 daphne==3.0.2
     # via channels
@@ -358,7 +358,7 @@ salesforce-bulk==2.2.0
     # via cumulusci
 sarge==0.1.7.post1
     # via cumulusci
-secretstorage==3.3.2
+secretstorage==3.3.3
     # via cumulusci
 selenium==3.141.0
     # via
