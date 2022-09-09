@@ -12,33 +12,39 @@ instances of the Job model and triggers the run_flows_job.
 """
 
 import contextlib
+from dataclasses import dataclass
 import enum
 import logging
 import os
 import sys
+import time
 import traceback
 import uuid
 from datetime import timedelta
 from typing import Union
+from zipfile import ZipFile
 
 from asgiref.sync import async_to_sync
 from cumulusci.core.config import OrgConfig, ServiceConfig
+from cumulusci.core.flowrunner import StepSpec
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.utils import timezone
 from django_rq import job as django_rq_job
+from metadeploy.api.tubular.util import run_job_on_tubular, authed_tubular_client
 from rq.exceptions import ShutDownImminentException
 from rq.worker import StopRequested
 
 from .cci_configs import MetaDeployCCI, extract_user_and_repo
 from .cleanup import cleanup_user_data
 from .flows import StopFlowException
-from .github import local_github_checkout
+from .github import get_repo_zip, local_github_checkout
 from .models import ORG_TYPES, Job, Plan, PreflightResult, ScratchOrg
 from .push import job_started, preflight_started, report_error
 from .salesforce import create_scratch_org as create_scratch_org_on_sf
 from .salesforce import delete_scratch_org as delete_scratch_org_on_sf
+
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -281,11 +287,100 @@ def run_flows(
 run_flows_job = job(run_flows)
 
 
+def run_flows_in_tubular(
+    *,
+    plan: Plan,
+    skip_steps: list[str],
+    result_class: Union[type[Job], type[PreflightResult]],
+    result_id: int,
+):
+    """
+    This operates with side effects; it changes things in a Salesforce
+    org, and then records the results of those operations on to a
+    `result`.
+
+    Args:
+        plan (Plan): The Plan instance for the flow you're running.
+        skip_steps (List[str]): The strings in the list should be valid
+            step_num values for steps in this flow.
+        result_class (Union[Type[Job], Type[PreflightResult]]): The type
+            of the instance onto which to record the results of running
+            steps in the flow. Either a PreflightResult or a Job, as
+            appropriate.
+        result_id (int): the PK of the result instance to get.
+    """
+    result = result_class.objects.get(pk=result_id)
+    scratch_org = None
+    if not result.user:
+        # This means we're in a ScratchOrg.
+        scratch_org = ScratchOrg.objects.get(org_id=result.org_id)
+
+    repo_url = plan.version.product.repo_url
+    commit_ish = plan.commit_ish or plan.version.commit_ish
+
+    with contextlib.ExitStack() as stack:
+        stack.enter_context(finalize_result(result))
+        if result.user:
+            stack.enter_context(report_errors_to(result.user))
+        if scratch_org:
+            stack.enter_context(delete_org_on_error(scratch_org))
+
+        # Let's clone the repo locally:
+        repo_user, repo_name = extract_user_and_repo(repo_url)
+        repo_root = stack.enter_context(
+            local_github_checkout(repo_user, repo_name, commit_ish)
+        )
+
+        # Get cwd into Python path, so that the tasks below can import
+        # from the checked-out repo:
+        stack.enter_context(prepend_python_path(os.path.abspath(repo_root)))
+
+        # There's a lot of setup to make configs and keychains, link
+        # them properly, and then eventually pass them into a flow,
+        # which we then run:
+        ctx = MetaDeployCCI(repo_root=repo_root, plan=plan)
+
+        current_org = "current_org"
+        if settings.METADEPLOY_FAST_FORWARD:  # pragma: no cover
+            org_config = OrgConfig({}, name=current_org, keychain=ctx.keychain)
+        elif scratch_org:
+            org_config = scratch_org.get_refreshed_org_config(
+                org_name=current_org, keychain=ctx.keychain
+            )
+        else:
+            token, token_secret = result.user.token
+            org_config = OrgConfig(
+                {
+                    "access_token": token,
+                    "instance_url": result.user.instance_url,
+                    "refresh_token": token_secret,
+                    "username": result.user.sf_username,
+                    # 'id' is used by CumulusCI to pick the right 'aud' for JWT auth
+                    "id": result.user.oauth_id,
+                },
+                current_org,
+                keychain=ctx.keychain,
+            )
+        org_config.save()
+
+        steps = get_tubular_steps(plan, ctx, skip_steps)
+        logger.info(f">>> Steps:\n\n{steps}")
+
+        if not settings.METADEPLOY_FAST_FORWARD:
+            logger.info(">>> Fetching repository zip file")
+            repo_zip = get_repo_zip(repo_user, repo_name, commit_ish)
+            iostream = repo_zip.fp
+            repo_zip.close()
+            run_job_on_tubular(result, iostream, steps, token)
+
+run_flows_in_tubular_job = job(run_flows_in_tubular)
+
+
 def enqueuer():
     logger.debug("Enqueuer live")
     for j in Job.objects.filter(enqueued_at=None):
         j.invalidate_related_preflight()
-        rq_job = run_flows_job.delay(
+        rq_job = run_flows_in_tubular_job.delay(
             plan=j.plan,
             skip_steps=j.skip_steps(),
             result_class=Job,
@@ -467,3 +562,30 @@ def setup_scratch_org(org_pk: str):
     org.complete(scratch_org_config)
 
     return org, plan
+
+def get_tubular_steps(plan: Plan, ctx, skip_steps):
+    steps = [
+        step.to_spec(
+            project_config=ctx.project_config, skip=step.step_num in skip_steps
+        )
+        for step in plan.steps.all()
+    ]
+    return convert_to_tubular_steps(steps)
+
+def convert_to_tubular_steps(steps: list[StepSpec]):
+    tubular_steps = []
+    for step in steps:
+        task_name = parse_task_name(step.task_name)
+        tubular_steps.append(
+            {"task": task_name, "options": step.task_config["options"]}
+        )
+
+    return tubular_steps
+
+
+def parse_task_name(step_spec_name: str) -> str:
+    parts = step_spec_name.split(".")
+    if len(parts) == 1:
+        return parts[0]
+    else:
+        return parts[-2]

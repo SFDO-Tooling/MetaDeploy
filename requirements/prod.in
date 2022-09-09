@@ -29,6 +29,7 @@ django-storages
 djangorestframework
 github3.py
 honcho
+httpx
 logfmt
 psycopg2-binary
 rq

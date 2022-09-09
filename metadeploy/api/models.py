@@ -700,6 +700,10 @@ class Step(HashIdMixin, TranslatableModel):
 
         update_translations(self)
 
+class TubularJob(models.Model):
+    # use the uuid that corresponds to the Tubular Job Id
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    status = Choices("queued", "running", "complete", "errored")
 
 class ClickThroughAgreement(models.Model):
     text = models.TextField()
@@ -707,8 +711,12 @@ class ClickThroughAgreement(models.Model):
 
 class Job(HashIdMixin, models.Model):
     Status = Choices("started", "complete", "failed", "canceled")
+
     tracker = FieldTracker(fields=("results", "status"))
 
+    tubular_job = models.ForeignKey(
+        TubularJob, on_delete=models.SET_NULL, null=True, blank=True
+    )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True
     )
