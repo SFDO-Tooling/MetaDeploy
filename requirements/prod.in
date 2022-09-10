@@ -4,7 +4,7 @@
 
 https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.20.0.tar.gz
 coloredlogs
-cumulusci==3.65.0.dev1
+git+https://github.com/SFDO-Tooling/cumulusci@feature/omniscript-logging-and-error-handling
 Django
 Pillow
 ansi2html
