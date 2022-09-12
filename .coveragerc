@@ -1,6 +1,7 @@
 [run]
 source = metadeploy
 omit =
+    metadeploy/asgi.py
     metadeploy/tests/test_integration.py
     metadeploy/*/migrations/*
 
