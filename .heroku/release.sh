@@ -1,6 +1,5 @@
 #!/bin/sh 
 set -e
-ln -s /app/.apt/usr/bin/google-chrome /app/.apt/usr/bin/chrome || true
 
 if [ -n "$CTC_URL" ] ; then
      # Run migration surrounded by CTC start/stop
