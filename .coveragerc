@@ -1,7 +1,7 @@
 [run]
 source = metadeploy
-omit = 
-    metadeploy/tests/integration.py
+omit =
+    metadeploy/tests/test_integration.py
     metadeploy/*/migrations/*
 
 [report]
