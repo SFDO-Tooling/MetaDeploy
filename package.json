@@ -49,7 +49,7 @@
     "storybook": "start-storybook -p 6006 --ci",
     "build-storybook": "build-storybook",
     "deploy-storybook": "storybook-to-ghpages --out=storybook-static --source-branch=main --branch=storybook",
-    "heroku-postbuild": "yarn prod"
+    "heroku-postbuild": "yarn prod ; mkdir -p /opt/google/chrome ; ln -s /app/.apt/usr/bin/google-chrome /opt/google/chrome/chrome"
   },
   "dependencies": {
     "@omnistudio/omniscript-lwc-compiler": "^240.1.0",
