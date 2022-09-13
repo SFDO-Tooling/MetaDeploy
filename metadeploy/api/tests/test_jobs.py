@@ -181,6 +181,7 @@ def test_expire_preflights(user_factory, plan_factory, preflight_result_factory)
     assert preflight3.is_valid
     assert preflight4.is_valid
 
+
 @pytest.mark.django_db
 def test_delete_org_on_error(scratch_org_factory):
     scratch_org = scratch_org_factory(org_id="00Dxxxxxxxxxxxxxxx")
