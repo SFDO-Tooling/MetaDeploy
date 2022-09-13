@@ -324,7 +324,6 @@ def expire_preflights():
         minutes=settings.PREFLIGHT_LIFETIME_MINUTES
     )
     preflights_to_invalidate = PreflightResult.objects.filter(
-        status=PreflightResult.Status.complete,
         created_at__lte=preflight_lifetime_ago,
         is_valid=True,
     )
