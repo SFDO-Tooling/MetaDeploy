@@ -1,4 +1,5 @@
 from functools import reduce
+from logging import getLogger
 
 import django_rq
 from django.conf import settings
@@ -40,6 +41,8 @@ from .serializers import (
     ScratchOrgSerializer,
     VersionSerializer,
 )
+
+logger = getLogger(__name__)
 
 User = get_user_model()
 
@@ -99,6 +102,7 @@ class UserView(generics.RetrieveAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
+        logger.info(">>> UserView.get_queryset()")
         return self.model.objects.filter(id=self.request.user.id)
 
     def get_object(self):
@@ -125,6 +129,7 @@ class JobViewSet(
     permission_classes = (HasOrgOrReadOnly,)
 
     def get_queryset(self):
+        logger.info(">>> JobViewSet.get_queryset()")
         user = self.request.user
         if user.is_staff:
             return Job.objects.all()
@@ -159,6 +164,7 @@ class ProductViewSet(
     model = Product
 
     def get_queryset(self):
+        logger.info(">>> ProductViewSet.get_queryset()")
         return self.omit_allowed_by_org(
             Product.objects.published().exclude(is_listed=False)
         )
@@ -171,6 +177,7 @@ class VersionViewSet(GetOneMixin, viewsets.ReadOnlyModelViewSet):
     model = Version
 
     def get_queryset(self):
+        logger.info(">>> VersionViewSet.get_queryset()")
         return Version.objects.exclude(is_listed=False)
 
     @action(detail=True, methods=["get"])
@@ -189,6 +196,7 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
     model = Plan
 
     def get_queryset(self):
+        logger.info(">>> PlanViewSet.get_queryset()")
         plans = Plan.objects.exclude(is_listed=False)
         return self.omit_allowed_by_org(plans)
 
