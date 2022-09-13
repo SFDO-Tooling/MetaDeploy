@@ -17,7 +17,7 @@ This job does four key things:
 
 Frequency: every minute
 
-Invalidates any preflight checks that were run more than 10 minutes ago. This can be configured to a custom value by setting the PREFLIGHT_LIFETIME_MINUTES environment variable.
+Invalidates any preflight checks that were created more than 10 minutes ago. This can be configured to a custom value by setting the PREFLIGHT_LIFETIME_MINUTES environment variable.
 
 ## `calculate_average_plan_runtimes`
 
