@@ -12,14 +12,15 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics, mixins, status, viewsets
+from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from .constants import REDIS_JOB_CANCEL_KEY
-from .filters import PlanFilter, ProductFilter, VersionFilter
-from .jobs import preflight_job
-from .models import (
+from metadeploy.api.constants import REDIS_JOB_CANCEL_KEY
+from metadeploy.api.filters import PlanFilter, ProductFilter, VersionFilter
+from metadeploy.api.jobs import preflight_job
+from metadeploy.api.models import (
     SUPPORTED_ORG_TYPES,
     Job,
     Plan,
@@ -27,11 +28,12 @@ from .models import (
     Product,
     ProductCategory,
     ScratchOrg,
+    Token,
     Version,
 )
-from .paginators import ProductPaginator
-from .permissions import HasOrgOrReadOnly
-from .serializers import (
+from metadeploy.api.paginators import ProductPaginator
+from metadeploy.api.permissions import HasOrgOrReadOnly
+from metadeploy.api.serializers import (
     FullUserSerializer,
     JobSerializer,
     OrgSerializer,
@@ -106,12 +108,21 @@ class UserView(generics.RetrieveAPIView):
     serializer_class = FullUserSerializer
     permission_classes = (IsAuthenticated,)
 
-    def get_queryset(self):
-        logger.info(">>> UserView.get_queryset()")
-        return self.model.objects.filter(id=self.request.user.id)
-
     def get_object(self):
-        return self.get_queryset().get()
+        return self.request.user
+
+
+class ObtainTokenView(ObtainAuthToken):
+    def post(self, request, *args, **kwargs):
+        """
+        Allow users to specify their credentials in exchange for an auth token. Tokens
+        are unique per site.
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data["user"]
+        token, _ = Token.objects.get_or_create(user=user)
+        return Response({"token": token.key})
 
 
 class JobViewSet(
@@ -167,7 +178,14 @@ class ProductCategoryViewSet(viewsets.ReadOnlyModelViewSet):
     """
 
     serializer_class = ProductCategorySerializer
-    queryset = ProductCategory.objects.all()
+
+    def get_queryset(self):
+        # Usually we would simply define `queryset = ProductCategory.objects.all()`
+        # directly on the class, but that would "freeze" the queryset on the instances
+        # that belong to the Site that is active during class definition. By using a
+        # method instead we make sure site-filtering is applied correctly on each
+        # request.
+        return ProductCategory.objects.all()
 
 
 class ProductViewSet(

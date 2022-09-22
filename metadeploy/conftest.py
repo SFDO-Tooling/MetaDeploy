@@ -6,6 +6,7 @@ import pytest
 from allauth.socialaccount.models import SocialAccount, SocialApp, SocialToken
 from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
+from django.core.cache import cache
 from pytest_factoryboy import register
 from rest_framework.test import APIClient
 from sfdo_template_helpers.crypto import fernet_encrypt
@@ -13,6 +14,7 @@ from sfdo_template_helpers.crypto import fernet_encrypt
 from metadeploy.api.models import (
     AllowedList,
     AllowedListOrg,
+    ClickThroughAgreement,
     Job,
     Plan,
     PlanSlug,
@@ -24,6 +26,7 @@ from metadeploy.api.models import (
     ScratchOrg,
     SiteProfile,
     Step,
+    Translation,
     Version,
 )
 
@@ -35,6 +38,16 @@ def format_timestamp(value):
     if value.endswith("+00:00"):
         value = value[:-6] + "Z"
     return value
+
+
+@register
+class SiteFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Site
+        django_get_or_create = ("domain",)
+
+    domain = "testserver"
+    name = factory.SelfAttribute("domain")
 
 
 @register
@@ -206,7 +219,7 @@ class SiteProfileFactory(factory.django.DjangoModelFactory):
     master_agreement = "MSA"
     copyright_notice = "(c) 2022"
 
-    site = factory.Iterator(Site.objects.all())
+    site = factory.SubFactory(SiteFactory)
 
 
 @register
@@ -228,6 +241,14 @@ class PlanSlugFactory(factory.django.DjangoModelFactory):
 
     slug = factory.Sequence("this-is-a-slug-{}".format)
     parent = factory.SubFactory(PlanTemplateFactory)
+
+
+@register
+class ClickTroughAgreementFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = ClickThroughAgreement
+
+    text = factory.Sequence("Text for Agreement {}".format)
 
 
 @register
@@ -269,10 +290,38 @@ class PreflightResultFactory(factory.django.DjangoModelFactory):
         model = PreflightResult
 
     plan = factory.SubFactory(PlanFactory)
+    user = factory.SubFactory(UserFactory)
+    org_id = factory.SelfAttribute("user.org_id")
+
+
+@register
+class TranslationFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Translation
+
+    slug = factory.Sequence("translation-{}".format)
+
+
+def adjust_site_domain():
+    """
+    Adjust the default Site instance to match the test Client host. Required by
+    CurrentSiteMiddleware to detect the default Site as expected.
+    """
+    Site.objects.filter(domain="example.com").update(domain="testserver")
+
+
+@pytest.fixture
+def extra_site(settings, site_factory):
+    site = site_factory(domain="extra-site.test")
+    settings.ALLOWED_HOSTS += ["extra-site.test"]
+    # Ensure CurrentSiteMiddleware doesn't get a stale ID for the site with this domain
+    cache.delete(f"SITE_ID:{site.domain}")
+    return site
 
 
 @pytest.fixture
 def client(user_factory):
+    adjust_site_domain()
     user = user_factory()
     client = APIClient()
     client.force_login(user)
@@ -282,7 +331,8 @@ def client(user_factory):
 
 @pytest.fixture
 def admin_api_client(user_factory):
-    user = user_factory(is_superuser=True)
+    adjust_site_domain()
+    user = user_factory(is_staff=True, is_superuser=True)
     client = APIClient()
     client.force_login(user)
     client.user = user
@@ -291,4 +341,24 @@ def admin_api_client(user_factory):
 
 @pytest.fixture
 def anon_client():
+    adjust_site_domain()
     return APIClient()
+
+
+@pytest.fixture
+def assert_multi_tenancy(client, extra_site):
+    def _do_assert(url):
+        response = client.get(url)
+        assert response.status_code == 200, (
+            f"Expected to get 200 when visiting {url} on the default Site. "
+            "This request should succeed to establish a baseline for the multi-tenancy test."
+        )
+
+        response = client.get(url, SERVER_NAME=extra_site.domain)
+        assert response.status_code == 404, (
+            f"Expected to get 404 when visiting {url} on the non-default Site. "
+            "This probably means per-site filtering is not working on that endpoint."
+        )
+
+    _do_assert.client = client
+    return _do_assert

@@ -6,6 +6,7 @@ from parler.models import TranslatableModel
 
 from metadeploy.api.jobs import job
 from metadeploy.api.models import Translation
+from metadeploy.multitenancy import override_current_site_id
 
 logger = logging.getLogger(__name__)
 
@@ -14,11 +15,12 @@ INSTALL_VERSION_RE = re.compile(r"^Install .*\d$")
 
 
 @job
-def update_all_translations(lang):
+def update_all_translations(lang, site_id):
     """Update all objects' translations from the Translation model"""
-    for model in TranslatableModel.__subclasses__():
-        for obj in model.objects.all():
-            update_translations(obj, [lang])
+    with override_current_site_id(site_id):
+        for model in TranslatableModel.__subclasses__():
+            for obj in model.objects.all():
+                update_translations(obj, [lang])
 
 
 def update_translations(obj, langs=None):

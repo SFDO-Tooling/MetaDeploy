@@ -16,6 +16,7 @@ from rq.worker import StopRequested
 from config.settings.base import MINIMUM_JOBS_FOR_AVERAGE
 from metadeploy.api.belvedere_utils import convert_to_18
 from metadeploy.api.constants import ERROR
+from metadeploy.multitenancy import override_current_site_id
 
 from ..flows import StopFlowException
 from ..jobs import (
@@ -77,6 +78,28 @@ def test_run_flows(mocker, job_factory, user_factory, plan_factory, step_factory
 
 @pytest.mark.django_db
 @vcr.use_cassette()
+def test_run_flows__multi_tenancy(
+    mocker, job_factory, user_factory, plan_factory, step_factory, extra_site
+):
+    run = mocker.patch("cumulusci.core.flowrunner.FlowCoordinator.run")
+    user = user_factory()
+    with override_current_site_id(extra_site.id):
+        plan = plan_factory()
+        step_factory(plan=plan)
+        job = job_factory(user=user, plan=plan, org_id=user.org_id)
+
+    run_flows(
+        plan=plan,
+        skip_steps=[],
+        result_class=Job,
+        result_id=job.id,
+    )
+
+    assert run.called, "Expected `run_flows` to support Jobs from all Sites"
+
+
+@pytest.mark.django_db
+@vcr.use_cassette()
 def test_run_flows__preflight(
     mocker, preflight_result_factory, user_factory, plan_factory, step_factory
 ):
@@ -116,6 +139,21 @@ def test_enqueuer(mocker, job_factory):
 
 
 @pytest.mark.django_db
+def test_enqueuer__multi_tenancy(mocker, job_factory, extra_site):
+    delay = mocker.patch("metadeploy.api.jobs.run_flows_job.delay", autospec=True)
+    delay.return_value = mocker.Mock(
+        id="294fc6d2-0f3c-4877-b849-54184724b6b2", enqueued_at=datetime.now()
+    )
+    job_factory(org_id="00Dxxxxxxxxxxxxxxx")
+    with override_current_site_id(extra_site.id):
+        job_factory(org_id="00Dxxxxxxxxxxxxxxx")
+
+    enqueuer()
+
+    assert delay.call_count == 2, "Expected `enqueuer` to support Jobs from all Sites"
+
+
+@pytest.mark.django_db
 def test_preflight(mocker, user_factory, plan_factory, preflight_result_factory):
     run_flows = mocker.patch("metadeploy.api.jobs.run_flows")
 
@@ -127,6 +165,20 @@ def test_preflight(mocker, user_factory, plan_factory, preflight_result_factory)
     preflight(preflight_result.pk)
 
     assert run_flows.called
+
+
+@pytest.mark.django_db
+def test_preflight__multi_tenancy(
+    mocker, user_factory, preflight_result_factory, extra_site
+):
+    run_flows = mocker.patch("metadeploy.api.jobs.run_flows")
+    user = user_factory()
+    with override_current_site_id(extra_site.id):
+        preflight_result = preflight_result_factory(user=user, org_id=user.org_id)
+
+    preflight(preflight_result.pk)
+
+    assert run_flows.called, "Expected `preflight` to support Preflights from all Sites"
 
 
 @pytest.mark.django_db
@@ -180,6 +232,24 @@ def test_expire_preflights(user_factory, plan_factory, preflight_result_factory)
     assert not preflight2.is_valid
     assert preflight3.is_valid
     assert preflight4.is_valid
+
+
+@pytest.mark.django_db
+def test_expire_preflights__multi_tenancy(preflight_result_factory, extra_site):
+    eleven_minutes_ago = timezone.now() - timedelta(minutes=11)
+    p1 = preflight_result_factory(status=PreflightResult.Status.complete)
+    PreflightResult.objects.filter(pk=p1.pk).update(created_at=eleven_minutes_ago)
+    with override_current_site_id(extra_site.id):
+        p2 = preflight_result_factory(status=PreflightResult.Status.complete)
+        PreflightResult.objects.filter(pk=p2.pk).update(created_at=eleven_minutes_ago)
+
+    expire_preflights()
+    p1.refresh_from_db()
+    p2.refresh_from_db()
+
+    assert (
+        not p1.is_valid and not p2.is_valid
+    ), "Expected `expire_preflights` to support Preflights from all Sites"
 
 
 @pytest.mark.django_db
@@ -374,6 +444,17 @@ class TestDeleteScratchOrg:
             delete_scratch_org(scratch_org)
 
             assert delete_scratch_org_on_sf.called
+
+    def test_multi_tenancy(self, scratch_org_factory, extra_site, mocker):
+        delete_on_sf = mocker.patch("metadeploy.api.jobs.delete_scratch_org_on_sf")
+        with override_current_site_id(extra_site.id):
+            scratch_org = scratch_org_factory()
+
+        delete_scratch_org(scratch_org)
+
+        assert (
+            delete_on_sf.called
+        ), "Expected `delete_scratch_org` to support orgs from all Sites"
 
 
 @pytest.mark.django_db(transaction=True)
@@ -612,6 +693,18 @@ class TestCreateScratchOrg:
             with pytest.raises(TypeError):
                 create_scratch_org(str(scratch_org.id))
 
+    def test_multi_tenancy(self, settings, scratch_org_factory, extra_site):
+        settings.METADEPLOY_FAST_FORWARD = True  # Bypass all calls to SF API
+        with override_current_site_id(extra_site.id):
+            scratch_org = scratch_org_factory(org_id=None)
+
+        create_scratch_org(scratch_org.id)
+        scratch_org.refresh_from_db()
+
+        assert (
+            scratch_org.org_id is not None
+        ), "Expected `create_scratch_org` to support orgs from all Sites"
+
 
 @pytest.mark.django_db
 class TestCalculateAveragePlanRuntime:
@@ -652,3 +745,16 @@ class TestCalculateAveragePlanRuntime:
         calculate_average_plan_runtime()
         plan.refresh_from_db()
         assert plan.calculated_average_duration is None
+
+    def test_multi_tenancy(self, plan_factory, extra_site, mocker):
+        mocker.patch("metadeploy.api.jobs.Plan.average_duration", return_value=123)
+        with override_current_site_id(extra_site.id):
+            plan = plan_factory()
+        assert plan.calculated_average_duration is None
+
+        calculate_average_plan_runtime()
+        plan.refresh_from_db()
+
+        assert (
+            plan.calculated_average_duration is not None
+        ), "Expected `calculate_average_plan_runtime` to support Plans from all Sites"

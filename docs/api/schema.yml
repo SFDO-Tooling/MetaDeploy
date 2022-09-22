@@ -434,6 +434,11 @@ paths:
         schema:
           type: integer
       - in: query
+        name: search
+        schema:
+          type: string
+        description: Search
+      - in: query
         name: slug
         schema:
           type: string
@@ -516,6 +521,36 @@ paths:
       responses:
         '302':
           description: No response body
+  /api/token/:
+    post:
+      operationId: token_create
+      description: |-
+        Allow users to specify their credentials in exchange for an auth token. Tokens
+        are unique per site.
+      tags:
+      - token
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AuthToken'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AuthToken'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthToken'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthToken'
+          description: ''
   /api/user/:
     get:
       operationId: user_retrieve
@@ -645,6 +680,22 @@ paths:
           description: ''
 components:
   schemas:
+    AuthToken:
+      type: object
+      properties:
+        username:
+          type: string
+          writeOnly: true
+        password:
+          type: string
+          writeOnly: true
+        token:
+          type: string
+          readOnly: true
+      required:
+      - password
+      - token
+      - username
     FullUser:
       type: object
       properties:

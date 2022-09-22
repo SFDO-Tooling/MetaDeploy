@@ -1,9 +1,12 @@
 import time
 
 from cumulusci.core.tasks import BaseTask
+from django.conf import settings
+from django.contrib.sites.models import Site
 from django.core.management.base import BaseCommand
 from django.utils.text import slugify
 
+from ....multitenancy import current_site_id
 from ...models import (
     AllowedList,
     Plan,
@@ -12,6 +15,7 @@ from ...models import (
     Product,
     ProductCategory,
     ProductSlug,
+    SiteProfile,
     Step,
     Version,
 )
@@ -39,6 +43,18 @@ class Fail(BaseTask):
 
 class Command(BaseCommand):
     help = "Add some sample data to the database."
+
+    def adjust_site_domain(self):
+        """
+        During local development, adjust the example Site record to match what the
+        documentation recommends so `CurrentSiteMiddleware` doesn't raise 404
+        """
+        if not settings.DEBUG:
+            return
+        site = Site.objects.filter(domain="example.com").first()
+        if site is not None:
+            site.domain = "localhost:8080"
+            site.save()
 
     def create_product(self, **kwargs):
         title = kwargs.pop("title", "Sample Product")
@@ -394,6 +410,11 @@ class Command(BaseCommand):
             Step.objects.create(plan=plan, **step)
 
     def handle(self, *args, **options):
+        self.adjust_site_domain()
+        SiteProfile.objects.get_or_create(
+            site_id=current_site_id(), defaults={"name": "Example"}
+        )
+
         sf_category = ProductCategory.objects.create(
             title="Salesforce.org Products",
             order_key=0,

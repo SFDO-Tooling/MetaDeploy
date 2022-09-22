@@ -152,6 +152,9 @@ export const createJob =
       payload,
     });
     const { pathname } = history.location;
+    const currentRoute = pathname.endsWith('/')
+      ? pathname.slice(0, -1)
+      : pathname;
     const { product_slug, version_label, version_is_most_recent, plan_slug } =
       payload;
     const matchingRoutes = [
@@ -163,7 +166,7 @@ export const createJob =
       );
     }
     /* istanbul ignore else */
-    if (matchingRoutes.includes(pathname)) {
+    if (matchingRoutes.includes(currentRoute)) {
       // redirect to job page, if still on plan-detail page
       const url = routes.job_detail(
         product_slug,

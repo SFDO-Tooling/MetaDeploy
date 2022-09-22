@@ -70,7 +70,7 @@ describe('getAction', () => {
       let expected = jobActions[action](payload);
       let actual = sockets.getAction(msg);
       if (thunk) {
-        const history = { location: {} };
+        const history = { location: { pathname: 'foo/' } };
         expected = expected((arg) => arg, undefined, history);
         actual = actual((arg) => arg, undefined, history);
       }

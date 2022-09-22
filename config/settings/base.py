@@ -87,7 +87,6 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "colorfield",
     "rest_framework",
-    "rest_framework.authtoken",
     "django_filters",
     "parler",
     "sfdo_template_helpers.oauth2.salesforce",
@@ -104,6 +103,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "metadeploy.multitenancy.middleware.CurrentSiteMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -258,8 +258,6 @@ TIME_ZONE = "UTC"
 
 USE_I18N = True
 
-USE_L10N = True
-
 USE_TZ = True
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -347,6 +345,8 @@ GITHUB_APP_ID = env("GITHUB_APP_ID", default=None)
 DOCKER_GITHUB_APP_KEY = env("DOCKER_GITHUB_APP_KEY", default="").replace("\\n", "\n")
 GITHUB_APP_KEY = env("GITHUB_APP_KEY", default=DOCKER_GITHUB_APP_KEY)
 
+# CCI expects this env var to be set to connect to GitHub
+os_environ["GITHUB_APP_KEY"] = GITHUB_APP_KEY
 
 if not GITHUB_TOKEN and not GITHUB_APP_ID and not GITHUB_APP_KEY:
     raise ImproperlyConfigured(
