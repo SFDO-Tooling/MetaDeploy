@@ -10,6 +10,7 @@ from django.db.models import Q
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import extend_schema
 from rest_framework import generics, mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -97,6 +98,10 @@ class GetOneMixin:
 
 
 class UserView(generics.RetrieveAPIView):
+    """
+    This is a degenerate endpoint that just shows some details of the current user.
+    """
+
     model = User
     serializer_class = FullUserSerializer
     permission_classes = (IsAuthenticated,)
@@ -116,6 +121,10 @@ class JobViewSet(
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet,
 ):
+    """
+    This is a constrained endpoint. You cannot list or meaningfully update.
+    """
+
     serializer_class = JobSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = (
@@ -127,6 +136,9 @@ class JobViewSet(
         "plan__version__product__productslug__slug",
     )
     permission_classes = (HasOrgOrReadOnly,)
+
+    # Used by drf-spectacular to infer path parameter types
+    queryset = Job.objects.none()
 
     def get_queryset(self):
         logger.info(">>> JobViewSet.get_queryset()")
@@ -150,6 +162,10 @@ class JobViewSet(
 
 
 class ProductCategoryViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    A `Category` is an organizing principle associated with `Products`.
+    """
+
     serializer_class = ProductCategorySerializer
     queryset = ProductCategory.objects.all()
 
@@ -157,6 +173,10 @@ class ProductCategoryViewSet(viewsets.ReadOnlyModelViewSet):
 class ProductViewSet(
     FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelViewSet
 ):
+    """
+    A `Product` is a set of `Versions` of metadata for your Salesforce org.
+    """
+
     serializer_class = ProductSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ProductFilter
@@ -171,6 +191,10 @@ class ProductViewSet(
 
 
 class VersionViewSet(GetOneMixin, viewsets.ReadOnlyModelViewSet):
+    """
+    A `Version` is a specific iteration of a `Product`.
+    """
+
     serializer_class = VersionSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = VersionFilter
@@ -180,6 +204,7 @@ class VersionViewSet(GetOneMixin, viewsets.ReadOnlyModelViewSet):
         logger.info(">>> VersionViewSet.get_queryset()")
         return Version.objects.exclude(is_listed=False)
 
+    @extend_schema(request=None, responses={200: PlanSerializer(many=True)})
     @action(detail=True, methods=["get"])
     def additional_plans(self, request, pk=None):
         version = self.get_object()
@@ -190,6 +215,12 @@ class VersionViewSet(GetOneMixin, viewsets.ReadOnlyModelViewSet):
 
 
 class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelViewSet):
+    """
+    A `Version` has many `Plans`, which detail the concrete steps to go through to apply
+    metadata to an org. Put another way, a `Plan` is like a particular set of options
+    for the `Version`.
+    """
+
     serializer_class = PlanSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = PlanFilter
@@ -261,6 +292,10 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
         serializer = PreflightResultSerializer(instance=preflight_result)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    @extend_schema(methods=["get"], responses={200: PreflightResultSerializer})
+    @extend_schema(
+        methods=["post"], request=None, responses={201: PreflightResultSerializer}
+    )
     @action(detail=True, methods=["post", "get"], permission_classes=(AllowAny,))
     def preflight(self, request, pk=None):
         if request.method == "GET":
@@ -318,6 +353,12 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
             status=status.HTTP_202_ACCEPTED,
         )
 
+    @extend_schema(methods=["get"], responses={200: ScratchOrgSerializer})
+    @extend_schema(
+        methods=["post"],
+        request=ScratchOrgSerializer,
+        responses={202: ScratchOrgSerializer},
+    )
     @action(detail=True, methods=["post", "get"], permission_classes=(AllowAny,))
     def scratch_org(self, request, pk=None):
         if request.method == "GET":
@@ -326,7 +367,7 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
             return self.scratch_org_post(request)
 
 
-class OrgViewSet(viewsets.ViewSet):
+class OrgViewSet(generics.RetrieveAPIView):
     permission_classes = (AllowAny,)
 
     @staticmethod
@@ -345,11 +386,12 @@ class OrgViewSet(viewsets.ViewSet):
             }
         ).data
 
-    def list(self, request):
+    @extend_schema(
+        responses={200: {"type": "object", "additionalProperties": {"type": "object"}}}
+    )
+    def get(self, request):
         """
-        This will return data on the user's current org(s). It is not a
-        list endpoint, but does not take a pk, so we have to implement
-        it this way.
+        This will return data on the user's current org(s).
         """
         response = {}
 
@@ -369,6 +411,10 @@ class ScratchOrgViewSet(viewsets.GenericViewSet):
     permission_classes = (AllowAny,)
     serializer_class = ScratchOrgSerializer
 
+    # Used by drf-spectacular to infer path parameter types
+    queryset = ScratchOrg.objects.none()
+
+    @extend_schema(request=None, responses={302: None})
     @action(detail=True, methods=["GET"])
     def redirect(self, request, pk=None):
         scratch_org = ScratchOrg.objects.filter(

@@ -1,8 +1,11 @@
 from collections import OrderedDict
+from typing import Optional
 
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+from drf_spectacular.extensions import OpenApiSerializerFieldExtension
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.fields import SkipField
 from rest_framework.relations import PKOnlyObject
@@ -26,6 +29,8 @@ from .paginators import ProductPaginator
 
 User = get_user_model()
 
+hash_id_openapi_schema = {"type": "string", "format": "HashID"}
+
 
 def get_from_data_or_instance(instance, data, name, default=None):
     value = data.get(name, getattr(instance, name, default))
@@ -35,6 +40,30 @@ def get_from_data_or_instance(instance, data, name, default=None):
     return value
 
 
+class HashIdFix(OpenApiSerializerFieldExtension):
+    # Fix drf_spectacular warnings about not knowing the return type of HashId fields
+    target_class = "hashid_field.rest.UnconfiguredHashidSerialField"
+
+    def map_serializer_field(self, auto_schema, direction):  # pragma: nocover
+        return hash_id_openapi_schema
+
+
+class HashIdModelSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
+
+
+class StringListField(serializers.ListField):
+    child = serializers.CharField()
+
+
+@extend_schema_field({"type": "object", "example": {"Lw7K5wK": [{"status": "ok"}]}})
+class StepResultsField(serializers.JSONField):
+    """
+    Each key is a Step ID and the value is an array of results for that Step
+    """
+
+
+@extend_schema_field(hash_id_openapi_schema)
 class IdOnlyField(serializers.Field):
     def __init__(self, *args, model=None, **kwargs):
         self.model = model
@@ -60,12 +89,12 @@ class ErrorWarningCountMixin:
                     pass
         return count
 
-    def get_error_count(self, obj):
+    def get_error_count(self, obj) -> int:
         if obj.status == self.Meta.model.Status.started:
             return 0
         return self._count_status_in_results(obj.results, ERROR)
 
-    def get_warning_count(self, obj):
+    def get_warning_count(self, obj) -> int:
         if obj.status == self.Meta.model.Status.started:
             return 0
         return self._count_status_in_results(obj.results, WARN)
@@ -114,10 +143,9 @@ class CircumspectSerializerMixin:
         return ret
 
 
-class FullUserSerializer(serializers.ModelSerializer):
-    id = serializers.CharField(read_only=True)
+class FullUserSerializer(HashIdModelSerializer):
     is_production_org = serializers.SerializerMethodField()
-    username = serializers.SerializerMethodField()
+    username = serializers.CharField(source="sf_username")
 
     class Meta:
         model = User
@@ -132,26 +160,19 @@ class FullUserSerializer(serializers.ModelSerializer):
             "is_staff",
         )
 
-    def get_is_production_org(self, obj):
+    def get_is_production_org(self, obj) -> bool:
         return obj.full_org_type == ORG_TYPES.Production
-
-    def get_username(self, obj):
-        return obj.sf_username
 
 
 class LimitedUserSerializer(serializers.ModelSerializer):
-    username = serializers.SerializerMethodField()
+    username = serializers.CharField(source="sf_username")
 
     class Meta:
         model = User
         fields = ("username", "is_staff")
 
-    def get_username(self, obj):
-        return obj.sf_username
 
-
-class StepSerializer(serializers.ModelSerializer):
-    id = serializers.CharField(read_only=True)
+class StepSerializer(HashIdModelSerializer):
     kind = serializers.CharField(source="get_kind_display")
     name = serializers.CharField()
     description = serializers.CharField()
@@ -169,8 +190,9 @@ class StepSerializer(serializers.ModelSerializer):
         )
 
 
-class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
-    id = serializers.CharField(read_only=True)
+class PlanSerializer(CircumspectSerializerMixin, HashIdModelSerializer):
+    slug = serializers.CharField(read_only=True)
+    old_slugs = StringListField(read_only=True)
     version = serializers.PrimaryKeyRelatedField(
         read_only=True, pk_field=serializers.CharField()
     )
@@ -179,8 +201,11 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
     title = serializers.CharField()
     preflight_message = serializers.SerializerMethodField()
     not_allowed_instructions = serializers.SerializerMethodField()
-    requires_preflight = serializers.SerializerMethodField()
-    average_duration = serializers.SerializerMethodField()
+    requires_preflight = serializers.BooleanField(read_only=True)
+    # Prefer the already calculated value instead of the expensive `Plan.average_duration`
+    average_duration = serializers.IntegerField(
+        source="calculated_average_duration", read_only=True
+    )
 
     class Meta:
         model = Plan
@@ -204,7 +229,7 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
         )
         circumspect_fields = ("steps", "preflight_message")
 
-    def get_preflight_message(self, obj):
+    def get_preflight_message(self, obj) -> str:
         return (
             getattr(obj.plan_template, "preflight_message_markdown", "")
             + obj.preflight_message_additional_markdown
@@ -213,21 +238,13 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
     def circumspect_visible(self, obj, user):
         return obj.is_visible_to(user) and obj.version.product.is_visible_to(user)
 
-    def get_is_allowed(self, obj):
+    def get_is_allowed(self, obj) -> bool:
         return obj.is_visible_to(self.context["request"].user)
 
-    def get_not_allowed_instructions(self, obj):
+    def get_not_allowed_instructions(self, obj) -> str:
         if not obj.version.product.is_visible_to(self.context["request"].user):
             return getattr(obj.version.product.visible_to, "description_markdown", None)
         return getattr(obj.visible_to, "description_markdown", None)
-
-    def get_requires_preflight(self, obj):
-        return obj.requires_preflight
-
-    def get_average_duration(self, obj):
-        """Plan.average_duration is an expensive query,
-        so we prefer the already calculated value if available."""
-        return obj.calculated_average_duration
 
     def validate(self, data):
         """
@@ -251,8 +268,7 @@ class PlanSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
         return data
 
 
-class VersionSerializer(serializers.ModelSerializer):
-    id = serializers.CharField(read_only=True)
+class VersionSerializer(HashIdModelSerializer):
     product = serializers.PrimaryKeyRelatedField(
         read_only=True, pk_field=serializers.CharField()
     )
@@ -278,6 +294,9 @@ class ProductCategorySerializer(serializers.ModelSerializer):
     description = serializers.CharField(source="description_markdown")
     first_page = serializers.SerializerMethodField()
 
+    # Parler fields require explicit typing to generate the API schema
+    title = serializers.CharField()
+
     class Meta:
         model = ProductCategory
         fields = ("id", "title", "description", "is_listed", "first_page")
@@ -298,6 +317,19 @@ class ProductCategorySerializer(serializers.ModelSerializer):
         """
         return None
 
+    @extend_schema_field(
+        {
+            "properties": {
+                "count": {"type": "number", "format": "int"},
+                "next": {"type": "string", "format": "uri"},
+                "previous": {"type": "string", "format": "uri"},
+                "results": {
+                    "type": "array",
+                    "items": {"$ref": "#/components/schemas/Product"},
+                },
+            }
+        }
+    )
     def get_first_page(self, obj):
         paginator = ProductPaginator()
         qs = self._get_product_qs(obj)
@@ -321,8 +353,9 @@ class ProductCategorySerializer(serializers.ModelSerializer):
         return qs
 
 
-class ProductSerializer(CircumspectSerializerMixin, serializers.ModelSerializer):
-    id = serializers.CharField(read_only=True)
+class ProductSerializer(CircumspectSerializerMixin, HashIdModelSerializer):
+    slug = serializers.CharField(read_only=True)
+    old_slugs = StringListField(read_only=True)
     category = serializers.CharField(source="category.title")
     most_recent_version = VersionSerializer()
     is_allowed = serializers.SerializerMethodField()
@@ -361,29 +394,31 @@ class ProductSerializer(CircumspectSerializerMixin, serializers.ModelSerializer)
     def circumspect_visible(self, obj, user):
         return obj.is_visible_to(user)
 
-    def get_is_allowed(self, obj):
+    def get_is_allowed(self, obj) -> bool:
         return obj.is_visible_to(self.context["request"].user)
 
-    def get_is_listed(self, obj):
+    def get_is_listed(self, obj) -> bool:
         return obj.is_listed and not obj.is_listed_by_org_only(
             self.context["request"].user
         )
 
-    def get_not_allowed_instructions(self, obj):
+    def get_not_allowed_instructions(self, obj) -> Optional[str]:
         return getattr(obj.visible_to, "description_markdown", None)
 
 
-class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
-    id = serializers.CharField(read_only=True)
+class JobSerializer(ErrorWarningCountMixin, HashIdModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     org_name = serializers.SerializerMethodField()
     instance_url = serializers.SerializerMethodField()
     org_id = serializers.SerializerMethodField()
     is_production_org = serializers.SerializerMethodField()
-    product_slug = serializers.SerializerMethodField()
-    version_label = serializers.SerializerMethodField()
+    product_slug = serializers.CharField(
+        source="plan.version.product.slug", read_only=True
+    )
+    version_label = serializers.CharField(source="plan.version.label", read_only=True)
     version_is_most_recent = serializers.SerializerMethodField()
-    plan_slug = serializers.SerializerMethodField()
+    plan_slug = serializers.CharField(source="plan.slug", read_only=True)
+    results = StepResultsField(required=False)
 
     plan = serializers.PrimaryKeyRelatedField(
         queryset=Plan.objects.all(), pk_field=serializers.CharField()
@@ -456,49 +491,42 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         except (AttributeError, KeyError):
             return False
 
-    def get_message(self, obj):
+    def get_message(self, obj) -> str:
         return (
             getattr(obj.plan.plan_template, "post_install_message_markdown", "")
             + obj.plan.post_install_message_additional_markdown
         )
 
-    def get_user_can_edit(self, obj):
+    def get_user_can_edit(self, obj) -> bool:
         return self.requesting_user_has_rights(include_staff=False)
 
+    @extend_schema_field(LimitedUserSerializer(allow_null=True))
     def get_creator(self, obj):
         if obj.user and self.requesting_user_has_rights():
             return LimitedUserSerializer(instance=obj.user).data
         return None
 
-    def get_org_id(self, obj):
+    def get_org_id(self, obj) -> Optional[str]:
         if self.requesting_user_has_rights():
             return obj.org_id
         return None
 
-    def get_org_name(self, obj):
+    def get_org_name(self, obj) -> Optional[str]:
         if self.requesting_user_has_rights():
             return obj.org_name
         return None
 
-    def get_instance_url(self, obj):
+    @extend_schema_field(serializers.URLField(allow_null=True))
+    def get_instance_url(self, obj) -> Optional[str]:
         if self.requesting_user_has_rights():
             return obj.instance_url
         return None
 
-    def get_is_production_org(self, obj):
+    def get_is_production_org(self, obj) -> bool:
         return obj.full_org_type == ORG_TYPES.Production
 
-    def get_product_slug(self, obj):
-        return obj.plan.version.product.slug
-
-    def get_version_label(self, obj):
-        return obj.plan.version.label
-
-    def get_version_is_most_recent(self, obj):
+    def get_version_is_most_recent(self, obj) -> bool:
         return obj.plan.version == obj.plan.version.product.most_recent_version
-
-    def get_plan_slug(self, obj):
-        return obj.plan.slug
 
     @staticmethod
     def _has_valid_preflight(most_recent_preflight, plan):
@@ -608,15 +636,16 @@ class JobSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
         return data
 
 
-class PreflightResultSerializer(ErrorWarningCountMixin, serializers.ModelSerializer):
-    id = serializers.CharField(read_only=True)
+class PreflightResultSerializer(ErrorWarningCountMixin, HashIdModelSerializer):
     plan = IdOnlyField(read_only=True)
     user = IdOnlyField(read_only=True)
     is_ready = serializers.SerializerMethodField()
     error_count = serializers.SerializerMethodField()
     warning_count = serializers.SerializerMethodField()
+    instance_url = serializers.URLField(read_only=True, allow_null=True)
+    results = StepResultsField(read_only=True)
 
-    def get_is_ready(self, obj):
+    def get_is_ready(self, obj) -> bool:
         return (
             obj.is_valid
             and obj.status == PreflightResult.Status.complete
@@ -641,18 +670,15 @@ class PreflightResultSerializer(ErrorWarningCountMixin, serializers.ModelSeriali
             "is_ready",
         )
         extra_kwargs = {
-            "instance_url": {"read_only": True},
             "org_id": {"read_only": True},
             "created_at": {"read_only": True},
             "edited_at": {"read_only": True},
             "is_valid": {"read_only": True},
             "status": {"read_only": True},
-            "results": {"read_only": True},
         }
 
 
-class JobSummarySerializer(serializers.ModelSerializer):
-    id = serializers.CharField(read_only=True)
+class JobSummarySerializer(HashIdModelSerializer):
     product_slug = serializers.CharField(source="plan.version.product.slug")
     version_label = serializers.CharField(source="plan.version.label")
     plan_slug = serializers.CharField(source="plan.slug")
@@ -668,7 +694,7 @@ class JobSummarySerializer(serializers.ModelSerializer):
             "plan_average_duration",
         )
 
-    def get_plan_average_duration(self, obj):
+    def get_plan_average_duration(self, obj) -> Optional[int]:
         if obj.plan.calculated_average_duration:
             return obj.plan.calculated_average_duration
         return None
@@ -699,7 +725,7 @@ class SiteSerializer(serializers.ModelSerializer):
         )
 
 
-class ScratchOrgSerializer(serializers.ModelSerializer):
+class ScratchOrgSerializer(HashIdModelSerializer):
     class Meta:
         model = ScratchOrg
         fields = (
@@ -725,5 +751,4 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "uuid": {"read_only": True},
         }
 
-    id = serializers.CharField(read_only=True)
     plan = IdOnlyField(model=Plan)
