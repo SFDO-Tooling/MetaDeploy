@@ -1,11 +1,12 @@
+from django.conf import settings
 from drf_spectacular.generators import EndpointEnumerator, SchemaGenerator
 
 
 class MetaDeployEndpointEnumerator(EndpointEnumerator):
-    """Don't include the admin API in the schema and documentation"""
+    """Don't include the Tenant Admin API in the schema and documentation"""
 
     def should_include_endpoint(self, path, callback):
-        if path.startswith("/admin/rest/"):
+        if path.startswith(f"/{settings.TENANT_AREA_PREFIX}"):
             return False
         return super().should_include_endpoint(path, callback)
 
