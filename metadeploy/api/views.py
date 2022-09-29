@@ -2,6 +2,7 @@ from functools import reduce
 from logging import getLogger
 
 import django_rq
+from django.contrib.auth.models import AnonymousUser
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core import exceptions
@@ -16,6 +17,7 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from metadeploy.api.constants import REDIS_JOB_CANCEL_KEY
 from metadeploy.api.filters import PlanFilter, ProductFilter, VersionFilter
@@ -110,6 +112,23 @@ class UserView(generics.RetrieveAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+class UserInfoView(APIView):
+    """
+    This is an endpoint to show the user id of the current user.
+    """
+
+    permission_classes = ()
+
+    def get(self, request):
+        # check to see if user is logged in
+        if isinstance(self.request.user, AnonymousUser):
+            return Response(
+                "You are not logged in. Please login to view information about your user."
+            )
+        else:
+            return Response({"username": f"{self.request.user.username}"})
 
 
 class ObtainTokenView(ObtainAuthToken):
