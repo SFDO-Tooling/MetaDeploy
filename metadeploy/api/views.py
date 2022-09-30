@@ -114,7 +114,7 @@ class UserView(generics.RetrieveAPIView):
         return self.request.user
 
 
-class UserInfoView(APIView):
+class UserInfoView(generics.GenericAPIView):
     """
     This is an endpoint to show the user id of the current user.
     """
