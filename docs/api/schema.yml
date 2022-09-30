@@ -568,6 +568,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/FullUser'
           description: ''
+  /api/userinfo/:
+    get:
+      operationId: userinfo_retrieve
+      description: This is an endpoint to show the user id of the current user.
+      tags:
+      - userinfo
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LimitedUser'
+          description: ''
   /api/versions/:
     get:
       operationId: versions_list
