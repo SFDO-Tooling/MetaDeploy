@@ -162,6 +162,11 @@ class UserManager(BaseUserManager):
 class User(HashIdMixin, AbstractUser):
     objects = UserManager()
 
+    do_not_delete = models.BooleanField(
+        default=False,
+        help_text="Do not delete User during monthly User clean up job",
+    )
+
     def subscribable_by(self, user, session):
         return self == user
 

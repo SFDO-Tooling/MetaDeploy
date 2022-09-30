@@ -49,12 +49,14 @@ def test_delete_old_users(user_factory):
     new_user = user_factory()
     old_user = user_factory(last_login=two_months_ago)
     staff_user = user_factory(last_login=two_months_ago, is_staff=True)
+    another_user = user_factory(last_login=two_months_ago, do_not_delete=True)
 
     delete_old_users()
 
     # make sure only the old user was deleted
     new_user.refresh_from_db()
     staff_user.refresh_from_db()
+    another_user.refresh_from_db()
     with pytest.raises(User.DoesNotExist):
         old_user.refresh_from_db()
 

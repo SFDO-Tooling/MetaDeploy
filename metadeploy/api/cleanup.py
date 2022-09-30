@@ -63,7 +63,9 @@ def delete_old_users():
     Deletes users who have not logged in for 30 days, unless they have the is_staff flag.
     """
     month_ago = timezone.now() - timedelta(days=30)
-    User.objects.filter(is_staff=False, last_login__lte=month_ago).delete()
+    User.objects.filter(
+        is_staff=False, last_login__lte=month_ago, do_not_delete=False
+    ).delete()
 
 
 @disable_site_filtering()
