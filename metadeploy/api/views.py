@@ -17,7 +17,6 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from metadeploy.api.constants import REDIS_JOB_CANCEL_KEY
 from metadeploy.api.filters import PlanFilter, ProductFilter, VersionFilter
@@ -123,8 +122,6 @@ class UserInfoView(generics.GenericAPIView):
     permission_classes = ()
 
     def get_serializer_class(self):
-        if isinstance(self.request.user, AnonymousUser):
-            return FullUserSerializer
         return LimitedUserSerializer
 
     def get(self, request):
