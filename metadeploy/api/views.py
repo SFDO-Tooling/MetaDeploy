@@ -38,6 +38,7 @@ from metadeploy.api.permissions import HasOrgOrReadOnly
 from metadeploy.api.serializers import (
     FullUserSerializer,
     JobSerializer,
+    LimitedUserSerializer,
     OrgSerializer,
     PlanSerializer,
     PreflightResultSerializer,
@@ -120,6 +121,11 @@ class UserInfoView(generics.GenericAPIView):
     """
 
     permission_classes = ()
+
+    def get_serializer_class(self):
+        if isinstance(self.request.user, AnonymousUser):
+            return FullUserSerializer
+        return LimitedUserSerializer
 
     def get(self, request):
         # check to see if user is logged in
