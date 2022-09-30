@@ -136,6 +136,15 @@ class UserInfoView(generics.GenericAPIView):
         else:
             return Response({"username": f"{self.request.user.username}"})
 
+    def get_queryset(self):
+        # check to see if user is logged in
+        if isinstance(self.request.user, AnonymousUser):
+            return Response(
+                "You are not logged in. Please login to view information about your user."
+            )
+        else:
+            return Response({"username": f"{self.request.user.username}"})
+
 
 class ObtainTokenView(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
