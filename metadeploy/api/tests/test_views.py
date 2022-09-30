@@ -68,6 +68,23 @@ class TestUserView:
 
 
 @pytest.mark.django_db
+class TestUserInfoView:
+    def test_ok(self, client):
+        response = client.get("/api/userinfo/")
+
+        assert response.status_code == 200
+
+    #     assert response.json()["username"].endswith("@example.com")
+
+    # def test_multi_tenancy(self, client, extra_site):
+    #     response = client.get(reverse("user"), SERVER_NAME=extra_site.domain)
+
+    #     assert (
+    #         response.status_code == 200
+    #     ), "Users should be able to authenticate on all Sites using sessions"
+
+
+@pytest.mark.django_db
 class TestObtainTokenView:
     def test_multi_tenancy(self, anon_client, user_factory, extra_site):
         url = reverse("token")
