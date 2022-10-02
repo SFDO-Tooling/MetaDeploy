@@ -69,19 +69,23 @@ class TestUserView:
 
 @pytest.mark.django_db
 class TestUserInfoView:
-    def test_ok(self, client):
+    def test_userinfo_ok(self, client):
         response = client.get("/api/userinfo/")
 
         assert response.status_code == 200
 
-    #     assert response.json()["username"].endswith("@example.com")
+        assert response.json()["username"].endswith("user3")
 
-    # def test_multi_tenancy(self, client, extra_site):
-    #     response = client.get(reverse("user"), SERVER_NAME=extra_site.domain)
 
-    #     assert (
-    #         response.status_code == 200
-    #     ), "Users should be able to authenticate on all Sites using sessions"
+@pytest.mark.django_db
+class TestUserInfoView:
+    def test_userinfo_not_signed_in(self, anon_client):
+        response = anon_client.get("/api/userinfo/")
+        assert response.status_code == 200
+        assert (
+            response.json()
+            == "You are not logged in. Please login to view information about your user."
+        )
 
 
 @pytest.mark.django_db
