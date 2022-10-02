@@ -76,6 +76,7 @@ class TestUserInfoView:
         assert response.status_code == 200
         # simple assertion until we determine how to get the username
         assert "user" in response.json()["username"]
+        assert response.json() == {"username": response.json()["username"]}
 
     def test_userinfo_not_signed_in(self, anon_client):
         """Test to ensure UserInfoView returns proper sign in prompt when not logged in."""
