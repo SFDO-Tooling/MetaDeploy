@@ -70,16 +70,15 @@ class TestUserView:
 @pytest.mark.django_db
 class TestUserInfoView:
     def test_userinfo_ok(self, client):
+        """Test to ensure UserInfoView returns just a username for the payload."""
         response = client.get("/api/userinfo/")
 
         assert response.status_code == 200
 
         assert response.json()["username"].endswith("user3")
 
-
-@pytest.mark.django_db
-class TestUserInfoView:
     def test_userinfo_not_signed_in(self, anon_client):
+        """Test to ensure UserInfoView returns proper sign in prompt when not logged in."""
         response = anon_client.get("/api/userinfo/")
         assert response.status_code == 200
         assert (
