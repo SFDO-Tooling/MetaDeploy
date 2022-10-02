@@ -122,7 +122,7 @@ class UserInfoView(generics.GenericAPIView):
     permission_classes = ()
 
     def get_serializer_class(self):
-        return LimitedUserSerializer
+        pass
 
     def get(self, request):
         # check to see if user is logged in
@@ -134,7 +134,6 @@ class UserInfoView(generics.GenericAPIView):
             return Response({"username": f"{self.request.user.username}"})
 
     def get_queryset(self):
-        # check to see if user is logged in
         pass
 
 
