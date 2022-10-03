@@ -289,7 +289,7 @@ class UserAdmin(AdminHelpTextMixin, BaseUserAdmin):
         (
             "Additional info",
             {
-                "fields": ("do_not_delete",),
+                "fields": ("is_persistent",),
             },
         ),
         ("Personal info", {"fields": ("first_name", "last_name", "email")}),
@@ -312,7 +312,7 @@ class UserAdmin(AdminHelpTextMixin, BaseUserAdmin):
         (
             "Additional info",
             {
-                "fields": ("do_not_delete",),
+                "fields": ("is_persistent",),
             },
         ),
         ("Personal info", {"fields": ("first_name", "last_name", "email")}),

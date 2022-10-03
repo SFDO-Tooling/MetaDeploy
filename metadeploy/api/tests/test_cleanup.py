@@ -49,7 +49,7 @@ def test_delete_old_users(user_factory):
     new_user = user_factory()
     old_user = user_factory(last_login=two_months_ago)
     staff_user = user_factory(last_login=two_months_ago, is_staff=True)
-    another_user = user_factory(last_login=two_months_ago, do_not_delete=True)
+    another_user = user_factory(last_login=two_months_ago, is_persistent=True)
 
     delete_old_users()
 

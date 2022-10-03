@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name="user",
-            name="do_not_delete",
+            name="is_persistent",
             field=models.BooleanField(
                 default=False,
                 help_text="Do not delete User during monthly User clean up job",

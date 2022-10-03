@@ -162,9 +162,9 @@ class UserManager(BaseUserManager):
 class User(HashIdMixin, AbstractUser):
     objects = UserManager()
 
-    do_not_delete = models.BooleanField(
+    is_persistent = models.BooleanField(
         default=False,
-        help_text="Do not delete User during monthly User clean up job",
+        help_text="Denotes whether a user should be skipped when the delete_old_users job executes.",
     )
 
     def subscribable_by(self, user, session):

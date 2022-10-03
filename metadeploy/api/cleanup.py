@@ -64,7 +64,7 @@ def delete_old_users():
     """
     month_ago = timezone.now() - timedelta(days=30)
     User.objects.filter(
-        is_staff=False, last_login__lte=month_ago, do_not_delete=False
+        is_staff=False, last_login__lte=month_ago, is_persistent=False
     ).delete()
 
 
