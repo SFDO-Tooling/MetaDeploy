@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             name="is_persistent",
             field=models.BooleanField(
                 default=False,
-                help_text="Do not delete User during monthly User clean up job",
+                help_text="Denotes whether a user should be skipped when the delete_old_users job executes.",
             ),
         ),
     ]
