@@ -172,6 +172,10 @@ class LimitedUserSerializer(serializers.ModelSerializer):
         fields = ("username", "is_staff")
 
 
+class UserInfoSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=256)
+
+
 class StepSerializer(HashIdModelSerializer):
     kind = serializers.CharField(source="get_kind_display")
     name = serializers.CharField()
