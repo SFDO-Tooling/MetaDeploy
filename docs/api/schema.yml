@@ -571,7 +571,7 @@ paths:
   /api/userinfo/:
     get:
       operationId: userinfo_retrieve
-      description: This is an endpoint to show the user id of the current user.
+      description: If authenticated, returns the current user's username.
       tags:
       - userinfo
       security:
@@ -582,7 +582,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LimitedUser'
+                $ref: '#/components/schemas/UserInfo'
           description: ''
   /api/versions/:
     get:
@@ -1338,6 +1338,14 @@ components:
       - secondary
       - additional
       type: string
+    UserInfo:
+      type: object
+      properties:
+        username:
+          type: string
+          maxLength: 256
+      required:
+      - username
     Version:
       type: object
       properties:
