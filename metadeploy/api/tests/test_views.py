@@ -74,8 +74,6 @@ class TestUserInfoView:
         response = client.get("/api/userinfo/")
 
         assert response.status_code == 200
-        # simple assertion until we determine how to get the username
-        assert "user" in response.json()["username"]
         assert response.json() == {"username": response.json()["username"]}
 
     def test_userinfo_not_signed_in(self, anon_client):
