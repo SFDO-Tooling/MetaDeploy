@@ -81,11 +81,10 @@ class TestUserInfoView:
     def test_userinfo_not_signed_in(self, anon_client):
         """Test to ensure UserInfoView returns proper sign in prompt when not logged in."""
         response = anon_client.get("/api/userinfo/")
-        assert response.status_code == 200
-        assert (
-            response.json()
-            == "You are not logged in. Please login to view information about your user."
-        )
+        assert response.status_code == 401
+        assert response.json() == {
+            "detail": "Please login to view information about your user."
+        }
 
 
 @pytest.mark.django_db

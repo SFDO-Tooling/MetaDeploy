@@ -13,6 +13,7 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics, mixins, status, viewsets
+import rest_framework.exceptions as drf_exceptions
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -44,6 +45,7 @@ from metadeploy.api.serializers import (
     ProductCategorySerializer,
     ProductSerializer,
     ScratchOrgSerializer,
+    UserInfoSerializer,
     VersionSerializer,
 )
 
@@ -119,21 +121,16 @@ class UserInfoView(generics.GenericAPIView):
     If authenticated, returns the current user's username.
     """
 
+    serializer_class = UserInfoSerializer
     permission_classes = ()
-
-    def get_serializer_class(self):
-        return LimitedUserSerializer
 
     def get(self, request):
         # check to see if user is logged in
         if isinstance(request.user, AnonymousUser):
-            return Response(
-                "Please login to view information about your user."
+            raise drf_exceptions.NotAuthenticated(
+                detail="Please login to view information about your user."
             )
-        else:
-            return Response({"username": self.request.user.username})
-    def get_queryset(self):
-        pass
+        return Response({"username": request.user.username})
 
 
 class ObtainTokenView(ObtainAuthToken):
