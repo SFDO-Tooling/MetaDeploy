@@ -116,7 +116,7 @@ class UserView(generics.RetrieveAPIView):
 
 class UserInfoView(generics.GenericAPIView):
     """
-    This is an endpoint to show the user id of the current user.
+    If authenticated, returns the current user's username.
     """
 
     permission_classes = ()
@@ -126,13 +126,12 @@ class UserInfoView(generics.GenericAPIView):
 
     def get(self, request):
         # check to see if user is logged in
-        if isinstance(self.request.user, AnonymousUser):
+        if isinstance(request.user, AnonymousUser):
             return Response(
-                "You are not logged in. Please login to view information about your user."
+                "Please login to view information about your user."
             )
         else:
-            return Response({"username": f"{self.request.user.username}"})
-
+            return Response({"username": self.request.user.username})
     def get_queryset(self):
         pass
 
