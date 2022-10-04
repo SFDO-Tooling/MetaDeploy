@@ -38,7 +38,6 @@ from metadeploy.api.permissions import HasOrgOrReadOnly
 from metadeploy.api.serializers import (
     FullUserSerializer,
     JobSerializer,
-    LimitedUserSerializer,
     OrgSerializer,
     PlanSerializer,
     PreflightResultSerializer,
