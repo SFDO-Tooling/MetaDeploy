@@ -68,20 +68,36 @@ class TestUserView:
 
 
 @pytest.mark.django_db
-class TestObtainTokenView:
+class TestResetTokenView:
+    def test_reset(self, anon_client, user_factory, extra_site):
+        url = reverse("token")
+        user = user_factory()
+        data = {"username": user.username, "password": "foobar"}
+
+        token1 = Token.objects.create(user=user)
+
+        response = anon_client.post(url, data=data)
+        assert response.data.get("token") is not token1.key
+
+    def test_not_authorized(self, anon_client, user_factory, extra_site):
+        url = reverse("token")
+        user = user_factory()
+        data = {"username": user.username, "password": "foobar"}
+
+        response = anon_client.post(url, data=data)
+        assert response.status_code == 403
+
     def test_multi_tenancy(self, anon_client, user_factory, extra_site):
         url = reverse("token")
         user = user_factory()
         data = {"username": user.username, "password": "foobar"}
-        token1 = Token.objects.create(user=user)
-        with override_current_site_id(extra_site.id):
-            token2 = Token.objects.create(user=user)
 
-        response = anon_client.post(url, data=data)
-        assert response.data.get("token") == token1.key
+        # Generate token for user under normal tenant
+        _ = Token.objects.create(user=user)
 
+        # anon client should not have token
         response = anon_client.post(url, data=data, SERVER_NAME=extra_site.domain)
-        assert response.data.get("token") == token2.key
+        assert response.status_code == 403
 
 
 @pytest.mark.django_db

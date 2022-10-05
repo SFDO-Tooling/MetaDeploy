@@ -112,7 +112,7 @@ class UserView(generics.RetrieveAPIView):
         return self.request.user
 
 
-class ObtainTokenView(ObtainAuthToken):
+class ResetTokenView(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
         """
         Allow users to specify their credentials in exchange for an auth token. Tokens
@@ -120,8 +120,21 @@ class ObtainTokenView(ObtainAuthToken):
         """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data["user"]
-        token, _ = Token.objects.get_or_create(user=user)
+        user = serializer.validated_data["user"]  # type: ignore
+
+        # Limit token creation to authorized users tenant.
+        try:
+            token = Token.objects.get(user=user)
+        except Token.DoesNotExist:
+            return Response(
+                "Unauthorized. Credentials could not be validated, or User token has not been provisioned yet",
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        # reset token
+        token.delete()
+        token = Token.objects.create(user=user)
+
         return Response({"token": token.key})
 
 

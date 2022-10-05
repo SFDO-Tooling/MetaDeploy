@@ -5,7 +5,7 @@ from rest_framework import routers
 
 from .views import (
     JobViewSet,
-    ObtainTokenView,
+    ResetTokenView,
     OrgViewSet,
     PlanViewSet,
     ProductCategoryViewSet,
@@ -25,7 +25,7 @@ router.register("scratch-orgs", ScratchOrgViewSet, basename="scratch-org")
 urlpatterns = router.urls + [
     path("user/", UserView.as_view(), name="user"),
     path("orgs/", OrgViewSet.as_view(), name="org-list"),
-    path("token/", ObtainTokenView.as_view(), name="token"),
+    path("token/", ResetTokenView.as_view(), name="token"),
 ]
 
 if settings.API_DOCS_ENABLED:  # pragma: nocover
