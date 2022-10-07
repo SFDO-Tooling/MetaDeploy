@@ -333,8 +333,8 @@ class UserAdmin(AdminHelpTextMixin, BaseUserAdmin):
 
 @admin.register(Token)
 class TokenAdmin(admin.ModelAdmin):
-    list_display = ("key", "user", "created")
-    fields = ("user",)
+    list_display = ("key", "user", "site", "created")
+    fields = ("user", "site")
     ordering = ("-created",)
 
 

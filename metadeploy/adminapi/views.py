@@ -4,6 +4,8 @@ from django.utils.translation import gettext_lazy as _
 from django_filters import rest_framework as filters
 from rest_framework import generics, permissions, serializers, status, viewsets
 from rest_framework.response import Response
+from rest_framework.authentication import TokenAuthentication
+
 from sfdo_template_helpers.admin.serializers import AdminAPISerializer
 from sfdo_template_helpers.admin.views import AdminAPIViewSet as BaseAdminAPIViewSet
 
@@ -24,7 +26,8 @@ class StrictDjangoModelPermissions(permissions.DjangoModelPermissions):
 
 
 class AdminAPIViewSet(BaseAdminAPIViewSet):
-    permission_classes = [permissions.IsAdminUser, StrictDjangoModelPermissions]
+    permission_classes = [StrictDjangoModelPermissions]
+    authentication_classes = [TokenAuthentication]
 
 
 class ExcludeSiteSerializer(AdminAPISerializer):

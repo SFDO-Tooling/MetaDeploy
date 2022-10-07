@@ -7,7 +7,8 @@ from django.http import Http404
 
 from . import override_current_site_id
 
-ADMIN_PREFIX = f"/{settings.ADMIN_AREA_PREFIX}/".replace("//", "/")
+ADMIN_URL = f"/{settings.ADMIN_URL}/".replace("//", "/")
+TENANT_URL = f"/{settings.TENANT_AREA_PREFIX}/".replace("//", "/")
 
 
 def site_id_for_host(host: str) -> int:
@@ -47,9 +48,9 @@ class CurrentSiteMiddleware:
 
     def __call__(self, request):
         site_id = None
-        is_admin = request.path.startswith(ADMIN_PREFIX)
-        is_admin_rest = request.path.startswith(f"{ADMIN_PREFIX}rest/")
-        if is_admin and not is_admin_rest:
+        is_admin_url = request.path.startswith(ADMIN_URL)
+        is_tenant_url = request.path.startswith(f"{TENANT_URL}rest/")
+        if is_admin_url and not is_tenant_url:
             site_id = request.session.get("site_id", None)
 
         if not site_id:

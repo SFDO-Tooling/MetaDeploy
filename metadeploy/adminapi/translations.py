@@ -25,7 +25,7 @@ def update_all_translations(lang, site_id):
 
 def update_translations(obj, langs=None):
     """Update one object's translations from the Translation model"""
-    # Make sure we were pased an object in the default language
+    # Make sure we were passed an object in the default language
     assert obj.get_current_language() == settings.LANGUAGE_CODE
     strategy, context = obj.get_translation_strategy()
     if langs is None:

@@ -19,12 +19,13 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path, re_path
 from django.views.decorators.csrf import ensure_csrf_cookie
-from django.views.generic import RedirectView, TemplateView
+from django.views.generic import TemplateView
 
 from . import views
 from .routing import websockets
 
-PREFIX = settings.ADMIN_AREA_PREFIX
+ADMIN_URL = settings.ADMIN_URL
+TENANT_AREA_PREFIX = settings.TENANT_AREA_PREFIX
 
 # Custom error views
 handler403 = "metadeploy.views.custom_permission_denied_view"
@@ -32,14 +33,14 @@ handler500 = "metadeploy.views.custom_500_view"
 
 
 urlpatterns = [
-    path(urljoin(PREFIX, r"django-rq/"), include("django_rq.urls")),
+    # TENANT_AREA_PREFIX is accessible to Tenant Admins
     path(
-        urljoin(PREFIX, r"rest/"),
+        urljoin(TENANT_AREA_PREFIX, r"rest/"),
         include("metadeploy.adminapi.urls", namespace="admin_rest"),
     ),
-    # Put this after all other things using `PREFIX`:
-    re_path(PREFIX.rstrip("/") + "$", RedirectView.as_view(url=f"/{PREFIX}")),
-    path(PREFIX, admin.site.urls),
+    # Everything under ADMIN_URL is only accessible to super users
+    path(urljoin(ADMIN_URL, r"django-rq/"), include("django_rq.urls")),
+    path(ADMIN_URL, admin.site.urls),
     path("set-site/", views.set_site, name="set_site"),
     path("accounts/", include("allauth.urls")),
     path("api/", include("metadeploy.api.urls")),

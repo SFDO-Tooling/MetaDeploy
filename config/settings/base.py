@@ -155,7 +155,11 @@ AUTH_USER_MODEL = "api.User"
 # URL configuration:
 ROOT_URLCONF = "metadeploy.urls"
 
-ADMIN_AREA_PREFIX = env("DJANGO_ADMIN_URL", default="admin/").rstrip("/") + "/"
+ADMIN_URL = env("DJANGO_ADMIN_URL", default="admin/").rstrip("/") + "/"
+TENANT_AREA_PREFIX = env("TENANT_AREA_PREFIX", default="tenant/").rstrip("/") + "/"
+# For backwards compatability with
+# sfdo_template_helpers AdminRestrictMiddleware
+ADMIN_AREA_PREFIX = TENANT_AREA_PREFIX
 
 ADMIN_API_ALLOWED_SUBNETS = [
     IPv4Network(net)
