@@ -11,6 +11,7 @@ from .views import (
     ProductCategoryViewSet,
     ProductViewSet,
     ScratchOrgViewSet,
+    UserInfoView,
     UserView,
     VersionViewSet,
 )
@@ -24,6 +25,7 @@ router.register("categories", ProductCategoryViewSet, basename="productcategory"
 router.register("scratch-orgs", ScratchOrgViewSet, basename="scratch-org")
 urlpatterns = router.urls + [
     path("user/", UserView.as_view(), name="user"),
+    path("userinfo/", UserInfoView.as_view(), name="user-info"),
     path("orgs/", OrgViewSet.as_view(), name="org-list"),
     path("token/reset/", ResetTokenView.as_view(), name="token"),
 ]

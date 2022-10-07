@@ -2,6 +2,7 @@ from functools import reduce
 from logging import getLogger
 
 import django_rq
+from django.contrib.auth.models import AnonymousUser
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core import exceptions
@@ -12,6 +13,8 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics, mixins, status, viewsets
+import rest_framework.exceptions as drf_exceptions
+from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -43,6 +46,7 @@ from metadeploy.api.serializers import (
     ProductCategorySerializer,
     ProductSerializer,
     ScratchOrgSerializer,
+    UserInfoSerializer,
     VersionSerializer,
 )
 
@@ -113,6 +117,23 @@ class UserView(generics.RetrieveAPIView):
         return self.request.user
 
 
+class UserInfoView(generics.GenericAPIView):
+    """
+    If authenticated, returns the current user's username.
+    """
+
+    serializer_class = UserInfoSerializer
+    permission_classes = ()
+
+    def get(self, request):
+        # check to see if user is logged in
+        if isinstance(request.user, AnonymousUser):
+            raise drf_exceptions.NotAuthenticated(
+                detail="Please login to view information about your user."
+            )
+        return Response({"username": request.user.username})
+
+
 class ResetTokenView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [SessionAuthentication]
@@ -165,7 +186,6 @@ class JobViewSet(
     queryset = Job.objects.none()
 
     def get_queryset(self):
-        logger.info(">>> JobViewSet.get_queryset()")
         user = self.request.user
         if user.is_staff:
             return Job.objects.all()
@@ -215,7 +235,6 @@ class ProductViewSet(
     model = Product
 
     def get_queryset(self):
-        logger.info(">>> ProductViewSet.get_queryset()")
         return self.omit_allowed_by_org(
             Product.objects.published().exclude(is_listed=False)
         )
@@ -232,7 +251,6 @@ class VersionViewSet(GetOneMixin, viewsets.ReadOnlyModelViewSet):
     model = Version
 
     def get_queryset(self):
-        logger.info(">>> VersionViewSet.get_queryset()")
         return Version.objects.exclude(is_listed=False)
 
     @extend_schema(request=None, responses={200: PlanSerializer(many=True)})
@@ -258,7 +276,6 @@ class PlanViewSet(FilterAllowedByOrgMixin, GetOneMixin, viewsets.ReadOnlyModelVi
     model = Plan
 
     def get_queryset(self):
-        logger.info(">>> PlanViewSet.get_queryset()")
         plans = Plan.objects.exclude(is_listed=False)
         return self.omit_allowed_by_org(plans)
 

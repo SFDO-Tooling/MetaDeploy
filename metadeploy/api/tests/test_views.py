@@ -361,9 +361,10 @@ class TestProductViewSet:
             "next": None,
         }
 
-    def test_multi_tenancy(self, version, assert_multi_tenancy):
-        assert_multi_tenancy.client.logout()
-        assert_multi_tenancy(reverse("product-detail", args=[version.product_id]))
+    def test_multi_tenancy(self, version, assert_multi_tenancy_session):
+        assert_multi_tenancy_session(
+            reverse("product-detail", args=[version.product_id])
+        )
 
     def test_unlisted(self, client, product_factory, version_factory):
         product1 = product_factory()

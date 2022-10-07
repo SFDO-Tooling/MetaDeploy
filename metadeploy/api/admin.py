@@ -284,13 +284,57 @@ class UserAdmin(AdminHelpTextMixin, BaseUserAdmin):
         "GDPR reminder: The username, name, and email are personally identifiable information. "
         "They must be used for support/debugging purposes only, and not exported from this system."
     )
-    list_display = ("username", "is_active", "is_staff", "is_superuser", "date_joined")
+    fieldsets = (
+        (None, {"fields": ("username", "password")}),
+        (
+            "Additional info",
+            {
+                "fields": ("is_persistent",),
+            },
+        ),
+        ("Personal info", {"fields": ("first_name", "last_name", "email")}),
+        (
+            "Permissions",
+            {
+                "fields": (
+                    "is_active",
+                    "is_staff",
+                    "is_superuser",
+                    "groups",
+                    "user_permissions",
+                )
+            },
+        ),
+        ("Important dates", {"fields": ("last_login", "date_joined")}),
+    )
+    add_fieldsets = (
+        (None, {"fields": ("username", "password")}),
+        (
+            "Additional info",
+            {
+                "fields": ("is_persistent",),
+            },
+        ),
+        ("Personal info", {"fields": ("first_name", "last_name", "email")}),
+        (
+            "Permissions",
+            {
+                "fields": (
+                    "is_active",
+                    "is_staff",
+                    "is_superuser",
+                    "groups",
+                    "user_permissions",
+                )
+            },
+        ),
+    )
 
 
 @admin.register(Token)
 class TokenAdmin(admin.ModelAdmin):
-    list_display = ("key", "user", "created")
-    fields = ("user",)
+    list_display = ("key", "user", "site", "created")
+    fields = ("user", "site")
     ordering = ("-created",)
 
 

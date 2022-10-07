@@ -549,6 +549,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/FullUser'
           description: ''
+  /api/userinfo/:
+    get:
+      operationId: userinfo_retrieve
+      description: If authenticated, returns the current user's username.
+      tags:
+      - userinfo
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfo'
+          description: ''
   /api/versions/:
     get:
       operationId: versions_list
@@ -1287,6 +1303,14 @@ components:
       - secondary
       - additional
       type: string
+    UserInfo:
+      type: object
+      properties:
+        username:
+          type: string
+          maxLength: 256
+      required:
+      - username
     Version:
       type: object
       properties:

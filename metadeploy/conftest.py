@@ -26,9 +26,12 @@ from metadeploy.api.models import (
     ScratchOrg,
     SiteProfile,
     Step,
+    Token,
     Translation,
     Version,
 )
+
+TEST_DOMAIN = "testserver"
 
 User = get_user_model()
 
@@ -46,7 +49,7 @@ class SiteFactory(factory.django.DjangoModelFactory):
         model = Site
         django_get_or_create = ("domain",)
 
-    domain = "testserver"
+    domain = TEST_DOMAIN
     name = factory.SelfAttribute("domain")
 
 
@@ -116,6 +119,15 @@ class UserFactory(factory.django.DjangoModelFactory):
     class Params:
         sf_username = factory.Sequence("user_{}@example.com".format)
         org_name = "Sample Org"
+
+
+@register
+class TokenFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Token
+
+    site = factory.SubFactory(SiteFactory)
+    user = factory.SubFactory(UserFactory)
 
 
 @register
@@ -307,7 +319,7 @@ def adjust_site_domain():
     Adjust the default Site instance to match the test Client host. Required by
     CurrentSiteMiddleware to detect the default Site as expected.
     """
-    Site.objects.filter(domain="example.com").update(domain="testserver")
+    Site.objects.filter(domain="example.com").update(domain=TEST_DOMAIN)
 
 
 @pytest.fixture
@@ -330,11 +342,29 @@ def client(user_factory):
 
 
 @pytest.fixture
-def admin_api_client(user_factory):
+def token_client(user_factory):
+    """A client passes a valid auth token associated with the user"""
     adjust_site_domain()
-    user = user_factory(is_staff=True, is_superuser=True)
+    user = user_factory()
+    site = Site.objects.get(domain=TEST_DOMAIN)
+    token = TokenFactory(user=user, site=site)
+
     client = APIClient()
-    client.force_login(user)
+    client.credentials(HTTP_AUTHORIZATION=f"token {token.key}")
+    client.user = user
+    return client
+
+
+@pytest.fixture
+def token_client__outside_ip(user_factory):
+    """A client passes a valid auth token associated with the user"""
+    adjust_site_domain()
+    user = user_factory()
+    site = Site.objects.get(domain=TEST_DOMAIN)
+    token = TokenFactory(user=user, site=site)
+
+    client = APIClient(REMOTE_ADDR="8.8.8.8")
+    client.credentials(HTTP_AUTHORIZATION=f"token {token.key}")
     client.user = user
     return client
 
@@ -346,7 +376,30 @@ def anon_client():
 
 
 @pytest.fixture
-def assert_multi_tenancy(client, extra_site):
+def assert_multi_tenancy(token_client, extra_site):
+    """Uses token authentication"""
+
+    def _do_assert(url):
+        response = token_client.get(url)
+        assert response.status_code == 200, (
+            f"Expected to get 200 when visiting {url} on the default Site. "
+            "This request should succeed to establish a baseline for the multi-tenancy test."
+        )
+
+        response = token_client.get(url, SERVER_NAME=extra_site.domain)
+        assert response.status_code == 401, (
+            f"Expected to get 401 when visiting {url} on the non-default Site. "
+            "This probably means per-site filtering is not working on that endpoint."
+        )
+
+    _do_assert.client = token_client
+    return _do_assert
+
+
+@pytest.fixture
+def assert_multi_tenancy_session(client, extra_site):
+    """Uses session authentication."""
+
     def _do_assert(url):
         response = client.get(url)
         assert response.status_code == 200, (
@@ -355,6 +408,7 @@ def assert_multi_tenancy(client, extra_site):
         )
 
         response = client.get(url, SERVER_NAME=extra_site.domain)
+        # This url (which likely includes a pk) should not exist on another domain.
         assert response.status_code == 404, (
             f"Expected to get 404 when visiting {url} on the non-default Site. "
             "This probably means per-site filtering is not working on that endpoint."

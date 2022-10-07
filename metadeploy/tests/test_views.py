@@ -7,6 +7,8 @@ from django.test import RequestFactory
 from django.urls import reverse
 from sfdo_template_helpers.oauth2.salesforce.views import SalesforcePermissionsError
 
+from metadeploy.adminapi.tests.test_views import Perm, add_perm_to_user
+
 from ..views import custom_500_view, custom_permission_denied_view
 
 
@@ -136,17 +138,19 @@ class TestSetSite:
     @pytest.mark.parametrize(
         "url_name", ("productcategory-detail", "admin_rest:productcategory-detail")
     )
-    def test_non_admin(self, client, product_category, extra_site, url_name):
-        client.user.is_staff = client.user.is_superuser = True
-        client.user.save()
+    def test_non_admin(self, token_client, product_category, extra_site, url_name):
+        token_client.user.is_staff = token_client.user.is_superuser = False
+        add_perm_to_user(token_client.user, "ProductCategory", Perm.VIEW)
+        token_client.user.save()
+
         url = reverse(url_name, args=[product_category.pk])
         ids = (product_category.id, str(product_category.id))
-        response = client.get(url)
+        response = token_client.get(url)
         assert response.data["id"] in ids
 
-        client.get(reverse("set_site"), {"site_id": extra_site.id})
+        token_client.get(reverse("set_site"), {"site_id": extra_site.id})
 
-        response = client.get(url)
+        response = token_client.get(url)
         assert (
             response.data["id"] in ids
         ), f"Visiting the set-site view shouldn't affect site-filtering for {url}"
