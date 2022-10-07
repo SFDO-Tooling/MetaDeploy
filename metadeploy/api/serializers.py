@@ -23,7 +23,6 @@ from .models import (
     ScratchOrg,
     SiteProfile,
     Step,
-    Token,
     Version,
 )
 from .paginators import ProductPaginator
