@@ -81,7 +81,7 @@ class TestResetTokenView:
 
         new_token = tokens[0]
         assert response.data.get("token") == new_token.key
-        assert old_token.key != new_token.key
+        assert new_token is not old_token
 
     def test_not_authorized(self, client):
         url = reverse("token")
@@ -96,7 +96,9 @@ class TestResetTokenView:
 
         # Generate token for user under default tenant
         Token.objects.create(user=client.user)
-
+        response = client.get(url)
+        # Reset works
+        assert response.status_code == 200
         # anon client should not have token on extra_site
         response = client.get(url, SERVER_NAME=extra_site.domain)
         assert response.status_code == 403
