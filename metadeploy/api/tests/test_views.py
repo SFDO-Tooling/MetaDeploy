@@ -69,35 +69,38 @@ class TestUserView:
 
 @pytest.mark.django_db
 class TestResetTokenView:
-    def test_reset(self, anon_client, user_factory, extra_site):
+    def test_reset_token(self, client):
         url = reverse("token")
-        user = user_factory()
-        data = {"username": user.username, "password": "foobar"}
+        user = client.user
+        old_token = Token.objects.create(user=user)
+        response = client.get(url)
 
-        token1 = Token.objects.create(user=user)
+        tokens = Token.objects.filter(user=user)
+        # Refreshing should not add another token
+        assert tokens.count() == 1
 
-        response = anon_client.post(url, data=data)
-        assert response.data.get("token") is not token1.key
+        new_token = tokens[0]
+        assert response.data.get("token") == new_token.key
+        assert old_token.key != new_token.key
 
-    def test_not_authorized(self, anon_client, user_factory, extra_site):
+    def test_not_authorized(self, client):
         url = reverse("token")
-        user = user_factory()
-        data = {"username": user.username, "password": "foobar"}
-
-        response = anon_client.post(url, data=data)
+        # Using `client``, we have an authorized user, but since there is no token,
+        # they are considered not authorized
+        response = client.get(url)
         assert response.status_code == 403
+        assert str(response.data) == "Unable to reset token: a token does not exist."
 
-    def test_multi_tenancy(self, anon_client, user_factory, extra_site):
+    def test_multi_tenancy(self, client, user_factory, extra_site):
         url = reverse("token")
-        user = user_factory()
-        data = {"username": user.username, "password": "foobar"}
 
-        # Generate token for user under normal tenant
-        _ = Token.objects.create(user=user)
+        # Generate token for user under default tenant
+        Token.objects.create(user=client.user)
 
-        # anon client should not have token
-        response = anon_client.post(url, data=data, SERVER_NAME=extra_site.domain)
+        # anon client should not have token on extra_site
+        response = client.get(url, SERVER_NAME=extra_site.domain)
         assert response.status_code == 403
+        assert str(response.data) == "Unable to reset token: a token does not exist."
 
 
 @pytest.mark.django_db
