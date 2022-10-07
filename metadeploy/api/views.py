@@ -116,6 +116,7 @@ class UserView(generics.RetrieveAPIView):
 class ResetTokenView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [SessionAuthentication]
+    serializer_class = None
 
     def get(self, request, *args, **kwargs):
         """
