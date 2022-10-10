@@ -14,10 +14,11 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics, mixins, status, viewsets
 import rest_framework.exceptions as drf_exceptions
-from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.authentication import SessionAuthentication
 
 from metadeploy.api.constants import REDIS_JOB_CANCEL_KEY
 from metadeploy.api.filters import PlanFilter, ProductFilter, VersionFilter
@@ -132,16 +133,28 @@ class UserInfoView(generics.GenericAPIView):
         return Response({"username": request.user.username})
 
 
-class ObtainTokenView(ObtainAuthToken):
-    def post(self, request, *args, **kwargs):
+class ResetTokenView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [SessionAuthentication]
+    serializer_class = None
+
+    def get(self, request, *args, **kwargs):
         """
-        Allow users to specify their credentials in exchange for an auth token. Tokens
-        are unique per site.
+        Allow users to get a new token if one already exists.
         """
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data["user"]
-        token, _ = Token.objects.get_or_create(user=user)
+
+        try:
+            token = Token.objects.get(user=request.user)
+        except Token.DoesNotExist:
+            return Response(
+                "Unable to reset token: a token does not exist.",
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        # reset token
+        token.delete()
+        token = Token.objects.create(user=request.user)
+
         return Response({"token": token.key})
 
 
