@@ -8,6 +8,7 @@ import os
 
 from cumulusci.core.github import get_github_api_for_repo
 from cumulusci.utils import download_extract_github, temporary_dir
+from metadeploy.api.models import Product
 
 
 @contextlib.contextmanager
@@ -15,8 +16,8 @@ def local_github_checkout(repo_owner, repo_name, commit_ish=None):
     with temporary_dir() as repo_root:
         # pretend it's a git clone to satisfy cci
         os.mkdir(".git")
-
-        repo = get_github_api_for_repo(None, repo_owner, repo_name)
+        product = Product.objects.get(repo_url__icontains=repo_name)
+        repo = get_github_api_for_repo(None, product.repo_url)
         if commit_ish is None:
             commit_ish = repo.repository(repo_owner, repo_name).default_branch
 
