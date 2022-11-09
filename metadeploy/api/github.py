@@ -16,7 +16,8 @@ def local_github_checkout(repo_owner, repo_name, commit_ish=None):
     with temporary_dir() as repo_root:
         # pretend it's a git clone to satisfy cci
         os.mkdir(".git")
-        product = Product.objects.get(repo_url__icontains=repo_name)
+        search_string = f"/{repo_owner}/{repo_name}"
+        product = Product.objects.get(repo_url__contains=search_string)
         repo = get_github_api_for_repo(None, product.repo_url)
         if commit_ish is None:
             commit_ish = repo.repository(repo_owner, repo_name).default_branch
