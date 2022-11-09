@@ -14,6 +14,7 @@ def test_local_github_checkout(product_factory):
     product_factory(
         repo_url="https://github.com/SalesforceFoundation/Grants-Management"
     )
+    product_factory(repo_url="https://github.com/SalesforceFoundation/gem-foo")
 
     with ExitStack() as stack:
         stack.enter_context(patch("metadeploy.api.github.os"))
