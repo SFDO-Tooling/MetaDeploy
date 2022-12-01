@@ -80,7 +80,11 @@ export const JobError = ({ errors }: { errors: StepResult[] }) => {
     }
   }
   const listItems = errorList.length > 0 ? errorList : warnList;
-  return <ul className="plan-error-list">{listItems.map((item) => item)}</ul>;
+  return (
+    <ul className="plan-error-list" role="alert">
+      {listItems.map((item) => item)}
+    </ul>
+  );
 };
 
 export const getErrorInfo = ({
@@ -173,7 +177,7 @@ const PreflightResults = ({ preflight }: { preflight: Preflight }) => {
   if (message !== null) {
     return (
       <>
-        <p className={failed ? 'slds-text-color_error' : ''}>
+        <p className={failed ? 'slds-text-color_error' : ''} role="alert">
           {failed ? <ErrorIcon /> : <WarningIcon />}
           {message}
         </p>
