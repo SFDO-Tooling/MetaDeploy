@@ -81,9 +81,11 @@ export const JobError = ({ errors }: { errors: StepResult[] }) => {
   }
   const listItems = errorList.length > 0 ? errorList : warnList;
   return (
-    <ul className="plan-error-list" role="alert">
-      {listItems.map((item) => item)}
-    </ul>
+    <div role="alert">
+       <ul className="plan-error-list">
+        {listItems.map((item) => item)}
+      </ul>
+    </div>
   );
 };
 
