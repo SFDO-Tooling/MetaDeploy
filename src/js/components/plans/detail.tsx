@@ -296,7 +296,7 @@ class PlanDetail extends Component<Props, State> {
         <>
           <div className="slds-p-bottom_xx-small">
             <ErrorIcon />
-            <span className="slds-text-color_error">
+            <span className="slds-text-color_error" role="alert">
               {t(
                 'Oops! It looks like you don’t have permissions to run an installation on this org.',
               )}
