@@ -12,6 +12,7 @@ This job does four key things:
 2. Delete any OAuth tokens older than 10 minutes if the user doesn't have any running jobs currently. This can be configured with the TOKEN_LIFETIME_MINUTES environment variable.
 3. Deletes all non-staff users that have not logged in for the last thirty days.
 4. Clears the exception field in `Job` and `Preflight` records over 90 days old. (This field may contain customer metadata such as custom schema names from the org).
+5. Deletes any API tokens that are older than 30 days. The number of days can be configured with the API_TOKEN_EXPIRE_AFTER_DAYS environment variable.
 
 ## `expire_preflight_results`
 

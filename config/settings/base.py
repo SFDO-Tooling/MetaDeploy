@@ -166,6 +166,8 @@ ADMIN_API_ALLOWED_SUBNETS = [
     for net in env.list("ADMIN_API_ALLOWED_SUBNETS", default=["127.0.0.1/32"])
 ]
 
+# API Token Stuff
+API_TOKEN_EXPIRE_AFTER_DAYS = env.int("API_TOKEN_EXPIRE_AFTER_DAYS", default=30)
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
