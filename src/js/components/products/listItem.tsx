@@ -24,6 +24,7 @@ const ProductItem = ({ item }: { item: Product }) => {
       <Link
         to={routes.product_detail(item.slug)}
         className="slds-text-link_reset"
+        aria-label={`${t('Product Link')}: ${item.title} version ${label}`}
       >
         <Card
           heading={item.title}
