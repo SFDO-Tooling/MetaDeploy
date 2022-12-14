@@ -110,7 +110,7 @@ def expire_api_access_tokens_older_than_days(days: int):
     """Delete any Admin API access tokens older than days given.
     We use @disable_site_filtering to ensure we query for tokens
     across all tenants."""
-    days_ago = timezone.now() - timedelta(days=days)
-    expired_tokens = Token.objects.filter(created__lte=days_ago)
+    obsolete_date = timezone.now() - timedelta(days=days)
+    expired_tokens = Token.objects.filter(created__lte=obsolete_date)
     if expired_tokens:
         expired_tokens.delete()
