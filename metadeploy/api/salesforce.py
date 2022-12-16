@@ -127,8 +127,17 @@ def _deploy_org_settings(*, cci, org_name, scratch_org_config, scratch_org):
         keychain=cci.keychain,
         sbx_login=True,
     )
-    path = os.path.join(cci.project_config.repo_root, scratch_org_config.config_file)
-    task_config = TaskConfig({"options": {"definition_file": path}})
+    path = os.path.join(
+        cci.project_config.repo_root, scratch_org_config.config_file
+    )
+    task_config = TaskConfig(
+        {
+            "options": {
+                "definition_file": path,
+                "api_version": org_config.latest_api_version,
+            }
+        }
+    )
     task = DeployOrgSettings(cci.project_config, task_config, org_config)
     task()
     return org_config
