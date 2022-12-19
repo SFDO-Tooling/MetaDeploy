@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from metadeploy.multitenancy import disable_site_filtering
 
-from .models import Job, PreflightResult, User
+from .models import Job, PreflightResult, User, Token
 from .push import user_token_expired
 
 
@@ -24,6 +24,9 @@ def cleanup_user_data():
 
     # remove job exceptions after 90 days
     clear_old_exceptions()
+
+    # expire API access tokens after specified number of days
+    expire_api_access_tokens_older_than_days(settings.API_TOKEN_EXPIRE_AFTER_DAYS)
 
 
 def expire_oauth_tokens():
@@ -100,3 +103,14 @@ def fix_dead_jobs_status():
     Job.objects.filter(status="started", enqueued_at__lte=timeout_ago).update(
         **canceled_values
     )
+
+
+@disable_site_filtering()
+def expire_api_access_tokens_older_than_days(days: int):
+    """Delete any Admin API access tokens older than days given.
+    We use @disable_site_filtering to ensure we query for tokens
+    across all tenants."""
+    obsolete_date = timezone.now() - timedelta(days=days)
+    expired_tokens = Token.objects.filter(created__lte=obsolete_date)
+    if expired_tokens:
+        expired_tokens.delete()

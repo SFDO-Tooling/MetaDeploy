@@ -3,16 +3,21 @@ from datetime import timedelta
 import pytest
 from django.utils import timezone
 
-from metadeploy.multitenancy import override_current_site_id
+
+from metadeploy.multitenancy import (
+    override_current_site_id,
+    disable_site_filtering,
+)
 
 from ..cleanup import (
     cleanup_user_data,
     clear_old_exceptions,
     delete_old_users,
     expire_oauth_tokens,
+    expire_api_access_tokens_older_than_days,
     fix_dead_jobs_status,
 )
-from ..models import User
+from metadeploy.api.models import User, Token
 
 
 @pytest.mark.django_db
@@ -120,3 +125,26 @@ def test_fix_dead_jobs_status__multi_tenancy(job_factory, extra_site):
     assert (
         old_job.status == "canceled"
     ), "Expected `fix_dead_job_status` to support Jobs from all Sites"
+
+
+@pytest.mark.django_db
+def test_expire_api_access_tokens(token_factory):
+    # set token creation time to two days ago
+    two_days_ago = timezone.now() - timedelta(days=2)
+    token = token_factory(created=two_days_ago)
+    token.created = two_days_ago
+    token.save()
+
+    # we should have 1 token to start with
+    with disable_site_filtering():
+        assert Token.objects.count() == 1
+
+    # token is 2 days old, so it won't be deleted
+    expire_api_access_tokens_older_than_days(3)
+    with disable_site_filtering():
+        assert Token.objects.count() == 1
+
+    # token should now be expired, and thus, deleted
+    expire_api_access_tokens_older_than_days(1)
+    with disable_site_filtering():
+        assert Token.objects.count() == 0
