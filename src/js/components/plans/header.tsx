@@ -32,17 +32,9 @@ const Header = ({
       className="page-header slds-p-around_x-large"
       title={plan.title}
       trail={[
-        <Link
-          to={routes.version_detail(
-            product.slug,
-            getVersionLabel(product, version),
-          )}
-          key={product.slug}
-        >
-          <Trans i18nKey="productWithVersion">
-            {{ product: product.title }} {{ version: version.label }}
-          </Trans>
-        </Link>,
+        <Trans i18nKey="productWithVersion" key={product.slug}>
+          {{ product: product.title }} {{ version: version.label }}
+        </Trans>,
       ]}
       onRenderActions={onRenderActions ? onRenderActions : null}
       icon={<ProductIcon item={product} />}
