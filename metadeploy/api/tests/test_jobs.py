@@ -7,7 +7,6 @@ import pytest
 import pytz
 import vcr
 from cumulusci.salesforce_api.exceptions import MetadataParseError
-
 from django.conf import settings
 from django.utils import timezone
 from django.utils.timezone import make_aware
@@ -151,7 +150,9 @@ def test_preflight_failure(
 @pytest.mark.django_db
 def test_expire_preflights(user_factory, plan_factory, preflight_result_factory):
     now = timezone.now()
-    eleven_minutes_ago = now - timedelta(minutes=settings.PREFLIGHT_LIFETIME_MINUTES + 1)
+    eleven_minutes_ago = now - timedelta(
+        minutes=settings.PREFLIGHT_LIFETIME_MINUTES + 1
+    )
     user = user_factory()
     plan = plan_factory()
     preflight1 = preflight_result_factory(

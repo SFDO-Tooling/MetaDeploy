@@ -8,6 +8,7 @@ import os
 
 from cumulusci.core.github import get_github_api_for_repo
 from cumulusci.utils import download_extract_github, temporary_dir
+
 from metadeploy.api.models import Product
 
 
