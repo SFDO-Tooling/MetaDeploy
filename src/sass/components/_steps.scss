@@ -161,7 +161,7 @@ $step-ending-columns-min: $step-type-min + $step-badge-min + $step-install-min;
   .slds-is-open > .slds-accordion__content {
     @include z-index('logs');
 
-    background: $brand-dark;
+    background: $brand-dark-active;
     color: $color-text-brand-primary;
     margin-bottom: $spacing-small * -1;
     margin-left: $spacing-large * -1;
