@@ -1,4 +1,3 @@
-import PageHeader from '@salesforce/design-system-react/components/page-header';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import { find } from 'lodash';
 import React, { Component, ReactNode } from 'react';
@@ -74,27 +73,34 @@ class Header extends Component<Props & PropsFromRedux> {
           <CurrentJobAlert currentJob={currentJob} history={history} />
         ) : null}
         <Errors errors={errors} doRemoveError={doRemoveError} />
-        <PageHeader
-          className="global-header
-            slds-p-horizontal_x-large
-            slds-p-vertical_medium"
-          title={
-            <Link
-              to={routes.home()}
-              className="slds-text-heading_large slds-text-link_reset"
-            >
-              {logoSrc ? (
-                <img
-                  className="site-logo"
-                  src={logoSrc}
-                  alt={window.GLOBALS.SITE.company_name}
-                  title={window.GLOBALS.SITE.company_name}
-                />
-              ) : null}
-            </Link>
-          }
-          onRenderControls={this.controls}
-        />
+        <div className="slds-page-header global-header slds-p-horizontal_x-large slds-p-vertical_medium">
+          <div className="slds-page-header__row">
+            <div className="slds-page-header__col-title">
+              <div className="slds-page-header__name">
+                <div className="slds-page-header__name-title">
+                  <Link
+                    to={routes.home()}
+                    className="slds-text-heading_large slds-text-link_reset"
+                  >
+                    {logoSrc ? (
+                      <img
+                        className="site-logo"
+                        src={logoSrc}
+                        alt={window.GLOBALS.SITE.company_name}
+                        title={window.GLOBALS.SITE.company_name}
+                      />
+                    ) : null}
+                  </Link>
+                </div>
+              </div>
+            </div>
+            <div className="slds-page-header__col-controls slds-align-middle">
+              <div className="slds-page-header__controls">
+                {this.controls()}
+              </div>
+            </div>
+          </div>
+        </div>
       </>
     );
   }
