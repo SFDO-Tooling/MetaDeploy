@@ -1,14 +1,11 @@
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import React, { ReactNode } from 'react';
 import { Trans } from 'react-i18next';
-import { Link } from 'react-router-dom';
 
 import ProductIcon from '@/js/components/products/icon';
 import { Job } from '@/js/store/jobs/reducer';
 import { Plan } from '@/js/store/plans/reducer';
 import { Product, Version } from '@/js/store/products/reducer';
-import { getVersionLabel } from '@/js/utils/helpers';
-import routes from '@/js/utils/routes';
 
 const Header = ({
   product,
