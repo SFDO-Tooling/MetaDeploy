@@ -1,7 +1,7 @@
-import pytest
-
 from contextlib import ExitStack
 from unittest.mock import patch
+
+import pytest
 
 from ..github import local_github_checkout
 
