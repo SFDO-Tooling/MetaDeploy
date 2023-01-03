@@ -8,6 +8,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from pytest_factoryboy import register
 from rest_framework.test import APIClient
+from rest_framework.authtoken.models import Token
 from sfdo_template_helpers.crypto import fernet_encrypt
 
 from metadeploy.api.models import (
@@ -292,3 +293,11 @@ def admin_api_client(user_factory):
 @pytest.fixture
 def anon_client():
     return APIClient()
+
+
+@register
+class TokenFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Token
+
+    user = factory.SubFactory(UserFactory)
