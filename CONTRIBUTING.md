@@ -3,12 +3,12 @@
 ## Using Docker
 
 To set up MetaDeploy using Docker please see the following instructions
-[./docs/running_docker.rst](./docs/running_docker.rst).
+[./docs/running_docker.md](./docs/running_docker.md).
 
 ## Using Local Machine
 
 MetaDeploy can be configured locally. To achieve this follow the instructions
-provided in [./docs/running.rst](./docs/running.rst).
+provided in [./docs/running.md](./docs/running.md).
 
 ## Development Tasks
 
