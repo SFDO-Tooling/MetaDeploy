@@ -23,7 +23,7 @@ as "Jobs".
 
 * [delete_scratch_org](https://github.com/search?q=repo%3ASFDO-Tooling%2FMetaDeploy+%22def+delete_scratch_org&type=code) : Delete a Scratch org
 
- ## Async Jobs triggered by Admins
+## Async Jobs triggered by Admins
 
  * [update_all_translations]((https://github.com/search?q=repo%3ASFDO-Tooling%2FMetaDeploy+%22def+update_all_translations&type=code)) : Update every TranslatableModel object for every language from every relevant Translation object
 
