@@ -3,7 +3,7 @@
 MetaDeploy has a variety of different things that one might think of
 as "Jobs".
 
- * [Scheduled Jobs](scheduled_jobs.md)
+ * Scheduled jobs
  * Plan-running jobs, which is what "Jobs" means in the [API](api/jobs.rst)
  * Processes spun off by APIs to do things asynchronously on behalf of users, rather than blocking REST API responses.
 
