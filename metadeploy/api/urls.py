@@ -2,6 +2,7 @@ from django.urls import path
 from rest_framework import routers
 
 from .views import (
+    FrontEndThingsAndStuff,
     JobViewSet,
     OrgViewSet,
     PlanViewSet,
@@ -20,4 +21,5 @@ router.register("plans", PlanViewSet, basename="plan")
 router.register("orgs", OrgViewSet, basename="org")
 router.register("categories", ProductCategoryViewSet)
 router.register("scratch-orgs", ScratchOrgViewSet, basename="scratch-org")
+router.register("fe", FrontEndThingsAndStuff, basename="fe")
 urlpatterns = router.urls + [path("user/", UserView.as_view(), name="user")]
