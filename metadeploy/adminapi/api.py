@@ -172,9 +172,9 @@ class AllowedListOrgSerializer(AdminAPISerializer):
     created_by = serializers.StringRelatedField()
 
 
-class AllowedListOrgViewSet(AdminAPIViewSet):
-    model_name = "AllowedListOrg"
-    serializer_base = AllowedListOrgSerializer
+# class AllowedListOrgViewSet(AdminAPIViewSet):
+#     model_name = "AllowedListOrg"
+#     serializer_base = AllowedListOrgSerializer
 
 
 class TranslationViewSet(viewsets.ViewSet):

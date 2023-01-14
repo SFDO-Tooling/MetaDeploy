@@ -92,6 +92,7 @@ INSTALLED_APPS = [
     "metadeploy.api",
     "metadeploy.adminapi.apps.AdminapiConfig",
     "django_js_reverse",
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
