@@ -14,10 +14,10 @@ RUN npm install --location=global sfdx-cli --ignore-scripts
 # Python requirements:
 COPY ./requirements requirements
 RUN pip install --no-cache-dir --upgrade pip pip-tools \
-    && pip install --no-cache-dir -r requirements/prod.txt
+  && pip install --no-cache-dir -r requirements/prod.txt
 RUN if [ "${BUILD_ENV}" = "development" ] ; then \
-    pip install --no-cache-dir -r requirements/dev.txt; \
-    fi
+  pip install --no-cache-dir -r requirements/dev.txt; \
+  fi
 
 # JS client setup:
 COPY ./package.json package.json
@@ -26,6 +26,7 @@ RUN yarn install --check-files
 
 COPY . /app
 
+RUN pip install --no-cache drf-spectacular
 # Avoid building prod assets in development
 RUN if [ "${BUILD_ENV}" = "production" ] || [ -n "${PROD_ASSETS}" ] ; then yarn prod ; else mkdir -p dist/prod ; fi
 
@@ -36,5 +37,6 @@ RUN \
   SFDX_CLIENT_CALLBACK_URL="sample callback" \
   SFDX_CLIENT_ID="sample id" \
   python manage.py collectstatic --noinput
+
 
 CMD /app/start-server.sh
