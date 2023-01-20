@@ -163,7 +163,7 @@ ADMIN_API_ALLOWED_SUBNETS = [
 
 
 # API Token Stuff
-API_TOKEN_EXPIRE_AFTER_DAYS = env.int("API_TOKEN_EXPIRE_AFTER_DAYS", default=30)
+API_TOKEN_EXPIRE_AFTER_DAYS = env.int("API_TOKEN_EXPIRE_AFTER_DAYS", default=90)
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
