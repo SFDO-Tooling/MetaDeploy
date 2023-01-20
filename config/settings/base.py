@@ -143,7 +143,9 @@ SITE_ID = 1
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
-DATABASES = {"default": env.db_url("DATABASE_URL", default="postgres:///metadeploy")}
+DATABASES = {
+    "default": env.db_url("DATABASE_URL", default="postgres:///metadeploy")
+}
 
 # Custom User model:
 AUTH_USER_MODEL = "api.User"
@@ -173,9 +175,21 @@ AUTH_PASSWORD_VALIDATORS = [
             "UserAttributeSimilarityValidator"
         )
     },
-    {"NAME": ("django.contrib.auth.password_validation.MinimumLengthValidator")},
-    {"NAME": ("django.contrib.auth.password_validation.CommonPasswordValidator")},
-    {"NAME": ("django.contrib.auth.password_validation.NumericPasswordValidator")},
+    {
+        "NAME": (
+            "django.contrib.auth.password_validation.MinimumLengthValidator"
+        )
+    },
+    {
+        "NAME": (
+            "django.contrib.auth.password_validation.CommonPasswordValidator"
+        )
+    },
+    {
+        "NAME": (
+            "django.contrib.auth.password_validation.NumericPasswordValidator"
+        )
+    },
 ]
 
 LOGIN_REDIRECT_URL = "/"
@@ -186,7 +200,9 @@ SECURE_PROXY_SSL_HEADER = env.tuple(
     default=("HTTP_X_FORWARDED_PROTO", "https"),
 )
 SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=True)
-SESSION_COOKIE_SECURE = env.bool("SESSION_COOKIE_SECURE", default=SECURE_SSL_REDIRECT)
+SESSION_COOKIE_SECURE = env.bool(
+    "SESSION_COOKIE_SECURE", default=SECURE_SSL_REDIRECT
+)
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE", default=SECURE_SSL_REDIRECT)
 SECURE_HSTS_SECONDS = env.int(
@@ -268,7 +284,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 
 AWS_ACCESS_KEY_ID = env(
-    "BUCKETEER_AWS_ACCESS_KEY_ID", default=env("AWS_ACCESS_KEY_ID", default=None)
+    "BUCKETEER_AWS_ACCESS_KEY_ID",
+    default=env("AWS_ACCESS_KEY_ID", default=None),
 )
 AWS_SECRET_ACCESS_KEY = env(
     "BUCKETEER_AWS_SECRET_ACCESS_KEY",
@@ -310,23 +327,30 @@ STATIC_ROOT = str(PROJECT_ROOT / "staticfiles")
 
 # SF Connected App and GitHub configuration:
 SFDX_CLIENT_SECRET = env(
-    "SFDX_CLIENT_SECRET", default=env("CONNECTED_APP_CLIENT_SECRET", default=None)
+    "SFDX_CLIENT_SECRET",
+    default=env("CONNECTED_APP_CLIENT_SECRET", default=None),
 )
 SFDX_CLIENT_CALLBACK_URL = env(
-    "SFDX_CLIENT_CALLBACK_URL", default=env("CONNECTED_APP_CALLBACK_URL", default=None)
+    "SFDX_CLIENT_CALLBACK_URL",
+    default=env("CONNECTED_APP_CALLBACK_URL", default=None),
 )
 SFDX_CLIENT_ID = env(
     "SFDX_CLIENT_ID", default=env("CONNECTED_APP_CLIENT_ID", default=None)
 )
 SFDX_SIGNUP_INSTANCE = env("SFDX_SIGNUP_INSTANCE", default=None)
 # Ugly hack to fix https://github.com/moby/moby/issues/12997
-DOCKER_SFDX_HUB_KEY = env("DOCKER_SFDX_HUB_KEY", default="").replace("\\n", "\n")
+DOCKER_SFDX_HUB_KEY = env("DOCKER_SFDX_HUB_KEY", default="").replace(
+    "\\n", "\n"
+)
 SFDX_HUB_KEY = env(
-    "SFDX_HUB_KEY", default=env("CONNECTED_APP_CLIENT_KEY", default=DOCKER_SFDX_HUB_KEY)
+    "SFDX_HUB_KEY",
+    default=env("CONNECTED_APP_CLIENT_KEY", default=DOCKER_SFDX_HUB_KEY),
 )
 
 if not SFDX_CLIENT_SECRET:
-    raise ImproperlyConfigured("Missing environment variable: SFDX_CLIENT_SECRET.")
+    raise ImproperlyConfigured(
+        "Missing environment variable: SFDX_CLIENT_SECRET."
+    )
 if not SFDX_CLIENT_CALLBACK_URL:
     raise ImproperlyConfigured(
         "Missing environment variable: SFDX_CLIENT_CALLBACK_URL."
@@ -344,7 +368,9 @@ HEROKU_TOKEN = env("HEROKU_TOKEN", default=None)
 GITHUB_TOKEN = env("GITHUB_TOKEN", default=None)
 GITHUB_APP_ID = env("GITHUB_APP_ID", default=None)
 # Ugly hack to fix https://github.com/moby/moby/issues/12997
-DOCKER_GITHUB_APP_KEY = env("DOCKER_GITHUB_APP_KEY", default="").replace("\\n", "\n")
+DOCKER_GITHUB_APP_KEY = env("DOCKER_GITHUB_APP_KEY", default="").replace(
+    "\\n", "\n"
+)
 GITHUB_APP_KEY = env("GITHUB_APP_KEY", default=DOCKER_GITHUB_APP_KEY)
 
 
@@ -353,9 +379,13 @@ if not GITHUB_TOKEN and not GITHUB_APP_ID and not GITHUB_APP_KEY:
         "You must set either GITHUB_TOKEN or GITHUB_APP_ID and GITHUB_APP_KEY"
     )
 if GITHUB_APP_ID and not GITHUB_APP_KEY:
-    raise ImproperlyConfigured("You must set GITHUB_APP_KEY if GITHUB_APP_ID is set")
+    raise ImproperlyConfigured(
+        "You must set GITHUB_APP_KEY if GITHUB_APP_ID is set"
+    )
 if GITHUB_APP_KEY and not GITHUB_APP_ID:
-    raise ImproperlyConfigured("You must set GITHUB_APP_ID if GITHUB_APP_KEY is set")
+    raise ImproperlyConfigured(
+        "You must set GITHUB_APP_ID if GITHUB_APP_KEY is set"
+    )
 
 SOCIALACCOUNT_PROVIDERS = {
     "salesforce": {
@@ -367,7 +397,9 @@ SOCIALACCOUNT_PROVIDERS = {
     },
 }
 ACCOUNT_EMAIL_VERIFICATION = "none"
-SOCIALACCOUNT_ADAPTER = "sfdo_template_helpers.oauth2.adapter.SFDOSocialAccountAdapter"
+SOCIALACCOUNT_ADAPTER = (
+    "sfdo_template_helpers.oauth2.adapter.SFDOSocialAccountAdapter"
+)
 SOCIALACCOUNT_STORE_TOKENS = True
 
 JS_REVERSE_JS_VAR_NAME = "api_urls"
@@ -377,7 +409,9 @@ METADEPLOY_JOB_TIMEOUT = env.int("METADEPLOY_JOB_TIMEOUT", default=3600)
 
 # Redis configuration:
 
-REDIS_LOCATION = "{}/{}".format(env("REDIS_URL", default="redis://localhost:6379"), 0)
+REDIS_LOCATION = "{}/{}".format(
+    env("REDIS_URL", default="redis://localhost:6379"), 0
+)
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
@@ -459,12 +493,22 @@ REST_FRAMEWORK = {
 }
 
 
+def preprocessing_filter_spec(endpoints):
+    filtered = []
+    for (path, path_regex, method, callback) in endpoints:
+        # Remove all but DRF API endpoints
+        if path.startswith("/api/"):
+            filtered.append((path, path_regex, method, callback))
+    return filtered
+
+
 SPECTACULAR_SETTINGS = {
     "TITLE": "Salesforce MetaDeploy API Documentation",
     "DESCRIPTION": "MetaDeploy",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
-    # OTHER SETTINGS
+    "DISABLE_ERRORS_AND_WARNINGS": False,
+    "PREPROCESSING_HOOKS": ["config.settings.base.preprocessing_filter_spec"],
 }
 
 # Token expiration
@@ -533,7 +577,11 @@ LOGGING = {
             "handlers": ["console"],
             "propagate": False,
         },
-        "django.server": {"handlers": ["console"], "level": "INFO", "propagate": False},
+        "django.server": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
         "django.request": {
             "handlers": ["console_error"],
             "level": "INFO",

@@ -71,7 +71,9 @@ class PlanSerializer(AdminAPISerializer):
         than one primary or secondary plan.
         """
 
-        visible_to = get_from_data_or_instance(self.instance, data, "visible_to")
+        visible_to = get_from_data_or_instance(
+            self.instance, data, "visible_to"
+        )
         supported_orgs = get_from_data_or_instance(
             self.instance,
             data,
@@ -91,7 +93,9 @@ class PlanSerializer(AdminAPISerializer):
                 get_from_data_or_instance(self.instance, data, "tier")
                 or Plan.Tier.primary
             )
-            plan_version = get_from_data_or_instance(self.instance, data, "version")
+            plan_version = get_from_data_or_instance(
+                self.instance, data, "version"
+            )
             if tier == Plan.Tier.primary and plan_version.primary_plan:
                 raise serializers.ValidationError(
                     {
@@ -121,14 +125,18 @@ class PlanSerializer(AdminAPISerializer):
 
     def update(self, instance, validated_data):
         if "steps" in validated_data:
-            raise serializers.ValidationError(_("Updating steps not supported."))
+            raise serializers.ValidationError(
+                _("Updating steps not supported.")
+            )
         validated_data.pop("steps", None)
         return super().update(instance, validated_data)
 
 
 class PlanTemplateSerializer(AdminAPISerializer):
     preflight_message = serializers.CharField(required=False, allow_blank=True)
-    post_install_message = serializers.CharField(required=False, allow_blank=True)
+    post_install_message = serializers.CharField(
+        required=False, allow_blank=True
+    )
     error_message = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
@@ -172,9 +180,9 @@ class AllowedListOrgSerializer(AdminAPISerializer):
     created_by = serializers.StringRelatedField()
 
 
-# class AllowedListOrgViewSet(AdminAPIViewSet):
-#     model_name = "AllowedListOrg"
-#     serializer_base = AllowedListOrgSerializer
+class AllowedListOrgViewSet(AdminAPIViewSet):
+    model_name = "AllowedListOrg"
+    serializer_base = AllowedListOrgSerializer
 
 
 class TranslationViewSet(viewsets.ViewSet):
