@@ -41,3 +41,14 @@ services:
     volumes:
       - .:/app:cached
       - /app/node_modules
+
+  openapi_mock:
+    container_name: openapi_mock
+    image: muonsoft/openapi-mock
+    environment:
+      OPENAPI_MOCK_SPECIFICATION_URL: 'https://gist.githubusercontent.com/davidjray/f32062799cff8a1b27d0be767b9eca87/raw/c8e6fd831575fb7da1f8c35dd98fd0c31f6ff394/MetaDeplySchema.yml'
+      OPENAPI_MOCK_DEBUG: 'true'
+      OPENAPI_MOCK_USE_EXAMPLES: 'if_present'
+      OPENAPI_MOCK_PORT: 3000
+    ports:
+      - "3000:3000"

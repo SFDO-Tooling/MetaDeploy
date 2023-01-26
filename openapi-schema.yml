@@ -1,0 +1,2653 @@
+openapi: 3.0.3
+info:
+  title: Salesforce MetaDeploy API Documentation
+  version: 1.0.0
+  description: MetaDeploy
+paths:
+  /admin/rest/plans:
+    get:
+      operationId: admin_rest_plans_list
+      parameters:
+      - in: query
+        name: calculated_average_duration
+        schema:
+          type: integer
+      - in: query
+        name: commit_ish
+        schema:
+          type: string
+      - in: query
+        name: created_at
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: is_listed
+        schema:
+          type: boolean
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: query
+        name: order_key
+        schema:
+          type: integer
+      - in: query
+        name: org_config_name
+        schema:
+          type: string
+      - in: query
+        name: plan_template
+        schema:
+          type: integer
+      - in: query
+        name: scratch_org_duration_override
+        schema:
+          type: integer
+      - in: query
+        name: supported_orgs
+        schema:
+          type: string
+          enum:
+          - Both
+          - Persistent
+          - Scratch
+      - in: query
+        name: tier
+        schema:
+          type: string
+          enum:
+          - additional
+          - primary
+          - secondary
+      - in: query
+        name: version
+        schema:
+          type: string
+      - in: query
+        name: visible_to
+        schema:
+          type: integer
+      tags:
+      - admin
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAdminList'
+          description: ''
+    post:
+      operationId: admin_rest_plans_create
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Admin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Admin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Admin'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+          description: ''
+  /admin/rest/plans/{id}:
+    get:
+      operationId: admin_rest_plans_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        description: A unique integer value identifying this plan.
+        required: true
+      tags:
+      - admin
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+          description: ''
+    put:
+      operationId: admin_rest_plans_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        description: A unique integer value identifying this plan.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Admin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Admin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Admin'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+          description: ''
+    patch:
+      operationId: admin_rest_plans_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        description: A unique integer value identifying this plan.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAdmin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAdmin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAdmin'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+          description: ''
+    delete:
+      operationId: admin_rest_plans_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        description: A unique integer value identifying this plan.
+        required: true
+      tags:
+      - admin
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /admin/rest/planslug:
+    get:
+      operationId: admin_rest_planslug_list
+      parameters:
+      - in: query
+        name: created_at
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: query
+        name: parent
+        schema:
+          type: integer
+      - in: query
+        name: slug
+        schema:
+          type: string
+      tags:
+      - admin
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAdminList'
+          description: ''
+    post:
+      operationId: admin_rest_planslug_create
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Admin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Admin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Admin'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+          description: ''
+  /admin/rest/planslug/{id}:
+    get:
+      operationId: admin_rest_planslug_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this plan slug.
+        required: true
+      tags:
+      - admin
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+          description: ''
+    put:
+      operationId: admin_rest_planslug_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this plan slug.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Admin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Admin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Admin'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+          description: ''
+    patch:
+      operationId: admin_rest_planslug_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this plan slug.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAdmin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAdmin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAdmin'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+          description: ''
+    delete:
+      operationId: admin_rest_planslug_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this plan slug.
+        required: true
+      tags:
+      - admin
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /admin/rest/plantemplates:
+    get:
+      operationId: admin_rest_plantemplates_list
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: name
+        schema:
+          type: string
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: query
+        name: product
+        schema:
+          type: string
+      - in: query
+        name: regression_test_opt_out
+        schema:
+          type: boolean
+      tags:
+      - admin
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAdminList'
+          description: ''
+    post:
+      operationId: admin_rest_plantemplates_create
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Admin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Admin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Admin'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+          description: ''
+  /admin/rest/plantemplates/{id}:
+    get:
+      operationId: admin_rest_plantemplates_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this plan template.
+        required: true
+      tags:
+      - admin
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+          description: ''
+    put:
+      operationId: admin_rest_plantemplates_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this plan template.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Admin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Admin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Admin'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+          description: ''
+    patch:
+      operationId: admin_rest_plantemplates_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this plan template.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAdmin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAdmin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAdmin'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+          description: ''
+    delete:
+      operationId: admin_rest_plantemplates_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this plan template.
+        required: true
+      tags:
+      - admin
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /admin/rest/productcategory:
+    get:
+      operationId: admin_rest_productcategory_list
+      parameters:
+      - in: query
+        name: is_listed
+        schema:
+          type: boolean
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: query
+        name: order_key
+        schema:
+          type: integer
+      tags:
+      - admin
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAdminList'
+          description: ''
+    post:
+      operationId: admin_rest_productcategory_create
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Admin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Admin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Admin'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+          description: ''
+  /admin/rest/productcategory/{id}:
+    get:
+      operationId: admin_rest_productcategory_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this product category.
+        required: true
+      tags:
+      - admin
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+          description: ''
+    put:
+      operationId: admin_rest_productcategory_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this product category.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Admin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Admin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Admin'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+          description: ''
+    patch:
+      operationId: admin_rest_productcategory_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this product category.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAdmin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAdmin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAdmin'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+          description: ''
+    delete:
+      operationId: admin_rest_productcategory_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this product category.
+        required: true
+      tags:
+      - admin
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /admin/rest/products:
+    get:
+      operationId: admin_rest_products_list
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: integer
+      - in: query
+        name: color
+        schema:
+          type: string
+      - in: query
+        name: icon_url
+        schema:
+          type: string
+      - in: query
+        name: is_listed
+        schema:
+          type: boolean
+      - in: query
+        name: layout
+        schema:
+          type: string
+          enum:
+          - Card
+          - Default
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: query
+        name: order_key
+        schema:
+          type: integer
+      - in: query
+        name: repo_url
+        schema:
+          type: string
+      - in: query
+        name: slds_icon_category
+        schema:
+          type: string
+          enum:
+          - ''
+          - action
+          - custom
+          - doctype
+          - standard
+          - utility
+      - in: query
+        name: slds_icon_name
+        schema:
+          type: string
+      - in: query
+        name: visible_to
+        schema:
+          type: integer
+      tags:
+      - admin
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAdminList'
+          description: ''
+    post:
+      operationId: admin_rest_products_create
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Admin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Admin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Admin'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+          description: ''
+  /admin/rest/products/{id}:
+    get:
+      operationId: admin_rest_products_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        description: A unique integer value identifying this product.
+        required: true
+      tags:
+      - admin
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+          description: ''
+    put:
+      operationId: admin_rest_products_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        description: A unique integer value identifying this product.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Admin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Admin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Admin'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+          description: ''
+    patch:
+      operationId: admin_rest_products_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        description: A unique integer value identifying this product.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAdmin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAdmin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAdmin'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+          description: ''
+    delete:
+      operationId: admin_rest_products_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        description: A unique integer value identifying this product.
+        required: true
+      tags:
+      - admin
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /admin/rest/productslug:
+    get:
+      operationId: admin_rest_productslug_list
+      parameters:
+      - in: query
+        name: created_at
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: query
+        name: parent
+        schema:
+          type: string
+      - in: query
+        name: slug
+        schema:
+          type: string
+      tags:
+      - admin
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAdminList'
+          description: ''
+    post:
+      operationId: admin_rest_productslug_create
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Admin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Admin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Admin'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+          description: ''
+  /admin/rest/productslug/{id}:
+    get:
+      operationId: admin_rest_productslug_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this product slug.
+        required: true
+      tags:
+      - admin
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+          description: ''
+    put:
+      operationId: admin_rest_productslug_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this product slug.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Admin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Admin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Admin'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+          description: ''
+    patch:
+      operationId: admin_rest_productslug_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this product slug.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAdmin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAdmin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAdmin'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+          description: ''
+    delete:
+      operationId: admin_rest_productslug_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this product slug.
+        required: true
+      tags:
+      - admin
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /admin/rest/translations/{id}:
+    patch:
+      operationId: admin_rest_translations_partial_update
+      description: |-
+        Facilitates adding/updating translated text.
+
+        PATCH /admin/rest/translations/es
+
+        {
+            "context": {
+                "slug": {
+                    "message": "En español",
+                    "description": "Spanish translation for slug in this context"
+                }
+            }
+        }
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - admin
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /admin/rest/versions:
+    get:
+      operationId: admin_rest_versions_list
+      parameters:
+      - in: query
+        name: commit_ish
+        schema:
+          type: string
+      - in: query
+        name: created_at
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: is_listed
+        schema:
+          type: boolean
+      - in: query
+        name: is_production
+        schema:
+          type: boolean
+      - in: query
+        name: label
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: query
+        name: product
+        schema:
+          type: string
+      tags:
+      - admin
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAdminList'
+          description: ''
+    post:
+      operationId: admin_rest_versions_create
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Admin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Admin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Admin'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+          description: ''
+  /admin/rest/versions/{id}:
+    get:
+      operationId: admin_rest_versions_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        description: A unique integer value identifying this version.
+        required: true
+      tags:
+      - admin
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+          description: ''
+    put:
+      operationId: admin_rest_versions_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        description: A unique integer value identifying this version.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Admin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Admin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Admin'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+          description: ''
+    patch:
+      operationId: admin_rest_versions_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        description: A unique integer value identifying this version.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAdmin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAdmin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAdmin'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+          description: ''
+    delete:
+      operationId: admin_rest_versions_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        description: A unique integer value identifying this version.
+        required: true
+      tags:
+      - admin
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/categories/:
+    get:
+      operationId: api_categories_list
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductCategory'
+          description: ''
+  /api/categories/{id}/:
+    get:
+      operationId: api_categories_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this product category.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductCategory'
+          description: ''
+  /api/jobs/:
+    post:
+      operationId: api_jobs_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Job'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Job'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Job'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+          description: ''
+  /api/jobs/{id}/:
+    get:
+      operationId: api_jobs_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+          description: ''
+    put:
+      operationId: api_jobs_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Job'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Job'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Job'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+          description: ''
+    patch:
+      operationId: api_jobs_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedJob'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedJob'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedJob'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+          description: ''
+    delete:
+      operationId: api_jobs_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/orgs/:
+    get:
+      operationId: api_orgs_retrieve
+      description: |-
+        This will return data on the user's current org(s). It is not a
+        list endpoint, but does not take a pk, so we have to implement
+        it this way.
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/plans/:
+    get:
+      operationId: api_plans_list
+      parameters:
+      - in: query
+        name: product
+        schema:
+          type: string
+      - in: query
+        name: slug
+        schema:
+          type: string
+      - in: query
+        name: version
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Plan'
+          description: ''
+  /api/plans/{id}/:
+    get:
+      operationId: api_plans_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        description: A unique integer value identifying this plan.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plan'
+          description: ''
+  /api/plans/{id}/preflight/:
+    get:
+      operationId: api_plans_preflight_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        description: A unique integer value identifying this plan.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plan'
+          description: ''
+    post:
+      operationId: api_plans_preflight_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        description: A unique integer value identifying this plan.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Plan'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Plan'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Plan'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plan'
+          description: ''
+  /api/plans/{id}/scratch_org/:
+    get:
+      operationId: api_plans_scratch_org_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        description: A unique integer value identifying this plan.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plan'
+          description: ''
+    post:
+      operationId: api_plans_scratch_org_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        description: A unique integer value identifying this plan.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Plan'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Plan'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Plan'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plan'
+          description: ''
+  /api/plans/get_one/:
+    get:
+      operationId: api_plans_get_one_retrieve
+      description: |-
+        This takes a set of filters and returns a single entry if
+        there's one entry that results from their application, and a 404
+        otherwise.
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plan'
+          description: ''
+  /api/products/:
+    get:
+      operationId: api_products_list
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: integer
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: slug
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProductList'
+          description: ''
+  /api/products/{id}/:
+    get:
+      operationId: api_products_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        description: A unique integer value identifying this product.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+          description: ''
+  /api/products/get_one/:
+    get:
+      operationId: api_products_get_one_retrieve
+      description: |-
+        This takes a set of filters and returns a single entry if
+        there's one entry that results from their application, and a 404
+        otherwise.
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+          description: ''
+  /api/scratch-orgs/{id}/redirect/:
+    get:
+      operationId: api_scratch_orgs_redirect_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScratchOrg'
+          description: ''
+  /api/user/:
+    get:
+      operationId: api_user_retrieve
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FullUser'
+          description: ''
+  /api/versions/:
+    get:
+      operationId: api_versions_list
+      parameters:
+      - in: query
+        name: label
+        schema:
+          type: string
+      - in: query
+        name: product
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Version'
+          description: ''
+  /api/versions/{id}/:
+    get:
+      operationId: api_versions_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        description: A unique integer value identifying this version.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Version'
+          description: ''
+  /api/versions/{id}/additional_plans/:
+    get:
+      operationId: api_versions_additional_plans_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        description: A unique integer value identifying this version.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Version'
+          description: ''
+  /api/versions/get_one/:
+    get:
+      operationId: api_versions_get_one_retrieve
+      description: |-
+        This takes a set of filters and returns a single entry if
+        there's one entry that results from their application, and a 404
+        otherwise.
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Version'
+          description: ''
+components:
+  schemas:
+    Admin:
+      type: object
+      description: |-
+        Custom serializer to make sure we link to /admin/rest/ routes
+        rather than the public /api/
+      properties:
+        url:
+          type: string
+          format: uri
+          readOnly: true
+        id:
+          type: string
+          readOnly: true
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanStep'
+        title:
+          type: string
+        preflight_message_additional:
+          type: string
+        post_install_message_additional:
+          type: string
+        commit_ish:
+          type: string
+          nullable: true
+          description: This is usually a tag, sometimes a branch. Use this to optionally
+            override the Version's commit_ish.
+          maxLength: 256
+        order_key:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        tier:
+          $ref: '#/components/schemas/TierEnum'
+        is_listed:
+          type: boolean
+        preflight_checks:
+          type: object
+          additionalProperties: {}
+        supported_orgs:
+          $ref: '#/components/schemas/SupportedOrgsEnum'
+        org_config_name:
+          type: string
+          maxLength: 64
+        scratch_org_duration_override:
+          type: integer
+          maximum: 30
+          minimum: 1
+          nullable: true
+          title: Scratch Org duration (days)
+          description: Lifetime of Scratch Orgs created for this plan. Will inherit
+            the global default value if left blank.
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        visible_to:
+          type: string
+          format: uri
+          nullable: true
+        plan_template:
+          type: string
+          format: uri
+        version:
+          type: string
+          format: uri
+      required:
+      - created_at
+      - id
+      - title
+      - url
+      - version
+    FullUser:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        username:
+          type: string
+          readOnly: true
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        valid_token_for:
+          type: string
+          readOnly: true
+        org_name:
+          type: string
+          readOnly: true
+        org_type:
+          type: string
+          readOnly: true
+        is_production_org:
+          type: string
+          readOnly: true
+        is_staff:
+          type: boolean
+          title: Staff status
+          description: Designates whether the user can log into this admin site.
+      required:
+      - id
+      - is_production_org
+      - org_name
+      - org_type
+      - username
+      - valid_token_for
+    Job:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        creator:
+          type: string
+          readOnly: true
+        plan:
+          type: string
+        steps:
+          type: array
+          items:
+            type: string
+        instance_url:
+          type: string
+          readOnly: true
+        org_id:
+          type: string
+          readOnly: true
+        results:
+          type: object
+          additionalProperties: {}
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        edited_at:
+          type: string
+          format: date-time
+          readOnly: true
+        enqueued_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        job_id:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusEnum'
+          readOnly: true
+        org_name:
+          type: string
+          readOnly: true
+        org_type:
+          type: string
+          readOnly: true
+        is_production_org:
+          type: string
+          readOnly: true
+        product_slug:
+          type: string
+          readOnly: true
+        version_label:
+          type: string
+          readOnly: true
+        version_is_most_recent:
+          type: string
+          readOnly: true
+        plan_slug:
+          type: string
+          readOnly: true
+        error_count:
+          type: string
+          readOnly: true
+        warning_count:
+          type: string
+          readOnly: true
+        is_public:
+          type: boolean
+        user_can_edit:
+          type: string
+          readOnly: true
+        message:
+          type: string
+          readOnly: true
+        error_message:
+          type: string
+          readOnly: true
+      required:
+      - created_at
+      - creator
+      - edited_at
+      - enqueued_at
+      - error_count
+      - error_message
+      - id
+      - instance_url
+      - is_production_org
+      - job_id
+      - message
+      - org_id
+      - org_name
+      - org_type
+      - plan
+      - plan_slug
+      - product_slug
+      - status
+      - steps
+      - user_can_edit
+      - version_is_most_recent
+      - version_label
+      - warning_count
+    KindEnum:
+      enum:
+      - metadata
+      - onetime
+      - managed
+      - data
+      - other
+      type: string
+    LayoutEnum:
+      enum:
+      - Default
+      - Card
+      type: string
+    PaginatedAdminList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Admin'
+    PaginatedProductList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+    PatchedAdmin:
+      type: object
+      description: |-
+        Custom serializer to make sure we link to /admin/rest/ routes
+        rather than the public /api/
+      properties:
+        url:
+          type: string
+          format: uri
+          readOnly: true
+        id:
+          type: string
+          readOnly: true
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanStep'
+        title:
+          type: string
+        preflight_message_additional:
+          type: string
+        post_install_message_additional:
+          type: string
+        commit_ish:
+          type: string
+          nullable: true
+          description: This is usually a tag, sometimes a branch. Use this to optionally
+            override the Version's commit_ish.
+          maxLength: 256
+        order_key:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        tier:
+          $ref: '#/components/schemas/TierEnum'
+        is_listed:
+          type: boolean
+        preflight_checks:
+          type: object
+          additionalProperties: {}
+        supported_orgs:
+          $ref: '#/components/schemas/SupportedOrgsEnum'
+        org_config_name:
+          type: string
+          maxLength: 64
+        scratch_org_duration_override:
+          type: integer
+          maximum: 30
+          minimum: 1
+          nullable: true
+          title: Scratch Org duration (days)
+          description: Lifetime of Scratch Orgs created for this plan. Will inherit
+            the global default value if left blank.
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        visible_to:
+          type: string
+          format: uri
+          nullable: true
+        plan_template:
+          type: string
+          format: uri
+        version:
+          type: string
+          format: uri
+    PatchedJob:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        creator:
+          type: string
+          readOnly: true
+        plan:
+          type: string
+        steps:
+          type: array
+          items:
+            type: string
+        instance_url:
+          type: string
+          readOnly: true
+        org_id:
+          type: string
+          readOnly: true
+        results:
+          type: object
+          additionalProperties: {}
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        edited_at:
+          type: string
+          format: date-time
+          readOnly: true
+        enqueued_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        job_id:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusEnum'
+          readOnly: true
+        org_name:
+          type: string
+          readOnly: true
+        org_type:
+          type: string
+          readOnly: true
+        is_production_org:
+          type: string
+          readOnly: true
+        product_slug:
+          type: string
+          readOnly: true
+        version_label:
+          type: string
+          readOnly: true
+        version_is_most_recent:
+          type: string
+          readOnly: true
+        plan_slug:
+          type: string
+          readOnly: true
+        error_count:
+          type: string
+          readOnly: true
+        warning_count:
+          type: string
+          readOnly: true
+        is_public:
+          type: boolean
+        user_can_edit:
+          type: string
+          readOnly: true
+        message:
+          type: string
+          readOnly: true
+        error_message:
+          type: string
+          readOnly: true
+    Plan:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        title:
+          type: string
+        version:
+          type: string
+          readOnly: true
+        preflight_message:
+          type: string
+          readOnly: true
+        tier:
+          $ref: '#/components/schemas/TierEnum'
+        slug:
+          type: string
+          readOnly: true
+        old_slugs:
+          type: string
+          readOnly: true
+        order_key:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/Step'
+        is_allowed:
+          type: string
+          readOnly: true
+        is_listed:
+          type: boolean
+        not_allowed_instructions:
+          type: string
+          readOnly: true
+        average_duration:
+          type: string
+          readOnly: true
+        requires_preflight:
+          type: string
+          readOnly: true
+        supported_orgs:
+          $ref: '#/components/schemas/SupportedOrgsEnum'
+        scratch_org_duration:
+          type: string
+          readOnly: true
+      required:
+      - average_duration
+      - id
+      - is_allowed
+      - not_allowed_instructions
+      - old_slugs
+      - preflight_message
+      - requires_preflight
+      - scratch_org_duration
+      - slug
+      - title
+      - version
+    PlanStep:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        is_required:
+          type: boolean
+        is_recommended:
+          type: boolean
+        kind:
+          $ref: '#/components/schemas/KindEnum'
+        path:
+          type: string
+          description: dotted path e.g. flow1.flow2.task_name
+          maxLength: 2048
+        step_num:
+          type: string
+          description: dotted step number for CCI task
+          pattern: ^[\d\./]+$
+          maxLength: 64
+        task_class:
+          type: string
+          description: dotted module path to BaseTask implementation
+          maxLength: 2048
+        task_config:
+          type: object
+          additionalProperties: {}
+        source:
+          type: object
+          additionalProperties: {}
+          nullable: true
+      required:
+      - name
+      - path
+      - step_num
+      - task_class
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        title:
+          type: string
+        description:
+          type: string
+        short_description:
+          type: string
+        click_through_agreement:
+          type: string
+        category:
+          type: string
+        color:
+          type: string
+          pattern: ^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$
+          maxLength: 18
+        icon:
+          type: string
+          readOnly: true
+        image:
+          type: string
+          format: uri
+        most_recent_version:
+          $ref: '#/components/schemas/Version'
+        slug:
+          type: string
+          readOnly: true
+        old_slugs:
+          type: string
+          readOnly: true
+        is_allowed:
+          type: string
+          readOnly: true
+        is_listed:
+          type: string
+          readOnly: true
+        order_key:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        not_allowed_instructions:
+          type: string
+          readOnly: true
+        layout:
+          $ref: '#/components/schemas/LayoutEnum'
+      required:
+      - category
+      - click_through_agreement
+      - description
+      - icon
+      - id
+      - is_allowed
+      - is_listed
+      - most_recent_version
+      - not_allowed_instructions
+      - old_slugs
+      - short_description
+      - slug
+      - title
+    ProductCategory:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+        description:
+          type: string
+        is_listed:
+          type: boolean
+        first_page:
+          type: string
+          readOnly: true
+      required:
+      - description
+      - first_page
+      - id
+      - title
+    ScratchOrg:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        plan:
+          type: string
+        email:
+          type: string
+          format: email
+          writeOnly: true
+          nullable: true
+          maxLength: 254
+        enqueued_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        edited_at:
+          type: string
+          format: date-time
+          readOnly: true
+        expires_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusEnum'
+          readOnly: true
+        org_id:
+          type: string
+          readOnly: true
+          nullable: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+      required:
+      - created_at
+      - edited_at
+      - email
+      - enqueued_at
+      - expires_at
+      - id
+      - org_id
+      - plan
+      - status
+      - uuid
+    StatusEnum:
+      enum:
+      - started
+      - complete
+      - failed
+      - canceled
+      type: string
+    Step:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        name:
+          type: string
+        description:
+          type: string
+        is_required:
+          type: boolean
+        is_recommended:
+          type: boolean
+        kind:
+          type: string
+        kind_icon:
+          type: string
+          readOnly: true
+      required:
+      - description
+      - id
+      - kind
+      - kind_icon
+      - name
+    SupportedOrgsEnum:
+      enum:
+      - Persistent
+      - Scratch
+      - Both
+      type: string
+    TierEnum:
+      enum:
+      - primary
+      - secondary
+      - additional
+      type: string
+    Version:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        product:
+          type: string
+          readOnly: true
+        label:
+          type: string
+          pattern: ^[a-zA-Z0-9._+-]+$
+          maxLength: 1024
+        description:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        primary_plan:
+          $ref: '#/components/schemas/Plan'
+        secondary_plan:
+          $ref: '#/components/schemas/Plan'
+        is_listed:
+          type: boolean
+      required:
+      - created_at
+      - description
+      - id
+      - label
+      - primary_plan
+      - product
+      - secondary_plan
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    tokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Token-based authentication with required prefix "Token"
