@@ -238,7 +238,11 @@ class StepsTable extends Component<Props, State> {
             <DataTableColumn key="kind" label={t('Type')} property="kind">
               <KindDataCell activeJobStep={activeJobStepId} />
             </DataTableColumn>
-            <DataTableColumn key="is_required" property="is_required">
+            <DataTableColumn
+              key="is_required"
+              label={t('Is Required')}
+              property="is_required"
+            >
               <RequiredDataCell
                 preflight={preflight}
                 job={job}
