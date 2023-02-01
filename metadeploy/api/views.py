@@ -383,7 +383,7 @@ class ScratchOrgViewSet(viewsets.GenericViewSet):
         return HttpResponseRedirect(redirect_to=url)
 
 
-class FrontEndInfo(viewsets.GenericViewSet):
+class BootstrapView(viewsets.GenericViewSet):
     @action(detail=False, methods=["GET"])
     def bootstrap(self, requst):
         site_profile = SiteProfile.objects.first()
