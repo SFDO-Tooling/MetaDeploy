@@ -28,7 +28,8 @@ const Logout = ({
             options={[
               {
                 label: user?.username,
-                type: 'header',
+                type: 'item',
+                disabled: true,
               },
               { type: 'divider' },
               {
