@@ -38,6 +38,12 @@ module.exports = merge(common, {
     hot: false,
     static: false,
   },
+  resolve: {
+    modules: ['src', 'src/sass', 'static', 'node_modules', 'mock'],
+    alias: {
+      mock_data$: '../../../mock/data.js',
+    },
+  },
   plugins: [
     new MiniCssExtractPlugin({
       filename: '[name].css',
