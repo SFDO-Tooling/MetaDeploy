@@ -1,3 +1,4 @@
+from datetime import datetime
 from functools import reduce
 from logging import getLogger
 
@@ -7,7 +8,7 @@ from django.contrib.auth import get_user_model
 from django.core import exceptions
 from django.core.cache import cache
 from django.db.models import Q
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, mixins, status, viewsets
@@ -26,6 +27,7 @@ from .models import (
     Product,
     ProductCategory,
     ScratchOrg,
+    SiteProfile,
     Version,
 )
 from .paginators import ProductPaginator
@@ -39,6 +41,7 @@ from .serializers import (
     ProductCategorySerializer,
     ProductSerializer,
     ScratchOrgSerializer,
+    SiteSerializer,
     VersionSerializer,
 )
 
@@ -378,3 +381,19 @@ class ScratchOrgViewSet(viewsets.GenericViewSet):
             raise Http404
         url = scratch_org.get_login_url()
         return HttpResponseRedirect(redirect_to=url)
+
+
+class BootstrapView(viewsets.GenericViewSet):
+    @action(detail=False, methods=["GET"])
+    def bootstrap(self, requst):
+        site_profile = SiteProfile.objects.first()
+        site_serializer = SiteSerializer(site_profile)
+        data = {
+            "PREFLIGHT_LIFETIME_MINUTES": settings.PREFLIGHT_LIFETIME_MINUTES,
+            "TOKEN_LIFETIME_MINUTES": settings.TOKEN_LIFETIME_MINUTES,
+            "SITE": site_serializer.data,
+            "YEAR": datetime.utcnow().year,
+            "SENTRY_DSN": settings.SENTRY_DSN,
+            "SCRATCH_ORGS_AVAILABLE": bool(settings.DEVHUB_USERNAME),
+        }
+        return JsonResponse(data)
