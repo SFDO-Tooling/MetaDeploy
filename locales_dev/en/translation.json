@@ -46,6 +46,7 @@
   "Installation encountered {{errorSummary}}.": "Installation encountered {{errorSummary}}.",
   "Installation was canceled.": "Installation was canceled.",
   "Installing…": "Installing…",
+  "Is Required": "Is Required",
   "Learn More": "Learn More",
   "Loading…": "Loading…",
   "Log In": "Log In",
