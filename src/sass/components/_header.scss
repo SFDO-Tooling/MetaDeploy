@@ -17,3 +17,11 @@
 .site-logo {
   max-height: 2.5rem;
 }
+
+[aria-labelledby='logout'] {
+  .slds-dropdown__item > a[aria-disabled='true'] {
+    font-weight: 500;
+    font-size: 1rem;
+    color: $color-text-default;
+  }
+}
