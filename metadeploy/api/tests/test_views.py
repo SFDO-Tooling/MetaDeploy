@@ -874,3 +874,37 @@ class TestScratchOrgView:
         response = anon_client.get(url)
 
         assert response.status_code == 404
+
+
+@pytest.mark.django_db
+def test_front_end_info(anon_client, site_profile_factory):
+    expected_keys = {
+        "PREFLIGHT_LIFETIME_MINUTES",
+        "SCRATCH_ORGS_AVAILABLE",
+        "SENTRY_DSN",
+        "SITE",
+        "TOKEN_LIFETIME_MINUTES",
+        "YEAR",
+    }
+    expected_site_keys = {
+        "company_logo",
+        "company_name",
+        "copyright_notice",
+        "favicon",
+        "master_agreement",
+        "name",
+        "show_metadeploy_wordmark",
+        "welcome_text",
+    }
+    site_profile_factory()
+    url = reverse("ui-bootstrap")
+    response = anon_client.get(url)
+
+    assert response.status_code == 200
+
+    content = response.json()
+    actual_keys = content.keys()
+    assert expected_keys == actual_keys
+
+    actual_site_keys = content["SITE"].keys()
+    assert expected_site_keys == set(actual_site_keys)
