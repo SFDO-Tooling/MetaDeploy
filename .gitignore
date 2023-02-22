@@ -15,6 +15,7 @@ npm-debug.log
 yarn-error.log
 staticfiles/
 webpack-stats.json
+metadeploy/api/tubular/constants.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
