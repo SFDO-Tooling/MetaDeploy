@@ -55,14 +55,15 @@ const CtaButton = ({
             rel="noreferrer noopener"
             className={btnClasses}
           >
+            {t('View Org')}
             <Icon
-              containerClassName="slds-p-right_x-small"
+              containerClassName="slds-p-left_x-small"
               category="utility"
               name="new_window"
+              assistiveText={{ label: t('New Window') }}
               size="x-small"
               inverse
             />
-            {t('View Org')}
           </a>
         );
       }
