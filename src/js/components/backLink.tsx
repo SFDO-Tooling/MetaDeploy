@@ -20,7 +20,8 @@ const BackLink = ({
         <p className={className}>
           <Link to={url}>
             <Icon
-              assistiveText={{ label }}
+              /* blank assistive text is OK because the arrow is decorative */
+              assistiveText=""
               category="utility"
               name={name}
               size="x-small"
