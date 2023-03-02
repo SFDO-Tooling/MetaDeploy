@@ -1,4 +1,5 @@
 const urls = window.api_urls;
+const WILDCARD = "*****";
 
 const dummyData = {};
 
@@ -576,15 +577,14 @@ dummyData[urls.productcategory_list()] = [
 ];
 
 dummyData[urls.org_list()] = {
-  "null": {
+  "testData": {
     "org_id": null,
     "current_job": null,
     "current_preflight": null
   }
 };
 
-
-dummyData[urls.version_additional_plans("*")] = [
+dummyData[urls.version_additional_plans(WILDCARD)] = [
   {
     "id": "DgrklZ6",
     "title": "Account Record Types",
@@ -914,4 +914,12 @@ dummyData[urls.version_additional_plans("*")] = [
   }
 ]
 
-export { dummyData };
+dummyData[urls.job_detail(WILDCARD)] = {
+  "testData": {
+    "org_id": null,
+    "current_job": null,
+    "current_preflight": null
+  }
+};
+
+export { dummyData, WILDCARD };

@@ -41,7 +41,10 @@ module.exports = merge(common, {
   resolve: {
     modules: ['src', 'src/sass', 'static', 'node_modules', 'mock'],
     alias: {
-      mock_data$: '../../../mock/data.js',
+      // mock_data$: '../../../mock/data.js',
+      // mock_setup$: '../../../mock/mocking_util.js',
+      mock_setup$: path.resolve(__dirname, 'mock/mocking_util.js'),
+      mock_data$: path.resolve(__dirname, 'mock/data.js'),
     },
   },
   plugins: [

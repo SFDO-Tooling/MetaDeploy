@@ -1,11 +1,12 @@
-import fetchMock from 'fetch-mock';
 import cookies from 'js-cookie';
+import { MOCK_FETCH, mockURLAgnosticPrimary } from 'mock_setup';
 import { ThunkDispatch } from 'redux-thunk';
 
 import { addError } from '@/js/store/errors/actions';
 import { logError } from '@/js/utils/logging';
-import { dummyData, mockEndpoint, mockFetch } from '@/js/utils/mocking';
-
+if (MOCK_FETCH) {
+  // runMocking();
+}
 export type UrlParams = {
   [key: string]: string | number | boolean;
 };
@@ -54,10 +55,8 @@ const apiFetch = (
       cookies.get('csrftoken') || '';
   }
 
-  // Mocking for FE
-  if (mockFetch) {
-    // Possible entrypoint here, to only mock the endpoints we are calling
-    mockEndpoint(url, dummyData[url]);
+  if (MOCK_FETCH) {
+    mockURLAgnosticPrimary(url);
   }
 
   return fetch(url, options)
