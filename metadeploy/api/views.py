@@ -1,6 +1,7 @@
 from datetime import datetime
 from functools import reduce
 from logging import getLogger
+from pathlib import Path
 
 import django_rq
 from django.conf import settings
@@ -8,7 +9,7 @@ from django.contrib.auth import get_user_model
 from django.core import exceptions
 from django.core.cache import cache
 from django.db.models import Q
-from django.http import Http404, HttpResponseRedirect, JsonResponse
+from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, mixins, status, viewsets
@@ -384,6 +385,9 @@ class ScratchOrgViewSet(viewsets.GenericViewSet):
 
 
 class BootstrapView(viewsets.GenericViewSet):
+
+    js_reverse_filepath: Path = Path("staticfiles/django_js_reverse/js/reverse.js")
+
     @action(detail=False, methods=["GET"])
     def bootstrap(self, requst):
         site_profile = SiteProfile.objects.first()
@@ -397,3 +401,10 @@ class BootstrapView(viewsets.GenericViewSet):
             "SCRATCH_ORGS_AVAILABLE": bool(settings.DEVHUB_USERNAME),
         }
         return JsonResponse(data)
+
+    @action(detail=False, methods=["GET"])
+    def reverse(self, request):
+        """Endpoint to supply the front-end with the contents
+        of js file produced by django-js-reverse"""
+        with open(self.js_reverse_filepath, "r", encoding="utf-8") as f:
+            return HttpResponse(f.read(), content_type="text/plain")
