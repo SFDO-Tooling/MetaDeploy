@@ -4,9 +4,7 @@ import { ThunkDispatch } from 'redux-thunk';
 
 import { addError } from '@/js/store/errors/actions';
 import { logError } from '@/js/utils/logging';
-if (MOCK_FETCH) {
-  // runMocking();
-}
+
 export type UrlParams = {
   [key: string]: string | number | boolean;
 };

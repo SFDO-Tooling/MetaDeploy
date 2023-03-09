@@ -4,7 +4,7 @@ import { dummyData, WILDCARD } from 'mock_data';
 
 window.dummyData = dummyData;
 
-const MOCK_FETCH = true;
+const MOCK_FETCH = false;
 const API_URLS = window.api_urls;
 
 // if (process?.env?.NODE_ENV === 'development') { }
@@ -31,31 +31,15 @@ const _getData = (url) => {
   }
 }
 
-const runGlobalMocking = () => {
-  if (MOCK_FETCH) {
-    for (const [key, value] of Object.entries(API_URLS)) {
-      let url = value();
-      // check for endpoint with a primary key
-      if (url === null) {
-        url = value(WILDCARD);
-      }
-      const dataResponse = dummyData[url] || null;
-      if (dataResponse) {
-        fetchMock.get(url, dataResponse, { overwriteRoutes: true });
-      }
-    }
-  }
-}
+
 /***
  * Return data for a given URL. Agnostic because the primary key doesn't matter.
  */
 const mockURLAgnosticPrimary = (url) => {
-  fetchMock.get(url, _getData(url));
+  const dataResponse = _getData(url);
+  fetchMock.get(url, dataResponse);
+  console.log(`Mocking "${url}`);
+  console.log(dataResponse);
 }
-
-for (const [key, value] of Object.entries(window.api_urls)) {
-  // console.log(`${key} : ${value()}`);
-}
-
 
 export { MOCK_FETCH, mockURLAgnosticPrimary };
