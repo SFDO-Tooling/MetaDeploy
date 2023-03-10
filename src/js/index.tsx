@@ -10,8 +10,7 @@ import { createBrowserHistory } from 'history';
 import { t } from 'i18next';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { Helmet, HelmetProvider } from 'react-helmet-async';
-import { useTranslation } from 'react-i18next';
+import { HelmetProvider } from 'react-helmet-async';
 import { Provider } from 'react-redux';
 // Consider upgrading to v6: https://github.com/remix-run/react-router/discussions/8753
 import { Redirect, Route, Router, Switch } from 'react-router-dom';
@@ -39,74 +38,65 @@ import { fetchProducts } from '@/js/store/products/actions';
 import { login, refetchAllData } from '@/js/store/user/actions';
 import { User } from '@/js/store/user/reducer';
 import { getUrlParam, removeUrlParam } from '@/js/utils/api';
+import apiFetch from '@/js/utils/api';
 import { SCRATCH_ORG_QS } from '@/js/utils/constants';
 import { log, logError } from '@/js/utils/logging';
 import { routePatterns } from '@/js/utils/routes';
 import { createSocket } from '@/js/utils/websockets';
 
+import BootstrapPageData from './components/bootstrap/bootstrapPageData';
 const history = createBrowserHistory();
 
 console.log('>>> index.tsx');
 
-const App = () => {
-  // We need to handle the RTL language tag using useTranslation()
-  const translation = useTranslation();
-  document.body.dir = translation.i18n.dir();
-  const site_title = window.SITE_NAME;
-  return (
-    <>
-      <Helmet>
-        <title>{site_title}</title>
-      </Helmet>
-      <div className="slds-grid slds-grid_frame slds-grid_vertical metadeploy-frame">
-        <ErrorBoundary>
-          <div className="slds-grow slds-shrink-none">
-            <ErrorBoundary>
-              <Switch>
-                <Route
-                  exact
-                  path={routePatterns.home()}
-                  render={() => <Redirect to={routePatterns.product_list()} />}
-                />
-                <Route
-                  exact
-                  path={routePatterns.product_list()}
-                  component={ProductsList}
-                />
-                <Route
-                  exact
-                  path={routePatterns.product_detail()}
-                  component={ProductDetail}
-                />
-                <Route
-                  exact
-                  path={routePatterns.version_detail()}
-                  component={VersionDetail}
-                />
-                <Route
-                  exact
-                  path={routePatterns.plan_detail()}
-                  component={PlanDetail}
-                />
-                <Route
-                  exact
-                  path={routePatterns.job_detail()}
-                  component={JobDetail}
-                />
-                <Route
-                  path={routePatterns.auth_error()}
-                  component={AuthError}
-                />
-                <Route component={FourOhFour} />
-              </Switch>
-            </ErrorBoundary>
-          </div>
-          <Footer />
-        </ErrorBoundary>
-      </div>
-    </>
-  );
-};
+const App = () => (
+  <>
+    <BootstrapPageData />
+    <div className="slds-grid slds-grid_frame slds-grid_vertical metadeploy-frame">
+      <ErrorBoundary>
+        <div className="slds-grow slds-shrink-none">
+          <ErrorBoundary>
+            <Switch>
+              <Route
+                exact
+                path={routePatterns.home()}
+                render={() => <Redirect to={routePatterns.product_list()} />}
+              />
+              <Route
+                exact
+                path={routePatterns.product_list()}
+                component={ProductsList}
+              />
+              <Route
+                exact
+                path={routePatterns.product_detail()}
+                component={ProductDetail}
+              />
+              <Route
+                exact
+                path={routePatterns.version_detail()}
+                component={VersionDetail}
+              />
+              <Route
+                exact
+                path={routePatterns.plan_detail()}
+                component={PlanDetail}
+              />
+              <Route
+                exact
+                path={routePatterns.job_detail()}
+                component={JobDetail}
+              />
+              <Route path={routePatterns.auth_error()} component={AuthError} />
+              <Route component={FourOhFour} />
+            </Switch>
+          </ErrorBoundary>
+        </div>
+        <Footer />
+      </ErrorBoundary>
+    </div>
+  </>
+);
 
 init_i18n((i18nError?: string) => {
   if (i18nError) {
@@ -149,28 +139,17 @@ init_i18n((i18nError?: string) => {
 
     // Get JS globals
     let GLOBALS = {};
-    try {
-      const globalsEl = document.getElementById('js-globals');
-      if (globalsEl?.textContent) {
-        GLOBALS = JSON.parse(globalsEl.textContent);
-      }
-    } catch (err: any) {
-      logError(err);
-    }
-    window.GLOBALS = GLOBALS;
-    window.SITE_NAME = window.GLOBALS.SITE?.name || t('MetaDeploy');
-
-    // Get JS context
-    let JS_CONTEXT = {};
-    try {
-      const contextEl = document.getElementById('js-context');
-      if (contextEl?.textContent) {
-        JS_CONTEXT = JSON.parse(contextEl.textContent);
-      }
-    } catch (err: any) {
-      logError(err);
-    }
-    window.JS_CONTEXT = JS_CONTEXT;
+    console.log('>>> fetching page globals');
+    const featchBootstrap = async () => {
+      await apiFetch(window.api_urls.ui_bootstrap(), null).then((response) => {
+        GLOBALS = response;
+        window.GLOBALS = GLOBALS;
+        window.SITE_NAME = window.GLOBALS.SITE?.name || t('MetaDeploy');
+        console.log('>>> page globals loaded');
+        return response;
+      });
+    };
+    featchBootstrap();
 
     // Get logged-in/out status
     const userString = el.getAttribute('data-user');
@@ -186,7 +165,7 @@ init_i18n((i18nError?: string) => {
         (appStore.dispatch as ThunkDispatch)(login(user));
       }
     }
-    el.removeAttribute('data-user');
+    // el.removeAttribute('data-user');
 
     // Set App element (used for react-SLDS modals)
     settings.setAppElement(el);

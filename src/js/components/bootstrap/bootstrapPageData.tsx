@@ -2,24 +2,10 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 
-import apiFetch from '@/js/utils/api';
-
 const BootstrapPageData = () => {
-  const { t } = useTranslation();
-
-  const featchBootstrap = async () => {
-    try {
-      const response = await apiFetch(window.api_urls.ui_bootstrap(), null);
-      console.log(response);
-      window.GLOBALS = response;
-    } catch (err) {
-      console.log(err);
-      throw err;
-    }
-  };
-
-  featchBootstrap();
-
+  const { t, i18n } = useTranslation();
+  // Setting language direction
+  document.dir = i18n.dir();
   /*
   {
     "PREFLIGHT_LIFETIME_MINUTES":60,
@@ -39,11 +25,18 @@ const BootstrapPageData = () => {
     "SCRATCH_ORGS_AVAILABLE":true
   }
   */
-
+  const GLOBALS = window.GLOBALS;
   return (
     <>
       <Helmet>
-        <title>{site_title}</title>
+        <title>{window.SITE_NAME}</title>
+        <meta name="author" content={GLOBALS?.SITE.company_name} />
+        <meta name="keywords" content="" />
+        <link rel="shortcut icon" href={GLOBALS?.SITE.favicon} />
+        <meta
+          name="description"
+          content="Web-based tool for installing Salesforce products"
+        />
       </Helmet>
     </>
   );

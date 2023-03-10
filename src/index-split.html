@@ -4,23 +4,8 @@
     <meta charset="utf-8" />
     <meta http-equiv="x-ua-compatible" content="ie=edge" />
     <meta name="robots" content="index, follow" />
-    <meta name="author" content="{{ GLOBALS.SITE.company_name }}" />
-    <meta
-      name="keywords"
-      content="{% block keywords %}{% endblock keywords %}"
-    />
     <meta name="language" content="en-us" />
-    <link rel="shortcut icon" href="{{ GLOBALS.SITE.favicon }}" />
-
-    <!-- Page Info -->
-    <title>GLOBALS.SITE.name</title>
-    <meta
-      name="description"
-      content="GLOBALS.SITE Web-based tool for installing Salesforce products"
-    />
-
-    <!-- Insert config variables -->
-    {{ GLOBALS | json_script:"js-globals" }}
+    <!-- Page Info handles by Helemt -->
   </head>
   <body>
     <main id="app" class="slds-grid slds-grid_vertical" data-user="userdata">
