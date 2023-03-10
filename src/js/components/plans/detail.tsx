@@ -1,6 +1,6 @@
 import { find } from 'lodash';
 import React, { Component } from 'react';
-import DocumentTitle from 'react-document-title';
+import { Helmet } from 'react-helmet-async';
 import { WithTranslation, withTranslation } from 'react-i18next';
 import { Trans } from 'react-i18next';
 import { connect, ConnectedProps } from 'react-redux';
@@ -453,101 +453,100 @@ class PlanDetail extends Component<Props, State> {
     );
 
     return (
-      <DocumentTitle
-        title={`${plan.title} | ${product.title} | ${window.SITE_NAME}`}
-      >
-        <>
-          <Header
-            history={history}
-            hideLogin={plan.supported_orgs === SUPPORTED_ORGS.Scratch}
-          />
-          <PageHeader
-            product={product}
-            version={version}
-            plan={plan}
-            userLoggedIn={Boolean(user?.valid_token_for)}
-            scratchOrgCreated={Boolean(
-              scratchOrg?.status === SCRATCH_ORG_STATUSES.complete,
-            )}
-            preflightStatus={preflight?.status}
-            preflightIsValid={Boolean(preflight?.is_valid)}
-            preflightIsReady={Boolean(preflight?.is_ready)}
-          />
-          {product.is_allowed && plan.is_allowed ? (
-            <BodyContainer>
-              {product.most_recent_version && !isMostRecent ? (
-                <OldVersionWarning
-                  link={routes.version_detail(product.slug, LATEST_VERSION)}
-                />
-              ) : null}
-              {preflight && (scratchOrg || user) ? (
-                <Toasts preflight={preflight} label="Pre-install validation" />
-              ) : null}
-              <Intro
-                averageDuration={plan.average_duration}
-                isProductionOrg={Boolean(user?.is_production_org)}
-                preMessage={
-                  plan.preflight_message ? (
-                    // These messages are pre-cleaned by the API
-                    <div
-                      className="markdown"
-                      dangerouslySetInnerHTML={{
-                        __html: plan.preflight_message,
-                      }}
-                    />
-                  ) : null
-                }
-                results={
-                  preflight && (scratchOrg || user) ? (
-                    <PreflightResults preflight={preflight} />
-                  ) : null
-                }
-                postMessage={this.getPostMessage()}
-                cta={this.getCTA(selectedSteps)}
-                backLink={
-                  <BackLink
-                    label={t('Select a different plan')}
-                    url={routes.version_detail(
-                      product.slug,
-                      getVersionLabel(product, version),
-                    )}
-                  />
-                }
+      <>
+        <Helmet>
+          <title>{`${plan.title} | ${product.title} | ${window.SITE_NAME}`}</title>
+        </Helmet>
+        <Header
+          history={history}
+          hideLogin={plan.supported_orgs === SUPPORTED_ORGS.Scratch}
+        />
+        <PageHeader
+          product={product}
+          version={version}
+          plan={plan}
+          userLoggedIn={Boolean(user?.valid_token_for)}
+          scratchOrgCreated={Boolean(
+            scratchOrg?.status === SCRATCH_ORG_STATUSES.complete,
+          )}
+          preflightStatus={preflight?.status}
+          preflightIsValid={Boolean(preflight?.is_valid)}
+          preflightIsReady={Boolean(preflight?.is_ready)}
+        />
+        {product.is_allowed && plan.is_allowed ? (
+          <BodyContainer>
+            {product.most_recent_version && !isMostRecent ? (
+              <OldVersionWarning
+                link={routes.version_detail(product.slug, LATEST_VERSION)}
               />
-              <UserInfo user={user} plan={plan} scratchOrg={scratchOrg} />
-              {plan.steps?.length ? (
-                <StepsTable
-                  plan={plan}
-                  preflight={preflight}
-                  steps={steps}
-                  selectedSteps={selectedSteps}
-                  canInstall={canInstall}
-                  handleStepsChange={this.handleStepsChange}
+            ) : null}
+            {preflight && (scratchOrg || user) ? (
+              <Toasts preflight={preflight} label="Pre-install validation" />
+            ) : null}
+            <Intro
+              averageDuration={plan.average_duration}
+              isProductionOrg={Boolean(user?.is_production_org)}
+              preMessage={
+                plan.preflight_message ? (
+                  // These messages are pre-cleaned by the API
+                  <div
+                    className="markdown"
+                    dangerouslySetInnerHTML={{
+                      __html: plan.preflight_message,
+                    }}
+                  />
+                ) : null
+              }
+              results={
+                preflight && (scratchOrg || user) ? (
+                  <PreflightResults preflight={preflight} />
+                ) : null
+              }
+              postMessage={this.getPostMessage()}
+              cta={this.getCTA(selectedSteps)}
+              backLink={
+                <BackLink
+                  label={t('Select a different plan')}
+                  url={routes.version_detail(
+                    product.slug,
+                    getVersionLabel(product, version),
+                  )}
                 />
-              ) : null}
-            </BodyContainer>
-          ) : (
-            <PlanNotAllowed
-              isLoggedIn={user !== null}
-              message={plan.not_allowed_instructions}
-              link={
-                <Trans i18nKey="planNotAllowed">
-                  Try{' '}
-                  <Link
-                    to={routes.version_detail(
-                      product.slug,
-                      getVersionLabel(product, version),
-                    )}
-                  >
-                    another plan
-                  </Link>{' '}
-                  from that product version
-                </Trans>
               }
             />
-          )}
-        </>
-      </DocumentTitle>
+            <UserInfo user={user} plan={plan} scratchOrg={scratchOrg} />
+            {plan.steps?.length ? (
+              <StepsTable
+                plan={plan}
+                preflight={preflight}
+                steps={steps}
+                selectedSteps={selectedSteps}
+                canInstall={canInstall}
+                handleStepsChange={this.handleStepsChange}
+              />
+            ) : null}
+          </BodyContainer>
+        ) : (
+          <PlanNotAllowed
+            isLoggedIn={user !== null}
+            message={plan.not_allowed_instructions}
+            link={
+              <Trans i18nKey="planNotAllowed">
+                Try{' '}
+                <Link
+                  to={routes.version_detail(
+                    product.slug,
+                    getVersionLabel(product, version),
+                  )}
+                >
+                  another plan
+                </Link>{' '}
+                from that product version
+              </Trans>
+            }
+          />
+        )}
+      </>
     );
   }
 }

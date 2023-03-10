@@ -9,8 +9,9 @@ import utilitySprite from '@salesforce-ux/design-system/assets/icons/utility-spr
 import { createBrowserHistory } from 'history';
 import { t } from 'i18next';
 import React from 'react';
-import DocumentTitle from 'react-document-title';
 import { createRoot } from 'react-dom/client';
+import { Helmet, HelmetProvider } from 'react-helmet-async';
+import { useTranslation } from 'react-i18next';
 import { Provider } from 'react-redux';
 // Consider upgrading to v6: https://github.com/remix-run/react-router/discussions/8753
 import { Redirect, Route, Router, Switch } from 'react-router-dom';
@@ -47,53 +48,65 @@ const history = createBrowserHistory();
 
 console.log('>>> index.tsx');
 
-const App = () => (
-  <DocumentTitle title={window.SITE_NAME}>
-    <div className="slds-grid slds-grid_frame slds-grid_vertical metadeploy-frame">
-      <ErrorBoundary>
-        <div className="slds-grow slds-shrink-none">
-          <ErrorBoundary>
-            <Switch>
-              <Route
-                exact
-                path={routePatterns.home()}
-                render={() => <Redirect to={routePatterns.product_list()} />}
-              />
-              <Route
-                exact
-                path={routePatterns.product_list()}
-                component={ProductsList}
-              />
-              <Route
-                exact
-                path={routePatterns.product_detail()}
-                component={ProductDetail}
-              />
-              <Route
-                exact
-                path={routePatterns.version_detail()}
-                component={VersionDetail}
-              />
-              <Route
-                exact
-                path={routePatterns.plan_detail()}
-                component={PlanDetail}
-              />
-              <Route
-                exact
-                path={routePatterns.job_detail()}
-                component={JobDetail}
-              />
-              <Route path={routePatterns.auth_error()} component={AuthError} />
-              <Route component={FourOhFour} />
-            </Switch>
-          </ErrorBoundary>
-        </div>
-        <Footer />
-      </ErrorBoundary>
-    </div>
-  </DocumentTitle>
-);
+const App = () => {
+  // We need to handle the RTL language tag using useTranslation()
+  const translation = useTranslation();
+  document.body.dir = translation.i18n.dir();
+  const site_title = window.SITE_NAME;
+  return (
+    <>
+      <Helmet>
+        <title>{site_title}</title>
+      </Helmet>
+      <div className="slds-grid slds-grid_frame slds-grid_vertical metadeploy-frame">
+        <ErrorBoundary>
+          <div className="slds-grow slds-shrink-none">
+            <ErrorBoundary>
+              <Switch>
+                <Route
+                  exact
+                  path={routePatterns.home()}
+                  render={() => <Redirect to={routePatterns.product_list()} />}
+                />
+                <Route
+                  exact
+                  path={routePatterns.product_list()}
+                  component={ProductsList}
+                />
+                <Route
+                  exact
+                  path={routePatterns.product_detail()}
+                  component={ProductDetail}
+                />
+                <Route
+                  exact
+                  path={routePatterns.version_detail()}
+                  component={VersionDetail}
+                />
+                <Route
+                  exact
+                  path={routePatterns.plan_detail()}
+                  component={PlanDetail}
+                />
+                <Route
+                  exact
+                  path={routePatterns.job_detail()}
+                  component={JobDetail}
+                />
+                <Route
+                  path={routePatterns.auth_error()}
+                  component={AuthError}
+                />
+                <Route component={FourOhFour} />
+              </Switch>
+            </ErrorBoundary>
+          </div>
+          <Footer />
+        </ErrorBoundary>
+      </div>
+    </>
+  );
+};
 
 init_i18n((i18nError?: string) => {
   if (i18nError) {
@@ -182,21 +195,24 @@ init_i18n((i18nError?: string) => {
     (appStore.dispatch as ThunkDispatch)(fetchProducts()).finally(() => {
       (appStore.dispatch as ThunkDispatch)(fetchOrgJobs());
       const root = createRoot(el);
+      const helmetContext = {};
       root.render(
         <Provider store={appStore}>
-          <Router history={history}>
-            <UNSAFE_DirectionSettings.Provider value={document.dir || 'ltr'}>
-              <IconSettings
-                actionSprite={actionSprite}
-                customSprite={customSprite}
-                doctypeSprite={doctypeSprite}
-                standardSprite={standardSprite}
-                utilitySprite={utilitySprite}
-              >
-                <App />
-              </IconSettings>
-            </UNSAFE_DirectionSettings.Provider>
-          </Router>
+          <HelmetProvider context={helmetContext}>
+            <Router history={history}>
+              <UNSAFE_DirectionSettings.Provider value={document.dir || 'ltr'}>
+                <IconSettings
+                  actionSprite={actionSprite}
+                  customSprite={customSprite}
+                  doctypeSprite={doctypeSprite}
+                  standardSprite={standardSprite}
+                  utilitySprite={utilitySprite}
+                >
+                  <App />
+                </IconSettings>
+              </UNSAFE_DirectionSettings.Provider>
+            </Router>
+          </HelmetProvider>
         </Provider>,
       );
     });

@@ -1,9 +1,8 @@
 {% load api_bootstrap %}
-{% load i18n %}
 {% load js_reverse %}
 
 <!DOCTYPE html>
-<html lang="en" {% get_current_language_bidi as LANGUAGE_BIDI %}{% if LANGUAGE_BIDI %}dir="rtl"{% endif %} class="slds-theme_default">
+<html lang="en" class="slds-theme_default">
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="x-ua-compatible" content="ie=edge" />
@@ -17,14 +16,6 @@
     <title>{% block title %}{% if GLOBALS.SITE and GLOBALS.SITE.name %}{{ GLOBALS.SITE.name }}{% else %}MetaDeploy{% endif %}{% endblock %}</title>
     <meta name="description" content="{% block description %}Web-based tool for installing Salesforce products{% endblock description %}" />
 
-    {% if GLOBALS.SENTRY_DSN %}
-      <!-- Insert Sentry setup -->
-      <script id="js-sentry-setup" type="application/json">
-        {
-          "dsn": "{{ GLOBALS.SENTRY_DSN }}"
-        }
-      </script>
-    {% endif %}
     <!-- Insert config variables -->
     {{ GLOBALS | json_script:"js-globals" }}
     <!-- Insert authentication error info -->

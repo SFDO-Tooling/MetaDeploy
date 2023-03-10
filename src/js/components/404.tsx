@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import DocumentTitle from 'react-document-title';
+import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { Trans } from 'react-i18next';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
@@ -30,23 +30,24 @@ const FourOhFour = ({
   const { t } = useTranslation();
 
   return (
-    <DocumentTitle title={`${t('404')} | ${window.SITE_NAME}`}>
-      <>
-        <Header history={history} />
-        <EmptyIllustration
-          message={
-            message === undefined ? (
-              <Trans i18nKey="pageCannotBeFound">
-                That page cannot be found. Try the{' '}
-                <Link to={routes.home()}>home page</Link>?
-              </Trans>
-            ) : (
-              message
-            )
-          }
-        />
-      </>
-    </DocumentTitle>
+    <>
+      <Helmet>
+        <title>{`${t('404')} | ${window.SITE_NAME}`}</title>
+      </Helmet>
+      <Header history={history} />
+      <EmptyIllustration
+        message={
+          message === undefined ? (
+            <Trans i18nKey="pageCannotBeFound">
+              That page cannot be found. Try the{' '}
+              <Link to={routes.home()}>home page</Link>?
+            </Trans>
+          ) : (
+            message
+          )
+        }
+      />
+    </>
   );
 };
 

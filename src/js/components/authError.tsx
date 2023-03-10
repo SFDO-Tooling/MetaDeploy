@@ -1,5 +1,5 @@
 import React from 'react';
-import DocumentTitle from 'react-document-title';
+import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { Trans } from 'react-i18next';
 import { connect } from 'react-redux';
@@ -25,22 +25,23 @@ const AuthError = withRouter(
     );
 
     return (
-      <DocumentTitle
-        title={`${t('Authentication Error')} | ${window.SITE_NAME}`}
-      >
-        <>
-          <Header history={history} />
-          <EmptyIllustration message={message} />
-          <div className="slds-align_absolute-center">
-            <Login
-              id="auth-error-login"
-              label={user ? t('Log In With a Different Org') : t('Log In')}
-              buttonClassName="slds-p-horizontal_xxx-small"
-              buttonVariant="base"
-            />
-          </div>
-        </>
-      </DocumentTitle>
+      <>
+        <Helmet>
+          <title>
+            title={`${t('Authentication Error')} | ${window.SITE_NAME}`}
+          </title>
+        </Helmet>
+        <Header history={history} />
+        <EmptyIllustration message={message} />
+        <div className="slds-align_absolute-center">
+          <Login
+            id="auth-error-login"
+            label={user ? t('Log In With a Different Org') : t('Log In')}
+            buttonClassName="slds-p-horizontal_xxx-small"
+            buttonVariant="base"
+          />
+        </div>
+      </>
     );
   },
 );
