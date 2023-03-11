@@ -1,6 +1,7 @@
 import { render as renderReact } from '@testing-library/react';
 import i18n, { use } from 'i18next';
 import React from 'react';
+import { HelmetProvider } from 'react-helmet-async';
 import { I18nextProvider, initReactI18next } from 'react-i18next';
 import { Provider } from 'react-redux';
 import configureStore from 'redux-mock-store';
@@ -38,10 +39,13 @@ export const renderWithRedux = (
   customStore = mockStore,
 ) => {
   const store = customStore(initialState);
+  const helmetContext = {};
   return {
     ...renderReact(
       <I18nextProvider i18n={i18n}>
-        <Provider store={store}>{ui}</Provider>
+        <Provider store={store}>
+          <HelmetProvider context={helmetContext}>{ui}</HelmetProvider>
+        </Provider>
       </I18nextProvider>,
     ),
     // adding `store` to the returned utilities to allow us
@@ -54,7 +58,9 @@ export const renderWithRedux = (
 export const reRenderWithRedux = (ui, store, rerender) => ({
   ...rerender(
     <I18nextProvider i18n={i18n}>
-      <Provider store={store}>{ui}</Provider>
+      <Provider store={store}>
+        <HelmetProvider context={{}}>{ui}</HelmetProvider>
+      </Provider>
     </I18nextProvider>,
   ),
 });
