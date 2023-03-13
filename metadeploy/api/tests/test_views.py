@@ -1,5 +1,6 @@
 from contextlib import ExitStack
 from datetime import datetime
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
@@ -908,3 +909,19 @@ def test_front_end_info(anon_client, site_profile_factory):
 
     actual_site_keys = content["SITE"].keys()
     assert expected_site_keys == set(actual_site_keys)
+
+
+@pytest.mark.django_db
+def test_reverse_endpoint(anon_client, tmp_path):
+    encoding: str = "utf-8"
+    expected_content: str = "This content is expected."
+
+    test_file: Path = tmp_path / "test.txt"
+    test_file.write_text(expected_content, encoding=encoding)
+
+    with patch("metadeploy.api.views.BootstrapView.js_reverse_filepath", test_file):
+        url = reverse("ui-reverse")
+        response = anon_client.get(url)
+
+    assert response.status_code == 200
+    assert response.content.decode(encoding) == expected_content
