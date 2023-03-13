@@ -455,7 +455,9 @@ class PlanDetail extends Component<Props, State> {
     return (
       <>
         <Helmet>
-          <title>{`${plan.title} | ${product.title} | ${window.SITE_NAME}`}</title>
+          <title>
+            {`${plan.title} | ${product.title} | ${window.SITE_NAME}`}
+          </title>
         </Helmet>
         <Header
           history={history}

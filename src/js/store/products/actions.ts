@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { omit } from 'lodash';
 
 import { ThunkResult } from '@/js/store';

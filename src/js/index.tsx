@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import IconSettings from '@salesforce/design-system-react/components/icon-settings';
 import settings from '@salesforce/design-system-react/components/settings';
 import UNSAFE_DirectionSettings from '@salesforce/design-system-react/components/utilities/UNSAFE_direction';
