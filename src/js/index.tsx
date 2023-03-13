@@ -40,7 +40,7 @@ import { User } from '@/js/store/user/reducer';
 import { getUrlParam, removeUrlParam } from '@/js/utils/api';
 import apiFetch from '@/js/utils/api';
 import { SCRATCH_ORG_QS } from '@/js/utils/constants';
-import { log, logError } from '@/js/utils/logging';
+import { log } from '@/js/utils/logging';
 import { routePatterns } from '@/js/utils/routes';
 import { createSocket } from '@/js/utils/websockets';
 
@@ -141,13 +141,15 @@ init_i18n((i18nError?: string) => {
     let GLOBALS = {};
     console.log('>>> fetching page globals');
     const featchBootstrap = async () => {
-      await apiFetch(window.api_urls.ui_bootstrap(), null).then((response) => {
-        GLOBALS = response;
-        window.GLOBALS = GLOBALS;
-        window.SITE_NAME = window.GLOBALS.SITE?.name || t('MetaDeploy');
-        console.log('>>> page globals loaded');
-        return response;
-      });
+      await apiFetch(window.api_urls.ui_bootstrap(), () => {}).then(
+        (response) => {
+          GLOBALS = response;
+          window.GLOBALS = GLOBALS;
+          window.SITE_NAME = window.GLOBALS.SITE?.name || t('MetaDeploy');
+          console.log('>>> page globals loaded');
+          return response;
+        },
+      );
     };
     featchBootstrap();
 
