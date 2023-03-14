@@ -1,29 +1,13 @@
 {% load api_bootstrap %}
-{% load js_reverse %}
 
 <!DOCTYPE html>
 <html lang="en" class="slds-theme_default">
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="x-ua-compatible" content="ie=edge" />
-    {% block robots %}<meta name="robots" content="index, follow" />{% endblock %}
-    {% if GLOBALS.SITE and GLOBALS.SITE.company_name %}<meta name="author" content="{{ GLOBALS.SITE.company_name }}" />{% endif %}
-    <meta name="keywords" content="{% block keywords %}{% endblock keywords %}" />
     <meta name="language" content="en-us" />
-    {% if GLOBALS.SITE and GLOBALS.SITE.favicon %}<link rel="shortcut icon" href="{{ GLOBALS.SITE.favicon }}" />{% endif %}
-
-    <!-- Page Info -->
-    <title>{% block title %}{% if GLOBALS.SITE and GLOBALS.SITE.name %}{{ GLOBALS.SITE.name }}{% else %}MetaDeploy{% endif %}{% endblock %}</title>
-    <meta name="description" content="{% block description %}Web-based tool for installing Salesforce products{% endblock description %}" />
-
-    <!-- Insert config variables -->
-
-    <!-- Insert authentication error info -->
-    {{ JS_CONTEXT | json_script:"js-context" }}
     <!-- Insert API URLs from Django -->
-    <script type="text/javascript">
-      {% js_reverse_inline %}
-    </script>
+    <script type="text/javascript" src="/api/ui/reverse"></script>
 
     <!-- JavaScript and Styles are inserted here -->
   </head>
