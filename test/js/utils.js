@@ -27,10 +27,18 @@ export const initI18n = () => {
 };
 
 export const render = (ui) =>
-  renderReact(<I18nextProvider i18n={i18n}>{ui}</I18nextProvider>);
+  renderReact(
+    <I18nextProvider i18n={i18n}>
+      <HelmetProvider context={{}}>{ui}</HelmetProvider>
+    </I18nextProvider>,
+  );
 
 export const rerenderWithI18n = (ui, rerender) => ({
-  ...rerender(<I18nextProvider i18n={i18n}>{ui}</I18nextProvider>),
+  ...rerender(
+    <I18nextProvider i18n={i18n}>
+      <HelmetProvider context={{}}>{ui}</HelmetProvider>
+    </I18nextProvider>,
+  ),
 });
 
 export const renderWithRedux = (

@@ -17,7 +17,7 @@
     <meta name="description" content="{% block description %}Web-based tool for installing Salesforce products{% endblock description %}" />
 
     <!-- Insert config variables -->
-    {{ GLOBALS | json_script:"js-globals" }}
+
     <!-- Insert authentication error info -->
     {{ JS_CONTEXT | json_script:"js-context" }}
     <!-- Insert API URLs from Django -->
