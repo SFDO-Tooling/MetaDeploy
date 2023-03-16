@@ -4,11 +4,12 @@
 
 [![Test Coverage](https://coveralls.io/repos/github/SFDO-Tooling/metadeploy/badge.svg?branch=main)](https://coveralls.io/github/SFDO-Tooling/MetaDeploy?branch=main)
 
-## Development
+## Development and Deployment
 
-[![image](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/SFDO-Tooling/MetaDeploy/tree/main)
+Learn how to run MetaDeploy in our
+[documentation](https://metadeploy.readthedocs.io).
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md) to get started developing MetaDeploy.
 
 ## Got feedback?
 
