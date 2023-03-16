@@ -61,7 +61,7 @@ afterAll(() => {
 /**
  * Testing  Helmet rendered meta tags is difficult because the
  * elements are rendered in the document <head>, and testing-libary doesn't
- * handle that so we mock it by adding a div to append the meta-rags to.
+ * handle that so we mock it by adding a div to append the meta-tags to.
  */
 jest.mock('react-helmet-async', () => {
   // eslint-disable-next-line global-require
