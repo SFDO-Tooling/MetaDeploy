@@ -149,7 +149,7 @@ init_i18n((i18nError?: string) => {
         console.log('>>> page globals loaded');
       });
     };
-    featchBootstrap();
+    fetchBootstrap();
 
     // Get logged-in/out status
     const userString = el.getAttribute('data-user');
