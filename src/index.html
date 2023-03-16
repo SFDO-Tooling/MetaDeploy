@@ -1,5 +1,3 @@
-{% load api_bootstrap %}
-
 <!DOCTYPE html>
 <html lang="en" class="slds-theme_default">
   <head>
@@ -12,7 +10,7 @@
     <!-- JavaScript and Styles are inserted here -->
   </head>
   <body>
-    <main id="app" class="slds-grid slds-grid_vertical" {% if user.is_authenticated %} data-user="{{ user|serialize }}"{% endif %}>
+    <main id="app" class="slds-grid slds-grid_vertical">
       <div role="status" class="slds-spinner slds-spinner_large">
         <span class="slds-assistive-text">Loading…</span>
         <div class="slds-spinner__dot-a"></div>

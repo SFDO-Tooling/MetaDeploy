@@ -152,20 +152,24 @@ init_i18n((i18nError?: string) => {
     fetchBootstrap();
 
     // Get logged-in/out status
-    const userString = el.getAttribute('data-user');
-    if (userString) {
-      let user;
-      try {
-        user = JSON.parse(userString) as User;
-      } catch (err) {
-        // swallow error
-      }
-      if (user) {
-        // Login
-        (appStore.dispatch as ThunkDispatch)(login(user));
-      }
-    }
-    // el.removeAttribute('data-user');
+    const featchUserInfo = () => {
+      console.log('>>> fetching user info');
+      apiFetch(window.api_urls.user(), () => {})
+        .catch((e) => {
+          // Shhhh
+        })
+        .then((response) => {
+          if (response) {
+            const user = response as User;
+            if (user) {
+              // Login
+              (appStore.dispatch as ThunkDispatch)(login(user));
+            }
+          }
+          console.log('>>> user info loaded');
+        });
+    };
+    featchUserInfo();
 
     // Set App element (used for react-SLDS modals)
     settings.setAppElement(el);
