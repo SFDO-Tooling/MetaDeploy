@@ -18,3 +18,7 @@
       Template.
     - If the plan has a value for "Visible to", make sure that Allowed List
       allows either the specified org you're testing, or its org type.
+
+## Tracking jobs
+
+When logged in as an admin user, go to `/admin/django-rq/` to monitor the task queue. (Replace `admin` with the value you configured for `DJANGO_ADMIN_URL` in your Heroku config vars).
