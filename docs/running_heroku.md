@@ -1,4 +1,4 @@
-# MetaDeploy for Partners - Heroku Deployment
+# Running MetaDeploy on Heroku
 
 This document outlines the steps necessary for the installation and setup of a new MetaDeploy instance in Heroku. Thanks to Claudio Moraes for developing this setup guide.
 
