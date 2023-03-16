@@ -30,9 +30,9 @@ const BootstrapPageData = () => {
   return (
     <Helmet>
       <title>{window.SITE_NAME}</title>
-      <meta name="author" content={GLOBALS?.SITE?.company_name} />
+      <meta name="author" content={GLOBALS?.SITE.company_name} />
       <meta name="keywords" content="" />
-      <link rel="shortcut icon" href={GLOBALS?.SITE?.favicon} />
+      <link rel="shortcut icon" href={GLOBALS?.SITE.favicon} />
       <meta
         name="description"
         content="Web-based tool for installing Salesforce products"

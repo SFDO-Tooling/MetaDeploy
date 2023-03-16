@@ -50,7 +50,7 @@ const Intro = ({
         ) : null}
         {preMessage}
         {results}
-        {postMessage}
+        <div role="alert">{postMessage}</div>
       </div>
       {cta}
       {backLink}
