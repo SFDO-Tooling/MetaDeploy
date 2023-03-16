@@ -1,6 +1,6 @@
 import { sortBy } from 'lodash';
 import React, { Component, ReactNode } from 'react';
-import DocumentTitle from 'react-document-title';
+import { Helmet } from 'react-helmet-async';
 import { WithTranslation, withTranslation } from 'react-i18next';
 import { Trans } from 'react-i18next';
 import { connect, ConnectedProps } from 'react-redux';
@@ -304,116 +304,117 @@ class VersionDetail extends Component<VersionDetailProps> {
     const isCardLayout = product.layout === PRODUCT_LAYOUTS.Card;
 
     return (
-      <DocumentTitle title={`${product.title} | ${window.SITE_NAME}`}>
-        <>
-          <Header history={history} />
-          <PageHeader product={product} versionLabel={version.label} />
-          {product.is_allowed ? (
-            <BodyContainer>
-              {product.most_recent_version && !isMostRecent ? (
-                <OldVersionWarning
-                  link={routes.version_detail(product.slug, LATEST_VERSION)}
-                />
-              ) : null}
-              <BodySection>
-                {isCardLayout && this.getProductDescription(product)}
-                <p>{version.description}</p>
-                {!isCardLayout && (
-                  <>
-                    {primary_plan && visiblePrimaryPlan ? (
-                      <p>
-                        <Link
-                          to={routes.plan_detail(
-                            product.slug,
-                            getVersionLabel(product, version),
-                            primary_plan.slug,
-                          )}
-                          className="slds-button
+      <>
+        <Helmet>
+          <title>{`${product.title} | ${window.SITE_NAME}`}</title>
+        </Helmet>
+        <Header history={history} />
+        <PageHeader product={product} versionLabel={version.label} />
+        {product.is_allowed ? (
+          <BodyContainer>
+            {product.most_recent_version && !isMostRecent ? (
+              <OldVersionWarning
+                link={routes.version_detail(product.slug, LATEST_VERSION)}
+              />
+            ) : null}
+            <BodySection>
+              {isCardLayout && this.getProductDescription(product)}
+              <p>{version.description}</p>
+              {!isCardLayout && (
+                <>
+                  {primary_plan && visiblePrimaryPlan ? (
+                    <p>
+                      <Link
+                        to={routes.plan_detail(
+                          product.slug,
+                          getVersionLabel(product, version),
+                          primary_plan.slug,
+                        )}
+                        className="slds-button
                             slds-button_brand
                             slds-size_full"
-                        >
-                          {t('{{title}} - View Details', {
-                            title: primary_plan.title,
-                          })}
-                        </Link>
-                      </p>
-                    ) : null}
-                    {secondary_plan && visibleSecondaryPlan ? (
-                      <p>
-                        <Link
-                          to={routes.plan_detail(
-                            product.slug,
-                            getVersionLabel(product, version),
-                            secondary_plan.slug,
-                          )}
-                          className="slds-button
+                      >
+                        {t('{{title}} - View Details', {
+                          title: primary_plan.title,
+                        })}
+                      </Link>
+                    </p>
+                  ) : null}
+                  {secondary_plan && visibleSecondaryPlan ? (
+                    <p>
+                      <Link
+                        to={routes.plan_detail(
+                          product.slug,
+                          getVersionLabel(product, version),
+                          secondary_plan.slug,
+                        )}
+                        className="slds-button
                             slds-button_outline-brand
                             slds-size_full"
-                        >
-                          {t('{{title}} - View Details', {
-                            title: secondary_plan.title,
-                          })}
-                        </Link>
-                      </p>
-                    ) : null}
-                  </>
-                )}
-                <BackLink
-                  label={t('Select a different product')}
-                  url={routes.product_list()}
-                />
-                {!isCardLayout && additionalPlansSorted.length ? (
-                  <div className="slds-p-top_x-large">
-                    {visiblePrimaryPlan || visibleSecondaryPlan ? (
-                      <h2 className="slds-text-heading_small">
-                        {t('Additional Plans')}
-                      </h2>
-                    ) : null}
-                    {additionalPlansSorted.map((plan) => (
-                      <p key={plan.id}>
-                        <Link
-                          to={routes.plan_detail(
-                            product.slug,
-                            getVersionLabel(product, version),
-                            plan.slug,
-                          )}
-                        >
-                          {plan.title}
-                        </Link>
-                      </p>
-                    ))}
-                  </div>
-                ) : null}
-              </BodySection>
-              {isCardLayout ? (
-                <div
-                  className="slds-text-longform
-                    slds-size_1-of-1"
-                >
-                  <PlanCards
-                    product={product}
-                    version={version}
-                    additionalPlans={additionalPlansSorted}
-                  />
-                </div>
-              ) : (
-                <BodySection>{this.getProductDescription(product)}</BodySection>
+                      >
+                        {t('{{title}} - View Details', {
+                          title: secondary_plan.title,
+                        })}
+                      </Link>
+                    </p>
+                  ) : null}
+                </>
               )}
-            </BodyContainer>
-          ) : (
-            <ProductNotAllowed
-              isLoggedIn={user !== null}
-              message={product.not_allowed_instructions}
-              link={
-                <Trans i18nKey="productNotAllowed">
-                  Try the{' '}
-                  <Link to={routes.product_list()}>list of all products</Link>
-                </Trans>
-              }
-            />
-          )}
-        </>
-      </DocumentTitle>
+              <BackLink
+                label={t('Select a different product')}
+                url={routes.product_list()}
+              />
+              {!isCardLayout && additionalPlansSorted.length ? (
+                <div className="slds-p-top_x-large">
+                  {visiblePrimaryPlan || visibleSecondaryPlan ? (
+                    <h2 className="slds-text-heading_small">
+                      {t('Additional Plans')}
+                    </h2>
+                  ) : null}
+                  {additionalPlansSorted.map((plan) => (
+                    <p key={plan.id}>
+                      <Link
+                        to={routes.plan_detail(
+                          product.slug,
+                          getVersionLabel(product, version),
+                          plan.slug,
+                        )}
+                      >
+                        {plan.title}
+                      </Link>
+                    </p>
+                  ))}
+                </div>
+              ) : null}
+            </BodySection>
+            {isCardLayout ? (
+              <div
+                className="slds-text-longform
+                    slds-size_1-of-1"
+              >
+                <PlanCards
+                  product={product}
+                  version={version}
+                  additionalPlans={additionalPlansSorted}
+                />
+              </div>
+            ) : (
+              <BodySection>{this.getProductDescription(product)}</BodySection>
+            )}
+          </BodyContainer>
+        ) : (
+          <ProductNotAllowed
+            isLoggedIn={user !== null}
+            message={product.not_allowed_instructions}
+            link={
+              <Trans i18nKey="productNotAllowed">
+                Try the{' '}
+                <Link to={routes.product_list()}>list of all products</Link>
+              </Trans>
+            }
+          />
+        )}
+      </>
     );
   }
 }

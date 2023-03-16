@@ -24,3 +24,4 @@ staticfiles/
 storybook-static/
 venv/
 webpack-stats.json
+src/index.html

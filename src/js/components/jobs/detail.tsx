@@ -1,7 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import React, { Component } from 'react';
-import DocumentTitle from 'react-document-title';
+import { Helmet } from 'react-helmet-async';
 import { WithTranslation, withTranslation } from 'react-i18next';
 import { connect, ConnectedProps } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
@@ -369,63 +369,62 @@ class JobDetail extends Component<Props, State> {
       ? plan.steps.filter((step) => JobDetail.stepIsVisible(step.id, job))
       : [];
     return (
-      <DocumentTitle
-        title={`${t('Installation')} | ${plan.title} | ${product.title} | ${
-          window.SITE_NAME
-        }`}
-      >
-        <>
-          <Header history={history} jobId={jobId} hideLogin={isScratchOrg} />
-          <PageHeader
-            product={product}
-            version={version}
-            plan={plan}
-            job={job}
-            onRenderActions={this.actions}
-          />
-          <ShareModal
-            isOpen={this.state.modalOpen}
-            job={job}
-            plan={plan}
-            scratchOrg={isScratchOrg ? scratchOrg : null}
-            toggleModal={this.toggleModal}
-            updateJob={doUpdateJob}
-          />
-          <BodyContainer>
-            <Toasts job={job} label="Installation" />
-            <Intro
-              averageDuration={plan.average_duration}
-              isProductionOrg={job.is_production_org}
-              results={<JobResults job={job} openModal={this.openModal} />}
-              cta={
-                <CtaButton
-                  job={job}
-                  isScratchOrg={isScratchOrg}
-                  linkToPlan={linkToPlan}
-                  canceling={canceling}
-                  preflightRequired={plan.requires_preflight}
-                  openModal={this.openModal}
+      <>
+        <Helmet>
+          <title>{`${t('Installation')} | ${plan.title} | ${product.title} | ${
+            window.SITE_NAME
+          }`}</title>
+        </Helmet>
+        <Header history={history} jobId={jobId} hideLogin={isScratchOrg} />
+        <PageHeader
+          product={product}
+          version={version}
+          plan={plan}
+          job={job}
+          onRenderActions={this.actions}
+        />
+        <ShareModal
+          isOpen={this.state.modalOpen}
+          job={job}
+          plan={plan}
+          scratchOrg={isScratchOrg ? scratchOrg : null}
+          toggleModal={this.toggleModal}
+          updateJob={doUpdateJob}
+        />
+        <BodyContainer>
+          <Toasts job={job} label="Installation" />
+          <Intro
+            averageDuration={plan.average_duration}
+            isProductionOrg={job.is_production_org}
+            results={<JobResults job={job} openModal={this.openModal} />}
+            cta={
+              <CtaButton
+                job={job}
+                isScratchOrg={isScratchOrg}
+                linkToPlan={linkToPlan}
+                canceling={canceling}
+                preflightRequired={plan.requires_preflight}
+                openModal={this.openModal}
+              />
+            }
+            postMessage={<JobMessage job={job} />}
+            backLink={
+              job.status === CONSTANTS.STATUS.STARTED ? null : (
+                <BackLink
+                  label={t('Install another product')}
+                  url={routes.product_list()}
+                  className="slds-p-top_small"
                 />
-              }
-              postMessage={<JobMessage job={job} />}
-              backLink={
-                job.status === CONSTANTS.STATUS.STARTED ? null : (
-                  <BackLink
-                    label={t('Install another product')}
-                    url={routes.product_list()}
-                    className="slds-p-top_small"
-                  />
-                )
-              }
-            />
-            <UserInfo job={job} scratchOrg={isScratchOrg ? scratchOrg : null} />
-            <ProgressBar job={job} />
-            {steps?.length ? (
-              <StepsTable steps={steps} plan={plan} job={job} />
-            ) : null}
-          </BodyContainer>
-        </>
-      </DocumentTitle>
+              )
+            }
+          />
+          <UserInfo job={job} scratchOrg={isScratchOrg ? scratchOrg : null} />
+          <ProgressBar job={job} />
+          {steps?.length ? (
+            <StepsTable steps={steps} plan={plan} job={job} />
+          ) : null}
+        </BodyContainer>
+      </>
     );
   }
 }

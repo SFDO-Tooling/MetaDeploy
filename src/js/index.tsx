@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import IconSettings from '@salesforce/design-system-react/components/icon-settings';
 import settings from '@salesforce/design-system-react/components/settings';
 import UNSAFE_DirectionSettings from '@salesforce/design-system-react/components/utilities/UNSAFE_direction';
@@ -9,8 +10,8 @@ import utilitySprite from '@salesforce-ux/design-system/assets/icons/utility-spr
 import { createBrowserHistory } from 'history';
 import { t } from 'i18next';
 import React from 'react';
-import DocumentTitle from 'react-document-title';
 import { createRoot } from 'react-dom/client';
+import { HelmetProvider } from 'react-helmet-async';
 import { Provider } from 'react-redux';
 // Consider upgrading to v6: https://github.com/remix-run/react-router/discussions/8753
 import { Redirect, Route, Router, Switch } from 'react-router-dom';
@@ -38,17 +39,20 @@ import { fetchProducts } from '@/js/store/products/actions';
 import { login, refetchAllData } from '@/js/store/user/actions';
 import { User } from '@/js/store/user/reducer';
 import { getUrlParam, removeUrlParam } from '@/js/utils/api';
+import apiFetch from '@/js/utils/api';
 import { SCRATCH_ORG_QS } from '@/js/utils/constants';
-import { log, logError } from '@/js/utils/logging';
+import { log } from '@/js/utils/logging';
 import { routePatterns } from '@/js/utils/routes';
 import { createSocket } from '@/js/utils/websockets';
 
+import BootstrapPageData from './components/bootstrap/bootstrapPageData';
 const history = createBrowserHistory();
 
 console.log('>>> index.tsx');
 
 const App = () => (
-  <DocumentTitle title={window.SITE_NAME}>
+  <>
+    <BootstrapPageData />
     <div className="slds-grid slds-grid_frame slds-grid_vertical metadeploy-frame">
       <ErrorBoundary>
         <div className="slds-grow slds-shrink-none">
@@ -92,7 +96,7 @@ const App = () => (
         <Footer />
       </ErrorBoundary>
     </div>
-  </DocumentTitle>
+  </>
 );
 
 init_i18n((i18nError?: string) => {
@@ -136,28 +140,16 @@ init_i18n((i18nError?: string) => {
 
     // Get JS globals
     let GLOBALS = {};
-    try {
-      const globalsEl = document.getElementById('js-globals');
-      if (globalsEl?.textContent) {
-        GLOBALS = JSON.parse(globalsEl.textContent);
-      }
-    } catch (err: any) {
-      logError(err);
-    }
-    window.GLOBALS = GLOBALS;
-    window.SITE_NAME = window.GLOBALS.SITE?.name || t('MetaDeploy');
-
-    // Get JS context
-    let JS_CONTEXT = {};
-    try {
-      const contextEl = document.getElementById('js-context');
-      if (contextEl?.textContent) {
-        JS_CONTEXT = JSON.parse(contextEl.textContent);
-      }
-    } catch (err: any) {
-      logError(err);
-    }
-    window.JS_CONTEXT = JS_CONTEXT;
+    console.log('>>> fetching page globals');
+    const fetchBootstrap = () => {
+      apiFetch(window.api_urls.ui_bootstrap(), () => {}).then((response) => {
+        GLOBALS = response;
+        window.GLOBALS = GLOBALS;
+        window.SITE_NAME = window.GLOBALS.SITE?.name || t('MetaDeploy');
+        console.log('>>> page globals loaded');
+      });
+    };
+    fetchBootstrap();
 
     // Get logged-in/out status
     const userString = el.getAttribute('data-user');
@@ -173,7 +165,7 @@ init_i18n((i18nError?: string) => {
         (appStore.dispatch as ThunkDispatch)(login(user));
       }
     }
-    el.removeAttribute('data-user');
+    // el.removeAttribute('data-user');
 
     // Set App element (used for react-SLDS modals)
     settings.setAppElement(el);
@@ -182,21 +174,24 @@ init_i18n((i18nError?: string) => {
     (appStore.dispatch as ThunkDispatch)(fetchProducts()).finally(() => {
       (appStore.dispatch as ThunkDispatch)(fetchOrgJobs());
       const root = createRoot(el);
+      const helmetContext = {};
       root.render(
         <Provider store={appStore}>
-          <Router history={history}>
-            <UNSAFE_DirectionSettings.Provider value={document.dir || 'ltr'}>
-              <IconSettings
-                actionSprite={actionSprite}
-                customSprite={customSprite}
-                doctypeSprite={doctypeSprite}
-                standardSprite={standardSprite}
-                utilitySprite={utilitySprite}
-              >
-                <App />
-              </IconSettings>
-            </UNSAFE_DirectionSettings.Provider>
-          </Router>
+          <HelmetProvider context={helmetContext}>
+            <Router history={history}>
+              <UNSAFE_DirectionSettings.Provider value={document.dir || 'ltr'}>
+                <IconSettings
+                  actionSprite={actionSprite}
+                  customSprite={customSprite}
+                  doctypeSprite={doctypeSprite}
+                  standardSprite={standardSprite}
+                  utilitySprite={utilitySprite}
+                >
+                  <App />
+                </IconSettings>
+              </UNSAFE_DirectionSettings.Provider>
+            </Router>
+          </HelmetProvider>
         </Provider>,
       );
     });

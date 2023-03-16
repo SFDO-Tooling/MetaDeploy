@@ -407,4 +407,6 @@ class BootstrapView(viewsets.GenericViewSet):
         """Endpoint to supply the front-end with the contents
         of js file produced by django-js-reverse"""
         with open(self.js_reverse_filepath, "r", encoding="utf-8") as f:
-            return HttpResponse(f.read(), content_type="text/plain")
+            return HttpResponse(
+                f.read(), content_type="application/javascript", charset="utf-8"
+            )

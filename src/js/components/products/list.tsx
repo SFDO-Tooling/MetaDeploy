@@ -3,7 +3,7 @@ import Spinner from '@salesforce/design-system-react/components/spinner';
 import Tabs from '@salesforce/design-system-react/components/tabs';
 import TabsPanel from '@salesforce/design-system-react/components/tabs/panel';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import DocumentTitle from 'react-document-title';
+import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
@@ -202,36 +202,37 @@ const ProductsList = () => {
   }
 
   return (
-    <DocumentTitle title={`${t('Products')} | ${window.SITE_NAME}`}>
-      <>
-        <Header history={history} />
-        <PageHeader />
-        <div className="slds-p-around_x-large">
-          {window.GLOBALS.SITE?.welcome_text ? (
-            // These messages are pre-cleaned by the API
-            <div
-              className="markdown
+    <>
+      <Helmet>
+        <title>{`${t('Products')} | ${window.SITE_NAME}`}</title>
+      </Helmet>
+      <Header history={history} />
+      <PageHeader />
+      <div className="slds-p-around_x-large">
+        {window.GLOBALS.SITE?.welcome_text ? (
+          // These messages are pre-cleaned by the API
+          <div
+            className="markdown
                 slds-p-bottom_medium
                 slds-text-longform
                 slds-size_1-of-1
                 slds-large-size_2-of-3"
-              dangerouslySetInnerHTML={{
-                __html: window.GLOBALS.SITE.welcome_text,
-              }}
-            />
-          ) : null}
-          {contents}
-          {fetchingProducts ? (
-            <div className="slds-align_absolute-center slds-m-top_x-large">
-              <span className="slds-is-relative slds-m-right_large">
-                <Spinner variant="brand" size="small" />
-              </span>
-              {t('Loading…')}
-            </div>
-          ) : null}
-        </div>
-      </>
-    </DocumentTitle>
+            dangerouslySetInnerHTML={{
+              __html: window.GLOBALS.SITE.welcome_text,
+            }}
+          />
+        ) : null}
+        {contents}
+        {fetchingProducts ? (
+          <div className="slds-align_absolute-center slds-m-top_x-large">
+            <span className="slds-is-relative slds-m-right_large">
+              <Spinner variant="brand" size="small" />
+            </span>
+            {t('Loading…')}
+          </div>
+        ) : null}
+      </div>
+    </>
   );
 };
 
