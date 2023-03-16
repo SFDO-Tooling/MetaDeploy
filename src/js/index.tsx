@@ -155,7 +155,7 @@ init_i18n((i18nError?: string) => {
     const featchUserInfo = () => {
       console.log('>>> fetching user info');
       apiFetch(window.api_urls.user(), () => {})
-        .catch(() => {
+        .catch((e) => {
           // Shhhh
         })
         .then((response) => {
