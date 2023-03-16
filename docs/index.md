@@ -5,6 +5,9 @@
 :caption: "Contents:"
 
 tutorial
+running_heroku
+running_docker
+running
 troubleshooting
 async
 api/index
