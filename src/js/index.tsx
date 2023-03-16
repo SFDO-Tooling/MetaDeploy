@@ -141,7 +141,7 @@ init_i18n((i18nError?: string) => {
     // Get JS globals
     let GLOBALS = {};
     console.log('>>> fetching page globals');
-    const featchBootstrap = () => {
+    const fetchBootstrap = () => {
       apiFetch(window.api_urls.ui_bootstrap(), () => {}).then((response) => {
         GLOBALS = response;
         window.GLOBALS = GLOBALS;
