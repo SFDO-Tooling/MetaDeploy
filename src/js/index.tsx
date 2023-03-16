@@ -155,22 +155,24 @@ init_i18n((i18nError?: string) => {
     featchBootstrap();
 
     // Load User info
-    const featchUserInfo = async () => {
+    const featchUserInfo = () => {
       console.log('>>> fetching user info');
-      await apiFetch(window.api_urls.user(), () => {}).then((response) => {
-        if (response) {
-          const user = response as User;
-          if (user) {
-            // Login
-            (appStore.dispatch as ThunkDispatch)(login(user));
+      apiFetch(window.api_urls.user(), () => {})
+        .catch((e) => {
+          // Shhhh
+        })
+        .then((response) => {
+          if (response) {
+            const user = response as User;
+            if (user) {
+              // Login
+              (appStore.dispatch as ThunkDispatch)(login(user));
+            }
           }
-        }
-        console.log('>>> user info loaded');
-      });
+          console.log('>>> user info loaded');
+        });
     };
-    featchUserInfo().catch((e) => {
-      // Shhhh
-    });
+    featchUserInfo();
 
     // Set App element (used for react-SLDS modals)
     settings.setAppElement(el);
