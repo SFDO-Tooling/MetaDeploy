@@ -328,6 +328,11 @@ def expire_preflights():
         is_valid=True,
     )
     for preflight in preflights_to_invalidate:
+        # If the status is "Started" then we can assume this job
+        # is stalled (e.g. from a dyno restart) and needs
+        # to be set to a "canceled" status
+        if preflight.status == PreflightResult.Status.started:
+            preflight.status = PreflightResult.Status.canceled
         preflight.is_valid = False
         preflight.save()
 

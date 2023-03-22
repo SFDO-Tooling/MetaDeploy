@@ -158,6 +158,7 @@ def test_expire_preflights(user_factory, plan_factory, preflight_result_factory)
     preflight1 = preflight_result_factory(
         user=user, plan=plan, status=PreflightResult.Status.complete, org_id=user.org_id
     )
+    # This preflight is in a "started" status, and we expect it to be changed to "cancelled"
     preflight2 = preflight_result_factory(
         user=user, plan=plan, status=PreflightResult.Status.started, org_id=user.org_id
     )
@@ -179,6 +180,7 @@ def test_expire_preflights(user_factory, plan_factory, preflight_result_factory)
 
     assert not preflight1.is_valid
     assert not preflight2.is_valid
+    assert preflight2.status == PreflightResult.Status.canceled
     assert preflight3.is_valid
     assert preflight4.is_valid
 
