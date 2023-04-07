@@ -39,7 +39,7 @@ class Login extends Component<Props, { modalOpen: boolean }> {
     buttonVariant: 'base',
     disabled: false,
     direction: 'ltr',
-    menuPosition: 'overflowBoundaryElement',
+    menuPosition: 'absolute',
     flipped: false,
     redirectParams: {},
   };
