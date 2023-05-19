@@ -1,0 +1,12 @@
+clean: false
+production_secret:
+non_production_secret: []
+mock_secret: []
+false_positive:
+ -
+  id: MetaDeploy://.yarn/releases/yarn-1.22.19.cjs_305883a93e118719a5f89cec0ff8d734cfd44677
+  justification: Not a password
+ -
+  id: MetaDeploy://.yarn/releases/yarn-1.22.19.cjs_2da3da7ae0ec57eaec8a179505320aa424cdf4f6
+  justification: Not a password
+
