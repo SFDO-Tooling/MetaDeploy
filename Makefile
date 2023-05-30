@@ -6,6 +6,7 @@ update-deps:
 # Example usage: make update-package PACKAGE="cumulusci"
 update-package:
 	pip-compile -P $(PACKAGE) --output-file=requirements/prod.txt requirements/prod.in
+	pip-compile -P $(PACKAGE) --output-file=requirements/dev.txt requirements/dev.in
 
 dev-install:
 	pip-sync requirements/*.txt
