@@ -158,7 +158,6 @@
     "@storybook/**/glob-parent": "^5.1.2",
     "@storybook/**/trim-newlines": "^3.0.1",
     "i18next-scanner-webpack/**/glob-parent": "^5.1.2",
-    "minipass": "^3.3.5",
     "trim": "^0.0.3",
     "unset-value": "^2.0.1"
   },
