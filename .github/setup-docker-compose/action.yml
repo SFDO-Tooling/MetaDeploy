@@ -14,6 +14,9 @@ inputs:
     required: false
     default: ''
     description: Refer to build-push-action for usage
+  omniout-token:
+    required: true
+    description: Vlocity private repository auth token
 
 outputs:
   tag:
@@ -32,13 +35,17 @@ runs:
     - uses: docker/setup-buildx-action@v1
     - name: Build
       uses: docker/build-push-action@v2
+      env:
+        OMNIOUT_TOKEN: ${{ inputs.omniout-token }}
       with:
         context: .
         load: true
         tags: ${{ env.TAG }}
         cache-from: ${{ inputs.cache-from }}
         cache-to: ${{ inputs.cache-to }}
-        build-args: PROD_ASSETS=1
+        build-args: |
+          PROD_ASSETS=1
+          OMNIOUT_TOKEN=${{ inputs.omniout-token }}
     - name: Add tag alias for compose
       id: tag
       shell: bash

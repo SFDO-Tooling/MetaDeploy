@@ -19,6 +19,7 @@ jobs:
           # By writing to the cache here subsequent jobs will get the updated
           # image when they use setup-docker-compose
           cache-to: type=gha,mode=max
+          omniout-token: ${{ secrets.OMNIOUT_TOKEN }}
 
   lint:
     name: Lint
