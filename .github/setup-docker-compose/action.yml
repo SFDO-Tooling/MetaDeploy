@@ -52,4 +52,4 @@ runs:
       run: |
         # The weird ",," syntax forces lowercase
         docker tag $TAG ${REPO,,}_${{ inputs.service }}:latest
-        echo "::set-output name=tag::$TAG"
+        echo "{tag}=$TAG" >> $GITHUB_OUTPUT
