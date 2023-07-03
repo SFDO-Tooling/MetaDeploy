@@ -19,6 +19,7 @@ jobs:
           # By writing to the cache here subsequent jobs will get the updated
           # image when they use setup-docker-compose
           cache-to: type=gha,mode=max
+          omniout-token: ${{ secrets.OMNIOUT_TOKEN }}
 
   lint:
     name: Lint
@@ -27,6 +28,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/setup-docker-compose
+        with:
+          omniout-token: ${{ secrets.OMNIOUT_TOKEN }}
       - name: Lint
         run: docker-compose run --no-deps web yarn lint:nofix
 
@@ -37,6 +40,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/setup-docker-compose
+        with:
+          omniout-token: ${{ secrets.OMNIOUT_TOKEN }}
       - name: Test frontend
         run: docker-compose run --no-deps web yarn test:js:coverage
       - name: Upload coverage artifact
@@ -53,6 +58,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/setup-docker-compose
+        with:
+          omniout-token: ${{ secrets.OMNIOUT_TOKEN }}
       - name: Test backend
         # prettier-ignore
         run: >
@@ -83,6 +90,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/setup-docker-compose
+        with:
+          omniout-token: ${{ secrets.OMNIOUT_TOKEN }}
       - name: Download frontend coverage artifacts
         uses: actions/download-artifact@v3
         with:

@@ -19,6 +19,8 @@ jobs:
           # https://github.com/peter-evans/create-pull-request/blob/main/docs/concepts-guidelines.md#triggering-further-workflow-runs
           ssh-key: ${{ secrets.DEPLOY_KEY }}
       - uses: ./.github/setup-docker-compose
+        with:
+          omniout-token: ${{ secrets.OMNIOUT_TOKEN }}
       - name: Upgrade JS dependencies
         # prettier-ignore
         run: >
