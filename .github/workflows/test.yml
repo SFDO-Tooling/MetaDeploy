@@ -90,6 +90,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/setup-docker-compose
+        with:
+          omniout-token: ${{ secrets.OMNIOUT_TOKEN }}
       - name: Download frontend coverage artifacts
         uses: actions/download-artifact@v3
         with:
