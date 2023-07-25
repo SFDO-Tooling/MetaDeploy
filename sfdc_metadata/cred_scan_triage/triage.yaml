@@ -9,4 +9,6 @@ false_positive:
  -
   id: MetaDeploy://.yarn/releases/yarn-1.22.19.cjs_2da3da7ae0ec57eaec8a179505320aa424cdf4f6
   justification: Not a password
-
+ -
+  id: MetaDeploy://.npmrc_1e2451ee769d28a2fbb5286ac8db6c396e761404
+  justification: This is an environment variable
