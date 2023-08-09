@@ -19,6 +19,7 @@ class ProductSerializer(AdminAPISerializer):
     description = serializers.CharField(default="")
     click_through_agreement = serializers.CharField(default="")
     error_message = serializers.CharField(default="")
+    slug = serializers.CharField(read_only=True)
 
     class Meta:
         fields = "__all__"
