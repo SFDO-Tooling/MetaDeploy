@@ -15,11 +15,11 @@ from metadeploy.api.serializers import get_from_data_or_instance
 
 class ProductSerializer(AdminAPISerializer):
     title = serializers.CharField()
-    short_description = serializers.CharField()
-    description = serializers.CharField()
-    click_through_agreement = serializers.CharField()
-    error_message = serializers.CharField()
-    slug = serializers.CharField()
+    short_description = serializers.CharField(default="")
+    description = serializers.CharField(default="")
+    click_through_agreement = serializers.CharField(default="")
+    error_message = serializers.CharField(default="")
+    slug = serializers.CharField(read_only=True)
 
     class Meta:
         fields = "__all__"

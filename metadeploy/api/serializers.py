@@ -328,13 +328,12 @@ class ProductSerializer(CircumspectSerializerMixin, serializers.ModelSerializer)
     is_allowed = serializers.SerializerMethodField()
     description = serializers.CharField(source="description_markdown")
     click_through_agreement = serializers.CharField(
-        source="click_through_agreement_markdown", allow_blank=True
+        source="click_through_agreement_markdown"
     )
     title = serializers.CharField()
-    short_description = serializers.CharField(allow_blank=True)
+    short_description = serializers.CharField()
     not_allowed_instructions = serializers.SerializerMethodField()
     is_listed = serializers.SerializerMethodField()
-    image = serializers.FileField(allow_null=True)
 
     class Meta:
         model = Product
