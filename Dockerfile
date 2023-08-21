@@ -32,6 +32,8 @@ COPY . /app
 # Avoid building prod assets in development
 RUN if [ "${BUILD_ENV}" = "production" ] || [ -n "${PROD_ASSETS}" ] ; then yarn prod ; else mkdir -p dist/prod ; fi
 
+# This is not a real key! It is present because we need a key
+# that matches the structure of the real value to launch the application.
 RUN \
   DB_ENCRYPTION_KEY="Ul-OySkEawSxUc7Ck13Twu2109IzIFh54C1WXO9KAFE=" \
   GITHUB_TOKEN="sample token" \
