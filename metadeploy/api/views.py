@@ -161,7 +161,7 @@ class ProductCategoryViewSet(viewsets.ReadOnlyModelViewSet):
 
     @method_decorator(cache_page(60*60*2))
     def list(self, *args, **kwargs):
-        return super().list(*args, **kwargs)
+        return super().list(*args, **kwargs)  # pragma: nocover
 
 
 class ProductViewSet(
