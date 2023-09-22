@@ -2,6 +2,8 @@ from datetime import datetime
 from functools import reduce
 from logging import getLogger
 from pathlib import Path
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 
 import django_rq
 from django.conf import settings
@@ -156,6 +158,10 @@ class JobViewSet(
 class ProductCategoryViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ProductCategorySerializer
     queryset = ProductCategory.objects.all()
+
+    @method_decorator(cache_page(60*60*2))
+    def list(self, *args, **kwargs):
+        return super().list(*args, **kwargs)  # pragma: nocover
 
 
 class ProductViewSet(
