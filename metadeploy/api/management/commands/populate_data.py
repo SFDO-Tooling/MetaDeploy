@@ -281,6 +281,7 @@ class Command(BaseCommand):
             title="Install",
             tier=Plan.Tier.primary,
             commit_ish="e785195d07a3ac9e395f27829866005dbdcd5bd0",
+            supported_orgs="Both"
         )
         PlanSlug.objects.create(parent=plan_template, slug="install")
         steps = [
