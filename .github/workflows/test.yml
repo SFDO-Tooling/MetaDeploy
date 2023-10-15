@@ -13,7 +13,7 @@ jobs:
     name: Build
     runs-on: sfdc-ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/setup-docker-compose
         with:
           # By writing to the cache here subsequent jobs will get the updated
@@ -26,7 +26,7 @@ jobs:
     needs: [build]
     runs-on: sfdc-ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/setup-docker-compose
         with:
           omniout-token: ${{ secrets.OMNIOUT_TOKEN }}
@@ -38,7 +38,7 @@ jobs:
     needs: [build]
     runs-on: sfdc-ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/setup-docker-compose
         with:
           omniout-token: ${{ secrets.OMNIOUT_TOKEN }}
@@ -56,7 +56,7 @@ jobs:
     needs: [build]
     runs-on: sfdc-ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/setup-docker-compose
         with:
           omniout-token: ${{ secrets.OMNIOUT_TOKEN }}
@@ -88,7 +88,7 @@ jobs:
     env:
       COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/setup-docker-compose
         with:
           omniout-token: ${{ secrets.OMNIOUT_TOKEN }}
