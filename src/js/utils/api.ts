@@ -1,5 +1,4 @@
 import cookies from 'js-cookie';
-import { useTranslation } from 'react-i18next';
 import { ThunkDispatch } from 'redux-thunk';
 
 import { addError } from '@/js/store/errors/actions';
