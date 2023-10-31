@@ -16,6 +16,16 @@ describe('<Errors />', () => {
     return { getByText };
   };
 
+  const setupforRawHTML = () => {
+    const errors = [
+      { id: 'err1', message: '<html><div>This is Error</div></html>' },
+    ];
+    const { findByText } = render(
+      <Errors errors={errors} doRemoveError={doRemoveError} />,
+    );
+    return { findByText };
+  };
+
   test('calls window.location.reload on link click', () => {
     const { getByText } = setup();
 
@@ -23,6 +33,11 @@ describe('<Errors />', () => {
     fireEvent.click(getByText('reload the page.'));
 
     expect(window.location.reload).toHaveBeenCalledTimes(1);
+  });
+  test('for raw html error', () => {
+    const { findByText } = setupforRawHTML();
+
+    findByText('Something went wrong. Please try again later.');
   });
 
   test('calls doRemoveError on close click', () => {

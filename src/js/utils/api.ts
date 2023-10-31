@@ -1,4 +1,5 @@
 import cookies from 'js-cookie';
+import { useTranslation } from 'react-i18next';
 import { ThunkDispatch } from 'redux-thunk';
 
 import { addError } from '@/js/store/errors/actions';
@@ -72,8 +73,8 @@ const apiFetch = (
             msg = body.non_field_errors;
           }
         }
-        if (response.status === 500) {
-          msg = 'Something Went Wrong';
+        if (response.status > 500 && response.status <= 600) {
+          msg = 'Something went wrong. Please try again later.';
         }
         dispatch(addError(msg));
         const error: ApiError = new Error(msg);
