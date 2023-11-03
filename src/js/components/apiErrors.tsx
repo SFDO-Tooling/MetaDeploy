@@ -18,6 +18,15 @@ const ErrorToast = ({
   doRemoveError: typeof removeError;
 }) => {
   const { t } = useTranslation();
+
+  if (
+    error.message &&
+    typeof error.message === 'string' &&
+    /<[a-z][\s\S]*>/i.test(error.message)
+  ) {
+    error.message = t('Something went wrong. Please try again later.');
+  }
+
   return (
     <Toast
       labels={{
