@@ -23,7 +23,6 @@ class IPRestrictionMiddlewaretest(TestCase):
 
         response = IPRestrictMiddleware(lambda x: x)(request)
         assert response == request
-        
 
     @patch('metadeploy.multitenancy.iprestrict_middleware.IPRestrictMiddleware.getSiteProfile')
     def test_ip_restrict_middleware_without_matching_allowed_client_ip(self, mock_site_profile_get):
