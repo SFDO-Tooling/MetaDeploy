@@ -151,22 +151,27 @@ class PlanViewSet(AdminAPIViewSet):
     model_name = "Plan"
     serializer_base = PlanSerializer
     filterset_class = PlanFilter
+    throttle_classes = []
 
 
 class PlanSlugViewSet(AdminAPIViewSet):
     model_name = "PlanSlug"
+    throttle_classes = []
 
 
 class VersionViewSet(AdminAPIViewSet):
     model_name = "Version"
+    throttle_classes = []
 
 
 class ProductCategoryViewSet(AdminAPIViewSet):
     model_name = "ProductCategory"
+    throttle_classes = []
 
 
 class AllowedListViewSet(AdminAPIViewSet):
     model_name = "AllowedList"
+    throttle_classes = []
 
 
 class AllowedListOrgSerializer(AdminAPISerializer):
@@ -176,6 +181,7 @@ class AllowedListOrgSerializer(AdminAPISerializer):
 class AllowedListOrgViewSet(AdminAPIViewSet):
     model_name = "AllowedListOrg"
     serializer_base = AllowedListOrgSerializer
+    throttle_classes = []
 
 
 class TranslationViewSet(viewsets.ViewSet):
@@ -195,6 +201,7 @@ class TranslationViewSet(viewsets.ViewSet):
 
     permission_classes = [IsAPIUser]
     model_name = "Translation"
+    throttle_classes = []
 
     def partial_update(self, request, pk=None):
         # Add or update a Translation record for each message
