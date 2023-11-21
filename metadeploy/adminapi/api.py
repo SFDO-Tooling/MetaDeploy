@@ -3,7 +3,6 @@ from django.utils.translation import gettext_lazy as _
 from django_filters import rest_framework as filters
 from rest_framework import serializers, status, viewsets
 from rest_framework.response import Response
-from rest_framework.throttling import UserRateThrottle
 from sfdo_template_helpers.admin.permissions import IsAPIUser
 from sfdo_template_helpers.admin.serializers import AdminAPISerializer
 from sfdo_template_helpers.admin.views import AdminAPIViewSet
@@ -12,10 +11,6 @@ from metadeploy.adminapi.translations import update_all_translations
 from metadeploy.api import models
 from metadeploy.api.models import SUPPORTED_ORG_TYPES, Plan
 from metadeploy.api.serializers import get_from_data_or_instance
-
-class AdminThrottle(UserRateThrottle):
-    scope = 'admin'
-
 
 
 class ProductSerializer(AdminAPISerializer):
@@ -143,7 +138,7 @@ class PlanTemplateSerializer(AdminAPISerializer):
 class PlanTemplateViewSet(AdminAPIViewSet):
     model_name = "PlanTemplate"
     serializer_base = PlanTemplateSerializer
-    throttle_classes = [AdminThrottle]
+    throttle_classes = []
 
 
 class PlanFilter(filters.FilterSet):
@@ -156,7 +151,6 @@ class PlanViewSet(AdminAPIViewSet):
     model_name = "Plan"
     serializer_base = PlanSerializer
     filterset_class = PlanFilter
-
 
 
 class PlanSlugViewSet(AdminAPIViewSet):
