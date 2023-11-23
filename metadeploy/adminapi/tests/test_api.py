@@ -86,6 +86,14 @@ class TestPlanViewSet:
             "meta": {"page": {"total": 1}},
         }
 
+    def test_throttle(self, admin_api_client):
+        url = "http://testserver/admin/rest/allowedlistorgs"
+        for i in range(0, 4):
+            response = admin_api_client.get(url)
+
+        response = admin_api_client.get(url)
+        assert response.status_code == 200
+
     def test_retrieve(self, admin_api_client, step_factory):
         step = step_factory()
         plan = step.plan
