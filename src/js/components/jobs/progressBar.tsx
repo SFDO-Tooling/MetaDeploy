@@ -116,7 +116,7 @@ class ProgressBar extends Component<Props, State> {
     const progressRounded = Math.min(Math.round(progress), 100);
     const id = `${job.id}-progress`;
     return (
-      <div className="slds-p-around_medium slds-size_1-of-1">
+      <div className="slds-p-around_medium slds-text-heading_small slds-size_1-of-1">
         <div
           id={id}
           className="slds-grid
