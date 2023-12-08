@@ -257,10 +257,16 @@ def _get_access_token(*, org_result, scratch_org_config):
         scope="web full refresh_token",
     )
     oauth2_client = OAuth2Client(oauth2_config)
-    auth_result = oauth2_client.auth_code_grant(org_result["AuthCode"]).json()
+    try:
+        auth_result = oauth2_client.auth_code_grant(org_result["AuthCode"]).json()
+    except HTTPError as err:
+        _handle_sf_error(err)    
+
+
     scratch_org_config.config["access_token"] = scratch_org_config._sfdx_info[
         "access_token"
     ] = auth_result["access_token"]
+
     scratch_org_config.config["refresh_token"] = auth_result["refresh_token"]
 
 
