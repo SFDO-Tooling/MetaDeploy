@@ -260,8 +260,7 @@ def _get_access_token(*, org_result, scratch_org_config):
     try:
         auth_result = oauth2_client.auth_code_grant(org_result["AuthCode"]).json()
     except HTTPError as err:
-        _handle_sf_error(err)    
-
+        _handle_sf_error(err)
 
     scratch_org_config.config["access_token"] = scratch_org_config._sfdx_info[
         "access_token"
