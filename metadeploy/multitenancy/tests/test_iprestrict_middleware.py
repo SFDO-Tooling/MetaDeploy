@@ -67,3 +67,18 @@ class IPRestrictionMiddlewaretest(TestCase):
 
         response = IPRestrictMiddleware(lambda x: x)(request)
         assert response == request
+
+    @patch('metadeploy.multitenancy.iprestrict_middleware.IPRestrictMiddleware.getSiteProfile')
+    def test_ip_restrict_middleware_without_matching_allowed_client_ip_admin_page(self, mock_site_profile_get):
+        request = self.factory.get('/admin/sites/site/1/change/')
+        request.META["REMOTE_ADDR"] = "127.0.0.2"
+
+        site = Site.objects.create(name="Test")
+        mock_site_profile = SiteProfile()
+        mock_site_profile.site = site
+        mock_site_profile.name = site.name
+        mock_site_profile.allowed_ip_addresses = '["127.0.0.1"]'
+        mock_site_profile_get.return_value = mock_site_profile
+
+        response = IPRestrictMiddleware(lambda x: x)(request)
+        assert response == request
