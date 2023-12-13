@@ -5,6 +5,7 @@ from django.http import HttpResponseForbidden
 
 ADMIN_URL = f"/{settings.ADMIN_URL}/".replace("//", "/")
 
+
 class IPRestrictMiddleware:
     def getSiteProfile(self):
         profile = SiteProfile.objects.filter(site=current_site_id()).first()
