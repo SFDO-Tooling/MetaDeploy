@@ -18,10 +18,15 @@ class IPRestrictMiddleware:
         client_ip = request.META.get('REMOTE_ADDR', None)
         profile = self.getSiteProfile()
         is_admin_url = request.path.startswith(ADMIN_URL)
+        has_ip_allowlist = (
+            hasattr(profile, "allowed_ip_addresses") and profile.allowed_ip_addresses
+        )
+        should_filter = not is_admin_url and has_ip_allowlist
 
-        if not is_admin_url and hasattr(profile, "allowed_ip_addresses") and profile.allowed_ip_addresses:
-            if client_ip not in profile.allowed_ip_addresses:
-                return HttpResponseForbidden("You don't have permission to access this resource.")
+        if should_filter and client_ip not in profile.allowed_ip_addresses:
+            return HttpResponseForbidden(
+                "You don't have permission to access this resource."
+            )
 
         response = self.get_response(request)
         return response
