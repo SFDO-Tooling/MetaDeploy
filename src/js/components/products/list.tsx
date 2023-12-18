@@ -212,8 +212,8 @@ const ProductsList = () => {
             // These messages are pre-cleaned by the API
             <div
               className="markdown
+                slds-p-bottom_medium
                 slds-text-heading_small
-                slds-text-longform
                 slds-size_1-of-1
                 slds-large-size_2-of-3"
               dangerouslySetInnerHTML={{
