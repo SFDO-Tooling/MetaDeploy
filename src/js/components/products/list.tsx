@@ -25,6 +25,7 @@ const getProductsList = (products: Product[], category?: Category) => (
       <div
         className="slds-text-longform
           slds-p-around_small
+          slds-text-heading_small
           slds-size_1-of-1
           slds-large-size_2-of-3
           markdown"
@@ -206,13 +207,13 @@ const ProductsList = () => {
       <>
         <Header history={history} />
         <PageHeader />
-        <div className="slds-p-around_x-large">
+        <div className="slds-text-heading_small slds-p-around_x-large">
           {window.GLOBALS.SITE?.welcome_text ? (
             // These messages are pre-cleaned by the API
             <div
               className="markdown
                 slds-p-bottom_medium
-                slds-text-longform
+                slds-text-heading_small
                 slds-size_1-of-1
                 slds-large-size_2-of-3"
               dangerouslySetInnerHTML={{

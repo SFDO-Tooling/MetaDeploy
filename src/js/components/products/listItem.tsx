@@ -37,11 +37,17 @@ const ProductItem = ({ item }: { item: Product }) => {
             {t('Version {{version}}', { version: label })}
           </div>
           {item.short_description ? (
-            <div className="slds-p-top_x-small">{item.short_description}</div>
+            <div
+              className="slds-p-top_x-small slds-text-heading_small"
+              style={{ fontWeight: 300 }}
+            >
+              {item.short_description}
+            </div>
           ) : (
             item.description && (
               <div
-                className="md-truncate-children slds-p-top_x-small"
+                className="md-truncate-children slds-text-heading_small "
+                style={{ fontWeight: 300 }}
                 // This description is pre-cleaned by the API
                 dangerouslySetInnerHTML={{ __html: item.description }}
               />

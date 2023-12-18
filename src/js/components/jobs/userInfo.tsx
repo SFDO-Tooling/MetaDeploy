@@ -53,6 +53,7 @@ const UserInfo = ({
   return contents ? (
     <div
       className="slds-p-around_medium
+        slds-text-heading_small
         slds-size_1-of-1
         slds-medium-size_1-of-2"
     >
