@@ -1,14 +1,14 @@
-from metadeploy.api.models import SiteProfile
-from . import current_site_id
+from ipaddress import ip_network, ip_address
 from django.conf import settings
 from django.http import HttpResponseForbidden
-from ipaddress import ip_network, ip_address
+from metadeploy.api.models import SiteProfile
+from . import current_site_id
 
 ADMIN_URL = f"/{settings.ADMIN_URL}/".replace("//", "/")
 
 
 class IPRestrictMiddleware:
-    def getSiteProfile(self):
+    def get_site_profile(self):
         profile = SiteProfile.objects.filter(site=current_site_id()).first()
         return profile
 
@@ -17,7 +17,7 @@ class IPRestrictMiddleware:
 
     def __call__(self, request):
         client_ip = request.META.get('REMOTE_ADDR', None)
-        profile = self.getSiteProfile()
+        profile = self.get_site_profile()
         is_admin_url = request.path.startswith(ADMIN_URL)
         has_ip_allowlist = (
             hasattr(profile, "allowed_ip_addresses") and profile.allowed_ip_addresses
@@ -42,4 +42,3 @@ class IPRestrictMiddleware:
             except ValueError:
                 continue
         return False
-

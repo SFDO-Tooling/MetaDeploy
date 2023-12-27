@@ -10,7 +10,7 @@ class IPRestrictionMiddlewaretest(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
 
-    @patch('metadeploy.multitenancy.iprestrict_middleware.IPRestrictMiddleware.getSiteProfile')
+    @patch('metadeploy.multitenancy.iprestrict_middleware.IPRestrictMiddleware.get_site_profile')
     def test_ip_restrict_middleware_with_matching_allowed_client_ip(self, mock_site_profile_get):
         request = self.factory.get('/test')
         request.META["REMOTE_ADDR"] = "127.0.0.1"
@@ -28,7 +28,7 @@ class IPRestrictionMiddlewaretest(TestCase):
         response = IPRestrictMiddleware(lambda x: x)(request)
         assert response == request
 
-    @patch('metadeploy.multitenancy.iprestrict_middleware.IPRestrictMiddleware.getSiteProfile')
+    @patch('metadeploy.multitenancy.iprestrict_middleware.IPRestrictMiddleware.get_site_profile')
     def test_ip_restrict_middleware_with_value_error_client_ip(self, mock_site_profile_get):
         request = self.factory.get('/test')
         request.META["REMOTE_ADDR"] = "127.0.0.1"
@@ -46,7 +46,7 @@ class IPRestrictionMiddlewaretest(TestCase):
         response = IPRestrictMiddleware(lambda x: x)(request)
         assert response == request
 
-    @patch('metadeploy.multitenancy.iprestrict_middleware.IPRestrictMiddleware.getSiteProfile')
+    @patch('metadeploy.multitenancy.iprestrict_middleware.IPRestrictMiddleware.get_site_profile')
     def test_ip_restrict_middleware_with_matching_allowed_client_ip_cidr_format(self, mock_site_profile_get):
         request = self.factory.get('/test')
         request.META["REMOTE_ADDR"] = "127.0.0.1"
@@ -64,7 +64,7 @@ class IPRestrictionMiddlewaretest(TestCase):
         response = IPRestrictMiddleware(lambda x: x)(request)
         assert response == request
 
-    @patch('metadeploy.multitenancy.iprestrict_middleware.IPRestrictMiddleware.getSiteProfile')
+    @patch('metadeploy.multitenancy.iprestrict_middleware.IPRestrictMiddleware.get_site_profile')
     def test_ip_restrict_middleware_without_matching_allowed_client_ip(self, mock_site_profile_get):
         request = self.factory.get('/test')
         request.META["REMOTE_ADDR"] = "127.0.0.2"
@@ -82,7 +82,7 @@ class IPRestrictionMiddlewaretest(TestCase):
         response = IPRestrictMiddleware(lambda x: x)(request)
         assert response.status_code == 403
 
-    @patch('metadeploy.multitenancy.iprestrict_middleware.IPRestrictMiddleware.getSiteProfile')
+    @patch('metadeploy.multitenancy.iprestrict_middleware.IPRestrictMiddleware.get_site_profile')
     def test_ip_restrict_middleware_without_allowed_list(self, mock_site_profile_get):
         request = self.factory.get('/test')
         request.META["REMOTE_ADDR"] = "127.0.0.1"
@@ -96,7 +96,7 @@ class IPRestrictionMiddlewaretest(TestCase):
         response = IPRestrictMiddleware(lambda x: x)(request)
         assert response == request
 
-    @patch('metadeploy.multitenancy.iprestrict_middleware.IPRestrictMiddleware.getSiteProfile')
+    @patch('metadeploy.multitenancy.iprestrict_middleware.IPRestrictMiddleware.get_site_profile')
     def test_ip_restrict_middleware_with_allowed_list_none(self, mock_site_profile_get):
         request = self.factory.get('/test')
         request.META["REMOTE_ADDR"] = "127.0.0.1"
@@ -111,7 +111,7 @@ class IPRestrictionMiddlewaretest(TestCase):
         response = IPRestrictMiddleware(lambda x: x)(request)
         assert response == request
 
-    @patch('metadeploy.multitenancy.iprestrict_middleware.IPRestrictMiddleware.getSiteProfile')
+    @patch('metadeploy.multitenancy.iprestrict_middleware.IPRestrictMiddleware.get_site_profile')
     def test_ip_restrict_middleware_without_matching_allowed_client_ip_admin_page(self, mock_site_profile_get):
         request = self.factory.get('/admin/sites/site/1/change/')
         request.META["REMOTE_ADDR"] = "127.0.0.2"
