@@ -33,12 +33,13 @@ class IPRestrictMiddleware:
         return response
 
     def validate_ip(self, target_ip, allowed_ips):
-        try:
-            target_ip_obj = ip_address(target_ip)
-            for allowed_ip in allowed_ips:
+        target_ip_obj = ip_address(target_ip)
+        for allowed_ip in allowed_ips:
+            try:
                 allowed_ip_obj = ip_network(allowed_ip, strict=False)
                 if target_ip_obj in allowed_ip_obj:
                     return True
-            return False
-        except ValueError:
-            return False
+            except ValueError:
+                continue
+        return False
+
