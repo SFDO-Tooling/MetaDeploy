@@ -734,6 +734,7 @@ class SiteSerializer(serializers.ModelSerializer):
             "show_metadeploy_wordmark",
             "company_logo",
             "favicon",
+            "allowed_ip_addresses",
         )
 
 

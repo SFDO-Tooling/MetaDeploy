@@ -104,6 +104,7 @@ MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "metadeploy.multitenancy.middleware.CurrentSiteMiddleware",
+    "metadeploy.multitenancy.iprestrict_middleware.IPRestrictMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",

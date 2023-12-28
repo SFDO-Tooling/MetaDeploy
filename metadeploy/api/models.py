@@ -1224,6 +1224,7 @@ class SiteProfile(TranslatableModel):
     show_metadeploy_wordmark = models.BooleanField(default=True)
     company_logo = models.ImageField(blank=True)
     favicon = models.ImageField(blank=True)
+    allowed_ip_addresses = models.JSONField(default=list, blank=True, null=True)
 
     @property
     def welcome_text_markdown(self):
