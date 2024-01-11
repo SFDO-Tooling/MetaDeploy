@@ -5,12 +5,12 @@
 https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.20.0.tar.gz
 coloredlogs
 cumulusci
-Django
+Django==4.*
 Pillow
 ansi2html
 bleach
 boto3
-channels
+channels[daphne]
 channels-redis
 django-allauth
 django-colorfield
