@@ -6,7 +6,10 @@ if [ -n "$CTC_URL" ] ; then
      python .heroku/check_change_traffic_control.py
 else
      # Simply run the migration
-     python manage.py migrate --noinput
+     python manage.py showmigrations account
+     python manage.py migrate account --fake
+     python manage.py showmigrations account
+     python manage.py migrate --noinput 
 fi
 
 if [ -n "$RELEASE_TEST_ENABLED" ]; then
