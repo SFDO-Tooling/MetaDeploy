@@ -2,7 +2,7 @@
 # upgrade-deps.yml workflow. Avoid pinning specific versions here unless required
 # for stability.
 
-https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.21.0.tar.gz
+https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.23.0.tar.gz
 coloredlogs
 cumulusci
 Django<5
