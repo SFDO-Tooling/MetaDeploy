@@ -39,9 +39,9 @@ bleach==6.1.0
     # via
     #   -r requirements/prod.in
     #   sfdo-template-helpers
-boto3==1.34.21
+boto3==1.34.22
     # via -r requirements/prod.in
-botocore==1.34.21
+botocore==1.34.22
     # via
     #   boto3
     #   s3transfer
@@ -387,7 +387,7 @@ service-identity==24.1.0
     # via
     #   -r requirements/prod.in
     #   twisted
-sfdo-template-helpers @ https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.22.0.tar.gz
+sfdo-template-helpers @ https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.23.0.tar.gz
     # via -r requirements/prod.in
 simple-salesforce==1.11.4
     # via
