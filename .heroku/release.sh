@@ -6,8 +6,8 @@ if [ -n "$CTC_URL" ] ; then
      # python .heroku/check_change_traffic_control.py
      python manage.py migrate account --fake
      python manage.py showmigrations account
-     python migrate account 0002
-     python migrate account
+     python manage.py migrate account 0002
+     python manage.py migrate account
      python manage.py migrate --noinput 
 else
      # Simply run the migration
