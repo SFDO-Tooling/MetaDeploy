@@ -11,9 +11,6 @@ if [ -n "$CTC_URL" ] ; then
      python manage.py migrate --noinput 
 else
      # Simply run the migration
-     python manage.py showmigrations account
-     python manage.py migrate account --fake
-     python manage.py showmigrations account
      python manage.py migrate --noinput 
 fi
 
