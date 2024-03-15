@@ -298,13 +298,13 @@ class PlanDetail extends Component<Props, State> {
             <ErrorIcon />
             <span className="slds-text-color_error" role="alert">
               {t(
-                'Oops! It looks like you don’t have permissions to run an installation on this org.',
+                'Oops! It looks like you have been logged out or don’t have permissions to run an installation on this org.',
               )}
             </span>
           </div>
           <p>
             {t(
-              'Please contact an Admin within your org or use the button below to log in with a different org.',
+              'Please log back in, contact an Admin, or use the button below to log in with a different org.',
             )}
           </p>
         </>
