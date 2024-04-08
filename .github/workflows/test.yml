@@ -45,7 +45,7 @@ jobs:
       - name: Test frontend
         run: docker-compose run --no-deps web yarn test:js:coverage
       - name: Upload coverage artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: frontend-coverage
           path: |
@@ -74,7 +74,7 @@ jobs:
           -e SFDX_HUB_KEY="sample key"
           web yarn test:py
       - name: Upload coverage artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: backend-coverage
           path: |
