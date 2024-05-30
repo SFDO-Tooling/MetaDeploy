@@ -215,7 +215,7 @@ describe('<PlanDetail />', () => {
       });
 
       expect(
-        getByText('you don’t have permissions', { exact: false }),
+        getByText('don’t have permissions', { exact: false }),
       ).toBeVisible();
     });
   });
