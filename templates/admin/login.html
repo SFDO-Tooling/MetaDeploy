@@ -1,0 +1,27 @@
+{% extends "admin/login.html" %}
+
+{% load socialaccount %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <style>
+        #content-main {
+            float: none !important;
+        }
+
+        .social_login_container {
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    {{ block.super }}
+
+    <div class="social_login_container">
+        <a href="{% provider_login_url "salesforce" action="reauthenticate" custom_domain="login" %}">Log in with Salesforce</a>
+    </div>
+
+{% endblock %}
