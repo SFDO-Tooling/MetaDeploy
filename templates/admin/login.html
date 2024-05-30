@@ -24,13 +24,9 @@
         <a href="{% provider_login_url "salesforce" %}">Log in with Salesforce</a>
     </div>
 
-    {% element form method="post" no_visible_fields=True action="{% provider_login_url "salesforce" %}" %}
-        {% slot actions %}
-            {% csrf_token %}
-            {% element button type="submit" %}
-                {% trans "Log in with Salesforce" %}
-            {% endelement %}
-        {% endslot %}
-    {% endelement %}
+    <form method="post" action="{% provider_login_url "salesforce" %}">
+      {% csrf_token %}
+      <button type="submit">Log in with Salesforce</button>
+    </form>
 
 {% endblock %}
