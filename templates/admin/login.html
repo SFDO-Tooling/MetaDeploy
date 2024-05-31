@@ -9,31 +9,23 @@
             float: none !important;
         }
 
-        @media (max-width: 767px) {
-            .salesforce-login-container {
-                margin-top: -30px;
-            }
-        }
-
         .salesforce-login-container {
             text-align: center;
-            margin-top: -80px;
-        }
-
-        #salesforce-login-form {
-            margin: 10px;
+            margin-top: 20px;
+            line-height: 2;
         }
     </style>
 {% endblock %}
 
 {% block content %}
     {{ block.super }}
-{% endblock %}
 
-<div class="salesforce-login-container">
-    <span>Or</span>
-    <form id="salesforce-login-form" method="post" action="{% provider_login_url "salesforce" %}">
-      {% csrf_token %}
-      <input type="submit" value="Log in with Salesforce" />
-    </form>
-</div>
+    <div class="salesforce-login-container">
+        <hr/>
+        <span>Or</span>
+        <form id="salesforce-login-form" method="post" action="{% provider_login_url "salesforce" %}">
+          {% csrf_token %}
+          <input type="submit" value="Log in with Salesforce" />
+        </form>
+    </div>
+{% endblock %}
