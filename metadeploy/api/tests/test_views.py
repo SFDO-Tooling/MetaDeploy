@@ -28,7 +28,7 @@ class TestJobViewset:
         response = client.get(reverse("job-detail", kwargs={"pk": job.id}))
 
         assert response.status_code == 404
-        assert response.json() == {"detail": "Not found."}
+        assert response.json() == {"detail": "No Job matches the given query."}
 
     def test_job__is_staff(self, client, user_factory, job_factory):
         staff_user = user_factory(is_staff=True)
