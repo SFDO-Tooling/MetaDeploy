@@ -12,7 +12,7 @@ appdirs==1.4.4
     # via
     #   cumulusci
     #   fs
-asgiref==3.7.2
+asgiref==3.8.1
     # via
     #   channels
     #   channels-redis
@@ -27,7 +27,7 @@ attrs==23.2.0
     #   automat
     #   service-identity
     #   twisted
-authlib==1.2.1
+authlib==1.3.0
     # via
     #   cumulusci
     #   simple-salesforce
@@ -39,13 +39,13 @@ bleach==6.1.0
     # via
     #   -r requirements/prod.in
     #   sfdo-template-helpers
-boto3==1.34.22
+boto3==1.34.127
     # via -r requirements/prod.in
-botocore==1.34.22
+botocore==1.34.127
     # via
     #   boto3
     #   s3transfer
-certifi==2023.7.22
+certifi==2024.2.2
     # via
     #   cumulusci
     #   requests
@@ -58,16 +58,15 @@ cffi==1.16.0
 channels[daphne]==3.0.5
     # via
     #   -r requirements/prod.in
-    #   channels
     #   channels-redis
 channels-redis==3.4.1
     # via -r requirements/prod.in
-charset-normalizer==3.2.0
+charset-normalizer==3.3.2
     # via
     #   cumulusci
     #   requests
     #   snowfakery
-click==8.1.6
+click==8.1.7
     # via
     #   cumulusci
     #   django-rq-scheduler
@@ -81,7 +80,7 @@ croniter==1.4.1
     # via django-rq-scheduler
 crontab==1.0.1
     # via rq-scheduler
-cryptography==41.0.7
+cryptography==42.0.7
     # via
     #   authlib
     #   autobahn
@@ -91,15 +90,13 @@ cryptography==41.0.7
     #   secretstorage
     #   service-identity
     #   sfdo-template-helpers
-cumulusci==3.84.3
+cumulusci==3.88.0
     # via -r requirements/prod.in
 daphne==3.0.2
     # via channels
 defusedxml==0.7.1
-    # via
-    #   cumulusci
-    #   python3-openid
-django==4.2.9
+    # via cumulusci
+django==4.2.13
     # via
     #   -r requirements/prod.in
     #   channels
@@ -117,49 +114,49 @@ django==4.2.9
     #   django-storages
     #   djangorestframework
     #   sfdo-template-helpers
-django-allauth==0.60.1
+django-allauth==0.63.3
     # via -r requirements/prod.in
-django-binary-database-files==1.0.17
+django-binary-database-files==1.0.18
     # via -r requirements/prod.in
 django-colorfield==0.11.0
     # via -r requirements/prod.in
 django-environ==0.11.2
     # via -r requirements/prod.in
-django-filter==23.5
+django-filter==24.2
     # via
     #   -r requirements/prod.in
     #   sfdo-template-helpers
-django-hashid-field==3.4.0
+django-hashid-field==3.4.1
     # via -r requirements/prod.in
 django-js-reverse==0.10.2
     # via -r requirements/prod.in
 django-log-request-id==2.1.0
     # via -r requirements/prod.in
-django-model-utils==4.3.1
+django-model-utils==4.5.1
     # via -r requirements/prod.in
 django-parler==2.3
     # via -r requirements/prod.in
 django-redis==5.4.0
     # via -r requirements/prod.in
-django-rq==2.10.1
+django-rq==2.10.2
     # via -r requirements/prod.in
 django-rq-scheduler==2023.9.0
     # via -r requirements/prod.in
-django-storages==1.14.2
+django-storages==1.14.3
     # via -r requirements/prod.in
-djangorestframework==3.14.0
+djangorestframework==3.15.1
     # via
     #   -r requirements/prod.in
     #   sfdo-template-helpers
 docutils==0.16
     # via cumulusci
-faker==19.3.0
+faker==24.4.0
     # via
     #   cumulusci
     #   faker-edu
     #   faker-nonprofit
     #   snowfakery
-faker-edu==1.0.0
+faker-edu==1.1.0
     # via
     #   cumulusci
     #   snowfakery
@@ -167,7 +164,7 @@ faker-nonprofit==1.0.0
     # via
     #   cumulusci
     #   snowfakery
-freezegun==1.4.0
+freezegun==1.5.1
     # via rq-scheduler
 fs==2.4.16
     # via cumulusci
@@ -175,9 +172,10 @@ github3-py==4.0.1
     # via
     #   -r requirements/prod.in
     #   cumulusci
-greenlet==3.0.1
+greenlet==3.0.3
     # via
     #   cumulusci
+    #   snowfakery
     #   sqlalchemy
 gvgen==1.0
     # via
@@ -195,14 +193,14 @@ hyperlink==21.0.0
     # via
     #   autobahn
     #   twisted
-idna==3.4
+idna==3.6
     # via
     #   cumulusci
     #   hyperlink
     #   requests
     #   snowfakery
     #   twisted
-importlib-metadata==6.8.0
+importlib-metadata==7.1.0
     # via
     #   cumulusci
     #   keyring
@@ -214,7 +212,7 @@ jeepney==0.8.0
     #   cumulusci
     #   keyring
     #   secretstorage
-jinja2==3.1.2
+jinja2==3.1.3
     # via
     #   cumulusci
     #   snowfakery
@@ -228,15 +226,15 @@ logfmt==0.4
     # via
     #   -r requirements/prod.in
     #   sfdo-template-helpers
-lxml==4.9.3
+lxml==5.2.2
     # via cumulusci
-markdown==3.5.2
+markdown==3.6
     # via sfdo-template-helpers
 markdown-it-py==2.2.0
     # via
     #   cumulusci
     #   rich
-markupsafe==2.1.3
+markupsafe==2.1.5
     # via
     #   cumulusci
     #   jinja2
@@ -246,55 +244,51 @@ mdurl==0.1.2
     # via
     #   cumulusci
     #   markdown-it-py
-msgpack==1.0.7
+msgpack==1.0.8
     # via channels-redis
 natsort==8.4.0
     # via
     #   cumulusci
     #   robotframework-pabot
-oauthlib==3.2.2
-    # via requests-oauthlib
-packaging==23.2
+packaging==24.1
     # via django-js-reverse
-pillow==10.2.0
+pillow==10.3.0
     # via
     #   -r requirements/prod.in
     #   django-colorfield
-psutil==5.9.6
+psutil==5.9.8
     # via cumulusci
 psycopg2-binary==2.9.9
     # via -r requirements/prod.in
-pyasn1==0.5.1
+pyasn1==0.6.0
     # via
     #   pyasn1-modules
     #   service-identity
-pyasn1-modules==0.3.0
+pyasn1-modules==0.4.0
     # via service-identity
-pycparser==2.21
+pycparser==2.22
     # via
     #   cffi
     #   cumulusci
-pydantic==1.10.12
+pydantic==1.10.14
     # via
     #   cumulusci
     #   snowfakery
-pygments==2.17.2
+pygments==2.18.0
     # via
     #   cumulusci
     #   rich
 pyjwt[crypto]==2.8.0
     # via
     #   cumulusci
-    #   django-allauth
     #   github3-py
-    #   pyjwt
-pyopenssl==23.3.0
+pyopenssl==24.1.0
     # via twisted
 python-baseconv==1.2.2
     # via
     #   cumulusci
     #   snowfakery
-python-dateutil==2.8.2
+python-dateutil==2.9.0.post0
     # via
     #   botocore
     #   croniter
@@ -304,17 +298,13 @@ python-dateutil==2.8.2
     #   github3-py
     #   rq-scheduler
     #   snowfakery
-python3-openid==3.2.0
-    # via django-allauth
-pytz==2023.3.post1
-    # via
-    #   cumulusci
-    #   djangorestframework
+pytz==2024.1
+    # via cumulusci
 pyyaml==6.0.1
     # via
     #   cumulusci
     #   snowfakery
-redis==5.0.1
+redis==5.0.6
     # via
     #   django-redis
     #   django-rq
@@ -322,34 +312,30 @@ redis==5.0.1
 requests==2.29.0
     # via
     #   cumulusci
-    #   django-allauth
     #   github3-py
     #   requests-futures
-    #   requests-oauthlib
     #   robotframework-requests
     #   salesforce-bulk
     #   simple-salesforce
     #   snowfakery
 requests-futures==1.0.1
     # via cumulusci
-requests-oauthlib==1.3.1
-    # via django-allauth
-rich==13.7.0
+rich==13.7.1
     # via cumulusci
-robotframework==6.1.1
+robotframework==7.0
     # via
     #   cumulusci
     #   robotframework-pabot
     #   robotframework-requests
     #   robotframework-seleniumlibrary
     #   robotframework-stacktrace
-robotframework-pabot==2.16.0
+robotframework-pabot==2.18.0
     # via cumulusci
-robotframework-pythonlibcore==4.3.0
+robotframework-pythonlibcore==4.4.1
     # via
     #   cumulusci
     #   robotframework-seleniumlibrary
-robotframework-requests==0.9.6
+robotframework-requests==0.9.7
     # via cumulusci
 robotframework-seleniumlibrary==5.1.3
     # via cumulusci
@@ -357,7 +343,7 @@ robotframework-stacktrace==0.4.1
     # via
     #   cumulusci
     #   robotframework-pabot
-rq==1.15.1
+rq==1.16.2
     # via
     #   -r requirements/prod.in
     #   django-rq
@@ -367,7 +353,7 @@ rq-scheduler==0.13.1
     # via -r requirements/prod.in
 rst2ansi==0.1.5
     # via cumulusci
-s3transfer==0.10.0
+s3transfer==0.10.1
     # via boto3
 salesforce-bulk==2.2.0
     # via cumulusci
@@ -381,7 +367,7 @@ selenium==3.141.0
     # via
     #   cumulusci
     #   robotframework-seleniumlibrary
-sentry-sdk==1.39.2
+sentry-sdk==2.5.1
     # via -r requirements/prod.in
 service-identity==24.1.0
     # via
@@ -402,21 +388,19 @@ six==1.16.0
     #   python-dateutil
     #   salesforce-bulk
     #   snowfakery
-snowfakery==3.6.1
+snowfakery==3.6.2
     # via cumulusci
-sqlalchemy==1.4.49
+sqlalchemy==1.4.52
     # via
     #   cumulusci
     #   snowfakery
-sqlparse==0.4.4
+sqlparse==0.5.0
     # via django
-twisted[tls]==23.10.0
-    # via
-    #   daphne
-    #   twisted
+twisted[tls]==24.3.0
+    # via daphne
 txaio==23.1.1
     # via autobahn
-typing-extensions==4.7.1
+typing-extensions==4.10.0
     # via
     #   asgiref
     #   cumulusci
@@ -431,7 +415,7 @@ uritemplate==4.1.1
     # via
     #   cumulusci
     #   github3-py
-urllib3==1.26.16
+urllib3==1.26.18
     # via
     #   botocore
     #   cumulusci
@@ -441,17 +425,17 @@ urllib3==1.26.16
     #   snowfakery
 webencodings==0.5.1
     # via bleach
-werkzeug==3.0.1
+werkzeug==3.0.3
     # via -r requirements/prod.in
 whitenoise==6.6.0
     # via -r requirements/prod.in
 xmltodict==0.13.0
     # via cumulusci
-zipp==3.17.0
+zipp==3.18.2
     # via
     #   cumulusci
     #   importlib-metadata
-zope-interface==6.1
+zope-interface==6.4.post2
     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:
