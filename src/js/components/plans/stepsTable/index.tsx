@@ -205,7 +205,7 @@ class StepsTable extends Component<Props, State> {
     const hasReadyPreflight = !plan.requires_preflight || preflight?.is_ready;
     const logsExpanded = expandedPanels.size > 0;
     return (
-      <div className="slds-p-around_medium slds-size_1-of-1">
+      <div className="slds-p-around_medium slds-text-heading_small slds-size_1-of-1">
         <article className="slds-card slds-scrollable_x">
           <DataTable items={steps} id="plan-steps-table">
             <DataTableColumn

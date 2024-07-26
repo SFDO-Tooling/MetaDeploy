@@ -2,16 +2,16 @@
 # upgrade-deps.yml workflow. Avoid pinning specific versions here unless required
 # for stability.
 
-https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.20.0.tar.gz
+https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.23.0.tar.gz
 coloredlogs
 cumulusci
-Django
+Django<5
 Pillow
 ansi2html
 bleach
 boto3
-channels
-channels-redis
+channels[daphne]<4
+channels-redis<4
 django-allauth
 django-colorfield
 django-binary-database-files
@@ -36,3 +36,4 @@ sentry-sdk
 service_identity
 werkzeug
 whitenoise
+rq-scheduler

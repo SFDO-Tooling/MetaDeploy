@@ -103,9 +103,8 @@ const UserInfo = ({
         </ul>
         <p className="slds-p-top_small">
           <Trans i18nKey="credentialsHoldTime" count={token_minutes}>
-            The credentials to your Salesforce org will only be held for{' '}
-            {{ token_minutes }} minutes or until your requested installation is
-            complete.
+            If no action is performed for {{ token_minutes }} minutes, you will
+            be automatically logged out and will need to log in again.
           </Trans>
         </p>
       </Card>
@@ -115,6 +114,7 @@ const UserInfo = ({
   return contents ? (
     <div
       className="slds-p-around_medium
+        slds-text-heading_small
         slds-size_1-of-1
         slds-medium-size_1-of-2"
     >

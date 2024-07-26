@@ -5,7 +5,9 @@ const BodyContainer = ({
 }: {
   children: ReactNode | null | undefined;
 }) => (
-  <div className="slds-p-around_medium slds-grid slds-wrap">{children}</div>
+  <div className="slds-p-around_medium slds-text-heading_small slds-grid slds-wrap">
+    {children}
+  </div>
 );
 
 export default BodyContainer;

@@ -72,6 +72,9 @@ const apiFetch = (
             msg = body.non_field_errors;
           }
         }
+        if (response.status > 500 && response.status <= 600) {
+          msg = 'Something went wrong. Please try again later.';
+        }
         dispatch(addError(msg));
         const error: ApiError = new Error(msg);
         error.response = response;

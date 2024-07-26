@@ -97,6 +97,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "metadeploy.logging_middleware.LoggingMiddleware",
     "sfdo_template_helpers.admin.middleware.AdminRestrictMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -460,7 +461,7 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_THROTTLE_RATES': {
         'anon': '4/second',
-        'user': '4/second'
+        'user': '4/second',
     }
 
 }

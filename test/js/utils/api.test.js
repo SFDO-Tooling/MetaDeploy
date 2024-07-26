@@ -35,6 +35,14 @@ describe('apiFetch', () => {
   });
 
   describe('error', () => {
+    test('throws Error for status code greater than 500', () => {
+      fetchMock.getOnce('/test/url/', { status: 503, body: {} });
+
+      expect.assertions(1);
+      return expect(apiFetch('/test/url/', dispatch)).rejects.toThrow(
+        'Something went wrong. Please try again later.',
+      );
+    });
     test('throws Error without response', () => {
       fetchMock.getOnce('/test/url/', { status: 500, body: {} });
 
