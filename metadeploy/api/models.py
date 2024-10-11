@@ -862,7 +862,7 @@ class Job(HashIdMixin, models.Model):
 
 class PreflightResultQuerySet(models.QuerySet):
     def most_recent(self, *, org_id, plan, is_valid_and_complete=True):
-        kwargs = {"org_id": org_id, "plan": plan}
+        kwargs = {"org_id": org_id, "plan": plan, "is_valid": True}
         if is_valid_and_complete:
             kwargs.update({"is_valid": True, "status": PreflightResult.Status.complete})
         return self.filter(**kwargs).order_by("-created_at").first()
