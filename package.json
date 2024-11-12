@@ -9,7 +9,7 @@
     "url": "https://github.com/SFDO-Tooling/MetaDeploy.git"
   },
   "engines": {
-    "node": "^16",
+    "node": "22.x",
     "yarn": "^1.22"
   },
   "scripts": {
@@ -39,7 +39,7 @@
     "test:js:coverage": "JEST_JUNIT_OUTPUT_DIR='./coverage' jest --ci --runInBand --reporters=default --reporters=jest-junit",
     "test:js:report-coverage": "cat ./coverage/lcov.info | coveralls",
     "test:js:check-coverage": "nyc check-coverage --temp-directory coverage",
-    "test:py": "pytest",
+    "test:py": "python -m pytest",
     "test:py:report-coverage": "python -m coveralls",
     "test:py:check-coverage": "coverage report --fail-under=100",
     "test:py:integration": "pytest -m 'integration'",
@@ -154,7 +154,7 @@
     "webpack-merge": "^5.8.0"
   },
   "optionalDependencies": {
-    "@omnistudio/omniscript-lwc-compiler": "^244.4.0"
+    "@omnistudio/omniscript-lwc-compiler": "^252.6.0"
   },
   "resolutions": {
     "@storybook/**/ansi-regex": "^5.0.1",

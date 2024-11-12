@@ -45,7 +45,7 @@ import { createSocket } from '@/js/utils/websockets';
 
 const history = createBrowserHistory();
 
-console.log('>>> index.tsx');
+log('>>> index.tsx');
 
 const App = () => (
   <DocumentTitle title={window.SITE_NAME}>
@@ -100,7 +100,7 @@ init_i18n((i18nError?: string) => {
     log(i18nError);
   }
   const el = document.getElementById('app');
-  console.log('>>> fetched app element');
+  log('>>> fetched app element');
   if (el) {
     // Remove scratch org UUID from URL
     const scratchOrgUUID = getUrlParam(SCRATCH_ORG_QS);
@@ -108,18 +108,20 @@ init_i18n((i18nError?: string) => {
       history.replace({ search: removeUrlParam(SCRATCH_ORG_QS) });
     }
 
-    console.log('>>> creating app store');
+    log('>>> creating app store');
     // Create store
     const appStore = createStore(
       reducer,
       undefined,
       composeWithDevTools(
+        // eslint-disable-next-line
+        // @ts-ignore
         applyMiddleware(thunk.withExtraArgument(history), logger),
       ),
     );
-    console.log('>>> appStore created');
+    log('>>> appStore created');
 
-    console.log('>>> connecting to websocket server');
+    log('>>> connecting to websocket server');
     // Connect to WebSocket server
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = window.location.host;
@@ -132,7 +134,7 @@ init_i18n((i18nError?: string) => {
         },
       },
     });
-    console.log('>>> connected to websocket server');
+    log('>>> connected to websocket server');
 
     // Get JS globals
     let GLOBALS = {};
@@ -177,7 +179,7 @@ init_i18n((i18nError?: string) => {
 
     // Set App element (used for react-SLDS modals)
     settings.setAppElement(el);
-    console.log('>>> about to fetch products');
+    log('>>> about to fetch products');
     // Fetch products before rendering App
     (appStore.dispatch as ThunkDispatch)(fetchProducts()).finally(() => {
       (appStore.dispatch as ThunkDispatch)(fetchOrgJobs());
@@ -200,6 +202,6 @@ init_i18n((i18nError?: string) => {
         </Provider>,
       );
     });
-    console.log('>>> fetched products');
+    log('>>> fetched products');
   }
 });
