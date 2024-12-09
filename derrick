@@ -1,22 +1,22 @@
 #!/bin/bash -e
 
 function dcr {
-  docker-compose run --rm web $@
+  docker compose run --rm web $@
 }
 
 function dcrq {
-  docker-compose run --rm --no-deps web $@
+  docker compose run --rm --no-deps web $@
 }
 
 case "$1" in
     "up")
-        docker-compose up
+        docker compose up
         ;;
     "down")
-        docker-compose down
+        docker compose down
         ;;
     "build")
-        docker-compose build
+        docker compose build
         ;;
     "manage")
         dcr python manage.py "${@:2}"
@@ -49,7 +49,7 @@ case "$1" in
         dcrq yarn test:js "${@:2}"
         ;;
     "storybook")
-        docker-compose run --rm --no-deps --service-ports web yarn storybook "${@:2}"
+        docker compose run --rm --no-deps --service-ports web yarn storybook "${@:2}"
         ;;
     "add:js")
         dcrq yarn add "${@:2}"

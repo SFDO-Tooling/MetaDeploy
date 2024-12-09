@@ -77,9 +77,6 @@ docs/_build/
 # Component library documentation
 storybook-static/
 
-# pyenv
-.python-version
-
 # celery beat schedule file
 celerybeat-schedule
 
