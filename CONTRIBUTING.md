@@ -14,8 +14,8 @@ provided in [./docs/running.md](./docs/running.md).
 
 To run these tests with Docker first run the following commands,
 
-    docker-compose up -d
-    docker-compose exec web bash
+    docker compose up -d
+    docker compose exec web bash
 
 If you are not using Docker or are using the VS Code integrated terminal inside
 the Docker container simply execute the commands in your project's root

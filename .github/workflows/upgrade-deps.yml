@@ -24,7 +24,7 @@ jobs:
       - name: Upgrade JS dependencies
         # prettier-ignore
         run: >
-          docker-compose run --no-deps web /bin/sh -c '
+          docker compose run --no-deps web /bin/sh -c '
           rm -f yarn.lock &&
           chown -R $(whoami):$(whoami) . &&
           npx --yes yarn-upgrade-all
@@ -32,7 +32,7 @@ jobs:
       - name: Upgrade Python dependencies
         # prettier-ignore
         run: >
-          docker-compose run --no-deps web /bin/sh -c '
+          docker compose run --no-deps web /bin/sh -c '
           pip install --upgrade pip pip-tools &&
           pip-compile --upgrade -o requirements/prod.txt requirements/prod.in &&
           pip-compile --upgrade -o requirements/dev.txt requirements/dev.in

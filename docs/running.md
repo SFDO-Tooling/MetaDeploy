@@ -7,9 +7,9 @@
 
 ## Making A Virtual Env
 
-MetaDeploy development requires Python v3.9. If `which python3.9` returns a
+MetaDeploy development requires Python v3.12. If `which python3.12` returns a
 non-empty path, it's already installed and you can continue to the next step. If
-it returns nothing, then install Python v3.9 using `brew install python`, or
+it returns nothing, then install Python v3.12 using `brew install python`, or
 from [Python.org](https://www.python.org/downloads/).
 
 Assuming you're in the repo root, do the following to create a virtualenv (once
@@ -17,7 +17,7 @@ you have
 [virtualenvwrapper](https://virtualenvwrapper.readthedocs.io/en/latest/)
 installed locally):
 
-    mkvirtualenv metadeploy --python=$(which python3.9)
+    mkvirtualenv metadeploy --python=$(which python3.12)
     setvirtualenvproject
 
 Install Python requirements:

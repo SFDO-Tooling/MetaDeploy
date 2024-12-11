@@ -2,7 +2,7 @@ ARG BUILD_ENV=development
 ARG PROD_ASSETS
 ARG OMNIOUT_TOKEN
 FROM node:22 AS node_base
-FROM python:3.9
+FROM python:3.12
 
 # Node and npm
 COPY --from=node_base /usr/local/lib/node_modules /usr/local/lib/node_modules
