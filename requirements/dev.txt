@@ -4,69 +4,69 @@
 #
 #    pip-compile --output-file=requirements/dev.txt requirements/dev.in
 #
-alabaster==0.7.16
+alabaster==1.0.0
     # via sphinx
-asgiref==3.7.2
+asgiref==3.8.1
     # via
-    #   -c requirements/prod.txt
+    #   -c /app/requirements/prod.txt
     #   django
-asttokens==2.4.1
+asttokens==3.0.0
     # via stack-data
-babel==2.14.0
+babel==2.16.0
     # via sphinx
-black==23.12.1
+black==24.10.0
     # via -r requirements/dev.in
-build==1.0.3
+build==1.2.2.post1
     # via pip-tools
-certifi==2023.7.22
+certifi==2024.12.14
     # via
-    #   -c requirements/prod.txt
+    #   -c /app/requirements/prod.txt
     #   requests
-charset-normalizer==3.2.0
+charset-normalizer==3.4.0
     # via
-    #   -c requirements/prod.txt
+    #   -c /app/requirements/prod.txt
     #   requests
-click==8.1.6
+click==8.1.7
     # via
-    #   -c requirements/prod.txt
+    #   -c /app/requirements/prod.txt
     #   black
     #   pip-tools
-coverage[toml]==6.5.0
+coverage[toml]==7.6.9
     # via
     #   coveralls
     #   pytest-cov
-coveralls==3.3.1
+coveralls==4.0.1
     # via -r requirements/dev.in
 decorator==5.1.1
     # via ipython
-django==4.2.9
+django==4.2.17
     # via
-    #   -c requirements/prod.txt
+    #   -c /app/requirements/prod.txt
     #   django-extensions
 django-extensions==3.2.3
     # via -r requirements/dev.in
 docopt==0.6.2
     # via coveralls
-docutils==0.16
+docutils==0.21.2
     # via
-    #   -c requirements/prod.txt
+    #   -c /app/requirements/prod.txt
     #   myst-parser
     #   sphinx
-executing==2.0.1
+executing==2.1.0
     # via stack-data
-factory-boy==3.3.0
+factory-boy==3.3.1
     # via
     #   -r requirements/dev.in
     #   pytest-factoryboy
-faker==19.3.0
+faker==33.1.0
     # via
-    #   -c requirements/prod.txt
+    #   -c /app/requirements/prod.txt
     #   factory-boy
-flake8==7.0.0
+flake8==7.1.1
     # via -r requirements/dev.in
-idna==3.4
+idna==3.10
     # via
-    #   -c requirements/prod.txt
+    #   -c /app/requirements/prod.txt
     #   requests
     #   yarl
 imagesize==1.4.1
@@ -75,79 +75,84 @@ inflection==0.5.1
     # via pytest-factoryboy
 iniconfig==2.0.0
     # via pytest
-ipython==8.18.1
+ipython==8.30.0
     # via -r requirements/dev.in
 isort==5.13.2
     # via -r requirements/dev.in
-jedi==0.19.1
+jedi==0.19.2
     # via ipython
-jinja2==3.1.2
+jinja2==3.1.4
     # via
-    #   -c requirements/prod.txt
+    #   -c /app/requirements/prod.txt
     #   myst-parser
     #   sphinx
-markdown-it-py==2.2.0
+markdown-it-py==3.0.0
     # via
-    #   -c requirements/prod.txt
+    #   -c /app/requirements/prod.txt
     #   mdit-py-plugins
     #   myst-parser
-markupsafe==2.1.3
+markupsafe==3.0.2
     # via
-    #   -c requirements/prod.txt
+    #   -c /app/requirements/prod.txt
     #   jinja2
-matplotlib-inline==0.1.6
+matplotlib-inline==0.1.7
     # via ipython
 mccabe==0.7.0
     # via flake8
-mdit-py-plugins==0.3.5
+mdit-py-plugins==0.4.2
     # via myst-parser
 mdurl==0.1.2
     # via
-    #   -c requirements/prod.txt
+    #   -c /app/requirements/prod.txt
     #   markdown-it-py
-multidict==6.0.4
+multidict==6.1.0
     # via yarl
 mypy-extensions==1.0.0
     # via black
-myst-parser==1.0.0
+myst-parser==4.0.0
     # via -r requirements/dev.in
-packaging==23.2
+packaging==24.2
     # via
-    #   -c requirements/prod.txt
+    #   -c /app/requirements/prod.txt
     #   black
     #   build
     #   pytest
+    #   pytest-factoryboy
     #   sphinx
-parso==0.8.3
+parso==0.8.4
     # via jedi
 pathspec==0.12.1
     # via black
 pexpect==4.9.0
     # via ipython
-pip-tools==7.3.0
+pip-tools==7.4.1
     # via -r requirements/dev.in
-platformdirs==4.1.0
+platformdirs==4.3.6
     # via black
-pluggy==1.3.0
+pluggy==1.5.0
     # via pytest
-prompt-toolkit==3.0.43
+prompt-toolkit==3.0.48
     # via ipython
+propcache==0.2.1
+    # via yarl
 ptyprocess==0.7.0
     # via pexpect
-pure-eval==0.2.2
+pure-eval==0.2.3
     # via stack-data
-pycodestyle==2.11.1
+pycodestyle==2.12.1
     # via flake8
 pyflakes==3.2.0
     # via flake8
-pygments==2.17.2
+pygments==2.18.0
     # via
-    #   -c requirements/prod.txt
+    #   -c /app/requirements/prod.txt
     #   ipython
     #   sphinx
-pyproject-hooks==1.0.0
-    # via build
-pytest==7.4.4
+pyproject-hooks==1.2.0
+    # via
+    #   build
+    #   pip-tools
+pytest==8.3.4
     # via
     #   -r requirements/dev.in
     #   pytest-asyncio
@@ -155,84 +160,85 @@ pytest==7.4.4
     #   pytest-django
     #   pytest-factoryboy
     #   pytest-mock
-pytest-asyncio==0.23.3
+pytest-asyncio==0.25.0
     # via -r requirements/dev.in
-pytest-cov==4.1.0
+pytest-cov==6.0.0
     # via -r requirements/dev.in
-pytest-django==4.7.0
+pytest-django==4.9.0
     # via -r requirements/dev.in
-pytest-factoryboy==2.6.0
+pytest-factoryboy==2.7.0
     # via -r requirements/dev.in
-pytest-mock==3.12.0
+pytest-mock==3.14.0
     # via -r requirements/dev.in
-python-dateutil==2.8.2
+python-dateutil==2.9.0.post0
     # via
-    #   -c requirements/prod.txt
+    #   -c /app/requirements/prod.txt
     #   faker
-pyyaml==6.0.1
+pyyaml==6.0.2
     # via
-    #   -c requirements/prod.txt
+    #   -c /app/requirements/prod.txt
     #   myst-parser
     #   vcrpy
-requests==2.29.0
+requests==2.32.3
     # via
-    #   -c requirements/prod.txt
+    #   -c /app/requirements/prod.txt
     #   coveralls
     #   sphinx
-six==1.16.0
+six==1.17.0
     # via
-    #   -c requirements/prod.txt
-    #   asttokens
+    #   -c /app/requirements/prod.txt
     #   python-dateutil
     #   sphinxcontrib-httpdomain
 snowballstemmer==2.2.0
     # via sphinx
-sphinx==5.3.0
+sphinx==8.1.3
     # via
     #   -r requirements/dev.in
     #   myst-parser
     #   sphinxcontrib-httpdomain
-sphinxcontrib-applehelp==1.0.8
+sphinxcontrib-applehelp==2.0.0
     # via sphinx
-sphinxcontrib-devhelp==1.0.6
+sphinxcontrib-devhelp==2.0.0
     # via sphinx
-sphinxcontrib-htmlhelp==2.0.5
+sphinxcontrib-htmlhelp==2.1.0
     # via sphinx
 sphinxcontrib-httpdomain==1.8.1
     # via -r requirements/dev.in
 sphinxcontrib-jsmath==1.0.1
     # via sphinx
-sphinxcontrib-qthelp==1.0.7
+sphinxcontrib-qthelp==2.0.0
     # via sphinx
-sphinxcontrib-serializinghtml==1.1.10
+sphinxcontrib-serializinghtml==2.0.0
     # via sphinx
-sqlparse==0.4.4
+sqlparse==0.5.3
     # via
-    #   -c requirements/prod.txt
+    #   -c /app/requirements/prod.txt
     #   django
 stack-data==0.6.3
     # via ipython
-traitlets==5.14.1
+traitlets==5.14.3
     # via
     #   ipython
     #   matplotlib-inline
-typing-extensions==4.7.1
+typing-extensions==4.12.2
     # via
-    #   -c requirements/prod.txt
+    #   -c /app/requirements/prod.txt
+    #   faker
     #   pytest-factoryboy
-urllib3==1.26.16
+urllib3==2.2.3
     # via
-    #   -c requirements/prod.txt
+    #   -c /app/requirements/prod.txt
     #   requests
-vcrpy==5.1.0
+    #   vcrpy
+vcrpy==6.0.2
     # via -r requirements/dev.in
 wcwidth==0.2.13
     # via prompt-toolkit
-wheel==0.42.0
+wheel==0.45.1
     # via pip-tools
-wrapt==1.16.0
+wrapt==1.17.0
     # via vcrpy
-yarl==1.9.4
+yarl==1.18.3
     # via vcrpy
 
 # The following packages are considered to be unsafe in a requirements file:
