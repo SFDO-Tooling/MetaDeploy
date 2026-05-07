@@ -4,6 +4,13 @@ ARG OMNIOUT_TOKEN
 FROM node:22 AS node_base
 FROM python:3.12-slim-bookworm
 
+# Re-import build args inside this stage. ARGs declared before the first
+# FROM are only in scope for FROM lines themselves; they reset to undefined
+# after each FROM and must be redeclared to be visible to RUN.
+ARG BUILD_ENV=development
+ARG PROD_ASSETS
+ARG OMNIOUT_TOKEN
+
 # Node and npm
 COPY --from=node_base /usr/local/lib/node_modules /usr/local/lib/node_modules
 COPY --from=node_base /usr/local/bin/node /usr/local/bin/node
