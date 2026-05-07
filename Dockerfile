@@ -34,6 +34,7 @@ RUN apt-get update \
        libxslt-dev \
        libpq-dev \
        libffi-dev \
+       curl \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
@@ -87,4 +88,4 @@ RUN \
   SFDX_CLIENT_ID="sample id" \
   python manage.py collectstatic --noinput
 
-CMD /app/start-server.sh
+CMD ["sh", "-c", "exec daphne --bind 0.0.0.0 --port $PORT metadeploy.asgi:application"]

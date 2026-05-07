@@ -84,28 +84,7 @@
     }
   },
   "addons": ["heroku-postgresql", "heroku-redis"],
-  "buildpacks": [
-    {
-      "url": "heroku/nodejs"
-    },
-    {
-      "url": "heroku/python"
-    }
-  ],
   "environments": {
-    "test": {
-      "scripts": {
-        "test-setup": "pip install --upgrade -r requirements/test.txt",
-        "test": "pytest"
-      },
-      "env": {
-        "DJANGO_SETTINGS_MODULE": "config.settings.test",
-        "DATABASE_URL": "sqlite:///test.db",
-        "AWS_ACCESS_KEY_ID": "None",
-        "AWS_SECRET_ACCESS_KEY": "None",
-        "AWS_BUCKET_NAME": "None"
-      }
-    },
     "review": {
       "scripts": {
         "postdeploy": "./manage.py populate_data"
