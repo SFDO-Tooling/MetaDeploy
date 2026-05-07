@@ -51,6 +51,9 @@ ENV OMNIOUT_TOKEN=${OMNIOUT_TOKEN}
 RUN npm install --location=global sfdx-cli --ignore-scripts
 
 # Python requirements:
+# setuptools<81 repeated here because --upgrade pip-tools would otherwise
+# re-resolve setuptools to >=81 in this layer; the pin must survive both
+# pip-install invocations (see the earlier toolchain layer for the full why).
 COPY ./requirements requirements
 RUN pip install --no-cache-dir --upgrade pip pip-tools "setuptools<81" \
     && pip install --no-cache-dir -r requirements/prod.txt
