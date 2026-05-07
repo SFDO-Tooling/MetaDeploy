@@ -3,6 +3,7 @@
   "description": "Web-based tool for installing Salesforce products",
   "repository": "https://github.com/SFDO-Tooling/MetaDeploy",
   "keywords": ["ci", "python", "django", "salesforce", "github"],
+  "stack": "container",
   "env": {
     "DJANGO_ALLOWED_HOSTS": {
       "description": "Heroku proxies web requests and Django needs to be configured to allow the forwards",
@@ -67,19 +68,19 @@
   "formation": {
     "web": {
       "quantity": 1,
-      "size": "free"
+      "size": "basic"
     },
     "devworker": {
       "quantity": 1,
-      "size": "free"
+      "size": "basic"
     },
     "worker": {
       "quantity": 0,
-      "size": "free"
+      "size": "basic"
     },
     "worker-short": {
       "quantity": 0,
-      "size": "free"
+      "size": "basic"
     }
   },
   "addons": ["heroku-postgresql", "heroku-redis"],
@@ -107,7 +108,7 @@
     },
     "review": {
       "scripts": {
-        "postdeploy": "./manage.py populate_db"
+        "postdeploy": "./manage.py populate_data"
       }
     }
   }
