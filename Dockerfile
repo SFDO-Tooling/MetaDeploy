@@ -2,7 +2,7 @@ ARG BUILD_ENV=development
 ARG PROD_ASSETS
 ARG OMNIOUT_TOKEN
 FROM node:22 AS node_base
-FROM python:3.12
+FROM python:3.12-slim-bookworm
 
 # Node and npm
 COPY --from=node_base /usr/local/lib/node_modules /usr/local/lib/node_modules
@@ -16,13 +16,25 @@ RUN ln -s /opt/yarn/bin/yarnpkg /usr/local/bin/yarnpkg
 RUN node --version && npm --version && yarn --version
 
 # System setup:
+# slim base lacks compilers and -dev headers needed to build wheels
+# for cryptography, lxml, psycopg2-binary, etc. Add toolchain deps.
 RUN apt-get update \
-  && apt-get install -y gettext redis-tools --no-install-recommends \
+  && apt-get install -y --no-install-recommends \
+       gettext \
+       redis-tools \
+       build-essential \
+       libxml2-dev \
+       libxslt-dev \
+       libpq-dev \
+       libffi-dev \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
 # Python context setup:
-RUN pip install --no-cache-dir --upgrade pip pip-tools
+# setuptools<81 keeps the legacy pkg_resources.declare_namespace API
+# that cumulusci's __init__ relies on. The full python:3.12 image
+# ships an older setuptools by default; slim does not, so pin it.
+RUN pip install --no-cache-dir --upgrade pip pip-tools "setuptools<81"
 
 # ================ ENVIRONMENT
 ENV PYTHONUNBUFFERED=1
@@ -40,7 +52,7 @@ RUN npm install --location=global sfdx-cli --ignore-scripts
 
 # Python requirements:
 COPY ./requirements requirements
-RUN pip install --no-cache-dir --upgrade pip pip-tools \
+RUN pip install --no-cache-dir --upgrade pip pip-tools "setuptools<81" \
     && pip install --no-cache-dir -r requirements/prod.txt
 RUN pip install --no-cache-dir -r requirements/dev.txt
 
