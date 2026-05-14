@@ -80,3 +80,24 @@ command:
 
 After running, you can view the Storybook at <http://localhost:6006/> in your
 browser.
+
+## Branching workflow
+
+MetaDeploy uses two long-lived branches:
+
+- `main` — released code. Reviewed, gated by required CI checks. Auto-deploys to staging; staging is manually promoted to production.
+- `dev` — integration branch for in-flight work. Gated by required CI checks only; no required review. Deploys to a persistent dev-app at `https://metadeploy-dev.herokuapp.com/`.
+
+### Where to send PRs
+
+- Long-lived feature work: PR against `dev`. The author self-merges (squash) once CI is green.
+- Hotfixes against released code: PR against `main`. Existing review requirement applies.
+- Promotions of `dev` to `main` happen on-demand when production needs the change. The author opens a `dev → main` PR for required review at that point.
+
+### Branch-naming convention
+
+Topic branches use descriptive names that describe the work: `feature/<work>`, `fix/<bug>`, `chore/<housekeeping>`. Do not encode plan structure or phase numbering in branch names.
+
+### Stability of `dev`
+
+`dev` carries unreviewed code that has only passed CI. It is work-in-progress, not a release artifact. Downstream forks should NOT pin to `dev` or expect stability there. Pull from `main` (or a tagged release) for downstream consumption.
