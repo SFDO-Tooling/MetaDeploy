@@ -12,6 +12,12 @@
   border: none;
   border-radius: 0;
   box-shadow: none;
+
+  // Ensure programmatically focused headings don't show default focus outline
+  // Focus is set via JS for accessibility (WCAG 2.4.3) but shouldn't be visually intrusive
+  [tabindex='-1']:focus {
+    outline: none;
+  }
 }
 
 .site-logo {
