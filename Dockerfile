@@ -2,7 +2,14 @@ ARG BUILD_ENV=development
 ARG PROD_ASSETS
 ARG OMNIOUT_TOKEN
 FROM node:22 AS node_base
-FROM python:3.12
+FROM python:3.12-slim-bookworm
+
+# Re-import build args inside this stage. ARGs declared before the first
+# FROM are only in scope for FROM lines themselves; they reset to undefined
+# after each FROM and must be redeclared to be visible to RUN.
+ARG BUILD_ENV=development
+ARG PROD_ASSETS
+ARG OMNIOUT_TOKEN
 
 # Node and npm
 COPY --from=node_base /usr/local/lib/node_modules /usr/local/lib/node_modules
@@ -16,13 +23,26 @@ RUN ln -s /opt/yarn/bin/yarnpkg /usr/local/bin/yarnpkg
 RUN node --version && npm --version && yarn --version
 
 # System setup:
+# slim base lacks compilers and -dev headers needed to build wheels
+# for cryptography, lxml, psycopg2-binary, etc. Add toolchain deps.
 RUN apt-get update \
-  && apt-get install -y gettext redis-tools --no-install-recommends \
+  && apt-get install -y --no-install-recommends \
+       gettext \
+       redis-tools \
+       build-essential \
+       libxml2-dev \
+       libxslt-dev \
+       libpq-dev \
+       libffi-dev \
+       curl \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
 # Python context setup:
-RUN pip install --no-cache-dir --upgrade pip pip-tools
+# setuptools<81 keeps the legacy pkg_resources.declare_namespace API
+# that cumulusci's __init__ relies on. The full python:3.12 image
+# ships an older setuptools by default; slim does not, so pin it.
+RUN pip install --no-cache-dir --upgrade pip pip-tools "setuptools<81"
 
 # ================ ENVIRONMENT
 ENV PYTHONUNBUFFERED=1
@@ -39,8 +59,11 @@ ENV OMNIOUT_TOKEN=${OMNIOUT_TOKEN}
 RUN npm install --location=global sfdx-cli --ignore-scripts
 
 # Python requirements:
+# setuptools<81 repeated here because --upgrade pip-tools would otherwise
+# re-resolve setuptools to >=81 in this layer; the pin must survive both
+# pip-install invocations (see the earlier toolchain layer for the full why).
 COPY ./requirements requirements
-RUN pip install --no-cache-dir --upgrade pip pip-tools \
+RUN pip install --no-cache-dir --upgrade pip pip-tools "setuptools<81" \
     && pip install --no-cache-dir -r requirements/prod.txt
 RUN pip install --no-cache-dir -r requirements/dev.txt
 
@@ -65,4 +88,4 @@ RUN \
   SFDX_CLIENT_ID="sample id" \
   python manage.py collectstatic --noinput
 
-CMD /app/start-server.sh
+CMD ["sh", "-c", "exec daphne --bind 0.0.0.0 --port $PORT metadeploy.asgi:application"]
