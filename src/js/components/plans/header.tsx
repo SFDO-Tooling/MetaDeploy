@@ -30,7 +30,9 @@ const Header = ({
     // Set focus to the header title on mount for proper focus order (WCAG 2.4.3)
     // This ensures screen readers land on the heading first, especially on iOS VoiceOver
     if (headerRef.current) {
-      const heading = headerRef.current.querySelector('h1, h2, [class*="heading"]');
+      const heading = headerRef.current.querySelector(
+        'h1, h2, [class*="heading"]',
+      );
       if (heading && heading instanceof HTMLElement) {
         // Set tabindex to make heading focusable, then focus it
         heading.setAttribute('tabindex', '-1');
