@@ -109,6 +109,7 @@ def refresh_access_token(
     try:
         org_config = OrgConfig(config, org_name, keychain=keychain)
         org_config.refresh_oauth_token(keychain, is_sandbox=sbx_login)
+        config.update(org_config.config)
         return org_config
     except HTTPError as err:
         _handle_sf_error(err, scratch_org=scratch_org)
