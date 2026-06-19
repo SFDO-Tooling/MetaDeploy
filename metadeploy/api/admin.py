@@ -2,6 +2,7 @@ from allauth.socialaccount.admin import SocialTokenAdmin
 from allauth.socialaccount.models import SocialToken
 from django.conf import settings
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.postgres.fields import ArrayField
 from django.forms.widgets import CheckboxSelectMultiple
 from django.shortcuts import redirect
@@ -172,7 +173,11 @@ class PlanAdmin(MetadeployTranslatableAdmin):
         "created_at",
     )
     list_select_related = ("version", "version__product")
-    search_fields = ("translations__title", "version", "version__product")
+    search_fields = (
+        "translations__title",
+        "version__label",
+        "version__product__translations__title",
+    )
     readonly_fields = ("created_at",)
 
     def product(self, obj):
@@ -251,16 +256,16 @@ class StepAdmin(MetadeployTranslatableAdmin, PlanMixin):
     list_filter = ("plan__version__product",)
     search_fields = (
         "translations__name",
-        "plan__title",
+        "plan__translations__title",
         "plan__version__label",
-        "plan__version__product",
+        "plan__version__product__translations__title",
         "step_num",
         "path",
     )
 
 
 @admin.register(User)
-class UserAdmin(AdminHelpTextMixin, admin.ModelAdmin):
+class UserAdmin(AdminHelpTextMixin, BaseUserAdmin):
     help_text = _(
         "GDPR reminder: The username, name, and email are personally identifiable information. "
         "They must be used for support/debugging purposes only, and not exported from this system."
@@ -274,7 +279,7 @@ class VersionAdmin(admin.ModelAdmin):
     list_filter = ("product", "is_production", "is_listed")
     list_editable = ("is_production", "is_listed")
     list_display = ("label", "product", "is_production", "is_listed", "commit_ish")
-    search_fields = ("label", "product")
+    search_fields = ("label", "product__translations__title")
 
 
 @admin.register(ClickThroughAgreement)
@@ -307,6 +312,25 @@ class CustomSocialTokenAdmin(SocialTokenAdmin):
 
 
 if "binary_database_files" in settings.INSTALLED_APPS:  # pragma: no cover
+    from django import forms
     from binary_database_files.models import File
 
-    admin.site.register(File)
+    class FileUploadForm(forms.ModelForm):
+        upload = forms.FileField(required=False)
+
+        class Meta:
+            model = File
+            fields = ("name",)
+
+    @admin.register(File)
+    class FileAdmin(admin.ModelAdmin):
+        form = FileUploadForm
+        list_display = ("name", "size")
+
+        def save_model(self, request, obj, form, change):
+            uploaded = request.FILES.get("upload")
+            if uploaded:
+                obj.name = obj.name or uploaded.name
+                obj.content = uploaded.read()
+                obj.size = uploaded.size
+            super().save_model(request, obj, form, change)
