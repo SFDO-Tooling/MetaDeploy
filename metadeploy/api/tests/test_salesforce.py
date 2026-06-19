@@ -9,6 +9,7 @@ from requests.exceptions import HTTPError
 
 from ..salesforce import (
     ScratchOrgError,
+    _get_access_token,
     _get_devhub_api,
     _get_org_result,
     _poll_for_scratch_org_completion,
@@ -181,3 +182,28 @@ def test_poll_for_scratch_org_completion__failure(sleep):
 
     with pytest.raises(ScratchOrgError, match="Scratch org creation failed"):
         _poll_for_scratch_org_completion(devhub_api, initial_result)
+
+
+def test_get_access_token_bad():
+    with ExitStack() as stack:
+        get_current_job = stack.enter_context(
+            patch("metadeploy.api.salesforce.get_current_job")
+        )
+        get_current_job.return_value = MagicMock(id=123)
+        OAuth2ClientConfig = stack.enter_context(
+            patch("metadeploy.api.salesforce.OAuth2ClientConfig")
+        )
+        OAuth2Client = stack.enter_context(
+            patch("metadeploy.api.salesforce.OAuth2Client")
+        )
+        error = HTTPError("Error message.", response=MagicMock(status_code=400))
+        OAuth2Client().auth_code_grant.side_effect = error
+
+        with pytest.raises(ScratchOrgError):
+            _get_access_token(
+                org_result=MagicMock(),
+                scratch_org_config=MagicMock(),
+            )
+
+        assert OAuth2ClientConfig.called
+        assert OAuth2Client.called
