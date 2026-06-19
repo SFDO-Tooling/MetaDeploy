@@ -29,7 +29,7 @@ autobahn==23.6.2
     # via daphne
 automat==22.10.0
     # via twisted
-bleach==6.1.0
+bleach==6.4.0
     # via
     #   -r requirements/prod.in
     #   sfdo-template-helpers
