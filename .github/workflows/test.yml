@@ -13,7 +13,7 @@ jobs:
     name: Build
     runs-on: SFDO-Tooling-Ubuntu
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - uses: ./.github/setup-docker-compose
         with:
           # By writing to the cache here subsequent jobs will get the updated
@@ -26,7 +26,7 @@ jobs:
     needs: [build]
     runs-on: SFDO-Tooling-Ubuntu
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - uses: ./.github/setup-docker-compose
         with:
           omniout-token: ${{ secrets.OMNIOUT_TOKEN }}
@@ -38,7 +38,7 @@ jobs:
     needs: [build]
     runs-on: SFDO-Tooling-Ubuntu
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - uses: ./.github/setup-docker-compose
         with:
           omniout-token: ${{ secrets.OMNIOUT_TOKEN }}
@@ -56,7 +56,7 @@ jobs:
     needs: [build]
     runs-on: SFDO-Tooling-Ubuntu
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - uses: ./.github/setup-docker-compose
         with:
           omniout-token: ${{ secrets.OMNIOUT_TOKEN }}
