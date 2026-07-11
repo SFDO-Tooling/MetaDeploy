@@ -78,7 +78,7 @@ cryptography==41.0.7
     #   sfdo-template-helpers
 cumulusci==4.0.1
     # via -r requirements/prod.in
-daphne==3.0.2
+daphne==4.2.2
     # via channels
 defusedxml==0.7.1
     # via
