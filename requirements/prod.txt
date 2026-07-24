@@ -222,7 +222,7 @@ psutil==5.9.6
     # via cumulusci
 psycopg2-binary==2.9.9
     # via -r requirements/prod.in
-pyasn1==0.5.1
+pyasn1==0.6.4
     # via
     #   pyasn1-modules
     #   service-identity
