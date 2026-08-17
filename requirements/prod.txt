@@ -349,7 +349,7 @@ sqlalchemy==1.4.49
     # via
     #   cumulusci
     #   snowfakery
-sqlparse==0.4.4
+sqlparse==0.6.0
     # via django
 twisted[tls]==23.10.0
     # via daphne
