@@ -360,6 +360,7 @@ if GITHUB_APP_KEY and not GITHUB_APP_ID:
 SOCIALACCOUNT_PROVIDERS = {
     "salesforce": {
         "SCOPE": ["web", "full", "refresh_token"],
+        "OAUTH_PKCE_ENABLED": True,
         "APP": {
             "client_id": SFDX_CLIENT_ID,
             "secret": SFDX_CLIENT_SECRET,
