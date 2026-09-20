@@ -67,7 +67,7 @@ croniter==1.4.1
     # via django-rq-scheduler
 crontab==1.0.1
     # via rq-scheduler
-cryptography==41.0.7
+cryptography==50.0.0
     # via
     #   authlib
     #   autobahn
