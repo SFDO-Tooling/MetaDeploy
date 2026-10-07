@@ -30,6 +30,7 @@ from django.utils import timezone
 from django_rq import job as django_rq_job
 from rq.exceptions import ShutDownImminentException
 from rq.worker import StopRequested
+from sfdo_template_helpers.crypto import fernet_decrypt, fernet_encrypt
 
 from .cci_configs import MetaDeployCCI, extract_user_and_repo
 from .cleanup import cleanup_user_data
@@ -177,6 +178,34 @@ def prepend_python_path(path):
         sys.path = prev_path
 
 
+def _save_updated_user_tokens(user, org_config):
+    """Write any rotated OAuth tokens back to the user's SocialToken record.
+
+    Salesforce uses refresh token rotation: each time the refresh token is used,
+    a new one is returned that must be stored for the next refresh. Without this,
+    the second job run for a user will fail with invalid_grant / expired token.
+    """
+    social_token = user.social_account.socialtoken_set.first()
+    if not social_token:
+        return
+
+    changed = False
+    new_access_token = org_config.access_token
+    new_refresh_token = org_config.refresh_token
+
+    if new_access_token and new_access_token != fernet_decrypt(social_token.token):
+        social_token.token = fernet_encrypt(new_access_token)
+        changed = True
+    if new_refresh_token and new_refresh_token != fernet_decrypt(
+        social_token.token_secret
+    ):
+        social_token.token_secret = fernet_encrypt(new_refresh_token)
+        changed = True
+
+    if changed:
+        social_token.save()
+
+
 def run_flows(
     *,
     plan: Plan,
@@ -275,7 +304,15 @@ def run_flows(
         ]
         org = ctx.keychain.get_org(current_org)
         if not settings.METADEPLOY_FAST_FORWARD:
-            result.run(ctx, plan, steps, org)
+            try:
+                # Refresh the access token right before running so long-polling
+                # tasks (e.g. SetOrgWideDefaults) start with the freshest token.
+                if result.user:
+                    org_config.refresh_oauth_token(ctx.keychain)
+                result.run(ctx, plan, steps, org)
+            finally:
+                if result.user:
+                    _save_updated_user_tokens(result.user, org)
 
 
 run_flows_job = job(run_flows)
