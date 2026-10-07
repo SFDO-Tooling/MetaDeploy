@@ -401,6 +401,7 @@ RQ_QUEUES = {
     },
 }
 RQ = {"WORKER_CLASS": "metadeploy.rq_worker.ConnectionClosingWorker"}
+RQ_SHOW_ADMIN_LINK=True
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
