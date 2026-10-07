@@ -206,7 +206,7 @@ markupsafe==2.1.3
     #   werkzeug
 mdurl==0.1.2
     # via markdown-it-py
-msgpack==1.0.7
+msgpack==1.2.1
     # via channels-redis
 natsort==8.4.0
     # via robotframework-pabot
